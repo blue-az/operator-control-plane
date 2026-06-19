@@ -1,0 +1,5 @@
+{"timestamp":"2026-05-29T06:10:00.000Z","type":"turn_context","payload":{"model":"gpt-5.5","cwd":"/home/blueaz/Python/project-phoenix"}}
+{"timestamp":"2026-05-29T06:10:05.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":5000,"cached_input_tokens":1000,"output_tokens":200,"total_tokens":6000}}}}
+{"timestamp":"2026-05-29T06:10:10.000Z","type":"response_item","payload":{"type":"custom_tool_call"}}
+{"timestamp":"2026-05-29T06:11:00.000Z","type":"turn_context","payload":{"model":"gpt-5.5","cwd":"/home/blueaz/Python/project-phoenix"}}
+{"timestamp":"2026-05-29T06:11:33.621Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":15000,"cached_input_tokens":4000,"output_tokens":800,"total_tokens":19800}}}}
