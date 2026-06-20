@@ -1,0 +1,9 @@
+flowchart LR
+  A[Doctor reviews verification] --> B[Self-verification]
+  A --> C[Reviewer mismatch]
+  A --> D[Legacy no verifier]
+  A --> E[Single-user mode]
+  B --> F[Flagged as a problem]
+  C --> G[Warned as a problem]
+  D --> H[Informational only]
+  E --> I[Warning only]

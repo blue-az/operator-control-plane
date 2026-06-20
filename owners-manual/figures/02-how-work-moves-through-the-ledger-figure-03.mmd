@@ -1,0 +1,9 @@
+flowchart LR
+  taskCmd["Task-scoped commands"]
+  current["Omit task flag"]
+  active["Use current task"]
+  harnessCmd["Harness-dependent commands"]
+  local["Need local harness record"]
+  missing["Missing record means fail closed"]
+  taskCmd --> current --> active
+  harnessCmd --> local --> missing

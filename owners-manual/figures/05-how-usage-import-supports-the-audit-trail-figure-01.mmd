@@ -1,0 +1,15 @@
+flowchart TD
+  subgraph imported["Imported activity"]
+    i["Imported usage"]
+    r["Session reconstruction"]
+    a["Activity review"]
+    i --> r --> a
+  end
+  subgraph verified["Verified record"]
+    v["Verified ledger"]
+    c["Claims, evidence, verification"]
+    v --> c
+  end
+  i -.->|helps review| a
+  i -.->|does not outrank| v
+  a -.->|conflict goes to| c

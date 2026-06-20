@@ -1,0 +1,14 @@
+flowchart TD
+  subgraph In[Inside the product]
+    A[Product commands]
+    B[Local ledger]
+    C[Work records]
+    A --> B --> C
+  end
+  subgraph Out[Outside the product]
+    D[Host or container]
+    E[Identity separation]
+    F[Isolation between people]
+    D --> E --> F
+  end
+  C -. relies on .-> D

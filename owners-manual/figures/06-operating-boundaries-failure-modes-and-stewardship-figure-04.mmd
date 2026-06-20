@@ -1,0 +1,14 @@
+flowchart LR
+  subgraph Left[Claude / Codex]
+    L1[Token-metered usage]
+    L2[Source-session reference]
+    L1 --> L2
+  end
+  subgraph Right[Gemini-Agy]
+    R1[Activity-only usage]
+    R2[Source-session reference]
+    R1 --> R2
+  end
+  L2 --> S[Repeat import updates the same record]
+  R2 --> S
+  S --> T[Missing source file later only warns]

@@ -1,0 +1,6 @@
+stateDiagram-v2
+  [*] --> Running
+  Running --> Closing: session ends
+  Closing --> Assigned: task is still running and no open sessions remain
+  Closing --> KeptClosed: explicit status sets a different outcome
+  Closing --> Refused: close is already finished unless forced

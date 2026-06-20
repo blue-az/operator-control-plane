@@ -1,0 +1,18 @@
+flowchart TD
+  A[Verification write]
+  subgraph Strong[Strong trust boundary]
+    B[Enforced match with configured identity]
+    C[Accepted as strong]
+    B --> C
+  end
+  subgraph Weak[Weaker paths]
+    D[Single-user or legacy path]
+    E[Guarded test path]
+    F[Doctor review]
+    G[Visible as weaker]
+    D --> F --> G
+    E --> F
+  end
+  A --> B
+  A --> D
+  A --> E

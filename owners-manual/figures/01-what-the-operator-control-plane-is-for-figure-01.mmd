@@ -1,0 +1,13 @@
+flowchart TD
+  cli["Operator CLI"]
+  assign["Assigned harness"]
+  review["Review harness"]
+  subgraph local["Local supervision layer"]
+    ledger["Local ledger"]
+    trail["Work and review records"]
+  end
+  cli -->|writes to| ledger
+  ledger -->|stores| trail
+  assign -->|returns work output into| trail
+  review -->|returns review output into| trail
+  trail -->|supports review| ledger

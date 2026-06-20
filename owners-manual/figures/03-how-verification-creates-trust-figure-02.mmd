@@ -1,0 +1,5 @@
+flowchart TD
+  A[Verifier name in the claim] --> B[Enforced check]
+  B --> C[Configured identity map]
+  C --> D[Trusted verified claim]
+  B -->|unknown or mismatch| E[Claim fails closed]

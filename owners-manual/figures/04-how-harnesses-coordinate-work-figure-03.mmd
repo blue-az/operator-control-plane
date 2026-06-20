@@ -1,0 +1,9 @@
+stateDiagram-v2
+  [*] --> Assigned
+  Assigned --> Running: session starts
+  Running --> Closing: session ends
+  Closing --> Assigned: still running and last open session is gone
+  state "Explicit result" as ExplicitResult
+  state "Refused close" as RefusedClose
+  Closing --> ExplicitResult: explicit status was set
+  Closing --> RefusedClose: already closed and not forced

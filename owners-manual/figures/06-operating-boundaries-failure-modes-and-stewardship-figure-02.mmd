@@ -1,0 +1,5 @@
+stateDiagram-v2
+  [*] --> Assigned
+  Assigned --> Running: session start opens usage
+  Running --> Assigned: last open session closes
+  Running --> Running: explicit status or duplicate-close guard
