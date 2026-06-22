@@ -1625,6 +1625,13 @@ def doctor_cmd(args) -> int:
                     else:
                         # mode is single_user or missing
                         infos.append(f"[Warning] claim {cid} verification is NOT identity-enforced (single-user mode); see EXECUTOR_IDENTITY_SPEC §5")
+                        # Enforcement-downgrade detection (warn-only, exit unchanged):
+                        # the identity map IS configured and this claim's executor maps to a
+                        # known identity, yet verified_by does not match it. enforced mode would
+                        # reject this as impersonation; single_user silently accepts it. Surface
+                        # the relaxation so a config flip (enforced -> single_user) is not silent.
+                        if expected_verifier and vby != expected_verifier:
+                            infos.append(f"[Warning] claim {cid} would be REJECTED under enforced mode: verified_by '{vby}' != identity '{expected_verifier}' for uid {exec_uid}; enforcement appears relaxed to single_user")
 
         if task_status in ["verified", "complete"] and quarantined_claims:
             issues.append(f"[Error] Task {task_id} status is '{task_status}' while claims are quarantined: {', '.join(quarantined_claims)}")

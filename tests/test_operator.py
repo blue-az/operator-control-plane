@@ -1133,6 +1133,52 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 1)
         self.assertIn("contains write with unauthorized test-override attempt", res.stdout)
 
+    def test_doctor_flags_enforcement_downgrade(self) -> None:
+        # A configured identity map left in single_user mode silently accepts claims that
+        # enforced mode would reject as impersonation. doctor must surface that relaxation
+        # (warn-only: it stays exit 0, but the downgrade is no longer invisible).
+        import yaml
+        self.run_operator("init")
+        self.run_operator("task-create", "--objective", "Downgrade check", "--id", "dg-task")
+        res = self.run_operator(
+            "claim-add", "--type", "test_passes", "--text", "a claim", "--gate", "test-gate"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        # Attach evidence + a clean verification (single_user is the default mode here).
+        evidence_file = Path(self.temp_dir) / "ev.txt"
+        evidence_file.write_text("evidence")
+        res = self.run_operator(
+            "evidence-attach", "--claim", "claim-0001", "--type", "test_output",
+            "--status", "verified", "--verified-by", "claude", str(evidence_file)
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        # Configure an identity map but leave enforcement relaxed to single_user.
+        identity_file = Path(self.temp_dir) / ".operator" / "identity.yaml"
+        identity_file.write_text("mode: single_user\nuids:\n  1001: gemini-agy\n  1002: claude\n")
+
+        claim_file = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
+
+        def set_executor(uid: int, user: str) -> None:
+            data = yaml.safe_load(claim_file.read_text())
+            data["executor"] = {"uid": uid, "user": user}
+            claim_file.write_text(yaml.safe_dump(data))
+
+        # Mismatch: executor maps to gemini-agy (uid 1001) but verified_by is claude.
+        # enforced mode would reject this; single_user accepts it -> doctor must warn, exit 0.
+        set_executor(1001, "gemini-agy")
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout)
+        self.assertIn("would be REJECTED under enforced mode", res.stdout)
+        self.assertIn("enforcement appears relaxed to single_user", res.stdout)
+
+        # Control: executor maps to claude (uid 1002), matching verified_by -> no downgrade warning.
+        set_executor(1002, "claude")
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout)
+        self.assertNotIn("would be REJECTED under enforced mode", res.stdout)
+
 if __name__ == "__main__":
     unittest.main()
 
