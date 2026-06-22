@@ -1,0 +1,17 @@
+# Pricing table fixture for the usage-import test.
+# Rates are USD per 1,000,000 tokens (see calculate_cost() in ../../operator).
+# This lives under tests/fixtures/ so the suite is self-contained: the real
+# runtime table lives in the gitignored .operator/ ledger and must not be a
+# test dependency.
+claude-opus-4-8:
+  input: 15.0
+  output: 75.0
+  cache_read: 1.5
+  cache_write: 18.75
+# gpt-5.5 is present-but-unpriced: it keeps the model out of doctor's
+# "price table missing model" warning while costing 0.0 until rates are set.
+gpt-5.5:
+  input: 0.0
+  output: 0.0
+  cache_read: 0.0
+  cache_write: 0.0

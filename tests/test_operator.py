@@ -739,9 +739,10 @@ class TestOperatorCLI(unittest.TestCase):
         fixtures_dir = Path(__file__).resolve().parent / "fixtures"
         op_path = Path(self.temp_dir) / ".operator"
         
-        # Copy the pricing.yaml table so that pricing rate lookup succeeds in test environment
-        repo_root = Path(OPERATOR_BIN).resolve().parent
-        shutil.copy(repo_root / ".operator" / "pricing.yaml", op_path / "pricing.yaml")
+        # Copy the pricing.yaml table so that pricing rate lookup succeeds in test environment.
+        # Sourced from tests/fixtures/ (not the gitignored runtime .operator/ ledger) so the
+        # suite is self-contained on a clean clone.
+        shutil.copy(fixtures_dir / "pricing.yaml", op_path / "pricing.yaml")
         
         today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
         usage_file = op_path / "usage" / f"{today}.yaml"
