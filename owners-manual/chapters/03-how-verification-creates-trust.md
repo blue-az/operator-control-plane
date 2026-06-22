@@ -60,6 +60,8 @@ Enforced verification uses the configured identity map and fails closed when the
 
 Doctor does not flatten all verification cases into one answer. It distinguishes self-verification, review-harness mismatch, older claims that carry no verifier, and the single-user warning path.
 
+A later refinement sharpens the single-user branch. When an identity map is configured but the mode is left at single-user, doctor now warns specifically where a claim's recorded executor maps to a different identity than its stated verifier — the case enforced mode would reject as impersonation but single-user mode silently accepts. Doctor names this as an enforcement downgrade, reporting that the claim would be rejected under enforced mode and that enforcement appears relaxed to single-user, and it keeps the warning advisory so the exit status is unchanged. The effect is that a silent relaxation of identity enforcement becomes visible in the audit, even though the product still does not treat single-user mode as identity enforcement.
+
 Workflow movement and trust are related but not identical. A task can move through handoff and session states without that movement becoming proof of verified work.
 
 > **Figure:** Doctor does not flatten verification into one verdict. The owner has to treat the branches differently, or real trust problems get mixed together with softer warnings.
