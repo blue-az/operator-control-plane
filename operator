@@ -499,6 +499,13 @@ def evidence_attach_cmd(args) -> int:
             return 1
         claim = load_yaml(claim_path)
         
+    # A status advances trust and is only ever recorded on a claim; reject a bare status write so it
+    # can't silently succeed-and-drop, leaving the operator thinking trust advanced when it did not.
+    if args.status and not claim:
+        print("Error: --status requires --claim. A status advances trust on a claim; a bare evidence "
+              "write cannot carry one (the status would be silently dropped).", file=sys.stderr)
+        return 1
+
     if claim and args.status:
         if not getattr(args, "verified_by", None):
             print("Error: --verified-by is required when setting --status (the verifier must identify themselves).", file=sys.stderr)

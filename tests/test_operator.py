@@ -1179,6 +1179,31 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 0, res.stdout)
         self.assertNotIn("would be REJECTED under enforced mode", res.stdout)
 
+    def test_status_requires_claim(self) -> None:
+        # A bare evidence-attach with --status but no --claim must fail closed: status is only ever
+        # recorded on a claim, so without one it would silently drop, leaving the operator thinking
+        # trust advanced when it did not.
+        self.run_operator("init")
+        self.run_operator("task-create", "--objective", "gate", "--id", "g-task")
+        evidence = Path(self.temp_dir) / "ev.txt"
+        evidence.write_text("evidence")
+
+        res = self.run_operator(
+            "evidence-attach", "--type", "test_output", "--status", "verified",
+            "--verified-by", "claude", str(evidence)
+        )
+        self.assertNotEqual(res.returncode, 0, "bare --status with no --claim should fail closed")
+        self.assertIn("--status requires --claim", res.stderr)
+
+        # Control: the same write WITH a claim succeeds.
+        self.run_operator("claim-add", "--type", "test_passes", "--text", "a claim", "--gate", "g")
+        res = self.run_operator(
+            "evidence-attach", "--claim", "claim-0001", "--type", "test_output",
+            "--status", "verified", "--verified-by", "claude", str(evidence)
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()
 
