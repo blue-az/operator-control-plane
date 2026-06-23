@@ -1,0 +1,9 @@
+flowchart TD
+  A[New claim] --> B[Unverified claim]
+  B --> C[Claim-backed check]
+  C --> D[Trusted evidence]
+  B --> E[Evidence write without the gate]
+  D --> F[Task looks finished]
+  F --> G[Later quarantine]
+  G --> H[Task becomes quarantined]
+  E -. not the same guard .-> H

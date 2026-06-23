@@ -1,9 +1,14 @@
-flowchart LR
-  taskCmd["Task-scoped commands"]
-  current["Omit task flag"]
-  active["Use current task"]
-  harnessCmd["Harness-dependent commands"]
-  local["Need local harness record"]
-  missing["Missing record means fail closed"]
-  taskCmd --> current --> active
-  harnessCmd --> local --> missing
+stateDiagram-v2
+  [*] --> open: work starts
+  open --> verified: review accepts the claim
+  open --> complete: work closes out
+  verified --> complete: work closes out
+  open --> quarantined: quarantine evidence arrives
+  verified --> quarantined
+  complete --> quarantined
+  note right of verified
+    Promotion only happens before the task looks terminal.
+  end note
+  note right of quarantined
+    A late quarantine can still downgrade the task.
+  end note

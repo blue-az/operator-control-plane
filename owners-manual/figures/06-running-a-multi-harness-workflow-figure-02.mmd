@@ -1,0 +1,10 @@
+flowchart LR
+  subgraph I[Imported usage]
+    A[Source session or time window] --> B[Permissive match]
+    B --> C[Existing open placeholder]
+    C --> D[Row rewritten in place]
+  end
+  subgraph J[Direct usage intake]
+    E[Caller-provided input] --> F[Direct intake]
+    F --> G[New usage row]
+  end

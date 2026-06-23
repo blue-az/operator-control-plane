@@ -1,0 +1,13 @@
+stateDiagram-v2
+  [*] --> Unverified
+  state "Claim unverified" as Unverified
+  state "Verification gate" as Gate
+  state "Claim verified" as Verified
+  state "Task closeout" as Closed
+  state "Quarantined" as Quarantined
+  Unverified --> Gate: evidence is attached
+  Gate --> Verified: verifier accepts
+  Gate --> Unverified: verifier is missing or mismatched
+  Verified --> Closed: the task reaches closeout
+  Verified --> Quarantined: quarantine arrives earlier
+  Closed --> Quarantined: quarantine can still overwrite it

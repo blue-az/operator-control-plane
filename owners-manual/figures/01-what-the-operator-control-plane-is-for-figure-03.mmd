@@ -1,6 +1,0 @@
-stateDiagram-v2
-  [*] --> Assigned
-  Assigned --> Assigned: handoff keeps the next step
-  Assigned --> Running: session starts
-  Running --> Assigned: last open session closes
-  Running --> Running: another usage session is still open

@@ -1,0 +1,12 @@
+flowchart TD
+    A[External session log] --> B{Match the source?}
+    B -->|exact session| C[Selected external session]
+    B -->|matching source fragment| C
+    B -->|time window| C
+    B -->|session overlap| C
+    B -->|best scored fallback| C
+    C --> D{Open placeholder exists?}
+    D -->|yes| E[Fill it in place]
+    D -->|no| F[Append a new usage row]
+    E --> G[Imported usage is recorded]
+    F --> G

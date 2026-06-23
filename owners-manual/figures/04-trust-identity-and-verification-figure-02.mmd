@@ -1,0 +1,6 @@
+flowchart TD
+A[Bare evidence with status] --> B[Status is recorded]
+A -.-> C[No verifier check]
+D[Claim-backed status write] --> E{Verifier gate}
+E -->|enforced mode| F[Stop on mismatch]
+E -->|single-user mode| G[Allow write and warn]

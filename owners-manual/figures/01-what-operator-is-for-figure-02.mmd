@@ -1,0 +1,8 @@
+sequenceDiagram
+  participant Current as Current harness
+  participant Ledger as Local ledger
+  participant Next as Next harness
+  Current->>Ledger: Record the brief and handoff
+  Current->>Ledger: Close the session
+  Ledger-->>Next: Surface the latest handoff and next action
+  Next->>Ledger: Continue from the recorded context

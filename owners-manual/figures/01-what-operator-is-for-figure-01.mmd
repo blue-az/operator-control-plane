@@ -1,0 +1,11 @@
+flowchart TD
+  O[Owner]
+  subgraph B[Local product boundary]
+    C[Fixed command surface]
+    L[File-backed local ledger]
+    W[Recorded task, claim, evidence, verification flow]
+    C --> L --> W
+  end
+  X[Outside the product]
+  O --> C
+  X -. not part of the product .-> C

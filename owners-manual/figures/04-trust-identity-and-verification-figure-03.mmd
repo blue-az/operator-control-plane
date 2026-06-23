@@ -1,0 +1,7 @@
+stateDiagram-v2
+[*] --> Open
+Open --> Verified: review succeeds
+Verified --> Finished: task closes
+Open --> Quarantined: quarantined attach
+Verified --> Quarantined: quarantined attach
+Finished --> Quarantined: later quarantine arrives

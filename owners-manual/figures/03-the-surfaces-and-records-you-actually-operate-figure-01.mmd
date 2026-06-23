@@ -1,0 +1,8 @@
+flowchart LR
+  C[Closed command surface]
+  I[First-run setup]
+  L[Durable local ledger]
+  R[Records to inspect and back up]
+  C -->|writes into| L
+  I -->|creates the ledger scaffold once| L
+  L -->|holds| R

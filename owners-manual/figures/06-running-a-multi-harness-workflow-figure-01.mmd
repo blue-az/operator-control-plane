@@ -1,0 +1,9 @@
+flowchart TD
+  A[Current task] --> B[Recorded handoff]
+  B --> C[Generated brief]
+  C --> D[Next harness session]
+  D --> E[Session start]
+  E --> F[Session end]
+  F --> A
+  C --> G[Next action]
+  E --> H[Running work stays tied to the task]

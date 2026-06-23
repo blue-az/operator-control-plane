@@ -1,0 +1,13 @@
+flowchart LR
+  subgraph Imported path
+    M[Source session details]
+    I[Imported usage]
+    H[Open placeholder]
+    M -->|matches against| I -->|may hydrate| H
+  end
+  subgraph Direct path
+    D[Direct usage intake]
+    R[Usage ledger row]
+    D -->|appends directly| R
+  end
+  H -->|becomes the stored row| R

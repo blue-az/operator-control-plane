@@ -1,10 +1,12 @@
 flowchart TD
-  task["Task record"]
-  claim["Claim record"]
-  evidence["Evidence record"]
-  handoff["Next step record"]
-  session["Active work record"]
-  task -->|adds a claim| claim
-  claim -->|links proof to the task| evidence
-  task -->|preserves the next step| handoff
-  task -->|marks work as active| session
+  T[Task]
+  C[Claim]
+  E[Evidence]
+  V[Verification]
+  R[Trusted claim]
+  N[Still only an assertion]
+  T --> C
+  C --> E
+  E --> V
+  V --> R
+  C --- N

@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant A as Assigned harness
+  participant L as Local ledger
+  participant R as Review harness
+  participant U as Usage intake
+  A->>L: Add handoff details
+  L->>L: Build the brief with the latest handoff
+  L->>R: Pass the brief to the next harness
+  A->>L: Start the session
+  L->>L: Mark the task running and open usage
+  L->>U: Record usage through its own intake path

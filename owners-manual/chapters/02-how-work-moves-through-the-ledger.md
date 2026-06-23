@@ -1,154 +1,199 @@
 ## How Work Moves Through the Ledger
 
-_This chapter explains the part of the product that turns supervised work into a record. A task is the unit of work, a claim is the asserted outcome, evidence is the proof attached to that claim, a handoff keeps the next step visible, and a session marks when work is active and when it closes. Read the ledger as a linked trail of records, not as one simple status field._
+_The product matters to the owner because it turns work into a governed record instead of a pile of loosely related notes. A task becomes a claim when an assigned harness says what it did, evidence supports that claim, and verification is the separate trust step that decides whether the claim should be treated as trusted._
 
 ### One-Minute Snapshot
 
-This chapter explains the part of the product that turns supervised work into a record. A task is the unit of work, a claim is the asserted outcome, evidence is the proof attached to that claim, a handoff keeps the next step visible, and a session marks when work is active and when it closes. Read the ledger as a linked trail of records, not as one simple status field. The main owner risk is that some transitions are conditional, especially session closure and the return to assigned, so a quick read can hide whether work is still live.
+The product matters to the owner because it turns work into a governed record instead of a pile of loosely related notes. A task becomes a claim when an assigned harness says what it did, evidence supports that claim, and verification is the separate trust step that decides whether the claim should be treated as trusted. Sessions, briefs, and handoffs sit around that core path so the next harness can continue without losing context. Usage records are also governed, but they are secondary to the trust path and should not be mistaken for proof of work.
 
 ### What You Should Be Able To Explain
 
-- You can tell what each ledger record means in plain terms: task, claim, evidence, handoff, and session.
-- You can follow how work becomes proof without collapsing the whole flow into one status value.
-- You can see where the ledger preserves the next step and where it marks work as still active.
-- You can spot the conditional points that matter for reassignment, closure, and later review.
-- You can separate this workflow chapter from the later chapters that deal with trust, harness coordination, and imported usage.
+- Understand the difference between a task, a claim, evidence, and verification.
+- See why claims and evidence stay separate until a verifier signs off.
+- Recognize which records are essential for auditability and which records mainly preserve continuity.
+- Spot where the workflow can drift, downgrade, or stay ambiguous before it becomes a governance problem.
+- Know which follow-on chapters handle surfaces, trust, usage, and operating rhythm in more detail.
 
 ### Mental Model
 
-This chapter owns the path from supervised work to later audit trail. The operator starts with a task, attaches claims to that task, and then attaches evidence to the claim. A handoff keeps the next step visible across time. A session marks the active stretch of work so the ledger can say when work is open and when it has closed. The safest way to read the product is as a chain of linked records, not as a single status field that tells the whole story.
+Think of the ledger as a governed work trail. The task is the container for work. The claim is the statement that something was done. Evidence is the support for that statement. Verification is the trust step that tells the owner whether the claim should count as trusted. Those are related, but they are not the same thing.
 
-> **Figure:** The owner should read the ledger as a chain of linked records, not as one status field. That matters because disputes and later review depend on the full trail: the task, the claim, the attached proof, the preserved next step, and the active work marker all carry different parts of the story.
+The supporting records sit beside that core path. Briefs and handoffs are there so the next harness can pick up the work with context intact. Sessions capture the working period and help close it out cleanly. Usage records account for activity and cost. A healthy workflow makes those layers visible instead of blending them into one vague status stream.
+
+> **Figure:** The owner should read trust as a separate gate, not something created by the claim itself. A task can become a claim before it is trusted, and only evidence plus verification changes how that claim counts.
 
 ```mermaid
 flowchart TD
-  task["Task record"]
-  claim["Claim record"]
-  evidence["Evidence record"]
-  handoff["Next step record"]
-  session["Active work record"]
-  task -->|adds a claim| claim
-  claim -->|links proof to the task| evidence
-  task -->|preserves the next step| handoff
-  task -->|marks work as active| session
+  T[Task]
+  C[Claim]
+  E[Evidence]
+  V[Verification]
+  R[Trusted claim]
+  N[Still only an assertion]
+  T --> C
+  C --> E
+  E --> V
+  V --> R
+  C --- N
 ```
 
-A task record sits at the center of the ledger. From that task, a claim record is added. The claim points to an evidence record that carries the proof. The task also keeps a next step record for handoff and an active work record for the session that marks when work is running. The consequence is that the owner has to read several linked records together to understand what actually happened.
+A task leads to a claim. The claim can gather evidence. Verification is a separate step that decides whether the claim becomes trusted. Until that review happens, the claim remains only an assertion about work, not proof.
 
 ### How It Works
 
-Work begins as a task record and becomes more specific as the operator adds claims, evidence, and handoffs. Evidence attachment is not just a note; it can also change the claim and the task outcome. Handoffs preserve the next step on the task so the work does not lose its direction when time passes or the work moves between harnesses. Sessions show when work is active. Closing a session is not a blind flip back to idle: if the task is still running and no open sessions remain, the ledger can return it to assigned unless the close request asks for a different outcome. That conditional return is the point where a quick reading can go wrong.
+The normal sequence is straightforward: a task exists, an assigned harness works it, a claim records what was done, evidence supports that claim, and verification decides whether the claim is trusted. The owner should read that as a chain of responsibility, not a set of interchangeable statuses.
 
-> **Figure:** Session closure is conditional, so the owner should not read every finished session as an automatic return to assigned. The important consequence is that reassignment only happens when the task is still running and nothing is left open, while an explicit outcome or a guarded second close keeps the task from falling back.
+A few supporting rules matter for how the chain behaves. Some writes follow the current active task automatically when no task is named, so the ledger depends on task state being correct. A new claim starts unverified and has no verifier until later evidence and verification are recorded. When claim-backed evidence is being marked with a status, the verification step is separate from the evidence itself, and the trust check is stricter in enforced mode than in single-user mode. Briefs and handoffs carry the latest context to the next harness, while session start and end frame the working period and the usage placeholder that belongs to it.
 
-```mermaid
-stateDiagram-v2
-  [*] --> Running
-  Running --> Closing: session ends
-  Closing --> Assigned: task is still running and no open sessions remain
-  Closing --> KeptClosed: explicit status sets a different outcome
-  Closing --> Refused: close is already finished unless forced
-```
-
-The lifecycle begins in running. When a session ends, the task moves into a closing step. From there, it returns to assigned only if the task is still running and no open sessions remain. If an explicit status requests a different outcome, the task stays kept closed. If a close is already finished and not forced, the close is refused. The consequence is that session end does not by itself mean the task is ready for reassignment.
-
-### Verified Facts
-
-The reviewed evidence supports a small, local, file-backed ledger model with the same workflow nouns the command line uses. It also supports a single mutation chain from task to claim to evidence, where proof material and task history stay linked. Handoff capture stores the next step on the task, and session start and end record when work is running and when it closes. The manual also shows that omitting a task name is only a shortcut on task-scoped commands, while commands that depend on harness registration fail if that local registry entry is missing. That makes the workflow more precise than a generic project tracker, but also less forgiving if the operator assumes one rule applies everywhere.
-
-> **Figure:** The shortcut is narrow, not universal. The owner should expect omitted task context to work only where the command is already task-scoped, while commands that depend on local harness state still stop when that record is missing.
+> **Figure:** Briefs, handoffs, sessions, and usage records sit beside the core path to preserve continuity and accounting. They help the next harness continue cleanly, but they do not replace the proof path.
 
 ```mermaid
 flowchart LR
-  taskCmd["Task-scoped commands"]
-  current["Omit task flag"]
-  active["Use current task"]
-  harnessCmd["Harness-dependent commands"]
-  local["Need local harness record"]
-  missing["Missing record means fail closed"]
-  taskCmd --> current --> active
-  harnessCmd --> local --> missing
+  subgraph Core[Core trust path]
+    T[Task] --> C[Claim] --> E[Evidence] --> V[Verification]
+  end
+  subgraph Support[Supporting records]
+    B[Brief] --- H[Handoff]
+    S[Session] --- U[Usage record]
+  end
+  B -. keeps context current .-> T
+  H -. passes work to the next harness .-> T
+  S -. frames the working period .-> T
+  U -. accounts for activity and cost .-> T
 ```
 
-One branch shows task-scoped commands: if the task flag is omitted, the command uses the current task. The other branch shows harness-dependent commands: they need a local harness record, and if that record is missing they fail closed. The consequence is that omitted task context does not apply everywhere, so the owner should read fallback behavior per command.
+The core path is task, claim, evidence, and verification. Around it sit briefs, handoffs, sessions, and usage records. Those supporting records keep context moving, frame the working period, and account for activity and cost, but they do not serve as proof of work.
+
+### Verified Facts
+
+The reviewed evidence supports a few concrete behaviors that matter to the owner:
+
+- Claim creation is not trust creation. A new claim begins unverified, with no verifier and no evidence refs, and it is linked back to its task.
+- Claim-backed evidence updates only enforce the verifier rule when a status is being recorded on a claim. That is the protected trust path; it is not a blanket rule for every evidence write.
+- Local evidence copying is best-effort. If the copy fails, the ledger write can still proceed, so the owner should not assume the file itself always landed safely just because the ledger entry exists.
+- Doctor is a diagnostic check, not a single binary gate. It separates self-verification errors, reviewer mismatch warnings, and legacy records that lack verifier metadata.
+- Briefs are meant to hand work to the next harness. They carry the latest handoff, the current task state, and the next action, and they tell builders to attach evidence while leaving verification to the review harness.
+- Usage has two lanes. Imported usage is tied to session history, while direct usage intake is a separate accounting write that goes straight into the dated usage ledger.
+- Executor identity is stamped on operational writes, but bootstrap is a known exception, and single-user mode can accept a write while still warning that verification is not identity-enforced.
+
+> **Figure:** Verified promotion is guarded by terminal-state checks, but quarantine still has the power to overwrite the parent task. That makes closeout reversible when late quarantine evidence arrives.
+
+```mermaid
+stateDiagram-v2
+  [*] --> open: work starts
+  open --> verified: review accepts the claim
+  open --> complete: work closes out
+  verified --> complete: work closes out
+  open --> quarantined: quarantine evidence arrives
+  verified --> quarantined
+  complete --> quarantined
+  note right of verified
+    Promotion only happens before the task looks terminal.
+  end note
+  note right of quarantined
+    A late quarantine can still downgrade the task.
+  end note
+```
+
+A task can move from open to verified or complete when review and closeout happen. Verified promotion only happens before the task looks terminal. If quarantine evidence arrives later, the task can still be moved to quarantined even after it looked finished. The owner should treat terminal-looking status as provisional when quarantine remains possible.
 
 ### Strengths
 
-The strongest part of this workflow is traceability. The owner can follow a task from creation, to claim, to evidence, to handoff, to session closure without losing the thread. The second strength is restraint: the ledger does not pretend that one status change is enough to prove the work is finished. Session closure has a duplicate-close guard, and the return to assigned is conditional rather than automatic. The third strength is boundary discipline. This chapter can stay focused on the movement of work while later chapters handle trust, identity, and external coordination.
+The strongest part of this lifecycle is that it separates assertion, support, and trust. That gives the owner a cleaner audit trail than a simple done/not-done status. The workflow also preserves continuity: the next harness does not have to guess what happened, because the brief and handoff records carry the recent context forward.
+
+The second strength is that the ledger does not force every record into one bucket. Usage, session closeout, and direct handoff records remain visible as supporting material instead of being hidden inside the claim itself. That makes it easier to tell whether the workflow is actually trusted, merely in progress, or already drifting into a state that needs review.
 
 ### Attention Cards
 
-#### ⚠ Do not treat one status as the whole story  _(attention · high)_
+#### ⚠ Claim status checks are not blanket checks  _(attention · critical)_
 
-**What happens:** Task state is spread across task, claim, evidence, handoff, and session records. Evidence attachment and session closure can change more than one record at once, so the latest status by itself is not the full audit trail.
+**What happens:** The verifier rule only runs on claim-backed evidence updates that are recording status. Bare evidence updates do not go through the same trust gate.
 
-**Why it matters:** If the owner reads only the end state, disputes can hide the record chain that shows what actually happened.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When ledger workflow behavior or related owner decisions change.
-
-#### ⚠ Session closure only returns to assigned under narrow conditions  _(attention · high)_
-
-**What happens:** A finished session does not automatically mean the task is back at assigned. The task must still be running, no open sessions can remain, and an explicit close request can override the fallback.
-
-**Why it matters:** The owner could think work is ready for reassignment while the ledger still treats it as active.
+**Why it matters:** If the owner assumes every status write is equally protected, they can overestimate how much the ledger is actually enforcing.
 
 **What to do:** Review this boundary and decide whether the current behavior is intentional.
 
-**Revisit when:** When ledger workflow behavior or related owner decisions change.
+**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
 
-#### ⚠ Current-task fallback is command-specific  _(attention · medium)_
+#### ⚠ A late quarantine can overwrite terminal task state  _(attention · high)_
 
-**What happens:** Omitting a task name binds only some task-scoped commands to the current task. Commands that depend on harness registration also fail closed when that local registry entry is missing.
+**What happens:** When a claim-backed evidence update is marked quarantined, it always writes quarantined back onto the parent task, even if the task was already complete or verified.
 
-**Why it matters:** If the manual overgeneralizes this rule, operators will expect the same fallback or the same validation everywhere.
+**Why it matters:** Closeout is not one-way here. A later quarantine can downgrade a task the owner thought was already finished.
 
 **What to do:** Review this boundary and decide whether the current behavior is intentional.
 
-**Revisit when:** When ledger workflow behavior or related owner decisions change.
+**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
+
+#### ⚠ Usage import can match more than one shape of source  _(attention · medium)_
+
+**What happens:** Usage import can match by exact session ID, by substring in the source reference, by time window, by session overlap, or by scored fallback, and it can hydrate an existing open placeholder instead of always appending a new row.
+
+**Why it matters:** Accounting can merge into an existing record instead of creating a fresh one, so a casual import assumption can hide a rewrite.
+
+**What to do:** Review this boundary and decide whether the current behavior is intentional.
+
+**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
+
+#### ⚠ Bootstrap is not a repair path  _(attention · medium)_
+
+**What happens:** Running initialization again does not repair a partially initialized ledger tree, and bootstrap does not carry the same executor provenance as normal operational writes.
+
+**Why it matters:** A broken local setup may look initialized enough to proceed while still missing parts the workflow depends on.
+
+**What to do:** Review this boundary and decide whether the current behavior is intentional.
+
+**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
+
+#### ⚠ Direct usage intake bypasses session provenance  _(attention · medium)_
+
+**What happens:** Manual usage entry writes straight into the dated usage ledger and does not carry the session-import trail that imported usage records have.
+
+**Why it matters:** The owner should treat direct usage intake as a first-class accounting write, not as imported history with the same provenance shape.
+
+**What to do:** Review this boundary and decide whether the current behavior is intentional.
+
+**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
 
 ### Owner Decisions
 
-#### ⚖ Should this chapter keep the product framed as a local ledger rather than a hosted workflow system?  _(owner decision · open)_
+#### ⚖ Should the manual treat claim-backed evidence status as the only trusted status path?  _(owner decision · open)_
 
-**Why it matters:** That framing sets the owner's expectation for where records live and how much of the workflow is meant to be local and inspectable.
+**Why it matters:** That choice determines whether the owner sees the verification step as a hard trust boundary or just one of several ways to update evidence.
 
-**Revisit when:** Before changing the related ledger workflow behavior.
+**Revisit when:** Before changing the related ledger lifecycle behavior.
 
-#### ⚖ Should the manual say session closure falls back to assigned only when the task is still running and no open sessions remain?  _(owner decision · open)_
+#### ⚖ Should a late quarantine be allowed to override a task that already looks complete or verified?  _(owner decision · open)_
 
-**Why it matters:** This is the point where a quick reading can produce the wrong operational conclusion about whether the work is actually finished.
+**Why it matters:** This is a closeout policy decision. It controls whether terminal task state is reversible when a later evidence update arrives.
 
-**Revisit when:** Before changing the related ledger workflow behavior.
+**Revisit when:** Before changing the related ledger lifecycle behavior.
 
-#### ⚖ Should the manual list which commands use the current-task fallback and which commands check harness state?  _(owner decision · open)_
+#### ⚖ Should usage import stay permissive and able to hydrate an open placeholder?  _(owner decision · open)_
 
-**Why it matters:** This affects how much the owner can trust omitted task context and missing harness files.
+**Why it matters:** This determines whether usage accounting is an append-oriented history or a merge-oriented correction path.
 
-**Revisit when:** Before changing the related ledger workflow behavior.
+**Revisit when:** Before changing the related ledger lifecycle behavior.
 
-#### ⚖ Should this chapter keep evidence capture separate from later verification?  _(owner decision · open)_
+#### ⚖ Should direct usage intake remain separate from session import provenance?  _(owner decision · open)_
 
-**Why it matters:** The workflow is easier to understand when proof material is attached first and trust is judged in the later chapter.
+**Why it matters:** This decides whether manual usage is a distinct accounting path or just another view of imported session history.
 
-**Revisit when:** Before changing the related ledger workflow behavior.
+**Revisit when:** Before changing the related ledger lifecycle behavior.
 
 ### Evidence Boundary
 
 > **Evidence boundary** — Reviewed:
-- The local ledger framing and the command vocabulary that this product uses to talk about work.
-- The linked path from task to claim to evidence, including how evidence can also change the recorded outcome.
-- The handoff and session lifecycle, including the conditional return to assigned after the last open session closes.
-- The fact that current-task fallback is command-specific rather than a blanket rule, with missing harness registration causing some commands to fail closed.
+- Reviewed the task, claim, evidence, verification, session, handoff, usage, identity, and bootstrap behaviors that define how work moves through the ledger.
+- Reviewed the diagnostic behavior that separates trust errors, reviewer mismatch warnings, and in-flight lifecycle drift.
+- Reviewed the boundary between core auditability records and supporting coordination records such as briefs, handoffs, sessions, and usage.
 
 Not reviewed:
-- The full identity and trust rules for verification.
-- The external harness coordination model beyond how it affects this workflow.
-- Imported usage and cost accounting in depth.
-- Broader durability, retention, recovery, and stewardship guarantees.
+- No live runtime ledger snapshot was mounted, so the chapter stays with documented behavior rather than observed production state.
+- No external home-directory session log corpus was available for usage import, so source availability and exact import results remain runtime-unverified.
+- Owner-confirmed product intent was not supplied, so the chapter avoids broader product-framing claims beyond the reviewed repository evidence.
 
-Recheck this chapter when task, claim, evidence, handoff, or session commands change, when the close-and-return behavior changes, or when the product scope moves beyond the local ledger model.
+Recheck the command surface, bootstrap path, claim creation, evidence update behavior, brief and handoff generation, session closeout, usage import, direct usage intake, and doctor diagnostics if the implementation or manual vocabulary changes. Mount a live ledger snapshot and the external session logs before making stronger claims about on-disk state or import source selection.
 
 > Reviewed: blue-az/operator-control-plane repository snapshot, Founder/owner context
 

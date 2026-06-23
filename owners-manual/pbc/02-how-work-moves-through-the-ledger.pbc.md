@@ -15,7 +15,7 @@ tags:
 
 ## Scope
 
-This chapter explains the part of the product that turns supervised work into a record. A task is the unit of work, a claim is the asserted outcome, evidence is the proof attached to that claim, a handoff keeps the next step visible, and a session marks when work is active and when it closes. Read the ledger as a linked trail of records, not as one simple status field.
+The product matters to the owner because it turns work into a governed record instead of a pile of loosely related notes. A task becomes a claim when an assigned harness says what it did, evidence supports that claim, and verification is the separate trust step that decides whether the claim should be treated as trusted.
 
 ## Actors
 
@@ -44,7 +44,7 @@ This chapter explains the part of the product that turns supervised work into a 
 id: HOW_WORK_MOVES_THROUGH_T-BHV-001
 name: "How Work Moves Through the Ledger"
 actor: product_system
-description: "This chapter explains the part of the product that turns supervised work into a record. A task is the unit of work, a claim is the asserted outcome, evidence is the proof attached to that claim, a handoff keeps the next step visible, and a session marks when work is active and when it closes. Read the ledger as a linked trail of records, not as one simple status field."
+description: "The product matters to the owner because it turns work into a governed record instead of a pile of loosely related notes. A task becomes a claim when an assigned harness says what it did, evidence supports that claim, and verification is the separate trust step that decides whether the claim should be treated as trusted."
 trust: provisional
 ```
 
@@ -69,15 +69,21 @@ section_responsibilities:
 ```pbc:grounding
 status: draft
 attention:
-  - title: "Do not treat one status as the whole story"
+  - title: "Claim status checks are not blanket checks"
+    severity: "critical"
+    why_it_matters: "If the owner assumes every status write is equally protected, they can overestimate how much the ledger is actually enforcing."
+  - title: "A late quarantine can overwrite terminal task state"
     severity: "high"
-    why_it_matters: "If the owner reads only the end state, disputes can hide the record chain that shows what actually happened."
-  - title: "Session closure only returns to assigned under narrow conditions"
-    severity: "high"
-    why_it_matters: "The owner could think work is ready for reassignment while the ledger still treats it as active."
-  - title: "Current-task fallback is command-specific"
+    why_it_matters: "Closeout is not one-way here. A later quarantine can downgrade a task the owner thought was already finished."
+  - title: "Usage import can match more than one shape of source"
     severity: "medium"
-    why_it_matters: "If the manual overgeneralizes this rule, operators will expect the same fallback or the same validation everywhere."
+    why_it_matters: "Accounting can merge into an existing record instead of creating a fresh one, so a casual import assumption can hide a rewrite."
+  - title: "Bootstrap is not a repair path"
+    severity: "medium"
+    why_it_matters: "A broken local setup may look initialized enough to proceed while still missing parts the workflow depends on."
+  - title: "Direct usage intake bypasses session provenance"
+    severity: "medium"
+    why_it_matters: "The owner should treat direct usage intake as a first-class accounting write, not as imported history with the same provenance shape."
 ```
 
 ## Owner Decisions
@@ -85,24 +91,25 @@ attention:
 ```pbc:grounding
 status: draft
 decisions:
-  - question: "Should this chapter keep the product framed as a local ledger rather than a hosted workflow system?"
+  - question: "Should the manual treat claim-backed evidence status as the only trusted status path?"
     state: "open"
-    why_it_matters: "That framing sets the owner's expectation for where records live and how much of the workflow is meant to be local and inspectable."
-  - question: "Should the manual say session closure falls back to assigned only when the task is still running and no open sessions remain?"
+    why_it_matters: "That choice determines whether the owner sees the verification step as a hard trust boundary or just one of several ways to update evidence."
+  - question: "Should a late quarantine be allowed to override a task that already looks complete or verified?"
     state: "open"
-    why_it_matters: "This is the point where a quick reading can produce the wrong operational conclusion about whether the work is actually finished."
-  - question: "Should the manual list which commands use the current-task fallback and which commands check harness state?"
+    why_it_matters: "This is a closeout policy decision. It controls whether terminal task state is reversible when a later evidence update arrives."
+  - question: "Should usage import stay permissive and able to hydrate an open placeholder?"
     state: "open"
-    why_it_matters: "This affects how much the owner can trust omitted task context and missing harness files."
-  - question: "Should this chapter keep evidence capture separate from later verification?"
+    why_it_matters: "This determines whether usage accounting is an append-oriented history or a merge-oriented correction path."
+  - question: "Should direct usage intake remain separate from session import provenance?"
     state: "open"
-    why_it_matters: "The workflow is easier to understand when proof material is attached first and trust is judged in the later chapter."
+    why_it_matters: "This decides whether manual usage is a distinct accounting path or just another view of imported session history."
 ```
 
 ## Provenance
 
 ```pbc:provenance
-- ref: "blue-az/operator-control-plane:master@c5cd06fca49d13e59ffb989d928d7c8fe923819f"
-  confidence: reviewed
+- ref: "blue-az/operator-control-plane:main@9b9e3e63a7f0f54ccde541c6c10570c8fdbe8f5b"
+  confidence: inferred
+  review_status: "reviewed"
   note: "Source snapshot for the generated Owner's Manual."
 ```

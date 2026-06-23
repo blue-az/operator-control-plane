@@ -15,4 +15,4 @@ Use these files as structured context for coding agents, QA review, drift checks
 - Uncertainty from the manual remains uncertainty here.
 - Missing repositories or external systems should stay visible as grounding context, not be converted into invented behavior.
 
-Source: blue-az/operator-control-plane:master@c5cd06fca49d13e59ffb989d928d7c8fe923819f
+Source: blue-az/operator-control-plane:main@9b9e3e63a7f0f54ccde541c6c10570c8fdbe8f5b

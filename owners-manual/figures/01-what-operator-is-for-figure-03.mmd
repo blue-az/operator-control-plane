@@ -1,0 +1,14 @@
+flowchart LR
+  subgraph A[With an explicit task]
+    A1[Writer names the task]
+    A2[The write targets that task]
+    A1 --> A2
+  end
+  subgraph B[Without an explicit task]
+    B1[Writer omits the task]
+    B2[The product reads the current task]
+    B3[No active task exists]
+    B4[The write fails closed]
+    B1 --> B2 --> B4
+    B2 -. when nothing is active .-> B3 --> B4
+  end

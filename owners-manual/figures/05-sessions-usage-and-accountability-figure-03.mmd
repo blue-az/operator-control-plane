@@ -1,0 +1,7 @@
+flowchart LR
+    ext[External session logs] --> imp[Imported usage row]
+    imp --> trail[Carries a source session trail]
+    ext -. replay-safe on the same source .-> imp
+    manual[Manual usage entry] --> direct[Direct usage row]
+    direct --> bare[No import trail]
+    manual -. bypasses import trail .-> direct

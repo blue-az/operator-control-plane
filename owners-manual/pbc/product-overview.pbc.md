@@ -19,12 +19,12 @@ Generated full-manual draft assembled from 6 chapter generation runs selected by
 
 ## Chapters
 
-1. What the Operator Control Plane Is For
+1. What operator Is For
 2. How Work Moves Through the Ledger
-3. How Verification Creates Trust
-4. How Harnesses Coordinate Work
-5. How Usage Import Supports the Audit Trail
-6. Operating Boundaries, Failure Modes, and Stewardship
+3. The Surfaces and Records You Actually Operate
+4. Trust, Identity, and Verification
+5. Sessions, Usage, and Accountability
+6. Running a Multi-Harness Workflow
 
 ## Actors
 
@@ -51,16 +51,20 @@ Generated full-manual draft assembled from 6 chapter generation runs selected by
 
 ```pbc:provenance
 - ref: "blue-az/operator-control-plane repository snapshot"
-  confidence: reviewed
-  note: "repository · Application repository snapshot used by the Operating Boundaries, Failure Modes, and Stewardship knowledge workflow."
+  confidence: inferred
+  review_status: "reviewed"
+  note: "repository · Application repository snapshot used by the Running a Multi-Harness Workflow knowledge workflow."
 - ref: "Founder/owner context"
-  confidence: reviewed
+  confidence: inferred
+  review_status: "reviewed"
   note: "document · Owner-confirmed intent and deferred decisions supplied before generation."
 - ref: "External runtime and integrations"
-  confidence: open
+  confidence: assumed
+  review_status: "external"
   note: "external-integration · Provider-side behavior, event ordering, retries, credentials, live data and operational truth outside the reviewed repository snapshot."
 - ref: "Unreviewed runtime and owner context"
-  confidence: open
+  confidence: assumed
+  review_status: "missing"
   note: "runtime · Operational behavior and owner intent outside the reviewed source snapshot and promoted knowledge."
 ```
 

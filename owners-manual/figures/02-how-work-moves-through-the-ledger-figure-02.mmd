@@ -1,6 +1,12 @@
-stateDiagram-v2
-  [*] --> Running
-  Running --> Closing: session ends
-  Closing --> Assigned: task is still running and no open sessions remain
-  Closing --> KeptClosed: explicit status sets a different outcome
-  Closing --> Refused: close is already finished unless forced
+flowchart LR
+  subgraph Core[Core trust path]
+    T[Task] --> C[Claim] --> E[Evidence] --> V[Verification]
+  end
+  subgraph Support[Supporting records]
+    B[Brief] --- H[Handoff]
+    S[Session] --- U[Usage record]
+  end
+  B -. keeps context current .-> T
+  H -. passes work to the next harness .-> T
+  S -. frames the working period .-> T
+  U -. accounts for activity and cost .-> T

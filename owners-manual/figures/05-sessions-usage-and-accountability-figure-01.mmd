@@ -1,0 +1,7 @@
+stateDiagram-v2
+    [*] --> Running: session starts, brief is written, usage opens
+    Running --> Closed: session ends and usage closes
+    Closed --> Closed: force-close an already closed record
+    Closed --> Assigned: no open usage remains and no final state is supplied
+    Closed --> FinalState: an explicit final state is chosen
+    FinalState --> [*]
