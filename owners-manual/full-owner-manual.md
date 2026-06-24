@@ -5,6 +5,44 @@ _6 generated chapters from the reviewed repository snapshot_
 > Source: blue-az/operator-control-plane:main@9b9e3e63a7f0f54ccde541c6c10570c8fdbe8f5b
 
 ---
+
+## Quickstart
+
+```bash
+pip install -r requirements.txt        # just PyYAML
+./operator --help
+./operator doctor                      # consistency check over the local .operator/ ledger
+pytest tests/                          # subprocess-driven tests + synthetic session fixtures
+```
+
+The ledger (`.operator/`) is gitignored — it's your work history, not the tool.
+
+## Worked example
+
+```bash
+./operator init                                    # create .operator/ ledger in this repo
+
+# open a task
+./operator task-create --objective "Add retry to the uploader" --id up-retry --repo myapp
+
+# an agent registers a typed, gate-bound claim
+./operator claim-add --task up-retry --type test_passes \
+    --text "uploader retries 3x on 5xx" --gate tests/test_upload.py
+
+# attach evidence and verify — verifier identity must differ from the builder (guard fails closed)
+./operator evidence-attach tests/out/upload.log --task up-retry --claim claim-0001 \
+    --type test_output --status verified --verified-by reviewer
+
+# read-only consistency check: unverified / self-verified claims, enforcement downgrades
+./operator doctor
+
+# track the session + its cost, then close out with a brief for the next harness
+./operator session-start --task up-retry --harness claude
+./operator session-end --outcome useful --cost 12.50
+./operator handoff-add --task up-retry --changed "uploader.py" --verified "retry test" --open "tune backoff"
+./operator export-brief --for codex --task up-retry
+```
+
 ## What operator Is For
 
 _operator is a local command-line control plane with a file-backed ledger under .operator/. Its job is not to be a general project tracker or a hosted control plane; it is to keep multi-agent work legible through a task, claim, evidence, and verification frame. For the owner, the important thing is the boundary: this product is about preserving accountable work records inside a bounded local workflow._
@@ -123,68 +161,6 @@ A claim starts unverified. When evidence is attached, it enters a verification g
 The strongest thing about the product is that it makes work legible across harnesses without asking the owner to trust memory. The vocabulary is consistent across the command surface and the recorded workflow, which makes it easier to tell whether a task is actually supported, merely asserted, or already verified.
 
 A second strength is that the product keeps continuity explicit. Briefs, handoffs, sessions, and provenance are recorded as part of the workflow instead of being left as informal side notes, so the ledger can answer what happened and who acted even when the work moved between roles.
-
-### Attention Cards
-
-#### ⚠ This may be only the local tool, not the whole workflow  _(attention · critical)_
-
-**What happens:** The evidence supports a bounded local product, but it does not prove that this repository covers every surrounding process the owner uses.
-
-**Why it matters:** If later evidence shows external companion steps, the manual must keep the boundary explicit instead of implying that operator is the entire operating system for the business.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When product identity behavior or related owner decisions change.
-
-#### ⚠ Init does not repair a broken ledger tree  _(attention · high)_
-
-**What happens:** First-run setup creates the standard .operator/ structure, but an already existing .operator/ stops bootstrap from rebuilding missing pieces.
-
-**Why it matters:** A partial or damaged ledger will not be fixed by rerunning bootstrap, so the owner should treat setup as creation, not repair.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When product identity behavior or related owner decisions change.
-
-#### ⚠ Some writes depend on the current task already being set  _(attention · high)_
-
-**What happens:** Several task-bound commands use the current task when no task is supplied and fail closed when there is no active task.
-
-**Why it matters:** This is convenient when the workflow is already anchored, but it can surprise an operator who expects every write to stand alone without repository state.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When product identity behavior or related owner decisions change.
-
-#### ⚠ A claim is not trusted when it is created  _(attention · medium)_
-
-**What happens:** A new claim starts unverified, with no verifier and no evidence refs.
-
-**Why it matters:** The owner should not read claim creation as correctness; it is only a tracked assertion that still needs support and verification.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When product identity behavior or related owner decisions change.
-
-### Owner Decisions
-
-#### ⚖ Should this manual treat operator as the whole operating environment, or as one local component inside a larger workflow?  _(owner decision · open)_
-
-**Why it matters:** That choice controls how far the manual is allowed to generalize beyond the repository evidence.
-
-**Revisit when:** Before changing the related product identity behavior.
-
-#### ⚖ Should task-bound writes rely on the current task by default, or should every write require an explicit task selection?  _(owner decision · open)_
-
-**Why it matters:** The current fallback is useful, but it makes the product depend on existing ledger state.
-
-**Revisit when:** Before changing the related product identity behavior.
-
-#### ⚖ Should bootstrap stay a first-run setup step, or should it also repair an existing .operator/ tree?  _(owner decision · open)_
-
-**Why it matters:** The answer determines whether a partially initialized ledger is an expected maintenance case or a supported recovery path.
-
-**Revisit when:** Before changing the related product identity behavior.
 
 ### Evidence Boundary
 
@@ -315,84 +291,6 @@ The strongest part of this lifecycle is that it separates assertion, support, an
 
 The second strength is that the ledger does not force every record into one bucket. Usage, session closeout, and direct handoff records remain visible as supporting material instead of being hidden inside the claim itself. That makes it easier to tell whether the workflow is actually trusted, merely in progress, or already drifting into a state that needs review.
 
-### Attention Cards
-
-#### ⚠ Claim status checks are not blanket checks  _(attention · critical)_
-
-**What happens:** The verifier rule only runs on claim-backed evidence updates that are recording status. Bare evidence updates do not go through the same trust gate.
-
-**Why it matters:** If the owner assumes every status write is equally protected, they can overestimate how much the ledger is actually enforcing.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
-
-#### ⚠ A late quarantine can overwrite terminal task state  _(attention · high)_
-
-**What happens:** When a claim-backed evidence update is marked quarantined, it always writes quarantined back onto the parent task, even if the task was already complete or verified.
-
-**Why it matters:** Closeout is not one-way here. A later quarantine can downgrade a task the owner thought was already finished.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
-
-#### ⚠ Usage import can match more than one shape of source  _(attention · medium)_
-
-**What happens:** Usage import can match by exact session ID, by substring in the source reference, by time window, by session overlap, or by scored fallback, and it can hydrate an existing open placeholder instead of always appending a new row.
-
-**Why it matters:** Accounting can merge into an existing record instead of creating a fresh one, so a casual import assumption can hide a rewrite.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
-
-#### ⚠ Bootstrap is not a repair path  _(attention · medium)_
-
-**What happens:** Running initialization again does not repair a partially initialized ledger tree, and bootstrap does not carry the same executor provenance as normal operational writes.
-
-**Why it matters:** A broken local setup may look initialized enough to proceed while still missing parts the workflow depends on.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
-
-#### ⚠ Direct usage intake bypasses session provenance  _(attention · medium)_
-
-**What happens:** Manual usage entry writes straight into the dated usage ledger and does not carry the session-import trail that imported usage records have.
-
-**Why it matters:** The owner should treat direct usage intake as a first-class accounting write, not as imported history with the same provenance shape.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When ledger lifecycle behavior or related owner decisions change.
-
-### Owner Decisions
-
-#### ⚖ Should the manual treat claim-backed evidence status as the only trusted status path?  _(owner decision · open)_
-
-**Why it matters:** That choice determines whether the owner sees the verification step as a hard trust boundary or just one of several ways to update evidence.
-
-**Revisit when:** Before changing the related ledger lifecycle behavior.
-
-#### ⚖ Should a late quarantine be allowed to override a task that already looks complete or verified?  _(owner decision · open)_
-
-**Why it matters:** This is a closeout policy decision. It controls whether terminal task state is reversible when a later evidence update arrives.
-
-**Revisit when:** Before changing the related ledger lifecycle behavior.
-
-#### ⚖ Should usage import stay permissive and able to hydrate an open placeholder?  _(owner decision · open)_
-
-**Why it matters:** This determines whether usage accounting is an append-oriented history or a merge-oriented correction path.
-
-**Revisit when:** Before changing the related ledger lifecycle behavior.
-
-#### ⚖ Should direct usage intake remain separate from session import provenance?  _(owner decision · open)_
-
-**Why it matters:** This decides whether manual usage is a distinct accounting path or just another view of imported session history.
-
-**Revisit when:** Before changing the related ledger lifecycle behavior.
-
 ### Evidence Boundary
 
 > **Evidence boundary** — Reviewed:
@@ -516,78 +414,6 @@ flowchart LR
 
 One path imports usage from source session details, where it can fill an open placeholder and rewrite that row in place. The other path adds usage directly to the ledger as a first-class write. The owner gets smoother reconciliation on the import path and a cleaner source trail on the direct path.
 
-### Attention Cards
-
-Some of the most important risks are not about whether records exist, but about when the product will accept them as trustworthy. A status-bearing evidence attach only enforces the verifier gate when a claim is present, so a status write without a claim can bypass the trust check the owner may assume is universal. A late quarantine can also overwrite a task that was already terminal, so closeout is not one-way. Usage import is permissive enough to widen beyond a strict exact match, and it can rewrite an open placeholder instead of always appending a fresh row. Direct usage intake bypasses the session-import trail, which means accounting can be correct while still being disconnected from the provenance path the owner might expect.
-
-#### ⚠ Status-bearing evidence can bypass the verifier gate when no claim is present  _(attention · critical)_
-
-**What happens:** A status write on evidence does not automatically go through the claim-based verifier check; that trust rule only applies when a claim is supplied.
-
-**Why it matters:** An owner could mistake status for universal verification, but this path is narrower than it looks and can let unsupported trust state into the ledger.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When surfaces and records behavior or related owner decisions change.
-
-#### ⚠ Quarantine can overwrite a task that was already terminal  _(attention · high)_
-
-**What happens:** A quarantine write is not blocked by prior terminal state the way verified promotion is, so late quarantine can downgrade a task.
-
-**Why it matters:** Closeout is not one-way; an owner who treats verified or complete as final may miss a later write that changes the task state again.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When surfaces and records behavior or related owner decisions change.
-
-#### ⚠ Usage import is more permissive than exact matching  _(attention · medium)_
-
-**What happens:** Usage import can match by more than exact session ID and can hydrate an existing open placeholder instead of always creating a fresh row.
-
-**Why it matters:** A caller who expects a strict one-session, one-row import may end up merging or selecting more than intended.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When surfaces and records behavior or related owner decisions change.
-
-#### ⚠ Direct usage intake bypasses the session-import trail  _(attention · medium)_
-
-**What happens:** Usage added directly is a first-class ledger write, but it does not carry the same source-session provenance as imported usage.
-
-**Why it matters:** Accounting can look complete while the provenance path the owner expected is missing, which complicates review and reconciliation.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When surfaces and records behavior or related owner decisions change.
-
-### Owner Decisions
-
-Before relying on this chapter operationally, the owner should decide how strict the local workflow needs to be. If current-task fallback is convenient, task-bound writes can stay implicit; if not, the workflow should require explicit task identifiers. If the product must never accept a status-bearing evidence attach without a claim, that behavior needs to be treated as a boundary, not a convenience. If a verified or complete task must not move back to quarantined, then quarantine needs stricter handling. If imported usage should remain merge-friendly and permissive, the current import behavior may be acceptable; if not, it should be narrowed to more exact matches and clearer provenance rules.
-
-#### ⚖ Should task-bound writes keep the implicit current-task fallback, or should the owner require explicit task identifiers on every write?  _(owner decision · open)_
-
-**Why it matters:** Implicit fallback is convenient, but it ties record creation to repository state in a way that can surprise a user who assumes the target task is always explicit.
-
-**Revisit when:** Before changing the related surfaces and records behavior.
-
-#### ⚖ Should any status-bearing evidence write require a claim, or should bare evidence status writes remain allowed?  _(owner decision · open)_
-
-**Why it matters:** This is the boundary between a record that merely exists and a record that can advance trust state.
-
-**Revisit when:** Before changing the related surfaces and records behavior.
-
-#### ⚖ Should quarantine be allowed to downgrade a task that is already verified or complete?  _(owner decision · open)_
-
-**Why it matters:** This determines whether closeout is final or can be revised by a later evidence write.
-
-**Revisit when:** Before changing the related surfaces and records behavior.
-
-#### ⚖ Should imported usage remain permissive and placeholder-hydrating, or should it be narrowed to stricter matching and append-only behavior?  _(owner decision · open)_
-
-**Why it matters:** This choice affects whether usage records optimize for smooth reconciliation or for tighter provenance and less accidental merging.
-
-**Revisit when:** Before changing the related surfaces and records behavior.
-
 ### Evidence Boundary
 
 > **Evidence boundary** — Reviewed:
@@ -680,100 +506,6 @@ A task starts open, can move to verified after review, and can then close. A qua
 
 The design already gives the owner several guardrails that make trust legible. Role separation is explicit. Unverified claims stay untrusted until evidence and verification are added. Doctor does not collapse every irregularity into one failure bucket; it separates self-verification, reviewer mismatch, legacy gaps, and in-flight drift. Handoffs and briefs keep cross-harness continuity structured, and usage imports are idempotent on their provenance key instead of blindly duplicating records. Those are real strengths because they let the owner inspect trust as a set of narrow checks instead of one vague sense of progress.
 
-### Attention Cards
-
-#### ⚠ Verifier gate is claim-bound  _(attention · critical)_
-
-**What happens:** Bare evidence attaches with status can skip verification logic when no claim is supplied.
-
-**Why it matters:** If the owner assumes every status change enforces verification, unsupported evidence can look trusted.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When trust and verification behavior or related owner decisions change.
-
-#### ⚠ Identity mode changes the guarantee  _(attention · critical)_
-
-**What happens:** Enforced mode fail-closes on unknown or mismatched identities; single-user mode accepts the write and warns.
-
-**Why it matters:** The same workflow carries different trust strength depending on configuration, so a trust promise is not universal.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When trust and verification behavior or related owner decisions change.
-
-#### ⚠ Evidence copy is best-effort  _(attention · high)_
-
-**What happens:** The ledger can record the verification change even if the local file copy fails and the file never lands on disk.
-
-**Why it matters:** The owner cannot assume the artifact exists just because the ledger says the claim was updated.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When trust and verification behavior or related owner decisions change.
-
-#### ⚠ Quarantine can downgrade a finished task  _(attention · high)_
-
-**What happens:** A later quarantine write can overwrite verified or complete task status.
-
-**Why it matters:** Closeout is not one-way, so a late integrity finding can reopen a supposedly settled task.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When trust and verification behavior or related owner decisions change.
-
-#### ⚠ Bootstrap is not self-healing  _(attention · medium)_
-
-**What happens:** Init makes the standard layout once, then stops; it does not repair a partial tree and it does not stamp executor identity.
-
-**Why it matters:** A broken initial setup can persist unnoticed, and trust audits should not assume bootstrap records prove provenance.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When trust and verification behavior or related owner decisions change.
-
-#### ⚠ Usage import can merge instead of append  _(attention · medium)_
-
-**What happens:** Import selection can widen beyond exact equality and can rewrite an existing placeholder in place.
-
-**Why it matters:** If the owner expects a strict append-only accounting trail, the import path does not behave that way.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When trust and verification behavior or related owner decisions change.
-
-### Owner Decisions
-
-#### ⚖ Should evidence attaches with status be rejected when no claim is supplied?  _(owner decision · open)_
-
-**Why it matters:** This decides whether verification is a universal gate or only a claim-backed one, which changes how much trust the operator can read from the status field.
-
-**Revisit when:** Before changing the related trust and verification behavior.
-
-#### ⚖ Should single-user mode remain a warning-only trust mode, or should it fail closed when identity rules are configured?  _(owner decision · open)_
-
-**Why it matters:** This sets whether identity mismatches are an audit warning or a hard stop, which directly affects how much the owner can rely on the ledger.
-
-**Revisit when:** Before changing the related trust and verification behavior.
-
-#### ⚖ Should a local evidence copy failure abort the write instead of letting verification continue?  _(owner decision · open)_
-
-**Why it matters:** This decides whether trust can advance without a durable artifact on disk, which is a concrete integrity boundary.
-
-**Revisit when:** Before changing the related trust and verification behavior.
-
-#### ⚖ Should quarantine be allowed to overwrite verified or complete task status?  _(owner decision · open)_
-
-**Why it matters:** This decides whether terminal status is final or whether a late integrity finding can still downgrade the task.
-
-**Revisit when:** Before changing the related trust and verification behavior.
-
-#### ⚖ Should usage import stay permissive on matching and placeholder hydration, or should it require an exact match and append-only writes?  _(owner decision · open)_
-
-**Why it matters:** This sets whether usage import is a flexible reconciliation path or a stricter provenance trail.
-
-**Revisit when:** Before changing the related trust and verification behavior.
-
 ### Evidence Boundary
 
 > **Evidence boundary** — Reviewed:
@@ -783,7 +515,7 @@ The design already gives the owner several guardrails that make trust legible. R
 - The ledger behaviors that matter to this chapter: unverified claims, identity enforcement, quarantine handling, executor provenance, and usage import rules.
 
 Not reviewed:
-- No live .operator ledger snapshot was mounted, so this chapter does not claim observed live-state behavior beyond the reviewed material.
+- No live .operator snapshot was mounted, so this chapter does not claim observed live-state behavior beyond the reviewed material.
 - External session logs used by usage import were not mounted, so import-source availability remains runtime-unverified.
 - No owner interview answers were supplied, so the chapter stays inside repository evidence and does not widen the product boundary.
 
@@ -877,72 +609,6 @@ External session logs feed imported usage rows, and those imported rows carry a 
 ### What this layer does well
 
 The strongest part of this layer is structure. Briefs and handoffs carry the latest handoff, current state, and next action forward to the next harness instead of leaving the operator to reconstruct context from memory. Imported usage is replay-safe on its source reference, so repeated intake does not automatically duplicate accounting. That combination gives the owner something usable for review and continuity without pretending this is a spend dashboard.
-
-### Attention Cards
-
-The main risks here are permissive matching, split accounting paths, and closeout conventions that can change the final task state. A session import can widen beyond a single exact source, direct usage entries do not carry the same source trail as imported session records, and session end can reshape the task's final state in ways that are easy to miss. The review also lacked mounted source logs, so live usage fidelity could not be checked here.
-
-#### ⚠ Import matching can pull in more than one source  _(attention · medium)_
-
-**What happens:** Usage import can match by exact session, by a fragment of the source reference, by time window, by overlap, or by a score-based fallback. That is flexible, but it is not a single exact lookup.
-
-**Why it matters:** If the operator assumes one exact session is being imported, the ledger can pick a different record and make the usage trail look cleaner or messier than reality.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When usage and sessions behavior or related owner decisions change.
-
-#### ⚠ Manual usage entries do not carry the same source trail  _(attention · high)_
-
-**What happens:** Direct usage entries are recorded straight into the ledger. They are first-class records, but they are not the same thing as imported session usage and do not give the same source trail.
-
-**Why it matters:** A later review can mistake a direct entry for imported accounting unless the owner keeps the two habits distinct.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When usage and sessions behavior or related owner decisions change.
-
-#### ⚠ Session closeout can change the final task state  _(attention · high)_
-
-**What happens:** Ending a session closes usage and may return a task to assigned when no open usage remains, unless someone explicitly chooses another final state. It can also force-close an already closed record.
-
-**Why it matters:** If closeout conventions are loose, the final state in the ledger may reflect the last closeout action rather than the full work history.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When usage and sessions behavior or related owner decisions change.
-
-#### ⚠ Import fidelity depends on external session logs  _(attention · medium)_
-
-**What happens:** Imported usage is only as reliable as the source logs and conventions available to the importer. This chapter could not verify those logs at runtime.
-
-**Why it matters:** When the source data is missing or inconsistent, the ledger can only account for what it can see, not the full runtime history.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When usage and sessions behavior or related owner decisions change.
-
-### Owner Decisions
-
-The owner still has three practical choices to make. Decide whether manual usage entries should stay as a separate direct-write path or be normalized around imported session records. Decide whether session import should keep its permissive matching and fallback behavior or require one exact source session. Decide whether closeout should keep the automatic fallback to assigned when usage ends or require an explicit final state every time.
-
-#### ⚖ Should manual usage entries stay as a separate direct-write path, or should every usage row be normalized around imported session records?  _(owner decision · open)_
-
-**Why it matters:** The choice sets whether usage is a flexible accounting input or a more uniform audit trail. Mixing both habits without a rule makes later review harder.
-
-**Revisit when:** Before changing the related usage and sessions behavior.
-
-#### ⚖ Should session import keep its permissive matching and fallback behavior, or should it require one exact source session?  _(owner decision · open)_
-
-**Why it matters:** This choice decides whether the owner favors operational tolerance or import precision. A permissive selector reduces friction, but it also raises the chance of pulling the wrong session into the ledger.
-
-**Revisit when:** Before changing the related usage and sessions behavior.
-
-#### ⚖ Should closeout keep the automatic fallback to assigned when usage ends, or should every closeout require an explicit final state?  _(owner decision · open)_
-
-**Why it matters:** This choice determines how much final-state ambiguity the owner is willing to tolerate at the end of a session. Automatic fallback is easier to run; explicit final states are easier to audit.
-
-**Revisit when:** Before changing the related usage and sessions behavior.
 
 ### Evidence Boundary
 
@@ -1063,90 +729,6 @@ The second strength is separation. Work creation, review, session closeout, and 
 
 A third strength is auditability. Re-importing usage does not have to create duplicates, and executor provenance is stamped on operational writes. That gives the owner a better chance of spotting drift instead of guessing which session produced which record.
 
-### Attention Cards
-
-#### ⚠ A quarantine can still downgrade a finished task  _(attention · critical)_
-
-**What happens:** When evidence is attached with a quarantine status, the parent task can be moved to quarantined even if it had already looked verified or complete.
-
-**Why it matters:** Closeout is not one-way. If the owner reads terminal status as final, a later quarantine can reverse that conclusion and change what the business thinks is done.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When handoffs and operating rhythm behavior or related owner decisions change.
-
-#### ⚠ Session closeout can diverge from usage cleanup  _(attention · high)_
-
-**What happens:** Session end usually falls back to assigned when the last open usage closes, but an explicit closeout status can override that fallback.
-
-**Why it matters:** The task status you see may not match the usage picture unless the owner knows which record was allowed to win. That matters when handoffs are used to judge whether work is still active.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When handoffs and operating rhythm behavior or related owner decisions change.
-
-#### ⚠ Verification is not a blanket rule on every evidence write  _(attention · high)_
-
-**What happens:** Status-based verification checks run only on claim-backed evidence writes. Bare evidence writes with a status do not enter the same guard.
-
-**Why it matters:** If the owner assumes every status change is checked the same way, trust can drift without being noticed. This is an authority boundary, not just a convenience difference.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When handoffs and operating rhythm behavior or related owner decisions change.
-
-#### ⚠ Usage import can match more broadly than an exact session ID  _(attention · medium)_
-
-**What happens:** Import selection can use exact match, substring match, a time window, overlap, or a score-based fallback, and it can hydrate an open placeholder in place.
-
-**Why it matters:** A rushed import can attach the wrong session or merge into a row that was already open. That affects accountability even when the ledger still looks tidy.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When handoffs and operating rhythm behavior or related owner decisions change.
-
-#### ⚠ The repository may not be the whole operating system  _(attention · low)_
-
-**What happens:** The reviewed evidence proves a local workflow, not the complete broader system that may surround it.
-
-**Why it matters:** If the owner treats this chapter as the whole truth, they may miss external coordination steps that are outside the bounded evidence and therefore still unverified.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When handoffs and operating rhythm behavior or related owner decisions change.
-
-### Owner Decisions
-
-#### ⚖ Should the generated brief remain the canonical handoff text for the next harness?  _(owner decision · open)_
-
-**Why it matters:** The brief is the main continuity artifact. If it stops being the source of truth, the next harness can inherit stale context or miss the current next action.
-
-**Revisit when:** Before changing the related handoffs and operating rhythm behavior.
-
-#### ⚖ Should task-bound writes keep the implicit current-task fallback, or should the manual require explicit task selection in high-risk work?  _(owner decision · open)_
-
-**Why it matters:** Several write paths depend on the active task when no task is passed. That is fast, but it also makes continuity dependent on repository state.
-
-**Revisit when:** Before changing the related handoffs and operating rhythm behavior.
-
-#### ⚖ Should session end be allowed to override the fallback assignment when usage closes, or should usage closeout and task status stay strictly coupled?  _(owner decision · open)_
-
-**Why it matters:** The workflow can separate usage cleanup from task status. If the owner wants a simpler lifecycle, that flexibility may need to be narrowed.
-
-**Revisit when:** Before changing the related handoffs and operating rhythm behavior.
-
-#### ⚖ Should usage import stay permissive about session matching and placeholder hydration, or should the owner require stricter selection rules?  _(owner decision · open)_
-
-**Why it matters:** Permissive matching is forgiving, but it also increases the chance of pulling in the wrong session or rewriting an open placeholder unexpectedly.
-
-**Revisit when:** Before changing the related handoffs and operating rhythm behavior.
-
-#### ⚖ Should the manual keep describing this as a local ledger workflow unless broader system boundaries are confirmed?  _(owner decision · open)_
-
-**Why it matters:** The evidence does not prove the repository is the entire system. Overstating the boundary would make the owner trust a wider operating model than the evidence supports.
-
-**Revisit when:** Before changing the related handoffs and operating rhythm behavior.
-
 ### Evidence Boundary
 
 > **Evidence boundary** — Reviewed:
@@ -1169,3 +751,88 @@ Recheck the command inventory, bootstrap path, task-bound writes, brief and hand
 
 > Not reviewed: External runtime and integrations, Unreviewed runtime and owner context
 
+## Command Reference
+
+The `operator` CLI exposes 20 subcommands across the task → claim → evidence → verification →
+session → usage lifecycle. Run `./operator <command> --help` for full flags.
+
+**Setup** — `init` create the `.operator/` ledger in the current repo.
+
+**Tasks**
+- `task-create --objective "…" [--id ID] [--repo R] [--assign A] [--review R]` — open a task.
+- `task-show [ID]` — show a task's claims, evidence, and status.
+- `task-list` — list all tasks with outcome summaries.
+
+**Claims** (a claim is a typed, checkable assertion bound to a gate)
+- `claim-add --type TYPE --text "…" [--task ID] [--gate GATE] [--by WHO]` — register a claim.
+  Types: `file_exists, test_passes, numeric_measurement, real_data, model_output,
+  firmware_behavior, deployment_state, supervision_credit, paper_or_report_claim`.
+- `claim-show [ID]` / `claim-list [--task ID]` — inspect claims.
+
+**Evidence & verification** (the core: a claim is only as good as its evidence + a different-identity sign-off)
+- `evidence-attach PATH_OR_URL --claim CID --type TYPE [--status {verified,false,quarantined}] [--verified-by WHO] [--verify-cmd CMD]`
+  — attach an artifact and optionally verify the claim. Evidence types: `run_log, manifest,
+  database_query, test_output, git_commit, screenshot, transcript, paper_section, external_doc`.
+- `verify RUN_DIR` — automated audit of a run directory's artifacts.
+- `doctor [--audit]` — read-only consistency check across the ledger: flags unverified claims,
+  **self-verification**, and **enforcement downgrades** (a claim that would be rejected under
+  enforced identity mode but is silently accepted under `single_user`).
+
+**Sessions** (track a coding session and its cost)
+- `session-start --harness H [--task ID] [--force]`
+- `session-end --outcome {useful,partial,no_go,quarantined,reverted,unknown} --cost N`
+- `session-list [--open] [--task ID] [--harness H]`
+
+**Usage / quota accounting**
+- `usage-add --harness H [--model M] [--outcome …]` — capture a pasted usage snippet.
+- `usage-import --harness {claude,codex,gemini-agy} [--since …] [--dry-run]` — auto-ingest
+  token/usage from harness session logs.
+- `usage-summary [--by-task] [--by-harness] [--by-model] [--metering]` / `usage-annotate [--cost …] [--note …]`.
+
+**Briefs & handoff**
+- `brief --for H [--task ID]` / `export-brief --for H [--task ID]` — generate a harness-specific
+  brief (copy-paste for the next agent).
+- `handoff-add [--task ID] [--changed …] [--verified …] [--claimed …] [--open …]` — record a closeout.
+
+## Configuration
+
+Operator is driven by files under `.operator/` (created by `init`); behavior is governed by a small
+set of product-facing config:
+
+- **`.operator/identity.yaml`** — the identity-enforcement policy:
+  ```yaml
+  mode: enforced          # or: single_user (advisory)
+  uids:
+    1001: reviewer
+    1002: builder
+  ```
+  In `enforced` mode, writes bind to the executing OS uid and a claim verified by the wrong
+  identity is **rejected** (impersonation guard). In `single_user` mode the binding is advisory —
+  and `doctor` warns when a claim *would* be rejected under enforced mode (an enforcement downgrade).
+- **`.operator/{tasks,claims,evidence,sessions}/`** — append-only YAML records (the ledger; gitignored).
+
+This config is what makes the guarantees real: the gate, the identities, and the fail-closed
+verification all read from it.
+
+## Appendix — Attention Items & Owner Decisions
+
+_The deduplicated set of caveats and open decisions Reflect surfaced (52 in-chapter cards collapsed to the distinct items below)._
+
+### Operating caveats — things to know
+- **A status needs a claim.** `evidence-attach --status` fails closed without `--claim` (now enforced).
+- **`init` creates, it doesn't repair.** Re-running it won't fix a broken `.operator/`; back up and re-init.
+- **Quarantine can reopen a finished task.** A late quarantine overrides verified/complete — intended (late findings should reopen); closeout isn't one-way.
+- **Identity mode sets the guarantee.** `enforced` = fail-closed on mismatch; `single_user` = warn only (`doctor` flags the relaxation).
+- **A claim isn't trusted at creation** — it's an assertion until evidence + verification land.
+- **Evidence copy is best-effort** — the ledger can record a verification even if the file copy failed; don't assume the artifact is on disk.
+- **Usage import is fuzzy** — it matches beyond an exact session ID and can merge into an open row; use exact IDs for strict provenance.
+- **Direct usage intake lacks the import provenance trail** — first-class, but distinct from imported usage.
+- **Task-bound writes use the current-task fallback** — they depend on ledger state; pass an explicit task for high-stakes writes.
+- **Session closeout can fall back to `assigned`** — set an explicit final state if you want a deterministic lifecycle.
+
+### Open owner decisions
+- Should `init` also repair an existing ledger, or stay create-only? _(currently create-only)_
+- Should quarantine override a verified/complete task? _(currently yes — late findings reopen)_
+- Should usage import be exact-match / append-only, or stay permissive? _(currently permissive)_
+- Should `single_user` fail closed when an identity map is configured? _(currently warn-only)_
+- Should the generated brief remain the canonical handoff? _(currently yes)_

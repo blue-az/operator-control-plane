@@ -117,68 +117,6 @@ The strongest thing about the product is that it makes work legible across harne
 
 A second strength is that the product keeps continuity explicit. Briefs, handoffs, sessions, and provenance are recorded as part of the workflow instead of being left as informal side notes, so the ledger can answer what happened and who acted even when the work moved between roles.
 
-### Attention Cards
-
-#### ⚠ This may be only the local tool, not the whole workflow  _(attention · critical)_
-
-**What happens:** The evidence supports a bounded local product, but it does not prove that this repository covers every surrounding process the owner uses.
-
-**Why it matters:** If later evidence shows external companion steps, the manual must keep the boundary explicit instead of implying that operator is the entire operating system for the business.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When product identity behavior or related owner decisions change.
-
-#### ⚠ Init does not repair a broken ledger tree  _(attention · high)_
-
-**What happens:** First-run setup creates the standard .operator/ structure, but an already existing .operator/ stops bootstrap from rebuilding missing pieces.
-
-**Why it matters:** A partial or damaged ledger will not be fixed by rerunning bootstrap, so the owner should treat setup as creation, not repair.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When product identity behavior or related owner decisions change.
-
-#### ⚠ Some writes depend on the current task already being set  _(attention · high)_
-
-**What happens:** Several task-bound commands use the current task when no task is supplied and fail closed when there is no active task.
-
-**Why it matters:** This is convenient when the workflow is already anchored, but it can surprise an operator who expects every write to stand alone without repository state.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When product identity behavior or related owner decisions change.
-
-#### ⚠ A claim is not trusted when it is created  _(attention · medium)_
-
-**What happens:** A new claim starts unverified, with no verifier and no evidence refs.
-
-**Why it matters:** The owner should not read claim creation as correctness; it is only a tracked assertion that still needs support and verification.
-
-**What to do:** Review this boundary and decide whether the current behavior is intentional.
-
-**Revisit when:** When product identity behavior or related owner decisions change.
-
-### Owner Decisions
-
-#### ⚖ Should this manual treat operator as the whole operating environment, or as one local component inside a larger workflow?  _(owner decision · open)_
-
-**Why it matters:** That choice controls how far the manual is allowed to generalize beyond the repository evidence.
-
-**Revisit when:** Before changing the related product identity behavior.
-
-#### ⚖ Should task-bound writes rely on the current task by default, or should every write require an explicit task selection?  _(owner decision · open)_
-
-**Why it matters:** The current fallback is useful, but it makes the product depend on existing ledger state.
-
-**Revisit when:** Before changing the related product identity behavior.
-
-#### ⚖ Should bootstrap stay a first-run setup step, or should it also repair an existing .operator/ tree?  _(owner decision · open)_
-
-**Why it matters:** The answer determines whether a partially initialized ledger is an expected maintenance case or a supported recovery path.
-
-**Revisit when:** Before changing the related product identity behavior.
-
 ### Evidence Boundary
 
 > **Evidence boundary** — Reviewed:
