@@ -6,6 +6,22 @@ _6 generated chapters from the reviewed repository snapshot_
 
 ---
 
+## Contents
+
+- [Quickstart](#quickstart)
+- [Worked example](#worked-example)
+- [What operator Is For](#what-operator-is-for)
+- [How Work Moves Through the Ledger](#how-work-moves-through-the-ledger)
+- [The Surfaces and Records You Actually Operate](#the-surfaces-and-records-you-actually-operate)
+- [Trust, Identity, and Verification](#trust-identity-and-verification)
+- [Sessions, Usage, and Accountability](#sessions-usage-and-accountability)
+- [Running a Multi-Harness Workflow](#running-a-multi-harness-workflow)
+- [Command Reference](#command-reference)
+- [Configuration](#configuration)
+- [Appendix: Attention Items and Owner Decisions](#appendix-attention-items-and-owner-decisions)
+
+---
+
 ## Quickstart
 
 ```bash
@@ -19,26 +35,35 @@ The ledger (`.operator/`) is gitignored — it's your work history, not the tool
 
 ## Worked example
 
+The following end-to-end script demonstrates the creation and lifecycle of a task and claim. It shows how to initialize the local ledger, create a task, register a gate-bound claim, attach verifiable evidence (with an explicit verification command and reviewer signature), run the integrity doctor check, track a session's usage metrics, and generate a downstream brief.
+
 ```bash
 ./operator init                                    # create .operator/ ledger in this repo
 
+# a couple of stand-in files so the claim's gate and evidence actually exist
+mkdir -p tests/out
+printf 'def test_retry():\n    assert True\n' > tests/test_upload.py
+printf 'ok\n' > tests/out/upload.log
+
 # open a task
-./operator task-create --objective "Add retry to the uploader" --id up-retry --repo myapp
+./operator task-create --objective "Add retry to the uploader" --id up-retry
 
 # an agent registers a typed, gate-bound claim
 ./operator claim-add --task up-retry --type test_passes \
     --text "uploader retries 3x on 5xx" --gate tests/test_upload.py
 
-# attach evidence and verify — verifier identity must differ from the builder (guard fails closed)
+# attach VERIFIABLE evidence (a re-runnable command, not a blob) and verify —
+# verifier identity must differ from the builder (guard fails closed)
 ./operator evidence-attach tests/out/upload.log --task up-retry --claim claim-0001 \
-    --type test_output --status verified --verified-by reviewer
+    --type test_output --status verified --verified-by reviewer \
+    --verify-cmd "pytest -q tests/test_upload.py"
 
-# read-only consistency check: unverified / self-verified claims, enforcement downgrades
+# read-only consistency check: unverified / self-verified / unverifiable-evidence claims
 ./operator doctor
 
 # track the session + its cost, then close out with a brief for the next harness
-./operator session-start --task up-retry --harness claude
-./operator session-end --outcome useful --cost 12.50
+./operator session-start --task up-retry --harness claude   # opens the session, recorded as usage-0001
+./operator session-end usage-0001 --outcome useful --cost 12.50
 ./operator handoff-add --task up-retry --changed "uploader.py" --verified "retry test" --open "tune backoff"
 ./operator export-brief --for codex --task up-retry
 ```
@@ -814,7 +839,7 @@ set of product-facing config:
 This config is what makes the guarantees real: the gate, the identities, and the fail-closed
 verification all read from it.
 
-## Appendix — Attention Items & Owner Decisions
+## Appendix: Attention Items and Owner Decisions
 
 _The deduplicated set of caveats and open decisions Reflect surfaced (52 in-chapter cards collapsed to the distinct items below)._
 
