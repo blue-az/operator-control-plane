@@ -1065,6 +1065,9 @@ class TestOperatorCLI(unittest.TestCase):
             "test-gate",
         )
         self.assertEqual(res.returncode, 0, res.stderr)
+        # Create the gate file
+        gate_file = Path(self.temp_dir) / "test-gate"
+        gate_file.write_text("mock gate content")
 
         evidence_file = Path(self.temp_dir) / "test_evidence.txt"
         evidence_file.write_text("dummy evidence content")
@@ -1103,6 +1106,8 @@ class TestOperatorCLI(unittest.TestCase):
                 status_val,
                 "--verified-by",
                 verifier,
+                "--verify-cmd",
+                "pytest",
                 str(evidence_file),
             )
 
@@ -1183,6 +1188,9 @@ class TestOperatorCLI(unittest.TestCase):
             "test-gate",
         )
         self.assertEqual(res.returncode, 0, res.stderr)
+        # Create the gate file
+        gate_file = Path(self.temp_dir) / "test-gate"
+        gate_file.write_text("mock gate content")
 
         claim_file = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
         evidence_file = Path(self.temp_dir) / "test_ev.txt"
@@ -1200,6 +1208,8 @@ class TestOperatorCLI(unittest.TestCase):
             "verified",
             "--verified-by",
             "claude",
+            "--verify-cmd",
+            "pytest",
             str(evidence_file),
             env=env_claude,
         )
@@ -1335,6 +1345,9 @@ class TestOperatorCLI(unittest.TestCase):
             "test-gate",
         )
         self.assertEqual(res.returncode, 0, res.stderr)
+        # Create the gate file
+        gate_file = Path(self.temp_dir) / "test-gate"
+        gate_file.write_text("mock gate content")
 
         # Attach evidence + a clean verification (single_user is the default mode here).
         evidence_file = Path(self.temp_dir) / "ev.txt"
@@ -1349,6 +1362,8 @@ class TestOperatorCLI(unittest.TestCase):
             "verified",
             "--verified-by",
             "claude",
+            "--verify-cmd",
+            "pytest",
             str(evidence_file),
         )
         self.assertEqual(res.returncode, 0, res.stderr)
@@ -1628,7 +1643,7 @@ class TestOperatorCLI(unittest.TestCase):
         evidence_file = Path(self.temp_dir) / "test_ev.txt"
         evidence_file.write_text("ev content")
 
-        # Attach evidence as verified
+        # Attach evidence as draft (not verified)
         env_claude = {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"}
         res = self.run_operator(
             "evidence-attach",
@@ -1636,16 +1651,12 @@ class TestOperatorCLI(unittest.TestCase):
             "claim-0001",
             "--type",
             "test_output",
-            "--status",
-            "verified",
-            "--verified-by",
-            "claude",
             str(evidence_file),
             env=env_claude,
         )
         self.assertEqual(res.returncode, 0)
 
-        # Clear test_override_active in claim and evidence
+        # Clear test_override_active in claim
         claim_data = yaml.safe_load(claim_file.read_text())
         claim_data["executor"]["test_override_active"] = False
         with open(claim_file, "w") as f:
@@ -1658,31 +1669,8 @@ class TestOperatorCLI(unittest.TestCase):
             / "warnings-task"
             / "evidence-0001.yaml"
         )
-        ev_data = yaml.safe_load(ev_file.read_text())
-        ev_data["executor"]["test_override_active"] = False
-        with open(ev_file, "w") as f:
-            yaml.safe_dump(ev_data, f)
-
-        # Doctor check: since we added the warnings as infos, doctor should run successfully (exiting 0)
-        # but outputting the Warnings in stdout!
-        res = self.run_operator("doctor")
-        self.assertEqual(res.returncode, 0, res.stdout + "\n" + res.stderr)
-        self.assertIn(
-            "[Warning] Task warnings-task repo path does not exist on disk: /nonexistent/repo/dir",
-            res.stdout,
-        )
-        self.assertIn(
-            "[Warning] Claim claim-0001 verified test_passes required_gate file does not exist: missing-gate.py",
-            res.stdout,
-        )
-        self.assertIn(
-            "[Warning] Claim claim-0001 verified test_passes has no evidence reference with a verification_command.",
-            res.stdout,
-        )
-
-        # Verify the url_or_external unverifiable evidence check:
-        # Since provenance for attached evidence defaults to local_file in test unless changed, let's edit
-        # the evidence yaml file to set provenance: url_or_external and remove hash/verification_command
+        # Let's customize the evidence file to use url_or_external provenance
+        # with no hash/verification_command, and nonexistent path_or_url
         ev_file = (
             Path(self.temp_dir)
             / ".operator"
@@ -1694,26 +1682,88 @@ class TestOperatorCLI(unittest.TestCase):
         ev_data["provenance"] = "url_or_external"
         ev_data["hash"] = None
         ev_data["verification_command"] = None
-        ev_data["path_or_url"] = "/nonexistent/test_output.log"
-        # also disable test_override_active
+        ev_data["path_or_url"] = (
+            "relative/nonexistent/test_output.log"  # relative path to test CWD resolution
+        )
         ev_data["executor"]["test_override_active"] = False
         with open(ev_file, "w") as f:
             yaml.safe_dump(ev_data, f)
 
-        # Clear test_override_active in claim as well
+        # Clear test_override_active in claim
         claim_data = yaml.safe_load(claim_file.read_text())
         claim_data["executor"]["test_override_active"] = False
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
 
+        # First Doctor check: Draft state -> all non-fatal warnings -> returns 0
         res = self.run_operator("doctor")
-        self.assertEqual(res.returncode, 0)
+        self.assertEqual(res.returncode, 0, res.stdout + "\n" + res.stderr)
+        self.assertIn("Records consistent, but non-fatal warnings exist.", res.stdout)
         self.assertIn(
-            "[Warning] Claim claim-0001 verified on unverifiable evidence: evidence/warnings-task/evidence-0001.yaml",
+            "[Warning] Task warnings-task repo path does not exist on disk: /nonexistent/repo/dir",
             res.stdout,
         )
         self.assertIn(
-            "[Warning] Evidence evidence/warnings-task/evidence-0001.yaml test_output file does not exist: /nonexistent/test_output.log",
+            "[Warning] Claim claim-0001 draft test_passes required_gate file does not exist: missing-gate.py",
+            res.stdout,
+        )
+        self.assertIn(
+            "[Warning] Claim claim-0001 draft test_passes has no evidence reference with a verification_command.",
+            res.stdout,
+        )
+        self.assertIn(
+            "[Warning] Claim claim-0001 draft on unverifiable evidence: evidence/warnings-task/evidence-0001.yaml",
+            res.stdout,
+        )
+        # Test CWD relative resolution check: resolves to /nonexistent/repo/dir/relative/nonexistent/test_output.log
+        self.assertIn(
+            "[Warning] Evidence evidence/warnings-task/evidence-0001.yaml test_output file does not exist: /nonexistent/repo/dir/relative/nonexistent/test_output.log",
+            res.stdout,
+        )
+
+        # Now, mark the claim as verified
+        claim_data["verification_outcome"] = "verified"
+        claim_data["verification_status"] = True
+        with open(claim_file, "w") as f:
+            yaml.safe_dump(claim_data, f)
+
+        # Second Doctor check: Verified claim -> checks escalate to Error -> returns 1 (failure)
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1, res.stdout + "\n" + res.stderr)
+        self.assertIn(
+            "[Error] Claim claim-0001 verified test_passes required_gate file does not exist: missing-gate.py",
+            res.stdout,
+        )
+        self.assertIn(
+            "[Error] Claim claim-0001 verified test_passes has no evidence reference with a verification_command.",
+            res.stdout,
+        )
+        self.assertIn(
+            "[Error] Claim claim-0001 verified on unverifiable evidence: evidence/warnings-task/evidence-0001.yaml",
+            res.stdout,
+        )
+        self.assertIn(
+            "[Error] Evidence evidence/warnings-task/evidence-0001.yaml test_output file does not exist: /nonexistent/repo/dir/relative/nonexistent/test_output.log",
+            res.stdout,
+        )
+        # But repo path is still [Warning] because task is not verified/complete status
+        self.assertIn(
+            "[Warning] Task warnings-task repo path does not exist on disk: /nonexistent/repo/dir",
+            res.stdout,
+        )
+
+        # Finally, mark the task status as complete
+        task_file = Path(self.temp_dir) / ".operator" / "tasks" / "warnings-task.yaml"
+        task_data = yaml.safe_load(task_file.read_text())
+        task_data["status"] = "complete"
+        with open(task_file, "w") as f:
+            yaml.safe_dump(task_data, f)
+
+        # Third Doctor check: Verified task -> repo missing escalates to Error
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1, res.stdout + "\n" + res.stderr)
+        self.assertIn(
+            "[Error] Task warnings-task repo path does not exist on disk: /nonexistent/repo/dir",
             res.stdout,
         )
 

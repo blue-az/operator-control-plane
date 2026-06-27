@@ -1897,9 +1897,14 @@ def doctor_cmd(args) -> int:
         # Repo existence check
         repo_path = task.get("repo")
         if repo_path and not os.path.exists(repo_path):
-            infos.append(
-                f"[Warning] Task {task_id} repo path does not exist on disk: {repo_path}"
-            )
+            if task_status in ["verified", "complete"]:
+                issues.append(
+                    f"[Error] Task {task_id} repo path does not exist on disk: {repo_path}"
+                )
+            else:
+                infos.append(
+                    f"[Warning] Task {task_id} repo path does not exist on disk: {repo_path}"
+                )
 
         claims_list = task.get("claims") or []
         quarantined_claims = []
@@ -1963,39 +1968,59 @@ def doctor_cmd(args) -> int:
                             "living_document",
                             "structural_verification",
                         ]
-                        if verified and not is_recheckable:
+                        if not is_recheckable:
                             v_cmd = ev_ref_data.get("verification_command")
                             if not v_cmd or not stored_hash:
-                                infos.append(
-                                    f"[Warning] Claim {cid} verified on unverifiable evidence: {ev_ref} (external/url provenance must have verification_command and hash)"
-                                )
+                                if verified:
+                                    issues.append(
+                                        f"[Error] Claim {cid} verified on unverifiable evidence: {ev_ref} (external/url provenance must have verification_command and hash)"
+                                    )
+                                else:
+                                    infos.append(
+                                        f"[Warning] Claim {cid} draft on unverifiable evidence: {ev_ref} (external/url provenance must have verification_command and hash)"
+                                    )
 
                         if ev_ref_data.get("evidence_type") == "test_output":
                             ev_path = ev_ref_data.get("path_or_url")
-                            if (
-                                ev_path
-                                and not ev_path.startswith(("http://", "https://"))
-                                and not os.path.exists(ev_path)
+                            if ev_path and not ev_path.startswith(
+                                ("http://", "https://")
                             ):
-                                infos.append(
-                                    f"[Warning] Evidence {ev_ref} test_output file does not exist: {ev_path}"
-                                )
+                                # Resolve relative path relative to repo_path if available
+                                if repo_path and not os.path.isabs(ev_path):
+                                    ev_path_resolved = os.path.join(repo_path, ev_path)
+                                else:
+                                    ev_path_resolved = ev_path
+
+                                if not os.path.exists(ev_path_resolved):
+                                    if verified:
+                                        issues.append(
+                                            f"[Error] Evidence {ev_ref} test_output file does not exist: {ev_path_resolved}"
+                                        )
+                                    else:
+                                        infos.append(
+                                            f"[Warning] Evidence {ev_ref} test_output file does not exist: {ev_path_resolved}"
+                                        )
 
             if outcome == "quarantined":
                 quarantined_claims.append(cid)
             elif verified:
                 verified_claims.append(cid)
 
-            if verified and c_data.get("type") == "test_passes":
+            if c_data.get("type") == "test_passes":
                 req_gate = c_data.get("required_gate")
                 if req_gate:
                     gate_path = req_gate
                     if repo_path and not os.path.isabs(gate_path):
                         gate_path = os.path.join(repo_path, gate_path)
                     if not os.path.exists(gate_path):
-                        infos.append(
-                            f"[Warning] Claim {cid} verified test_passes required_gate file does not exist: {req_gate}"
-                        )
+                        if verified:
+                            issues.append(
+                                f"[Error] Claim {cid} verified test_passes required_gate file does not exist: {req_gate}"
+                            )
+                        else:
+                            infos.append(
+                                f"[Warning] Claim {cid} draft test_passes required_gate file does not exist: {req_gate}"
+                            )
 
                 # Check for verification_command in evidence
                 has_verification_cmd = False
@@ -2007,9 +2032,14 @@ def doctor_cmd(args) -> int:
                             has_verification_cmd = True
                             break
                 if not has_verification_cmd:
-                    infos.append(
-                        f"[Warning] Claim {cid} verified test_passes has no evidence reference with a verification_command."
-                    )
+                    if verified:
+                        issues.append(
+                            f"[Error] Claim {cid} verified test_passes has no evidence reference with a verification_command."
+                        )
+                    else:
+                        infos.append(
+                            f"[Warning] Claim {cid} draft test_passes has no evidence reference with a verification_command."
+                        )
 
             made = c_data.get("made_by")
             vby = c_data.get("verified_by")
@@ -2260,7 +2290,13 @@ def doctor_cmd(args) -> int:
         print(f"Total consistency issues found: {len(issues)}")
         return 1
     else:
-        print("All records consistent. No issues found.")
+        has_warnings = any("Warning" in msg for msg in infos)
+        if has_warnings:
+            print(
+                "Records consistent, but non-fatal warnings exist. Review audit report above."
+            )
+        else:
+            print("All records consistent. No issues found.")
         print("=" * 80)
         return 0
 
