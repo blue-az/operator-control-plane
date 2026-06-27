@@ -12,17 +12,19 @@ import glob
 import hashlib
 import json
 import os
+import pwd
 import re
 import sys
-import yaml
-import pwd
 from pathlib import Path
+
+import yaml
+
 
 def find_operator_dir(start_dir: str | None = None) -> str | None:
     """Search upwards from start_dir for a directory named '.operator'."""
     if start_dir is None:
         start_dir = os.getcwd()
-    
+
     current = os.path.abspath(start_dir)
     while True:
         candidate = os.path.join(current, ".operator")
@@ -34,85 +36,87 @@ def find_operator_dir(start_dir: str | None = None) -> str | None:
         current = parent
     return None
 
+
 def get_current_utc_iso() -> str:
     """Return the current time in UTC ISO format."""
-    return datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+    return (
+        datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+    )
+
 
 def load_yaml(filepath: str) -> any:
     """Helper to load a YAML file safely."""
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             return yaml.safe_load(f)
     except Exception as e:
         print(f"Error loading YAML {filepath}: {e}", file=sys.stderr)
         return None
 
+
 def save_yaml(data: any, filepath: str) -> bool:
     """Helper to save a python object to a YAML file."""
     try:
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
         return True
     except Exception as e:
         print(f"Error saving YAML {filepath}: {e}", file=sys.stderr)
         return False
 
+
 def get_executor_identity() -> dict:
     test_uid_env = os.environ.get("OPERATOR_TEST_UID")
     test_sentinel_env = os.environ.get("OPERATOR_TEST_SENTINEL")
-    
+
     use_override = False
     spoof_attempt = False
-    
+
     if test_uid_env:
         if test_sentinel_env == "true" or test_sentinel_env == "1":
             use_override = True
         else:
             spoof_attempt = True
-            
+
     if use_override:
         uid = int(test_uid_env)
         try:
             user = pwd.getpwuid(uid).pw_name
         except Exception:
             user = f"uid-{uid}"
-        return {
-            "uid": uid,
-            "user": user,
-            "test_override_active": True
-        }
+        return {"uid": uid, "user": user, "test_override_active": True}
     else:
         uid = os.getuid()
         try:
             user = pwd.getpwuid(uid).pw_name
         except Exception:
             user = f"uid-{uid}"
-        res = {
-            "uid": uid,
-            "user": user
-        }
+        res = {"uid": uid, "user": user}
         if spoof_attempt:
             res["test_override_unauthorized"] = True
         return res
 
+
 def slugify(text: str) -> str:
     """Slugify text to generate safe task IDs."""
     text = text.lower()
-    text = re.sub(r'[^a-z0-9\-_]+', '-', text)
-    text = re.sub(r'-+', '-', text).strip('-')
+    text = re.sub(r"[^a-z0-9\-_]+", "-", text)
+    text = re.sub(r"-+", "-", text).strip("-")
     return text
+
 
 def calculate_file_hash(filepath: str) -> str | None:
     """Calculate the SHA-256 hash of a local file."""
     sha256 = hashlib.sha256()
     try:
-        with open(filepath, 'rb') as f:
-            for chunk in iter(lambda: f.read(65536), b''):
+        with open(filepath, "rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
                 sha256.update(chunk)
         return sha256.hexdigest()
     except Exception:
         return None
+
 
 def get_next_claim_id(operator_dir: str) -> str:
     """Determine the next sequential claim-XXXX ID."""
@@ -128,6 +132,7 @@ def get_next_claim_id(operator_dir: str) -> str:
                 max_id = num
     return f"claim-{max_id + 1:04d}"
 
+
 def get_next_evidence_id(operator_dir: str, task_id: str) -> str:
     """Determine the next sequential evidence-XXXX ID for a specific task."""
     task_ev_dir = os.path.join(operator_dir, "evidence", task_id)
@@ -142,6 +147,7 @@ def get_next_evidence_id(operator_dir: str, task_id: str) -> str:
             if num > max_id:
                 max_id = num
     return f"evidence-{max_id + 1:04d}"
+
 
 def get_next_usage_id(operator_dir: str) -> str:
     """Determine the next sequential usage-XXXX ID."""
@@ -162,6 +168,7 @@ def get_next_usage_id(operator_dir: str) -> str:
             pass
     return f"usage-{max_id + 1:04d}"
 
+
 def get_next_handoff_id(operator_dir: str, task_id: str) -> str:
     """Determine the next sequential handoff-XXXX ID for a specific task."""
     task_ho_dir = os.path.join(operator_dir, "handoffs", task_id)
@@ -177,18 +184,28 @@ def get_next_handoff_id(operator_dir: str, task_id: str) -> str:
                 max_id = num
     return f"handoff-{max_id + 1:04d}"
 
+
 # --- Commands ---
+
 
 def init_cmd(args) -> int:
     target_dir = os.path.abspath(os.path.join(os.getcwd(), ".operator"))
     if os.path.exists(target_dir):
         print(f"Operator directory already exists at: {target_dir}")
         return 0
-    
-    subdirs = ["harnesses", "tasks", "claims", "evidence", "handoffs", "usage", "briefs"]
+
+    subdirs = [
+        "harnesses",
+        "tasks",
+        "claims",
+        "evidence",
+        "handoffs",
+        "usage",
+        "briefs",
+    ]
     for sd in subdirs:
         os.makedirs(os.path.join(target_dir, sd), exist_ok=True)
-    
+
     harnesses_data = {
         "codex": {
             "harness_id": "codex",
@@ -201,7 +218,10 @@ def init_cmd(args) -> int:
             "usage_source": "status",
             "transcript_source": "local",
             "strengths": ["implementation", "local verification"],
-            "known_failure_modes": ["narration overclaim without evidence gates", "context and usage budget pressure"]
+            "known_failure_modes": [
+                "narration overclaim without evidence gates",
+                "context and usage budget pressure",
+            ],
         },
         "claude": {
             "harness_id": "claude",
@@ -214,7 +234,10 @@ def init_cmd(args) -> int:
             "usage_source": "usage",
             "transcript_source": "local",
             "strengths": ["design", "critique", "architecture", "prose"],
-            "known_failure_modes": ["supervision recommendations can rely on unchecked data-source assumptions", "high-volume execution costs"]
+            "known_failure_modes": [
+                "supervision recommendations can rely on unchecked data-source assumptions",
+                "high-volume execution costs",
+            ],
         },
         "gemini-agy": {
             "harness_id": "gemini-agy",
@@ -227,7 +250,10 @@ def init_cmd(args) -> int:
             "usage_source": "quota",
             "transcript_source": "cloud",
             "strengths": ["broad context", "alternate review", "high-volume work"],
-            "known_failure_modes": ["execution narration can outrun evidence", "fine-grained local file manipulation without tool support"]
+            "known_failure_modes": [
+                "execution narration can outrun evidence",
+                "fine-grained local file manipulation without tool support",
+            ],
         },
         "copilot": {
             "harness_id": "copilot",
@@ -240,51 +266,64 @@ def init_cmd(args) -> int:
             "usage_source": "manual",
             "transcript_source": "cloud",
             "strengths": ["github-native async and SDK integration"],
-            "known_failure_modes": ["offline operations"]
-        }
+            "known_failure_modes": ["offline operations"],
+        },
     }
-    
+
     for hid, hdata in harnesses_data.items():
         save_yaml(hdata, os.path.join(target_dir, "harnesses", f"{hid}.yaml"))
-        
+
     save_yaml({"current_task": None}, os.path.join(target_dir, "operator.yaml"))
-    
+
     print(f"Initialized empty Operator Control Plane repository in {target_dir}")
     return 0
+
 
 def task_create_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-    
+
     if args.assign:
         h_path = os.path.join(op_dir, "harnesses", f"{args.assign}.yaml")
         if not os.path.exists(h_path):
-            print(f"Error: Assigned harness '{args.assign}' does not exist in registry.", file=sys.stderr)
+            print(
+                f"Error: Assigned harness '{args.assign}' does not exist in registry.",
+                file=sys.stderr,
+            )
             return 1
     if args.review:
         h_path = os.path.join(op_dir, "harnesses", f"{args.review}.yaml")
         if not os.path.exists(h_path):
-            print(f"Error: Review harness '{args.review}' does not exist in registry.", file=sys.stderr)
+            print(
+                f"Error: Review harness '{args.review}' does not exist in registry.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     objective = args.objective
     task_id = args.task_id
     if not task_id:
         task_id = slugify(objective)[:50]
         if not task_id:
-            print("Error: Could not generate task ID from objective. Please provide --id.", file=sys.stderr)
+            print(
+                "Error: Could not generate task ID from objective. Please provide --id.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
     if os.path.exists(task_path):
         print(f"Error: Task '{task_id}' already exists.", file=sys.stderr)
         return 1
-        
+
     repo = os.path.abspath(args.repo)
     utc_now = get_current_utc_iso()
-    
+
     task_data = {
         "task_id": task_id,
         "repo": repo,
@@ -299,46 +338,53 @@ def task_create_cmd(args) -> int:
         "open_assumptions": args.assumptions,
         "claims": [],
         "evidence": [],
-        "executor": get_executor_identity()
+        "executor": get_executor_identity(),
     }
-    
+
     save_yaml(task_data, task_path)
-    
+
     config_path = os.path.join(op_dir, "operator.yaml")
     config = load_yaml(config_path) or {}
     config["current_task"] = task_id
     save_yaml(config, config_path)
-    
+
     os.makedirs(os.path.join(op_dir, "evidence", task_id), exist_ok=True)
     os.makedirs(os.path.join(op_dir, "handoffs", task_id), exist_ok=True)
-    
+
     print(f"Task '{task_id}' created successfully.")
     print(f"Active task set to '{task_id}'.")
     return 0
 
+
 def task_show_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task_id = args.task_id
     if not task_id:
         config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
         task_id = config.get("current_task")
         if not task_id:
-            print("Error: No active task set. Specify task ID or create a task.", file=sys.stderr)
+            print(
+                "Error: No active task set. Specify task ID or create a task.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
     if not os.path.exists(task_path):
         print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
         return 1
-        
+
     task = load_yaml(task_path)
     if not task:
         return 1
-        
+
     print("=" * 80)
     print(f"Task ID:          {task.get('task_id')}")
     print(f"Objective:        {task.get('objective')}")
@@ -361,7 +407,7 @@ def task_show_cmd(args) -> int:
     else:
         print("  (None)")
     print("-" * 80)
-    
+
     print("Claims:")
     claims_list = task.get("claims") or []
     if claims_list:
@@ -372,9 +418,15 @@ def task_show_cmd(args) -> int:
                 if c_data:
                     outcome = c_data.get("verification_outcome")
                     if not outcome:
-                        outcome = "verified" if c_data.get("verification_status") else "unverified"
+                        outcome = (
+                            "verified"
+                            if c_data.get("verification_status")
+                            else "unverified"
+                        )
                     status_str = str(outcome).upper()
-                    print(f"  - [{cid}] ({c_data.get('type')}) - {status_str}: {c_data.get('text')}")
+                    print(
+                        f"  - [{cid}] ({c_data.get('type')}) - {status_str}: {c_data.get('text')}"
+                    )
                     if c_data.get("verdict"):
                         print(f"    Verdict: {c_data.get('verdict')}")
             else:
@@ -382,7 +434,7 @@ def task_show_cmd(args) -> int:
     else:
         print("  (None registered)")
     print("-" * 80)
-    
+
     print("Evidence:")
     ev_list = task.get("evidence") or []
     if ev_list:
@@ -391,7 +443,7 @@ def task_show_cmd(args) -> int:
     else:
         print("  (None attached)")
     print("-" * 80)
-    
+
     print("Handoffs:")
     ho_list = task.get("handoffs") or []
     if ho_list:
@@ -402,33 +454,40 @@ def task_show_cmd(args) -> int:
     print("=" * 80)
     return 0
 
+
 def claim_add_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task_id = args.task_id
     if not task_id:
         config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
         task_id = config.get("current_task")
         if not task_id:
-            print("Error: No active task set. Specify task ID or create a task.", file=sys.stderr)
+            print(
+                "Error: No active task set. Specify task ID or create a task.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
     if not os.path.exists(task_path):
         print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
         return 1
-        
+
     task = load_yaml(task_path)
     if not task:
         return 1
-        
+
     claim_id = get_next_claim_id(op_dir)
     made_by = args.by if args.by else task.get("assigned_harness") or "operator"
     utc_now = get_current_utc_iso()
-    
+
     claim_data = {
         "claim_id": claim_id,
         "task_id": task_id,
@@ -454,39 +513,46 @@ def claim_add_cmd(args) -> int:
             "it as an ambiguous credit (FR-12).",
             file=sys.stderr,
         )
-    
+
     task["claims"] = task.get("claims") or []
     if claim_id not in task["claims"]:
         task["claims"].append(claim_id)
     task["updated_at"] = utc_now
     save_yaml(task, task_path)
-    
+
     print(f"Registered claim '{claim_id}' on task '{task_id}'.")
     return 0
+
 
 def evidence_attach_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task_id = args.task_id
     if not task_id:
         config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
         task_id = config.get("current_task")
         if not task_id:
-            print("Error: No active task set. Specify task ID or create a task.", file=sys.stderr)
+            print(
+                "Error: No active task set. Specify task ID or create a task.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
     if not os.path.exists(task_path):
         print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
         return 1
-        
+
     task = load_yaml(task_path)
     if not task:
         return 1
-        
+
     claim_id = args.claim
     claim = None
     exec_identity = get_executor_identity()
@@ -498,19 +564,25 @@ def evidence_attach_cmd(args) -> int:
             print(f"Error: Claim '{claim_id}' not found.", file=sys.stderr)
             return 1
         claim = load_yaml(claim_path)
-        
+
     # A status advances trust and is only ever recorded on a claim; reject a bare status write so it
     # can't silently succeed-and-drop, leaving the operator thinking trust advanced when it did not.
     if args.status and not claim:
-        print("Error: --status requires --claim. A status advances trust on a claim; a bare evidence "
-              "write cannot carry one (the status would be silently dropped).", file=sys.stderr)
+        print(
+            "Error: --status requires --claim. A status advances trust on a claim; a bare evidence "
+            "write cannot carry one (the status would be silently dropped).",
+            file=sys.stderr,
+        )
         return 1
 
     if claim and args.status:
         if not getattr(args, "verified_by", None):
-            print("Error: --verified-by is required when setting --status (the verifier must identify themselves).", file=sys.stderr)
+            print(
+                "Error: --verified-by is required when setting --status (the verifier must identify themselves).",
+                file=sys.stderr,
+            )
             return 1
-            
+
         # Executor identity check and binding
         identity_path = os.path.join(op_dir, "identity.yaml")
         identity_map = {}
@@ -527,21 +599,28 @@ def evidence_attach_cmd(args) -> int:
 
         if mode == "enforced":
             if not actual_verifier:
-                print(f"Error: refusing to record verification: executor uid {actual_uid} is not a known identity", file=sys.stderr)
+                print(
+                    f"Error: refusing to record verification: executor uid {actual_uid} is not a known identity",
+                    file=sys.stderr,
+                )
                 return 1
             if args.verified_by != actual_verifier:
-                print(f"Error: --verified-by '{args.verified_by}' does not match the executing identity '{actual_verifier}'", file=sys.stderr)
+                print(
+                    f"Error: --verified-by '{args.verified_by}' does not match the executing identity '{actual_verifier}'",
+                    file=sys.stderr,
+                )
                 return 1
             verified_by_value = actual_verifier
         else:
             verified_by_value = args.verified_by
-            
+
     path_or_url = args.path_or_url
     evidence_id = get_next_evidence_id(op_dir, task_id)
-    
+
     # Relocate local evidence files to ensure persistence
     if os.path.isfile(path_or_url):
         import shutil
+
         dest_dir = os.path.join(op_dir, "evidence", task_id)
         os.makedirs(dest_dir, exist_ok=True)
         ext = os.path.splitext(path_or_url)[1]
@@ -550,14 +629,17 @@ def evidence_attach_cmd(args) -> int:
             shutil.copy2(path_or_url, dest_path)
             path_or_url = os.path.abspath(dest_path)
         except Exception as e:
-            print(f"Warning: Failed to persist evidence file to {dest_path}: {e}", file=sys.stderr)
-            
+            print(
+                f"Warning: Failed to persist evidence file to {dest_path}: {e}",
+                file=sys.stderr,
+            )
+
     file_hash = args.hash
     if not file_hash and os.path.isfile(path_or_url):
         file_hash = calculate_file_hash(path_or_url)
     made_by = args.by if args.by else task.get("assigned_harness") or "operator"
     utc_now = get_current_utc_iso()
-    
+
     evidence_data = {
         "evidence_id": evidence_id,
         "task_id": task_id,
@@ -565,28 +647,30 @@ def evidence_attach_cmd(args) -> int:
         "evidence_type": args.type,
         "produced_by": made_by,
         "produced_at": utc_now,
-        "provenance": "local_file" if os.path.exists(path_or_url) else "url_or_external",
+        "provenance": (
+            "local_file" if os.path.exists(path_or_url) else "url_or_external"
+        ),
         "hash": file_hash,
         "verification_command": args.verify_cmd,
         "notes": args.notes,
-        "executor": exec_identity
+        "executor": exec_identity,
     }
-    
+
     ev_path = os.path.join(op_dir, "evidence", task_id, f"{evidence_id}.yaml")
     save_yaml(evidence_data, ev_path)
-    
+
     task["evidence"] = task.get("evidence") or []
     if path_or_url not in task["evidence"]:
         task["evidence"].append(path_or_url)
     task["updated_at"] = utc_now
     save_yaml(task, task_path)
-    
+
     if claim:
         claim["evidence_refs"] = claim.get("evidence_refs") or []
         ref_str = f"evidence/{task_id}/{evidence_id}.yaml"
         if ref_str not in claim["evidence_refs"]:
             claim["evidence_refs"].append(ref_str)
-            
+
         if args.status:
             claim["verified_by"] = verified_by_value
             claim["verification_outcome"] = args.status
@@ -594,46 +678,58 @@ def evidence_attach_cmd(args) -> int:
                 claim["verification_status"] = True
             else:
                 claim["verification_status"] = False
-                
+
             claim["executor"] = exec_identity
-                
+
         if args.verdict:
             claim["verdict"] = args.verdict
-            
+
         claim_path = os.path.join(op_dir, "claims", f"{claim_id}.yaml")
         save_yaml(claim, claim_path)
-        
+
         if args.status == "quarantined":
             task["status"] = "quarantined"
             save_yaml(task, task_path)
-        elif args.status == "verified" and task["status"] not in ["quarantined", "complete"]:
+        elif args.status == "verified" and task["status"] not in [
+            "quarantined",
+            "complete",
+        ]:
             task["status"] = "verified"
             save_yaml(task, task_path)
-            
+
     print(f"Attached evidence '{evidence_id}' to task '{task_id}'.")
     if claim_id:
-        print(f"Associated with claim '{claim_id}' (Verification status: {claim.get('verification_status')}).")
+        print(
+            f"Associated with claim '{claim_id}' (Verification status: {claim.get('verification_status')})."
+        )
     return 0
+
 
 def usage_add_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task_id = args.task_id
     if not task_id:
         config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
         task_id = config.get("current_task")
         if not task_id:
-            print("Error: No active task set. Specify task ID or create a task.", file=sys.stderr)
+            print(
+                "Error: No active task set. Specify task ID or create a task.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
     if not os.path.exists(task_path):
         print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
         return 1
-        
+
     raw_payload = ""
     if args.file and args.file != "-":
         # Read the payload verbatim from a file. This is the fidelity-preserving
@@ -650,17 +746,19 @@ def usage_add_cmd(args) -> int:
             return 1
     else:
         if sys.stdin.isatty():
-            print("Paste your usage snapshot / status / quota snippet (press Ctrl-D to save):")
+            print(
+                "Paste your usage snapshot / status / quota snippet (press Ctrl-D to save):"
+            )
         try:
             raw_payload = sys.stdin.read()
         except KeyboardInterrupt:
             print("\nAborted.")
             return 1
-        
+
     usage_id = get_next_usage_id(op_dir)
     utc_now = get_current_utc_iso()
     date_str = utc_now.split("T")[0]
-    
+
     usage_record = {
         "usage_id": usage_id,
         "task_id": task_id,
@@ -671,60 +769,87 @@ def usage_add_cmd(args) -> int:
         "cost_estimate_usd": args.cost,
         "outcome": args.outcome,
         "raw_payload": raw_payload.strip(),
-        "executor": get_executor_identity()
+        "executor": get_executor_identity(),
+        "lane": getattr(args, "lane", None) or "unknown",
+        "task_class": getattr(args, "task_class", None) or "unknown",
     }
-    
+
     usage_file_path = os.path.join(op_dir, "usage", f"{date_str}.yaml")
     records = []
     if os.path.exists(usage_file_path):
         records = load_yaml(usage_file_path) or []
-        
+
     records.append(usage_record)
     save_yaml(records, usage_file_path)
-    
+
     task = load_yaml(task_path)
     if task:
         task["updated_at"] = utc_now
         save_yaml(task, task_path)
-        
+
     print(f"Usage record '{usage_id}' successfully added under {date_str}.yaml.")
     return 0
+
 
 def parse_iso_to_datetime(ts_str: str) -> datetime.datetime | None:
     if not ts_str:
         return None
     ts_str = ts_str.strip()
-    if ts_str.endswith('Z'):
-        ts_str = ts_str[:-1] + '+00:00'
+    if ts_str.endswith("Z"):
+        ts_str = ts_str[:-1] + "+00:00"
     try:
         return datetime.datetime.fromisoformat(ts_str)
     except Exception:
         pass
-    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(?:([+-]\d{2}):?(\d{2}))?$", ts_str)
+    m = re.match(
+        r"^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(?:([+-]\d{2}):?(\d{2}))?$",
+        ts_str,
+    )
     if m:
         year, month, day, hour, minute, second, frac, tz_hour, tz_min = m.groups()
         microsecond = 0
         if frac:
-            frac = frac[:6].ljust(6, '0')
+            frac = frac[:6].ljust(6, "0")
             microsecond = int(frac)
         tz = datetime.timezone.utc
         if tz_hour:
-            sign = -1 if tz_hour.startswith('-') else 1
+            sign = -1 if tz_hour.startswith("-") else 1
             offset_mins = int(tz_hour) * 60 + sign * int(tz_min)
             tz = datetime.timezone(datetime.timedelta(minutes=offset_mins))
-        return datetime.datetime(int(year), int(month), int(day), int(hour), int(minute), int(second), microsecond, tz)
+        return datetime.datetime(
+            int(year),
+            int(month),
+            int(day),
+            int(hour),
+            int(minute),
+            int(second),
+            microsecond,
+            tz,
+        )
     try:
-        return datetime.datetime.strptime(ts_str.split('+')[0].split('-')[0], "%Y-%m-%dT%H:%M:%S")
+        return datetime.datetime.strptime(
+            ts_str.split("+")[0].split("-")[0], "%Y-%m-%dT%H:%M:%S"
+        )
     except Exception:
         return None
+
 
 def parse_glog_timestamp(line: str, default_year: int) -> datetime.datetime | None:
     m = re.match(r"^([IWEF])(\d{2})(\d{2}) (\d{2}):(\d{2}):(\d{2})\.(\d{6})", line)
     if m:
         _, month, day, hour, minute, second, micro = m.groups()
-        dt = datetime.datetime(default_year, int(month), int(day), int(hour), int(minute), int(second), int(micro))
+        dt = datetime.datetime(
+            default_year,
+            int(month),
+            int(day),
+            int(hour),
+            int(minute),
+            int(second),
+            int(micro),
+        )
         return dt.astimezone()
     return None
+
 
 def parse_log_line_timestamp(line: str, default_year: int) -> datetime.datetime | None:
     dt = parse_glog_timestamp(line, default_year)
@@ -742,13 +867,22 @@ def parse_log_line_timestamp(line: str, default_year: int) -> datetime.datetime 
                 return dt
     return None
 
+
 def load_pricing_table(op_dir: str) -> dict:
     pricing_path = os.path.join(op_dir, "pricing.yaml")
     if not os.path.exists(pricing_path):
         return {}
     return load_yaml(pricing_path) or {}
 
-def calculate_cost(model: str | None, tokens_in: int, tokens_out: int, tokens_cache_read: int, tokens_cache_write: int, pricing_table: dict) -> float | None:
+
+def calculate_cost(
+    model: str | None,
+    tokens_in: int,
+    tokens_out: int,
+    tokens_cache_read: int,
+    tokens_cache_write: int,
+    pricing_table: dict,
+) -> float | None:
     if not model or model not in pricing_table:
         return None
     rates = pricing_table[model]
@@ -758,6 +892,7 @@ def calculate_cost(model: str | None, tokens_in: int, tokens_out: int, tokens_ca
     cost += tokens_cache_read * rates.get("cache_read", 0.0)
     cost += tokens_cache_write * rates.get("cache_write", 0.0)
     return cost / 1000000.0
+
 
 def get_nested(d: dict, path: str, default: any = None) -> any:
     parts = path.split(".")
@@ -769,6 +904,7 @@ def get_nested(d: dict, path: str, default: any = None) -> any:
         return d.get(parts[-1], default)
     return default
 
+
 def set_nested(d: dict, path: str, value: any) -> None:
     parts = path.split(".")
     for part in parts[:-1]:
@@ -777,7 +913,10 @@ def set_nested(d: dict, path: str, value: any) -> None:
         d = d[part]
     d[parts[-1]] = value
 
-def set_record_field(record: dict, field_name: str, value: any, source: str = "auto") -> None:
+
+def set_record_field(
+    record: dict, field_name: str, value: any, source: str = "auto"
+) -> None:
     if "field_sources" not in record:
         record["field_sources"] = {}
     if "auto_values" not in record:
@@ -792,12 +931,26 @@ def set_record_field(record: dict, field_name: str, value: any, source: str = "a
         set_nested(record, field_name, value)
         record["field_sources"][flat_key] = "manual"
 
-def check_overlap(start1: datetime.datetime, end1: datetime.datetime | None, start2: datetime.datetime, end2: datetime.datetime | None) -> bool:
+
+def check_overlap(
+    start1: datetime.datetime,
+    end1: datetime.datetime | None,
+    start2: datetime.datetime,
+    end2: datetime.datetime | None,
+) -> bool:
     t1_start = start1
-    t1_end = end1 if end1 is not None else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+    t1_end = (
+        end1
+        if end1 is not None
+        else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+    )
     t2_start = start2
-    t2_end = end2 if end2 is not None else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
-    
+    t2_end = (
+        end2
+        if end2 is not None
+        else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+    )
+
     # Standardise timezones to UTC for comparison
     if t1_start.tzinfo:
         t1_start = t1_start.astimezone(datetime.timezone.utc)
@@ -807,10 +960,13 @@ def check_overlap(start1: datetime.datetime, end1: datetime.datetime | None, sta
         t2_start = t2_start.astimezone(datetime.timezone.utc)
     if t2_end.tzinfo:
         t2_end = t2_end.astimezone(datetime.timezone.utc)
-        
+
     return t1_start <= t2_end and t2_start <= t1_end
 
-def is_within_window(dt: datetime.datetime, start: datetime.datetime, end: datetime.datetime) -> bool:
+
+def is_within_window(
+    dt: datetime.datetime, start: datetime.datetime, end: datetime.datetime
+) -> bool:
     start_local = start.astimezone().replace(tzinfo=None) if start.tzinfo else start
     end_local = end.astimezone().replace(tzinfo=None) if end.tzinfo else end
     dt_naive = dt.replace(tzinfo=None) if dt.tzinfo else dt
@@ -821,6 +977,7 @@ def is_within_window(dt: datetime.datetime, start: datetime.datetime, end: datet
     if start_naive <= dt_naive <= end_naive:
         return True
     return False
+
 
 def score_session(session: dict, abs_repo: str, task_id: str, harness_id: str) -> int:
     score = 0
@@ -833,6 +990,7 @@ def score_session(session: dict, abs_repo: str, task_id: str, harness_id: str) -
         if sid and (task_id in sid or sid in task_id):
             score += 5
     return score
+
 
 def parse_claude_session_file(filepath: str) -> dict | None:
     try:
@@ -904,8 +1062,9 @@ def parse_claude_session_file(filepath: str) -> dict | None:
         "tokens_cache_read": tokens_cache_read,
         "tokens_cache_write": tokens_cache_write,
         "source_session_ref": os.path.abspath(filepath),
-        "metering": "tokens"
+        "metering": "tokens",
     }
+
 
 def parse_codex_session_file(filepath: str) -> dict | None:
     try:
@@ -946,7 +1105,12 @@ def parse_codex_session_file(filepath: str) -> dict | None:
                     cwds.append(scwd)
             elif ev_type == "response_item":
                 ptype = payload.get("type")
-                if ptype in {"function_call", "local_shell_call", "custom_tool_call", "mcp_tool_call"}:
+                if ptype in {
+                    "function_call",
+                    "local_shell_call",
+                    "custom_tool_call",
+                    "mcp_tool_call",
+                }:
                     tool_calls += 1
             elif ev_type == "event_msg" and payload.get("type") == "token_count":
                 last_token_event = payload
@@ -988,8 +1152,9 @@ def parse_codex_session_file(filepath: str) -> dict | None:
         "tokens_cache_read": tokens_cache_read,
         "tokens_cache_write": None,
         "source_session_ref": os.path.abspath(filepath),
-        "metering": "tokens"
+        "metering": "tokens",
     }
+
 
 def parse_gemini_session_file(filepath: str, base_dir: str) -> dict | None:
     try:
@@ -1030,7 +1195,9 @@ def parse_gemini_session_file(filepath: str, base_dir: str) -> dict | None:
     start_time = timestamps[0]
     end_time = timestamps[-1]
     quota_events = 0
-    log_files = glob.glob(os.path.join(base_dir, "log", "cli-*.log")) + glob.glob(os.path.join(base_dir, "cli-*.log"))
+    log_files = glob.glob(os.path.join(base_dir, "log", "cli-*.log")) + glob.glob(
+        os.path.join(base_dir, "cli-*.log")
+    )
     for lf in log_files:
         try:
             with open(lf, "r") as f:
@@ -1055,10 +1222,13 @@ def parse_gemini_session_file(filepath: str, base_dir: str) -> dict | None:
         "tokens_cache_write": None,
         "quota_events": quota_events,
         "source_session_ref": os.path.abspath(filepath),
-        "metering": "activity"
+        "metering": "activity",
     }
 
-def find_usage_record_by_ref(op_dir: str, source_session_ref: str) -> tuple[str, list, int] | tuple[None, None, None]:
+
+def find_usage_record_by_ref(
+    op_dir: str, source_session_ref: str
+) -> tuple[str, list, int] | tuple[None, None, None]:
     usage_dir = os.path.join(op_dir, "usage")
     if not os.path.isdir(usage_dir):
         return None, None, None
@@ -1069,10 +1239,14 @@ def find_usage_record_by_ref(op_dir: str, source_session_ref: str) -> tuple[str,
                 return filepath, records, idx
     return None, None, None
 
+
 def usage_import_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
     task_id = args.task_id
     if not task_id:
@@ -1088,7 +1262,9 @@ def usage_import_cmd(args) -> int:
     abs_repo = os.path.abspath(task.get("repo", ".")) if task else os.path.abspath(".")
     harness_id = args.harness
     if harness_id == "claude":
-        base_dir = os.environ.get("OPERATOR_TEST_CLAUDE_DIR", os.path.expanduser("~/.claude"))
+        base_dir = os.environ.get(
+            "OPERATOR_TEST_CLAUDE_DIR", os.path.expanduser("~/.claude")
+        )
         files = []
         if os.path.isfile(base_dir):
             if base_dir.endswith(".jsonl"):
@@ -1104,7 +1280,9 @@ def usage_import_cmd(args) -> int:
             if res:
                 all_sessions.append(res)
     elif harness_id == "codex":
-        base_dir = os.environ.get("OPERATOR_TEST_CODEX_DIR", os.path.expanduser("~/.codex"))
+        base_dir = os.environ.get(
+            "OPERATOR_TEST_CODEX_DIR", os.path.expanduser("~/.codex")
+        )
         files = []
         if os.path.isfile(base_dir):
             if base_dir.endswith(".jsonl"):
@@ -1120,7 +1298,9 @@ def usage_import_cmd(args) -> int:
             if res:
                 all_sessions.append(res)
     elif harness_id == "gemini-agy":
-        base_dir = os.environ.get("OPERATOR_TEST_GEMINI_DIR", os.path.expanduser("~/.gemini/antigravity-cli"))
+        base_dir = os.environ.get(
+            "OPERATOR_TEST_GEMINI_DIR", os.path.expanduser("~/.gemini/antigravity-cli")
+        )
         files = []
         if os.path.isfile(base_dir):
             if base_dir.endswith(".jsonl"):
@@ -1147,7 +1327,10 @@ def usage_import_cmd(args) -> int:
         for usage_path in glob.glob(os.path.join(usage_dir, "*.yaml")):
             records = load_yaml(usage_path) or []
             for rec in records:
-                if rec.get("task_id") == task_id and rec.get("harness_id") == harness_id:
+                if (
+                    rec.get("task_id") == task_id
+                    and rec.get("harness_id") == harness_id
+                ):
                     matching_records.append(rec)
     if matching_records:
         matching_records.sort(key=lambda r: r.get("started_at", ""), reverse=True)
@@ -1160,11 +1343,21 @@ def usage_import_cmd(args) -> int:
     selected_sessions = []
     if args.session_id:
         for s in all_sessions:
-            if s["session_id"] == args.session_id or args.session_id in s.get("source_session_ref", ""):
+            if s["session_id"] == args.session_id or args.session_id in s.get(
+                "source_session_ref", ""
+            ):
                 selected_sessions.append(s)
     elif args.since or args.until:
-        since_dt = parse_iso_to_datetime(args.since) if args.since else datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
-        until_dt = parse_iso_to_datetime(args.until) if args.until else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+        since_dt = (
+            parse_iso_to_datetime(args.since)
+            if args.since
+            else datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+        )
+        until_dt = (
+            parse_iso_to_datetime(args.until)
+            if args.until
+            else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+        )
         for s in all_sessions:
             if since_dt <= s["start_time"] <= until_dt:
                 selected_sessions.append(s)
@@ -1195,19 +1388,22 @@ def usage_import_cmd(args) -> int:
         if filepath is not None:
             rec = records[idx]
         else:
-            open_ids = []
             if op_start is not None:
                 # Find open placeholder record overlapping this session
                 for u_path in glob.glob(os.path.join(usage_dir, "*.yaml")):
                     u_recs = load_yaml(u_path) or []
                     for u_idx, u_rec in enumerate(u_recs):
-                        if (u_rec.get("task_id") == task_id and 
-                            u_rec.get("harness_id") == harness_id and 
-                            u_rec.get("source_session_ref") is None and 
-                            u_rec.get("ended_at") is None):
+                        if (
+                            u_rec.get("task_id") == task_id
+                            and u_rec.get("harness_id") == harness_id
+                            and u_rec.get("source_session_ref") is None
+                            and u_rec.get("ended_at") is None
+                        ):
                             u_start = parse_iso_to_datetime(u_rec.get("started_at"))
                             u_end = datetime.datetime.now(datetime.timezone.utc)
-                            if check_overlap(s["start_time"], s["end_time"], u_start, u_end):
+                            if check_overlap(
+                                s["start_time"], s["end_time"], u_start, u_end
+                            ):
                                 filepath = u_path
                                 records = u_recs
                                 idx = u_idx
@@ -1222,28 +1418,56 @@ def usage_import_cmd(args) -> int:
                     "task_id": task_id,
                     "harness_id": harness_id,
                     "outcome": "unknown",
-                    "raw_payload": f"Auto-imported from {ref}"
+                    "raw_payload": f"Auto-imported from {ref}",
                 }
-        
+
+        # Default lane and task_class heuristics if missing or unknown
+        if rec.get("lane") is None or rec.get("lane") == "unknown":
+            if harness_id == "gemini-agy":
+                set_record_field(rec, "lane", "local", "auto")
+            elif harness_id in ("codex", "claude"):
+                set_record_field(rec, "lane", "frontier_driver", "auto")
+            else:
+                set_record_field(rec, "lane", "unknown", "auto")
+        elif "lane" not in rec.get("field_sources", {}):
+            set_record_field(rec, "lane", rec.get("lane"), "manual")
+
+        if rec.get("task_class") is None or rec.get("task_class") == "unknown":
+            set_record_field(rec, "task_class", "unknown", "auto")
+        elif "task_class" not in rec.get("field_sources", {}):
+            set_record_field(rec, "task_class", rec.get("task_class"), "manual")
+
         cost = calculate_cost(
-            s["model"], 
-            s["tokens_in"] or 0, 
-            s["tokens_out"] or 0, 
-            s["tokens_cache_read"] or 0, 
-            s["tokens_cache_write"] or 0, 
-            pricing_table
+            s["model"],
+            s["tokens_in"] or 0,
+            s["tokens_out"] or 0,
+            s["tokens_cache_read"] or 0,
+            s["tokens_cache_write"] or 0,
+            pricing_table,
         )
-        
+
         rec["metering"] = s["metering"]
         rec["source_session_ref"] = ref
-        
-        start_iso = s["start_time"].astimezone(datetime.timezone.utc).replace(microsecond=0).isoformat()
-        end_iso = s["end_time"].astimezone(datetime.timezone.utc).replace(microsecond=0).isoformat() if s["end_time"] else None
-        
+
+        start_iso = (
+            s["start_time"]
+            .astimezone(datetime.timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+        )
+        end_iso = (
+            s["end_time"]
+            .astimezone(datetime.timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+            if s["end_time"]
+            else None
+        )
+
         set_record_field(rec, "started_at", start_iso, "auto")
         set_record_field(rec, "ended_at", end_iso, "auto")
         set_record_field(rec, "model", s["model"], "auto")
-        
+
         if s["metering"] == "tokens":
             set_record_field(rec, "tokens_in", s["tokens_in"], "auto")
             set_record_field(rec, "tokens_out", s["tokens_out"], "auto")
@@ -1256,24 +1480,24 @@ def usage_import_cmd(args) -> int:
             rec["tokens_cache_read"] = None
             rec["tokens_cache_write"] = None
             rec["cost_estimate_usd"] = None
-            
+
         set_record_field(rec, "activity.tool_calls", s["tool_calls"], "auto")
         set_record_field(rec, "activity.turns", s["turns"], "auto")
-        
+
         wall_clock = 0
         if s["end_time"] and s["start_time"]:
             wall_clock = int((s["end_time"] - s["start_time"]).total_seconds())
         set_record_field(rec, "activity.wall_clock_s", wall_clock, "auto")
-        
+
         if s["metering"] == "activity" and s.get("quota_events") is not None:
             set_record_field(rec, "activity.quota_events", s["quota_events"], "auto")
         else:
             if "quota_events" not in rec.get("activity", {}):
                 set_nested(rec, "activity.quota_events", None)
-                
+
         if "active_s" not in rec.get("activity", {}):
             set_nested(rec, "activity.active_s", None)
-            
+
         rec["executor"] = get_executor_identity()
         if args.dry_run:
             print("---")
@@ -1284,25 +1508,35 @@ def usage_import_cmd(args) -> int:
                 records[idx] = rec
                 save_yaml(records, filepath)
             else:
-                date_str = s["start_time"].astimezone(datetime.timezone.utc).strftime("%Y-%m-%d")
+                date_str = (
+                    s["start_time"]
+                    .astimezone(datetime.timezone.utc)
+                    .strftime("%Y-%m-%d")
+                )
                 u_path = os.path.join(op_dir, "usage", f"{date_str}.yaml")
                 u_recs = []
                 if os.path.exists(u_path):
                     u_recs = load_yaml(u_path) or []
                 u_recs.append(rec)
                 save_yaml(u_recs, u_path)
-            
+
             if task:
                 task["updated_at"] = utc_now
                 save_yaml(task, task_path)
-            print(f"Successfully imported usage record '{rec['usage_id']}' for task '{task_id}'.")
-            
+            print(
+                f"Successfully imported usage record '{rec['usage_id']}' for task '{task_id}'."
+            )
+
     return 0
+
 
 def usage_annotate_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
     usage_id = args.usage_id
     filepath, records, idx = find_usage_record(op_dir, usage_id)
@@ -1310,41 +1544,55 @@ def usage_annotate_cmd(args) -> int:
         print(f"Error: Usage record '{usage_id}' not found.", file=sys.stderr)
         return 1
     usage_record = records[idx]
-    if (args.active_start and not args.active_end) or (args.active_end and not args.active_start):
-        print("Error: Both --active-start and --active-end must be specified to calculate active_s.", file=sys.stderr)
+    if (args.active_start and not args.active_end) or (
+        args.active_end and not args.active_start
+    ):
+        print(
+            "Error: Both --active-start and --active-end must be specified to calculate active_s.",
+            file=sys.stderr,
+        )
         return 1
     if args.active_start and args.active_end:
         start_dt = parse_iso_to_datetime(args.active_start)
         end_dt = parse_iso_to_datetime(args.active_end)
         if not start_dt or not end_dt:
-            print("Error: Invalid ISO8601 format for active start/end.", file=sys.stderr)
+            print(
+                "Error: Invalid ISO8601 format for active start/end.", file=sys.stderr
+            )
             return 1
         active_s = int((end_dt - start_dt).total_seconds())
         set_record_field(usage_record, "activity.active_s", active_s, "manual")
     if args.cost is not None:
         set_record_field(usage_record, "cost_estimate_usd", args.cost, "manual")
     if args.quota_events is not None:
-        set_record_field(usage_record, "activity.quota_events", args.quota_events, "manual")
+        set_record_field(
+            usage_record, "activity.quota_events", args.quota_events, "manual"
+        )
     if args.note is not None:
         usage_record["raw_payload"] = args.note
+    if getattr(args, "lane", None) is not None:
+        set_record_field(usage_record, "lane", args.lane, "manual")
+    if getattr(args, "task_class", None) is not None:
+        set_record_field(usage_record, "task_class", args.task_class, "manual")
 
     usage_record["executor"] = get_executor_identity()
     save_yaml(records, filepath)
     print(f"Successfully annotated usage record '{usage_id}'.")
     return 0
 
+
 def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str | None:
     task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
     harness_path = os.path.join(op_dir, "harnesses", f"{harness_id}.yaml")
-    
+
     if not os.path.exists(task_path) or not os.path.exists(harness_path):
         return None
-        
+
     task = load_yaml(task_path)
     harness = load_yaml(harness_path)
     if not task or not harness:
         return None
-        
+
     claims = []
     claims_list = task.get("claims") or []
     for cid in claims_list:
@@ -1353,7 +1601,7 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
             c_data = load_yaml(c_path)
             if c_data:
                 claims.append(c_data)
-                
+
     latest_handoff = None
     handoffs_list = task.get("handoffs") or []
     if handoffs_list:
@@ -1383,7 +1631,9 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     md.append("")
     md.append("## 3. Current Task State & Recommended Next Action")
     md.append(f"- **Current Status:** `{task.get('status')}`")
-    md.append(f"- **Recommended Next Action:** `{task.get('next_action') or 'Not specified'}`")
+    md.append(
+        f"- **Recommended Next Action:** `{task.get('next_action') or 'Not specified'}`"
+    )
     md.append("- **Initial Assumptions:**")
     assumptions = task.get("open_assumptions") or []
     if assumptions:
@@ -1394,19 +1644,35 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     md.append("")
     md.append("## 4. Latest Harness Handoff Closeout")
     if latest_handoff:
-        md.append(f"*(Consumed from `{latest_handoff.get('handoff_id')}` by `{latest_handoff.get('by')}` at `{latest_handoff.get('created_at')}`)*")
+        md.append(
+            f"*(Consumed from `{latest_handoff.get('handoff_id')}` by `{latest_handoff.get('by')}` at `{latest_handoff.get('created_at')}`)*"
+        )
         md.append("")
-        md.append(f"- **What Changed:** {latest_handoff.get('what_changed') or 'Not documented'}")
-        md.append(f"- **What Was Verified:** {latest_handoff.get('what_verified') or 'Not documented'}")
-        md.append(f"- **What Was Claimed (unverified):** {latest_handoff.get('what_claimed') or 'Not documented'}")
-        md.append(f"- **What Remains Open:** {latest_handoff.get('what_remains_open') or 'Not documented'}")
-        md.append(f"- **Unchecked Assumptions:** {latest_handoff.get('unchecked_assumptions') or 'Not documented'}")
+        md.append(
+            f"- **What Changed:** {latest_handoff.get('what_changed') or 'Not documented'}"
+        )
+        md.append(
+            f"- **What Was Verified:** {latest_handoff.get('what_verified') or 'Not documented'}"
+        )
+        md.append(
+            f"- **What Was Claimed (unverified):** {latest_handoff.get('what_claimed') or 'Not documented'}"
+        )
+        md.append(
+            f"- **What Remains Open:** {latest_handoff.get('what_remains_open') or 'Not documented'}"
+        )
+        md.append(
+            f"- **Unchecked Assumptions:** {latest_handoff.get('unchecked_assumptions') or 'Not documented'}"
+        )
     else:
-        md.append("No previous handoff captured for this task yet. Starting from initial setup.")
+        md.append(
+            "No previous handoff captured for this task yet. Starting from initial setup."
+        )
     md.append("")
     md.append("## 5. Claims & Verification Gates")
     if claims:
-        md.append("The following claims have been registered for this task. All load-bearing claims must have verification evidence.")
+        md.append(
+            "The following claims have been registered for this task. All load-bearing claims must have verification evidence."
+        )
         md.append("")
         md.append("| Claim ID | Made By | Status | Type | Text | Required Gate |")
         md.append("| --- | --- | --- | --- | --- | --- |")
@@ -1415,17 +1681,27 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
             if not outcome:
                 outcome = "verified" if c.get("verification_status") else "unverified"
             status_str = str(outcome)
-            md.append(f"| `{c.get('claim_id')}` | {c.get('made_by')} | {status_str} | `{c.get('type')}` | {c.get('text')} | {c.get('required_gate') or 'N/A'} |")
+            md.append(
+                f"| `{c.get('claim_id')}` | {c.get('made_by')} | {status_str} | `{c.get('type')}` | {c.get('text')} | {c.get('required_gate') or 'N/A'} |"
+            )
     else:
         md.append("No claims have been registered yet for this task.")
     md.append("")
     md.append("## 6. Required Evidence")
-    md.append("- **Builders attach evidence but do NOT set `--status`.** Register claims and attach evidence (`evidence-attach --claim ... --by <you>`). Leave verification to the review harness.")
-    md.append("- **Only the review harness verifies**, with `evidence-attach --status verified --verified-by <reviewer>`.")
+    md.append(
+        "- **Builders attach evidence but do NOT set `--status`.** Register claims and attach evidence (`evidence-attach --claim ... --by <you>`). Leave verification to the review harness."
+    )
+    md.append(
+        "- **Only the review harness verifies**, with `evidence-attach --status verified --verified-by <reviewer>`."
+    )
     md.append("- **`file_exists`**: Verify by providing file path or `stat` output.")
     md.append("- **`test_passes`**: Verify by providing output text of the test run.")
-    md.append("- **`real_data`**: Provide physical/provenance chain for the data sources.")
-    md.append("- **`supervision_credit`**: Name the layer supervised via `--layer` (`design`, `evidence`, `execution`, `release`, `end_to_end`); an unnamed layer is flagged ambiguous by doctor (FR-12).")
+    md.append(
+        "- **`real_data`**: Provide physical/provenance chain for the data sources."
+    )
+    md.append(
+        "- **`supervision_credit`**: Name the layer supervised via `--layer` (`design`, `evidence`, `execution`, `release`, `end_to_end`); an unnamed layer is flagged ambiguous by doctor (FR-12)."
+    )
     md.append("")
     md.append("## 7. Handoff Guidelines")
     md.append("Upon completion, output a handoff file summarizing:")
@@ -1435,83 +1711,103 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     md.append("4. **Open items:** unchecked assumptions, remaining risks.")
     md.append("5. **Next action:** proposed next step for the subsequent harness.")
     md.append("")
-    
+
     return "\n".join(md)
+
 
 def brief_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task_id = args.task_id
     if not task_id:
         config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
         task_id = config.get("current_task")
         if not task_id:
-            print("Error: No active task set. Specify task ID or create a task.", file=sys.stderr)
+            print(
+                "Error: No active task set. Specify task ID or create a task.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     brief_content = generate_brief_markdown(op_dir, task_id, args.harness_id)
     if not brief_content:
-        print(f"Error: Could not generate brief for task '{task_id}' and harness '{args.harness_id}'. Check if they exist.", file=sys.stderr)
+        print(
+            f"Error: Could not generate brief for task '{task_id}' and harness '{args.harness_id}'. Check if they exist.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     brief_filename = f"{task_id}.{args.harness_id}.md"
     brief_path = os.path.join(op_dir, "briefs", brief_filename)
-    
+
     try:
-        with open(brief_path, 'w') as f:
+        with open(brief_path, "w") as f:
             f.write(brief_content)
     except Exception as e:
         print(f"Error writing brief: {e}", file=sys.stderr)
         return 1
-        
+
     print(brief_content)
     print(f"\nBrief written to: {brief_path}")
     return 0
 
+
 def export_brief_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task_id = args.task_id
     if not task_id:
         config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
         task_id = config.get("current_task")
         if not task_id:
-            print("Error: No active task set. Specify task ID or create a task.", file=sys.stderr)
+            print(
+                "Error: No active task set. Specify task ID or create a task.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     brief_content = generate_brief_markdown(op_dir, task_id, args.harness_id)
     if not brief_content:
-        print(f"Error: Could not generate brief for task '{task_id}' and harness '{args.harness_id}'. Check if they exist.", file=sys.stderr)
+        print(
+            f"Error: Could not generate brief for task '{task_id}' and harness '{args.harness_id}'. Check if they exist.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     harness_path = os.path.join(op_dir, "harnesses", f"{args.harness_id}.yaml")
     harness = load_yaml(harness_path) or {}
     harness_display_name = harness.get("display_name", args.harness_id)
-    
+
     export_filename = f"{task_id}.{args.harness_id}.export.md"
     export_path = os.path.join(op_dir, "briefs", export_filename)
-    
+
     export_header = (
         f"<!-- SYSTEM INSTRUCTIONS FOR {harness_display_name.upper()} -->\n"
         f"<!-- PASTE THIS ENTIRE BRIEF INTO THE CHAT SESSION TO INITIALIZE STATE -->\n"
         f"<!-- DO NOT INVENT OR ASSUME DETAILS NOT DOCUMENTED IN THIS BRIEF -->\n\n"
     )
-    
+
     full_export_content = export_header + brief_content
-    
+
     try:
-        with open(export_path, 'w') as f:
+        with open(export_path, "w") as f:
             f.write(full_export_content)
     except Exception as e:
         print(f"Error writing export brief: {e}", file=sys.stderr)
         return 1
-        
+
     print("=" * 80)
     print(f"PASTE THE CONTENT BELOW INTO THE {harness_display_name.upper()} SESSION:")
     print("=" * 80)
@@ -1521,18 +1817,22 @@ def export_brief_cmd(args) -> int:
     print("=" * 80)
     return 0
 
+
 def doctor_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     tasks_dir = os.path.join(op_dir, "tasks")
     task_files = glob.glob(os.path.join(tasks_dir, "*.yaml"))
-    
+
     issues = []
     infos = []
-    
+
     # Load identity map
     identity_path = os.path.join(op_dir, "identity.yaml")
     identity_map = {}
@@ -1547,19 +1847,23 @@ def doctor_cmd(args) -> int:
         if not executor:
             return
         if executor.get("test_override_active"):
-            issues.append(f"[Error] {source_name} contains write made with test-override active")
+            issues.append(
+                f"[Error] {source_name} contains write made with test-override active"
+            )
         if executor.get("test_override_unauthorized"):
-            issues.append(f"[Error] {source_name} contains write with unauthorized test-override attempt")
+            issues.append(
+                f"[Error] {source_name} contains write with unauthorized test-override attempt"
+            )
 
     for tf in task_files:
         task = load_yaml(tf)
         if not task:
             continue
-            
+
         task_id = task.get("task_id", os.path.splitext(os.path.basename(tf))[0])
         check_executor_block(task, f"Task {task_id}")
         task_status = task.get("status")
-        
+
         claims_list = task.get("claims") or []
         quarantined_claims = []
         verified_claims = []
@@ -1568,56 +1872,78 @@ def doctor_cmd(args) -> int:
             if not os.path.exists(c_path):
                 issues.append(f"[Error] Task {task_id} references missing claim: {cid}")
                 continue
-                
+
             c_data = load_yaml(c_path)
             if not c_data:
                 issues.append(f"[Error] Claim {cid} could not be loaded.")
                 continue
-                
-            check_executor_block(c_data, f"Claim {cid}")
-                
-            if not c_data.get("required_gate"):
-                issues.append(f"[Warning] Claim {cid} ('{c_data.get('text')}') has no required_gate defined.")
 
-            if c_data.get("type") == "supervision_credit" and not c_data.get("supervision_layer"):
-                issues.append(f"[Warning] Claim {cid} is a supervision_credit with no named layer (ambiguous credit; FR-12).")
-                
+            check_executor_block(c_data, f"Claim {cid}")
+
+            if not c_data.get("required_gate"):
+                issues.append(
+                    f"[Warning] Claim {cid} ('{c_data.get('text')}') has no required_gate defined."
+                )
+
+            if c_data.get("type") == "supervision_credit" and not c_data.get(
+                "supervision_layer"
+            ):
+                issues.append(
+                    f"[Warning] Claim {cid} is a supervision_credit with no named layer (ambiguous credit; FR-12)."
+                )
+
             evidence_refs = c_data.get("evidence_refs") or []
             if c_data.get("verification_status") and not evidence_refs:
-                issues.append(f"[Error] Claim {cid} is marked verified but has no evidence references.")
+                issues.append(
+                    f"[Error] Claim {cid} is marked verified but has no evidence references."
+                )
 
             for ev_ref in evidence_refs:
                 ev_ref_path = os.path.join(op_dir, ev_ref)
                 if not os.path.exists(ev_ref_path):
-                    issues.append(f"[Error] Claim {cid} evidence reference points to missing file: {ev_ref}")
+                    issues.append(
+                        f"[Error] Claim {cid} evidence reference points to missing file: {ev_ref}"
+                    )
                 else:
                     ev_ref_data = load_yaml(ev_ref_path)
                     if ev_ref_data:
                         check_executor_block(ev_ref_data, f"Evidence file {ev_ref}")
-                        if ev_ref_data.get("provenance") == "local_file" and not ev_ref_data.get("hash"):
-                            issues.append(f"[Warning] Claim {cid} evidence reference has no stored hash: {ev_ref}")
-                
+                        if ev_ref_data.get(
+                            "provenance"
+                        ) == "local_file" and not ev_ref_data.get("hash"):
+                            issues.append(
+                                f"[Warning] Claim {cid} evidence reference has no stored hash: {ev_ref}"
+                            )
+
             outcome = c_data.get("verification_outcome")
             if outcome == "quarantined":
                 quarantined_claims.append(cid)
             elif c_data.get("verification_status") or outcome == "verified":
                 verified_claims.append(cid)
-                
+
             made = c_data.get("made_by")
             vby = c_data.get("verified_by")
-            verified = (outcome == "verified") or bool(c_data.get("verification_status"))
+            verified = (outcome == "verified") or bool(
+                c_data.get("verification_status")
+            )
             review = task.get("review_harness")
-            
+
             if verified:
                 if vby == made:
-                    issues.append(f"[Error] claim {cid} is self-verified by '{made}' (maker cannot verify own claim)")
+                    issues.append(
+                        f"[Error] claim {cid} is self-verified by '{made}' (maker cannot verify own claim)"
+                    )
                 elif vby and review and vby != review:
-                    issues.append(f"[Warning] claim {cid} verified by '{vby}', not the task's review harness '{review}'")
-                
+                    issues.append(
+                        f"[Warning] claim {cid} verified by '{vby}', not the task's review harness '{review}'"
+                    )
+
                 # Executor verification checks
                 executor = c_data.get("executor")
                 if not vby or not executor:
-                    infos.append(f"[Info] Claim {cid} has unknown verifier (legacy claim)")
+                    infos.append(
+                        f"[Info] Claim {cid} has unknown verifier (legacy claim)"
+                    )
                 else:
                     exec_uid = executor.get("uid")
                     expected_verifier = identity_map.get(exec_uid)
@@ -1626,37 +1952,51 @@ def doctor_cmd(args) -> int:
 
                     if mode == "enforced":
                         if not expected_verifier:
-                            issues.append(f"[Error] claim {cid} verified by unknown UID {exec_uid}")
+                            issues.append(
+                                f"[Error] claim {cid} verified by unknown UID {exec_uid}"
+                            )
                         elif vby != expected_verifier:
-                            issues.append(f"[Error] claim {cid} verification identity mismatch (possible impersonation): verified_by is '{vby}', but executor maps to '{expected_verifier}' (uid {exec_uid})")
+                            issues.append(
+                                f"[Error] claim {cid} verification identity mismatch (possible impersonation): verified_by is '{vby}', but executor maps to '{expected_verifier}' (uid {exec_uid})"
+                            )
                     else:
                         # mode is single_user or missing
-                        infos.append(f"[Warning] claim {cid} verification is NOT identity-enforced (single-user mode); see EXECUTOR_IDENTITY_SPEC §5")
+                        infos.append(
+                            f"[Warning] claim {cid} verification is NOT identity-enforced (single-user mode); see EXECUTOR_IDENTITY_SPEC §5"
+                        )
                         # Enforcement-downgrade detection (warn-only, exit unchanged):
                         # the identity map IS configured and this claim's executor maps to a
                         # known identity, yet verified_by does not match it. enforced mode would
                         # reject this as impersonation; single_user silently accepts it. Surface
                         # the relaxation so a config flip (enforced -> single_user) is not silent.
                         if expected_verifier and vby != expected_verifier:
-                            infos.append(f"[Warning] claim {cid} would be REJECTED under enforced mode: verified_by '{vby}' != identity '{expected_verifier}' for uid {exec_uid}; enforcement appears relaxed to single_user")
+                            infos.append(
+                                f"[Warning] claim {cid} would be REJECTED under enforced mode: verified_by '{vby}' != identity '{expected_verifier}' for uid {exec_uid}; enforcement appears relaxed to single_user"
+                            )
 
         if task_status in ["verified", "complete"] and quarantined_claims:
-            issues.append(f"[Error] Task {task_id} status is '{task_status}' while claims are quarantined: {', '.join(quarantined_claims)}")
+            issues.append(
+                f"[Error] Task {task_id} status is '{task_status}' while claims are quarantined: {', '.join(quarantined_claims)}"
+            )
 
         if task_status == "quarantined" and verified_claims:
-            issues.append(f"[Error] Task {task_id} is quarantined while claims are still marked verified: {', '.join(verified_claims)}")
-            
+            issues.append(
+                f"[Error] Task {task_id} is quarantined while claims are still marked verified: {', '.join(verified_claims)}"
+            )
+
         ho_list = task.get("handoffs") or []
         for ho_ref in ho_list:
             ho_path = os.path.join(op_dir, ho_ref)
             if not os.path.exists(ho_path):
-                issues.append(f"[Error] Task {task_id} handoff reference points to missing file: {ho_ref}")
+                issues.append(
+                    f"[Error] Task {task_id} handoff reference points to missing file: {ho_ref}"
+                )
             else:
                 ho_data = load_yaml(ho_path)
                 if ho_data:
                     ho_id = ho_data.get("handoff_id")
                     check_executor_block(ho_data, f"Handoff {ho_id} for task {task_id}")
-                
+
         if ho_list:
             latest_ho_ref = ho_list[-1]
             latest_ho_path = os.path.join(op_dir, latest_ho_ref)
@@ -1665,9 +2005,15 @@ def doctor_cmd(args) -> int:
                 if latest_ho:
                     ho_next = latest_ho.get("next_action")
                     task_next = task.get("next_action")
-                    if task_status not in ["verified", "complete"] and ho_next and ho_next != task_next:
-                        issues.append(f"[Warning] Task {task_id} next_action differs from the latest handoff recommended next action. Task: '{task_next}', Handoff: '{ho_next}'")
-                        
+                    if (
+                        task_status not in ["verified", "complete"]
+                        and ho_next
+                        and ho_next != task_next
+                    ):
+                        issues.append(
+                            f"[Warning] Task {task_id} next_action differs from the latest handoff recommended next action. Task: '{task_next}', Handoff: '{ho_next}'"
+                        )
+
         ev_dir = os.path.join(op_dir, "evidence", task_id)
         if os.path.isdir(ev_dir):
             ev_files = glob.glob(os.path.join(ev_dir, "evidence-*.yaml"))
@@ -1680,24 +2026,32 @@ def doctor_cmd(args) -> int:
                 path_or_url = ev_data.get("path_or_url")
                 provenance = ev_data.get("provenance")
                 stored_hash = ev_data.get("hash")
-                
-                if provenance in ["local_file", "living_document", "structural_verification"]:
+
+                if provenance in [
+                    "local_file",
+                    "living_document",
+                    "structural_verification",
+                ]:
                     if not os.path.exists(path_or_url):
-                        issues.append(f"[Warning] Evidence {ev_id} local file is missing: {path_or_url}")
+                        issues.append(
+                            f"[Warning] Evidence {ev_id} local file is missing: {path_or_url}"
+                        )
                     elif provenance == "local_file":
                         curr_hash = calculate_file_hash(path_or_url)
                         if curr_hash and curr_hash != stored_hash:
-                            issues.append(f"[Error] Evidence {ev_id} local file hash has changed (expected {stored_hash}, got {curr_hash}). File: {path_or_url}")
+                            issues.append(
+                                f"[Error] Evidence {ev_id} local file hash has changed (expected {stored_hash}, got {curr_hash}). File: {path_or_url}"
+                            )
 
         if args.audit and task_status == "verified":
-             # Check for independent supervisor_verdict.md (Phase 3.2)
-             # Assumption: run directories are under docs/domain_runs/DBB-001a/
-             # We'll try to find a directory matching task_id (or similar)
-             pass
+            # Check for independent supervisor_verdict.md (Phase 3.2)
+            # Assumption: run directories are under docs/domain_runs/DBB-001a/
+            # We'll try to find a directory matching task_id (or similar)
+            pass
 
     usage_by_task = {}
     pricing_table = load_pricing_table(op_dir)
-    
+
     def check_divergence(val_manual, val_auto):
         try:
             m = float(val_manual)
@@ -1720,38 +2074,60 @@ def doctor_cmd(args) -> int:
                 check_executor_block(rec, f"Usage record {usage_id}")
                 if task_id and rec.get("ended_at") is None:
                     usage_by_task.setdefault(task_id, []).append(usage_id)
-                    infos.append(f"[Info] Task {task_id} has open usage session: {usage_id}")
-                
+                    infos.append(
+                        f"[Info] Task {task_id} has open usage session: {usage_id}"
+                    )
+
+                if (
+                    rec.get("lane") == "frontier_driver"
+                    and rec.get("task_class") == "bounded"
+                ):
+                    infos.append(
+                        f"[Info] Session {usage_id} is an offload candidate (tagged frontier_driver + bounded)."
+                    )
+
                 harness_id = rec.get("harness_id")
                 metering = rec.get("metering")
                 if not metering:
                     metering = "activity" if harness_id == "gemini-agy" else "tokens"
-                
+
                 if metering == "tokens" and rec.get("cost_estimate_usd") is None:
                     model = rec.get("model")
                     if model not in pricing_table:
                         issues.append(f"[Warning] price table missing model {model}")
-                
+
                 source_ref = rec.get("source_session_ref")
                 if source_ref and not os.path.exists(source_ref):
-                    issues.append(f"[Warning] Usage record {usage_id} source session log file is missing: {source_ref}")
-                
+                    issues.append(
+                        f"[Warning] Usage record {usage_id} source session log file is missing: {source_ref}"
+                    )
+
                 cost_estimate = rec.get("cost_estimate_usd")
                 field_sources = rec.get("field_sources", {})
                 if metering == "activity" and cost_estimate is not None:
                     if field_sources.get("cost_estimate_usd") == "auto":
-                        issues.append(f"[Error] Usage record {usage_id} is activity-metered but has auto-calculated cost.")
-                
+                        issues.append(
+                            f"[Error] Usage record {usage_id} is activity-metered but has auto-calculated cost."
+                        )
+
                 auto_vals = rec.get("auto_values", {})
-                
-                for field in ["tokens_in", "tokens_out", "tokens_cache_read", "tokens_cache_write", "cost_estimate_usd"]:
+
+                for field in [
+                    "tokens_in",
+                    "tokens_out",
+                    "tokens_cache_read",
+                    "tokens_cache_write",
+                    "cost_estimate_usd",
+                ]:
                     if field_sources.get(field) == "manual" and field in auto_vals:
                         m_val = rec.get(field)
                         a_val = auto_vals[field]
                         if m_val is not None and a_val is not None:
                             if check_divergence(m_val, a_val):
-                                issues.append(f"[Warning] manual/auto divergence on {field}")
-                                
+                                issues.append(
+                                    f"[Warning] manual/auto divergence on {field}"
+                                )
+
                 activity = rec.get("activity", {})
                 for field in ["tool_calls", "turns", "wall_clock_s", "quota_events"]:
                     if field_sources.get(field) == "manual" and field in auto_vals:
@@ -1759,7 +2135,9 @@ def doctor_cmd(args) -> int:
                         a_val = auto_vals[field]
                         if m_val is not None and a_val is not None:
                             if check_divergence(m_val, a_val):
-                                issues.append(f"[Warning] manual/auto divergence on {field}")
+                                issues.append(
+                                    f"[Warning] manual/auto divergence on {field}"
+                                )
     infos.sort()
 
     for tf in task_files:
@@ -1770,11 +2148,17 @@ def doctor_cmd(args) -> int:
         status = task.get("status")
         open_usage_ids = usage_by_task.get(task_id, [])
         if status == "running" and not open_usage_ids:
-            issues.append(f"[Warning] Task {task_id} is running but has no open usage session.")
+            issues.append(
+                f"[Warning] Task {task_id} is running but has no open usage session."
+            )
         if status != "running" and open_usage_ids:
-            issues.append(f"[Error] Task {task_id} is '{status}' but has open usage sessions: {', '.join(open_usage_ids)}")
+            issues.append(
+                f"[Error] Task {task_id} is '{status}' but has open usage sessions: {', '.join(open_usage_ids)}"
+            )
         if len(open_usage_ids) > 1:
-            issues.append(f"[Warning] Task {task_id} has multiple open usage sessions: {', '.join(open_usage_ids)}")
+            issues.append(
+                f"[Warning] Task {task_id} has multiple open usage sessions: {', '.join(open_usage_ids)}"
+            )
 
     print("=" * 80)
     print("OPERATOR DOCTOR - LEDGER CONSISTENCY REPORT")
@@ -1784,7 +2168,7 @@ def doctor_cmd(args) -> int:
         for msg in all_msgs:
             print(msg)
         print("-" * 80)
-        
+
     if issues:
         print(f"Total consistency issues found: {len(issues)}")
         return 1
@@ -1793,32 +2177,33 @@ def doctor_cmd(args) -> int:
         print("=" * 80)
         return 0
 
+
 def verify_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
         print("Error: No .operator directory found.", file=sys.stderr)
         return 1
-        
+
     run_dir = Path(args.run_dir).resolve()
     if not run_dir.is_dir():
         print(f"Error: {run_dir} is not a directory.", file=sys.stderr)
         return 1
-        
+
     verdict_path = run_dir / "candidate_verdict.md"
     if not verdict_path.exists():
         print(f"Error: candidate_verdict.md missing in {run_dir}", file=sys.stderr)
         return 1
-        
+
     print(f"Verifying run directory: {run_dir}")
-    
+
     issues = []
-    
+
     # Load candidate verdict
     try:
-        with open(verdict_path, 'r') as f:
+        with open(verdict_path, "r") as f:
             content = f.read()
             # Simple YAML extraction from markdown
-            match = re.search(r'```yaml\n(.*?)\n```', content, re.DOTALL)
+            match = re.search(r"```yaml\n(.*?)\n```", content, re.DOTALL)
             if match:
                 verdict_data = yaml.safe_load(match.group(1))
             else:
@@ -1827,7 +2212,7 @@ def verify_cmd(args) -> int:
     except Exception as e:
         print(f"Error parsing candidate_verdict.md: {e}", file=sys.stderr)
         return 1
-        
+
     if not verdict_data:
         print("Error: Empty or invalid candidate_verdict.md", file=sys.stderr)
         return 1
@@ -1839,13 +2224,19 @@ def verify_cmd(args) -> int:
     stored_hashes = v_info.get("distinct_tools_hashes", {})
     if stored_hashes:
         for variation, stored_hash in stored_hashes.items():
-            tools_path = run_dir / "saved_implementation" / "variations" / variation / "tools.py"
+            tools_path = (
+                run_dir / "saved_implementation" / "variations" / variation / "tools.py"
+            )
             if tools_path.exists():
                 curr_hash = hashlib.md5(tools_path.read_bytes()).hexdigest()
                 if curr_hash != stored_hash:
-                    issues.append(f"[Error] Hash mismatch for {variation}: stored {stored_hash}, recalculated {curr_hash}")
+                    issues.append(
+                        f"[Error] Hash mismatch for {variation}: stored {stored_hash}, recalculated {curr_hash}"
+                    )
             else:
-                issues.append(f"[Warning] Referenced variation {variation} missing on disk at {tools_path}")
+                issues.append(
+                    f"[Warning] Referenced variation {variation} missing on disk at {tools_path}"
+                )
 
     # 2. Verify verified_by != made_by (Phase 3.1.2)
     handoff_id = v_info.get("handoff_id")
@@ -1856,17 +2247,24 @@ def verify_cmd(args) -> int:
         tasks_dir = os.path.join(op_dir, "tasks")
         for tf in glob.glob(os.path.join(tasks_dir, "*.yaml")):
             task = load_yaml(tf)
-            if not task: continue
+            if not task:
+                continue
             for cid in task.get("claims", []):
                 c_path = os.path.join(op_dir, "claims", f"{cid}.yaml")
                 if os.path.exists(c_path):
                     c_data = load_yaml(c_path)
-                    if c_data and c_data.get("text") and handoff_id in c_data.get("text", ""):
+                    if (
+                        c_data
+                        and c_data.get("text")
+                        and handoff_id in c_data.get("text", "")
+                    ):
                         found_claim = True
                         made = c_data.get("made_by")
                         vby = c_data.get("verified_by")
                         if vby and made and vby == made:
-                            issues.append(f"[Error] Claim for {handoff_id} is self-verified by '{made}'")
+                            issues.append(
+                                f"[Error] Claim for {handoff_id} is self-verified by '{made}'"
+                            )
         if not found_claim:
             # We skip if handoff isn't in ledger yet, but warn
             pass
@@ -1879,18 +2277,26 @@ def verify_cmd(args) -> int:
         # Look for the row matching implementation_path
         impl_path = v_info.get("implementation_path")
         if impl_path:
-             # Look for | Implementation Path | ... | hash | ...
-             # Regex for table row
-             pattern = rf"\|\s*{re.escape(impl_path)}.*\|\s*([a-f0-9]+)\s*\|"
-             match = re.search(pattern, status_content, re.IGNORECASE)
-             if match:
-                 status_hash = match.group(1)
-                 # Check against variation_1/tools.py hash (typical for DBB-001a)
-                 t1_path = run_dir / "saved_implementation" / "variations" / "variation_1" / "tools.py"
-                 if t1_path.exists():
-                     curr_t1_hash = hashlib.md5(t1_path.read_bytes()).hexdigest()[:8]
-                     if curr_t1_hash != status_hash:
-                         issues.append(f"[Error] Evidence Drift: AGENT_HANDOFF_STATUS.md reports {status_hash}, but disk implementation hash is {curr_t1_hash}")
+            # Look for | Implementation Path | ... | hash | ...
+            # Regex for table row
+            pattern = rf"\|\s*{re.escape(impl_path)}.*\|\s*([a-f0-9]+)\s*\|"
+            match = re.search(pattern, status_content, re.IGNORECASE)
+            if match:
+                status_hash = match.group(1)
+                # Check against variation_1/tools.py hash (typical for DBB-001a)
+                t1_path = (
+                    run_dir
+                    / "saved_implementation"
+                    / "variations"
+                    / "variation_1"
+                    / "tools.py"
+                )
+                if t1_path.exists():
+                    curr_t1_hash = hashlib.md5(t1_path.read_bytes()).hexdigest()[:8]
+                    if curr_t1_hash != status_hash:
+                        issues.append(
+                            f"[Error] Evidence Drift: AGENT_HANDOFF_STATUS.md reports {status_hash}, but disk implementation hash is {curr_t1_hash}"
+                        )
 
     if issues:
         print("--- VERIFICATION ISSUES FOUND ---")
@@ -1901,36 +2307,40 @@ def verify_cmd(args) -> int:
         print("All artifact hashes and metadata verified successfully.")
         return 0
 
+
 def task_list_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     tasks_dir = os.path.join(op_dir, "tasks")
     task_files = glob.glob(os.path.join(tasks_dir, "*.yaml"))
-    
+
     if not task_files:
         print("No tasks found in ledger.")
         return 0
-        
+
     tasks_data = []
     for tf in sorted(task_files):
         task = load_yaml(tf)
         if not task:
             continue
-            
+
         task_id = task.get("task_id")
         status = task.get("status")
         assign = task.get("assigned_harness") or "None"
         review = task.get("review_harness") or "None"
         next_act = task.get("next_action") or "None"
-        
+
         claims_list = task.get("claims") or []
         verified_cnt = 0
         quarantined_cnt = 0
         open_cnt = 0
-        
+
         for cid in claims_list:
             c_path = os.path.join(op_dir, "claims", f"{cid}.yaml")
             if os.path.exists(c_path):
@@ -1945,113 +2355,133 @@ def task_list_cmd(args) -> int:
                         open_cnt += 1
             else:
                 open_cnt += 1
-                
+
         claims_summary = f"V:{verified_cnt} Q:{quarantined_cnt} O:{open_cnt}"
-        
-        tasks_data.append({
-            "task_id": task_id,
-            "status": status,
-            "assign": assign,
-            "review": review,
-            "claims": claims_summary,
-            "next_action": next_act
-        })
-        
+
+        tasks_data.append(
+            {
+                "task_id": task_id,
+                "status": status,
+                "assign": assign,
+                "review": review,
+                "claims": claims_summary,
+                "next_action": next_act,
+            }
+        )
+
     print("=" * 100)
-    print(f"{'TASK ID':<25} | {'STATUS':<12} | {'ASSIGNED':<10} | {'REVIEWER':<10} | {'CLAIMS':<10} | {'LATEST NEXT ACTION'}")
+    print(
+        f"{'TASK ID':<25} | {'STATUS':<12} | {'ASSIGNED':<10} | {'REVIEWER':<10} | {'CLAIMS':<10} | {'LATEST NEXT ACTION'}"
+    )
     print("=" * 100)
     for td in tasks_data:
         na = td["next_action"]
         if len(na) > 30:
             na = na[:27] + "..."
-        print(f"{td['task_id']:<25} | {td['status']:<12} | {td['assign']:<10} | {td['review']:<10} | {td['claims']:<10} | {na}")
+        print(
+            f"{td['task_id']:<25} | {td['status']:<12} | {td['assign']:<10} | {td['review']:<10} | {td['claims']:<10} | {na}"
+        )
     print("=" * 100)
     return 0
+
 
 def claim_list_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task_id = args.task_id
     if not task_id:
         config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
         task_id = config.get("current_task")
-        
+
     claims_dir = os.path.join(op_dir, "claims")
     claim_files = glob.glob(os.path.join(claims_dir, "claim-*.yaml"))
-    
+
     if not claim_files:
         print("No claims found in ledger.")
         return 0
-        
+
     claims_data = []
     for cf in sorted(claim_files):
         c_data = load_yaml(cf)
         if not c_data:
             continue
-            
+
         t_id = c_data.get("task_id")
         if task_id and task_id != "all" and t_id != task_id:
             continue
-            
+
         cid = c_data.get("claim_id")
         c_type = c_data.get("type")
         text = c_data.get("text")
         outcome = c_data.get("verification_outcome")
         if not outcome:
             outcome = "verified" if c_data.get("verification_status") else "unverified"
-            
-        claims_data.append({
-            "claim_id": cid,
-            "task_id": t_id,
-            "type": c_type,
-            "status": str(outcome).upper(),
-            "text": text
-        })
-        
+
+        claims_data.append(
+            {
+                "claim_id": cid,
+                "task_id": t_id,
+                "type": c_type,
+                "status": str(outcome).upper(),
+                "text": text,
+            }
+        )
+
     if not claims_data:
         if task_id and task_id != "all":
             print(f"No claims found for task '{task_id}'.")
         else:
             print("No claims found.")
         return 0
-        
+
     print("=" * 100)
     title_str = f"CLAIMS LEDGER (Task: {task_id or 'all'})"
     print(f"{title_str}")
     print("=" * 100)
-    print(f"{'CLAIM ID':<10} | {'TASK ID':<20} | {'TYPE':<15} | {'STATUS':<12} | {'CLAIM TEXT'}")
+    print(
+        f"{'CLAIM ID':<10} | {'TASK ID':<20} | {'TYPE':<15} | {'STATUS':<12} | {'CLAIM TEXT'}"
+    )
     print("=" * 100)
     for cd in claims_data:
         text = cd["text"]
         if len(text) > 40:
             text = text[:37] + "..."
-        print(f"{cd['claim_id']:<10} | {cd['task_id']:<20} | {cd['type']:<15} | {cd['status']:<12} | {text}")
+        print(
+            f"{cd['claim_id']:<10} | {cd['task_id']:<20} | {cd['type']:<15} | {cd['status']:<12} | {text}"
+        )
     print("=" * 100)
     return 0
+
 
 def claim_show_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     claim_id = args.claim_id
     if not claim_id:
         print("Error: Specify a claim ID (e.g. claim-0001).", file=sys.stderr)
         return 1
-        
+
     claim_path = os.path.join(op_dir, "claims", f"{claim_id}.yaml")
     if not os.path.exists(claim_path):
         print(f"Error: Claim '{claim_id}' not found.", file=sys.stderr)
         return 1
-        
+
     claim = load_yaml(claim_path)
     if not claim:
         return 1
-        
+
     print("=" * 80)
     print(f"Claim ID:            {claim.get('claim_id')}")
     print(f"Task ID:             {claim.get('task_id')}")
@@ -2059,20 +2489,24 @@ def claim_show_cmd(args) -> int:
     print(f"Text:                {claim.get('text')}")
     print(f"Made By:             {claim.get('made_by')}")
     print(f"Made At:             {claim.get('made_at')}")
-    
+
     outcome = claim.get("verification_outcome")
     if not outcome:
         outcome = "verified" if claim.get("verification_status") else "unverified"
-    
+
     status_str = str(outcome).upper()
-    print(f"Verification status: {status_str} (Status boolean: {claim.get('verification_status')})")
-    
+    print(
+        f"Verification status: {status_str} (Status boolean: {claim.get('verification_status')})"
+    )
+
     if claim.get("verdict"):
         print(f"Verdict:             {claim.get('verdict')}")
-        
+
     print(f"Required Gate:       {claim.get('required_gate') or 'N/A'}")
     if claim.get("type") == "supervision_credit":
-        print(f"Supervision Layer:   {claim.get('supervision_layer') or 'AMBIGUOUS (no layer)'}")
+        print(
+            f"Supervision Layer:   {claim.get('supervision_layer') or 'AMBIGUOUS (no layer)'}"
+        )
     print("-" * 80)
     print("Evidence References:")
     refs = claim.get("evidence_refs") or []
@@ -2084,73 +2518,125 @@ def claim_show_cmd(args) -> int:
     print("=" * 80)
     return 0
 
+
 def usage_summary_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     usage_dir = os.path.join(op_dir, "usage")
     usage_files = glob.glob(os.path.join(usage_dir, "*.yaml"))
-    
+
     records = []
     for filepath in usage_files:
         data = load_yaml(filepath) or []
         if isinstance(data, list):
             records.extend(data)
-            
+
     if not records:
         print("No usage records found in ledger.")
         return 0
-        
+
+    if getattr(args, "offload_audit", False):
+        frontier_spend = 0.0
+        avoidable_spend = 0.0
+        for r in records:
+            lane = r.get("lane") or "unknown"
+            task_class = r.get("task_class") or "unknown"
+            cost = (
+                float(r.get("cost_estimate_usd") or 0.0)
+                if r.get("cost_estimate_usd") is not None
+                else 0.0
+            )
+            if lane.startswith("frontier_"):
+                frontier_spend += cost
+                if task_class == "bounded":
+                    avoidable_spend += cost
+        pct = (avoidable_spend / frontier_spend * 100.0) if frontier_spend > 0 else 0.0
+        print(
+            f"{pct:.1f}% of frontier spend went to bounded work (avoidable → route to the cheap stack)."
+        )
+        return 0
+
     def print_records_summary(recs, title, show_cost):
         total_cost = 0.0
         run_count = 0
         total_tool_calls = 0
         outcome_counts = {}
-        
+
         task_groups = {}
         harness_groups = {}
         model_groups = {}
-        
+
         for r in recs:
-            cost = float(r.get("cost_estimate_usd") or 0.0) if r.get("cost_estimate_usd") is not None else 0.0
+            cost = (
+                float(r.get("cost_estimate_usd") or 0.0)
+                if r.get("cost_estimate_usd") is not None
+                else 0.0
+            )
             task_id = r.get("task_id") or "unknown"
             harness_id = r.get("harness_id") or "unknown"
             model = r.get("model") or "unknown"
             outcome = r.get("outcome") or "unknown"
-            
+
             activity = r.get("activity", {})
             tool_calls = int(activity.get("tool_calls") or 0)
             turns = int(activity.get("turns") or 0)
             wall_clock = int(activity.get("wall_clock_s") or 0)
-            
+
             total_cost += cost
             run_count += 1
             total_tool_calls += tool_calls
             outcome_counts[outcome] = outcome_counts.get(outcome, 0) + 1
-            
+
             if task_id not in task_groups:
-                task_groups[task_id] = {"cost": 0.0, "runs": 0, "outcomes": {}, "tool_calls": 0}
+                task_groups[task_id] = {
+                    "cost": 0.0,
+                    "runs": 0,
+                    "outcomes": {},
+                    "tool_calls": 0,
+                }
             task_groups[task_id]["cost"] += cost
             task_groups[task_id]["runs"] += 1
-            task_groups[task_id]["outcomes"][outcome] = task_groups[task_id]["outcomes"].get(outcome, 0) + 1
+            task_groups[task_id]["outcomes"][outcome] = (
+                task_groups[task_id]["outcomes"].get(outcome, 0) + 1
+            )
             task_groups[task_id]["tool_calls"] += tool_calls
-            
+
             if harness_id not in harness_groups:
-                harness_groups[harness_id] = {"cost": 0.0, "runs": 0, "outcomes": {}, "tool_calls": 0, "turns": 0, "wall_clock_s": 0}
+                harness_groups[harness_id] = {
+                    "cost": 0.0,
+                    "runs": 0,
+                    "outcomes": {},
+                    "tool_calls": 0,
+                    "turns": 0,
+                    "wall_clock_s": 0,
+                }
             harness_groups[harness_id]["cost"] += cost
             harness_groups[harness_id]["runs"] += 1
-            harness_groups[harness_id]["outcomes"][outcome] = harness_groups[harness_id]["outcomes"].get(outcome, 0) + 1
+            harness_groups[harness_id]["outcomes"][outcome] = (
+                harness_groups[harness_id]["outcomes"].get(outcome, 0) + 1
+            )
             harness_groups[harness_id]["tool_calls"] += tool_calls
             harness_groups[harness_id]["turns"] += turns
             harness_groups[harness_id]["wall_clock_s"] += wall_clock
-            
+
             if model not in model_groups:
-                model_groups[model] = {"cost": 0.0, "runs": 0, "outcomes": {}, "tool_calls": 0}
+                model_groups[model] = {
+                    "cost": 0.0,
+                    "runs": 0,
+                    "outcomes": {},
+                    "tool_calls": 0,
+                }
             model_groups[model]["cost"] += cost
             model_groups[model]["runs"] += 1
-            model_groups[model]["outcomes"][outcome] = model_groups[model]["outcomes"].get(outcome, 0) + 1
+            model_groups[model]["outcomes"][outcome] = (
+                model_groups[model]["outcomes"].get(outcome, 0) + 1
+            )
             model_groups[model]["tool_calls"] += tool_calls
 
         print("=" * 80)
@@ -2165,7 +2651,7 @@ def usage_summary_cmd(args) -> int:
         for out, cnt in sorted(outcome_counts.items()):
             print(f"  - {out}: {cnt}")
         print("=" * 80)
-        
+
         if args.by_task:
             print("\n" + "=" * 80)
             print(f"SUMMARY BY TASK ({title})")
@@ -2176,11 +2662,13 @@ def usage_summary_cmd(args) -> int:
                 if show_cost:
                     print(f"  Est. Cost:  ${data['cost']:.4f} USD")
                 print(f"  Tool Calls: {data['tool_calls']}")
-                outs = ", ".join(f"{k}:{v}" for k, v in sorted(data["outcomes"].items()))
+                outs = ", ".join(
+                    f"{k}:{v}" for k, v in sorted(data["outcomes"].items())
+                )
                 print(f"  Outcomes:   {outs}")
                 print("-" * 40)
             print("=" * 80)
-            
+
         if args.by_harness:
             print("\n" + "=" * 80)
             print(f"SUMMARY BY HARNESS ({title})")
@@ -2191,13 +2679,19 @@ def usage_summary_cmd(args) -> int:
                 if show_cost:
                     print(f"  Est. Cost:  ${data['cost']:.4f} USD")
                 print(f"  Tool Calls: {data['tool_calls']}")
-                print(f"  Turns:      {data['turns']} (harness-internal; not cross-comparable)")
-                print(f"  Wall Clock: {data['wall_clock_s']}s (harness-internal; not cross-comparable)")
-                outs = ", ".join(f"{k}:{v}" for k, v in sorted(data["outcomes"].items()))
+                print(
+                    f"  Turns:      {data['turns']} (harness-internal; not cross-comparable)"
+                )
+                print(
+                    f"  Wall Clock: {data['wall_clock_s']}s (harness-internal; not cross-comparable)"
+                )
+                outs = ", ".join(
+                    f"{k}:{v}" for k, v in sorted(data["outcomes"].items())
+                )
                 print(f"  Outcomes:   {outs}")
                 print("-" * 40)
             print("=" * 80)
-            
+
         if args.by_model:
             print("\n" + "=" * 80)
             print(f"SUMMARY BY MODEL ({title})")
@@ -2208,9 +2702,66 @@ def usage_summary_cmd(args) -> int:
                 if show_cost:
                     print(f"  Est. Cost:  ${data['cost']:.4f} USD")
                 print(f"  Tool Calls: {data['tool_calls']}")
-                outs = ", ".join(f"{k}:{v}" for k, v in sorted(data["outcomes"].items()))
+                outs = ", ".join(
+                    f"{k}:{v}" for k, v in sorted(data["outcomes"].items())
+                )
                 print(f"  Outcomes:   {outs}")
                 print("-" * 40)
+            print("=" * 80)
+
+        if getattr(args, "by_lane", False):
+            print("\n" + "=" * 80)
+            print(f"SUMMARY BY LANE × TASK_CLASS ({title})")
+            print("=" * 80)
+            lane_groups = {}
+            for r in recs:
+                ln = r.get("lane") or "unknown"
+                tc = r.get("task_class") or "unknown"
+                cost = (
+                    float(r.get("cost_estimate_usd") or 0.0)
+                    if r.get("cost_estimate_usd") is not None
+                    else 0.0
+                )
+                t_in = (
+                    int(r.get("tokens_in") or 0)
+                    if r.get("tokens_in") is not None
+                    else 0
+                )
+                t_out = (
+                    int(r.get("tokens_out") or 0)
+                    if r.get("tokens_out") is not None
+                    else 0
+                )
+
+                key = (ln, tc)
+                if key not in lane_groups:
+                    lane_groups[key] = {
+                        "cost": 0.0,
+                        "runs": 0,
+                        "tokens_in": 0,
+                        "tokens_out": 0,
+                    }
+                lane_groups[key]["cost"] += cost
+                lane_groups[key]["runs"] += 1
+                lane_groups[key]["tokens_in"] += t_in
+                lane_groups[key]["tokens_out"] += t_out
+
+            for (ln, tc), data in sorted(lane_groups.items(), key=lambda item: item[0]):
+                print(f"Lane:         {ln}")
+                print(f"Task Class:   {tc}")
+                print(f"  Runs:       {data['runs']}")
+                if show_cost:
+                    print(f"  Est. Cost:  ${data['cost']:.4f} USD")
+                print(f"  Tokens In:  {data['tokens_in']}")
+                print(f"  Tokens Out: {data['tokens_out']}")
+                print("-" * 40)
+
+            avoidable_cost = 0.0
+            for (ln, tc), data in lane_groups.items():
+                if ln.startswith("frontier_") and tc == "bounded":
+                    avoidable_cost += data["cost"]
+            if show_cost:
+                print(f"Avoidable Rollup Cost: ${avoidable_cost:.4f} USD")
             print("=" * 80)
 
     if args.metering:
@@ -2224,45 +2775,58 @@ def usage_summary_cmd(args) -> int:
                 tokens_recs.append(r)
             else:
                 activity_recs.append(r)
-                
+
         if tokens_recs:
-            print_records_summary(tokens_recs, "OPERATOR USAGE & COST SUMMARY (TOKENS-METERED)", True)
+            print_records_summary(
+                tokens_recs, "OPERATOR USAGE & COST SUMMARY (TOKENS-METERED)", True
+            )
             if activity_recs:
                 print()
         if activity_recs:
-            print_records_summary(activity_recs, "OPERATOR USAGE & ACTIVITY SUMMARY (ACTIVITY-METERED)", False)
+            print_records_summary(
+                activity_recs,
+                "OPERATOR USAGE & ACTIVITY SUMMARY (ACTIVITY-METERED)",
+                False,
+            )
     else:
         print_records_summary(records, "OPERATOR USAGE & COST SUMMARY", True)
-        
+
     return 0
+
 
 def handoff_add_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task_id = args.task_id
     if not task_id:
         config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
         task_id = config.get("current_task")
         if not task_id:
-            print("Error: No active task set. Specify task ID or create a task.", file=sys.stderr)
+            print(
+                "Error: No active task set. Specify task ID or create a task.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
     if not os.path.exists(task_path):
         print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
         return 1
-        
+
     task = load_yaml(task_path)
     if not task:
         return 1
-        
+
     handoff_id = get_next_handoff_id(op_dir, task_id)
     by = args.by if args.by else task.get("assigned_harness") or "operator"
     utc_now = get_current_utc_iso()
-    
+
     handoff_data = {}
     if args.file:
         if args.file == "-":
@@ -2280,7 +2844,17 @@ def handoff_add_cmd(args) -> int:
                 return 1
             handoff_data = load_yaml(args.file) or {}
     else:
-        if not (args.changed or args.verified or args.claimed or args.open or args.assumptions or args.next_action) and not sys.stdin.isatty():
+        if (
+            not (
+                args.changed
+                or args.verified
+                or args.claimed
+                or args.open
+                or args.assumptions
+                or args.next_action
+            )
+            and not sys.stdin.isatty()
+        ):
             try:
                 raw = sys.stdin.read()
                 handoff_data = yaml.safe_load(raw) or {}
@@ -2294,9 +2868,9 @@ def handoff_add_cmd(args) -> int:
                 "what_claimed": args.claimed,
                 "what_remains_open": args.open,
                 "unchecked_assumptions": args.assumptions,
-                "next_action": args.next_action
+                "next_action": args.next_action,
             }
-            
+
     if not isinstance(handoff_data, dict):
         print("Error: Handoff payload must be a YAML mapping/object.", file=sys.stderr)
         return 1
@@ -2310,7 +2884,10 @@ def handoff_add_cmd(args) -> int:
         "next_action",
     ]
     if not any(handoff_data.get(field) for field in handoff_fields):
-        print("Error: Handoff is empty. Provide at least one structured handoff field.", file=sys.stderr)
+        print(
+            "Error: Handoff is empty. Provide at least one structured handoff field.",
+            file=sys.stderr,
+        )
         return 1
 
     final_data = {
@@ -2324,89 +2901,102 @@ def handoff_add_cmd(args) -> int:
         "what_remains_open": handoff_data.get("what_remains_open"),
         "unchecked_assumptions": handoff_data.get("unchecked_assumptions"),
         "next_action": handoff_data.get("next_action"),
-        "executor": get_executor_identity()
+        "executor": get_executor_identity(),
     }
-    
+
     ho_file_path = os.path.join(op_dir, "handoffs", task_id, f"{handoff_id}.yaml")
     save_yaml(final_data, ho_file_path)
-    
+
     task["handoffs"] = task.get("handoffs") or []
     ref_str = f"handoffs/{task_id}/{handoff_id}.yaml"
     if ref_str not in task["handoffs"]:
         task["handoffs"].append(ref_str)
-        
+
     task["updated_at"] = utc_now
-    
+
     if final_data["next_action"]:
         task["next_action"] = final_data["next_action"]
-        
+
     save_yaml(task, task_path)
-    
+
     print(f"Successfully recorded handoff '{handoff_id}' for task '{task_id}'.")
     return 0
+
 
 def session_start_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task_id = args.task_id
     if not task_id:
         config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
         task_id = config.get("current_task")
         if not task_id:
-            print("Error: No active task set. Specify task ID or create a task.", file=sys.stderr)
+            print(
+                "Error: No active task set. Specify task ID or create a task.",
+                file=sys.stderr,
+            )
             return 1
-            
+
     task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
     if not os.path.exists(task_path):
         print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
         return 1
-        
+
     harness_id = args.harness_id
     harness_path = os.path.join(op_dir, "harnesses", f"{harness_id}.yaml")
     if not os.path.exists(harness_path):
-        print(f"Error: Harness '{harness_id}' not found in harnesses/ registry.", file=sys.stderr)
+        print(
+            f"Error: Harness '{harness_id}' not found in harnesses/ registry.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     task = load_yaml(task_path)
     harness = load_yaml(harness_path)
     if not task or not harness:
         return 1
-        
+
     if task.get("status") == "running" and not args.force:
-        print(f"Error: Task '{task_id}' is already running. Use --force to override.", file=sys.stderr)
+        print(
+            f"Error: Task '{task_id}' is already running. Use --force to override.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     brief_content = generate_brief_markdown(op_dir, task_id, harness_id)
     if not brief_content:
         print("Error: Brief generation failed.", file=sys.stderr)
         return 1
-        
+
     harness_display_name = harness.get("display_name", harness_id)
     export_filename = f"{task_id}.{harness_id}.export.md"
     export_path = os.path.join(op_dir, "briefs", export_filename)
-    
+
     export_header = (
         f"<!-- SYSTEM INSTRUCTIONS FOR {harness_display_name.upper()} -->\n"
         f"<!-- PASTE THIS ENTIRE BRIEF INTO THE CHAT SESSION TO INITIALIZE STATE -->\n"
         f"<!-- DO NOT INVENT OR ASSUME DETAILS NOT DOCUMENTED IN THIS BRIEF -->\n\n"
     )
-    
+
     full_export_content = export_header + brief_content
-    
+
     try:
-        with open(export_path, 'w') as f:
+        with open(export_path, "w") as f:
             f.write(full_export_content)
     except Exception as e:
         print(f"Error writing export brief: {e}", file=sys.stderr)
         return 1
-        
+
     usage_id = get_next_usage_id(op_dir)
     utc_now = get_current_utc_iso()
     date_str = utc_now.split("T")[0]
-    
+
     usage_record = {
         "usage_id": usage_id,
         "task_id": task_id,
@@ -2417,40 +3007,56 @@ def session_start_cmd(args) -> int:
         "cost_estimate_usd": 0.0,
         "outcome": "unknown",
         "raw_payload": "Session started via operator session-start.",
-        "executor": get_executor_identity()
+        "executor": get_executor_identity(),
+        "lane": getattr(args, "lane", None) or "unknown",
+        "task_class": getattr(args, "task_class", None) or "unknown",
     }
-    
+
+    if getattr(args, "lane", None) is not None:
+        usage_record.setdefault("field_sources", {})["lane"] = "manual"
+    if getattr(args, "task_class", None) is not None:
+        usage_record.setdefault("field_sources", {})["task_class"] = "manual"
+
     usage_file_path = os.path.join(op_dir, "usage", f"{date_str}.yaml")
     records = []
     if os.path.exists(usage_file_path):
         records = load_yaml(usage_file_path) or []
     records.append(usage_record)
     save_yaml(records, usage_file_path)
-    
+
     task["status"] = "running"
     task["updated_at"] = utc_now
     save_yaml(task, task_path)
-    
+
     print("=" * 80)
     print(f"SESSION INITIALIZED: {task_id} @ {harness_display_name.upper()}")
     print("=" * 80)
     print(f"1. Export brief written to: {export_path}")
-    print(f"2. Usage placeholder recorded: {usage_id} (${usage_record['cost_estimate_usd']:.2f} USD)")
+    print(
+        f"2. Usage placeholder recorded: {usage_id} (${usage_record['cost_estimate_usd']:.2f} USD)"
+    )
     print("-" * 80)
-    
+
     launch_cmd = harness.get("command")
     if launch_cmd:
         print(f"Launch command: {launch_cmd}")
     else:
-        print(f"Launch instructions: Open your target environment for {harness_display_name}.")
-        
+        print(
+            f"Launch instructions: Open your target environment for {harness_display_name}."
+        )
+
     print("Paste instructions:")
-    print(f"  Copy the entire content of {export_filename} and paste it into the start of your session.")
+    print(
+        f"  Copy the entire content of {export_filename} and paste it into the start of your session."
+    )
     print("=" * 80)
-    
+
     return 0
 
-def find_usage_record(op_dir: str, usage_id: str) -> tuple[str, list, int] | tuple[None, None, None]:
+
+def find_usage_record(
+    op_dir: str, usage_id: str
+) -> tuple[str, list, int] | tuple[None, None, None]:
     """Search all date YAML files in usage/ to find a usage_id."""
     usage_dir = os.path.join(op_dir, "usage")
     if not os.path.isdir(usage_dir):
@@ -2462,6 +3068,7 @@ def find_usage_record(op_dir: str, usage_id: str) -> tuple[str, list, int] | tup
             if rec.get("usage_id") == usage_id:
                 return filepath, records, idx
     return None, None, None
+
 
 def get_open_usage_ids_for_task(op_dir: str, task_id: str) -> list[str]:
     """Return usage IDs for records on task_id that do not have ended_at set."""
@@ -2479,12 +3086,16 @@ def get_open_usage_ids_for_task(op_dir: str, task_id: str) -> list[str]:
                     open_ids.append(uid)
     return open_ids
 
+
 def session_end_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     usage_id = args.usage_id
     if not usage_id:
         print("Error: Specify a usage ID (e.g. usage-0001).", file=sys.stderr)
@@ -2493,18 +3104,21 @@ def session_end_cmd(args) -> int:
     if not filepath:
         print(f"Error: Usage record '{usage_id}' not found.", file=sys.stderr)
         return 1
-        
+
     usage_record = records[idx]
-    
+
     if usage_record.get("ended_at") is not None and not args.force:
-        print(f"Error: Usage record '{usage_id}' is already closed (ended_at: {usage_record.get('ended_at')}). Use --force to override.", file=sys.stderr)
+        print(
+            f"Error: Usage record '{usage_id}' is already closed (ended_at: {usage_record.get('ended_at')}). Use --force to override.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     utc_now = get_current_utc_iso()
     usage_record["ended_at"] = utc_now
     usage_record["outcome"] = args.outcome
     usage_record["cost_estimate_usd"] = args.cost
-    
+
     raw_payload = ""
     if not sys.stdin.isatty():
         raw_payload = sys.stdin.read().strip()
@@ -2515,13 +3129,13 @@ def session_end_cmd(args) -> int:
         except KeyboardInterrupt:
             print("\nAborted.")
             return 1
-            
+
     if raw_payload:
         usage_record["raw_payload"] = raw_payload
-        
+
     usage_record["executor"] = get_executor_identity()
     save_yaml(records, filepath)
-    
+
     task_id = usage_record.get("task_id")
     if task_id:
         task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
@@ -2537,35 +3151,39 @@ def session_end_cmd(args) -> int:
                     # Default back to assigned if no explicit status is provided.
                     task["status"] = "assigned"
                 save_yaml(task, task_path)
-                
+
     print(f"Successfully closed usage session '{usage_id}'.")
     return 0
+
 
 def session_list_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
-        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
         return 1
-        
+
     usage_dir = os.path.join(op_dir, "usage")
     if not os.path.isdir(usage_dir):
         print("No sessions found in ledger.")
         return 0
-        
+
     usage_files = glob.glob(os.path.join(usage_dir, "*.yaml"))
-    
+
     records = []
     for filepath in usage_files:
         data = load_yaml(filepath) or []
         if isinstance(data, list):
             records.extend(data)
-            
+
     if not records:
         print("No sessions found in ledger.")
         return 0
-        
+
     records.sort(key=lambda r: r.get("usage_id", ""))
-    
+
     filtered_records = []
     for r in records:
         if args.open and r.get("ended_at") is not None:
@@ -2575,13 +3193,15 @@ def session_list_cmd(args) -> int:
         if args.harness_id and r.get("harness_id") != args.harness_id:
             continue
         filtered_records.append(r)
-        
+
     if not filtered_records:
         print("No sessions matched the filters.")
         return 0
-        
+
     print("=" * 110)
-    print(f"{'USAGE ID':<12} | {'TASK ID':<25} | {'HARNESS':<10} | {'STATUS':<8} | {'STARTED':<25} | {'ENDED'}")
+    print(
+        f"{'USAGE ID':<12} | {'TASK ID':<25} | {'HARNESS':<10} | {'STATUS':<8} | {'STARTED':<25} | {'ENDED'}"
+    )
     print("=" * 110)
     for r in filtered_records:
         usage_id = r.get("usage_id", "unknown")
@@ -2590,175 +3210,554 @@ def session_list_cmd(args) -> int:
         status = "open" if r.get("ended_at") is None else "closed"
         started = r.get("started_at") or "-"
         ended = r.get("ended_at") or "-"
-        print(f"{usage_id:<12} | {task_id:<25} | {harness:<10} | {status:<8} | {started:<25} | {ended}")
+        print(
+            f"{usage_id:<12} | {task_id:<25} | {harness:<10} | {status:<8} | {started:<25} | {ended}"
+        )
     print("=" * 110)
     return 0
 
+
 # --- CLI Setup ---
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Operator Control Plane CLI - Coordination and Ledger Tool for AI Coding Harnesses."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
-    
+
     # operator init
-    subparsers.add_parser("init", help="Initialize .operator ledger directories in the current folder.")
-    
+    subparsers.add_parser(
+        "init", help="Initialize .operator ledger directories in the current folder."
+    )
+
     # operator task create
-    create_parser = subparsers.add_parser("task-create", help="Create a new task in the ledger.")
-    create_parser.add_argument("--objective", "-o", required=True, help="Task objective statement.")
-    create_parser.add_argument("--id", dest="task_id", default=None, help="Explicit task ID slug (auto-slugified if omitted).")
-    create_parser.add_argument("--repo", "-r", default=".", help="Path to repository under task (defaults to current folder).")
-    create_parser.add_argument("--assign", "-a", default=None, help="Harness ID to assign.")
-    create_parser.add_argument("--review", dest="review", default=None, help="Harness ID to assign as reviewer.")
-    create_parser.add_argument("--assumption", "-m", action="append", dest="assumptions", default=[], help="Open assumptions to document.")
-    
+    create_parser = subparsers.add_parser(
+        "task-create", help="Create a new task in the ledger."
+    )
+    create_parser.add_argument(
+        "--objective", "-o", required=True, help="Task objective statement."
+    )
+    create_parser.add_argument(
+        "--id",
+        dest="task_id",
+        default=None,
+        help="Explicit task ID slug (auto-slugified if omitted).",
+    )
+    create_parser.add_argument(
+        "--repo",
+        "-r",
+        default=".",
+        help="Path to repository under task (defaults to current folder).",
+    )
+    create_parser.add_argument(
+        "--assign", "-a", default=None, help="Harness ID to assign."
+    )
+    create_parser.add_argument(
+        "--review",
+        dest="review",
+        default=None,
+        help="Harness ID to assign as reviewer.",
+    )
+    create_parser.add_argument(
+        "--assumption",
+        "-m",
+        action="append",
+        dest="assumptions",
+        default=[],
+        help="Open assumptions to document.",
+    )
+
     # operator task show
-    show_parser = subparsers.add_parser("task-show", help="Show details of the current or specified task.")
-    show_parser.add_argument("task_id", nargs="?", default=None, help="Task ID (defaults to current active task).")
-    show_parser.add_argument("--id", dest="task_id_flag", default=None, help="Task ID (alias for positional task_id).")
-    
+    show_parser = subparsers.add_parser(
+        "task-show", help="Show details of the current or specified task."
+    )
+    show_parser.add_argument(
+        "task_id",
+        nargs="?",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+    show_parser.add_argument(
+        "--id",
+        dest="task_id_flag",
+        default=None,
+        help="Task ID (alias for positional task_id).",
+    )
+
     # operator claim add
-    claim_parser = subparsers.add_parser("claim-add", help="Register a claim for the current or specified task.")
-    claim_parser.add_argument("--type", "-t", required=True, 
-                               choices=["file_exists", "test_passes", "numeric_measurement", "real_data", 
-                                        "model_output", "firmware_behavior", "deployment_state", "supervision_credit", "paper_or_report_claim"],
-                               help="Type of claim.")
-    claim_parser.add_argument("--text", "-x", required=True, help="Claim description text.")
-    claim_parser.add_argument("--task", dest="task_id", default=None, help="Task ID (defaults to current active task).")
-    claim_parser.add_argument("--by", default=None, help="Actor who made the claim (defaults to assigned harness).")
-    claim_parser.add_argument("--gate", "-g", default=None, help="Required verification gate description.")
-    claim_parser.add_argument("--layer", "-l", default=None,
-                              choices=["design", "execution", "evidence", "release", "end_to_end"],
-                              help="Supervision layer (required for supervision_credit claims per FR-12).")
+    claim_parser = subparsers.add_parser(
+        "claim-add", help="Register a claim for the current or specified task."
+    )
+    claim_parser.add_argument(
+        "--type",
+        "-t",
+        required=True,
+        choices=[
+            "file_exists",
+            "test_passes",
+            "numeric_measurement",
+            "real_data",
+            "model_output",
+            "firmware_behavior",
+            "deployment_state",
+            "supervision_credit",
+            "paper_or_report_claim",
+        ],
+        help="Type of claim.",
+    )
+    claim_parser.add_argument(
+        "--text", "-x", required=True, help="Claim description text."
+    )
+    claim_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+    claim_parser.add_argument(
+        "--by",
+        default=None,
+        help="Actor who made the claim (defaults to assigned harness).",
+    )
+    claim_parser.add_argument(
+        "--gate", "-g", default=None, help="Required verification gate description."
+    )
+    claim_parser.add_argument(
+        "--layer",
+        "-l",
+        default=None,
+        choices=["design", "execution", "evidence", "release", "end_to_end"],
+        help="Supervision layer (required for supervision_credit claims per FR-12).",
+    )
 
     # operator claim show
-    claim_show_parser = subparsers.add_parser("claim-show", help="Show details of a registered claim.")
-    claim_show_parser.add_argument("claim_id", nargs="?", default=None, help="Claim ID (e.g. claim-0001).")
-    claim_show_parser.add_argument("--id", dest="claim_id_flag", default=None, help="Claim ID (alias for positional claim_id).")
+    claim_show_parser = subparsers.add_parser(
+        "claim-show", help="Show details of a registered claim."
+    )
+    claim_show_parser.add_argument(
+        "claim_id", nargs="?", default=None, help="Claim ID (e.g. claim-0001)."
+    )
+    claim_show_parser.add_argument(
+        "--id",
+        dest="claim_id_flag",
+        default=None,
+        help="Claim ID (alias for positional claim_id).",
+    )
 
     # operator evidence attach
-    evidence_parser = subparsers.add_parser("evidence-attach", help="Attach an evidence artifact to a task and optionally verify a claim.")
-    evidence_parser.add_argument("path_or_url", help="Path to local file or URL of the evidence artifact.")
-    evidence_parser.add_argument("--claim", "-c", default=None, help="Associated Claim ID.")
-    evidence_parser.add_argument("--type", "-t", default="run_log",
-                                 choices=["run_log", "manifest", "database_query", "test_output", 
-                                          "git_commit", "screenshot", "transcript", "paper_section", "external_doc"],
-                                 help="Type of evidence.")
-    evidence_parser.add_argument("--task", dest="task_id", default=None, help="Task ID (defaults to current active task).")
-    evidence_parser.add_argument("--by", default=None, help="Actor who produced the evidence.")
-    evidence_parser.add_argument("--hash", default=None, help="Explicit SHA-256 hash of the evidence (auto-computed for local files if omitted).")
-    evidence_parser.add_argument("--notes", "-n", default=None, help="Optional description or details about the evidence.")
-    evidence_parser.add_argument("--verify-cmd", dest="verify_cmd", default=None, help="Command used to produce/verify this evidence.")
-    evidence_parser.add_argument("--status", choices=["verified", "false", "quarantined"], default=None,
-                                 help="Update associated claim status.")
-    evidence_parser.add_argument("--verdict", "-v", default=None, help="Verification verdict text for the claim.")
-    evidence_parser.add_argument("--verified-by", default=None, help="Actor who verified the claim.")
-    
+    evidence_parser = subparsers.add_parser(
+        "evidence-attach",
+        help="Attach an evidence artifact to a task and optionally verify a claim.",
+    )
+    evidence_parser.add_argument(
+        "path_or_url", help="Path to local file or URL of the evidence artifact."
+    )
+    evidence_parser.add_argument(
+        "--claim", "-c", default=None, help="Associated Claim ID."
+    )
+    evidence_parser.add_argument(
+        "--type",
+        "-t",
+        default="run_log",
+        choices=[
+            "run_log",
+            "manifest",
+            "database_query",
+            "test_output",
+            "git_commit",
+            "screenshot",
+            "transcript",
+            "paper_section",
+            "external_doc",
+        ],
+        help="Type of evidence.",
+    )
+    evidence_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+    evidence_parser.add_argument(
+        "--by", default=None, help="Actor who produced the evidence."
+    )
+    evidence_parser.add_argument(
+        "--hash",
+        default=None,
+        help="Explicit SHA-256 hash of the evidence (auto-computed for local files if omitted).",
+    )
+    evidence_parser.add_argument(
+        "--notes",
+        "-n",
+        default=None,
+        help="Optional description or details about the evidence.",
+    )
+    evidence_parser.add_argument(
+        "--verify-cmd",
+        dest="verify_cmd",
+        default=None,
+        help="Command used to produce/verify this evidence.",
+    )
+    evidence_parser.add_argument(
+        "--status",
+        choices=["verified", "false", "quarantined"],
+        default=None,
+        help="Update associated claim status.",
+    )
+    evidence_parser.add_argument(
+        "--verdict", "-v", default=None, help="Verification verdict text for the claim."
+    )
+    evidence_parser.add_argument(
+        "--verified-by", default=None, help="Actor who verified the claim."
+    )
+
     # operator usage add
-    usage_parser = subparsers.add_parser("usage-add", help="Capture a pasted usage snippet / quota log.")
-    usage_parser.add_argument("--harness", "-a", required=True, help="Harness ID associated with this usage.")
-    usage_parser.add_argument("--task", dest="task_id", default=None, help="Task ID (defaults to current active task).")
+    usage_parser = subparsers.add_parser(
+        "usage-add", help="Capture a pasted usage snippet / quota log."
+    )
+    usage_parser.add_argument(
+        "--harness", "-a", required=True, help="Harness ID associated with this usage."
+    )
+    usage_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
     usage_parser.add_argument("--model", "-m", default=None, help="Model ID used.")
-    usage_parser.add_argument("--outcome", "-o", default="unknown",
-                              choices=["useful", "partial", "no_go", "quarantined", "reverted", "unknown"],
-                              help="Outcome classification.")
-    usage_parser.add_argument("--cost", "-c", type=float, default=0.0, help="Estimated cost in USD.")
-    usage_parser.add_argument("--file", "-f", default=None, help="Read raw payload verbatim from a file (use '-' or omit for stdin). Avoids shell quoting/expansion corruption.")
-    
+    usage_parser.add_argument(
+        "--outcome",
+        "-o",
+        default="unknown",
+        choices=["useful", "partial", "no_go", "quarantined", "reverted", "unknown"],
+        help="Outcome classification.",
+    )
+    usage_parser.add_argument(
+        "--cost", "-c", type=float, default=0.0, help="Estimated cost in USD."
+    )
+    usage_parser.add_argument(
+        "--file",
+        "-f",
+        default=None,
+        help="Read raw payload verbatim from a file (use '-' or omit for stdin). Avoids shell quoting/expansion corruption.",
+    )
+    usage_parser.add_argument(
+        "--lane",
+        choices=["local", "frontier_driver", "frontier_author"],
+        default=None,
+        help="Lane classification.",
+    )
+    usage_parser.add_argument(
+        "--class",
+        dest="task_class",
+        choices=["bounded", "hard"],
+        default=None,
+        help="Task class classification.",
+    )
+
     # operator usage summary
-    usage_summary_parser = subparsers.add_parser("usage-summary", help="Show summary of usage across tasks/harnesses.")
-    usage_summary_parser.add_argument("--by-task", action="store_true", help="Group summary by task.")
-    usage_summary_parser.add_argument("--by-harness", action="store_true", help="Group summary by harness.")
-    usage_summary_parser.add_argument("--by-model", action="store_true", help="Group summary by model.")
-    usage_summary_parser.add_argument("--metering", action="store_true", help="Split summary into token/cost and activity-only blocks.")
+    usage_summary_parser = subparsers.add_parser(
+        "usage-summary", help="Show summary of usage across tasks/harnesses."
+    )
+    usage_summary_parser.add_argument(
+        "--by-task", action="store_true", help="Group summary by task."
+    )
+    usage_summary_parser.add_argument(
+        "--by-harness", action="store_true", help="Group summary by harness."
+    )
+    usage_summary_parser.add_argument(
+        "--by-model", action="store_true", help="Group summary by model."
+    )
+    usage_summary_parser.add_argument(
+        "--metering",
+        action="store_true",
+        help="Split summary into token/cost and activity-only blocks.",
+    )
+    usage_summary_parser.add_argument(
+        "--by-lane", action="store_true", help="Group summary by lane × task_class."
+    )
+    usage_summary_parser.add_argument(
+        "--offload-audit",
+        action="store_true",
+        help="Produce one-line offload audit report.",
+    )
 
     # operator usage-import
-    usage_import_parser = subparsers.add_parser("usage-import", help="Import usage automatically from session logs.")
-    usage_import_parser.add_argument("--harness", required=True, choices=["claude", "codex", "gemini-agy"], help="Target harness logs to parse.")
-    usage_import_parser.add_argument("--task", dest="task_id", default=None, help="Task ID (defaults to active task).")
-    usage_import_parser.add_argument("--session-id", default=None, help="Force selection of a specific source session ID.")
-    usage_import_parser.add_argument("--since", default=None, help="Import sessions started on or after this ISO8601 timestamp.")
-    usage_import_parser.add_argument("--until", default=None, help="Import sessions started on or before this ISO8601 timestamp.")
-    usage_import_parser.add_argument("--dry-run", action="store_true", help="Print the record(s) that would be imported without writing them.")
+    usage_import_parser = subparsers.add_parser(
+        "usage-import", help="Import usage automatically from session logs."
+    )
+    usage_import_parser.add_argument(
+        "--harness",
+        required=True,
+        choices=["claude", "codex", "gemini-agy"],
+        help="Target harness logs to parse.",
+    )
+    usage_import_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to active task).",
+    )
+    usage_import_parser.add_argument(
+        "--session-id",
+        default=None,
+        help="Force selection of a specific source session ID.",
+    )
+    usage_import_parser.add_argument(
+        "--since",
+        default=None,
+        help="Import sessions started on or after this ISO8601 timestamp.",
+    )
+    usage_import_parser.add_argument(
+        "--until",
+        default=None,
+        help="Import sessions started on or before this ISO8601 timestamp.",
+    )
+    usage_import_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print the record(s) that would be imported without writing them.",
+    )
 
     # operator usage-annotate
-    usage_annotate_parser = subparsers.add_parser("usage-annotate", help="Manually override fields in a usage record.")
-    usage_annotate_parser.add_argument("usage_id", help="Usage ID to annotate (e.g. usage-0001).")
-    usage_annotate_parser.add_argument("--active-start", default=None, help="Start timestamp of active coding time.")
-    usage_annotate_parser.add_argument("--active-end", default=None, help="End timestamp of active coding time.")
-    usage_annotate_parser.add_argument("--cost", type=float, default=None, help="Set manual cost in USD.")
-    usage_annotate_parser.add_argument("--quota-events", type=int, default=None, help="Set manual quota events count.")
-    usage_annotate_parser.add_argument("--note", default=None, help="Add manual notes or paste a snippet to raw_payload.")
+    usage_annotate_parser = subparsers.add_parser(
+        "usage-annotate", help="Manually override fields in a usage record."
+    )
+    usage_annotate_parser.add_argument(
+        "usage_id", help="Usage ID to annotate (e.g. usage-0001)."
+    )
+    usage_annotate_parser.add_argument(
+        "--active-start", default=None, help="Start timestamp of active coding time."
+    )
+    usage_annotate_parser.add_argument(
+        "--active-end", default=None, help="End timestamp of active coding time."
+    )
+    usage_annotate_parser.add_argument(
+        "--cost", type=float, default=None, help="Set manual cost in USD."
+    )
+    usage_annotate_parser.add_argument(
+        "--quota-events", type=int, default=None, help="Set manual quota events count."
+    )
+    usage_annotate_parser.add_argument(
+        "--note",
+        default=None,
+        help="Add manual notes or paste a snippet to raw_payload.",
+    )
+    usage_annotate_parser.add_argument(
+        "--lane",
+        choices=["local", "frontier_driver", "frontier_author", "unknown"],
+        default=None,
+        help="Set manual lane.",
+    )
+    usage_annotate_parser.add_argument(
+        "--class",
+        dest="task_class",
+        choices=["bounded", "hard", "unknown"],
+        default=None,
+        help="Set manual task class.",
+    )
 
     # operator brief
-    brief_parser = subparsers.add_parser("brief", help="Generate a harness-specific brief.")
-    brief_parser.add_argument("--for", dest="harness_id", required=True, help="Target Harness ID.")
-    brief_parser.add_argument("--task", dest="task_id", default=None, help="Task ID (defaults to current active task).")
-    
+    brief_parser = subparsers.add_parser(
+        "brief", help="Generate a harness-specific brief."
+    )
+    brief_parser.add_argument(
+        "--for", dest="harness_id", required=True, help="Target Harness ID."
+    )
+    brief_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+
     # operator export-brief
-    export_brief_parser = subparsers.add_parser("export-brief", help="Export a harness-specific brief formatted for copy-paste.")
-    export_brief_parser.add_argument("--for", dest="harness_id", required=True, help="Target Harness ID.")
-    export_brief_parser.add_argument("--task", dest="task_id", default=None, help="Task ID (defaults to current active task).")
+    export_brief_parser = subparsers.add_parser(
+        "export-brief", help="Export a harness-specific brief formatted for copy-paste."
+    )
+    export_brief_parser.add_argument(
+        "--for", dest="harness_id", required=True, help="Target Harness ID."
+    )
+    export_brief_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
 
     # operator doctor
-    doctor_parser = subparsers.add_parser("doctor", help="Run a read-only consistency check across the operator ledger.")
-    doctor_parser.add_argument("--audit", action="store_true", help="Perform additional independent-supervision checks (Phase 3.2).")
+    doctor_parser = subparsers.add_parser(
+        "doctor", help="Run a read-only consistency check across the operator ledger."
+    )
+    doctor_parser.add_argument(
+        "--audit",
+        action="store_true",
+        help="Perform additional independent-supervision checks (Phase 3.2).",
+    )
 
     # operator task-list
-    subparsers.add_parser("task-list", help="List all tasks in the ledger with outcome summaries.")
+    subparsers.add_parser(
+        "task-list", help="List all tasks in the ledger with outcome summaries."
+    )
 
     # operator claim-list
-    claim_list_parser = subparsers.add_parser("claim-list", help="List registered claims in the ledger.")
-    claim_list_parser.add_argument("--task", dest="task_id", default=None, help="Filter claims by Task ID (use 'all' for all).")
+    claim_list_parser = subparsers.add_parser(
+        "claim-list", help="List registered claims in the ledger."
+    )
+    claim_list_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Filter claims by Task ID (use 'all' for all).",
+    )
 
     # operator handoff-add
-    handoff_parser = subparsers.add_parser("handoff-add", help="Record a handoff closeout for the task.")
-    handoff_parser.add_argument("--task", dest="task_id", default=None, help="Task ID (defaults to current active task).")
-    handoff_parser.add_argument("--by", default=None, help="Actor who produced the handoff.")
-    handoff_parser.add_argument("--changed", "-c", default=None, help="Description of what changed.")
-    handoff_parser.add_argument("--verified", "-v", default=None, help="Description of what was verified.")
-    handoff_parser.add_argument("--claimed", "-k", default=None, help="Description of what was claimed but unverified.")
-    handoff_parser.add_argument("--open", "-o", default=None, help="Description of what remains open.")
-    handoff_parser.add_argument("--assumptions", "-u", default=None, help="Description of unchecked assumptions.")
-    handoff_parser.add_argument("--next-action", "-n", default=None, help="First recommended next action.")
-    handoff_parser.add_argument("--file", "-f", default=None, help="YAML file path containing handoff fields (use '-' for stdin).")
+    handoff_parser = subparsers.add_parser(
+        "handoff-add", help="Record a handoff closeout for the task."
+    )
+    handoff_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+    handoff_parser.add_argument(
+        "--by", default=None, help="Actor who produced the handoff."
+    )
+    handoff_parser.add_argument(
+        "--changed", "-c", default=None, help="Description of what changed."
+    )
+    handoff_parser.add_argument(
+        "--verified", "-v", default=None, help="Description of what was verified."
+    )
+    handoff_parser.add_argument(
+        "--claimed",
+        "-k",
+        default=None,
+        help="Description of what was claimed but unverified.",
+    )
+    handoff_parser.add_argument(
+        "--open", "-o", default=None, help="Description of what remains open."
+    )
+    handoff_parser.add_argument(
+        "--assumptions",
+        "-u",
+        default=None,
+        help="Description of unchecked assumptions.",
+    )
+    handoff_parser.add_argument(
+        "--next-action", "-n", default=None, help="First recommended next action."
+    )
+    handoff_parser.add_argument(
+        "--file",
+        "-f",
+        default=None,
+        help="YAML file path containing handoff fields (use '-' for stdin).",
+    )
 
     # operator session-start
-    session_start_parser = subparsers.add_parser("session-start", help="Start a coding session for a task using a target harness.")
-    session_start_parser.add_argument("--task", dest="task_id", default=None, help="Task ID (defaults to current active task).")
-    session_start_parser.add_argument("--harness", dest="harness_id", required=True, help="Harness ID to start.")
-    session_start_parser.add_argument("--force", action="store_true", help="Force session start even if task is running.")
+    session_start_parser = subparsers.add_parser(
+        "session-start",
+        help="Start a coding session for a task using a target harness.",
+    )
+    session_start_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+    session_start_parser.add_argument(
+        "--harness", dest="harness_id", required=True, help="Harness ID to start."
+    )
+    session_start_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force session start even if task is running.",
+    )
+    session_start_parser.add_argument(
+        "--lane",
+        choices=["local", "frontier_driver", "frontier_author"],
+        default=None,
+        help="Lane classification.",
+    )
+    session_start_parser.add_argument(
+        "--class",
+        dest="task_class",
+        choices=["bounded", "hard"],
+        default=None,
+        help="Task class classification.",
+    )
 
     # operator session-end
     session_end_parser = subparsers.add_parser("session-end", help="End session")
-    session_end_parser.add_argument("usage_id", nargs="?", default=None, help="Usage ID to close.")
-    session_end_parser.add_argument("--usage", dest="usage_id_flag", default=None, help="Usage ID to close.")
-    session_end_parser.add_argument("--outcome", choices=["useful", "partial", "no_go", "quarantined", "reverted", "unknown"], required=True, help="Outcome status.")
-    session_end_parser.add_argument("--cost", type=float, required=True, help="Total cost incurred.")
-    session_end_parser.add_argument("--status", choices=["assigned", "verified", "quarantined", "complete"], default=None, help="Optionally update task status.")
-    session_end_parser.add_argument("--force", action="store_true", help="Force closing an already closed session.")
-    session_end_parser.add_argument("--paste", action="store_true", help="Interactively paste final status notes from stdin.")
+    session_end_parser.add_argument(
+        "usage_id", nargs="?", default=None, help="Usage ID to close."
+    )
+    session_end_parser.add_argument(
+        "--usage", dest="usage_id_flag", default=None, help="Usage ID to close."
+    )
+    session_end_parser.add_argument(
+        "--outcome",
+        choices=["useful", "partial", "no_go", "quarantined", "reverted", "unknown"],
+        required=True,
+        help="Outcome status.",
+    )
+    session_end_parser.add_argument(
+        "--cost", type=float, required=True, help="Total cost incurred."
+    )
+    session_end_parser.add_argument(
+        "--status",
+        choices=["assigned", "verified", "quarantined", "complete"],
+        default=None,
+        help="Optionally update task status.",
+    )
+    session_end_parser.add_argument(
+        "--force", action="store_true", help="Force closing an already closed session."
+    )
+    session_end_parser.add_argument(
+        "--paste",
+        action="store_true",
+        help="Interactively paste final status notes from stdin.",
+    )
 
     # operator session-list
-    session_list_parser = subparsers.add_parser("session-list", help="List coding sessions.")
-    session_list_parser.add_argument("--open", action="store_true", help="Filter for open sessions only.")
-    session_list_parser.add_argument("--task", dest="task_id", default=None, help="Filter by task ID.")
-    session_list_parser.add_argument("--harness", dest="harness_id", default=None, help="Filter by harness ID.")
+    session_list_parser = subparsers.add_parser(
+        "session-list", help="List coding sessions."
+    )
+    session_list_parser.add_argument(
+        "--open", action="store_true", help="Filter for open sessions only."
+    )
+    session_list_parser.add_argument(
+        "--task", dest="task_id", default=None, help="Filter by task ID."
+    )
+    session_list_parser.add_argument(
+        "--harness", dest="harness_id", default=None, help="Filter by harness ID."
+    )
 
     # operator verify (Phase 3.1)
-    verify_parser = subparsers.add_parser("verify", help="Automated audit of a run directory artifacts (Phase 3).")
-    verify_parser.add_argument("run_dir", help="Path to the agent run directory (e.g. docs/domain_runs/DBB-001a/gemini_cli_ladder).")
+    verify_parser = subparsers.add_parser(
+        "verify", help="Automated audit of a run directory artifacts (Phase 3)."
+    )
+    verify_parser.add_argument(
+        "run_dir",
+        help="Path to the agent run directory (e.g. docs/domain_runs/DBB-001a/gemini_cli_ladder).",
+    )
 
     args = parser.parse_args()
-    if getattr(args, "command", None) == "task-show" and getattr(args, "task_id_flag", None):
+    if getattr(args, "command", None) == "task-show" and getattr(
+        args, "task_id_flag", None
+    ):
         args.task_id = args.task_id_flag
-    if getattr(args, "command", None) == "claim-show" and getattr(args, "claim_id_flag", None):
+    if getattr(args, "command", None) == "claim-show" and getattr(
+        args, "claim_id_flag", None
+    ):
         args.claim_id = args.claim_id_flag
-    if getattr(args, "command", None) == "session-end" and getattr(args, "usage_id_flag", None):
+    if getattr(args, "command", None) == "session-end" and getattr(
+        args, "usage_id_flag", None
+    ):
         args.usage_id = args.usage_id_flag
-    
+
     # Mapping subcommand names to python functions.
     # Note: Using python command-group naming conventions to avoid bash collision.
     cmd_map = {
@@ -2781,10 +3780,11 @@ def main() -> None:
         "brief": brief_cmd,
         "export-brief": export_brief_cmd,
         "doctor": doctor_cmd,
-        "verify": verify_cmd
+        "verify": verify_cmd,
     }
-    
+
     sys.exit(cmd_map[args.command](args))
+
 
 if __name__ == "__main__":
     main()
