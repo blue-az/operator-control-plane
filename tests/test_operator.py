@@ -1595,6 +1595,128 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 0)
         self.assertIn("is an offload candidate", res.stdout)
 
+    def test_doctor_new_warnings(self) -> None:
+        import yaml
+
+        self.run_operator("init")
+
+        # Create task with a nonexistent repo
+        res = self.run_operator(
+            "task-create",
+            "--objective",
+            "Test new doctor warnings",
+            "--id",
+            "warnings-task",
+            "--repo",
+            "/nonexistent/repo/dir",
+        )
+        self.assertEqual(res.returncode, 0)
+
+        # Create claim under it
+        res = self.run_operator(
+            "claim-add",
+            "--type",
+            "test_passes",
+            "--text",
+            "Verified gate claim",
+            "--gate",
+            "missing-gate.py",
+        )
+        self.assertEqual(res.returncode, 0)
+
+        claim_file = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
+        evidence_file = Path(self.temp_dir) / "test_ev.txt"
+        evidence_file.write_text("ev content")
+
+        # Attach evidence as verified
+        env_claude = {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"}
+        res = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+            str(evidence_file),
+            env=env_claude,
+        )
+        self.assertEqual(res.returncode, 0)
+
+        # Clear test_override_active in claim and evidence
+        claim_data = yaml.safe_load(claim_file.read_text())
+        claim_data["executor"]["test_override_active"] = False
+        with open(claim_file, "w") as f:
+            yaml.safe_dump(claim_data, f)
+
+        ev_file = (
+            Path(self.temp_dir)
+            / ".operator"
+            / "evidence"
+            / "warnings-task"
+            / "evidence-0001.yaml"
+        )
+        ev_data = yaml.safe_load(ev_file.read_text())
+        ev_data["executor"]["test_override_active"] = False
+        with open(ev_file, "w") as f:
+            yaml.safe_dump(ev_data, f)
+
+        # Doctor check: since we added the warnings as infos, doctor should run successfully (exiting 0)
+        # but outputting the Warnings in stdout!
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + "\n" + res.stderr)
+        self.assertIn(
+            "[Warning] Task warnings-task repo path does not exist on disk: /nonexistent/repo/dir",
+            res.stdout,
+        )
+        self.assertIn(
+            "[Warning] Claim claim-0001 verified test_passes required_gate file does not exist: missing-gate.py",
+            res.stdout,
+        )
+        self.assertIn(
+            "[Warning] Claim claim-0001 verified test_passes has no evidence reference with a verification_command.",
+            res.stdout,
+        )
+
+        # Verify the url_or_external unverifiable evidence check:
+        # Since provenance for attached evidence defaults to local_file in test unless changed, let's edit
+        # the evidence yaml file to set provenance: url_or_external and remove hash/verification_command
+        ev_file = (
+            Path(self.temp_dir)
+            / ".operator"
+            / "evidence"
+            / "warnings-task"
+            / "evidence-0001.yaml"
+        )
+        ev_data = yaml.safe_load(ev_file.read_text())
+        ev_data["provenance"] = "url_or_external"
+        ev_data["hash"] = None
+        ev_data["verification_command"] = None
+        ev_data["path_or_url"] = "/nonexistent/test_output.log"
+        # also disable test_override_active
+        ev_data["executor"]["test_override_active"] = False
+        with open(ev_file, "w") as f:
+            yaml.safe_dump(ev_data, f)
+
+        # Clear test_override_active in claim as well
+        claim_data = yaml.safe_load(claim_file.read_text())
+        claim_data["executor"]["test_override_active"] = False
+        with open(claim_file, "w") as f:
+            yaml.safe_dump(claim_data, f)
+
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0)
+        self.assertIn(
+            "[Warning] Claim claim-0001 verified on unverifiable evidence: evidence/warnings-task/evidence-0001.yaml",
+            res.stdout,
+        )
+        self.assertIn(
+            "[Warning] Evidence evidence/warnings-task/evidence-0001.yaml test_output file does not exist: /nonexistent/test_output.log",
+            res.stdout,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

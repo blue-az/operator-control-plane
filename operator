@@ -1894,6 +1894,13 @@ def doctor_cmd(args) -> int:
         check_executor_block(task, f"Task {task_id}")
         task_status = task.get("status")
 
+        # Repo existence check
+        repo_path = task.get("repo")
+        if repo_path and not os.path.exists(repo_path):
+            infos.append(
+                f"[Warning] Task {task_id} repo path does not exist on disk: {repo_path}"
+            )
+
         claims_list = task.get("claims") or []
         quarantined_claims = []
         verified_claims = []
@@ -1910,6 +1917,11 @@ def doctor_cmd(args) -> int:
 
             check_executor_block(c_data, f"Claim {cid}")
 
+            outcome = c_data.get("verification_outcome")
+            verified = (outcome == "verified") or bool(
+                c_data.get("verification_status")
+            )
+
             if not c_data.get("required_gate"):
                 issues.append(
                     f"[Warning] Claim {cid} ('{c_data.get('text')}') has no required_gate defined."
@@ -1923,7 +1935,7 @@ def doctor_cmd(args) -> int:
                 )
 
             evidence_refs = c_data.get("evidence_refs") or []
-            if c_data.get("verification_status") and not evidence_refs:
+            if verified and not evidence_refs:
                 issues.append(
                     f"[Error] Claim {cid} is marked verified but has no evidence references."
                 )
@@ -1938,24 +1950,69 @@ def doctor_cmd(args) -> int:
                     ev_ref_data = load_yaml(ev_ref_path)
                     if ev_ref_data:
                         check_executor_block(ev_ref_data, f"Evidence file {ev_ref}")
-                        if ev_ref_data.get(
-                            "provenance"
-                        ) == "local_file" and not ev_ref_data.get("hash"):
+                        provenance = ev_ref_data.get("provenance")
+                        stored_hash = ev_ref_data.get("hash")
+
+                        if provenance == "local_file" and not stored_hash:
                             issues.append(
                                 f"[Warning] Claim {cid} evidence reference has no stored hash: {ev_ref}"
                             )
 
-            outcome = c_data.get("verification_outcome")
+                        is_recheckable = provenance in [
+                            "local_file",
+                            "living_document",
+                            "structural_verification",
+                        ]
+                        if verified and not is_recheckable:
+                            v_cmd = ev_ref_data.get("verification_command")
+                            if not v_cmd or not stored_hash:
+                                infos.append(
+                                    f"[Warning] Claim {cid} verified on unverifiable evidence: {ev_ref} (external/url provenance must have verification_command and hash)"
+                                )
+
+                        if ev_ref_data.get("evidence_type") == "test_output":
+                            ev_path = ev_ref_data.get("path_or_url")
+                            if (
+                                ev_path
+                                and not ev_path.startswith(("http://", "https://"))
+                                and not os.path.exists(ev_path)
+                            ):
+                                infos.append(
+                                    f"[Warning] Evidence {ev_ref} test_output file does not exist: {ev_path}"
+                                )
+
             if outcome == "quarantined":
                 quarantined_claims.append(cid)
-            elif c_data.get("verification_status") or outcome == "verified":
+            elif verified:
                 verified_claims.append(cid)
+
+            if verified and c_data.get("type") == "test_passes":
+                req_gate = c_data.get("required_gate")
+                if req_gate:
+                    gate_path = req_gate
+                    if repo_path and not os.path.isabs(gate_path):
+                        gate_path = os.path.join(repo_path, gate_path)
+                    if not os.path.exists(gate_path):
+                        infos.append(
+                            f"[Warning] Claim {cid} verified test_passes required_gate file does not exist: {req_gate}"
+                        )
+
+                # Check for verification_command in evidence
+                has_verification_cmd = False
+                for ev_ref in evidence_refs:
+                    ev_ref_path = os.path.join(op_dir, ev_ref)
+                    if os.path.exists(ev_ref_path):
+                        ev_ref_data = load_yaml(ev_ref_path)
+                        if ev_ref_data and ev_ref_data.get("verification_command"):
+                            has_verification_cmd = True
+                            break
+                if not has_verification_cmd:
+                    infos.append(
+                        f"[Warning] Claim {cid} verified test_passes has no evidence reference with a verification_command."
+                    )
 
             made = c_data.get("made_by")
             vby = c_data.get("verified_by")
-            verified = (outcome == "verified") or bool(
-                c_data.get("verification_status")
-            )
             review = task.get("review_harness")
 
             if verified:
