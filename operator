@@ -268,6 +268,36 @@ def init_cmd(args) -> int:
             "strengths": ["github-native async and SDK integration"],
             "known_failure_modes": ["offline operations"],
         },
+        "gemma3_local": {
+            "harness_id": "gemma3_local",
+            "display_name": "Gemma 3 Local",
+            "kind": "gemma3",
+            "command": None,
+            "working_directory": None,
+            "model": "gemma3:27b",
+            "permission_profile": "local",
+            "usage_source": "local",
+            "transcript_source": "local",
+            "strengths": ["local execution", "offline privacy"],
+            "known_failure_modes": ["structural regressions", "context limitations"],
+        },
+        "gemma4_local": {
+            "harness_id": "gemma4_local",
+            "display_name": "Gemma 4 Local",
+            "kind": "gemma4",
+            "command": None,
+            "working_directory": None,
+            "model": "gemma4:26b",
+            "permission_profile": "local",
+            "usage_source": "local",
+            "transcript_source": "local",
+            "strengths": [
+                "local execution",
+                "offline privacy",
+                "reasoning capability",
+            ],
+            "known_failure_modes": ["structural regressions", "context limitations"],
+        },
     }
 
     for hid, hdata in harnesses_data.items():
