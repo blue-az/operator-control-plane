@@ -287,7 +287,7 @@ The reviewed evidence supports a few concrete behaviors that matter to the owner
 - Claim creation is not trust creation. A new claim begins unverified, with no verifier and no evidence refs, and it is linked back to its task.
 - Claim-backed evidence updates only enforce the verifier rule when a status is being recorded on a claim. That is the protected trust path; it is not a blanket rule for every evidence write.
 - Local evidence copying is best-effort. If the copy fails, the ledger write can still proceed, so the owner should not assume the file itself always landed safely just because the ledger entry exists.
-- Doctor is a diagnostic check, not a single binary gate. It separates self-verification errors, reviewer mismatch warnings, and legacy records that lack verifier metadata.
+- Doctor is a diagnostic check, not a single binary gate. It separates self-verification errors, reviewer mismatch warnings, and legacy records that lack verifier metadata, and it fails closed (exit code 1) on verified records if required evidence files, target repository references, matching gate/test files, or valid command run hashes are missing.
 - Briefs are meant to hand work to the next harness. They carry the latest handoff, the current task state, and the next action, and they tell builders to attach evidence while leaving verification to the review harness.
 - Usage has two lanes. Imported usage is tied to session history, while direct usage intake is a separate accounting write that goes straight into the dated usage ledger.
 - Executor identity is stamped on operational writes, but bootstrap is a known exception, and single-user mode can accept a write while still warning that verification is not identity-enforced.
@@ -514,7 +514,7 @@ Bare evidence with status moves straight to a recorded status and is shown outsi
 
 ### Verified Facts
 
-The CLI surface is fixed rather than dynamically discovered. Task-bound writes fall back to the current task if no task id is provided and fail closed when there is no active task. Init creates the standard ledger layout on first run and does not repair an existing partial tree. Most operational writes stamp executor identity, but init is exempt. Claim-backed evidence updates require a verifier identity and can change task status to verified or quarantined. Quarantine can overwrite terminal task status. Usage import can match a source session by more than exact equality, can hydrate an existing placeholder, and rewrites that row in place. Direct usage intake writes a row without a source-session import trail. Doctor separates self-verification errors, reviewer mismatch warnings, and legacy no-verifier informational cases instead of collapsing them into one bucket.
+The CLI surface is fixed rather than dynamically discovered. Task-bound writes fall back to the current task if no task id is provided and fail closed when there is no active task. Init creates the standard ledger layout on first run and does not repair an existing partial tree. Most operational writes stamp executor identity, but init is exempt. Claim-backed evidence updates require a verifier identity and can change task status to verified or quarantined. Quarantine can overwrite terminal task status. Usage import can match a source session by more than exact equality, can hydrate an existing placeholder, and rewrites that row in place. Direct usage intake writes a row without a source-session import trail. Doctor separates self-verification errors, reviewer mismatch warnings, and legacy no-verifier informational cases, failing closed (exit code 1) on verified records missing evidence files, repository references, gate/test files, or run command hashes.
 
 > **Figure:** Verification can move a task forward only before it reaches a terminal state, but quarantine can still land later and pull a finished task back to a quarantined state. Closeout is therefore reversible when integrity evidence arrives late.
 
@@ -532,7 +532,7 @@ A task starts open, can move to verified after review, and can then close. A qua
 
 ### Strengths
 
-The design already gives the owner several guardrails that make trust legible. Role separation is explicit. Unverified claims stay untrusted until evidence and verification are added. Doctor does not collapse every irregularity into one failure bucket; it separates self-verification, reviewer mismatch, legacy gaps, and in-flight drift. Handoffs and briefs keep cross-harness continuity structured, and usage imports are idempotent on their provenance key instead of blindly duplicating records. Those are real strengths because they let the owner inspect trust as a set of narrow checks instead of one vague sense of progress.
+The design already gives the owner several guardrails that make trust legible. Role separation is explicit. Unverified claims stay untrusted until evidence and verification are added. Doctor does not collapse every irregularity into one failure bucket; it separates self-verification, reviewer mismatch, legacy gaps, and in-flight drift, failing closed to enforce ledger integrity. Handoffs and briefs keep cross-harness continuity structured, and usage imports are idempotent on their provenance key instead of blindly duplicating records. Those are real strengths because they let the owner inspect trust as a set of narrow checks instead of one vague sense of progress.
 
 ### Evidence Boundary
 
@@ -731,7 +731,7 @@ A new claim starts unverified, with no verifier and no evidence attached. Claim 
 
 Verification checks are not blanket checks on every evidence write. The trusted-status branch is gated by the presence of a claim and a status update, and identity enforcement can be strict or warning-only depending on configuration.
 
-Doctor is a diagnostic check, not a generic failure for every inconsistency. It separates self-verification, reviewer mismatch, legacy verifier gaps, and lifecycle drift so the owner can see what is broken versus what is merely incomplete.
+Doctor is a diagnostic check, not a generic failure for every inconsistency. It separates self-verification, reviewer mismatch, legacy verifier gaps, and lifecycle drift so the owner can see what is broken versus what is merely incomplete, failing closed (exit code 1) on verified records if required evidence files, target repository references, matching gate/test files, or valid command run hashes are missing.
 
 > **Figure:** Verification is a gated path, not a blanket promise over every evidence write. Even after a task appears finished, quarantine still has the power to pull it back and change the owner’s reading of completion.
 
@@ -804,7 +804,9 @@ session → usage lifecycle. Run `./operator <command> --help` for full flags.
 - `verify RUN_DIR` — automated audit of a run directory's artifacts.
 - `doctor [--audit]` — read-only consistency check across the ledger: flags unverified claims,
   **self-verification**, and **enforcement downgrades** (a claim that would be rejected under
-  enforced identity mode but is silently accepted under `single_user`).
+  enforced identity mode but is silently accepted under `single_user`). Fails closed (exit code 1) on
+  verified/completed records if they lack required evidence files, target repository references,
+  matching gate/test files, or valid command run hashes.
 
 **Sessions** (track a coding session and its cost)
 - `session-start --harness H [--task ID] [--force]`
@@ -815,7 +817,7 @@ session → usage lifecycle. Run `./operator <command> --help` for full flags.
 - `usage-add --harness H [--model M] [--outcome …]` — capture a pasted usage snippet.
 - `usage-import --harness {claude,codex,gemini-agy} [--since …] [--dry-run]` — auto-ingest
   token/usage from harness session logs.
-- `usage-summary [--by-task] [--by-harness] [--by-model] [--metering]` / `usage-annotate [--cost …] [--note …]`.
+- `usage-summary [--by-task] [--by-harness] [--by-model] [--by-lane] [--offload-audit] [--metering]` / `usage-annotate [--cost …] [--note …]`.
 
 **Briefs & handoff**
 - `brief --for H [--task ID]` / `export-brief --for H [--task ID]` — generate a harness-specific

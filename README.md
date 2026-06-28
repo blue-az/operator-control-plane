@@ -45,7 +45,9 @@ session → usage lifecycle. Run `./operator <command> --help` for full flags.
 - `verify RUN_DIR` — automated audit of a run directory's artifacts.
 - `doctor [--audit]` — read-only consistency check across the ledger: flags unverified claims,
   **self-verification**, and **enforcement downgrades** (a claim that would be rejected under
-  enforced identity mode but is silently accepted under `single_user`).
+  enforced identity mode but is silently accepted under `single_user`). Fails closed (exit code 1) on
+  verified/completed records if they lack required evidence files, target repository references,
+  matching gate/test files, or valid command run hashes.
 
 **Sessions** (track a coding session and its cost)
 - `session-start --harness H [--task ID] [--force]`
@@ -56,7 +58,7 @@ session → usage lifecycle. Run `./operator <command> --help` for full flags.
 - `usage-add --harness H [--model M] [--outcome …]` — capture a pasted usage snippet.
 - `usage-import --harness {claude,codex,gemini-agy} [--since …] [--dry-run]` — auto-ingest
   token/usage from harness session logs.
-- `usage-summary [--by-task] [--by-harness] [--by-model] [--metering]` / `usage-annotate [--cost …] [--note …]`.
+- `usage-summary [--by-task] [--by-harness] [--by-model] [--by-lane] [--offload-audit] [--metering]` / `usage-annotate [--cost …] [--note …]`.
 
 **Briefs & handoff**
 - `brief --for H [--task ID]` / `export-brief --for H [--task ID]` — generate a harness-specific
