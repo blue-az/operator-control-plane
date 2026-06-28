@@ -93,13 +93,9 @@ class TestOperatorCLI(unittest.TestCase):
         res = self.run_operator("task-show")
         self.assertEqual(res.returncode, 0, f"task-show failed: {res.stderr}")
         self.assertIn("Task ID:          prox-hil-002-audit", res.stdout)
-        self.assertIn(
-            "Objective:        Audit the PROX-HIL-002 real-data claim", res.stdout
-        )
+        self.assertIn("Objective:        Audit the PROX-HIL-002 real-data claim", res.stdout)
         self.assertIn("Status:           assigned", res.stdout)
-        self.assertIn(
-            "Session 3 physical-capture provenance is undocumented.", res.stdout
-        )
+        self.assertIn("Session 3 physical-capture provenance is undocumented.", res.stdout)
 
         # 4. Add Claim
         res = self.run_operator(
@@ -144,9 +140,7 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 0, f"evidence-attach failed: {res.stderr}")
         self.assertIn("Attached evidence 'evidence-0001'", res.stdout)
 
-        evidence_record_path = (
-            op_path / "evidence" / "prox-hil-002-audit" / "evidence-0001.yaml"
-        )
+        evidence_record_path = op_path / "evidence" / "prox-hil-002-audit" / "evidence-0001.yaml"
         evidence_record = yaml.safe_load(evidence_record_path.read_text())
         expected_hash = hashlib.sha256(evidence_file.read_bytes()).hexdigest()
         self.assertEqual(evidence_record.get("hash"), expected_hash)
@@ -196,16 +190,12 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("Task ID:      prox-hil-002-audit", res.stdout)
 
         res = self.run_operator("usage-summary", "--by-harness")
-        self.assertEqual(
-            res.returncode, 0, f"usage-summary --by-harness failed: {res.stderr}"
-        )
+        self.assertEqual(res.returncode, 0, f"usage-summary --by-harness failed: {res.stderr}")
         self.assertIn("SUMMARY BY HARNESS", res.stdout)
         self.assertIn("Harness ID:   codex", res.stdout)
 
         res = self.run_operator("usage-summary", "--by-model")
-        self.assertEqual(
-            res.returncode, 0, f"usage-summary --by-model failed: {res.stderr}"
-        )
+        self.assertEqual(res.returncode, 0, f"usage-summary --by-model failed: {res.stderr}")
         self.assertIn("SUMMARY BY MODEL", res.stdout)
         self.assertIn("Model ID:     gemma4:26b", res.stdout)
 
@@ -230,9 +220,7 @@ class TestOperatorCLI(unittest.TestCase):
 
         handoff_file = op_path / "handoffs" / "prox-hil-002-audit" / "handoff-0001.yaml"
         handoff_record = yaml.safe_load(handoff_file.read_text())
-        self.assertEqual(
-            handoff_record.get("what_verified"), "Session 3 data is database replay"
-        )
+        self.assertEqual(handoff_record.get("what_verified"), "Session 3 data is database replay")
         self.assertEqual(
             handoff_record.get("next_action"), "Replay proximity data on physical bench"
         )
@@ -255,15 +243,11 @@ class TestOperatorCLI(unittest.TestCase):
             "next_action: Review stdin handoff\n"
         )
         res = self.run_operator("handoff-add", "--file", "-", stdin_data=stdin_handoff)
-        self.assertEqual(
-            res.returncode, 0, f"handoff-add --file - failed: {res.stderr}"
-        )
+        self.assertEqual(res.returncode, 0, f"handoff-add --file - failed: {res.stderr}")
         self.assertIn("Successfully recorded handoff 'handoff-0003'", res.stdout)
 
         # 15. Reject invalid and empty handoff payloads
-        res = self.run_operator(
-            "handoff-add", "--file", "-", stdin_data="- not\n- a mapping\n"
-        )
+        res = self.run_operator("handoff-add", "--file", "-", stdin_data="- not\n- a mapping\n")
         self.assertNotEqual(res.returncode, 0)
         self.assertIn("must be a YAML mapping/object", res.stderr)
 
@@ -273,9 +257,7 @@ class TestOperatorCLI(unittest.TestCase):
 
         # Verify that task-show includes the handoff and updated next action
         res = self.run_operator("task-show")
-        self.assertEqual(
-            res.returncode, 0, f"task-show with handoffs failed: {res.stderr}"
-        )
+        self.assertEqual(res.returncode, 0, f"task-show with handoffs failed: {res.stderr}")
         self.assertIn("Handoffs:", res.stdout)
         self.assertIn("handoffs/prox-hil-002-audit/handoff-0001.yaml", res.stdout)
         self.assertIn("handoffs/prox-hil-002-audit/handoff-0002.yaml", res.stdout)
@@ -350,9 +332,7 @@ class TestOperatorCLI(unittest.TestCase):
             "doctor-test-task",
         )
 
-        res = self.run_operator(
-            "claim-add", "--type", "real_data", "--text", "Doctor claim test."
-        )
+        res = self.run_operator("claim-add", "--type", "real_data", "--text", "Doctor claim test.")
         self.assertEqual(res.returncode, 0)
 
         res = self.run_operator("doctor")
@@ -370,9 +350,7 @@ class TestOperatorCLI(unittest.TestCase):
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 0, res.stdout)
 
-        claim_data["evidence_refs"] = [
-            "evidence/doctor-test-task/missing-evidence.yaml"
-        ]
+        claim_data["evidence_refs"] = ["evidence/doctor-test-task/missing-evidence.yaml"]
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
 
@@ -431,9 +409,7 @@ class TestOperatorCLI(unittest.TestCase):
         with open(task_file, "w") as f:
             yaml.safe_dump(task_data, f)
 
-        self.run_operator(
-            "handoff-add", "--changed", "test changed", "--next-action", "Action A"
-        )
+        self.run_operator("handoff-add", "--changed", "test changed", "--next-action", "Action A")
         task_data = yaml.safe_load(task_file.read_text())
         task_data["next_action"] = "Action B"
         with open(task_file, "w") as f:
@@ -866,9 +842,7 @@ class TestOperatorCLI(unittest.TestCase):
         )
         self.assertEqual(res.returncode, 0, res.stderr)
 
-        res = self.run_operator(
-            "session-start", "--task", "claude-task", "--harness", "claude"
-        )
+        res = self.run_operator("session-start", "--task", "claude-task", "--harness", "claude")
         self.assertEqual(res.returncode, 0, res.stderr)
         adjust_start_time("usage-0001", "2026-05-29T06:00:00Z")
 
@@ -912,9 +886,7 @@ class TestOperatorCLI(unittest.TestCase):
         )
         self.assertEqual(res.returncode, 0, res.stderr)
 
-        res = self.run_operator(
-            "session-start", "--task", "codex-task", "--harness", "codex"
-        )
+        res = self.run_operator("session-start", "--task", "codex-task", "--harness", "codex")
         self.assertEqual(res.returncode, 0, res.stderr)
         adjust_start_time("usage-0002", "2026-05-29T06:00:00Z")
 
@@ -948,9 +920,7 @@ class TestOperatorCLI(unittest.TestCase):
         )
         self.assertEqual(res.returncode, 0, res.stderr)
 
-        res = self.run_operator(
-            "session-start", "--task", "agy-task", "--harness", "gemini-agy"
-        )
+        res = self.run_operator("session-start", "--task", "agy-task", "--harness", "gemini-agy")
         self.assertEqual(res.returncode, 0, res.stderr)
         adjust_start_time("usage-0003", "2026-05-29T06:00:00Z")
 
@@ -1084,9 +1054,7 @@ class TestOperatorCLI(unittest.TestCase):
             str(evidence_file),
         )
         self.assertNotEqual(res.returncode, 0)
-        self.assertIn(
-            "Error: --verified-by is required when setting --status", res.stderr
-        )
+        self.assertIn("Error: --verified-by is required when setting --status", res.stderr)
 
         claim_file = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
         claim_data = yaml.safe_load(claim_file.read_text())
@@ -1117,9 +1085,7 @@ class TestOperatorCLI(unittest.TestCase):
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1)
-        self.assertIn(
-            "[Error] claim claim-0001 is self-verified by 'codex'", res.stdout
-        )
+        self.assertIn("[Error] claim claim-0001 is self-verified by 'codex'", res.stdout)
 
         # 3. wrong verifier warns: --verified-by gemini-agy (not review_harness claude) -> doctor warns, exits 1
         res = update_claim("verified", "gemini-agy")
@@ -1151,9 +1117,7 @@ class TestOperatorCLI(unittest.TestCase):
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 0, res.stdout)
-        self.assertIn(
-            "[Info] Claim claim-0001 has unknown verifier (legacy claim)", res.stdout
-        )
+        self.assertIn("[Info] Claim claim-0001 has unknown verifier (legacy claim)", res.stdout)
 
     def test_executor_identity_binding(self) -> None:
         import yaml
@@ -1161,9 +1125,7 @@ class TestOperatorCLI(unittest.TestCase):
         self.run_operator("init")
 
         # 1. executor stamped: any write records executor.uid / executor.user
-        res = self.run_operator(
-            "task-create", "--objective", "Test executor", "--id", "exec-task"
-        )
+        res = self.run_operator("task-create", "--objective", "Test executor", "--id", "exec-task")
         self.assertEqual(res.returncode, 0, res.stderr)
         task_file = Path(self.temp_dir) / ".operator" / "tasks" / "exec-task.yaml"
         task_data = yaml.safe_load(task_file.read_text())
@@ -1231,11 +1193,7 @@ class TestOperatorCLI(unittest.TestCase):
             yaml.safe_dump(claim_data, f)
 
         ev_file = (
-            Path(self.temp_dir)
-            / ".operator"
-            / "evidence"
-            / "exec-task"
-            / "evidence-0001.yaml"
+            Path(self.temp_dir) / ".operator" / "evidence" / "exec-task" / "evidence-0001.yaml"
         )
         ev_data = yaml.safe_load(ev_file.read_text())
         ev_data["executor"]["test_override_active"] = False
@@ -1301,9 +1259,7 @@ class TestOperatorCLI(unittest.TestCase):
         )
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 0, res.stdout)
-        self.assertIn(
-            "verification is NOT identity-enforced (single-user mode)", res.stdout
-        )
+        self.assertIn("verification is NOT identity-enforced (single-user mode)", res.stdout)
 
         # 7. test-hook guard: a ledger write made under OPERATOR_TEST_UID without the test sentinel -> doctor Error
         env_spoof = {"OPERATOR_TEST_UID": "1002"}
@@ -1321,9 +1277,7 @@ class TestOperatorCLI(unittest.TestCase):
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1)
-        self.assertIn(
-            "contains write with unauthorized test-override attempt", res.stdout
-        )
+        self.assertIn("contains write with unauthorized test-override attempt", res.stdout)
 
     def test_doctor_flags_enforcement_downgrade(self) -> None:
         # A configured identity map left in single_user mode silently accepts claims that
@@ -1332,9 +1286,7 @@ class TestOperatorCLI(unittest.TestCase):
         import yaml
 
         self.run_operator("init")
-        self.run_operator(
-            "task-create", "--objective", "Downgrade check", "--id", "dg-task"
-        )
+        self.run_operator("task-create", "--objective", "Downgrade check", "--id", "dg-task")
         res = self.run_operator(
             "claim-add",
             "--type",
@@ -1370,9 +1322,7 @@ class TestOperatorCLI(unittest.TestCase):
 
         # Configure an identity map but leave enforcement relaxed to single_user.
         identity_file = Path(self.temp_dir) / ".operator" / "identity.yaml"
-        identity_file.write_text(
-            "mode: single_user\nuids:\n  1001: gemini-agy\n  1002: claude\n"
-        )
+        identity_file.write_text("mode: single_user\nuids:\n  1001: gemini-agy\n  1002: claude\n")
 
         claim_file = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
 
@@ -1414,15 +1364,11 @@ class TestOperatorCLI(unittest.TestCase):
             "claude",
             str(evidence),
         )
-        self.assertNotEqual(
-            res.returncode, 0, "bare --status with no --claim should fail closed"
-        )
+        self.assertNotEqual(res.returncode, 0, "bare --status with no --claim should fail closed")
         self.assertIn("--status requires --claim", res.stderr)
 
         # Control: the same write WITH a claim succeeds.
-        self.run_operator(
-            "claim-add", "--type", "test_passes", "--text", "a claim", "--gate", "g"
-        )
+        self.run_operator("claim-add", "--type", "test_passes", "--text", "a claim", "--gate", "g")
         res = self.run_operator(
             "evidence-attach",
             "--claim",
@@ -1451,9 +1397,7 @@ class TestOperatorCLI(unittest.TestCase):
         usage_file = op_path / "usage" / f"{today}.yaml"
 
         # 1. session-start with lane/class
-        res = self.run_operator(
-            "task-create", "--objective", "tagging", "--id", "t-tagging"
-        )
+        res = self.run_operator("task-create", "--objective", "tagging", "--id", "t-tagging")
         self.assertEqual(res.returncode, 0)
         res = self.run_operator(
             "session-start",
@@ -1515,13 +1459,9 @@ class TestOperatorCLI(unittest.TestCase):
 
         # 3. usage-import heuristics
         # Create a task for claude-import
-        res = self.run_operator(
-            "task-create", "--objective", "claude-imp", "--id", "claude-task"
-        )
+        res = self.run_operator("task-create", "--objective", "claude-imp", "--id", "claude-task")
         self.assertEqual(res.returncode, 0)
-        res = self.run_operator(
-            "session-start", "--task", "claude-task", "--harness", "claude"
-        )
+        res = self.run_operator("session-start", "--task", "claude-task", "--harness", "claude")
         self.assertEqual(res.returncode, 0)
 
         # Update started_at of usage-0003 so that autoimport matches it
@@ -1663,20 +1603,12 @@ class TestOperatorCLI(unittest.TestCase):
             yaml.safe_dump(claim_data, f)
 
         ev_file = (
-            Path(self.temp_dir)
-            / ".operator"
-            / "evidence"
-            / "warnings-task"
-            / "evidence-0001.yaml"
+            Path(self.temp_dir) / ".operator" / "evidence" / "warnings-task" / "evidence-0001.yaml"
         )
         # Let's customize the evidence file to use url_or_external provenance
         # with no hash/verification_command, and nonexistent path_or_url
         ev_file = (
-            Path(self.temp_dir)
-            / ".operator"
-            / "evidence"
-            / "warnings-task"
-            / "evidence-0001.yaml"
+            Path(self.temp_dir) / ".operator" / "evidence" / "warnings-task" / "evidence-0001.yaml"
         )
         ev_data = yaml.safe_load(ev_file.read_text())
         ev_data["provenance"] = "url_or_external"
