@@ -1155,8 +1155,8 @@ def parse_codex_session_file(filepath: str) -> dict | None:
     tokens_out = 0
     tokens_cache_read = 0
     if last_token_event:
-        info = last_token_event.get("info", {})
-        usage = info.get("total_token_usage", last_token_event)
+        info = last_token_event.get("info") or {}
+        usage = info.get("total_token_usage") or last_token_event
         input_tokens = usage.get("input_tokens", 0)
         cached_input_tokens = usage.get("cached_input_tokens", 0)
         output_tokens = usage.get("output_tokens", 0)

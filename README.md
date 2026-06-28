@@ -68,11 +68,11 @@ session → usage lifecycle. Run `./operator <command> --help` for full flags.
 The following end-to-end script demonstrates the creation and lifecycle of a task and claim. It shows how to initialize the local ledger, create a task, register a gate-bound claim, attach verifiable evidence (with an explicit verification command and reviewer signature), run the integrity doctor check, track a session's usage metrics, and generate a downstream brief.
 
 ```bash
-./operator init                                    # create .operator/ ledger in this repo
+./operator init                                    # create .operator/ ledger (run this in a fresh throwaway dir)
 
 # a couple of stand-in files so the claim's gate and evidence actually exist
 mkdir -p tests/out
-printf 'def test_retry():\n    assert True\n' > tests/test_upload.py
+printf 'def retries(n): return n <= 3\ndef test_retry(): assert retries(3) and not retries(4)\n' > tests/test_upload.py
 printf 'ok\n' > tests/out/upload.log
 
 # open a task
@@ -138,6 +138,11 @@ unverified claims are worthless):
   it's supposed to be bound by. Wants out-of-band / immutable policy.
 - **Evidence binding.** Prefer binding a *re-runnable structural test* over a captured blob or a
   byte-hash of a living document (living docs drift and train reviewers to rubber-stamp).
+- **Structural, not semantic, verification.** `doctor` checks that evidence is bound, hashed, and has a
+  re-runnable command — *not* that the check is meaningful. A vacuous gate (`assert True`), or a real test
+  against code that doesn't exist, passes structurally. Whether a test actually exercises real behavior is
+  a human judgment the tool can't make for you — it can enforce that a check *exists and runs*, never that
+  it *means* something.
 
 ## License
 
