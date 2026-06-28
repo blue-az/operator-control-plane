@@ -2,6 +2,9 @@
 
 Source: blue-az/operator-control-plane:main@9b9e3e63a7f0f54ccde541c6c10570c8fdbe8f5b
 
+> [!NOTE]
+> **Post-scan verification (owner)**: Reflect's per-chapter boundaries below reflect its static scan. Since the scan, the owner exercised the runtime live — the worked example, doctor, and usage-import against the real session-log corpus — and fixed a codex-import bug surfaced in doing so. The runtime caveats describe the scan, not the current verified state.
+
 ## Contents
 
 1. [What operator Is For](chapters/01-what-operator-is-for.md)
