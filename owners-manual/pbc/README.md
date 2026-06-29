@@ -8,6 +8,8 @@ Use these files as structured context for coding agents, QA review, drift checks
 
 - `product-overview.pbc.md` — package-level draft contract context.
 - `NN-chapter-name.pbc.md` — chapter-level draft behavior-contract projections.
+- `07-opr-governed-llm-client.pbc.md` — draft target contract for extracting `opr`
+  into this repository as a governed LLM client.
 
 ## Trust Model
 
