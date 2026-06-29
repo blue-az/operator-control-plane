@@ -1,6 +1,6 @@
-# opr Governed LLM Client
+# Appendix: opr Governed LLM Client
 
-_This chapter is a draft target chapter for extracting `opr` from Project Phoenix into
+_This appendix is a draft target for extracting `opr` from Project Phoenix into
 `operator-control-plane`. It describes the intended open-source surface, not behavior already
 implemented in this repository._
 
@@ -56,8 +56,8 @@ migration plan.
 
 ## Attention Cards
 
-- **critical: Do not over-claim implementation location** — `opr` is still implemented in Project
-  Phoenix, so this chapter is a migration target until code lands in `operator-control-plane`.
+- **evidence boundary: Implementation lives elsewhere** — `opr` is still implemented in Project
+  Phoenix, so this appendix is a migration target until code lands in `operator-control-plane`.
 - **high: Frontier pass-through is an authority boundary** — local context must not be sent to
   Claude, Codex, or Agy/Gemini without explicit opt-in and confirmation.
 - **medium: Tool audit records may need promotion** — sidecar JSONL audit logs are useful, but a

@@ -13,7 +13,11 @@ Source: blue-az/operator-control-plane:main@9b9e3e63a7f0f54ccde541c6c10570c8fdbe
 4. [Trust, Identity, and Verification](chapters/04-trust-identity-and-verification.md)
 5. [Sessions, Usage, and Accountability](chapters/05-sessions-usage-and-accountability.md)
 6. [Running a Multi-Harness Workflow](chapters/06-running-a-multi-harness-workflow.md)
-7. [opr Governed LLM Client](chapters/07-opr-governed-llm-client.md) _(draft target chapter)_
+
+## Appendices
+
+- [opr Governed LLM Client](chapters/appendix-opr-governed-llm-client.md) — draft migration
+  target for the planned `opr` extraction.
 
 ## Attention Index
 
