@@ -1,17 +1,14 @@
 # Appendix: opr Governed LLM Client
 
-_This appendix is a draft target for extracting `opr` from Project Phoenix into
-`operator-control-plane`. It describes the intended open-source surface, not behavior already
-implemented in this repository._
+This appendix describes the open-source governed model client `opr` implemented in this repository.
 
 ## One-Minute Snapshot
 
-`opr` should become the governed LLM client that sits next to the `operator` ledger. `operator`
+`opr` is the governed LLM client that sits next to the `operator` ledger. `operator`
 records tasks, claims, evidence, sessions, and usage; `opr` runs local models, bounded workspace
 tools, and explicitly enabled frontier CLI harnesses while writing those runs back to the ledger.
 
-The current prototype lives at `/home/blueaz/Python/project-phoenix/scripts/opr`. The open-source
-plan is to move that behavior into this repository and remove hardcoded Project Phoenix paths.
+The client is fully generalized to load its configuration from `~/.config/operator/opr.yaml`.
 
 ## What You Should Be Able To Explain
 
@@ -56,8 +53,6 @@ migration plan.
 
 ## Attention Cards
 
-- **evidence boundary: Implementation lives elsewhere** — `opr` is still implemented in Project
-  Phoenix, so this appendix is a migration target until code lands in `operator-control-plane`.
 - **high: Frontier pass-through is an authority boundary** — local context must not be sent to
   Claude, Codex, or Agy/Gemini without explicit opt-in and confirmation.
 - **medium: Tool audit records may need promotion** — sidecar JSONL audit logs are useful, but a
@@ -74,12 +69,7 @@ migration plan.
 
 Reviewed:
 
-- Current Project Phoenix `scripts/opr` behavior as inspected locally.
-- The BOTTLENECKS entry that calls for generalizing `opr` into `operator-control-plane`.
+- Implementation of `opr` CLI client in the root of the repository.
+- Unit and integration tests in `tests/test_opr.py` confirming configuration loading, safe path resolution, routing, and gating behavior.
+- Configuration schemas loading from `~/.config/operator/opr.yaml`.
 - Existing operator owner-manual and PBC structure.
-
-Not reviewed:
-
-- An implementation of `opr` inside this repository.
-- Packaging, installation, or config loading code for the generalized client.
-- Cross-platform behavior for external frontier CLIs.

@@ -1,0 +1,1246 @@
+#!/usr/bin/env python3
+import argparse
+import datetime
+import json
+import os
+import re
+import shlex
+import signal
+import subprocess
+import sys
+from pathlib import Path
+
+import requests
+import yaml
+
+
+def load_config(config_path_opt=None):
+    default_config = {
+        "ledger_root": "~/.operator-usage",
+        "workspace_root": ".",
+        "default_model": "gemma4:26b",
+        "local": {
+            "ollama_url": "http://localhost:11434"
+        },
+        "frontier": {
+            "enabled": False,
+            "commands": {
+                "claude": "claude",
+                "codex": "codex",
+                "agy": "antigravity"
+            }
+        },
+        "tools": {
+            "read": True,
+            "shell": False,
+            "write": False
+        }
+    }
+    
+    config_path = config_path_opt
+    if not config_path:
+        config_path = os.path.expanduser("~/.config/operator/opr.yaml")
+        
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r") as f:
+                user_config = yaml.safe_load(f) or {}
+                for k, v in user_config.items():
+                    if isinstance(v, dict) and k in default_config:
+                        default_config[k].update(v)
+                    else:
+                        default_config[k] = v
+        except Exception as e:
+            print(f"Warning: Failed to load config from {config_path}: {e}", file=sys.stderr)
+            
+    # Resolve paths
+    default_config["ledger_root"] = os.path.abspath(os.path.expanduser(default_config["ledger_root"]))
+    default_config["workspace_root"] = os.path.abspath(os.path.expanduser(default_config["workspace_root"]))
+    return default_config
+
+
+def find_operator_bin():
+    script_dir = Path(__file__).resolve().parent
+    local_op = script_dir / "operator"
+    if local_op.exists() and os.access(local_op, os.X_OK):
+        return str(local_op)
+    import shutil
+    path_op = shutil.which("operator")
+    if path_op:
+        return path_op
+    return "operator"
+
+
+def initialize_ledger(ledger_dir, operator_bin):
+    if not os.path.exists(os.path.join(ledger_dir, ".operator")):
+        os.makedirs(ledger_dir, exist_ok=True)
+        subprocess.run(
+            [operator_bin, "init"],
+            cwd=ledger_dir,
+            capture_output=True,
+        )
+    return ledger_dir
+
+
+def get_next_session_index(ledger_dir):
+    usage_dir = Path(ledger_dir) / ".operator" / "usage"
+    count = 0
+    if usage_dir.exists():
+        for f in usage_dir.glob("*.yaml"):
+            try:
+                data = yaml.safe_load(f.read_text()) or []
+                count += len(data)
+            except Exception:
+                pass
+    return count + 1
+
+
+def resolve_safe_path(user_path: str, workspace_root: Path) -> Path:
+    try:
+        resolved_root = workspace_root.resolve()
+        if not user_path:
+            return resolved_root
+
+        target_path = Path(user_path)
+        if not target_path.is_absolute():
+            target_path = resolved_root / target_path
+
+        target_path = target_path.resolve()
+
+        # Security boundaries check
+        if resolved_root not in target_path.parents and resolved_root != target_path:
+            raise PermissionError("Path is outside the workspace root.")
+
+        return target_path
+    except Exception as e:
+        raise PermissionError(f"Access denied: {str(e)}")
+
+
+def build_tree(dir_path: Path, prefix="", max_depth=3, depth=0) -> list[str]:
+    if depth > max_depth:
+        return ["..."]
+    lines = []
+    try:
+        items = sorted(list(dir_path.iterdir()), key=lambda x: (not x.is_dir(), x.name.lower()))
+        items = [
+            item
+            for item in items
+            if not item.name.startswith(".") and item.name != "__pycache__" and item.name != ".venv"
+        ]
+        for idx, item in enumerate(items):
+            connector = "└── " if idx == len(items) - 1 else "├── "
+            lines.append(f"{prefix}{connector}{item.name}")
+            if item.is_dir():
+                extension = "    " if idx == len(items) - 1 else "│   "
+                lines.extend(build_tree(item, prefix + extension, max_depth, depth + 1))
+    except Exception as e:
+        lines.append(f"{prefix}Error: {e}")
+    return lines
+
+
+def audit_tool_call(
+    tool_name: str,
+    argument: str,
+    allowed: bool,
+    byte_count: int,
+    session_id: str,
+    ledger_dir: str,
+):
+    audit_file = Path(ledger_dir) / ".operator" / "tool_audit.log"
+    audit_file.parent.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    record = {
+        "timestamp": timestamp,
+        "session_id": session_id or "none",
+        "tool": tool_name,
+        "argument": argument,
+        "allowed": allowed,
+        "byte_count": byte_count,
+    }
+    with open(audit_file, "a") as f:
+        f.write(json.dumps(record) + "\n")
+
+
+def is_frontier_model(model_name: str) -> bool:
+    name = model_name.lower()
+    return any(
+        x in name
+        for x in [
+            "claude",
+            "codex",
+            "gpt",
+            "openai",
+            "gemini",
+            "agy",
+            "antigravity",
+        ]
+    )
+
+
+def get_frontier_lane(prompt: str) -> str:
+    lower_p = prompt.lower()
+    review_keywords = [
+        "review",
+        "verify",
+        "audit",
+        "check",
+        "prove",
+        "test",
+        "gate",
+    ]
+    if any(k in lower_p for k in review_keywords):
+        return "frontier_driver"
+    return "frontier_author"
+
+
+SYSTEM_INSTRUCTIONS = """You are a governed agent. You can execute local tools by outputting a JSON object.
+Available tools:
+1. read_file: {"tool": "read_file", "path": "relative/path"}
+2. write_file: {"tool": "write_file", "path": "relative/path", "content": "file content"}
+3. patch_file: {"tool": "patch_file", "path": "relative/path", "target_content": "exact text to replace", "replacement_content": "new text"}
+4. run_command: {"tool": "run_command", "command": "command to run"}
+5. list_dir: {"tool": "list_dir", "path": "relative/path"}
+6. grep_search: {"tool": "grep_search", "pattern": "regex pattern", "path": "relative/path"}
+7. tree_dir: {"tool": "tree_dir", "path": "relative/path"}
+
+If you want to invoke a tool, output the raw JSON block ONLY. Do not write any explanations or conversational preambles.
+If you do not want to invoke a tool, respond with normal conversation.
+"""
+
+
+def extract_json_tool_call(text: str) -> dict | None:
+    text = text.strip()
+    m = re.search(r"\{.*\}", text, re.DOTALL)
+    if m:
+        try:
+            obj = json.loads(m.group(0))
+            if isinstance(obj, dict) and "tool" in obj:
+                return obj
+        except Exception:
+            pass
+    return None
+
+
+class Dispatcher:
+    def __init__(self, govern: bool, govern_cli: str, govern_dir: str):
+        self.govern = govern
+        self.govern_cli = govern_cli
+        self.govern_dir = govern_dir
+
+    def _slugify(self, text: str) -> str:
+        text = text.lower()
+        text = re.sub(r"[^a-z0-9\-_]+", "-", text)
+        text = re.sub(r"-+", "-", text).strip("-")
+        return text
+
+    def _run_operator(self, cmd_args: list[str]) -> tuple[int, str]:
+        cmd = [self.govern_cli]
+        cmd.extend(cmd_args)
+        try:
+            res = subprocess.run(cmd, cwd=self.govern_dir, capture_output=True, text=True)
+            return res.returncode, res.stdout + res.stderr
+        except Exception as e:
+            print(
+                f"Warning: Governed dispatch failed: operator CLI is unreachable ({e}). Proceeding without governance.",
+                file=sys.stderr
+            )
+            return -1, str(e)
+
+    def _govern_session_start(self, task: str, harness: str, lane: str, task_class: str) -> tuple[str, str]:
+        if not self.govern:
+            return "", ""
+        task_id = self._slugify(task)[:50]
+        self._run_operator(["task-create", "--objective", task, "--id", task_id])
+
+        code, output = self._run_operator(
+            [
+                "session-start",
+                "--task",
+                task_id,
+                "--harness",
+                harness,
+                "--lane",
+                lane,
+                "--class",
+                task_class,
+            ]
+        )
+        if code != 0:
+            print(
+                f"Warning: Governed session-start failed (code {code}): {output.strip()}. Proceeding without session governance.",
+                file=sys.stderr
+            )
+            return task_id, ""
+        m = re.search(r"usage-\d+", output)
+        usage_id = m.group(0) if m else ""
+        return task_id, usage_id
+
+    def _govern_session_end(self, usage_id: str, outcome: str, cost: float = 0.0) -> None:
+        if not self.govern or not usage_id:
+            return
+        self._run_operator(["session-end", usage_id, "--outcome", outcome, "--cost", str(cost)])
+
+    def _map_harness(self, provider: str, model: str) -> str:
+        prov = provider.lower()
+        mod = model.lower()
+        if "agy" in prov or "antigravity" in prov:
+            return "gemini-agy"
+        elif "codex" in prov:
+            return "codex"
+        elif "claude" in prov or "anthropic" in prov:
+            return "claude"
+        else:
+            return "gemma4_local"
+
+    def _dispatch_ollama(self, model: str, task: str, ollama_url: str) -> str:
+        url = f"{ollama_url.rstrip('/')}/api/generate"
+        payload = {"model": model, "prompt": task, "stream": False}
+        if "no_think" in model or "26b" in model:
+            payload["system"] = "Respond with strict JSON only. No thinking preamble. No markdown."
+        try:
+            response = requests.post(url, json=payload, timeout=120)
+            response.raise_for_status()
+            return response.json().get("response", "")
+        except Exception as e:
+            return f"Ollama API Error: {str(e)}"
+
+
+class RoutingResult:
+    def __init__(self, task, lane, lane_label, why, worker):
+        self.task = task
+        self.lane = lane
+        self.lane_label = lane_label
+        self.why = why
+        self.worker = worker
+
+
+def get_routing_for_model(model_name: str, task_prompt: str) -> RoutingResult:
+    is_front = is_frontier_model(model_name)
+    if is_front:
+        harness = (
+            "claude"
+            if "claude" in model_name.lower()
+            else ("codex" if "codex" in model_name.lower() else "openai")
+        )
+        lane = "lane_3_strong_model"
+        lane_label = "Lane 3 — Frontier model pass-through"
+        why = f"Frontier model override requested: {model_name}"
+        worker = {
+            "provider": harness,
+            "model": model_name,
+            "transport": "anthropic_api" if harness == "claude" else "openai_api",
+            "command": f"# call api for {model_name}"
+        }
+    else:
+        lane = "lane_2_local_strict" if "strict json" in task_prompt.lower() else "lane_1_local_repair"
+        lane_label = "Lane 2 — Local model, strict protocol" if "strict json" in task_prompt.lower() else "Lane 1 — Local model, repair-assisted"
+        why = f"Local model override requested: {model_name}"
+        worker = {
+            "provider": "local_ollama",
+            "model": model_name,
+            "transport": "ollama_api",
+            "command": f"# call http://localhost:11434/api/generate with model={model_name}"
+        }
+    return RoutingResult(task_prompt, lane, lane_label, why, worker)
+
+
+def route_task(task_prompt: str, config: dict) -> RoutingResult:
+    default_model = config.get("default_model", "gemma4:26b")
+    lower_p = task_prompt.lower()
+    needs_frontier = any(k in lower_p for k in ["claude", "codex", "gpt-4", "gpt-o"])
+    
+    if needs_frontier and config.get("frontier", {}).get("enabled", False):
+        model = "claude" if "claude" in lower_p else "codex"
+        return get_routing_for_model(model, task_prompt)
+    else:
+        return get_routing_for_model(default_model, task_prompt)
+
+
+def execute_model_tool(
+    tool_call: dict,
+    workspace_root: Path,
+    ledger_dir: str,
+    current_usage_id: str,
+    config: dict,
+) -> tuple[str, bool]:
+    tool = tool_call.get("tool")
+    allowed = True
+    output = ""
+    arg_log = ""
+
+    try:
+        if tool == "read_file":
+            path = tool_call.get("path")
+            arg_log = str(path)
+            if not path:
+                raise ValueError("Missing 'path' argument for read_file")
+            resolved = resolve_safe_path(path, workspace_root)
+            if not resolved.exists():
+                raise FileNotFoundError(f"Path not found: {path}")
+            if not resolved.is_file():
+                raise ValueError(f"Not a file: {path}")
+            content = resolved.read_text(errors="ignore")
+            if len(content) > 100 * 1024:
+                content = content[: 100 * 1024] + "\n[Content truncated due to size limit]"
+            output = content
+
+        elif tool == "write_file":
+            path = tool_call.get("path")
+            content = tool_call.get("content", "")
+            arg_log = f"{path} ({len(content)} bytes)"
+            if not path:
+                raise ValueError("Missing 'path' argument for write_file")
+            if not config["tools"]["write"]:
+                allowed = False
+                raise PermissionError(
+                    "File writing is disabled. Run opr with --allow-write or configure tools.write to enable."
+                )
+
+            resolved = resolve_safe_path(path, workspace_root)
+            confirm = input(f"Confirm model-initiated write to {path}? [y/N]: ").strip().lower()
+            if confirm != "y":
+                raise ValueError("Write cancelled by user.")
+
+            resolved.write_text(content)
+            output = f"Successfully wrote {len(content)} bytes to {path}."
+
+        elif tool == "patch_file":
+            path = tool_call.get("path")
+            target_content = tool_call.get("target_content")
+            repl_content = tool_call.get("replacement_content", "")
+            arg_log = str(path)
+            if not path or target_content is None:
+                raise ValueError("Missing 'path' or 'target_content' argument for patch_file")
+            if not config["tools"]["write"]:
+                allowed = False
+                raise PermissionError(
+                    "File writing is disabled. Run opr with --allow-write or configure tools.write to enable."
+                )
+
+            resolved = resolve_safe_path(path, workspace_root)
+            if not resolved.exists():
+                raise FileNotFoundError(f"File not found: {path}")
+            if not resolved.is_file():
+                raise ValueError(f"Not a file: {path}")
+
+            existing_content = resolved.read_text(errors="ignore")
+            if target_content not in existing_content:
+                raise ValueError("Target content to replace not found in the file.")
+
+            confirm = input(f"Confirm model-initiated patch to {path}? [y/N]: ").strip().lower()
+            if confirm != "y":
+                raise ValueError("Patch cancelled by user.")
+
+            new_content = existing_content.replace(target_content, repl_content)
+            resolved.write_text(new_content)
+            output = f"Successfully patched {path}."
+
+        elif tool == "run_command":
+            cmd = tool_call.get("command")
+            arg_log = str(cmd)
+            if not cmd:
+                raise ValueError("Missing 'command' argument for run_command")
+            if not config["tools"]["shell"]:
+                allowed = False
+                raise PermissionError(
+                    "Shell execution is disabled. Run opr with --allow-run or configure tools.shell to enable."
+                )
+
+            confirm = input(f"Confirm model-initiated execution of: {cmd}? [y/N]: ").strip().lower()
+            if confirm != "y":
+                raise ValueError("Command execution cancelled by user.")
+
+            run_cmd_args = shlex.split(cmd) if not re.search(r"[|&<>]", cmd) else cmd
+            res = subprocess.run(
+                run_cmd_args,
+                shell=re.search(r"[|&<>]", cmd) is not None,
+                cwd=workspace_root,
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            output = res.stdout
+            if res.stderr:
+                output += "\n" + res.stderr
+
+        elif tool == "list_dir":
+            path = tool_call.get("path", "")
+            arg_log = str(path)
+            resolved = resolve_safe_path(path, workspace_root)
+            if not resolved.exists():
+                raise FileNotFoundError(f"Path not found: {path}")
+            if resolved.is_dir():
+                contents = sorted(
+                    list(resolved.iterdir()),
+                    key=lambda x: (not x.is_dir(), x.name.lower()),
+                )
+                output = "\n".join(f"{'[DIR] ' if c.is_dir() else ''}{c.name}" for c in contents)
+            else:
+                output = resolved.name
+
+        elif tool == "grep_search":
+            pattern_str = tool_call.get("pattern")
+            search_path = tool_call.get("path", "")
+            arg_log = f"'{pattern_str}' in {search_path}"
+            if not pattern_str:
+                raise ValueError("Missing 'pattern' argument for grep_search")
+
+            resolved = resolve_safe_path(search_path, workspace_root)
+            if not resolved.exists():
+                raise FileNotFoundError(f"Path not found: {search_path if search_path else '.'}")
+
+            pattern = re.compile(pattern_str)
+            results = []
+            count = 0
+            for root, dirs, files in os.walk(resolved):
+                dirs[:] = [
+                    d for d in dirs if not d.startswith(".") and d != "__pycache__" and d != ".venv"
+                ]
+                for f in files:
+                    file_path = Path(root) / f
+                    if file_path.suffix in [".png", ".jpg", ".pdf", ".db", ".pyc"]:
+                        continue
+                    try:
+                        relative_file = file_path.relative_to(workspace_root)
+                        content = file_path.read_text(errors="ignore")
+                        for idx, line in enumerate(content.splitlines(), 1):
+                            if pattern.search(line):
+                                results.append(f"{relative_file}:{idx}: {line}")
+                                count += 1
+                                if count >= 100:
+                                    break
+                    except Exception:
+                        pass
+                    if count >= 100:
+                        break
+                if count >= 100:
+                    break
+            output = "\n".join(results) if results else "No matches found."
+
+        elif tool == "tree_dir":
+            path = tool_call.get("path", "")
+            arg_log = str(path)
+            resolved = resolve_safe_path(path, workspace_root)
+            if not resolved.exists():
+                raise FileNotFoundError(f"Path not found: {path}")
+            if not resolved.is_dir():
+                raise ValueError(f"Not a directory: {path}")
+            tree_lines = build_tree(resolved)
+            output = "\n".join(tree_lines)
+
+        else:
+            allowed = False
+            raise ValueError(f"Unknown model tool: {tool}")
+
+    except PermissionError as pe:
+        allowed = False
+        output = f"Permission Error: {str(pe)}"
+    except FileNotFoundError as fnfe:
+        output = f"Error: {str(fnfe)}"
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    audit_tool_call(
+        f"model:{tool}",
+        arg_log,
+        allowed,
+        len(output.encode("utf-8", errors="ignore")),
+        current_usage_id,
+        ledger_dir,
+    )
+
+    return output, allowed and not output.startswith("Error:")
+
+
+def prepare_prompt(task_input: str, accumulated_context: str) -> str:
+    parts = [SYSTEM_INSTRUCTIONS]
+    if accumulated_context:
+        parts.append(f"Context:\n{accumulated_context}")
+    parts.append(f"Task:\n{task_input}")
+    return "\n\n".join(parts)
+
+
+def dispatch_frontier(model_name: str, prompt: str, workspace_root: Path, config: dict) -> str:
+    model_lower = model_name.lower()
+    
+    # Resolve cmd from config
+    cmds = config.get("frontier", {}).get("commands", {})
+    if "claude" in model_lower:
+        cmd_template = cmds.get("claude", "claude")
+    elif "codex" in model_lower:
+        cmd_template = cmds.get("codex", "codex")
+    elif "gemini" in model_lower or "agy" in model_lower or "antigravity" in model_lower:
+        cmd_template = cmds.get("agy", "antigravity")
+    else:
+        cmd_template = model_name
+
+    cmd_args = shlex.split(cmd_template)
+
+    has_placeholder = False
+    for i in range(len(cmd_args)):
+        if "{prompt}" in cmd_args[i]:
+            cmd_args[i] = cmd_args[i].replace("{prompt}", prompt)
+            has_placeholder = True
+        if "{task}" in cmd_args[i]:
+            cmd_args[i] = cmd_args[i].replace("{task}", prompt)
+            has_placeholder = True
+
+    try:
+        if not has_placeholder:
+            res = subprocess.run(
+                cmd_args,
+                input=prompt,
+                capture_output=True,
+                text=True,
+                cwd=workspace_root,
+                timeout=300,
+            )
+        else:
+            res = subprocess.run(
+                cmd_args,
+                capture_output=True,
+                text=True,
+                cwd=workspace_root,
+                timeout=300,
+            )
+
+        output = res.stdout
+        if res.stderr:
+            output += "\n" + res.stderr
+        return output
+    except Exception as e:
+        return f"Frontier Subprocess Dispatch Error: {str(e)}"
+
+
+def run_agent_loop(
+    initial_prompt: str,
+    current_model: str,
+    workspace_root: Path,
+    ledger_dir: str,
+    current_usage_id: str,
+    dispatcher: Dispatcher,
+    config: dict,
+    initial_context: str = "",
+) -> str:
+    accumulated_context = initial_context
+    task_input = initial_prompt
+    max_turns = 10
+    turn = 0
+    seen_tool_calls = set()
+    terminal_tools = {"write_file", "patch_file", "run_command"}
+
+    while turn < max_turns:
+        prompt = prepare_prompt(task_input, accumulated_context)
+
+        # Context confirmation check for frontier models
+        if is_frontier_model(current_model) and accumulated_context:
+            print("Warning: You are about to send local tool output context to a frontier provider.")
+            confirm = input("Confirm sending accumulated context to frontier provider? [y/N]: ").strip().lower()
+            if confirm != "y":
+                print("Aborted context sharing.")
+                return "[Aborted: User declined context sharing with frontier model]"
+
+        print("Thinking...")
+        if is_frontier_model(current_model):
+            response = dispatch_frontier(current_model, prompt, workspace_root, config)
+        else:
+            response = dispatcher._dispatch_ollama(current_model, prompt, config["local"]["ollama_url"])
+
+        tool_call = extract_json_tool_call(response)
+        if not tool_call:
+            return response
+
+        tool_name = tool_call.get("tool")
+        tool_fingerprint = json.dumps(tool_call, sort_keys=True)
+        if tool_fingerprint in seen_tool_calls:
+            return f"[Stopped: model repeated identical tool call '{tool_name}' after it had already been handled.]"
+        seen_tool_calls.add(tool_fingerprint)
+
+        print(f"\n[Model requests tool call: {tool_name}]")
+        print(f"Arguments: {json.dumps(tool_call, indent=2)}")
+
+        tool_output, success = execute_model_tool(
+            tool_call, workspace_root, ledger_dir, current_usage_id, config
+        )
+
+        print(f"\n[Tool Output]\n{tool_output}\n")
+
+        if tool_name in terminal_tools:
+            if success:
+                return f"[Tool completed: {tool_name}]\n{tool_output}"
+            return f"[Tool failed or cancelled: {tool_name}]\n{tool_output}"
+
+        accumulated_context += f"\n--- Tool Output: {tool_name} ---\n{tool_output}\n---------------------------\n"
+        turn += 1
+
+    return "[Agent Loop terminated: reached max turn limit of 10]"
+
+
+def main():
+    parser = argparse.ArgumentParser(description="opr - Unified Governed LLM CLI")
+    parser.add_argument("task", nargs="?", default=None, help="The prompt/task to run.")
+    parser.add_argument("-m", "--model", default=None, help="LLM model to query.")
+    parser.add_argument("--context-file", help="Path to context file (JSON or text) to inject.")
+    parser.add_argument("--config", help="Path to custom config yaml file.")
+    parser.add_argument(
+        "--hard",
+        action="store_true",
+        help="Tag the session task class as 'hard' (default: bounded).",
+    )
+    parser.add_argument(
+        "--no-govern", action="store_true", help="Run without logging to operator ledger."
+    )
+    parser.add_argument(
+        "--workspace",
+        default=None,
+        help="Workspace root for bounded tool access (default: current directory).",
+    )
+    parser.add_argument(
+        "-r",
+        "--allow-run",
+        action="store_true",
+        help="Allow running shell commands.",
+    )
+    parser.add_argument(
+        "-w",
+        "--allow-write",
+        action="store_true",
+        help="Allow writing/modifying files.",
+    )
+    parser.add_argument(
+        "--allow-frontier",
+        action="store_true",
+        help="Allow governed frontier model pass-through.",
+    )
+    parser.add_argument(
+        "--frontier",
+        default=None,
+        help="Direct frontier run with a specified model/provider (e.g. claude, codex, gpt-4o).",
+    )
+    args = parser.parse_args()
+
+    # Load configuration
+    config = load_config(args.config)
+    
+    # Command line overrides
+    if args.workspace:
+        config["workspace_root"] = os.path.abspath(os.path.expanduser(args.workspace))
+    if args.allow_run:
+        config["tools"]["shell"] = True
+    if args.allow_write:
+        config["tools"]["write"] = True
+    if args.allow_frontier:
+        config["frontier"]["enabled"] = True
+
+    operator_bin = find_operator_bin()
+    ledger_dir = initialize_ledger(config["ledger_root"], operator_bin)
+    workspace_root = Path(config["workspace_root"]).resolve()
+
+    # Load context if specified
+    context_str = ""
+    if args.context_file:
+        ctx_path = Path(os.path.expanduser(args.context_file))
+        if ctx_path.exists():
+            content = ctx_path.read_text()
+            try:
+                js = json.loads(content)
+                context_str = json.dumps(js, indent=2)
+            except Exception:
+                context_str = content
+        else:
+            print(f"Error: Context file not found: {args.context_file}", file=sys.stderr)
+            sys.exit(1)
+
+    dispatcher = Dispatcher(
+        govern=not args.no_govern,
+        govern_cli=operator_bin,
+        govern_dir=ledger_dir,
+    )
+
+    # Establish model choice
+    if args.frontier:
+        if not config["frontier"]["enabled"]:
+            print(
+                "Error: Frontier model access is disabled. Run opr with --allow-frontier or configure frontier.enabled=true.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        model_to_use = args.frontier
+    elif args.model:
+        model_to_use = args.model
+    else:
+        model_to_use = config.get("default_model", "gemma4:26b")
+
+    if is_frontier_model(model_to_use) and not config["frontier"]["enabled"]:
+        print(
+            "Error: Frontier model access is disabled. Run opr with --allow-frontier or configure frontier.enabled=true.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    if args.task:
+        # 1. Positional Prompt Execution
+        task_prompt = f"Context:\n{context_str}\n\nTask:\n{args.task}" if context_str else args.task
+
+        if is_frontier_model(model_to_use) and context_str:
+            print("Warning: You are about to send local tool output context to a frontier provider.")
+            confirm = input("Confirm sending accumulated context to frontier provider? [y/N]: ").strip().lower()
+            if confirm != "y":
+                print("Aborted.")
+                sys.exit(1)
+
+        # Route or model selection
+        if not args.frontier and not args.model:
+            result = route_task(task_prompt, config)
+        else:
+            result = get_routing_for_model(model_to_use, task_prompt)
+
+        print(f"Routing task to: {result.worker['model']} ({result.lane})")
+        print("Dispatching governed query...")
+
+        harness = dispatcher._map_harness(result.worker["provider"], result.worker["model"])
+        if is_frontier_model(result.worker["model"]):
+            lane = get_frontier_lane(result.task)
+            task_class = "hard"
+        else:
+            lane = "local"
+            task_class = "hard" if args.hard else "bounded"
+
+        task_id, usage_id = dispatcher._govern_session_start(result.task, harness, lane, task_class)
+
+        output = run_agent_loop(
+            result.task,
+            result.worker["model"],
+            workspace_root,
+            ledger_dir,
+            usage_id or "none",
+            dispatcher,
+            config,
+            initial_context=context_str,
+        )
+
+        outcome = "useful"
+        if (
+            "error:" in output.lower()
+            or "dispatch error:" in output.lower()
+            or "[Agent Loop terminated" in output
+        ):
+            outcome = "no_go"
+        dispatcher._govern_session_end(usage_id, outcome)
+
+        print("\n--- Output ---")
+        print(output)
+        print("-" * 14)
+
+    else:
+        # 2. Interactive REPL Mode
+        current_model = model_to_use
+        current_usage_id = None
+        current_task_id = None
+
+        def start_repl_session(model_name):
+            nonlocal current_usage_id, current_task_id
+            if args.no_govern:
+                return
+            is_front = is_frontier_model(model_name)
+            harness = dispatcher._map_harness(
+                "frontier" if is_front else "local_ollama", model_name
+            )
+            task_class = "hard" if (args.hard or is_front) else "bounded"
+            lane = "frontier_author" if is_front else "local"
+
+            session_index = get_next_session_index(ledger_dir)
+            task_obj = f"Interactive OPR REPL session using {model_name} {session_index}"
+            current_task_id, current_usage_id = dispatcher._govern_session_start(
+                task_obj, harness, lane, task_class
+            )
+            print(
+                f"[Session: {current_usage_id} | Harness: {harness} | Class: {task_class} | Lane: {lane}]"
+            )
+
+        def end_repl_session(outcome="useful"):
+            nonlocal current_usage_id
+            if current_usage_id:
+                dispatcher._govern_session_end(current_usage_id, outcome)
+                print(f"[Session {current_usage_id} closed]")
+                current_usage_id = None
+
+        def handle_sigint(sig, frame):
+            print("\nExiting REPL...")
+            end_repl_session("useful")
+            sys.exit(0)
+
+        signal.signal(signal.SIGINT, handle_sigint)
+
+        print("\n============================================================")
+        print(" opr — Governed LLM CLI (REPL Mode)")
+        print(" Commands: /model <name> (switch model), /exit or /quit")
+        print("============================================================")
+
+        start_repl_session(current_model)
+
+        accumulated_context = ""
+        if context_str:
+            accumulated_context += f"--- Initial Context File ---\n{context_str}\n---------------------------\n"
+
+        while True:
+            try:
+                user_input = input(f"opr ({current_model})> ").strip()
+            except EOFError:
+                print("\nExiting REPL...")
+                end_repl_session("useful")
+                break
+
+            if not user_input:
+                continue
+
+            # Command execution from user
+            if user_input.startswith("!"):
+                shell_cmd = user_input[1:].strip()
+                if not shell_cmd:
+                    continue
+
+                if not config["tools"]["shell"]:
+                    print("Error: Shell execution is disabled. Run opr with --allow-run or configure tools.shell=true to enable.")
+                    audit_tool_call("!shell", shell_cmd, False, 0, current_usage_id, ledger_dir)
+                    continue
+
+                confirm = input(f"Confirm execution of: {shell_cmd} [y/N]: ").strip().lower()
+                if confirm != "y":
+                    print("Execution cancelled.")
+                    audit_tool_call("!shell", shell_cmd, False, 0, current_usage_id, ledger_dir)
+                    continue
+
+                res = subprocess.run(
+                    shell_cmd,
+                    shell=True,
+                    cwd=workspace_root,
+                    capture_output=True,
+                    text=True,
+                )
+                output = res.stdout + res.stderr
+                print(output)
+
+                audit_tool_call(
+                    "!shell",
+                    shell_cmd,
+                    True,
+                    len(output.encode("utf-8", errors="ignore")),
+                    current_usage_id,
+                    ledger_dir,
+                )
+                accumulated_context += f"\n--- Shell Command: {shell_cmd} ---\n{output}\n---------------------------\n"
+                continue
+
+            # Internal commands
+            if user_input.startswith("/"):
+                parts = user_input.split(maxsplit=1)
+                cmd = parts[0]
+                arg = parts[1].strip() if len(parts) > 1 else ""
+
+                if cmd in ("/exit", "/quit"):
+                    end_repl_session("useful")
+                    break
+                elif cmd == "/model":
+                    if not arg:
+                        print(f"Current model: {current_model}")
+                        try:
+                            response = requests.get(f"{config['local']['ollama_url'].rstrip('/')}/api/tags", timeout=5)
+                            response.raise_for_status()
+                            models = sorted(
+                                model.get("name", "")
+                                for model in response.json().get("models", [])
+                                if model.get("name")
+                            )
+                            if models:
+                                print("Available Ollama models:")
+                                for model in models:
+                                    print(f"  {model}")
+                            else:
+                                print("No Ollama models reported by the local server.")
+                        except Exception as e:
+                            print(f"Could not query Ollama models: {e}")
+                    else:
+                        new_model = arg
+                        if is_frontier_model(new_model):
+                            if not config["frontier"]["enabled"]:
+                                print(
+                                    "Model switch aborted: Frontier model access is disabled. Run opr with --allow-frontier to enable."
+                                )
+                                continue
+                        else:
+                            try:
+                                response = requests.get(
+                                    f"{config['local']['ollama_url'].rstrip('/')}/api/tags", timeout=5
+                                )
+                                response.raise_for_status()
+                                models = {
+                                    model.get("name", "")
+                                    for model in response.json().get("models", [])
+                                    if model.get("name")
+                                }
+                            except Exception as e:
+                                print(f"Model switch aborted: could not query Ollama models: {e}")
+                                continue
+
+                            if new_model not in models:
+                                print(f"Model switch aborted: Ollama model not found: {new_model}")
+                                if models:
+                                    print("Available Ollama models:")
+                                    for model in sorted(models):
+                                        print(f"  {model}")
+                                continue
+
+                        end_repl_session("useful")
+                        current_model = new_model
+                        start_repl_session(current_model)
+                    continue
+
+                elif cmd in ("/pwd", "/ls", "/cat", "/rg", "/tree"):
+                    allowed = True
+                    output = ""
+                    try:
+                        if cmd == "/pwd":
+                            output = str(workspace_root)
+                        elif cmd == "/ls":
+                            resolved = resolve_safe_path(arg, workspace_root)
+                            if not resolved.exists():
+                                raise FileNotFoundError(f"Path not found: {arg}")
+                            if resolved.is_dir():
+                                contents = sorted(
+                                    list(resolved.iterdir()),
+                                    key=lambda x: (not x.is_dir(), x.name.lower()),
+                                )
+                                output = "\n".join(
+                                    f"{'[DIR] ' if c.is_dir() else ''}{c.name}" for c in contents
+                                )
+                            else:
+                                output = resolved.name
+                        elif cmd == "/cat":
+                            if not arg:
+                                raise ValueError("Usage: /cat <path>")
+                            resolved = resolve_safe_path(arg, workspace_root)
+                            if not resolved.exists():
+                                raise FileNotFoundError(f"Path not found: {arg}")
+                            if not resolved.is_file():
+                                raise ValueError(f"Not a file: {arg}")
+                            content = resolved.read_text(errors="ignore")
+                            if len(content) > 100 * 1024:
+                                content = content[: 100 * 1024] + "\n[Content truncated due to size limit]"
+                            output = content
+                        elif cmd == "/rg":
+                            if not arg:
+                                raise ValueError("Usage: /rg <pattern> [path]")
+                            m = re.match(r'^"([^"]+)"\s*(.*)$', arg)
+                            if m:
+                                pattern_str = m.group(1)
+                                search_path = m.group(2).strip()
+                            else:
+                                parts_rg = arg.split(maxsplit=1)
+                                pattern_str = parts_rg[0]
+                                search_path = parts_rg[1].strip() if len(parts_rg) > 1 else ""
+
+                            resolved = resolve_safe_path(search_path, workspace_root)
+                            if not resolved.exists():
+                                raise FileNotFoundError(f"Path not found: {search_path if search_path else '.'}")
+
+                            pattern = re.compile(pattern_str)
+                            results = []
+                            count = 0
+                            for root, dirs, files in os.walk(resolved):
+                                dirs[:] = [
+                                    d for d in dirs if not d.startswith(".") and d != "__pycache__" and d != ".venv"
+                                ]
+                                for f in files:
+                                    file_path = Path(root) / f
+                                    if file_path.suffix in [".png", ".jpg", ".pdf", ".db", ".pyc"]:
+                                        continue
+                                    try:
+                                        relative_file = file_path.relative_to(workspace_root)
+                                        content = file_path.read_text(errors="ignore")
+                                        for idx, line in enumerate(content.splitlines(), 1):
+                                            if pattern.search(line):
+                                                results.append(f"{relative_file}:{idx}: {line}")
+                                                count += 1
+                                                if count >= 100:
+                                                    break
+                                    except Exception:
+                                        pass
+                                    if count >= 100:
+                                        break
+                                if count >= 100:
+                                    break
+                            output = "\n".join(results) if results else "No matches found."
+                        elif cmd == "/tree":
+                            resolved = resolve_safe_path(arg, workspace_root)
+                            if not resolved.exists():
+                                raise FileNotFoundError(f"Path not found: {arg if arg else '.'}")
+                            if not resolved.is_dir():
+                                raise ValueError(f"Not a directory: {arg}")
+                            tree_lines = build_tree(resolved)
+                            output = "\n".join(tree_lines)
+                    except PermissionError as pe:
+                        allowed = False
+                        output = f"Permission Error: {str(pe)}"
+                    except FileNotFoundError as fnfe:
+                        output = f"Error: {str(fnfe)}"
+                    except Exception as e:
+                        output = f"Error: {str(e)}"
+
+                    print(output)
+                    audit_tool_call(
+                        cmd,
+                        arg,
+                        allowed,
+                        len(output.encode("utf-8", errors="ignore")),
+                        current_usage_id,
+                        ledger_dir,
+                    )
+
+                    if allowed and not output.startswith("Error:"):
+                        accumulated_context += f"\n--- Tool Output: {cmd} {arg} ---\n{output}\n---------------------------\n"
+                    continue
+
+                elif cmd in ("/run", "/write", "/patch"):
+                    allowed = True
+                    output = ""
+                    try:
+                        if cmd == "/run":
+                            if not config["tools"]["shell"]:
+                                allowed = False
+                                raise PermissionError(
+                                    "Shell execution is disabled. Run opr with --allow-run or configure tools.shell=true to enable."
+                                )
+                            if not arg:
+                                raise ValueError("Usage: /run <command>")
+
+                            confirm = input(f"Confirm execution of: {arg} [y/N]: ").strip().lower()
+                            if confirm != "y":
+                                raise ValueError("Execution cancelled by user.")
+
+                            res = subprocess.run(
+                                arg,
+                                shell=True,
+                                cwd=workspace_root,
+                                capture_output=True,
+                                text=True,
+                            )
+                            output = res.stdout + res.stderr
+
+                        elif cmd in ("/write", "/patch"):
+                            if not config["tools"]["write"]:
+                                allowed = False
+                                raise PermissionError(
+                                    "File writing is disabled. Run opr with --allow-write or configure tools.write to enable."
+                                )
+                            if not arg:
+                                raise ValueError(f"Usage: {cmd} <path>")
+
+                            resolved = resolve_safe_path(arg, workspace_root)
+
+                            if cmd == "/write":
+                                print("Enter file content. Type EOF on a new line when finished:")
+                                lines = []
+                                while True:
+                                    try:
+                                        line = input()
+                                        if line.strip() == "EOF":
+                                            break
+                                        lines.append(line)
+                                    except EOFError:
+                                        break
+                                content = "\n".join(lines)
+
+                                confirm = input(f"Confirm writing to {arg}? [y/N]: ").strip().lower()
+                                if confirm != "y":
+                                    raise ValueError("Write cancelled by user.")
+
+                                resolved.write_text(content)
+                                output = f"Successfully wrote {len(content)} bytes to {arg}."
+
+                            elif cmd == "/patch":
+                                if not resolved.exists():
+                                    raise FileNotFoundError(f"File not found: {arg}")
+                                if not resolved.is_file():
+                                    raise ValueError(f"Not a file: {arg}")
+
+                                print("Enter target block to replace (exact match). Type EOF on a new line when finished:")
+                                lines_target = []
+                                while True:
+                                    try:
+                                        line = input()
+                                        if line.strip() == "EOF":
+                                            break
+                                        lines_target.append(line)
+                                    except EOFError:
+                                        break
+                                target_content = "\n".join(lines_target)
+
+                                print("Enter replacement block. Type EOF on a new line when finished:")
+                                lines_repl = []
+                                while True:
+                                    try:
+                                        line = input()
+                                        if line.strip() == "EOF":
+                                            break
+                                        lines_repl.append(line)
+                                    except EOFError:
+                                        break
+                                repl_content = "\n".join(lines_repl)
+
+                                existing_content = resolved.read_text(errors="ignore")
+                                if target_content not in existing_content:
+                                    raise ValueError("Target content to replace not found in the file.")
+
+                                confirm = input(f"Confirm patching {arg}? [y/N]: ").strip().lower()
+                                if confirm != "y":
+                                    raise ValueError("Patch cancelled by user.")
+
+                                new_content = existing_content.replace(target_content, repl_content)
+                                resolved.write_text(new_content)
+                                output = f"Successfully patched {arg}."
+                    except PermissionError as pe:
+                        allowed = False
+                        output = f"Permission Error: {str(pe)}"
+                    except FileNotFoundError as fnfe:
+                        output = f"Error: {str(fnfe)}"
+                    except Exception as e:
+                        output = f"Error: {str(e)}"
+
+                    print(output)
+                    audit_tool_call(
+                        cmd,
+                        arg,
+                        allowed,
+                        len(output.encode("utf-8", errors="ignore")),
+                        current_usage_id,
+                        ledger_dir,
+                    )
+
+                    if allowed and not output.startswith("Error:"):
+                        accumulated_context += f"\n--- Tool Output: {cmd} {arg} ---\n{output}\n---------------------------\n"
+                    continue
+                else:
+                    print(f"Unknown REPL command: {cmd}")
+                    continue
+
+            # Run agent loop for prompt
+            output = run_agent_loop(
+                user_input,
+                current_model,
+                workspace_root,
+                ledger_dir,
+                current_usage_id or "none",
+                dispatcher,
+                config,
+                initial_context=accumulated_context,
+            )
+
+            print("\n--- Output ---")
+            print(output)
+            print("-" * 14 + "\n")
+
+
+if __name__ == "__main__":
+    main()

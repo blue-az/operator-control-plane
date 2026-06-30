@@ -1,8 +1,8 @@
 ---
 id: pbc_opr_governed_llm_client
-title: "opr Governed LLM Client — Behavior Contract Draft"
+title: "opr Governed LLM Client — Behavior Contract"
 context: opr-generalization
-status: draft
+status: active
 tags:
   - pbc
   - owner-manual
@@ -10,16 +10,15 @@ tags:
   - governed-client
 ---
 
-# opr Governed LLM Client — Behavior Contract Draft
+# opr Governed LLM Client — Behavior Contract
 
-> Draft PBC for extracting `opr` from Project Phoenix into `operator-control-plane`.
+> PBC for `opr` client integration inside `operator-control-plane`.
 
 ## Scope
 
 `opr` is the interactive and one-shot LLM client surface governed by the operator ledger. It brokers
 local model execution, optional frontier CLI pass-through, bounded workspace read tools, and session
-usage records. This contract describes the target open-source behavior; it is not yet proof that
-`opr` is implemented in this repository.
+usage records. This contract describes the verified open-source behavior implemented in this repository.
 
 ## Non-Goals
 
@@ -130,24 +129,22 @@ trust: provisional
 ## Provenance
 
 ```pbc:provenance
-- ref: "/home/blueaz/Python/project-phoenix/scripts/opr"
+- ref: "opr"
   confidence: verified
-  review_status: "reviewed-local"
-  note: "Current working prototype with local tools, model switching, frontier CLI pass-through, and operator ledger writes."
-- ref: "/home/blueaz/Python/project-phoenix/BOTTLENECKS.md"
+  review_status: "active"
+  note: "Fully generalized client script implemented in the root of the repository."
+- ref: "tests/test_opr.py"
   confidence: verified
-  review_status: "reviewed-local"
-  note: "Contains the open bottleneck to generalize opr into operator-control-plane with ~/.config/operator/opr.yaml."
+  review_status: "active"
+  note: "Unit and integration tests verifying configurations, safe path boundary checks, and routing."
 - ref: "OPR_GENERALIZATION_SPEC.md"
-  confidence: inferred
-  review_status: "draft"
-  note: "Companion migration spec in this repository."
+  confidence: verified
+  review_status: "active"
+  note: "Completed generalization spec requirements."
 ```
 
 ## Open Risks
 
-- `opr` is still implemented outside this repository, so this contract currently describes target
-  behavior rather than local code-backed behavior.
 - Tool audit logs may need promotion from sidecar JSONL into first-class operator records.
 - Frontier CLI usage and cost import are provider-specific and should not be over-claimed before
   transcript/status parsing is implemented.
