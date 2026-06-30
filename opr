@@ -203,6 +203,29 @@ def is_frontier_model(model_name: str) -> bool:
     )
 
 
+def get_local_ollama_models(config: dict, refresh: bool = False) -> set[str]:
+    if not refresh and "_local_ollama_models" in config:
+        return config["_local_ollama_models"]
+
+    try:
+        response = requests.get(f"{config['local']['ollama_url'].rstrip('/')}/api/tags", timeout=5)
+        response.raise_for_status()
+        models = {
+            model.get("name", "")
+            for model in response.json().get("models", [])
+            if model.get("name")
+        }
+    except Exception:
+        models = set()
+
+    config["_local_ollama_models"] = models
+    return models
+
+
+def is_effective_frontier_model(model_name: str, config: dict) -> bool:
+    return is_frontier_model(model_name) and model_name not in get_local_ollama_models(config)
+
+
 def get_frontier_lane(prompt: str) -> str:
     lower_p = prompt.lower()
     review_keywords = [
@@ -340,8 +363,8 @@ class RoutingResult:
         self.worker = worker
 
 
-def get_routing_for_model(model_name: str, task_prompt: str) -> RoutingResult:
-    is_front = is_frontier_model(model_name)
+def get_routing_for_model(model_name: str, task_prompt: str, config: dict | None = None) -> RoutingResult:
+    is_front = is_effective_frontier_model(model_name, config) if config else is_frontier_model(model_name)
     if is_front:
         harness = (
             "claude"
@@ -377,9 +400,9 @@ def route_task(task_prompt: str, config: dict) -> RoutingResult:
     
     if needs_frontier and config.get("frontier", {}).get("enabled", False):
         model = "claude" if "claude" in lower_p else "codex"
-        return get_routing_for_model(model, task_prompt)
+        return get_routing_for_model(model, task_prompt, config)
     else:
-        return get_routing_for_model(default_model, task_prompt)
+        return get_routing_for_model(default_model, task_prompt, config)
 
 
 def execute_model_tool(
@@ -659,7 +682,7 @@ def run_agent_loop(
         prompt = prepare_prompt(task_input, accumulated_context)
 
         # Context confirmation check for frontier models
-        if is_frontier_model(current_model) and accumulated_context:
+        if is_effective_frontier_model(current_model, config) and accumulated_context:
             print("Warning: You are about to send local tool output context to a frontier provider.")
             confirm = input("Confirm sending accumulated context to frontier provider? [y/N]: ").strip().lower()
             if confirm != "y":
@@ -667,7 +690,7 @@ def run_agent_loop(
                 return "[Aborted: User declined context sharing with frontier model]"
 
         print("Thinking...")
-        if is_frontier_model(current_model):
+        if is_effective_frontier_model(current_model, config):
             response = dispatch_frontier(current_model, prompt, workspace_root, config)
         else:
             response = dispatcher._dispatch_ollama(current_model, prompt, config["local"]["ollama_url"])
@@ -798,7 +821,7 @@ def main():
     else:
         model_to_use = config.get("default_model", "gemma4:26b")
 
-    if is_frontier_model(model_to_use) and not config["frontier"]["enabled"]:
+    if is_effective_frontier_model(model_to_use, config) and not config["frontier"]["enabled"]:
         print(
             "Error: Frontier model access is disabled. Run opr with --allow-frontier or configure frontier.enabled=true.",
             file=sys.stderr,
@@ -809,7 +832,7 @@ def main():
         # 1. Positional Prompt Execution
         task_prompt = f"Context:\n{context_str}\n\nTask:\n{args.task}" if context_str else args.task
 
-        if is_frontier_model(model_to_use) and context_str:
+        if is_effective_frontier_model(model_to_use, config) and context_str:
             print("Warning: You are about to send local tool output context to a frontier provider.")
             confirm = input("Confirm sending accumulated context to frontier provider? [y/N]: ").strip().lower()
             if confirm != "y":
@@ -820,13 +843,13 @@ def main():
         if not args.frontier and not args.model:
             result = route_task(task_prompt, config)
         else:
-            result = get_routing_for_model(model_to_use, task_prompt)
+            result = get_routing_for_model(model_to_use, task_prompt, config)
 
         print(f"Routing task to: {result.worker['model']} ({result.lane})")
         print("Dispatching governed query...")
 
         harness = dispatcher._map_harness(result.worker["provider"], result.worker["model"])
-        if is_frontier_model(result.worker["model"]):
+        if is_effective_frontier_model(result.worker["model"], config):
             lane = get_frontier_lane(result.task)
             task_class = "hard"
         else:
@@ -869,7 +892,7 @@ def main():
             nonlocal current_usage_id, current_task_id
             if args.no_govern:
                 return
-            is_front = is_frontier_model(model_name)
+            is_front = is_effective_frontier_model(model_name, config)
             harness = dispatcher._map_harness(
                 "frontier" if is_front else "local_ollama", model_name
             )
@@ -989,32 +1012,19 @@ def main():
                             print(f"Could not query Ollama models: {e}")
                     else:
                         new_model = arg
-                        if is_frontier_model(new_model):
+                        local_models = get_local_ollama_models(config, refresh=True)
+                        if is_frontier_model(new_model) and new_model not in local_models:
                             if not config["frontier"]["enabled"]:
                                 print(
                                     "Model switch aborted: Frontier model access is disabled. Run opr with --allow-frontier to enable."
                                 )
                                 continue
                         else:
-                            try:
-                                response = requests.get(
-                                    f"{config['local']['ollama_url'].rstrip('/')}/api/tags", timeout=5
-                                )
-                                response.raise_for_status()
-                                models = {
-                                    model.get("name", "")
-                                    for model in response.json().get("models", [])
-                                    if model.get("name")
-                                }
-                            except Exception as e:
-                                print(f"Model switch aborted: could not query Ollama models: {e}")
-                                continue
-
-                            if new_model not in models:
+                            if new_model not in local_models:
                                 print(f"Model switch aborted: Ollama model not found: {new_model}")
-                                if models:
+                                if local_models:
                                     print("Available Ollama models:")
-                                    for model in sorted(models):
+                                    for model in sorted(local_models):
                                         print(f"  {model}")
                                 continue
 

@@ -104,6 +104,12 @@ class TestOprRouting(unittest.TestCase):
         self.assertFalse(opr.is_frontier_model("gemma4:26b"))
         self.assertFalse(opr.is_frontier_model("llama3:8b"))
 
+    def test_local_ollama_model_overrides_frontier_name_heuristic(self):
+        config = opr.load_config("/nonexistent/opr.yaml")
+        config["_local_ollama_models"] = {"gpt-oss:latest"}
+        self.assertTrue(opr.is_frontier_model("gpt-oss:latest"))
+        self.assertFalse(opr.is_effective_frontier_model("gpt-oss:latest", config))
+
     def test_get_frontier_lane(self):
         self.assertEqual(opr.get_frontier_lane("review the code changes"), "frontier_driver")
         self.assertEqual(opr.get_frontier_lane("write a python script"), "frontier_author")
@@ -127,6 +133,14 @@ class TestOprRouting(unittest.TestCase):
         result = opr.route_task("use claude to write a compiler", config)
         self.assertEqual(result.worker["model"], "claude")
         self.assertEqual(result.lane, "lane_3_strong_model")
+
+    def test_route_task_default_gpt_oss_local(self):
+        config = opr.load_config("/nonexistent/opr.yaml")
+        config["default_model"] = "gpt-oss:latest"
+        config["_local_ollama_models"] = {"gpt-oss:latest"}
+        result = opr.route_task("implement feature", config)
+        self.assertEqual(result.worker["model"], "gpt-oss:latest")
+        self.assertEqual(result.worker["provider"], "local_ollama")
 
 
 if __name__ == "__main__":
