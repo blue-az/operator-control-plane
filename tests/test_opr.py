@@ -3,6 +3,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import importlib.machinery
@@ -68,6 +69,31 @@ tools:
         self.assertEqual(config["default_model"], "my-custom-model")
         self.assertTrue(config["frontier"]["enabled"])
         self.assertTrue(config["tools"]["write"])
+
+
+class TestOprGovernanceSetup(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp_dir = Path(tempfile.mkdtemp()).resolve()
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.temp_dir)
+
+    def test_initialize_ledger_requires_operator_when_governed(self):
+        with self.assertRaises(FileNotFoundError) as ctx:
+            opr.initialize_ledger(str(self.temp_dir), None, govern=True)
+        self.assertIn("Governed ledger binary not found", str(ctx.exception))
+
+    def test_initialize_ledger_skips_operator_when_not_governed(self):
+        result = opr.initialize_ledger(str(self.temp_dir), None, govern=False)
+        self.assertEqual(result, str(self.temp_dir))
+        self.assertFalse((self.temp_dir / ".operator").exists())
+
+    def test_configured_operator_bin_can_be_found_on_path(self):
+        with mock.patch.object(opr.shutil, "which", return_value="/usr/local/bin/operator"):
+            self.assertEqual(
+                opr.find_operator_bin({"operator_bin": "custom-operator"}),
+                "/usr/local/bin/operator",
+            )
 
 
 class TestOprRouting(unittest.TestCase):

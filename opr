@@ -5,6 +5,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import signal
 import subprocess
 import sys
@@ -34,7 +35,8 @@ def load_config(config_path_opt=None):
             "read": True,
             "shell": False,
             "write": False
-        }
+        },
+        "operator_bin": None,
     }
     
     config_path = config_path_opt
@@ -59,26 +61,49 @@ def load_config(config_path_opt=None):
     return default_config
 
 
-def find_operator_bin():
+def find_operator_bin(config=None):
+    configured_bin = (config or {}).get("operator_bin")
+    if configured_bin:
+        configured_path = Path(os.path.expanduser(configured_bin))
+        if configured_path.exists() and os.access(configured_path, os.X_OK):
+            return str(configured_path.resolve())
+        path_op = shutil.which(configured_bin)
+        if path_op:
+            return path_op
+
     script_dir = Path(__file__).resolve().parent
     local_op = script_dir / "operator"
     if local_op.exists() and os.access(local_op, os.X_OK):
         return str(local_op)
-    import shutil
+
     path_op = shutil.which("operator")
     if path_op:
         return path_op
-    return "operator"
+    return None
 
 
-def initialize_ledger(ledger_dir, operator_bin):
+def initialize_ledger(ledger_dir, operator_bin, govern=True):
+    if not govern:
+        return ledger_dir
+    if not operator_bin:
+        raise FileNotFoundError(
+            "Governed ledger binary not found. Run opr from an operator-control-plane checkout, "
+            "put 'operator' on PATH, or set operator_bin in ~/.config/operator/opr.yaml. "
+            "Use --no-govern only for unguided smoke tests."
+        )
     if not os.path.exists(os.path.join(ledger_dir, ".operator")):
         os.makedirs(ledger_dir, exist_ok=True)
-        subprocess.run(
+        res = subprocess.run(
             [operator_bin, "init"],
             cwd=ledger_dir,
             capture_output=True,
+            text=True,
         )
+        if res.returncode != 0:
+            raise RuntimeError(
+                f"Failed to initialize governed ledger with {operator_bin}: "
+                f"{(res.stdout + res.stderr).strip()}"
+            )
     return ledger_dir
 
 
@@ -733,8 +758,9 @@ def main():
     if args.allow_frontier:
         config["frontier"]["enabled"] = True
 
-    operator_bin = find_operator_bin()
-    ledger_dir = initialize_ledger(config["ledger_root"], operator_bin)
+    govern_enabled = not args.no_govern
+    operator_bin = find_operator_bin(config) if govern_enabled else ""
+    ledger_dir = initialize_ledger(config["ledger_root"], operator_bin, govern=govern_enabled)
     workspace_root = Path(config["workspace_root"]).resolve()
 
     # Load context if specified
@@ -753,7 +779,7 @@ def main():
             sys.exit(1)
 
     dispatcher = Dispatcher(
-        govern=not args.no_govern,
+        govern=govern_enabled,
         govern_cli=operator_bin,
         govern_dir=ledger_dir,
     )
