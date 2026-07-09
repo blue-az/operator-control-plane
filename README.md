@@ -9,6 +9,11 @@ the executing OS identity, guards against self-verification, and ships a `doctor
 Built as the "engine room / logbook" enforcement substrate for [Bulkhead τ](https://bulkheadtau.com),
 but it stands alone. **Contributions welcome** — especially on the open problems below.
 
+![opr REPL example: confirmation-gated shell and file writes on the left; /model switching across local models on the right](docs/opr-example.png)
+
+*The `opr` governed REPL: every shell command and model-initiated file write requires explicit
+confirmation, each session is a tracked usage record, and `/model` swaps local models mid-conversation.*
+
 ## Quickstart
 
 ```bash
