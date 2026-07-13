@@ -1,10 +1,11 @@
 # Operator Control Plane
 
-A small, local, file-backed **governance ledger for multi-agent software work.** It enforces a
+A small, local **governance ledger for multi-agent software work.** It enforces a
 **narration-vs-execution partition**: an agent's *claim* ("I did X, it passes") is only as good as the
 *evidence* attached to it and the *verification* by a different identity. The `operator` CLI records
-tasks → claims → evidence → verifications as append-only YAML under `.operator/`, binds each write to
-the executing OS identity, guards against self-verification, and ships a `doctor` consistency checker.
+tasks → claims → evidence → verifications as YAML projections under `.operator/`, preserves each
+trust-relevant write in an append-only SQLite event history, binds writes to the executing OS identity,
+guards against self-verification, and ships a `doctor` consistency checker.
 
 Built as the "engine room / logbook" enforcement substrate for [Bulkhead τ](https://bulkheadtau.com),
 but it stands alone. **Contributions welcome** — especially on the open problems below.
@@ -23,14 +24,16 @@ pip install -r requirements.txt        # just PyYAML
 pytest tests/                          # subprocess-driven tests + synthetic session fixtures
 ```
 
-The ledger (`.operator/`) is gitignored — it's your work history, not the tool.
+The ledger (`.operator/`) is gitignored — it's your work history, not the tool. Its durable local event
+history is stored in `.operator/ledger.sqlite3`.
 
 ## Commands
 
 The `operator` CLI exposes 20 subcommands across the task → claim → evidence → verification →
 session → usage lifecycle. Run `./operator <command> --help` for full flags.
 
-**Setup** — `init` create the `.operator/` ledger in the current repo.
+**Setup** — `init` creates the `.operator/` ledger in the current repo. Re-running it on an existing
+YAML-only ledger baselines those records into SQLite without changing their visible IDs or files.
 
 **Tasks**
 - `task-create --objective "…" [--id ID] [--repo R] [--assign A] [--review R]` — open a task.
@@ -52,7 +55,8 @@ session → usage lifecycle. Run `./operator <command> --help` for full flags.
   **self-verification**, and **enforcement downgrades** (a claim that would be rejected under
   enforced identity mode but is silently accepted under `single_user`). Fails closed (exit code 1) on
   verified/completed records if they lack required evidence files, target repository references,
-  matching gate/test files, or valid command run hashes.
+  matching gate/test files, or valid command run hashes. It also verifies SQLite event hashes and
+  compares each latest event with the corresponding YAML projection.
 
 **Sessions** (track a coding session and its cost)
 - `session-start --harness H [--task ID] [--force]`
@@ -120,7 +124,15 @@ set of product-facing config:
   In `enforced` mode, writes bind to the executing OS uid and a claim verified by the wrong
   identity is **rejected** (impersonation guard). In `single_user` mode the binding is advisory —
   and `doctor` warns when a claim *would* be rejected under enforced mode (an enforcement downgrade).
-- **`.operator/{tasks,claims,evidence,sessions}/`** — append-only YAML records (the ledger; gitignored).
+- **`.operator/{tasks,claims,evidence,handoffs,usage}/`** — current YAML projections (gitignored).
+- **`.operator/ledger.sqlite3`** — append-only, full-snapshot event versions for task, claim,
+  evidence, handoff, and usage/session records. Session commands version their `usage-XXXX` record.
+
+SQLite is the durable audit history for CLI writes; YAML remains the compatibility read surface. Event
+versions are allocated transactionally, linked by per-record SHA-256 hashes, and protected from
+`UPDATE`/`DELETE` through database triggers. `doctor` reports divergence but does not silently repair
+either side. Because both live on the same writable disk, this improves local durability and
+auditability; it is not an off-machine backup or an adversarial tamper-proof boundary.
 
 This config is what makes the guarantees real: the gate, the identities, and the fail-closed
 verification all read from it.
@@ -139,8 +151,9 @@ unverified claims are worthless):
 - **Honor-system `verified_by` in `single_user` mode.** When every agent runs under one OS user,
   identity enforcement is advisory — the builder can assert the reviewer's name. Real enforcement needs
   distinct OS users / containers, or a write-isolated reviewer. *Hard problem; ideas welcome.*
-- **The ledger is local-only and unbacked.** `.operator/` is gitignored; a disk wipe loses the audit
-  trail. Evidence written to `/tmp` has been lost this way. Wants a durable, tamper-evident store.
+- **The durable ledger is still local-only.** SQLite preserves version history when a YAML projection
+  is damaged or removed, but `.operator/` remains gitignored and has no off-machine backup. A disk
+  loss can still remove both the event history and copied evidence.
 - **The policy gate is self-amendable.** Any agent with write access to the config can weaken the gate
   it's supposed to be bound by. Wants out-of-band / immutable policy.
 - **Evidence binding.** Prefer binding a *re-runnable structural test* over a captured blob or a

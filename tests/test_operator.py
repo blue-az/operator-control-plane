@@ -6,9 +6,12 @@ Validates the full spine of commands using a temporary workspace.
 
 from __future__ import annotations
 
+import concurrent.futures
 import hashlib
 import os
 import shutil
+import sqlite3
+import stat
 import subprocess
 import tempfile
 import unittest
@@ -45,6 +48,24 @@ class TestOperatorCLI(unittest.TestCase):
             env=run_env,
         )
 
+    def rebaseline_ledger(self) -> None:
+        db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        for suffix in ("", "-wal", "-shm"):
+            Path(f"{db_path}{suffix}").unlink(missing_ok=True)
+        res = self.run_operator("init")
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+    def read_ledger_events(self) -> list[sqlite3.Row]:
+        db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        try:
+            return conn.execute(
+                "SELECT * FROM ledger_events ORDER BY record_type, record_id, version"
+            ).fetchall()
+        finally:
+            conn.close()
+
     def test_init_creates_structure(self) -> None:
         res = self.run_operator("init")
         self.assertEqual(res.returncode, 0, f"init failed: {res.stderr}")
@@ -58,10 +79,554 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertTrue((op_path / "evidence").exists())
         self.assertTrue((op_path / "usage").exists())
         self.assertTrue((op_path / "briefs").exists())
+        self.assertTrue((op_path / "ledger.sqlite3").exists())
 
         # Verify default harnesses
         self.assertTrue((op_path / "harnesses" / "codex.yaml").exists())
         self.assertTrue((op_path / "harnesses" / "claude.yaml").exists())
+
+    def test_durable_event_ledger_tracks_record_history(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Exercise durable writes",
+                "--id",
+                "durable-task",
+                "--assign",
+                "codex",
+            ).returncode,
+            0,
+        )
+        self.assertEqual(
+            self.run_operator(
+                "claim-add",
+                "--type",
+                "real_data",
+                "--text",
+                "A bounded claim",
+                "--gate",
+                "manual provenance review",
+            ).returncode,
+            0,
+        )
+
+        source = Path(self.temp_dir) / "evidence.txt"
+        source.write_text("evidence")
+        self.assertEqual(
+            self.run_operator(
+                "evidence-attach",
+                "--claim",
+                "claim-0001",
+                "--type",
+                "manifest",
+                str(source),
+            ).returncode,
+            0,
+        )
+        self.assertEqual(
+            self.run_operator(
+                "session-start", "--task", "durable-task", "--harness", "codex"
+            ).returncode,
+            0,
+        )
+        self.assertEqual(
+            self.run_operator(
+                "session-end", "usage-0001", "--outcome", "useful", "--cost", "0"
+            ).returncode,
+            0,
+        )
+        self.assertEqual(
+            self.run_operator(
+                "usage-add",
+                "--harness",
+                "codex",
+                "--task",
+                "durable-task",
+                stdin_data="manual usage snapshot",
+            ).returncode,
+            0,
+        )
+        self.assertEqual(
+            self.run_operator(
+                "handoff-add",
+                "--task",
+                "durable-task",
+                "--changed",
+                "Durable history exercised",
+                "--next-action",
+                "Review the event rows",
+            ).returncode,
+            0,
+        )
+
+        rows = self.read_ledger_events()
+        self.assertEqual(
+            {row["record_type"] for row in rows},
+            {"task", "claim", "evidence", "usage", "handoff"},
+        )
+        by_record = {}
+        for row in rows:
+            by_record.setdefault((row["record_type"], row["record_id"]), []).append(row)
+
+        self.assertGreater(len(by_record[("task", "durable-task")]), 1)
+        self.assertEqual([row["version"] for row in by_record[("claim", "claim-0001")]], [1, 2])
+        session_rows = by_record[("usage", "usage-0001")]
+        self.assertEqual(
+            [row["event_type"] for row in session_rows], ["session_started", "session_ended"]
+        )
+        self.assertEqual(session_rows[1]["previous_event_hash"], session_rows[0]["event_hash"])
+        self.assertEqual(
+            [row["source_command"] for row in session_rows], ["session-start", "session-end"]
+        )
+
+        db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        conn = sqlite3.connect(db_path)
+        try:
+            with self.assertRaises(sqlite3.IntegrityError):
+                conn.execute("UPDATE ledger_events SET event_type = 'changed'")
+            conn.rollback()
+            with self.assertRaises(sqlite3.IntegrityError):
+                conn.execute("DELETE FROM ledger_events")
+        finally:
+            conn.close()
+
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+
+    def test_doctor_reconciles_yaml_with_durable_history(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Reconcile projections", "--id", "reconcile-task"
+        )
+        self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Original claim",
+            "--gate",
+            "manual provenance review",
+        )
+        source = Path(self.temp_dir) / "source.yaml"
+        source.write_text("source: true\n")
+        self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "manifest",
+            str(source),
+        )
+
+        op_path = Path(self.temp_dir) / ".operator"
+        evidence_record = yaml.safe_load(
+            (op_path / "evidence" / "reconcile-task" / "evidence-0001.yaml").read_text()
+        )
+        self.assertTrue(evidence_record["path_or_url"].endswith("artifact-evidence-0001.yaml"))
+        self.assertTrue(Path(evidence_record["path_or_url"]).exists())
+        self.assertEqual(self.run_operator("doctor").returncode, 0)
+        claim_path = op_path / "claims" / "claim-0001.yaml"
+        original_claim = claim_path.read_text()
+        changed_claim = yaml.safe_load(original_claim)
+        changed_claim["text"] = "Changed outside the CLI"
+        claim_path.write_text(yaml.safe_dump(changed_claim))
+
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("Durable ledger mismatch for claim claim-0001", res.stdout)
+
+        claim_path.write_text(": [malformed")
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("cannot parse YAML projection claims/claim-0001.yaml", res.stdout)
+
+        claim_path.write_text(original_claim)
+        evidence_path = op_path / "evidence" / "reconcile-task" / "evidence-0001.yaml"
+        evidence_path.unlink()
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn(
+            "Durable ledger latest evidence reconcile-task/evidence-0001 has no YAML projection",
+            res.stdout,
+        )
+
+    def test_concurrent_claim_creation_keeps_ids_distinct(self) -> None:
+        self.run_operator("init")
+        task_ids = [f"concurrent-task-{index}" for index in range(8)]
+        for task_id in task_ids:
+            res = self.run_operator(
+                "task-create", "--objective", f"Task {task_id}", "--id", task_id
+            )
+            self.assertEqual(res.returncode, 0, res.stderr)
+
+        def add_claim(task_id: str) -> subprocess.CompletedProcess[str]:
+            return self.run_operator(
+                "claim-add",
+                "--task",
+                task_id,
+                "--type",
+                "real_data",
+                "--text",
+                f"Claim for {task_id}",
+                "--gate",
+                "manual review",
+            )
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(task_ids)) as pool:
+            results = list(pool.map(add_claim, task_ids))
+        for result in results:
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+        op_path = Path(self.temp_dir) / ".operator"
+        claim_files = sorted((op_path / "claims").glob("claim-*.yaml"))
+        self.assertEqual(len(claim_files), len(task_ids))
+        claims = [yaml.safe_load(path.read_text()) for path in claim_files]
+        self.assertEqual({claim["task_id"] for claim in claims}, set(task_ids))
+        self.assertEqual(len({claim["claim_id"] for claim in claims}), len(task_ids))
+
+        rows = [row for row in self.read_ledger_events() if row["record_type"] == "claim"]
+        self.assertEqual(len(rows), len(task_ids))
+        self.assertTrue(all(row["version"] == 1 for row in rows))
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+
+    def test_multirecord_write_preflights_and_doctor_finds_orphans(self) -> None:
+        self.run_operator("init")
+        self.run_operator("task-create", "--objective", "Preflight task", "--id", "preflight-task")
+        op_path = Path(self.temp_dir) / ".operator"
+        task_path = op_path / "tasks" / "preflight-task.yaml"
+        original_task = task_path.read_text()
+        changed_task = yaml.safe_load(original_task)
+        changed_task["objective"] = "Changed outside the CLI"
+        task_path.write_text(yaml.safe_dump(changed_task))
+
+        res = self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Must not be partially written",
+            "--gate",
+            "manual review",
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("differs from the durable ledger", res.stderr)
+        self.assertEqual(list((op_path / "claims").glob("claim-*.yaml")), [])
+        self.assertFalse(any(row["record_type"] == "claim" for row in self.read_ledger_events()))
+
+        task_path.write_text(original_task)
+        res = self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Referenced claim",
+            "--gate",
+            "manual review",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        task_data = yaml.safe_load(task_path.read_text())
+        task_data["claims"] = []
+        task_path.write_text(yaml.safe_dump(task_data))
+        self.rebaseline_ledger()
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn(
+            "Claim claim-0001 is not referenced by owning task preflight-task", res.stdout
+        )
+
+    def test_evidence_cannot_cross_task_claim_boundaries(self) -> None:
+        self.run_operator("init")
+        self.run_operator("task-create", "--objective", "Task A", "--id", "task-a")
+        self.run_operator("task-create", "--objective", "Task B", "--id", "task-b")
+        self.run_operator(
+            "claim-add",
+            "--task",
+            "task-b",
+            "--type",
+            "real_data",
+            "--text",
+            "Task B claim",
+            "--gate",
+            "manual review",
+        )
+        source = Path(self.temp_dir) / "cross-task.txt"
+        source.write_text("evidence")
+
+        res = self.run_operator(
+            "evidence-attach",
+            "--task",
+            "task-a",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "manifest",
+            str(source),
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("belongs to task 'task-b', not 'task-a'", res.stderr)
+        self.assertEqual(
+            list((Path(self.temp_dir) / ".operator" / "evidence" / "task-a").glob("*")),
+            [],
+        )
+        self.assertFalse(any(row["record_type"] == "evidence" for row in self.read_ledger_events()))
+        self.assertEqual(self.run_operator("doctor").returncode, 0)
+
+    def test_existing_yaml_ledger_bootstraps_on_init(self) -> None:
+        self.run_operator("init")
+        self.run_operator("task-create", "--objective", "Legacy YAML task", "--id", "legacy-task")
+        self.rebaseline_ledger()
+
+        rows = self.read_ledger_events()
+        task_rows = [
+            row
+            for row in rows
+            if row["record_type"] == "task" and row["record_id"] == "legacy-task"
+        ]
+        self.assertEqual(len(task_rows), 1)
+        self.assertEqual(task_rows[0]["version"], 1)
+        self.assertEqual(task_rows[0]["event_type"], "baseline_imported")
+        self.assertEqual(task_rows[0]["source_command"], "legacy-bootstrap")
+
+        res = self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Post-migration claim",
+            "--gate",
+            "manual review",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+
+    def test_symlinked_operator_directory_keeps_event_logging_enabled(self) -> None:
+        self.run_operator("init")
+        original_operator_dir = Path(self.temp_dir) / ".operator"
+        shared_ledger = Path(self.temp_dir) / "shared-ledger"
+        original_operator_dir.rename(shared_ledger)
+
+        workspace = Path(self.temp_dir) / "workspace"
+        workspace.mkdir()
+        (workspace / ".operator").symlink_to(shared_ledger, target_is_directory=True)
+        os.chdir(workspace)
+
+        res = self.run_operator(
+            "task-create", "--objective", "Symlinked ledger", "--id", "symlink-task"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        conn = sqlite3.connect(shared_ledger / "ledger.sqlite3")
+        try:
+            task_event_count = conn.execute(
+                """
+                SELECT COUNT(*) FROM ledger_events
+                WHERE record_type = 'task' AND record_id = 'symlink-task'
+                """
+            ).fetchone()[0]
+        finally:
+            conn.close()
+        self.assertEqual(task_event_count, 1)
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+
+    def test_task_ids_cannot_escape_the_ledger_layout(self) -> None:
+        self.run_operator("init")
+        for task_id in ("../escaped-task", "nested/task", ".hidden-task"):
+            res = self.run_operator(
+                "task-create", "--objective", "Invalid task ID", "--id", task_id
+            )
+            self.assertEqual(res.returncode, 1)
+            self.assertIn("Task ID must start with an alphanumeric character", res.stderr)
+
+        op_path = Path(self.temp_dir) / ".operator"
+        self.assertFalse((op_path / "escaped-task.yaml").exists())
+        self.assertFalse((op_path / "tasks" / "nested" / "task.yaml").exists())
+        self.assertEqual(self.run_operator("doctor").returncode, 0)
+
+    def test_lookup_ids_cannot_escape_the_ledger_layout(self) -> None:
+        self.run_operator("init")
+        self.run_operator("task-create", "--objective", "Safe task", "--id", "safe-task")
+        op_path = Path(self.temp_dir) / ".operator"
+
+        victim_task_id = str(Path(self.temp_dir) / "victim-task")
+        victim_task_path = Path(f"{victim_task_id}.yaml")
+        victim_task_path.write_text(
+            yaml.safe_dump(
+                {
+                    "task_id": victim_task_id,
+                    "objective": "Outside the ledger",
+                    "claims": [],
+                }
+            )
+        )
+        original_task = victim_task_path.read_text()
+        res = self.run_operator(
+            "claim-add",
+            "--task",
+            victim_task_id,
+            "--type",
+            "real_data",
+            "--text",
+            "Must not touch an external task file",
+            "--gate",
+            "manual review",
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("Task ID must start with an alphanumeric character", res.stderr)
+        self.assertEqual(victim_task_path.read_text(), original_task)
+        self.assertEqual(list((op_path / "claims").glob("claim-*.yaml")), [])
+
+        safe_task_path = op_path / "tasks" / "safe-task.yaml"
+        original_safe_task = safe_task_path.read_text()
+        mismatched_task = yaml.safe_load(original_safe_task)
+        mismatched_task["task_id"] = "different-task"
+        safe_task_path.write_text(yaml.safe_dump(mismatched_task))
+        res = self.run_operator(
+            "claim-add",
+            "--task",
+            "safe-task",
+            "--type",
+            "real_data",
+            "--text",
+            "Must reject a mismatched task projection",
+            "--gate",
+            "manual review",
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("contains mismatched task_id 'different-task'", res.stderr)
+        self.assertEqual(list((op_path / "claims").glob("claim-*.yaml")), [])
+        safe_task_path.write_text(original_safe_task)
+
+        victim_claim_id = str(Path(self.temp_dir) / "victim-claim")
+        victim_claim_path = Path(f"{victim_claim_id}.yaml")
+        victim_claim_path.write_text(
+            yaml.safe_dump(
+                {
+                    "claim_id": victim_claim_id,
+                    "task_id": "safe-task",
+                    "text": "Outside the ledger",
+                    "evidence_refs": [],
+                }
+            )
+        )
+        original_claim = victim_claim_path.read_text()
+        evidence_source = Path(self.temp_dir) / "proof.txt"
+        evidence_source.write_text("proof")
+        res = self.run_operator(
+            "evidence-attach",
+            "--task",
+            "safe-task",
+            "--claim",
+            victim_claim_id,
+            "--type",
+            "manifest",
+            str(evidence_source),
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("Claim ID must use the form claim-NNNN", res.stderr)
+        self.assertEqual(victim_claim_path.read_text(), original_claim)
+        self.assertEqual(list((op_path / "evidence" / "safe-task").glob("*")), [])
+        self.assertFalse(
+            any(row["record_type"] in {"claim", "evidence"} for row in self.read_ledger_events())
+        )
+        self.assertEqual(self.run_operator("doctor").returncode, 0)
+
+    def test_session_end_rejects_unsafe_task_id_embedded_in_usage(self) -> None:
+        self.run_operator("init")
+        op_path = Path(self.temp_dir) / ".operator"
+
+        victim_task_id = str(Path(self.temp_dir) / "victim-session-task")
+        victim_task_path = Path(f"{victim_task_id}.yaml")
+        victim_task_path.write_text(
+            yaml.safe_dump({"task_id": victim_task_id, "status": "running"})
+        )
+        original_task = victim_task_path.read_text()
+
+        usage_path = op_path / "usage" / "legacy.yaml"
+        usage_path.write_text(
+            yaml.safe_dump(
+                [
+                    {
+                        "usage_id": "usage-9999",
+                        "task_id": victim_task_id,
+                        "started_at": "2026-01-01T00:00:00Z",
+                        "ended_at": None,
+                    }
+                ]
+            )
+        )
+        original_usage = usage_path.read_text()
+
+        res = self.run_operator(
+            "session-end",
+            "usage-9999",
+            "--outcome",
+            "partial",
+            "--cost",
+            "1.0",
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("Task ID must start with an alphanumeric character", res.stderr)
+        self.assertEqual(victim_task_path.read_text(), original_task)
+        self.assertEqual(usage_path.read_text(), original_usage)
+        self.assertFalse(any(row["record_type"] == "usage" for row in self.read_ledger_events()))
+
+    def test_atomic_projection_writes_preserve_file_modes(self) -> None:
+        self.run_operator("init")
+        self.run_operator("task-create", "--objective", "Shared ledger mode", "--id", "shared-mode")
+        op_path = Path(self.temp_dir) / ".operator"
+        task_path = op_path / "tasks" / "shared-mode.yaml"
+        task_path.chmod(0o660)
+        original_stat = task_path.stat()
+
+        res = self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Preserve projection mode",
+            "--gate",
+            "manual review",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        updated_stat = task_path.stat()
+        self.assertEqual(stat.S_IMODE(updated_stat.st_mode), 0o660)
+        self.assertEqual(
+            (updated_stat.st_uid, updated_stat.st_gid), (original_stat.st_uid, original_stat.st_gid)
+        )
+
+        current_umask = os.umask(0)
+        os.umask(current_umask)
+        expected_new_mode = 0o666 & ~current_umask
+        claim_path = op_path / "claims" / "claim-0001.yaml"
+        self.assertEqual(stat.S_IMODE(claim_path.stat().st_mode), expected_new_mode)
+
+    def test_newer_event_store_schema_fails_closed(self) -> None:
+        self.run_operator("init")
+        db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        conn = sqlite3.connect(db_path)
+        try:
+            conn.execute("PRAGMA user_version = 2")
+        finally:
+            conn.close()
+
+        res = self.run_operator("init")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("schema version 2 is newer", res.stderr)
+        conn = sqlite3.connect(db_path)
+        try:
+            self.assertEqual(conn.execute("PRAGMA user_version").fetchone()[0], 2)
+        finally:
+            conn.close()
+
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("schema version 2 is unsupported", res.stdout)
 
     def test_task_lifecycle_and_quarantine_flow(self) -> None:
         # 1. Initialize
@@ -302,6 +867,7 @@ class TestOperatorCLI(unittest.TestCase):
         task_data["status"] = "running"
         with open(task_file, "w") as f:
             yaml.safe_dump(task_data, f)
+        self.rebaseline_ledger()
 
         # In-flight: the divergence is worth flagging.
         res = self.run_operator("doctor")
@@ -312,6 +878,7 @@ class TestOperatorCLI(unittest.TestCase):
             task_data["status"] = terminal_status
             with open(task_file, "w") as f:
                 yaml.safe_dump(task_data, f)
+            self.rebaseline_ledger()
             res = self.run_operator("doctor")
             self.assertNotIn(
                 "next_action differs",
@@ -346,6 +913,7 @@ class TestOperatorCLI(unittest.TestCase):
         claim_data["required_gate"] = "test gate"
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 0, res.stdout)
@@ -353,6 +921,7 @@ class TestOperatorCLI(unittest.TestCase):
         claim_data["evidence_refs"] = ["evidence/doctor-test-task/missing-evidence.yaml"]
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1)
@@ -368,6 +937,7 @@ class TestOperatorCLI(unittest.TestCase):
         task_data["status"] = "verified"
         with open(task_file, "w") as f:
             yaml.safe_dump(task_data, f)
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1)
@@ -383,6 +953,7 @@ class TestOperatorCLI(unittest.TestCase):
         task_data["status"] = "quarantined"
         with open(task_file, "w") as f:
             yaml.safe_dump(task_data, f)
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1)
@@ -397,6 +968,7 @@ class TestOperatorCLI(unittest.TestCase):
         claim_data["verification_status"] = False
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 0, res.stdout)
@@ -408,12 +980,14 @@ class TestOperatorCLI(unittest.TestCase):
         task_data["status"] = "assigned"
         with open(task_file, "w") as f:
             yaml.safe_dump(task_data, f)
+        self.rebaseline_ledger()
 
         self.run_operator("handoff-add", "--changed", "test changed", "--next-action", "Action A")
         task_data = yaml.safe_load(task_file.read_text())
         task_data["next_action"] = "Action B"
         with open(task_file, "w") as f:
             yaml.safe_dump(task_data, f)
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1)
@@ -465,6 +1039,7 @@ class TestOperatorCLI(unittest.TestCase):
         claim_data["supervision_layer"] = "end_to_end"
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 0, res.stdout)
@@ -827,6 +1402,7 @@ class TestOperatorCLI(unittest.TestCase):
                 if r.get("usage_id") == usage_id:
                     r["started_at"] = new_start
             usage_file.write_text(yaml.safe_dump(data))
+            self.rebaseline_ledger()
 
         # 1. Claude import testing
         res = self.run_operator(
@@ -1114,6 +1690,7 @@ class TestOperatorCLI(unittest.TestCase):
             del claim_data["verified_by"]
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 0, res.stdout)
@@ -1199,6 +1776,7 @@ class TestOperatorCLI(unittest.TestCase):
         ev_data["executor"]["test_override_active"] = False
         with open(ev_file, "w") as f:
             yaml.safe_dump(ev_data, f)
+        self.rebaseline_ledger()
 
         # Now doctor should be clean
         res = self.run_operator("doctor")
@@ -1248,6 +1826,7 @@ class TestOperatorCLI(unittest.TestCase):
         claim_data["executor"] = {"uid": 1001, "user": "gemini-agy"}
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1)
@@ -1330,6 +1909,7 @@ class TestOperatorCLI(unittest.TestCase):
             data = yaml.safe_load(claim_file.read_text())
             data["executor"] = {"uid": uid, "user": user}
             claim_file.write_text(yaml.safe_dump(data))
+            self.rebaseline_ledger()
 
         # Mismatch: executor maps to gemini-agy (uid 1001) but verified_by is claude.
         # enforced mode would reject this; single_user accepts it -> doctor must warn, exit 0.
@@ -1470,6 +2050,7 @@ class TestOperatorCLI(unittest.TestCase):
             if r["usage_id"] == "usage-0003":
                 r["started_at"] = "2026-05-29T06:00:00Z"
         usage_file.write_text(yaml.safe_dump(data))
+        self.rebaseline_ledger()
 
         env_claude = {"OPERATOR_TEST_CLAUDE_DIR": str(fixtures_dir / "claude")}
         res = self.run_operator(
@@ -1487,6 +2068,7 @@ class TestOperatorCLI(unittest.TestCase):
         task_data = yaml.safe_load(task_file.read_text())
         task_data["status"] = "complete"
         task_file.write_text(yaml.safe_dump(task_data))
+        self.rebaseline_ledger()
 
         data = yaml.safe_load(usage_file.read_text())
         rec = next(r for r in data if r["usage_id"] == "usage-0003")
@@ -1621,11 +2203,19 @@ class TestOperatorCLI(unittest.TestCase):
         with open(ev_file, "w") as f:
             yaml.safe_dump(ev_data, f)
 
+        task_file = Path(self.temp_dir) / ".operator" / "tasks" / "warnings-task.yaml"
+        task_data = yaml.safe_load(task_file.read_text())
+        task_data["evidence"] = [ev_data["path_or_url"]]
+        with open(task_file, "w") as f:
+            yaml.safe_dump(task_data, f)
+
         # Clear test_override_active in claim
         claim_data = yaml.safe_load(claim_file.read_text())
         claim_data["executor"]["test_override_active"] = False
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
+
+        self.rebaseline_ledger()
 
         # First Doctor check: Draft state -> all non-fatal warnings -> returns 0
         res = self.run_operator("doctor")
@@ -1658,6 +2248,7 @@ class TestOperatorCLI(unittest.TestCase):
         claim_data["verification_status"] = True
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
+        self.rebaseline_ledger()
 
         # Second Doctor check: Verified claim -> checks escalate to Error -> returns 1 (failure)
         res = self.run_operator("doctor")
@@ -1685,11 +2276,11 @@ class TestOperatorCLI(unittest.TestCase):
         )
 
         # Finally, mark the task status as complete
-        task_file = Path(self.temp_dir) / ".operator" / "tasks" / "warnings-task.yaml"
         task_data = yaml.safe_load(task_file.read_text())
         task_data["status"] = "complete"
         with open(task_file, "w") as f:
             yaml.safe_dump(task_data, f)
+        self.rebaseline_ledger()
 
         # Third Doctor check: Verified task -> repo missing escalates to Error
         res = self.run_operator("doctor")

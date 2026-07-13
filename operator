@@ -8,16 +8,710 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import fcntl
 import glob
 import hashlib
 import json
 import os
 import pwd
 import re
+import sqlite3
+import stat
 import sys
+import tempfile
 from pathlib import Path
 
 import yaml
+
+LEDGER_DB_NAME = "ledger.sqlite3"
+LEDGER_HASH_FORMAT = "operator-ledger-event-v1"
+LEDGER_SCHEMA_VERSION = 1
+VALID_TASK_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+VALID_CLAIM_ID = re.compile(r"^claim-[0-9]{4,}$")
+TRUST_RECORD_DIRS = {
+    "tasks": "task",
+    "claims": "claim",
+    "evidence": "evidence",
+    "handoffs": "handoff",
+    "usage": "usage",
+}
+MUTATING_COMMANDS = {
+    "init",
+    "task-create",
+    "claim-add",
+    "evidence-attach",
+    "usage-add",
+    "usage-import",
+    "usage-annotate",
+    "handoff-add",
+    "session-start",
+    "session-end",
+}
+
+
+class LedgerWriteError(RuntimeError):
+    pass
+
+
+def acquire_command_lock(command: str):
+    operator_dir = find_operator_dir()
+    if not operator_dir:
+        return None
+    lock_path = os.path.join(operator_dir, "ledger.lock")
+    is_mutating = command in MUTATING_COMMANDS
+    if not is_mutating and not os.path.exists(lock_path):
+        return None
+    handle = None
+    fd = None
+    try:
+        flags = os.O_RDONLY | (os.O_CREAT if is_mutating else 0)
+        fd = os.open(lock_path, flags, 0o666)
+        handle = os.fdopen(fd, "r")
+        fd = None
+        lock_mode = fcntl.LOCK_EX if is_mutating else fcntl.LOCK_SH
+        fcntl.flock(handle.fileno(), lock_mode)
+        return handle
+    except OSError as exc:
+        if fd is not None:
+            os.close(fd)
+        if handle is not None:
+            handle.close()
+        raise LedgerWriteError(f"Could not acquire ledger command lock: {exc}") from exc
+
+
+def release_command_lock(handle) -> None:
+    if handle is None:
+        return
+    try:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    finally:
+        handle.close()
+
+
+def canonical_json(data: any) -> str:
+    return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
+
+
+def ledger_db_path(operator_dir: str) -> str:
+    return os.path.join(operator_dir, LEDGER_DB_NAME)
+
+
+def connect_event_store(operator_dir: str, read_only: bool = False) -> sqlite3.Connection:
+    db_path = Path(ledger_db_path(operator_dir)).resolve()
+    if read_only:
+        conn = sqlite3.connect(f"{db_path.as_uri()}?mode=ro", uri=True)
+    else:
+        conn = sqlite3.connect(str(db_path), timeout=5.0)
+        conn.execute("PRAGMA busy_timeout = 5000")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def initialize_event_store(operator_dir: str) -> None:
+    os.makedirs(operator_dir, exist_ok=True)
+    conn = None
+    try:
+        conn = connect_event_store(operator_dir)
+        schema_version = conn.execute("PRAGMA user_version").fetchone()[0]
+        if schema_version > LEDGER_SCHEMA_VERSION:
+            raise LedgerWriteError(
+                f"Durable ledger schema version {schema_version} is newer than this CLI supports "
+                f"(maximum {LEDGER_SCHEMA_VERSION})"
+            )
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA synchronous = FULL")
+        conn.executescript(
+            """
+                CREATE TABLE IF NOT EXISTS ledger_events (
+                    event_id TEXT PRIMARY KEY,
+                    record_type TEXT NOT NULL,
+                    record_id TEXT NOT NULL,
+                    version INTEGER NOT NULL CHECK (version > 0),
+                    event_type TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    actor_uid INTEGER,
+                    actor_name TEXT,
+                    created_at TEXT NOT NULL,
+                    source_command TEXT,
+                    previous_event_hash TEXT,
+                    event_hash TEXT NOT NULL,
+                    UNIQUE(record_type, record_id, version)
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_ledger_events_record
+                    ON ledger_events(record_type, record_id, version);
+
+                CREATE TRIGGER IF NOT EXISTS ledger_events_no_update
+                BEFORE UPDATE ON ledger_events
+                BEGIN
+                    SELECT RAISE(ABORT, 'ledger_events is append-only');
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS ledger_events_no_delete
+                BEFORE DELETE ON ledger_events
+                BEGIN
+                    SELECT RAISE(ABORT, 'ledger_events is append-only');
+                END;
+            """
+        )
+        conn.execute(f"PRAGMA user_version = {LEDGER_SCHEMA_VERSION}")
+        conn.commit()
+    except LedgerWriteError:
+        raise
+    except sqlite3.Error as exc:
+        raise LedgerWriteError(f"Could not initialize durable ledger store: {exc}") from exc
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+def operator_dir_for_path(filepath: str) -> str | None:
+    path = Path(os.path.abspath(filepath))
+    for parent in [path.parent, *path.parents]:
+        if parent.name == ".operator":
+            return str(parent)
+    return None
+
+
+def logical_record_id(record_type: str, record: dict) -> str:
+    id_fields = {
+        "task": "task_id",
+        "claim": "claim_id",
+        "evidence": "evidence_id",
+        "handoff": "handoff_id",
+        "usage": "usage_id",
+    }
+    field = id_fields[record_type]
+    record_id = record.get(field)
+    if not record_id:
+        raise LedgerWriteError(f"{record_type} record is missing required field '{field}'")
+    if record_type in {"evidence", "handoff"}:
+        task_id = record.get("task_id")
+        if not task_id:
+            raise LedgerWriteError(
+                f"{record_type} record '{record_id}' is missing required field 'task_id'"
+            )
+        return f"{task_id}/{record_id}"
+    return str(record_id)
+
+
+def record_items_for_data(filepath: str, data: any) -> list[tuple[str, str, dict]]:
+    operator_dir = operator_dir_for_path(filepath)
+    if not operator_dir:
+        return []
+    try:
+        absolute_path = Path(os.path.abspath(filepath))
+        absolute_operator_dir = Path(os.path.abspath(operator_dir))
+        relative_parts = absolute_path.relative_to(absolute_operator_dir).parts
+    except ValueError:
+        return []
+    if not relative_parts or relative_parts[0] not in TRUST_RECORD_DIRS:
+        return []
+
+    record_type = TRUST_RECORD_DIRS[relative_parts[0]]
+    if record_type == "usage":
+        if len(relative_parts) != 2 or not relative_parts[1].endswith(".yaml"):
+            return []
+        if not isinstance(data, list):
+            raise LedgerWriteError(f"Usage ledger '{filepath}' must contain a YAML list")
+        records = data
+    else:
+        expected_depth = 3 if record_type in {"evidence", "handoff"} else 2
+        if len(relative_parts) != expected_depth or not relative_parts[-1].endswith(".yaml"):
+            return []
+        if not isinstance(data, dict):
+            raise LedgerWriteError(f"{record_type} ledger '{filepath}' must contain a YAML mapping")
+        records = [data]
+
+    items = []
+    seen_ids = set()
+    for record in records:
+        if not isinstance(record, dict):
+            raise LedgerWriteError(
+                f"{record_type} ledger '{filepath}' contains a non-mapping record"
+            )
+        record_id = logical_record_id(record_type, record)
+        if record_id in seen_ids:
+            raise LedgerWriteError(
+                f"{record_type} ledger '{filepath}' contains duplicate record ID '{record_id}'"
+            )
+        seen_ids.add(record_id)
+        items.append((record_type, record_id, record))
+    return items
+
+
+def visible_record_files(operator_dir: str) -> list[str]:
+    patterns = [
+        os.path.join(operator_dir, "tasks", "*.yaml"),
+        os.path.join(operator_dir, "claims", "*.yaml"),
+        os.path.join(operator_dir, "evidence", "*", "evidence-*.yaml"),
+        os.path.join(operator_dir, "handoffs", "*", "handoff-*.yaml"),
+        os.path.join(operator_dir, "usage", "*.yaml"),
+    ]
+    return sorted(path for pattern in patterns for path in glob.glob(pattern))
+
+
+def load_visible_records(
+    operator_dir: str,
+) -> tuple[dict[tuple[str, str], tuple[dict, str]], list[str]]:
+    records = {}
+    errors = []
+    for filepath in visible_record_files(operator_dir):
+        relative_path = os.path.relpath(filepath, operator_dir)
+        try:
+            with open(filepath, "r") as handle:
+                data = yaml.safe_load(handle)
+            items = record_items_for_data(filepath, data)
+        except Exception as exc:
+            errors.append(
+                f"[Error] Durable ledger cannot parse YAML projection {relative_path}: {exc}"
+            )
+            continue
+        for record_type, record_id, record in items:
+            key = (record_type, record_id)
+            if key in records:
+                errors.append(
+                    f"[Error] Duplicate YAML projection for {record_type} {record_id}: "
+                    f"{records[key][1]} and {relative_path}"
+                )
+                continue
+            records[key] = (record, relative_path)
+    return records, errors
+
+
+def event_hash_for_fields(
+    record_type: str,
+    record_id: str,
+    version: int,
+    event_type: str,
+    payload_json: str,
+    actor_uid: int | None,
+    actor_name: str | None,
+    created_at: str,
+    source_command: str | None,
+    previous_event_hash: str | None,
+) -> str:
+    hash_fields = {
+        "hash_format": LEDGER_HASH_FORMAT,
+        "record_type": record_type,
+        "record_id": record_id,
+        "version": version,
+        "event_type": event_type,
+        "payload_json": payload_json,
+        "actor_uid": actor_uid,
+        "actor_name": actor_name,
+        "created_at": created_at,
+        "source_command": source_command,
+        "previous_event_hash": previous_event_hash,
+    }
+    return hashlib.sha256(canonical_json(hash_fields).encode("utf-8")).hexdigest()
+
+
+def event_type_for(record_type: str, version: int, source_command: str) -> str:
+    if source_command == "legacy-bootstrap":
+        return "baseline_imported"
+    if record_type == "usage" and source_command == "session-start":
+        return "session_started"
+    if record_type == "usage" and source_command == "session-end":
+        return "session_ended"
+    return "record_created" if version == 1 else "record_updated"
+
+
+def append_record_events(
+    operator_dir: str,
+    items: list[tuple[str, str, dict]],
+    source_command: str,
+) -> int:
+    if not items:
+        return 0
+    actor = get_executor_identity()
+    created_at = get_current_utc_iso()
+    inserted = 0
+    conn = connect_event_store(operator_dir)
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        for record_type, record_id, record in items:
+            payload_json = canonical_json(record)
+            previous = conn.execute(
+                """
+                SELECT version, payload_json, event_hash
+                FROM ledger_events
+                WHERE record_type = ? AND record_id = ?
+                ORDER BY version DESC
+                LIMIT 1
+                """,
+                (record_type, record_id),
+            ).fetchone()
+            if previous and previous["payload_json"] == payload_json:
+                continue
+            version = (previous["version"] + 1) if previous else 1
+            previous_hash = previous["event_hash"] if previous else None
+            event_type = event_type_for(record_type, version, source_command)
+            event_hash = event_hash_for_fields(
+                record_type,
+                record_id,
+                version,
+                event_type,
+                payload_json,
+                actor.get("uid"),
+                actor.get("user"),
+                created_at,
+                source_command,
+                previous_hash,
+            )
+            conn.execute(
+                """
+                INSERT INTO ledger_events (
+                    event_id, record_type, record_id, version, event_type, payload_json,
+                    actor_uid, actor_name, created_at, source_command, previous_event_hash,
+                    event_hash
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    event_hash,
+                    record_type,
+                    record_id,
+                    version,
+                    event_type,
+                    payload_json,
+                    actor.get("uid"),
+                    actor.get("user"),
+                    created_at,
+                    source_command,
+                    previous_hash,
+                    event_hash,
+                ),
+            )
+            inserted += 1
+        conn.commit()
+    except Exception as exc:
+        conn.rollback()
+        raise LedgerWriteError(f"Could not append durable ledger event: {exc}") from exc
+    finally:
+        conn.close()
+    return inserted
+
+
+def ensure_event_store(operator_dir: str) -> None:
+    initialize_event_store(operator_dir)
+    try:
+        conn = connect_event_store(operator_dir, read_only=True)
+        try:
+            event_count = conn.execute("SELECT COUNT(*) FROM ledger_events").fetchone()[0]
+        finally:
+            conn.close()
+    except sqlite3.Error as exc:
+        raise LedgerWriteError(f"Could not inspect durable ledger store: {exc}") from exc
+    if event_count:
+        return
+    records, errors = load_visible_records(operator_dir)
+    if errors:
+        raise LedgerWriteError(errors[0].removeprefix("[Error] "))
+    if records:
+        items = [
+            (record_type, record_id, payload)
+            for (record_type, record_id), (payload, _) in records.items()
+        ]
+        append_record_events(operator_dir, items, "legacy-bootstrap")
+
+
+def latest_event_payload(conn: sqlite3.Connection, record_type: str, record_id: str) -> str | None:
+    row = conn.execute(
+        """
+        SELECT payload_json
+        FROM ledger_events
+        WHERE record_type = ? AND record_id = ?
+        ORDER BY version DESC
+        LIMIT 1
+        """,
+        (record_type, record_id),
+    ).fetchone()
+    return row["payload_json"] if row else None
+
+
+def assert_projection_current(
+    operator_dir: str,
+    filepath: str,
+    new_items: list[tuple[str, str, dict]],
+) -> None:
+    new_keys = {(record_type, record_id) for record_type, record_id, _ in new_items}
+    old_items = []
+    if os.path.exists(filepath):
+        try:
+            with open(filepath, "r") as handle:
+                old_data = yaml.safe_load(handle)
+            old_items = record_items_for_data(filepath, old_data)
+        except Exception as exc:
+            raise LedgerWriteError(
+                f"YAML projection is not readable before write: {filepath}: {exc}"
+            ) from exc
+    old_keys = {(record_type, record_id) for record_type, record_id, _ in old_items}
+    removed_keys = old_keys - new_keys
+    if removed_keys:
+        removed = ", ".join(f"{kind} {record_id}" for kind, record_id in sorted(removed_keys))
+        raise LedgerWriteError(
+            f"Refusing to remove append-only records from YAML projection: {removed}"
+        )
+
+    conn = connect_event_store(operator_dir, read_only=True)
+    try:
+        for record_type, record_id, record in old_items:
+            stored_payload = latest_event_payload(conn, record_type, record_id)
+            if stored_payload != canonical_json(record):
+                raise LedgerWriteError(
+                    f"YAML projection for {record_type} {record_id} differs from the durable ledger; "
+                    "run 'operator doctor' before writing"
+                )
+        for record_type, record_id, _ in new_items:
+            if (record_type, record_id) in old_keys:
+                continue
+            if latest_event_payload(conn, record_type, record_id) is not None:
+                raise LedgerWriteError(
+                    f"Refusing to reuse durable record ID for {record_type} {record_id}"
+                )
+    finally:
+        conn.close()
+
+
+def preflight_projection(operator_dir: str, filepath: str, data: any) -> None:
+    ensure_event_store(operator_dir)
+    items = record_items_for_data(filepath, data)
+    assert_projection_current(operator_dir, filepath, items)
+
+
+def atomic_write_text(filepath: str, content: str) -> None:
+    parent = os.path.dirname(filepath)
+    os.makedirs(parent, exist_ok=True)
+    existing_stat = os.stat(filepath) if os.path.exists(filepath) else None
+    if existing_stat:
+        target_mode = stat.S_IMODE(existing_stat.st_mode)
+    else:
+        current_umask = os.umask(0)
+        os.umask(current_umask)
+        target_mode = 0o666 & ~current_umask
+    fd, temp_path = tempfile.mkstemp(prefix=f".{os.path.basename(filepath)}.", dir=parent)
+    try:
+        if existing_stat:
+            try:
+                os.fchown(fd, -1, existing_stat.st_gid)
+            except PermissionError:
+                pass
+            try:
+                os.fchown(fd, existing_stat.st_uid, -1)
+            except PermissionError:
+                pass
+        os.fchmod(fd, target_mode)
+        with os.fdopen(fd, "w") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_path, filepath)
+        directory_fd = os.open(parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def audit_event_store(operator_dir: str) -> list[str]:
+    db_path = ledger_db_path(operator_dir)
+    if not os.path.exists(db_path):
+        return [
+            f"[Error] Durable ledger store is missing: {db_path}. Run 'operator init' to "
+            "baseline this YAML ledger."
+        ]
+
+    visible_records, messages = load_visible_records(operator_dir)
+    latest_events = {}
+    chain_state = {}
+    try:
+        conn = connect_event_store(operator_dir, read_only=True)
+        try:
+            schema_version = conn.execute("PRAGMA user_version").fetchone()[0]
+            if schema_version != LEDGER_SCHEMA_VERSION:
+                messages.append(
+                    f"[Error] Durable ledger schema version {schema_version} is unsupported; "
+                    f"expected {LEDGER_SCHEMA_VERSION}"
+                )
+                return messages
+            rows = conn.execute(
+                """
+                SELECT event_id, record_type, record_id, version, event_type, payload_json,
+                       actor_uid, actor_name, created_at, source_command, previous_event_hash,
+                       event_hash
+                FROM ledger_events
+                ORDER BY record_type, record_id, version
+                """
+            ).fetchall()
+        finally:
+            conn.close()
+    except sqlite3.Error as exc:
+        messages.append(f"[Error] Durable ledger store cannot be read: {exc}")
+        return messages
+
+    for row in rows:
+        key = (row["record_type"], row["record_id"])
+        previous = chain_state.get(key)
+        expected_version = previous[0] + 1 if previous else 1
+        expected_previous_hash = previous[1] if previous else None
+        if row["version"] != expected_version:
+            messages.append(
+                f"[Error] Durable ledger version gap for {key[0]} {key[1]}: "
+                f"expected {expected_version}, got {row['version']}"
+            )
+        if row["previous_event_hash"] != expected_previous_hash:
+            messages.append(
+                f"[Error] Durable ledger hash chain is broken for {key[0]} {key[1]} "
+                f"at version {row['version']}"
+            )
+
+        try:
+            decoded_payload = json.loads(row["payload_json"])
+            if canonical_json(decoded_payload) != row["payload_json"]:
+                messages.append(
+                    f"[Error] Durable ledger payload is not canonical for {key[0]} {key[1]} "
+                    f"version {row['version']}"
+                )
+        except (TypeError, json.JSONDecodeError):
+            messages.append(
+                f"[Error] Durable ledger payload is invalid JSON for {key[0]} {key[1]} "
+                f"version {row['version']}"
+            )
+
+        expected_hash = event_hash_for_fields(
+            row["record_type"],
+            row["record_id"],
+            row["version"],
+            row["event_type"],
+            row["payload_json"],
+            row["actor_uid"],
+            row["actor_name"],
+            row["created_at"],
+            row["source_command"],
+            row["previous_event_hash"],
+        )
+        if row["event_hash"] != expected_hash or row["event_id"] != row["event_hash"]:
+            messages.append(
+                f"[Error] Durable ledger event hash mismatch for {key[0]} {key[1]} "
+                f"version {row['version']}"
+            )
+        chain_state[key] = (row["version"], row["event_hash"])
+        latest_events[key] = row["payload_json"]
+
+    for key, (record, relative_path) in sorted(visible_records.items()):
+        stored_payload = latest_events.get(key)
+        if stored_payload is None:
+            messages.append(
+                f"[Error] Durable ledger has no event for YAML {key[0]} {key[1]} "
+                f"({relative_path})"
+            )
+        elif stored_payload != canonical_json(record):
+            messages.append(
+                f"[Error] Durable ledger mismatch for {key[0]} {key[1]}: "
+                f"YAML projection {relative_path} differs from latest event"
+            )
+
+    for key in sorted(set(latest_events) - set(visible_records)):
+        messages.append(f"[Error] Durable ledger latest {key[0]} {key[1]} has no YAML projection")
+
+    tasks = {
+        record_id: record
+        for (record_type, record_id), (record, _) in visible_records.items()
+        if record_type == "task"
+    }
+    for (record_type, record_id), (record, relative_path) in sorted(visible_records.items()):
+        if record_type == "task":
+            continue
+        task_id = record.get("task_id")
+        task = tasks.get(task_id)
+        if task is None:
+            messages.append(
+                f"[Error] YAML {record_type} {record_id} references missing task {task_id} "
+                f"({relative_path})"
+            )
+            continue
+        if record_type == "claim" and record_id not in (task.get("claims") or []):
+            messages.append(f"[Error] Claim {record_id} is not referenced by owning task {task_id}")
+        elif record_type == "evidence":
+            if record.get("path_or_url") not in (task.get("evidence") or []):
+                messages.append(
+                    f"[Error] Evidence {record_id} is not referenced by owning task {task_id}"
+                )
+            claim_id = record.get("claim_id")
+            if claim_id:
+                claim_entry = visible_records.get(("claim", claim_id))
+                evidence_ref = f"evidence/{task_id}/{record.get('evidence_id')}.yaml"
+                if claim_entry is not None and claim_entry[0].get("task_id") != task_id:
+                    messages.append(
+                        f"[Error] Evidence {record_id} belongs to task {task_id} but claim "
+                        f"{claim_id} belongs to task {claim_entry[0].get('task_id')}"
+                    )
+                elif claim_entry is None or evidence_ref not in (
+                    claim_entry[0].get("evidence_refs") or []
+                ):
+                    messages.append(
+                        f"[Error] Evidence {record_id} is not referenced by claim {claim_id}"
+                    )
+        elif record_type == "handoff":
+            handoff_ref = f"handoffs/{task_id}/{record.get('handoff_id')}.yaml"
+            if handoff_ref not in (task.get("handoffs") or []):
+                messages.append(
+                    f"[Error] Handoff {record_id} is not referenced by owning task {task_id}"
+                )
+    return messages
+
+
+def max_durable_sequence(
+    operator_dir: str, record_type: str, prefix: str, scope: str | None = None
+) -> int:
+    if not os.path.exists(ledger_db_path(operator_dir)):
+        return 0
+    conn = connect_event_store(operator_dir, read_only=True)
+    try:
+        if scope is None:
+            rows = conn.execute(
+                "SELECT DISTINCT record_id FROM ledger_events WHERE record_type = ?",
+                (record_type,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """
+                SELECT DISTINCT record_id
+                FROM ledger_events
+                WHERE record_type = ? AND record_id LIKE ?
+                """,
+                (record_type, f"{scope}/%"),
+            ).fetchall()
+    finally:
+        conn.close()
+    max_id = 0
+    pattern = re.compile(rf"^{re.escape(prefix)}(\d+)$")
+    for row in rows:
+        leaf_id = row["record_id"].rsplit("/", 1)[-1]
+        match = pattern.match(leaf_id)
+        if match:
+            max_id = max(max_id, int(match.group(1)))
+    return max_id
+
+
+def durable_record_exists(operator_dir: str, record_type: str, record_id: str) -> bool:
+    if not os.path.exists(ledger_db_path(operator_dir)):
+        return False
+    conn = connect_event_store(operator_dir, read_only=True)
+    try:
+        row = conn.execute(
+            "SELECT 1 FROM ledger_events WHERE record_type = ? AND record_id = ? LIMIT 1",
+            (record_type, record_id),
+        ).fetchone()
+    finally:
+        conn.close()
+    return row is not None
 
 
 def find_operator_dir(start_dir: str | None = None) -> str | None:
@@ -39,9 +733,7 @@ def find_operator_dir(start_dir: str | None = None) -> str | None:
 
 def get_current_utc_iso() -> str:
     """Return the current time in UTC ISO format."""
-    return (
-        datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
-    )
+    return datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
 
 
 def load_yaml(filepath: str) -> any:
@@ -57,13 +749,20 @@ def load_yaml(filepath: str) -> any:
 def save_yaml(data: any, filepath: str) -> bool:
     """Helper to save a python object to a YAML file."""
     try:
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, "w") as f:
-            yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
+        rendered = yaml.safe_dump(data, default_flow_style=False, sort_keys=False)
+        items = record_items_for_data(filepath, data)
+        if items:
+            operator_dir = operator_dir_for_path(filepath)
+            ensure_event_store(operator_dir)
+            assert_projection_current(operator_dir, filepath, items)
+            source_command = sys.argv[1] if len(sys.argv) > 1 else "internal"
+            append_record_events(operator_dir, items, source_command)
+        atomic_write_text(filepath, rendered)
         return True
+    except LedgerWriteError:
+        raise
     except Exception as e:
-        print(f"Error saving YAML {filepath}: {e}", file=sys.stderr)
-        return False
+        raise LedgerWriteError(f"Error saving YAML {filepath}: {e}") from e
 
 
 def get_executor_identity() -> dict:
@@ -106,6 +805,74 @@ def slugify(text: str) -> str:
     return text
 
 
+def resolve_task_record(
+    operator_dir: str, requested_task_id: str | None
+) -> tuple[str, str, dict] | None:
+    task_id = requested_task_id
+    if not task_id:
+        config = load_yaml(os.path.join(operator_dir, "operator.yaml")) or {}
+        task_id = config.get("current_task")
+        if not task_id:
+            print(
+                "Error: No active task set. Specify task ID or create a task.",
+                file=sys.stderr,
+            )
+            return None
+
+    if not isinstance(task_id, str) or not VALID_TASK_ID.fullmatch(task_id):
+        print(
+            "Error: Task ID must start with an alphanumeric character and contain only "
+            "letters, numbers, '.', '_', or '-'.",
+            file=sys.stderr,
+        )
+        return None
+
+    task_path = os.path.join(operator_dir, "tasks", f"{task_id}.yaml")
+    if not os.path.isfile(task_path):
+        print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
+        return None
+
+    task = load_yaml(task_path)
+    if not isinstance(task, dict):
+        print(f"Error: Task '{task_id}' is not a YAML mapping.", file=sys.stderr)
+        return None
+    if task.get("task_id") != task_id:
+        print(
+            f"Error: Task file for '{task_id}' contains mismatched task_id "
+            f"'{task.get('task_id')}'.",
+            file=sys.stderr,
+        )
+        return None
+    return task_id, task_path, task
+
+
+def resolve_claim_record(operator_dir: str, claim_id: str) -> tuple[str, dict] | None:
+    if not isinstance(claim_id, str) or not VALID_CLAIM_ID.fullmatch(claim_id):
+        print(
+            "Error: Claim ID must use the form claim-NNNN.",
+            file=sys.stderr,
+        )
+        return None
+
+    claim_path = os.path.join(operator_dir, "claims", f"{claim_id}.yaml")
+    if not os.path.isfile(claim_path):
+        print(f"Error: Claim '{claim_id}' not found.", file=sys.stderr)
+        return None
+
+    claim = load_yaml(claim_path)
+    if not isinstance(claim, dict):
+        print(f"Error: Claim '{claim_id}' is not a YAML mapping.", file=sys.stderr)
+        return None
+    if claim.get("claim_id") != claim_id:
+        print(
+            f"Error: Claim file for '{claim_id}' contains mismatched claim_id "
+            f"'{claim.get('claim_id')}'.",
+            file=sys.stderr,
+        )
+        return None
+    return claim_path, claim
+
+
 def calculate_file_hash(filepath: str) -> str | None:
     """Calculate the SHA-256 hash of a local file."""
     sha256 = hashlib.sha256()
@@ -120,9 +887,10 @@ def calculate_file_hash(filepath: str) -> str | None:
 
 def get_next_claim_id(operator_dir: str) -> str:
     """Determine the next sequential claim-XXXX ID."""
+    ensure_event_store(operator_dir)
     claims_dir = os.path.join(operator_dir, "claims")
     existing = glob.glob(os.path.join(claims_dir, "claim-*.yaml"))
-    max_id = 0
+    max_id = max_durable_sequence(operator_dir, "claim", "claim-")
     for path in existing:
         filename = os.path.basename(path)
         match = re.match(r"claim-(\d+)\.yaml", filename)
@@ -135,10 +903,11 @@ def get_next_claim_id(operator_dir: str) -> str:
 
 def get_next_evidence_id(operator_dir: str, task_id: str) -> str:
     """Determine the next sequential evidence-XXXX ID for a specific task."""
+    ensure_event_store(operator_dir)
     task_ev_dir = os.path.join(operator_dir, "evidence", task_id)
     os.makedirs(task_ev_dir, exist_ok=True)
     existing = glob.glob(os.path.join(task_ev_dir, "evidence-*.yaml"))
-    max_id = 0
+    max_id = max_durable_sequence(operator_dir, "evidence", "evidence-", task_id)
     for path in existing:
         filename = os.path.basename(path)
         match = re.match(r"evidence-(\d+)\.yaml", filename)
@@ -151,9 +920,10 @@ def get_next_evidence_id(operator_dir: str, task_id: str) -> str:
 
 def get_next_usage_id(operator_dir: str) -> str:
     """Determine the next sequential usage-XXXX ID."""
+    ensure_event_store(operator_dir)
     usage_dir = os.path.join(operator_dir, "usage")
     existing = glob.glob(os.path.join(usage_dir, "*.yaml"))
-    max_id = 0
+    max_id = max_durable_sequence(operator_dir, "usage", "usage-")
     for path in existing:
         try:
             records = load_yaml(path) or []
@@ -171,10 +941,11 @@ def get_next_usage_id(operator_dir: str) -> str:
 
 def get_next_handoff_id(operator_dir: str, task_id: str) -> str:
     """Determine the next sequential handoff-XXXX ID for a specific task."""
+    ensure_event_store(operator_dir)
     task_ho_dir = os.path.join(operator_dir, "handoffs", task_id)
     os.makedirs(task_ho_dir, exist_ok=True)
     existing = glob.glob(os.path.join(task_ho_dir, "handoff-*.yaml"))
-    max_id = 0
+    max_id = max_durable_sequence(operator_dir, "handoff", "handoff-", task_id)
     for path in existing:
         filename = os.path.basename(path)
         match = re.match(r"handoff-(\d+)\.yaml", filename)
@@ -191,7 +962,15 @@ def get_next_handoff_id(operator_dir: str, task_id: str) -> str:
 def init_cmd(args) -> int:
     target_dir = os.path.abspath(os.path.join(os.getcwd(), ".operator"))
     if os.path.exists(target_dir):
+        if not os.path.isdir(target_dir):
+            print(
+                f"Error: Operator path exists and is not a directory: {target_dir}",
+                file=sys.stderr,
+            )
+            return 1
+        ensure_event_store(target_dir)
         print(f"Operator directory already exists at: {target_dir}")
+        print(f"Durable ledger store initialized at: {ledger_db_path(target_dir)}")
         return 0
 
     subdirs = [
@@ -205,6 +984,8 @@ def init_cmd(args) -> int:
     ]
     for sd in subdirs:
         os.makedirs(os.path.join(target_dir, sd), exist_ok=True)
+
+    ensure_event_store(target_dir)
 
     harnesses_data = {
         "codex": {
@@ -346,8 +1127,16 @@ def task_create_cmd(args) -> int:
             )
             return 1
 
+    if not VALID_TASK_ID.fullmatch(task_id):
+        print(
+            "Error: Task ID must start with an alphanumeric character and contain only "
+            "letters, numbers, '.', '_', or '-'.",
+            file=sys.stderr,
+        )
+        return 1
     task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
-    if os.path.exists(task_path):
+    ensure_event_store(op_dir)
+    if os.path.exists(task_path) or durable_record_exists(op_dir, "task", task_id):
         print(f"Error: Task '{task_id}' already exists.", file=sys.stderr)
         return 1
 
@@ -395,25 +1184,10 @@ def task_show_cmd(args) -> int:
         )
         return 1
 
-    task_id = args.task_id
-    if not task_id:
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        task_id = config.get("current_task")
-        if not task_id:
-            print(
-                "Error: No active task set. Specify task ID or create a task.",
-                file=sys.stderr,
-            )
-            return 1
-
-    task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
-    if not os.path.exists(task_path):
-        print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
         return 1
-
-    task = load_yaml(task_path)
-    if not task:
-        return 1
+    task_id, task_path, task = resolved_task
 
     print("=" * 80)
     print(f"Task ID:          {task.get('task_id')}")
@@ -442,25 +1216,18 @@ def task_show_cmd(args) -> int:
     claims_list = task.get("claims") or []
     if claims_list:
         for cid in claims_list:
-            c_path = os.path.join(op_dir, "claims", f"{cid}.yaml")
-            if os.path.exists(c_path):
-                c_data = load_yaml(c_path)
-                if c_data:
-                    outcome = c_data.get("verification_outcome")
-                    if not outcome:
-                        outcome = (
-                            "verified"
-                            if c_data.get("verification_status")
-                            else "unverified"
-                        )
-                    status_str = str(outcome).upper()
-                    print(
-                        f"  - [{cid}] ({c_data.get('type')}) - {status_str}: {c_data.get('text')}"
-                    )
-                    if c_data.get("verdict"):
-                        print(f"    Verdict: {c_data.get('verdict')}")
-            else:
+            resolved_claim = resolve_claim_record(op_dir, cid)
+            if not resolved_claim:
                 print(f"  - {cid} (Record missing)")
+                continue
+            _, c_data = resolved_claim
+            outcome = c_data.get("verification_outcome")
+            if not outcome:
+                outcome = "verified" if c_data.get("verification_status") else "unverified"
+            status_str = str(outcome).upper()
+            print(f"  - [{cid}] ({c_data.get('type')}) - {status_str}: {c_data.get('text')}")
+            if c_data.get("verdict"):
+                print(f"    Verdict: {c_data.get('verdict')}")
     else:
         print("  (None registered)")
     print("-" * 80)
@@ -494,25 +1261,11 @@ def claim_add_cmd(args) -> int:
         )
         return 1
 
-    task_id = args.task_id
-    if not task_id:
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        task_id = config.get("current_task")
-        if not task_id:
-            print(
-                "Error: No active task set. Specify task ID or create a task.",
-                file=sys.stderr,
-            )
-            return 1
-
-    task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
-    if not os.path.exists(task_path):
-        print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
         return 1
-
-    task = load_yaml(task_path)
-    if not task:
-        return 1
+    task_id, task_path, task = resolved_task
+    preflight_projection(op_dir, task_path, task)
 
     claim_id = get_next_claim_id(op_dir)
     made_by = args.by if args.by else task.get("assigned_harness") or "operator"
@@ -563,25 +1316,10 @@ def evidence_attach_cmd(args) -> int:
         )
         return 1
 
-    task_id = args.task_id
-    if not task_id:
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        task_id = config.get("current_task")
-        if not task_id:
-            print(
-                "Error: No active task set. Specify task ID or create a task.",
-                file=sys.stderr,
-            )
-            return 1
-
-    task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
-    if not os.path.exists(task_path):
-        print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
         return 1
-
-    task = load_yaml(task_path)
-    if not task:
-        return 1
+    task_id, task_path, task = resolved_task
 
     claim_id = args.claim
     claim = None
@@ -589,11 +1327,17 @@ def evidence_attach_cmd(args) -> int:
     verified_by_value = args.verified_by
 
     if claim_id:
-        claim_path = os.path.join(op_dir, "claims", f"{claim_id}.yaml")
-        if not os.path.exists(claim_path):
-            print(f"Error: Claim '{claim_id}' not found.", file=sys.stderr)
+        resolved_claim = resolve_claim_record(op_dir, claim_id)
+        if not resolved_claim:
             return 1
-        claim = load_yaml(claim_path)
+        claim_path, claim = resolved_claim
+        if claim.get("task_id") != task_id:
+            print(
+                f"Error: Claim '{claim_id}' belongs to task '{claim.get('task_id')}', not "
+                f"'{task_id}'.",
+                file=sys.stderr,
+            )
+            return 1
 
     # A status advances trust and is only ever recorded on a claim; reject a bare status write so it
     # can't silently succeed-and-drop, leaving the operator thinking trust advanced when it did not.
@@ -644,6 +1388,10 @@ def evidence_attach_cmd(args) -> int:
         else:
             verified_by_value = args.verified_by
 
+    preflight_projection(op_dir, task_path, task)
+    if claim:
+        preflight_projection(op_dir, claim_path, claim)
+
     path_or_url = args.path_or_url
     evidence_id = get_next_evidence_id(op_dir, task_id)
 
@@ -654,7 +1402,10 @@ def evidence_attach_cmd(args) -> int:
         dest_dir = os.path.join(op_dir, "evidence", task_id)
         os.makedirs(dest_dir, exist_ok=True)
         ext = os.path.splitext(path_or_url)[1]
-        dest_path = os.path.join(dest_dir, f"{evidence_id}{ext}")
+        artifact_name = (
+            f"artifact-{evidence_id}{ext}" if ext in {".yaml", ".yml"} else f"{evidence_id}{ext}"
+        )
+        dest_path = os.path.join(dest_dir, artifact_name)
         try:
             shutil.copy2(path_or_url, dest_path)
             path_or_url = os.path.abspath(dest_path)
@@ -673,13 +1424,12 @@ def evidence_attach_cmd(args) -> int:
     evidence_data = {
         "evidence_id": evidence_id,
         "task_id": task_id,
+        "claim_id": claim_id,
         "path_or_url": path_or_url,
         "evidence_type": args.type,
         "produced_by": made_by,
         "produced_at": utc_now,
-        "provenance": (
-            "local_file" if os.path.exists(path_or_url) else "url_or_external"
-        ),
+        "provenance": ("local_file" if os.path.exists(path_or_url) else "url_or_external"),
         "hash": file_hash,
         "verification_command": args.verify_cmd,
         "notes": args.notes,
@@ -714,7 +1464,6 @@ def evidence_attach_cmd(args) -> int:
         if args.verdict:
             claim["verdict"] = args.verdict
 
-        claim_path = os.path.join(op_dir, "claims", f"{claim_id}.yaml")
         save_yaml(claim, claim_path)
 
         if args.status == "quarantined":
@@ -744,21 +1493,11 @@ def usage_add_cmd(args) -> int:
         )
         return 1
 
-    task_id = args.task_id
-    if not task_id:
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        task_id = config.get("current_task")
-        if not task_id:
-            print(
-                "Error: No active task set. Specify task ID or create a task.",
-                file=sys.stderr,
-            )
-            return 1
-
-    task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
-    if not os.path.exists(task_path):
-        print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
         return 1
+    task_id, task_path, task = resolved_task
+    preflight_projection(op_dir, task_path, task)
 
     raw_payload = ""
     if args.file and args.file != "-":
@@ -776,9 +1515,7 @@ def usage_add_cmd(args) -> int:
             return 1
     else:
         if sys.stdin.isatty():
-            print(
-                "Paste your usage snapshot / status / quota snippet (press Ctrl-D to save):"
-            )
+            print("Paste your usage snapshot / status / quota snippet (press Ctrl-D to save):")
         try:
             raw_payload = sys.stdin.read()
         except KeyboardInterrupt:
@@ -812,10 +1549,8 @@ def usage_add_cmd(args) -> int:
     records.append(usage_record)
     save_yaml(records, usage_file_path)
 
-    task = load_yaml(task_path)
-    if task:
-        task["updated_at"] = utc_now
-        save_yaml(task, task_path)
+    task["updated_at"] = utc_now
+    save_yaml(task, task_path)
 
     print(f"Usage record '{usage_id}' successfully added under {date_str}.yaml.")
     return 0
@@ -857,9 +1592,7 @@ def parse_iso_to_datetime(ts_str: str) -> datetime.datetime | None:
             tz,
         )
     try:
-        return datetime.datetime.strptime(
-            ts_str.split("+")[0].split("-")[0], "%Y-%m-%dT%H:%M:%S"
-        )
+        return datetime.datetime.strptime(ts_str.split("+")[0].split("-")[0], "%Y-%m-%dT%H:%M:%S")
     except Exception:
         return None
 
@@ -944,9 +1677,7 @@ def set_nested(d: dict, path: str, value: any) -> None:
     d[parts[-1]] = value
 
 
-def set_record_field(
-    record: dict, field_name: str, value: any, source: str = "auto"
-) -> None:
+def set_record_field(record: dict, field_name: str, value: any, source: str = "auto") -> None:
     if "field_sources" not in record:
         record["field_sources"] = {}
     if "auto_values" not in record:
@@ -970,15 +1701,11 @@ def check_overlap(
 ) -> bool:
     t1_start = start1
     t1_end = (
-        end1
-        if end1 is not None
-        else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+        end1 if end1 is not None else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
     )
     t2_start = start2
     t2_end = (
-        end2
-        if end2 is not None
-        else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+        end2 if end2 is not None else datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
     )
 
     # Standardise timezones to UTC for comparison
@@ -1278,23 +2005,15 @@ def usage_import_cmd(args) -> int:
             file=sys.stderr,
         )
         return 1
-    task_id = args.task_id
-    if not task_id:
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        task_id = config.get("current_task")
-        if not task_id:
-            print("Error: No active task set. Specify task ID.", file=sys.stderr)
-            return 1
-    task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
-    task = None
-    if os.path.exists(task_path):
-        task = load_yaml(task_path)
-    abs_repo = os.path.abspath(task.get("repo", ".")) if task else os.path.abspath(".")
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
+        return 1
+    task_id, task_path, task = resolved_task
+    preflight_projection(op_dir, task_path, task)
+    abs_repo = os.path.abspath(task.get("repo", "."))
     harness_id = args.harness
     if harness_id == "claude":
-        base_dir = os.environ.get(
-            "OPERATOR_TEST_CLAUDE_DIR", os.path.expanduser("~/.claude")
-        )
+        base_dir = os.environ.get("OPERATOR_TEST_CLAUDE_DIR", os.path.expanduser("~/.claude"))
         files = []
         if os.path.isfile(base_dir):
             if base_dir.endswith(".jsonl"):
@@ -1310,9 +2029,7 @@ def usage_import_cmd(args) -> int:
             if res:
                 all_sessions.append(res)
     elif harness_id == "codex":
-        base_dir = os.environ.get(
-            "OPERATOR_TEST_CODEX_DIR", os.path.expanduser("~/.codex")
-        )
+        base_dir = os.environ.get("OPERATOR_TEST_CODEX_DIR", os.path.expanduser("~/.codex"))
         files = []
         if os.path.isfile(base_dir):
             if base_dir.endswith(".jsonl"):
@@ -1357,10 +2074,7 @@ def usage_import_cmd(args) -> int:
         for usage_path in glob.glob(os.path.join(usage_dir, "*.yaml")):
             records = load_yaml(usage_path) or []
             for rec in records:
-                if (
-                    rec.get("task_id") == task_id
-                    and rec.get("harness_id") == harness_id
-                ):
+                if rec.get("task_id") == task_id and rec.get("harness_id") == harness_id:
                     matching_records.append(rec)
     if matching_records:
         matching_records.sort(key=lambda r: r.get("started_at", ""), reverse=True)
@@ -1431,9 +2145,7 @@ def usage_import_cmd(args) -> int:
                         ):
                             u_start = parse_iso_to_datetime(u_rec.get("started_at"))
                             u_end = datetime.datetime.now(datetime.timezone.utc)
-                            if check_overlap(
-                                s["start_time"], s["end_time"], u_start, u_end
-                            ):
+                            if check_overlap(s["start_time"], s["end_time"], u_start, u_end):
                                 filepath = u_path
                                 records = u_recs
                                 idx = u_idx
@@ -1480,16 +2192,10 @@ def usage_import_cmd(args) -> int:
         rec["source_session_ref"] = ref
 
         start_iso = (
-            s["start_time"]
-            .astimezone(datetime.timezone.utc)
-            .replace(microsecond=0)
-            .isoformat()
+            s["start_time"].astimezone(datetime.timezone.utc).replace(microsecond=0).isoformat()
         )
         end_iso = (
-            s["end_time"]
-            .astimezone(datetime.timezone.utc)
-            .replace(microsecond=0)
-            .isoformat()
+            s["end_time"].astimezone(datetime.timezone.utc).replace(microsecond=0).isoformat()
             if s["end_time"]
             else None
         )
@@ -1538,11 +2244,7 @@ def usage_import_cmd(args) -> int:
                 records[idx] = rec
                 save_yaml(records, filepath)
             else:
-                date_str = (
-                    s["start_time"]
-                    .astimezone(datetime.timezone.utc)
-                    .strftime("%Y-%m-%d")
-                )
+                date_str = s["start_time"].astimezone(datetime.timezone.utc).strftime("%Y-%m-%d")
                 u_path = os.path.join(op_dir, "usage", f"{date_str}.yaml")
                 u_recs = []
                 if os.path.exists(u_path):
@@ -1553,9 +2255,7 @@ def usage_import_cmd(args) -> int:
             if task:
                 task["updated_at"] = utc_now
                 save_yaml(task, task_path)
-            print(
-                f"Successfully imported usage record '{rec['usage_id']}' for task '{task_id}'."
-            )
+            print(f"Successfully imported usage record '{rec['usage_id']}' for task '{task_id}'.")
 
     return 0
 
@@ -1574,9 +2274,7 @@ def usage_annotate_cmd(args) -> int:
         print(f"Error: Usage record '{usage_id}' not found.", file=sys.stderr)
         return 1
     usage_record = records[idx]
-    if (args.active_start and not args.active_end) or (
-        args.active_end and not args.active_start
-    ):
+    if (args.active_start and not args.active_end) or (args.active_end and not args.active_start):
         print(
             "Error: Both --active-start and --active-end must be specified to calculate active_s.",
             file=sys.stderr,
@@ -1586,18 +2284,14 @@ def usage_annotate_cmd(args) -> int:
         start_dt = parse_iso_to_datetime(args.active_start)
         end_dt = parse_iso_to_datetime(args.active_end)
         if not start_dt or not end_dt:
-            print(
-                "Error: Invalid ISO8601 format for active start/end.", file=sys.stderr
-            )
+            print("Error: Invalid ISO8601 format for active start/end.", file=sys.stderr)
             return 1
         active_s = int((end_dt - start_dt).total_seconds())
         set_record_field(usage_record, "activity.active_s", active_s, "manual")
     if args.cost is not None:
         set_record_field(usage_record, "cost_estimate_usd", args.cost, "manual")
     if args.quota_events is not None:
-        set_record_field(
-            usage_record, "activity.quota_events", args.quota_events, "manual"
-        )
+        set_record_field(usage_record, "activity.quota_events", args.quota_events, "manual")
     if args.note is not None:
         usage_record["raw_payload"] = args.note
     if getattr(args, "lane", None) is not None:
@@ -1612,30 +2306,39 @@ def usage_annotate_cmd(args) -> int:
 
 
 def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str | None:
-    task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
+    resolved_task = resolve_task_record(op_dir, task_id)
+    if not resolved_task:
+        return None
+    task_id, _, task = resolved_task
     harness_path = os.path.join(op_dir, "harnesses", f"{harness_id}.yaml")
 
-    if not os.path.exists(task_path) or not os.path.exists(harness_path):
+    if not os.path.exists(harness_path):
         return None
 
-    task = load_yaml(task_path)
     harness = load_yaml(harness_path)
-    if not task or not harness:
+    if not harness:
         return None
 
     claims = []
     claims_list = task.get("claims") or []
     for cid in claims_list:
-        c_path = os.path.join(op_dir, "claims", f"{cid}.yaml")
-        if os.path.exists(c_path):
-            c_data = load_yaml(c_path)
-            if c_data:
-                claims.append(c_data)
+        resolved_claim = resolve_claim_record(op_dir, cid)
+        if not resolved_claim:
+            return None
+        _, c_data = resolved_claim
+        claims.append(c_data)
 
     latest_handoff = None
     handoffs_list = task.get("handoffs") or []
     if handoffs_list:
         ho_rel_path = handoffs_list[-1]
+        expected_handoff = rf"handoffs/{re.escape(task_id)}/handoff-[0-9]{{4,}}\.yaml"
+        if not isinstance(ho_rel_path, str) or not re.fullmatch(expected_handoff, ho_rel_path):
+            print(
+                f"Error: Task '{task_id}' contains an invalid handoff reference.",
+                file=sys.stderr,
+            )
+            return None
         ho_path = os.path.join(op_dir, ho_rel_path)
         if os.path.exists(ho_path):
             latest_handoff = load_yaml(ho_path)
@@ -1661,9 +2364,7 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     md.append("")
     md.append("## 3. Current Task State & Recommended Next Action")
     md.append(f"- **Current Status:** `{task.get('status')}`")
-    md.append(
-        f"- **Recommended Next Action:** `{task.get('next_action') or 'Not specified'}`"
-    )
+    md.append(f"- **Recommended Next Action:** `{task.get('next_action') or 'Not specified'}`")
     md.append("- **Initial Assumptions:**")
     assumptions = task.get("open_assumptions") or []
     if assumptions:
@@ -1678,9 +2379,7 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
             f"*(Consumed from `{latest_handoff.get('handoff_id')}` by `{latest_handoff.get('by')}` at `{latest_handoff.get('created_at')}`)*"
         )
         md.append("")
-        md.append(
-            f"- **What Changed:** {latest_handoff.get('what_changed') or 'Not documented'}"
-        )
+        md.append(f"- **What Changed:** {latest_handoff.get('what_changed') or 'Not documented'}")
         md.append(
             f"- **What Was Verified:** {latest_handoff.get('what_verified') or 'Not documented'}"
         )
@@ -1694,9 +2393,7 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
             f"- **Unchecked Assumptions:** {latest_handoff.get('unchecked_assumptions') or 'Not documented'}"
         )
     else:
-        md.append(
-            "No previous handoff captured for this task yet. Starting from initial setup."
-        )
+        md.append("No previous handoff captured for this task yet. Starting from initial setup.")
     md.append("")
     md.append("## 5. Claims & Verification Gates")
     if claims:
@@ -1726,9 +2423,7 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     )
     md.append("- **`file_exists`**: Verify by providing file path or `stat` output.")
     md.append("- **`test_passes`**: Verify by providing output text of the test run.")
-    md.append(
-        "- **`real_data`**: Provide physical/provenance chain for the data sources."
-    )
+    md.append("- **`real_data`**: Provide physical/provenance chain for the data sources.")
     md.append(
         "- **`supervision_credit`**: Name the layer supervised via `--layer` (`design`, `evidence`, `execution`, `release`, `end_to_end`); an unnamed layer is flagged ambiguous by doctor (FR-12)."
     )
@@ -1754,16 +2449,10 @@ def brief_cmd(args) -> int:
         )
         return 1
 
-    task_id = args.task_id
-    if not task_id:
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        task_id = config.get("current_task")
-        if not task_id:
-            print(
-                "Error: No active task set. Specify task ID or create a task.",
-                file=sys.stderr,
-            )
-            return 1
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
+        return 1
+    task_id, _, _ = resolved_task
 
     brief_content = generate_brief_markdown(op_dir, task_id, args.harness_id)
     if not brief_content:
@@ -1797,16 +2486,10 @@ def export_brief_cmd(args) -> int:
         )
         return 1
 
-    task_id = args.task_id
-    if not task_id:
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        task_id = config.get("current_task")
-        if not task_id:
-            print(
-                "Error: No active task set. Specify task ID or create a task.",
-                file=sys.stderr,
-            )
-            return 1
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
+        return 1
+    task_id, _, _ = resolved_task
 
     brief_content = generate_brief_markdown(op_dir, task_id, args.harness_id)
     if not brief_content:
@@ -1862,6 +2545,7 @@ def doctor_cmd(args) -> int:
 
     issues = []
     infos = []
+    issues.extend(audit_event_store(op_dir))
 
     # Load identity map
     identity_path = os.path.join(op_dir, "identity.yaml")
@@ -1877,9 +2561,7 @@ def doctor_cmd(args) -> int:
         if not executor:
             return
         if executor.get("test_override_active"):
-            issues.append(
-                f"[Error] {source_name} contains write made with test-override active"
-            )
+            issues.append(f"[Error] {source_name} contains write made with test-override active")
         if executor.get("test_override_unauthorized"):
             issues.append(
                 f"[Error] {source_name} contains write with unauthorized test-override attempt"
@@ -1887,10 +2569,21 @@ def doctor_cmd(args) -> int:
 
     for tf in task_files:
         task = load_yaml(tf)
-        if not task:
+        if not isinstance(task, dict):
             continue
 
-        task_id = task.get("task_id", os.path.splitext(os.path.basename(tf))[0])
+        file_task_id = os.path.splitext(os.path.basename(tf))[0]
+        task_id = task.get("task_id")
+        if (
+            not isinstance(task_id, str)
+            or not VALID_TASK_ID.fullmatch(task_id)
+            or task_id != file_task_id
+        ):
+            issues.append(
+                f"[Error] Task projection {os.path.basename(tf)} has invalid or mismatched "
+                f"task_id: {task_id}"
+            )
+            continue
         check_executor_block(task, f"Task {task_id}")
         task_status = task.get("status")
 
@@ -1910,6 +2603,9 @@ def doctor_cmd(args) -> int:
         quarantined_claims = []
         verified_claims = []
         for cid in claims_list:
+            if not isinstance(cid, str) or not VALID_CLAIM_ID.fullmatch(cid):
+                issues.append(f"[Error] Task {task_id} references invalid claim ID: {cid}")
+                continue
             c_path = os.path.join(op_dir, "claims", f"{cid}.yaml")
             if not os.path.exists(c_path):
                 issues.append(f"[Error] Task {task_id} references missing claim: {cid}")
@@ -1919,22 +2615,30 @@ def doctor_cmd(args) -> int:
             if not c_data:
                 issues.append(f"[Error] Claim {cid} could not be loaded.")
                 continue
+            if c_data.get("claim_id") != cid:
+                issues.append(
+                    f"[Error] Claim projection {cid}.yaml contains mismatched claim_id: "
+                    f"{c_data.get('claim_id')}"
+                )
+                continue
+
+            if c_data.get("task_id") != task_id:
+                issues.append(
+                    f"[Error] Task {task_id} references claim {cid} owned by task "
+                    f"{c_data.get('task_id')}"
+                )
 
             check_executor_block(c_data, f"Claim {cid}")
 
             outcome = c_data.get("verification_outcome")
-            verified = (outcome == "verified") or bool(
-                c_data.get("verification_status")
-            )
+            verified = (outcome == "verified") or bool(c_data.get("verification_status"))
 
             if not c_data.get("required_gate"):
                 issues.append(
                     f"[Warning] Claim {cid} ('{c_data.get('text')}') has no required_gate defined."
                 )
 
-            if c_data.get("type") == "supervision_credit" and not c_data.get(
-                "supervision_layer"
-            ):
+            if c_data.get("type") == "supervision_credit" and not c_data.get("supervision_layer"):
                 issues.append(
                     f"[Warning] Claim {cid} is a supervision_credit with no named layer (ambiguous credit; FR-12)."
                 )
@@ -1955,6 +2659,17 @@ def doctor_cmd(args) -> int:
                     ev_ref_data = load_yaml(ev_ref_path)
                     if ev_ref_data:
                         check_executor_block(ev_ref_data, f"Evidence file {ev_ref}")
+                        if ev_ref_data.get("task_id") != task_id:
+                            issues.append(
+                                f"[Error] Claim {cid} references evidence owned by task "
+                                f"{ev_ref_data.get('task_id')}: {ev_ref}"
+                            )
+                        bound_claim_id = ev_ref_data.get("claim_id")
+                        if bound_claim_id and bound_claim_id != cid:
+                            issues.append(
+                                f"[Error] Claim {cid} references evidence bound to claim "
+                                f"{bound_claim_id}: {ev_ref}"
+                            )
                         provenance = ev_ref_data.get("provenance")
                         stored_hash = ev_ref_data.get("hash")
 
@@ -1982,9 +2697,7 @@ def doctor_cmd(args) -> int:
 
                         if ev_ref_data.get("evidence_type") == "test_output":
                             ev_path = ev_ref_data.get("path_or_url")
-                            if ev_path and not ev_path.startswith(
-                                ("http://", "https://")
-                            ):
+                            if ev_path and not ev_path.startswith(("http://", "https://")):
                                 # Resolve relative path relative to repo_path if available
                                 if repo_path and not os.path.isabs(ev_path):
                                     ev_path_resolved = os.path.join(repo_path, ev_path)
@@ -2058,9 +2771,7 @@ def doctor_cmd(args) -> int:
                 # Executor verification checks
                 executor = c_data.get("executor")
                 if not vby or not executor:
-                    infos.append(
-                        f"[Info] Claim {cid} has unknown verifier (legacy claim)"
-                    )
+                    infos.append(f"[Info] Claim {cid} has unknown verifier (legacy claim)")
                 else:
                     exec_uid = executor.get("uid")
                     expected_verifier = identity_map.get(exec_uid)
@@ -2069,9 +2780,7 @@ def doctor_cmd(args) -> int:
 
                     if mode == "enforced":
                         if not expected_verifier:
-                            issues.append(
-                                f"[Error] claim {cid} verified by unknown UID {exec_uid}"
-                            )
+                            issues.append(f"[Error] claim {cid} verified by unknown UID {exec_uid}")
                         elif vby != expected_verifier:
                             issues.append(
                                 f"[Error] claim {cid} verification identity mismatch (possible impersonation): verified_by is '{vby}', but executor maps to '{expected_verifier}' (uid {exec_uid})"
@@ -2191,14 +2900,9 @@ def doctor_cmd(args) -> int:
                 check_executor_block(rec, f"Usage record {usage_id}")
                 if task_id and rec.get("ended_at") is None:
                     usage_by_task.setdefault(task_id, []).append(usage_id)
-                    infos.append(
-                        f"[Info] Task {task_id} has open usage session: {usage_id}"
-                    )
+                    infos.append(f"[Info] Task {task_id} has open usage session: {usage_id}")
 
-                if (
-                    rec.get("lane") == "frontier_driver"
-                    and rec.get("task_class") == "bounded"
-                ):
+                if rec.get("lane") == "frontier_driver" and rec.get("task_class") == "bounded":
                     infos.append(
                         f"[Info] Session {usage_id} is an offload candidate (tagged frontier_driver + bounded)."
                     )
@@ -2241,9 +2945,7 @@ def doctor_cmd(args) -> int:
                         a_val = auto_vals[field]
                         if m_val is not None and a_val is not None:
                             if check_divergence(m_val, a_val):
-                                issues.append(
-                                    f"[Warning] manual/auto divergence on {field}"
-                                )
+                                issues.append(f"[Warning] manual/auto divergence on {field}")
 
                 activity = rec.get("activity", {})
                 for field in ["tool_calls", "turns", "wall_clock_s", "quota_events"]:
@@ -2252,9 +2954,7 @@ def doctor_cmd(args) -> int:
                         a_val = auto_vals[field]
                         if m_val is not None and a_val is not None:
                             if check_divergence(m_val, a_val):
-                                issues.append(
-                                    f"[Warning] manual/auto divergence on {field}"
-                                )
+                                issues.append(f"[Warning] manual/auto divergence on {field}")
     infos.sort()
 
     for tf in task_files:
@@ -2265,9 +2965,7 @@ def doctor_cmd(args) -> int:
         status = task.get("status")
         open_usage_ids = usage_by_task.get(task_id, [])
         if status == "running" and not open_usage_ids:
-            issues.append(
-                f"[Warning] Task {task_id} is running but has no open usage session."
-            )
+            issues.append(f"[Warning] Task {task_id} is running but has no open usage session.")
         if status != "running" and open_usage_ids:
             issues.append(
                 f"[Error] Task {task_id} is '{status}' but has open usage sessions: {', '.join(open_usage_ids)}"
@@ -2292,9 +2990,7 @@ def doctor_cmd(args) -> int:
     else:
         has_warnings = any("Warning" in msg for msg in infos)
         if has_warnings:
-            print(
-                "Records consistent, but non-fatal warnings exist. Review audit report above."
-            )
+            print("Records consistent, but non-fatal warnings exist. Review audit report above.")
         else:
             print("All records consistent. No issues found.")
         print("=" * 80)
@@ -2347,9 +3043,7 @@ def verify_cmd(args) -> int:
     stored_hashes = v_info.get("distinct_tools_hashes", {})
     if stored_hashes:
         for variation, stored_hash in stored_hashes.items():
-            tools_path = (
-                run_dir / "saved_implementation" / "variations" / variation / "tools.py"
-            )
+            tools_path = run_dir / "saved_implementation" / "variations" / variation / "tools.py"
             if tools_path.exists():
                 curr_hash = hashlib.md5(tools_path.read_bytes()).hexdigest()
                 if curr_hash != stored_hash:
@@ -2373,14 +3067,13 @@ def verify_cmd(args) -> int:
             if not task:
                 continue
             for cid in task.get("claims", []):
+                if not isinstance(cid, str) or not VALID_CLAIM_ID.fullmatch(cid):
+                    issues.append(f"[Error] Task references invalid claim ID: {cid}")
+                    continue
                 c_path = os.path.join(op_dir, "claims", f"{cid}.yaml")
                 if os.path.exists(c_path):
                     c_data = load_yaml(c_path)
-                    if (
-                        c_data
-                        and c_data.get("text")
-                        and handoff_id in c_data.get("text", "")
-                    ):
+                    if c_data and c_data.get("text") and handoff_id in c_data.get("text", ""):
                         found_claim = True
                         made = c_data.get("made_by")
                         vby = c_data.get("verified_by")
@@ -2408,11 +3101,7 @@ def verify_cmd(args) -> int:
                 status_hash = match.group(1)
                 # Check against variation_1/tools.py hash (typical for DBB-001a)
                 t1_path = (
-                    run_dir
-                    / "saved_implementation"
-                    / "variations"
-                    / "variation_1"
-                    / "tools.py"
+                    run_dir / "saved_implementation" / "variations" / "variation_1" / "tools.py"
                 )
                 if t1_path.exists():
                     curr_t1_hash = hashlib.md5(t1_path.read_bytes()).hexdigest()[:8]
@@ -2465,6 +3154,9 @@ def task_list_cmd(args) -> int:
         open_cnt = 0
 
         for cid in claims_list:
+            if not isinstance(cid, str) or not VALID_CLAIM_ID.fullmatch(cid):
+                open_cnt += 1
+                continue
             c_path = os.path.join(op_dir, "claims", f"{cid}.yaml")
             if os.path.exists(c_path):
                 c_data = load_yaml(c_path)
@@ -2567,9 +3259,7 @@ def claim_list_cmd(args) -> int:
     title_str = f"CLAIMS LEDGER (Task: {task_id or 'all'})"
     print(f"{title_str}")
     print("=" * 100)
-    print(
-        f"{'CLAIM ID':<10} | {'TASK ID':<20} | {'TYPE':<15} | {'STATUS':<12} | {'CLAIM TEXT'}"
-    )
+    print(f"{'CLAIM ID':<10} | {'TASK ID':<20} | {'TYPE':<15} | {'STATUS':<12} | {'CLAIM TEXT'}")
     print("=" * 100)
     for cd in claims_data:
         text = cd["text"]
@@ -2596,14 +3286,10 @@ def claim_show_cmd(args) -> int:
         print("Error: Specify a claim ID (e.g. claim-0001).", file=sys.stderr)
         return 1
 
-    claim_path = os.path.join(op_dir, "claims", f"{claim_id}.yaml")
-    if not os.path.exists(claim_path):
-        print(f"Error: Claim '{claim_id}' not found.", file=sys.stderr)
+    resolved_claim = resolve_claim_record(op_dir, claim_id)
+    if not resolved_claim:
         return 1
-
-    claim = load_yaml(claim_path)
-    if not claim:
-        return 1
+    _, claim = resolved_claim
 
     print("=" * 80)
     print(f"Claim ID:            {claim.get('claim_id')}")
@@ -2618,18 +3304,14 @@ def claim_show_cmd(args) -> int:
         outcome = "verified" if claim.get("verification_status") else "unverified"
 
     status_str = str(outcome).upper()
-    print(
-        f"Verification status: {status_str} (Status boolean: {claim.get('verification_status')})"
-    )
+    print(f"Verification status: {status_str} (Status boolean: {claim.get('verification_status')})")
 
     if claim.get("verdict"):
         print(f"Verdict:             {claim.get('verdict')}")
 
     print(f"Required Gate:       {claim.get('required_gate') or 'N/A'}")
     if claim.get("type") == "supervision_credit":
-        print(
-            f"Supervision Layer:   {claim.get('supervision_layer') or 'AMBIGUOUS (no layer)'}"
-        )
+        print(f"Supervision Layer:   {claim.get('supervision_layer') or 'AMBIGUOUS (no layer)'}")
     print("-" * 80)
     print("Evidence References:")
     refs = claim.get("evidence_refs") or []
@@ -2785,9 +3467,7 @@ def usage_summary_cmd(args) -> int:
                 if show_cost:
                     print(f"  Est. Cost:  ${data['cost']:.4f} USD")
                 print(f"  Tool Calls: {data['tool_calls']}")
-                outs = ", ".join(
-                    f"{k}:{v}" for k, v in sorted(data["outcomes"].items())
-                )
+                outs = ", ".join(f"{k}:{v}" for k, v in sorted(data["outcomes"].items()))
                 print(f"  Outcomes:   {outs}")
                 print("-" * 40)
             print("=" * 80)
@@ -2802,15 +3482,11 @@ def usage_summary_cmd(args) -> int:
                 if show_cost:
                     print(f"  Est. Cost:  ${data['cost']:.4f} USD")
                 print(f"  Tool Calls: {data['tool_calls']}")
-                print(
-                    f"  Turns:      {data['turns']} (harness-internal; not cross-comparable)"
-                )
+                print(f"  Turns:      {data['turns']} (harness-internal; not cross-comparable)")
                 print(
                     f"  Wall Clock: {data['wall_clock_s']}s (harness-internal; not cross-comparable)"
                 )
-                outs = ", ".join(
-                    f"{k}:{v}" for k, v in sorted(data["outcomes"].items())
-                )
+                outs = ", ".join(f"{k}:{v}" for k, v in sorted(data["outcomes"].items()))
                 print(f"  Outcomes:   {outs}")
                 print("-" * 40)
             print("=" * 80)
@@ -2825,9 +3501,7 @@ def usage_summary_cmd(args) -> int:
                 if show_cost:
                     print(f"  Est. Cost:  ${data['cost']:.4f} USD")
                 print(f"  Tool Calls: {data['tool_calls']}")
-                outs = ", ".join(
-                    f"{k}:{v}" for k, v in sorted(data["outcomes"].items())
-                )
+                outs = ", ".join(f"{k}:{v}" for k, v in sorted(data["outcomes"].items()))
                 print(f"  Outcomes:   {outs}")
                 print("-" * 40)
             print("=" * 80)
@@ -2845,16 +3519,8 @@ def usage_summary_cmd(args) -> int:
                     if r.get("cost_estimate_usd") is not None
                     else 0.0
                 )
-                t_in = (
-                    int(r.get("tokens_in") or 0)
-                    if r.get("tokens_in") is not None
-                    else 0
-                )
-                t_out = (
-                    int(r.get("tokens_out") or 0)
-                    if r.get("tokens_out") is not None
-                    else 0
-                )
+                t_in = int(r.get("tokens_in") or 0) if r.get("tokens_in") is not None else 0
+                t_out = int(r.get("tokens_out") or 0) if r.get("tokens_out") is not None else 0
 
                 key = (ln, tc)
                 if key not in lane_groups:
@@ -2926,25 +3592,11 @@ def handoff_add_cmd(args) -> int:
         )
         return 1
 
-    task_id = args.task_id
-    if not task_id:
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        task_id = config.get("current_task")
-        if not task_id:
-            print(
-                "Error: No active task set. Specify task ID or create a task.",
-                file=sys.stderr,
-            )
-            return 1
-
-    task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
-    if not os.path.exists(task_path):
-        print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
         return 1
-
-    task = load_yaml(task_path)
-    if not task:
-        return 1
+    task_id, task_path, task = resolved_task
+    preflight_projection(op_dir, task_path, task)
 
     handoff_id = get_next_handoff_id(op_dir, task_id)
     by = args.by if args.by else task.get("assigned_harness") or "operator"
@@ -3055,21 +3707,10 @@ def session_start_cmd(args) -> int:
         )
         return 1
 
-    task_id = args.task_id
-    if not task_id:
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        task_id = config.get("current_task")
-        if not task_id:
-            print(
-                "Error: No active task set. Specify task ID or create a task.",
-                file=sys.stderr,
-            )
-            return 1
-
-    task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
-    if not os.path.exists(task_path):
-        print(f"Error: Task '{task_id}' not found.", file=sys.stderr)
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
         return 1
+    task_id, task_path, task = resolved_task
 
     harness_id = args.harness_id
     harness_path = os.path.join(op_dir, "harnesses", f"{harness_id}.yaml")
@@ -3080,10 +3721,10 @@ def session_start_cmd(args) -> int:
         )
         return 1
 
-    task = load_yaml(task_path)
     harness = load_yaml(harness_path)
-    if not task or not harness:
+    if not harness:
         return 1
+    preflight_projection(op_dir, task_path, task)
 
     if task.get("status") == "running" and not args.force:
         print(
@@ -3164,9 +3805,7 @@ def session_start_cmd(args) -> int:
     if launch_cmd:
         print(f"Launch command: {launch_cmd}")
     else:
-        print(
-            f"Launch instructions: Open your target environment for {harness_display_name}."
-        )
+        print(f"Launch instructions: Open your target environment for {harness_display_name}.")
 
     print("Paste instructions:")
     print(
@@ -3237,6 +3876,16 @@ def session_end_cmd(args) -> int:
         )
         return 1
 
+    task_id = usage_record.get("task_id")
+    task = None
+    task_path = None
+    if task_id:
+        resolved_task = resolve_task_record(op_dir, task_id)
+        if not resolved_task:
+            return 1
+        _, task_path, task = resolved_task
+        preflight_projection(op_dir, task_path, task)
+
     utc_now = get_current_utc_iso()
     usage_record["ended_at"] = utc_now
     usage_record["outcome"] = args.outcome
@@ -3259,21 +3908,16 @@ def session_end_cmd(args) -> int:
     usage_record["executor"] = get_executor_identity()
     save_yaml(records, filepath)
 
-    task_id = usage_record.get("task_id")
-    if task_id:
-        task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
-        if os.path.exists(task_path):
-            task = load_yaml(task_path)
-            if task:
-                task["updated_at"] = utc_now
-                open_usage_ids = get_open_usage_ids_for_task(op_dir, task_id)
-                if args.status:
-                    task["status"] = args.status
-                elif task.get("status") == "running" and not open_usage_ids:
-                    # Task is no longer running since all sessions for it are closed.
-                    # Default back to assigned if no explicit status is provided.
-                    task["status"] = "assigned"
-                save_yaml(task, task_path)
+    if task:
+        task["updated_at"] = utc_now
+        open_usage_ids = get_open_usage_ids_for_task(op_dir, task_id)
+        if args.status:
+            task["status"] = args.status
+        elif task.get("status") == "running" and not open_usage_ids:
+            # Task is no longer running since all sessions for it are closed.
+            # Default back to assigned if no explicit status is provided.
+            task["status"] = "assigned"
+        save_yaml(task, task_path)
 
     print(f"Successfully closed usage session '{usage_id}'.")
     return 0
@@ -3355,12 +3999,8 @@ def main() -> None:
     )
 
     # operator task create
-    create_parser = subparsers.add_parser(
-        "task-create", help="Create a new task in the ledger."
-    )
-    create_parser.add_argument(
-        "--objective", "-o", required=True, help="Task objective statement."
-    )
+    create_parser = subparsers.add_parser("task-create", help="Create a new task in the ledger.")
+    create_parser.add_argument("--objective", "-o", required=True, help="Task objective statement.")
     create_parser.add_argument(
         "--id",
         dest="task_id",
@@ -3373,9 +4013,7 @@ def main() -> None:
         default=".",
         help="Path to repository under task (defaults to current folder).",
     )
-    create_parser.add_argument(
-        "--assign", "-a", default=None, help="Harness ID to assign."
-    )
+    create_parser.add_argument("--assign", "-a", default=None, help="Harness ID to assign.")
     create_parser.add_argument(
         "--review",
         dest="review",
@@ -3429,9 +4067,7 @@ def main() -> None:
         ],
         help="Type of claim.",
     )
-    claim_parser.add_argument(
-        "--text", "-x", required=True, help="Claim description text."
-    )
+    claim_parser.add_argument("--text", "-x", required=True, help="Claim description text.")
     claim_parser.add_argument(
         "--task",
         dest="task_id",
@@ -3476,9 +4112,7 @@ def main() -> None:
     evidence_parser.add_argument(
         "path_or_url", help="Path to local file or URL of the evidence artifact."
     )
-    evidence_parser.add_argument(
-        "--claim", "-c", default=None, help="Associated Claim ID."
-    )
+    evidence_parser.add_argument("--claim", "-c", default=None, help="Associated Claim ID.")
     evidence_parser.add_argument(
         "--type",
         "-t",
@@ -3502,9 +4136,7 @@ def main() -> None:
         default=None,
         help="Task ID (defaults to current active task).",
     )
-    evidence_parser.add_argument(
-        "--by", default=None, help="Actor who produced the evidence."
-    )
+    evidence_parser.add_argument("--by", default=None, help="Actor who produced the evidence.")
     evidence_parser.add_argument(
         "--hash",
         default=None,
@@ -3647,9 +4279,7 @@ def main() -> None:
     usage_annotate_parser = subparsers.add_parser(
         "usage-annotate", help="Manually override fields in a usage record."
     )
-    usage_annotate_parser.add_argument(
-        "usage_id", help="Usage ID to annotate (e.g. usage-0001)."
-    )
+    usage_annotate_parser.add_argument("usage_id", help="Usage ID to annotate (e.g. usage-0001).")
     usage_annotate_parser.add_argument(
         "--active-start", default=None, help="Start timestamp of active coding time."
     )
@@ -3682,12 +4312,8 @@ def main() -> None:
     )
 
     # operator brief
-    brief_parser = subparsers.add_parser(
-        "brief", help="Generate a harness-specific brief."
-    )
-    brief_parser.add_argument(
-        "--for", dest="harness_id", required=True, help="Target Harness ID."
-    )
+    brief_parser = subparsers.add_parser("brief", help="Generate a harness-specific brief.")
+    brief_parser.add_argument("--for", dest="harness_id", required=True, help="Target Harness ID.")
     brief_parser.add_argument(
         "--task",
         dest="task_id",
@@ -3720,9 +4346,7 @@ def main() -> None:
     )
 
     # operator task-list
-    subparsers.add_parser(
-        "task-list", help="List all tasks in the ledger with outcome summaries."
-    )
+    subparsers.add_parser("task-list", help="List all tasks in the ledger with outcome summaries.")
 
     # operator claim-list
     claim_list_parser = subparsers.add_parser(
@@ -3745,9 +4369,7 @@ def main() -> None:
         default=None,
         help="Task ID (defaults to current active task).",
     )
-    handoff_parser.add_argument(
-        "--by", default=None, help="Actor who produced the handoff."
-    )
+    handoff_parser.add_argument("--by", default=None, help="Actor who produced the handoff.")
     handoff_parser.add_argument(
         "--changed", "-c", default=None, help="Description of what changed."
     )
@@ -3814,9 +4436,7 @@ def main() -> None:
 
     # operator session-end
     session_end_parser = subparsers.add_parser("session-end", help="End session")
-    session_end_parser.add_argument(
-        "usage_id", nargs="?", default=None, help="Usage ID to close."
-    )
+    session_end_parser.add_argument("usage_id", nargs="?", default=None, help="Usage ID to close.")
     session_end_parser.add_argument(
         "--usage", dest="usage_id_flag", default=None, help="Usage ID to close."
     )
@@ -3845,9 +4465,7 @@ def main() -> None:
     )
 
     # operator session-list
-    session_list_parser = subparsers.add_parser(
-        "session-list", help="List coding sessions."
-    )
+    session_list_parser = subparsers.add_parser("session-list", help="List coding sessions.")
     session_list_parser.add_argument(
         "--open", action="store_true", help="Filter for open sessions only."
     )
@@ -3868,17 +4486,11 @@ def main() -> None:
     )
 
     args = parser.parse_args()
-    if getattr(args, "command", None) == "task-show" and getattr(
-        args, "task_id_flag", None
-    ):
+    if getattr(args, "command", None) == "task-show" and getattr(args, "task_id_flag", None):
         args.task_id = args.task_id_flag
-    if getattr(args, "command", None) == "claim-show" and getattr(
-        args, "claim_id_flag", None
-    ):
+    if getattr(args, "command", None) == "claim-show" and getattr(args, "claim_id_flag", None):
         args.claim_id = args.claim_id_flag
-    if getattr(args, "command", None) == "session-end" and getattr(
-        args, "usage_id_flag", None
-    ):
+    if getattr(args, "command", None) == "session-end" and getattr(args, "usage_id_flag", None):
         args.usage_id = args.usage_id_flag
 
     # Mapping subcommand names to python functions.
@@ -3906,7 +4518,16 @@ def main() -> None:
         "verify": verify_cmd,
     }
 
-    sys.exit(cmd_map[args.command](args))
+    lock_handle = None
+    try:
+        lock_handle = acquire_command_lock(args.command)
+        return_code = cmd_map[args.command](args)
+    except LedgerWriteError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return_code = 1
+    finally:
+        release_command_lock(lock_handle)
+    sys.exit(return_code)
 
 
 if __name__ == "__main__":

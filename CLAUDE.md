@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A local, file-backed **governance ledger for multi-agent software work**. The core idea is a
+A local **governance ledger for multi-agent software work**. The core idea is a
 **narration-vs-execution partition**: an agent's *claim* ("I did X, it passes") is only trustworthy if
 it has *evidence* attached and is *verified by a different identity*. The tool records the
-task → claim → evidence → verification → session → usage lifecycle as append-only YAML under
-`.operator/`, binds each write to the executing OS identity, blocks self-verification, and ships a
-`doctor` consistency checker that fails closed.
+task → claim → evidence → verification → session → usage lifecycle as YAML projections plus an
+append-only SQLite event history under `.operator/`, binds each write to the executing OS identity,
+blocks self-verification, and ships a `doctor` consistency checker that fails closed.
 
 When changing verification, identity, or `doctor` semantics, the guiding principle is: **enforce that a
 check exists and runs, never claim it is meaningful.** Structural verification only (see the README's
@@ -30,23 +30,25 @@ isort --check-only .                     # import sorting check
 ```
 
 `./operator init` creates a local `.operator/` ledger in the current directory — only run it in a
-throwaway/intended workspace. The `.operator/` dir is gitignored; never commit task/claim/evidence/
-session/usage records.
+throwaway/intended workspace. The `.operator/` dir is gitignored; never commit its YAML records or
+`ledger.sqlite3` event store.
 
 ## Architecture
 
-**Single-file CLI.** Almost all implementation lives in the top-level `operator` script (~3900 lines,
+**Single-file CLI.** Almost all implementation lives in the top-level `operator` script (~4700 lines,
 Python 3 stdlib + PyYAML). `main()` builds an argparse subparser per command and dispatches through the
 `cmd_map` dict near the end of the file (`init` → `init_cmd`, `task-create` → `task_create_cmd`, etc.).
 To add or change a command, edit both the `add_parser(...)` block in `main()` and the corresponding
 `*_cmd(args)` function.
 
-**Ledger layout** (created by `init_cmd`, all append-only YAML):
-`.operator/{tasks,claims,evidence,handoffs,usage,sessions,briefs}/` plus `harnesses/<id>.yaml` (the
+**Ledger layout** (created by `init_cmd`):
+`.operator/{tasks,claims,evidence,handoffs,usage,briefs}/` plus `harnesses/<id>.yaml` (the
 known AI harnesses — claude, codex, gemini-agy, copilot, gemma3_local, gemma4_local; their default
 definitions are hardcoded in `init_cmd`'s `harnesses_data`). `operator.yaml` holds top-level state like
 `current_task`. Record IDs are sequential and zero-padded: `claim-0001`, `evidence-0001`, `usage-0001`,
-`handoff-0001`. `find_operator_dir()` walks upward from cwd to locate the active ledger.
+`handoff-0001`. These YAML files are current projections; `.operator/ledger.sqlite3` retains immutable
+full-snapshot versions for trust-relevant writes. Session commands version their `usage-XXXX` record.
+`find_operator_dir()` walks upward from cwd to locate the active ledger.
 
 **Identity binding** (`get_executor_identity()`, EXECUTOR_IDENTITY_SPEC.md). Every write binds to
 `os.getuid()`. Policy lives in `.operator/identity.yaml`: `mode: enforced` rejects a claim whose
@@ -58,9 +60,10 @@ binding advisory, and `doctor` warns when a claim *would* be rejected under enfo
 (fail-closed), and a builder cannot sign off their own claim. Evidence prefers a re-runnable
 `--verify-cmd` over a static blob; files are SHA-256 hashed (`calculate_file_hash`).
 
-**doctor** (`doctor_cmd`) is read-only and fails closed (exit 1) on verified/completed records that lack
-required evidence files, target-repo references, matching gate/test files, or valid command run hashes —
-in addition to flagging unverified claims and self-verification.
+**doctor** (`doctor_cmd`) is read-only and fails closed (exit 1) when SQLite event hashes or YAML
+projections disagree, or when verified/completed records lack required evidence files, target-repo
+references, matching gate/test files, or valid command run hashes — in addition to flagging unverified
+claims and self-verification.
 
 **Usage auto-import** (`usage_import_cmd`, USAGE_AUTOIMPORT_SPEC.md). Parses per-session token/usage from
 real harness logs under `~/.claude`, `~/.codex`, `~/.gemini/...`. Session scoring/lane-tagging
