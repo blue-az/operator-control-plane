@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import concurrent.futures
 import hashlib
+import json
 import os
 import shutil
 import sqlite3
@@ -33,7 +34,11 @@ class TestOperatorCLI(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
 
     def run_operator(
-        self, *args: str, stdin_data: str | None = None, env: dict | None = None
+        self,
+        *args: str,
+        stdin_data: str | None = None,
+        env: dict | None = None,
+        timeout: float | None = None,
     ) -> subprocess.CompletedProcess[str]:
         cmd = [OPERATOR_BIN] + list(args)
         run_env = os.environ.copy()
@@ -46,6 +51,7 @@ class TestOperatorCLI(unittest.TestCase):
             stderr=subprocess.PIPE,
             text=True,
             env=run_env,
+            timeout=timeout,
         )
 
     def rebaseline_ledger(self) -> None:
@@ -191,6 +197,313 @@ class TestOperatorCLI(unittest.TestCase):
                 conn.execute("DELETE FROM ledger_events")
         finally:
             conn.close()
+
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+
+    def test_local_evidence_fingerprint_detects_source_and_snapshot_staleness(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Fingerprint evidence", "--id", "fingerprint-task"
+        )
+        self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Evidence bytes remain current",
+            "--gate",
+            "manual review",
+        )
+
+        source = Path(self.temp_dir) / "evidence.bin"
+        source.write_bytes(b"alpha")
+        sentinel = Path(self.temp_dir) / "verification-command-ran"
+        res = self.run_operator(
+            "evidence-attach",
+            str(source),
+            "--claim",
+            "claim-0001",
+            "--type",
+            "manifest",
+            "--status",
+            "verified",
+            "--verified-by",
+            "reviewer",
+            "--verify-cmd",
+            f"touch {sentinel}",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        evidence_path = (
+            Path(self.temp_dir)
+            / ".operator"
+            / "evidence"
+            / "fingerprint-task"
+            / "evidence-0001.yaml"
+        )
+        evidence = yaml.safe_load(evidence_path.read_text())
+        expected_hash = hashlib.sha256(b"alpha").hexdigest()
+        self.assertEqual(evidence["hash"], expected_hash)
+        self.assertEqual(evidence["fingerprint"]["algorithm"], "sha256")
+        self.assertEqual(evidence["fingerprint"]["value"], expected_hash)
+        self.assertEqual(evidence["fingerprint"]["size_bytes"], 5)
+        self.assertIsInstance(evidence["fingerprint"]["mtime_ns"], int)
+        self.assertEqual(evidence["source"]["kind"], "local_file")
+        self.assertEqual(evidence["source"]["locator"], str(source.resolve()))
+        self.assertEqual(evidence["source"]["fingerprint"]["value"], expected_hash)
+
+        event = next(row for row in self.read_ledger_events() if row["record_type"] == "evidence")
+        event_payload = json.loads(event["payload_json"])
+        self.assertEqual(event_payload["fingerprint"], evidence["fingerprint"])
+        self.assertFalse(sentinel.exists())
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.assertFalse(sentinel.exists())
+
+        del evidence["hash"]
+        evidence["claim_id"] = None
+        evidence_path.write_text(yaml.safe_dump(evidence))
+        self.rebaseline_ledger()
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.assertFalse(sentinel.exists())
+
+        source.unlink()
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.assertIn("local source is unavailable; retained snapshot remains current", res.stdout)
+        self.assertFalse(sentinel.exists())
+
+        source.write_bytes(b"omega")
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1, res.stdout + res.stderr)
+        self.assertIn("verified local source content changed since attachment", res.stdout)
+        self.assertFalse(sentinel.exists())
+
+        source.write_bytes(b"alpha")
+        retained_snapshot = Path(evidence["path_or_url"])
+        retained_snapshot.write_bytes(b"bravo")
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1, res.stdout + res.stderr)
+        self.assertIn("retained snapshot content changed", res.stdout)
+        self.assertFalse(sentinel.exists())
+
+        retained_snapshot.unlink()
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1, res.stdout + res.stderr)
+        self.assertIn("retained snapshot is missing", res.stdout)
+        self.assertFalse(sentinel.exists())
+
+        os.mkfifo(retained_snapshot)
+        res = self.run_operator("doctor", timeout=5)
+        self.assertEqual(res.returncode, 1, res.stdout + res.stderr)
+        self.assertIn("retained snapshot is unreadable", res.stdout)
+        self.assertIn("is not a regular file", res.stdout)
+        self.assertFalse(sentinel.exists())
+
+    def test_expected_evidence_hash_is_validated_before_trust_writes(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Expected fingerprint", "--id", "expected-hash-task"
+        )
+        self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Expected digest matches bytes",
+            "--gate",
+            "manual review",
+        )
+        source = Path(self.temp_dir) / "expected.bin"
+        source.write_bytes(b"expected bytes")
+        evidence_dir = Path(self.temp_dir) / ".operator" / "evidence" / "expected-hash-task"
+        ledger_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        for path in ledger_path.parent.glob("ledger.sqlite3*"):
+            path.unlink()
+
+        for supplied_hash, expected_message in (
+            ("not-a-sha256", "must be exactly 64 hexadecimal characters"),
+            ("0" * 64, "does not match local evidence bytes"),
+        ):
+            res = self.run_operator(
+                "evidence-attach",
+                str(source),
+                "--claim",
+                "claim-0001",
+                "--type",
+                "manifest",
+                "--status",
+                "verified",
+                "--verified-by",
+                "reviewer",
+                "--hash",
+                supplied_hash,
+            )
+            self.assertEqual(res.returncode, 1)
+            self.assertIn(expected_message, res.stderr)
+            self.assertEqual(list(evidence_dir.glob("*")), [])
+            self.assertFalse(ledger_path.exists())
+
+        source_dir = Path(self.temp_dir) / "not-a-file"
+        source_dir.mkdir()
+        res = self.run_operator(
+            "evidence-attach",
+            str(source_dir),
+            "--claim",
+            "claim-0001",
+            "--type",
+            "manifest",
+            "--hash",
+            hashlib.sha256(b"").hexdigest(),
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("is not a regular file", res.stderr)
+        self.assertEqual(list(evidence_dir.glob("*")), [])
+        self.assertFalse(ledger_path.exists())
+
+        missing_source = Path(self.temp_dir) / "missing-evidence.bin"
+        for missing_locator in (str(missing_source), f"FILE://{missing_source}"):
+            res = self.run_operator(
+                "evidence-attach",
+                missing_locator,
+                "--claim",
+                "claim-0001",
+                "--type",
+                "manifest",
+                "--status",
+                "verified",
+                "--verified-by",
+                "reviewer",
+                "--hash",
+                hashlib.sha256(b"invented").hexdigest(),
+                "--verify-cmd",
+                "true",
+            )
+            self.assertEqual(res.returncode, 1)
+            self.assertIn("Local evidence file does not exist", res.stderr)
+            self.assertFalse(ledger_path.exists())
+
+        expected_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+        res = self.run_operator(
+            "evidence-attach",
+            str(source),
+            "--claim",
+            "claim-0001",
+            "--type",
+            "manifest",
+            "--status",
+            "verified",
+            "--verified-by",
+            "reviewer",
+            "--hash",
+            expected_hash.upper(),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        evidence = yaml.safe_load((evidence_dir / "evidence-0001.yaml").read_text())
+        self.assertEqual(evidence["hash"], expected_hash)
+        self.assertEqual(evidence["fingerprint"]["value"], expected_hash)
+
+    def test_evidence_copy_never_clobbers_or_deletes_an_existing_artifact(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "No-clobber evidence copy", "--id", "copy-safety-task"
+        )
+        evidence_dir = Path(self.temp_dir) / ".operator" / "evidence" / "copy-safety-task"
+        evidence_dir.mkdir(exist_ok=True)
+        existing_artifact = evidence_dir / "evidence-0001.txt"
+        existing_artifact.write_text("must survive")
+
+        res = self.run_operator("evidence-attach", str(existing_artifact), "--type", "manifest")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("artifact destination already exists", res.stderr)
+        self.assertEqual(existing_artifact.read_text(), "must survive")
+        self.assertFalse((evidence_dir / "evidence-0001.yaml").exists())
+        self.assertFalse(any(row["record_type"] == "evidence" for row in self.read_ledger_events()))
+
+    def test_remote_evidence_is_explicitly_uncheckable_and_commands_are_not_run(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Remote evidence", "--id", "remote-evidence-task"
+        )
+        self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Remote evidence remains structural",
+            "--gate",
+            "manual review",
+        )
+        sentinel = Path(self.temp_dir) / "remote-verification-command-ran"
+        remote_url = "https://example.invalid/evidence.json"
+        expected_hash = "a" * 64
+
+        res = self.run_operator(
+            "evidence-attach",
+            remote_url,
+            "--claim",
+            "claim-0001",
+            "--type",
+            "external_doc",
+            "--status",
+            "verified",
+            "--verified-by",
+            "reviewer",
+            "--hash",
+            expected_hash,
+            "--verify-cmd",
+            f"touch {sentinel}",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        evidence_path = (
+            Path(self.temp_dir)
+            / ".operator"
+            / "evidence"
+            / "remote-evidence-task"
+            / "evidence-0001.yaml"
+        )
+        evidence = yaml.safe_load(evidence_path.read_text())
+        self.assertEqual(evidence["source"], {"kind": "remote_url", "locator": remote_url})
+        self.assertEqual(
+            evidence["fingerprint"],
+            {
+                "algorithm": "sha256",
+                "value": expected_hash,
+                "size_bytes": None,
+                "mtime_ns": None,
+            },
+        )
+
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.assertIn("remote freshness is uncheckable without a local snapshot", res.stdout)
+        self.assertIn("verification command was not executed", res.stdout)
+        self.assertFalse(sentinel.exists())
+
+    def test_doctor_accepts_legacy_raw_hash_evidence(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Legacy fingerprint", "--id", "legacy-hash-task"
+        )
+        source = Path(self.temp_dir) / "legacy.txt"
+        source.write_text("legacy evidence")
+        res = self.run_operator("evidence-attach", str(source), "--type", "manifest")
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        evidence_path = (
+            Path(self.temp_dir)
+            / ".operator"
+            / "evidence"
+            / "legacy-hash-task"
+            / "evidence-0001.yaml"
+        )
+        evidence = yaml.safe_load(evidence_path.read_text())
+        del evidence["fingerprint"]
+        del evidence["source"]
+        evidence_path.write_text(yaml.safe_dump(evidence))
+        self.rebaseline_ledger()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
@@ -2195,10 +2508,15 @@ class TestOperatorCLI(unittest.TestCase):
         ev_data = yaml.safe_load(ev_file.read_text())
         ev_data["provenance"] = "url_or_external"
         ev_data["hash"] = None
+        ev_data["fingerprint"] = None
         ev_data["verification_command"] = None
         ev_data["path_or_url"] = (
             "relative/nonexistent/test_output.log"  # relative path to test CWD resolution
         )
+        ev_data["source"] = {
+            "kind": "external_reference",
+            "locator": ev_data["path_or_url"],
+        }
         ev_data["executor"]["test_override_active"] = False
         with open(ev_file, "w") as f:
             yaml.safe_dump(ev_data, f)

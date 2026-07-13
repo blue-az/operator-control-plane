@@ -11,9 +11,10 @@ task → claim → evidence → verification → session → usage lifecycle as 
 append-only SQLite event history under `.operator/`, binds each write to the executing OS identity,
 blocks self-verification, and ships a `doctor` consistency checker that fails closed.
 
-When changing verification, identity, or `doctor` semantics, the guiding principle is: **enforce that a
-check exists and runs, never claim it is meaningful.** Structural verification only (see the README's
-"Known limitations").
+When changing verification, identity, or `doctor` semantics, keep `doctor` structural and read-only. It
+may validate bindings and recompute fingerprints, but it must never execute a stored verification command.
+Do not claim that structurally valid evidence is semantically meaningful (see the README's "Known
+limitations").
 
 ## Commands
 
@@ -58,12 +59,17 @@ binding advisory, and `doctor` warns when a claim *would* be rejected under enfo
 
 **Verification guard** (VERIFIED_BY_GUARD_SPEC.md). `evidence-attach --status` requires `--claim`
 (fail-closed), and a builder cannot sign off their own claim. Evidence prefers a re-runnable
-`--verify-cmd` over a static blob; files are SHA-256 hashed (`calculate_file_hash`).
+`--verify-cmd` over a static blob. Local files are copied only after their bytes are fingerprinted with
+SHA-256, size, and modification time; `--hash` is treated as an expected digest and must match those bytes.
+The original local locator and fingerprint are retained separately from the copied snapshot. The raw
+`hash` field remains a compatibility alias for older readers.
 
 **doctor** (`doctor_cmd`) is read-only and fails closed (exit 1) when SQLite event hashes or YAML
 projections disagree, or when verified/completed records lack required evidence files, target-repo
-references, matching gate/test files, or valid command run hashes — in addition to flagging unverified
-claims and self-verification.
+references, matching gate/test files, valid command run hashes, or current local evidence bytes — in
+addition to flagging unverified claims and self-verification. It distinguishes changed content from an
+unavailable original source, reports remote evidence as uncheckable without a local snapshot, and never
+executes `verification_command`.
 
 **Usage auto-import** (`usage_import_cmd`, USAGE_AUTOIMPORT_SPEC.md). Parses per-session token/usage from
 real harness logs under `~/.claude`, `~/.codex`, `~/.gemini/...`. Session scoring/lane-tagging

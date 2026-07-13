@@ -15,6 +15,7 @@ import json
 import os
 import pwd
 import re
+import shutil
 import sqlite3
 import stat
 import sys
@@ -28,6 +29,7 @@ LEDGER_HASH_FORMAT = "operator-ledger-event-v1"
 LEDGER_SCHEMA_VERSION = 1
 VALID_TASK_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 VALID_CLAIM_ID = re.compile(r"^claim-[0-9]{4,}$")
+VALID_SHA256 = re.compile(r"^[0-9a-fA-F]{64}$")
 TRUST_RECORD_DIRS = {
     "tasks": "task",
     "claims": "claim",
@@ -50,6 +52,10 @@ MUTATING_COMMANDS = {
 
 
 class LedgerWriteError(RuntimeError):
+    pass
+
+
+class EvidenceFingerprintError(RuntimeError):
     pass
 
 
@@ -873,16 +879,229 @@ def resolve_claim_record(operator_dir: str, claim_id: str) -> tuple[str, dict] |
     return claim_path, claim
 
 
-def calculate_file_hash(filepath: str) -> str | None:
-    """Calculate the SHA-256 hash of a local file."""
-    sha256 = hashlib.sha256()
+def normalize_sha256(value: str) -> str:
+    if not isinstance(value, str) or not VALID_SHA256.fullmatch(value):
+        raise EvidenceFingerprintError("SHA-256 must be exactly 64 hexadecimal characters")
+    return value.lower()
+
+
+def fingerprint_regular_file(filepath: str) -> dict:
     try:
-        with open(filepath, "rb") as f:
+        sha256 = hashlib.sha256()
+        fd = os.open(filepath, os.O_RDONLY | os.O_NONBLOCK)
+        with os.fdopen(fd, "rb") as f:
+            before = os.fstat(f.fileno())
+            if not stat.S_ISREG(before.st_mode):
+                raise EvidenceFingerprintError(f"Evidence path is not a regular file: {filepath}")
             for chunk in iter(lambda: f.read(65536), b""):
                 sha256.update(chunk)
-        return sha256.hexdigest()
-    except Exception:
+            after = os.fstat(f.fileno())
+        path_after = os.stat(filepath)
+    except EvidenceFingerprintError:
+        raise
+    except OSError as exc:
+        raise EvidenceFingerprintError(
+            f"Could not fingerprint evidence file '{filepath}': {exc}"
+        ) from exc
+
+    before_identity = (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+    after_identity = (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+    if before_identity != after_identity:
+        raise EvidenceFingerprintError(f"Evidence file changed while fingerprinting: {filepath}")
+    path_identity = (
+        path_after.st_dev,
+        path_after.st_ino,
+        path_after.st_size,
+        path_after.st_mtime_ns,
+    )
+    if after_identity != path_identity:
+        raise EvidenceFingerprintError(f"Evidence path changed while fingerprinting: {filepath}")
+
+    return {
+        "algorithm": "sha256",
+        "value": sha256.hexdigest(),
+        "size_bytes": after.st_size,
+        "mtime_ns": after.st_mtime_ns,
+    }
+
+
+def parse_stored_fingerprint(
+    fingerprint: object, legacy_hash: object = None
+) -> tuple[dict | None, str | None]:
+    if fingerprint is None:
+        if legacy_hash is None:
+            return None, "has no SHA-256 fingerprint"
+        try:
+            value = normalize_sha256(legacy_hash)
+        except EvidenceFingerprintError as exc:
+            return None, str(exc)
+        return {
+            "algorithm": "sha256",
+            "value": value,
+            "size_bytes": None,
+            "mtime_ns": None,
+        }, None
+
+    if not isinstance(fingerprint, dict):
+        return None, "fingerprint must be a mapping"
+    if fingerprint.get("algorithm") != "sha256":
+        return None, "fingerprint algorithm must be sha256"
+    try:
+        value = normalize_sha256(fingerprint.get("value"))
+    except EvidenceFingerprintError as exc:
+        return None, str(exc)
+
+    size_bytes = fingerprint.get("size_bytes")
+    mtime_ns = fingerprint.get("mtime_ns")
+    if size_bytes is not None and (type(size_bytes) is not int or size_bytes < 0):
+        return None, "fingerprint size_bytes must be a non-negative integer or null"
+    if mtime_ns is not None and (type(mtime_ns) is not int or mtime_ns < 0):
+        return None, "fingerprint mtime_ns must be a non-negative integer or null"
+
+    if legacy_hash is not None:
+        try:
+            normalized_legacy = normalize_sha256(legacy_hash)
+        except EvidenceFingerprintError as exc:
+            return None, str(exc)
+        if normalized_legacy != value:
+            return None, "raw hash does not match structured fingerprint"
+
+    return {
+        "algorithm": "sha256",
+        "value": value,
+        "size_bytes": size_bytes,
+        "mtime_ns": mtime_ns,
+    }, None
+
+
+def calculate_file_hash(filepath: str) -> str | None:
+    """Calculate the SHA-256 hash of a local regular file."""
+    try:
+        return fingerprint_regular_file(filepath)["value"]
+    except EvidenceFingerprintError:
         return None
+
+
+def evidence_freshness_diagnostics(evidence: dict, verified: bool) -> tuple[list[str], list[str]]:
+    issues = []
+    infos = []
+    evidence_id = evidence.get("evidence_id", "unknown")
+    provenance = evidence.get("provenance")
+    source = evidence.get("source")
+    source_kind = source.get("kind") if isinstance(source, dict) else None
+    is_local = (
+        provenance
+        in {
+            "local_file",
+            "living_document",
+            "structural_verification",
+        }
+        or source_kind == "local_file"
+    )
+
+    stored, fingerprint_error = parse_stored_fingerprint(
+        evidence.get("fingerprint"), evidence.get("hash")
+    )
+    if not is_local:
+        if fingerprint_error and (
+            evidence.get("fingerprint") is not None or evidence.get("hash") is not None
+        ):
+            prefix = "[Error]" if verified else "[Warning]"
+            message = f"{prefix} Evidence {evidence_id} has invalid remote fingerprint: {fingerprint_error}"
+            (issues if verified else infos).append(message)
+        infos.append(
+            f"[Warning] Evidence {evidence_id} remote freshness is uncheckable without a local "
+            "snapshot; verification command was not executed"
+        )
+        return issues, infos
+
+    snapshot_path = evidence.get("path_or_url")
+    if not isinstance(snapshot_path, str) or not snapshot_path:
+        issues.append(f"[Error] Evidence {evidence_id} retained snapshot path is missing")
+        return issues, infos
+    if not os.path.exists(snapshot_path):
+        issues.append(
+            f"[Error] Evidence {evidence_id} retained snapshot is missing: {snapshot_path}"
+        )
+        return issues, infos
+    if fingerprint_error:
+        issues.append(
+            f"[Error] Evidence {evidence_id} retained snapshot fingerprint is invalid: "
+            f"{fingerprint_error}"
+        )
+        return issues, infos
+
+    try:
+        current = fingerprint_regular_file(snapshot_path)
+    except EvidenceFingerprintError as exc:
+        issues.append(f"[Error] Evidence {evidence_id} retained snapshot is unreadable: {exc}")
+        return issues, infos
+
+    if current["value"] != stored["value"]:
+        issues.append(
+            f"[Error] Evidence {evidence_id} retained snapshot content changed "
+            f"(expected {stored['value']}, got {current['value']}): {snapshot_path}"
+        )
+        return issues, infos
+    if stored["size_bytes"] is not None and current["size_bytes"] != stored["size_bytes"]:
+        issues.append(
+            f"[Error] Evidence {evidence_id} retained snapshot size changed "
+            f"(expected {stored['size_bytes']}, got {current['size_bytes']}): {snapshot_path}"
+        )
+        return issues, infos
+    if stored["mtime_ns"] is not None and current["mtime_ns"] != stored["mtime_ns"]:
+        infos.append(
+            f"[Info] Evidence {evidence_id} retained snapshot metadata changed but content "
+            "fingerprint remains current"
+        )
+
+    if source_kind != "local_file":
+        return issues, infos
+    source_locator = source.get("locator")
+    if not isinstance(source_locator, str) or not source_locator:
+        issues.append(f"[Error] Evidence {evidence_id} local source locator is invalid")
+        return issues, infos
+    if os.path.abspath(source_locator) == os.path.abspath(snapshot_path):
+        return issues, infos
+    if not os.path.exists(source_locator):
+        infos.append(
+            f"[Warning] Evidence {evidence_id} local source is unavailable; retained snapshot "
+            "remains current"
+        )
+        return issues, infos
+
+    source_stored, source_error = parse_stored_fingerprint(source.get("fingerprint"))
+    if source_error:
+        issues.append(
+            f"[Error] Evidence {evidence_id} local source fingerprint is invalid: {source_error}"
+        )
+        return issues, infos
+    try:
+        source_current = fingerprint_regular_file(source_locator)
+    except EvidenceFingerprintError as exc:
+        prefix = "[Error]" if verified else "[Warning]"
+        message = f"{prefix} Evidence {evidence_id} local source is unreadable: {exc}"
+        (issues if verified else infos).append(message)
+        return issues, infos
+
+    if source_current["value"] != source_stored["value"]:
+        state = "verified" if verified else "draft"
+        prefix = "[Error]" if verified else "[Warning]"
+        message = (
+            f"{prefix} Evidence {evidence_id} {state} local source content changed since "
+            f"attachment (expected {source_stored['value']}, got {source_current['value']}): "
+            f"{source_locator}"
+        )
+        (issues if verified else infos).append(message)
+    elif (
+        source_stored["mtime_ns"] is not None
+        and source_current["mtime_ns"] != source_stored["mtime_ns"]
+    ):
+        infos.append(
+            f"[Info] Evidence {evidence_id} local source metadata changed but content fingerprint "
+            "remains current"
+        )
+    return issues, infos
 
 
 def get_next_claim_id(operator_dir: str) -> str:
@@ -1388,36 +1607,112 @@ def evidence_attach_cmd(args) -> int:
         else:
             verified_by_value = args.verified_by
 
+    expected_hash = None
+    if args.hash is not None:
+        try:
+            expected_hash = normalize_sha256(args.hash)
+        except EvidenceFingerprintError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+
+    original_locator = args.path_or_url
+    path_or_url = original_locator
+    source_fingerprint = None
+    source_path = None
+    source_kind = None
+    fingerprint = None
+    source = None
+    provenance = "url_or_external"
+
+    if os.path.exists(original_locator):
+        if not os.path.isfile(original_locator):
+            print(
+                f"Error: Evidence path is not a regular file: {original_locator}",
+                file=sys.stderr,
+            )
+            return 1
+        source_path = os.path.abspath(original_locator)
+        try:
+            source_fingerprint = fingerprint_regular_file(source_path)
+        except EvidenceFingerprintError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        if expected_hash and expected_hash != source_fingerprint["value"]:
+            print(
+                "Error: Supplied SHA-256 does not match local evidence bytes "
+                f"(expected {expected_hash}, got {source_fingerprint['value']})",
+                file=sys.stderr,
+            )
+            return 1
+    else:
+        scheme_match = re.match(r"^([A-Za-z][A-Za-z0-9+.-]*):", original_locator)
+        scheme = scheme_match.group(1).lower() if scheme_match else None
+        if scheme in {"http", "https"}:
+            source_kind = "remote_url"
+        elif scheme and scheme != "file":
+            source_kind = "external_reference"
+        else:
+            print(f"Error: Local evidence file does not exist: {original_locator}", file=sys.stderr)
+            return 1
+
     preflight_projection(op_dir, task_path, task)
     if claim:
         preflight_projection(op_dir, claim_path, claim)
 
-    path_or_url = args.path_or_url
     evidence_id = get_next_evidence_id(op_dir, task_id)
 
-    # Relocate local evidence files to ensure persistence
-    if os.path.isfile(path_or_url):
-        import shutil
+    if source_path:
 
         dest_dir = os.path.join(op_dir, "evidence", task_id)
         os.makedirs(dest_dir, exist_ok=True)
-        ext = os.path.splitext(path_or_url)[1]
+        ext = os.path.splitext(source_path)[1]
         artifact_name = (
             f"artifact-{evidence_id}{ext}" if ext in {".yaml", ".yml"} else f"{evidence_id}{ext}"
         )
         dest_path = os.path.join(dest_dir, artifact_name)
-        try:
-            shutil.copy2(path_or_url, dest_path)
-            path_or_url = os.path.abspath(dest_path)
-        except Exception as e:
+        if os.path.lexists(dest_path):
             print(
-                f"Warning: Failed to persist evidence file to {dest_path}: {e}",
-                file=sys.stderr,
+                f"Error: Evidence artifact destination already exists: {dest_path}", file=sys.stderr
             )
+            return 1
 
-    file_hash = args.hash
-    if not file_hash and os.path.isfile(path_or_url):
-        file_hash = calculate_file_hash(path_or_url)
+        temp_fd, temp_path = tempfile.mkstemp(prefix=f".{artifact_name}.", dir=dest_dir)
+        os.close(temp_fd)
+        try:
+            shutil.copy2(source_path, temp_path)
+            fingerprint = fingerprint_regular_file(temp_path)
+            if fingerprint["value"] != source_fingerprint["value"]:
+                raise EvidenceFingerprintError(
+                    f"Evidence file changed while being persisted: {source_path}"
+                )
+            os.link(temp_path, dest_path)
+        except (OSError, EvidenceFingerprintError) as exc:
+            print(f"Error: Could not persist evidence file '{source_path}': {exc}", file=sys.stderr)
+            return 1
+        finally:
+            try:
+                os.unlink(temp_path)
+            except FileNotFoundError:
+                pass
+
+        path_or_url = os.path.abspath(dest_path)
+        provenance = "local_file"
+        source = {
+            "kind": "local_file",
+            "locator": source_path,
+            "fingerprint": source_fingerprint,
+        }
+    else:
+        source = {"kind": source_kind, "locator": original_locator}
+        if expected_hash:
+            fingerprint = {
+                "algorithm": "sha256",
+                "value": expected_hash,
+                "size_bytes": None,
+                "mtime_ns": None,
+            }
+
+    file_hash = fingerprint["value"] if fingerprint else None
     made_by = args.by if args.by else task.get("assigned_harness") or "operator"
     utc_now = get_current_utc_iso()
 
@@ -1429,8 +1724,10 @@ def evidence_attach_cmd(args) -> int:
         "evidence_type": args.type,
         "produced_by": made_by,
         "produced_at": utc_now,
-        "provenance": ("local_file" if os.path.exists(path_or_url) else "url_or_external"),
+        "provenance": provenance,
         "hash": file_hash,
+        "fingerprint": fingerprint,
+        "source": source,
         "verification_command": args.verify_cmd,
         "notes": args.notes,
         "executor": exec_identity,
@@ -2602,6 +2899,7 @@ def doctor_cmd(args) -> int:
         claims_list = task.get("claims") or []
         quarantined_claims = []
         verified_claims = []
+        verified_evidence_paths = set()
         for cid in claims_list:
             if not isinstance(cid, str) or not VALID_CLAIM_ID.fullmatch(cid):
                 issues.append(f"[Error] Task {task_id} references invalid claim ID: {cid}")
@@ -2651,6 +2949,8 @@ def doctor_cmd(args) -> int:
 
             for ev_ref in evidence_refs:
                 ev_ref_path = os.path.join(op_dir, ev_ref)
+                if verified:
+                    verified_evidence_paths.add(os.path.abspath(ev_ref_path))
                 if not os.path.exists(ev_ref_path):
                     issues.append(
                         f"[Error] Claim {cid} evidence reference points to missing file: {ev_ref}"
@@ -2671,11 +2971,13 @@ def doctor_cmd(args) -> int:
                                 f"{bound_claim_id}: {ev_ref}"
                             )
                         provenance = ev_ref_data.get("provenance")
-                        stored_hash = ev_ref_data.get("hash")
+                        stored_fingerprint, _ = parse_stored_fingerprint(
+                            ev_ref_data.get("fingerprint"), ev_ref_data.get("hash")
+                        )
 
-                        if provenance == "local_file" and not stored_hash:
+                        if provenance == "local_file" and not stored_fingerprint:
                             issues.append(
-                                f"[Warning] Claim {cid} evidence reference has no stored hash: {ev_ref}"
+                                f"[Warning] Claim {cid} evidence reference has no valid fingerprint: {ev_ref}"
                             )
 
                         is_recheckable = provenance in [
@@ -2685,7 +2987,7 @@ def doctor_cmd(args) -> int:
                         ]
                         if not is_recheckable:
                             v_cmd = ev_ref_data.get("verification_command")
-                            if not v_cmd or not stored_hash:
+                            if not v_cmd or not stored_fingerprint:
                                 if verified:
                                     issues.append(
                                         f"[Error] Claim {cid} verified on unverifiable evidence: {ev_ref} (external/url provenance must have verification_command and hash)"
@@ -2849,25 +3151,15 @@ def doctor_cmd(args) -> int:
                     continue
                 ev_id = ev_data.get("evidence_id")
                 check_executor_block(ev_data, f"Evidence {ev_id} for task {task_id}")
-                path_or_url = ev_data.get("path_or_url")
-                provenance = ev_data.get("provenance")
-                stored_hash = ev_data.get("hash")
-
-                if provenance in [
-                    "local_file",
-                    "living_document",
-                    "structural_verification",
-                ]:
-                    if not os.path.exists(path_or_url):
-                        issues.append(
-                            f"[Warning] Evidence {ev_id} local file is missing: {path_or_url}"
-                        )
-                    elif provenance == "local_file":
-                        curr_hash = calculate_file_hash(path_or_url)
-                        if curr_hash and curr_hash != stored_hash:
-                            issues.append(
-                                f"[Error] Evidence {ev_id} local file hash has changed (expected {stored_hash}, got {curr_hash}). File: {path_or_url}"
-                            )
+                evidence_is_verified = (
+                    os.path.abspath(ef) in verified_evidence_paths
+                    or ev_data.get("claim_id") in verified_claims
+                )
+                freshness_issues, freshness_infos = evidence_freshness_diagnostics(
+                    ev_data, evidence_is_verified
+                )
+                issues.extend(freshness_issues)
+                infos.extend(freshness_infos)
 
         if args.audit and task_status == "verified":
             # Check for independent supervisor_verdict.md (Phase 3.2)
@@ -4140,7 +4432,10 @@ def main() -> None:
     evidence_parser.add_argument(
         "--hash",
         default=None,
-        help="Explicit SHA-256 hash of the evidence (auto-computed for local files if omitted).",
+        help=(
+            "Expected SHA-256 digest (validated against local file bytes before the evidence "
+            "write; required as an assertion for remote evidence)."
+        ),
     )
     evidence_parser.add_argument(
         "--notes",
@@ -4152,7 +4447,7 @@ def main() -> None:
         "--verify-cmd",
         dest="verify_cmd",
         default=None,
-        help="Command used to produce/verify this evidence.",
+        help="Command recorded for later verification; evidence-attach and doctor do not run it.",
     )
     evidence_parser.add_argument(
         "--status",

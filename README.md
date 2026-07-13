@@ -47,16 +47,22 @@ YAML-only ledger baselines those records into SQLite without changing their visi
 - `claim-show [ID]` / `claim-list [--task ID]` — inspect claims.
 
 **Evidence & verification** (the core: a claim is only as good as its evidence + a different-identity sign-off)
-- `evidence-attach PATH_OR_URL --claim CID --type TYPE [--status {verified,false,quarantined}] [--verified-by WHO] [--verify-cmd CMD]`
-  — attach an artifact and optionally verify the claim. Evidence types: `run_log, manifest,
+- `evidence-attach PATH_OR_URL --claim CID --type TYPE [--hash SHA256] [--status {verified,false,quarantined}] [--verified-by WHO] [--verify-cmd CMD]`
+  — attach an artifact and optionally verify the claim. Local files are copied into the ledger and
+  fingerprinted with SHA-256, byte size, and modification time; `--hash` is an expected digest that
+  must match the local bytes before any evidence write. Missing filesystem paths are rejected;
+  non-file external references must use an explicit URI scheme. Evidence types: `run_log, manifest,
   database_query, test_output, git_commit, screenshot, transcript, paper_section, external_doc`.
 - `verify RUN_DIR` — automated audit of a run directory's artifacts.
 - `doctor [--audit]` — read-only consistency check across the ledger: flags unverified claims,
   **self-verification**, and **enforcement downgrades** (a claim that would be rejected under
   enforced identity mode but is silently accepted under `single_user`). Fails closed (exit code 1) on
   verified/completed records if they lack required evidence files, target repository references,
-  matching gate/test files, or valid command run hashes. It also verifies SQLite event hashes and
-  compares each latest event with the corresponding YAML projection.
+  matching gate/test files, or valid command run hashes. It also verifies SQLite event hashes,
+  compares each latest event with the corresponding YAML projection, and recomputes local evidence
+  fingerprints. A changed verified source or retained snapshot fails closed; an unavailable original
+  source is reported separately when its retained snapshot is still current. Remote evidence without
+  a local snapshot is explicitly uncheckable. `doctor` never executes a stored `--verify-cmd`.
 
 **Sessions** (track a coding session and its cost)
 - `session-start --harness H [--task ID] [--force]`
@@ -156,13 +162,14 @@ unverified claims are worthless):
   loss can still remove both the event history and copied evidence.
 - **The policy gate is self-amendable.** Any agent with write access to the config can weaken the gate
   it's supposed to be bound by. Wants out-of-band / immutable policy.
-- **Evidence binding.** Prefer binding a *re-runnable structural test* over a captured blob or a
-  byte-hash of a living document (living docs drift and train reviewers to rubber-stamp).
-- **Structural, not semantic, verification.** `doctor` checks that evidence is bound, hashed, and has a
-  re-runnable command — *not* that the check is meaningful. A vacuous gate (`assert True`), or a real test
-  against code that doesn't exist, passes structurally. Whether a test actually exercises real behavior is
-  a human judgment the tool can't make for you — it can enforce that a check *exists and runs*, never that
-  it *means* something.
+- **Evidence binding.** Local attachment preserves both the original source fingerprint and a retained
+  snapshot fingerprint, so later byte drift is visible. Remote evidence has no bytes to recompute and is
+  reported as uncheckable. Prefer binding a *re-runnable structural test* over a captured blob or a
+  byte-hash of a living document.
+- **Structural, not semantic, verification.** `doctor` checks bindings, metadata, and fingerprints. It
+  deliberately does not execute stored verification commands; those are inert audit metadata until a
+  separately isolated verifier exists. A vacuous gate (`assert True`) or a hash of irrelevant bytes can
+  still look structurally valid. Whether evidence proves the claim remains a reviewer judgment.
 
 ## License
 
