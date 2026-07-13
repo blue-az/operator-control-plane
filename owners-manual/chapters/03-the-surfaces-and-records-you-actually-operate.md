@@ -59,22 +59,21 @@ An assigned harness writes handoff details into the local ledger, the ledger bui
 
 A task is the parent record; a claim is a tracked assertion attached to that task; a fresh claim starts unverified, with no verifier and no evidence links. Evidence can be attached to a claim, but verification is not the same thing as simply adding a record. The record families around the core lifecycle are distinct enough to matter: sessions frame activity, usage records account for it, and briefs and handoffs carry context forward. The command surface and the README use the same lifecycle vocabulary, which reduces the chance that the manual invents terms the product itself does not use.
 
-> **Figure:** The claim-based verifier gate is narrower than a blanket evidence rule, so a status write without a claim can still change the task path without passing the same check.
+> **Figure:** Draft evidence can be attached without changing claim status. Any status-bearing attach
+> requires a claim and then follows the configured verification-authority gate.
 
 ```mermaid
 flowchart TD
-  subgraph Protected path
-    C[Claim-backed evidence]
-    G[Verifier gate]
-    T[Task record]
-    C -->|status with a claim| G
-    G -->|approved write| T
-  end
-  B[Bare status evidence write]
-  B -->|skips that gate| T
+  E[Evidence attach] --> S{Status supplied?}
+  S -->|no| D[Record draft evidence]
+  S -->|yes| C{Claim supplied?}
+  C -->|no| R[Reject]
+  C -->|yes| G[Verification authority gate]
+  G --> T[Update claim and task]
 ```
 
-Claim-backed evidence goes through the verifier gate before it changes the task record. A bare status evidence write goes straight to the task record without that same gate, so verification is not universal across every evidence write.
+Draft evidence remains separate from verification. A status cannot be silently dropped onto bare
+evidence: the command requires a claim before any authority, artifact, projection, or event write.
 
 ### What Is Strong Here
 

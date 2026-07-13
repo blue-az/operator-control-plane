@@ -92,8 +92,8 @@ attention:
 status: draft
 decisions:
   - question: "Should the manual treat claim-backed evidence status as the only trusted status path?"
-    state: "open"
-    why_it_matters: "That choice determines whether the owner sees the verification step as a hard trust boundary or just one of several ways to update evidence."
+    state: "resolved"
+    why_it_matters: "Resolved: every status-bearing evidence write requires a claim, and only enforced verification by a distinct registered verifier UID is trusted; other usable verification is advisory."
   - question: "Should a late quarantine be allowed to override a task that already looks complete or verified?"
     state: "open"
     why_it_matters: "This is a closeout policy decision. It controls whether terminal task state is reversible when a later evidence update arrives."

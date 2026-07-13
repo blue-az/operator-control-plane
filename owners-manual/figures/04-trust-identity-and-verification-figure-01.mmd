@@ -1,5 +1,6 @@
 flowchart TD
-A[Assigned harness does the work] --> B[Claim is recorded]
-B --> C[Review harness checks it]
-C --> D[Verifier identity is written]
-D --> E[Trusted claim]
+A[Builder UID does the work] --> B[Claim records author UID]
+B --> C[Verifier checks evidence]
+C --> D{Verifier UID differs?}
+D -->|yes, enforced| E[uid_isolated]
+D -->|no or single_user| F[advisory or rejected]

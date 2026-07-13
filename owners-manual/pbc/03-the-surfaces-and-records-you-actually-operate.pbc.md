@@ -69,9 +69,6 @@ section_responsibilities:
 ```pbc:grounding
 status: draft
 attention:
-  - title: "Status-bearing evidence can bypass the verifier gate when no claim is present"
-    severity: "critical"
-    why_it_matters: "An owner could mistake status for universal verification, but this path is narrower than it looks and can let unsupported trust state into the ledger."
   - title: "Quarantine can overwrite a task that was already terminal"
     severity: "high"
     why_it_matters: "Closeout is not one-way; an owner who treats verified or complete as final may miss a later write that changes the task state again."
@@ -91,9 +88,6 @@ decisions:
   - question: "Should task-bound writes keep the implicit current-task fallback, or should the owner require explicit task identifiers on every write?"
     state: "open"
     why_it_matters: "Implicit fallback is convenient, but it ties record creation to repository state in a way that can surprise a user who assumes the target task is always explicit."
-  - question: "Should any status-bearing evidence write require a claim, or should bare evidence status writes remain allowed?"
-    state: "open"
-    why_it_matters: "This is the boundary between a record that merely exists and a record that can advance trust state."
   - question: "Should quarantine be allowed to downgrade a task that is already verified or complete?"
     state: "open"
     why_it_matters: "This determines whether closeout is final or can be revised by a later evidence write."
@@ -101,6 +95,11 @@ decisions:
     state: "open"
     why_it_matters: "This choice affects whether usage records optimize for smooth reconciliation or for tighter provenance and less accidental merging."
 ```
+
+## Resolved Boundaries
+
+- Status-bearing evidence requires a claim and then passes the configured verification-authority
+  gate. Rejection occurs before artifact, projection, or event writes.
 
 ## Provenance
 

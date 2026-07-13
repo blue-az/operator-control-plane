@@ -72,6 +72,68 @@ class TestOperatorCLI(unittest.TestCase):
         finally:
             conn.close()
 
+    def write_identity_registry(self, mode: str, uids: dict) -> Path:
+        identity_path = Path(self.temp_dir) / ".operator" / "identity.yaml"
+        identity_path.write_text(yaml.safe_dump({"mode": mode, "uids": uids}, sort_keys=False))
+        return identity_path
+
+    def trust_state_snapshot(self) -> dict:
+        operator_dir = Path(self.temp_dir) / ".operator"
+        projection_roots = ["tasks", "claims", "evidence", "handoffs", "usage"]
+        projections = []
+        for root in projection_roots:
+            root_path = operator_dir / root
+            if not root_path.exists():
+                continue
+            projections.extend(
+                (str(path.relative_to(operator_dir)), path.read_bytes())
+                for path in sorted(root_path.rglob("*"))
+                if path.is_file()
+            )
+        return {
+            "projections": projections,
+            "events": [tuple(row) for row in self.read_ledger_events()],
+        }
+
+    def setup_p2_enforced_claim(self, uids: dict | None = None) -> tuple[Path, Path]:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        task = self.run_operator(
+            "task-create",
+            "--objective",
+            "Exercise P2 verifier isolation",
+            "--id",
+            "p2-task",
+            "--assign",
+            "codex",
+            "--review",
+            "claude",
+        )
+        self.assertEqual(task.returncode, 0, task.stderr)
+        self.write_identity_registry(
+            "enforced",
+            uids
+            or {
+                1001: {"name": "codex", "roles": ["builder"]},
+                1002: {"name": "claude", "roles": ["verifier"]},
+            },
+        )
+        claim = self.run_operator(
+            "claim-add",
+            "--type",
+            "test_passes",
+            "--text",
+            "P2 isolated verification works",
+            "--gate",
+            "test-gate",
+            env={"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertEqual(claim.returncode, 0, claim.stderr)
+        gate = Path(self.temp_dir) / "test-gate"
+        gate.write_text("structural gate")
+        evidence = Path(self.temp_dir) / "p2-evidence.txt"
+        evidence.write_text("p2 evidence")
+        return gate, evidence
+
     def test_init_creates_structure(self) -> None:
         res = self.run_operator("init")
         self.assertEqual(res.returncode, 0, f"init failed: {res.stderr}")
@@ -1999,8 +2061,14 @@ class TestOperatorCLI(unittest.TestCase):
         claim_data = yaml.safe_load(claim_file.read_text())
         claim_data["verification_status"] = True
         claim_data["verification_outcome"] = "verified"
-        if "verified_by" in claim_data:
-            del claim_data["verified_by"]
+        claim_data.pop("verified_by", None)
+        for field in (
+            "author_executor",
+            "verification_executor",
+            "verification_authority",
+            "verification_mode",
+        ):
+            claim_data.pop(field, None)
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
         self.rebaseline_ledger()
@@ -2038,6 +2106,7 @@ class TestOperatorCLI(unittest.TestCase):
             "Test claim",
             "--gate",
             "test-gate",
+            env={"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"},
         )
         self.assertEqual(res.returncode, 0, res.stderr)
         # Create the gate file
@@ -2078,7 +2147,8 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("contains write made with test-override active", res.stdout)
 
         # Hand-modify both claim and evidence to clear test_override_active for testing doctor mismatch checks
-        claim_data["executor"]["test_override_active"] = False
+        for field in ("executor", "author_executor", "verification_executor"):
+            claim_data[field]["test_override_active"] = False
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
 
@@ -2137,6 +2207,7 @@ class TestOperatorCLI(unittest.TestCase):
         claim_data["verification_status"] = True
         claim_data["verification_outcome"] = "verified"
         claim_data["executor"] = {"uid": 1001, "user": "gemini-agy"}
+        claim_data["verification_executor"] = {"uid": 1001, "user": "gemini-agy"}
         with open(claim_file, "w") as f:
             yaml.safe_dump(claim_data, f)
         self.rebaseline_ledger()
@@ -2145,13 +2216,13 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 1)
         self.assertIn("verification identity mismatch", res.stdout)
 
-        # 6. single_user honesty: mode: single_user -> warning, exit 0
+        # 6. Policy changes remain visible without relabeling the recorded authority.
         identity_file.write_text(
             "mode: single_user\n" "uids:\n" "  1001: gemini-agy\n" "  1002: claude\n"
         )
         res = self.run_operator("doctor")
-        self.assertEqual(res.returncode, 0, res.stdout)
-        self.assertIn("verification is NOT identity-enforced (single-user mode)", res.stdout)
+        self.assertEqual(res.returncode, 1, res.stdout)
+        self.assertIn("current identity policy is single_user", res.stdout)
 
         # 7. test-hook guard: a ledger write made under OPERATOR_TEST_UID without the test sentinel -> doctor Error
         env_spoof = {"OPERATOR_TEST_UID": "1002"}
@@ -2170,6 +2241,574 @@ class TestOperatorCLI(unittest.TestCase):
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1)
         self.assertIn("contains write with unauthorized test-override attempt", res.stdout)
+
+    def test_p2_structured_roles_record_distinct_uid_authority_without_execution(self) -> None:
+        _, evidence = self.setup_p2_enforced_claim()
+        builder_env = {"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"}
+        verifier_env = {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"}
+
+        draft = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            str(evidence),
+            env=builder_env,
+        )
+        self.assertEqual(draft.returncode, 0, draft.stderr)
+
+        sentinel = Path(self.temp_dir) / "verification-command-ran"
+        verified = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+            "--verify-cmd",
+            f"touch {sentinel}",
+            str(evidence),
+            env=verifier_env,
+        )
+        self.assertEqual(verified.returncode, 0, verified.stderr)
+
+        claim_path = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
+        claim = yaml.safe_load(claim_path.read_text())
+        self.assertEqual(claim["author_executor"]["uid"], 1001)
+        self.assertEqual(claim["verification_executor"]["uid"], 1002)
+        self.assertEqual(claim["verification_authority"], "uid_isolated")
+        self.assertEqual(claim["verification_mode"], "enforced")
+        self.assertEqual(claim["verified_by"], "claude")
+
+        claim_event_rows = [
+            row
+            for row in self.read_ledger_events()
+            if row["record_type"] == "claim" and row["record_id"] == "claim-0001"
+        ]
+        claim_events = [json.loads(row["payload_json"]) for row in claim_event_rows]
+        self.assertEqual(claim_events[-1]["verification_authority"], "uid_isolated")
+        self.assertEqual(claim_events[-1]["author_executor"]["uid"], 1001)
+        self.assertEqual(claim_events[-1]["verification_executor"]["uid"], 1002)
+        self.assertEqual(claim_event_rows[-1]["actor_uid"], 1002)
+        self.assertFalse(sentinel.exists())
+
+        shown = self.run_operator("claim-show", "claim-0001")
+        self.assertEqual(shown.returncode, 0, shown.stderr)
+        self.assertIn("Authority:           uid_isolated", shown.stdout)
+        self.assertIn("Author Executor:      uid 1001", shown.stdout)
+        self.assertIn("Verifier Executor:    uid 1002", shown.stdout)
+
+        doctor = self.run_operator("doctor")
+        self.assertEqual(doctor.returncode, 1, doctor.stdout)
+        self.assertIn("test-override active", doctor.stdout)
+        self.assertRegex(doctor.stdout.lower(), r"uid[-_]isolated")
+        self.assertFalse(sentinel.exists())
+
+    def test_p2_status_rejections_are_atomic(self) -> None:
+        _, evidence = self.setup_p2_enforced_claim(
+            {
+                1001: {"name": "codex", "roles": ["builder", "verifier"]},
+                1002: {"name": "claude", "roles": ["verifier"]},
+                1003: {"name": "observer", "roles": []},
+            }
+        )
+
+        attempts = [
+            (
+                {"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"},
+                "codex",
+                ("uid", "differ"),
+            ),
+            (
+                {"OPERATOR_TEST_UID": "9999", "OPERATOR_TEST_SENTINEL": "1"},
+                "unknown",
+                ("known", "uid"),
+            ),
+            (
+                {"OPERATOR_TEST_UID": "1003", "OPERATOR_TEST_SENTINEL": "1"},
+                "observer",
+                ("verifier", "role"),
+            ),
+            (
+                {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"},
+                "not-claude",
+                ("does not match", "identity"),
+            ),
+        ]
+        for env, verifier, expected_words in attempts:
+            with self.subTest(verifier=verifier):
+                before = self.trust_state_snapshot()
+                result = self.run_operator(
+                    "evidence-attach",
+                    "--claim",
+                    "claim-0001",
+                    "--type",
+                    "test_output",
+                    "--status",
+                    "verified",
+                    "--verified-by",
+                    verifier,
+                    str(evidence),
+                    env=env,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                diagnostic = (result.stdout + result.stderr).lower()
+                for word in expected_words:
+                    self.assertIn(word, diagnostic)
+                self.assertEqual(self.trust_state_snapshot(), before)
+
+        claim_path = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
+        claim = yaml.safe_load(claim_path.read_text())
+        claim.pop("author_executor")
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+        before = self.trust_state_snapshot()
+        legacy_author = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+            str(evidence),
+            env={"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertNotEqual(legacy_author.returncode, 0)
+        self.assertIn("author uid", (legacy_author.stdout + legacy_author.stderr).lower())
+        self.assertEqual(self.trust_state_snapshot(), before)
+
+        claim = yaml.safe_load(claim_path.read_text())
+        claim["author_executor"] = {"uid": -1, "user": "invalid"}
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+        before = self.trust_state_snapshot()
+        negative_author = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+            str(evidence),
+            env={"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertNotEqual(negative_author.returncode, 0)
+        self.assertIn("valid author uid", negative_author.stderr.lower())
+        self.assertEqual(self.trust_state_snapshot(), before)
+
+    def test_p2_verifier_only_uid_cannot_use_builder_paths(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        task = self.run_operator(
+            "task-create",
+            "--objective",
+            "P2 role boundary",
+            "--id",
+            "p2-task",
+            "--assign",
+            "codex",
+            "--review",
+            "claude",
+        )
+        self.assertEqual(task.returncode, 0, task.stderr)
+        self.write_identity_registry(
+            "enforced",
+            {
+                1001: {"name": "codex", "roles": ["builder"]},
+                1002: {"name": "claude", "roles": ["verifier"]},
+            },
+        )
+        verifier_env = {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"}
+
+        before = self.trust_state_snapshot()
+        claim = self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Verifier must not author this claim",
+            "--gate",
+            "manual review",
+            env=verifier_env,
+        )
+        self.assertNotEqual(claim.returncode, 0)
+        self.assertIn("builder role", (claim.stdout + claim.stderr).lower())
+        self.assertEqual(self.trust_state_snapshot(), before)
+
+        builder = self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Builder claim",
+            "--gate",
+            "manual review",
+            env={"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertEqual(builder.returncode, 0, builder.stderr)
+        evidence = Path(self.temp_dir) / "draft.txt"
+        evidence.write_text("draft")
+        before = self.trust_state_snapshot()
+        attached = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "manifest",
+            str(evidence),
+            env=verifier_env,
+        )
+        self.assertNotEqual(attached.returncode, 0)
+        self.assertIn("builder role", (attached.stdout + attached.stderr).lower())
+        self.assertEqual(self.trust_state_snapshot(), before)
+
+    def test_p2_malformed_identity_policy_fails_closed(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "P2 malformed identity policy",
+                "--id",
+                "p2-policy",
+            ).returncode,
+            0,
+        )
+        identity_path = Path(self.temp_dir) / ".operator" / "identity.yaml"
+        identity_path.write_text(
+            "mode: enforced\n" "uids:\n" "  1001:\n" "    name: codex\n" "    roles: builder\n"
+        )
+
+        before = self.trust_state_snapshot()
+        result = self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Malformed policy must not authorize",
+            "--gate",
+            "manual review",
+            env={"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("invalid identity policy", result.stderr.lower())
+        self.assertEqual(self.trust_state_snapshot(), before)
+
+        doctor = self.run_operator("doctor")
+        self.assertEqual(doctor.returncode, 1, doctor.stdout)
+        self.assertIn("invalid identity policy", doctor.stdout.lower())
+
+        identity_path.write_text("mode: enforced\n" "uids:\n" "  1001: codex\n" "  1001: claude\n")
+        before = self.trust_state_snapshot()
+        duplicate = self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Duplicate policy keys must not authorize",
+            "--gate",
+            "manual review",
+            env={"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertNotEqual(duplicate.returncode, 0)
+        self.assertIn("duplicate key", duplicate.stderr.lower())
+        self.assertEqual(self.trust_state_snapshot(), before)
+
+        duplicate_doctor = self.run_operator("doctor")
+        self.assertEqual(duplicate_doctor.returncode, 1, duplicate_doctor.stdout)
+        self.assertIn("duplicate key", duplicate_doctor.stdout.lower())
+
+    def test_p2_single_user_verification_is_explicitly_advisory(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        task = self.run_operator(
+            "task-create",
+            "--objective",
+            "P2 advisory mode",
+            "--id",
+            "p2-advisory",
+            "--assign",
+            "codex",
+            "--review",
+            "claude",
+        )
+        self.assertEqual(task.returncode, 0, task.stderr)
+        claim = self.run_operator(
+            "claim-add",
+            "--type",
+            "test_passes",
+            "--text",
+            "Advisory verification remains usable",
+            "--gate",
+            "test-gate",
+        )
+        self.assertEqual(claim.returncode, 0, claim.stderr)
+        (Path(self.temp_dir) / "test-gate").write_text("gate")
+        evidence = Path(self.temp_dir) / "advisory.txt"
+        evidence.write_text("advisory")
+        sentinel = Path(self.temp_dir) / "advisory-command-ran"
+
+        result = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+            "--verify-cmd",
+            f"touch {sentinel}",
+            str(evidence),
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        claim_path = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
+        claim_data = yaml.safe_load(claim_path.read_text())
+        self.assertEqual(claim_data["verification_authority"], "advisory")
+        self.assertNotEqual(claim_data["verification_authority"], "uid_isolated")
+        self.assertEqual(claim_data["verification_mode"], "single_user")
+        self.assertEqual(
+            claim_data["author_executor"]["uid"],
+            claim_data["verification_executor"]["uid"],
+        )
+        self.assertFalse(sentinel.exists())
+
+        doctor = self.run_operator("doctor")
+        self.assertEqual(doctor.returncode, 0, doctor.stdout)
+        self.assertIn("advisory", doctor.stdout.lower())
+        self.assertFalse(sentinel.exists())
+
+        false_result = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "false",
+            "--verified-by",
+            "claude",
+            str(evidence),
+        )
+        self.assertEqual(false_result.returncode, 0, false_result.stderr)
+        claim_data = yaml.safe_load(claim_path.read_text())
+        self.assertEqual(claim_data["verification_outcome"], "false")
+        self.assertEqual(claim_data["verification_authority"], "advisory")
+        false_doctor = self.run_operator("doctor")
+        self.assertEqual(false_doctor.returncode, 0, false_doctor.stdout)
+        self.assertIn("advisory", false_doctor.stdout.lower())
+        self.assertFalse(sentinel.exists())
+
+    def test_p2_legacy_scalar_registry_remains_usable(self) -> None:
+        _, evidence = self.setup_p2_enforced_claim({1001: "codex", 1002: "claude"})
+        result = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+            str(evidence),
+            env={"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        claim_path = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
+        claim = yaml.safe_load(claim_path.read_text())
+        self.assertEqual(claim["author_executor"]["uid"], 1001)
+        self.assertEqual(claim["verification_executor"]["uid"], 1002)
+        self.assertEqual(claim["verification_authority"], "uid_isolated")
+
+    def test_p2_legacy_claim_remains_nonfatal_and_advisory(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "P2 legacy claim",
+                "--id",
+                "p2-legacy",
+                "--assign",
+                "codex",
+                "--review",
+                "claude",
+            ).returncode,
+            0,
+        )
+        self.assertEqual(
+            self.run_operator(
+                "claim-add",
+                "--type",
+                "real_data",
+                "--text",
+                "Legacy claim remains readable",
+                "--gate",
+                "manual review",
+            ).returncode,
+            0,
+        )
+        evidence = Path(self.temp_dir) / "legacy.txt"
+        evidence.write_text("legacy")
+        verified = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "manifest",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+            str(evidence),
+        )
+        self.assertEqual(verified.returncode, 0, verified.stderr)
+        claim_path = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
+        claim = yaml.safe_load(claim_path.read_text())
+        for field in (
+            "author_executor",
+            "verification_executor",
+            "verification_authority",
+            "verification_mode",
+        ):
+            claim.pop(field, None)
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+
+        doctor = self.run_operator("doctor")
+        self.assertEqual(doctor.returncode, 0, doctor.stdout)
+        self.assertIn("legacy", doctor.stdout.lower())
+        self.assertIn("advisory", doctor.stdout.lower())
+
+        self.write_identity_registry("enforced", {1002: {"name": "claude", "roles": ["verifier"]}})
+        enforced_doctor = self.run_operator("doctor")
+        self.assertEqual(enforced_doctor.returncode, 0, enforced_doctor.stdout)
+        self.assertIn("legacy", enforced_doctor.stdout.lower())
+        self.assertIn("remains advisory", enforced_doctor.stdout.lower())
+
+    def test_p2_doctor_distinguishes_valid_malformed_and_test_override_authority(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "P2 doctor authority",
+                "--id",
+                "p2-doctor",
+                "--assign",
+                "codex",
+                "--review",
+                "claude",
+            ).returncode,
+            0,
+        )
+        self.assertEqual(
+            self.run_operator(
+                "claim-add",
+                "--type",
+                "real_data",
+                "--text",
+                "Doctor classifies authority",
+                "--gate",
+                "manual review",
+            ).returncode,
+            0,
+        )
+        evidence = Path(self.temp_dir) / "doctor-authority.txt"
+        evidence.write_text("authority")
+        self.assertEqual(
+            self.run_operator(
+                "evidence-attach",
+                "--claim",
+                "claim-0001",
+                "--type",
+                "manifest",
+                "--status",
+                "verified",
+                "--verified-by",
+                "claude",
+                str(evidence),
+            ).returncode,
+            0,
+        )
+        self.write_identity_registry("enforced", {1001: "codex", 1002: "claude"})
+        claim_path = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
+        claim = yaml.safe_load(claim_path.read_text())
+        claim.update(
+            {
+                "made_by": "codex",
+                "verified_by": "claude",
+                "author_executor": {"uid": 1001, "user": "uid-1001"},
+                "verification_executor": {"uid": 1002, "user": "uid-1002"},
+                "verification_authority": "uid_isolated",
+                "verification_mode": "enforced",
+                "executor": {"uid": 1002, "user": "uid-1002"},
+            }
+        )
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+
+        valid = self.run_operator("doctor")
+        self.assertEqual(valid.returncode, 0, valid.stdout)
+        self.assertIn("[Info]", valid.stdout)
+        self.assertRegex(valid.stdout.lower(), r"uid[-_]isolated")
+
+        claim = yaml.safe_load(claim_path.read_text())
+        claim["executor"]["uid"] = 1001
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+        contradictory = self.run_operator("doctor")
+        self.assertEqual(contradictory.returncode, 1, contradictory.stdout)
+        self.assertIn("compatibility executor uid", contradictory.stdout.lower())
+        self.assertIn("disagrees", contradictory.stdout.lower())
+
+        claim = yaml.safe_load(claim_path.read_text())
+        claim["executor"]["uid"] = 1002
+        claim["verification_outcome"] = "false"
+        claim["verification_status"] = False
+        claim["verification_executor"]["uid"] = 1001
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+        same_uid = self.run_operator("doctor")
+        self.assertEqual(same_uid.returncode, 1, same_uid.stdout)
+        self.assertIn("same author and verifier uid", same_uid.stdout.lower())
+
+        claim = yaml.safe_load(claim_path.read_text())
+        claim["verification_executor"]["uid"] = 9999
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+        unregistered = self.run_operator("doctor")
+        self.assertEqual(unregistered.returncode, 1, unregistered.stdout)
+        self.assertIn("unregistered verifier uid", unregistered.stdout.lower())
+
+        claim = yaml.safe_load(claim_path.read_text())
+        claim["verification_executor"]["uid"] = 1002
+        claim["verification_mode"] = "single_user"
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+        malformed = self.run_operator("doctor")
+        self.assertEqual(malformed.returncode, 1, malformed.stdout)
+        self.assertRegex(malformed.stdout.lower(), r"uid[-_]isolated")
+        self.assertIn("enforced", malformed.stdout.lower())
+
+        claim = yaml.safe_load(claim_path.read_text())
+        claim["verification_mode"] = "enforced"
+        claim["author_executor"]["test_override_active"] = True
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+        overridden = self.run_operator("doctor")
+        self.assertEqual(overridden.returncode, 1, overridden.stdout)
+        self.assertIn("test-override active", overridden.stdout)
 
     def test_doctor_flags_enforcement_downgrade(self) -> None:
         # A configured identity map left in single_user mode silently accepts claims that
@@ -2221,6 +2860,7 @@ class TestOperatorCLI(unittest.TestCase):
         def set_executor(uid: int, user: str) -> None:
             data = yaml.safe_load(claim_file.read_text())
             data["executor"] = {"uid": uid, "user": user}
+            data["verification_executor"] = {"uid": uid, "user": user}
             claim_file.write_text(yaml.safe_dump(data))
             self.rebaseline_ledger()
 

@@ -1,80 +1,108 @@
-# Operator Executor-Identity Binding — Build Spec
+# Operator Executor Identity and UID Isolation
 
-**For:** the implementing agent (Agy / Antigravity). **Reviewer:** Claude.
-**Target:** extend `the operator CLI in this repo`. Match existing conventions.
-**Premise memory:** `project_operator_verifier_identity.md` — `verified_by` is honor-system; impersonation was demonstrated 2×.
+This spec defines the authority boundary for claim authorship and verification. The CLI consumes an
+OS isolation boundary; it does not create one.
 
----
+## Authority Rule
 
-## 0. READ THIS FIRST — what this task can and cannot do
+A verification is trusted as `uid_isolated` only when all of these are true:
 
-The `verified_by` guard records whatever string is typed into `--verified-by`. The goal here is to bind verification to the **actual executor** so a builder can't stamp the reviewer's name. **But be honest about the ceiling:**
+1. `.operator/identity.yaml` uses `mode: enforced`.
+2. The claim records its author from `os.getuid()` and `pwd.getpwuid()`.
+3. The executing verifier UID is registered with the `verifier` role.
+4. The verifier UID differs from the claim author's UID.
 
-> **Software in the operator CLI cannot, by itself, prevent impersonation when all agents run as the same OS user with shell access.** Such an agent can read any env var, any key file, and set any identity. Real enforcement requires an **isolation boundary the agent cannot cross** — distinct OS users, containers, or a credential store outside the agent's reach. That boundary is *infrastructure*, not code.
+Names, harness assignments, environment variables, and role labels do not create isolation. Agents
+running as the same OS UID cannot be meaningfully isolated by this CLI. In `single_user` mode,
+verification remains usable but is always `advisory`.
 
-So the operator's job is narrow and achievable: **consume an unforgeable identity source, reconcile it against the claimed verifier, and FAIL CLOSED when identity can't be established.** Passing tests **do not** mean impersonation is prevented — they mean the operator correctly enforces identity *given* the isolation boundary. State this explicitly in the handoff; do not claim "impersonation solved."
+## Identity Registry
 
-**Anti-goal:** do not build something that *looks* like enforcement but isn't (e.g., trusting a spoofable env var as identity). That would be worse than the current honest honor-system, because it would launder false confidence.
+The structured registry is:
 
----
-
-## 1. The unforgeable primitive — stamp the real executor on every write
-On every ledger write (claim creation, evidence attach, verification, usage), record:
 ```yaml
-executor:
-  uid: <int>          # os.getuid() — the kernel-enforced, process-unforgeable signal
-  user: <string>      # pwd.getpwuid(os.getuid()).pw_name  (NOT $USER/$LOGNAME — those are spoofable)
-```
-Use `os.getuid()` + `pwd.getpwuid()`. **Do not** derive identity from `getpass.getuser()` or `$USER`/`$LOGNAME` — those honor env and are forgeable by the agent. uid is the authoritative key.
-
-## 2. Identity map — `.operator/identity.yaml`
-```yaml
-# Maps unforgeable OS uids to agent identities. Maintained by the operator (human), not agents.
-mode: enforced | single_user      # see §5
+mode: enforced
 uids:
-  1000: blueaz-supervisor          # example
-  1001: gemini-agy
-  1002: codex
-  # the reviewer's uid -> claude
+  1001:
+    name: codex
+    roles: [builder]
+  1002:
+    name: claude
+    roles: [verifier]
 ```
 
-## 3. Verification binding (`evidence-attach --status`)
-When `--status` is set:
-1. Resolve `actual = uids[os.getuid()]` from the identity map.
-2. If the uid is **not in the map** → **fail closed**: error `refusing to record verification: executor uid <n> is not a known identity`, exit non-zero. (Don't default, don't guess.)
-3. Set `verified_by = actual` (derived from the unforgeable uid). If `--verified-by` is also passed and **≠ actual** → error `--verified-by '<x>' does not match the executing identity '<actual>'`. (So `--verified-by` becomes a redundant assertion that must agree, not a free input.)
-4. Continue to record the `executor` block (§1) on the verification evidence.
+Valid roles are `builder` and `verifier`. A UID may hold both roles, but it still cannot verify its
+own claim. For compatibility, a scalar entry such as `1001: codex` is normalized to the name
+`codex` with both roles. Missing configuration defaults to `single_user`. Malformed configuration
+fails role-gated writes and is an error in `doctor`.
 
-## 4. `doctor` rules
-- Verified claim where `verified_by != uids[executor.uid]` (claimed verifier ≠ who actually ran it) → **`[Error]` verification identity mismatch (possible impersonation)**.
-- Verified claim with `verified_by == made_by` → keep the existing self-verification `[Error]`.
-- Verified claim with **no `executor` block** (legacy, pre-this-feature) → `[Info]` (don't fail; back-compat — `claim-0007/0008/0009/0010` predate this).
-- `identity.yaml mode: single_user` OR missing → every verification gets `[Warning] verification is NOT identity-enforced (single-user mode); see EXECUTOR_IDENTITY_SPEC §5`. This makes the honest limitation **visible in the ledger** rather than hidden.
+## Recorded Fields
 
-## 5. The honest mode switch (`single_user` vs `enforced`)
-Today all three CLIs likely run as the **same OS user** → uid is identical for builder and reviewer, so uid **cannot distinguish them**. Don't pretend otherwise:
-- `mode: single_user` (default until the infra exists): the operator still stamps executor + records `verified_by`, but `doctor` **warns** that verification is not identity-enforced. No false confidence.
-- `mode: enforced` (set only once agents run under distinct uids / containers): `doctor` upgrades the mismatch check to `[Error]` and the fail-closed in §3.2 is active.
-- **The operational prerequisite for real enforcement** (run each agent under its own OS user or container) is documented here as out-of-band setup the operator consumes; it is NOT something this build can create.
+Claim creation records both the compatibility `executor` field and explicit authorship context:
 
-## 6. Test-hook honesty
-Tests need to simulate different uids without privileges. If you add a test override (e.g. `OPERATOR_TEST_UID`), it is itself a **spoof vector** — the operator MUST ignore it unless an explicit test sentinel is set, and `doctor` MUST `[Error]` if a real ledger contains writes made while a test-override was active (record a flag on the executor block when the override was used). A test hook that production silently honors would re-open the exact hole we're closing.
+```yaml
+author_executor:
+  uid: 1001
+  user: builder-user
+```
 
-## 7. Acceptance tests (`tests/test_operator.py`, subprocess; simulate uids via the guarded test hook)
-1. **executor stamped:** any write records `executor.uid`/`executor.user`.
-2. **derive + match:** with identity map {1001: gemini-agy, 1002: claude}, simulated uid 1002 setting `--status verified` → `verified_by == claude`; `doctor` clean (mode enforced).
-3. **mismatch rejected:** simulated uid 1001 with `--verified-by claude` → error (≠ resolved gemini-agy); claim unchanged.
-4. **unknown uid fails closed:** uid not in map + `--status` → non-zero error, no write.
-5. **doctor impersonation catch:** hand-write a verified claim with `verified_by: claude` but `executor.uid` mapping to gemini-agy → `[Error]` mismatch.
-6. **single_user honesty:** `mode: single_user` → verification produces `doctor` `[Warning]` (not silent), exit still 0 if that's the only finding... **decision point:** confirm with reviewer whether single_user warning should keep exit 0 (consistent with `[Info]`/`[Warning]` not failing) or force a deliberate ack. Default: warning, exit 0.
-7. **test-hook guard:** a ledger write made under `OPERATOR_TEST_UID` without the test sentinel → `doctor` `[Error]`.
-8. existing tests pass; `doctor` clean on the live ledger (legacy claims → `[Info]`, single_user → `[Warning]` — confirm the live ledger stays exit 0).
+A status-bearing evidence attachment records:
 
-## 8. Out of scope (do NOT build / do NOT claim)
-- Do not claim impersonation is "prevented" — it is prevented **only** under `mode: enforced` with real uid isolation, which this build does not create.
-- No cryptographic signing scheme this pass (a verifier key still reduces to "can the agent read the key" = isolation). Note it as a future option, don't build it.
-- Do not trust `$USER`/`$LOGNAME`/any env as identity.
-- Do not auto-set `mode: enforced` — that's a human decision made after the OS-user/container isolation is actually in place.
+```yaml
+verification_executor:
+  uid: 1002
+  user: verifier-user
+verification_authority: uid_isolated  # or advisory
+verification_mode: enforced           # or single_user
+```
 
----
-*Continues the operator integrity-hardening lane. The honest framing in §0/§5 is the load-bearing part — a green test suite here is necessary but not sufficient for real enforcement.*
+The existing `executor`, `made_by`, `verified_by`, outcome, and status fields remain available for
+compatibility. Verification does not overwrite `author_executor`. Legacy claims are never backfilled
+or inferred from a harness name.
+
+## Write Gates
+
+In `mode: enforced`:
+
+- `claim-add` requires a registered UID with the `builder` role.
+- Status-free `evidence-attach` requires a registered UID with the `builder` role.
+- Any status-bearing `evidence-attach` requires a registered UID with the `verifier` role.
+- `--verified-by` is a required assertion and must equal the registered verifier name.
+- A status write fails when the claim lacks a valid author UID or the verifier UID equals it.
+
+Authorization completes before evidence fingerprinting or copying and before IDs, YAML projections,
+SQLite events, or task/claim status are written.
+
+In `single_user`, those workflows remain usable. Every status write records
+`verification_authority: advisory`; it never records `uid_isolated`.
+
+## Doctor
+
+`doctor` is structural and read-only. It never executes `verification_command`.
+
+- Valid distinct-UID verification is reported as `uid_isolated`.
+- `advisory` verification is reported as a non-fatal warning.
+- Legacy verified claims without the new fields are reported as legacy/advisory and remain readable.
+- Malformed `uid_isolated` records are errors, including missing or equal UIDs, a recorded mode other
+  than `enforced`, an unregistered verifier UID, a missing verifier role, or a `verified_by` mismatch.
+- Guarded test-UID markers are errors and are not proof of real UID isolation.
+- A later policy-mode change is visible but does not relabel the authority recorded on an event.
+
+## Test Hook
+
+`OPERATOR_TEST_UID` is honored only when `OPERATOR_TEST_SENTINEL` is `1` or `true`. Writes produced
+through that guarded simulation record `test_override_active`; `doctor` treats them as test artifacts.
+An override request without the sentinel records `test_override_unauthorized`, which is also an error.
+
+Passing simulated-UID tests proves the gate logic, not real isolation. A real isolation claim requires
+dogfood with genuinely distinct OS users and confirmation that the recorded author UID, verifier UID,
+and SQLite event actor UID differ as expected.
+
+## Out of Scope
+
+- Provisioning OS users or containers
+- Cryptographic keys or signatures
+- Immutable policy or ledger configuration (P3)
+- Semantic evidence judgment
+- Executing stored verification commands
+- Rooms, orchestration, or UI

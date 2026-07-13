@@ -4,6 +4,11 @@ _6 generated chapters from the reviewed repository snapshot_
 
 > Source: blue-az/operator-control-plane:main@9b9e3e63a7f0f54ccde541c6c10570c8fdbe8f5b
 
+> [!WARNING]
+> This generated snapshot predates the current SQLite, evidence-staleness, and distinct-UID P2
+> controls. Use the repository `README.md` and `EXECUTOR_IDENTITY_SPEC.md` for current behavior;
+> identity and bare-status descriptions below are historical.
+
 > [!NOTE]
 > **Post-scan verification (owner)**: Reflect's per-chapter boundaries below reflect its static scan. Since the scan, the owner exercised the runtime live — the worked example, doctor, and usage-import against the real session-log corpus — and fixed a codex-import bug surfaced in doing so. The runtime caveats describe the scan, not the current verified state.
 
@@ -55,8 +60,8 @@ printf 'ok\n' > tests/out/upload.log
 ./operator claim-add --task up-retry --type test_passes \
     --text "uploader retries 3x on 5xx" --gate tests/test_upload.py
 
-# attach VERIFIABLE evidence (a re-runnable command, not a blob) and verify —
-# verifier identity must differ from the builder (guard fails closed)
+# attach evidence and record an advisory verification in the default single_user mode;
+# --verify-cmd is inert audit metadata and is not executed by operator
 ./operator evidence-attach tests/out/upload.log --task up-retry --claim claim-0001 \
     --type test_output --status verified --verified-by reviewer \
     --verify-cmd "pytest -q tests/test_upload.py"
@@ -286,7 +291,8 @@ The reviewed evidence supports a few concrete behaviors that matter to the owner
 
 - Claim creation is not trust creation. A new claim begins unverified, with no verifier and no evidence refs, and it is linked back to its task.
 - Claim-backed evidence updates only enforce the verifier rule when a status is being recorded on a claim. That is the protected trust path; it is not a blanket rule for every evidence write.
-- Local evidence copying is best-effort. If the copy fails, the ledger write can still proceed, so the owner should not assume the file itself always landed safely just because the ledger entry exists.
+- Local evidence copying is fail-closed. Copy or fingerprint failure prevents the evidence and trust
+  records from being written.
 - Doctor is a diagnostic check, not a single binary gate. It separates self-verification errors, reviewer mismatch warnings, and legacy records that lack verifier metadata, and it fails closed (exit code 1) on verified records if required evidence files, target repository references, matching gate/test files, or valid command run hashes are missing.
 - Briefs are meant to hand work to the next harness. They carry the latest handoff, the current task state, and the next action, and they tell builders to attach evidence while leaving verification to the review harness.
 - Usage has two lanes. Imported usage is tied to session history, while direct usage intake is a separate accounting write that goes straight into the dated usage ledger.
@@ -401,22 +407,21 @@ An assigned harness writes handoff details into the local ledger, the ledger bui
 
 A task is the parent record; a claim is a tracked assertion attached to that task; a fresh claim starts unverified, with no verifier and no evidence links. Evidence can be attached to a claim, but verification is not the same thing as simply adding a record. The record families around the core lifecycle are distinct enough to matter: sessions frame activity, usage records account for it, and briefs and handoffs carry context forward. The command surface and the README use the same lifecycle vocabulary, which reduces the chance that the manual invents terms the product itself does not use.
 
-> **Figure:** The claim-based verifier gate is narrower than a blanket evidence rule, so a status write without a claim can still change the task path without passing the same check.
+> **Figure:** Draft evidence can be attached without changing claim status. Any status-bearing attach
+> requires a claim and then follows the configured verification-authority gate.
 
 ```mermaid
 flowchart TD
-  subgraph Protected path
-    C[Claim-backed evidence]
-    G[Verifier gate]
-    T[Task record]
-    C -->|status with a claim| G
-    G -->|approved write| T
-  end
-  B[Bare status evidence write]
-  B -->|skips that gate| T
+  E[Evidence attach] --> S{Status supplied?}
+  S -->|no| D[Record draft evidence]
+  S -->|yes| C{Claim supplied?}
+  C -->|no| R[Reject]
+  C -->|yes| G[Verification authority gate]
+  G --> T[Update claim and task]
 ```
 
-Claim-backed evidence goes through the verifier gate before it changes the task record. A bare status evidence write goes straight to the task record without that same gate, so verification is not universal across every evidence write.
+Draft evidence remains separate from verification. A status cannot be silently dropped onto bare
+evidence: the command requires a claim before any authority, artifact, projection, or event write.
 
 ### What Is Strong Here
 
@@ -481,40 +486,62 @@ Trust in this product is not a feeling; it is the result of separated roles, evi
 
 ### Mental Model
 
-Trust is a governance layer on top of the ledger, not a synonym for activity. The assigned harness does the work, the review harness checks it, and the verifier is the identity attached when trust is written. A claim starts unverified, so present, supported, and trusted are different states. Doctor is the integrity audit that looks for self-verification, reviewer mismatch, missing verifier metadata, and session or usage drift before the ledger quietly drifts. Some of this trust framing comes from the command behavior itself, and some from the surrounding policy language that explains how those commands are meant to be interpreted.
+Trust is a governance layer on top of the ledger, not a synonym for activity. The builder does the
+work and records a claim; trusted verification requires a registered verifier process running under a
+different OS UID. Harness names organize work but do not create isolation. A claim starts unverified,
+so present, supported, and trusted are different states. Doctor audits the structural authority and
+ledger integrity without judging evidence semantics or executing stored commands.
 
-> **Figure:** Recording the work and trusting the work are different steps: the assigned harness can create the claim, but trust only exists after a separate review harness writes a verifier identity.
+> **Figure:** Recording and trusting work are different steps. Trust requires a distinct verifier UID,
+> not only a different review-harness label.
 
 ```mermaid
 flowchart TD
-A[Assigned harness does the work] --> B[Claim is recorded]
-B --> C[Review harness checks it]
-C --> D[Verifier identity is written]
-D --> E[Trusted claim]
+A[Builder UID does the work] --> B[Claim records author UID]
+B --> C[Verifier checks evidence]
+C --> D{Verifier UID differs?}
+D -->|yes, enforced| E[uid_isolated]
+D -->|no or single_user| F[advisory or rejected]
 ```
 
-The assigned harness does the work first, then a claim is recorded. A separate review harness checks that claim, and only after that is a verifier identity written. The consequence for the owner is that trust depends on a second role, not just on work being present in the ledger.
+The claim preserves its author UID. A verification becomes UID-isolated only when a registered
+verifier under another UID records it in enforced mode.
 
 ### How It Works
 
-The trust path is narrow on purpose. A new claim is unverified and carries no verifier or evidence refs. When evidence is attached to a claim and a status is being set, the command requires a verifier identity; in enforced mode it rejects unknown identities and mismatches before the ledger accepts trusted verification. If identity is configured more loosely, the command can still accept the write and doctor will warn rather than treat the mismatch as fully enforced. The generated brief is meant to hand the task to the next harness with the latest handoff and next action, while telling the builder to attach evidence and leave verification to the review harness. Sessions and handoffs support continuity, but they are not the same thing as trust; they help the next harness continue work without pretending the work has already been proven.
+The trust path is narrow on purpose. A new claim is unverified and records its author executor. In
+enforced mode, claim and draft-evidence writes require a registered builder; every status write
+requires a registered verifier whose OS UID differs from the author UID. In single-user mode, the
+same workflow remains available but is recorded as advisory. The generated brief carries this
+boundary forward. Sessions and handoffs support continuity, but they are not proof.
 
-> **Figure:** The same write can carry different trust strength: claim-backed status updates hit a hard gate in enforced mode, but single-user mode only warns, and bare evidence updates can bypass verifier checks altogether.
+> **Figure:** A bare status is rejected. Claim-backed status writes either pass the distinct-UID gate
+> in enforced mode or are explicitly advisory in single-user mode.
 
 ```mermaid
 flowchart TD
-A[Bare evidence with status] --> B[Status is recorded]
-A -.-> C[No verifier check]
-D[Claim-backed status write] --> E{Verifier gate}
-E -->|enforced mode| F[Stop on mismatch]
-E -->|single-user mode| G[Allow write and warn]
+A[Evidence attach with status] --> B{Claim supplied?}
+B -->|no| C[Reject]
+B -->|yes| D{Identity mode}
+D -->|enforced| E{Registered verifier UID differs from author UID?}
+E -->|no| C
+E -->|yes| F[Record uid_isolated]
+D -->|single_user| G[Record advisory]
 ```
 
-Bare evidence with status moves straight to a recorded status and is shown outside the verifier gate. Claim-backed status writes pass through a verifier gate, where enforced mode stops mismatches and single-user mode allows the write but records a warning. The consequence is that not every status update carries the same trust guarantee.
+Status cannot be silently dropped onto bare evidence. Enforced verification receives trusted
+authority only after the role and distinct-UID checks pass; single-user verification stays usable
+without being presented as isolated.
 
 ### Verified Facts
 
-The CLI surface is fixed rather than dynamically discovered. Task-bound writes fall back to the current task if no task id is provided and fail closed when there is no active task. Init creates the standard ledger layout on first run and does not repair an existing partial tree. Most operational writes stamp executor identity, but init is exempt. Claim-backed evidence updates require a verifier identity and can change task status to verified or quarantined. Quarantine can overwrite terminal task status. Usage import can match a source session by more than exact equality, can hydrate an existing placeholder, and rewrites that row in place. Direct usage intake writes a row without a source-session import trail. Doctor separates self-verification errors, reviewer mismatch warnings, and legacy no-verifier informational cases, failing closed (exit code 1) on verified records missing evidence files, repository references, gate/test files, or run command hashes.
+The CLI surface is fixed rather than dynamically discovered. Task-bound writes fall back to the
+current task if no task id is provided and fail closed when there is no active task. Init creates the
+standard ledger layout on first run and does not repair an existing partial tree. Operational writes
+stamp executor identity. Enforced claim and draft-evidence writes require a builder role; status writes
+require a verifier role and a UID distinct from the claim author. Quarantine can overwrite terminal
+task status. Doctor distinguishes advisory, UID-isolated, malformed, and legacy authority while also
+checking evidence, projection, and event integrity.
 
 > **Figure:** Verification can move a task forward only before it reaches a terminal state, but quarantine can still land later and pull a finished task back to a quarantined state. Closeout is therefore reversible when integrity evidence arrives late.
 
@@ -532,7 +559,10 @@ A task starts open, can move to verified after review, and can then close. A qua
 
 ### Strengths
 
-The design already gives the owner several guardrails that make trust legible. Role separation is explicit. Unverified claims stay untrusted until evidence and verification are added. Doctor does not collapse every irregularity into one failure bucket; it separates self-verification, reviewer mismatch, legacy gaps, and in-flight drift, failing closed to enforce ledger integrity. Handoffs and briefs keep cross-harness continuity structured, and usage imports are idempotent on their provenance key instead of blindly duplicating records. Those are real strengths because they let the owner inspect trust as a set of narrow checks instead of one vague sense of progress.
+The design makes the role and UID boundaries explicit. Unverified claims stay untrusted until evidence
+and verification are added, and single-user verification is never relabeled as isolated. Doctor keeps
+legacy and advisory records visible while failing malformed UID-isolated records. Handoffs and briefs
+preserve continuity without serving as proof.
 
 ### Evidence Boundary
 
@@ -833,16 +863,19 @@ set of product-facing config:
   ```yaml
   mode: enforced          # or: single_user (advisory)
   uids:
-    1001: reviewer
-    1002: builder
+    1001:
+      name: builder
+      roles: [builder]
+    1002:
+      name: reviewer
+      roles: [verifier]
   ```
-  In `enforced` mode, writes bind to the executing OS uid and a claim verified by the wrong
-  identity is **rejected** (impersonation guard). In `single_user` mode the binding is advisory —
-  and `doctor` warns when a claim *would* be rejected under enforced mode (an enforcement downgrade).
+  Enforced claim/draft writes require a builder role. Status writes require a registered verifier
+  OS UID distinct from the recorded claim-author UID. `single_user` status writes are advisory.
 - **`.operator/{tasks,claims,evidence,sessions}/`** — append-only YAML records (the ledger; gitignored).
 
-This config is what makes the guarantees real: the gate, the identities, and the fail-closed
-verification all read from it.
+The registry supplies role policy. Trusted verification also requires genuinely distinct OS UIDs;
+the CLI does not provision those users or containers.
 
 ## Appendix: Attention Items and Owner Decisions
 
@@ -852,9 +885,11 @@ _The deduplicated set of caveats and open decisions Reflect surfaced (52 in-chap
 - **A status needs a claim.** `evidence-attach --status` fails closed without `--claim` (now enforced).
 - **`init` creates, it doesn't repair.** Re-running it won't fix a broken `.operator/`; back up and re-init.
 - **Quarantine can reopen a finished task.** A late quarantine overrides verified/complete — intended (late findings should reopen); closeout isn't one-way.
-- **Identity mode sets the guarantee.** `enforced` = fail-closed on mismatch; `single_user` = warn only (`doctor` flags the relaxation).
+- **Mode plus OS isolation sets the guarantee.** `enforced` is trusted only with a registered verifier
+  UID distinct from the claim author; `single_user` is advisory.
 - **A claim isn't trusted at creation** — it's an assertion until evidence + verification land.
-- **Evidence copy is best-effort** — the ledger can record a verification even if the file copy failed; don't assume the artifact is on disk.
+- **Local evidence copy is fail-closed** — a copy or fingerprint failure prevents the evidence and
+  verification write.
 - **Usage import is fuzzy** — it matches beyond an exact session ID and can merge into an open row; use exact IDs for strict provenance.
 - **Direct usage intake lacks the import provenance trail** — first-class, but distinct from imported usage.
 - **Task-bound writes use the current-task fallback** — they depend on ledger state; pass an explicit task for high-stakes writes.

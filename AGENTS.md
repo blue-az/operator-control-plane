@@ -51,5 +51,7 @@ updates.
 ## Security & Configuration Tips
 
 Identity and verification behavior is governed by `.operator/identity.yaml`.
-Preserve fail-closed verification semantics: builders should not verify their own
-claims, and evidence should prefer re-runnable commands over static blobs.
+Preserve fail-closed verification semantics: only an enforced, registered verifier
+OS UID distinct from the claim author is `uid_isolated`; `single_user` verification
+is advisory. Evidence should prefer re-runnable commands over static blobs, but the
+operator must never execute stored verification commands.

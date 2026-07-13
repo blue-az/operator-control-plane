@@ -7,6 +7,9 @@ tasks → claims → evidence → verifications as YAML projections under `.oper
 trust-relevant write in an append-only SQLite event history, binds writes to the executing OS identity,
 guards against self-verification, and ships a `doctor` consistency checker.
 
+Only an enforced verification by a registered verifier OS UID distinct from the claim author's UID is
+recorded as `uid_isolated`. Same-UID and default `single_user` verification is explicitly advisory.
+
 Built as the "engine room / logbook" enforcement substrate for [Bulkhead τ](https://bulkheadtau.com),
 but it stands alone. **Contributions welcome** — especially on the open problems below.
 
@@ -53,10 +56,12 @@ YAML-only ledger baselines those records into SQLite without changing their visi
   must match the local bytes before any evidence write. Missing filesystem paths are rejected;
   non-file external references must use an explicit URI scheme. Evidence types: `run_log, manifest,
   database_query, test_output, git_commit, screenshot, transcript, paper_section, external_doc`.
+  Under enforced identity policy, draft attachment is a builder action and any status attachment is a
+  verifier action from an OS UID distinct from the claim author.
 - `verify RUN_DIR` — automated audit of a run directory's artifacts.
 - `doctor [--audit]` — read-only consistency check across the ledger: flags unverified claims,
-  **self-verification**, and **enforcement downgrades** (a claim that would be rejected under
-  enforced identity mode but is silently accepted under `single_user`). Fails closed (exit code 1) on
+  **self-verification**, advisory verification, malformed UID-isolated verification, and enforcement
+  downgrades. Fails closed (exit code 1) on
   verified/completed records if they lack required evidence files, target repository references,
   matching gate/test files, or valid command run hashes. It also verifies SQLite event hashes,
   compares each latest event with the corresponding YAML projection, and recomputes local evidence
@@ -99,8 +104,8 @@ printf 'ok\n' > tests/out/upload.log
 ./operator claim-add --task up-retry --type test_passes \
     --text "uploader retries 3x on 5xx" --gate tests/test_upload.py
 
-# attach VERIFIABLE evidence (a re-runnable command, not a blob) and verify —
-# verifier identity must differ from the builder (guard fails closed)
+# attach evidence and record an advisory verification in the default single_user mode;
+# --verify-cmd is inert audit metadata and is not executed by operator
 ./operator evidence-attach tests/out/upload.log --task up-retry --claim claim-0001 \
     --type test_output --status verified --verified-by reviewer \
     --verify-cmd "pytest -q tests/test_upload.py"
@@ -124,12 +129,19 @@ set of product-facing config:
   ```yaml
   mode: enforced          # or: single_user (advisory)
   uids:
-    1001: reviewer
-    1002: builder
+    1001:
+      name: builder
+      roles: [builder]
+    1002:
+      name: reviewer
+      roles: [verifier]
   ```
-  In `enforced` mode, writes bind to the executing OS uid and a claim verified by the wrong
-  identity is **rejected** (impersonation guard). In `single_user` mode the binding is advisory —
-  and `doctor` warns when a claim *would* be rejected under enforced mode (an enforcement downgrade).
+  In `enforced` mode, claim creation and draft evidence require the `builder` role. Status-bearing
+  evidence requires the `verifier` role, a matching `--verified-by`, and a verifier UID distinct from
+  the recorded claim-author UID. Rejections occur before artifacts or ledger records are written. A
+  legacy scalar entry such as `1001: builder` remains loadable and grants both roles, but the distinct
+  UID rule still prevents self-verification. In `single_user`, status writes remain available and are
+  recorded as `advisory`, never `uid_isolated`.
 - **`.operator/{tasks,claims,evidence,handoffs,usage}/`** — current YAML projections (gitignored).
 - **`.operator/ledger.sqlite3`** — append-only, full-snapshot event versions for task, claim,
   evidence, handoff, and usage/session records. Session commands version their `usage-XXXX` record.
@@ -140,8 +152,8 @@ versions are allocated transactionally, linked by per-record SHA-256 hashes, and
 either side. Because both live on the same writable disk, this improves local durability and
 auditability; it is not an off-machine backup or an adversarial tamper-proof boundary.
 
-This config is what makes the guarantees real: the gate, the identities, and the fail-closed
-verification all read from it.
+The registry supplies role policy. The trusted boundary also requires the processes to run under
+genuinely distinct OS UIDs; the CLI does not provision those users or containers.
 
 ## Design specs
 
@@ -154,9 +166,9 @@ verification all read from it.
 These are real and known (named honestly rather than hidden — the whole point of the tool is that
 unverified claims are worthless):
 
-- **Honor-system `verified_by` in `single_user` mode.** When every agent runs under one OS user,
-  identity enforcement is advisory — the builder can assert the reviewer's name. Real enforcement needs
-  distinct OS users / containers, or a write-isolated reviewer. *Hard problem; ideas welcome.*
+- **Advisory verification in `single_user` mode.** When every agent runs under one OS user, the
+  builder can assert a reviewer's name. Trusted `uid_isolated` verification requires pre-provisioned,
+  distinct OS users; provisioning them is outside this tool.
 - **The durable ledger is still local-only.** SQLite preserves version history when a YAML projection
   is damaged or removed, but `.operator/` remains gitignored and has no off-machine backup. A disk
   loss can still remove both the event history and copied evidence.
@@ -167,9 +179,9 @@ unverified claims are worthless):
   reported as uncheckable. Prefer binding a *re-runnable structural test* over a captured blob or a
   byte-hash of a living document.
 - **Structural, not semantic, verification.** `doctor` checks bindings, metadata, and fingerprints. It
-  deliberately does not execute stored verification commands; those are inert audit metadata until a
-  separately isolated verifier exists. A vacuous gate (`assert True`) or a hash of irrelevant bytes can
-  still look structurally valid. Whether evidence proves the claim remains a reviewer judgment.
+  deliberately does not execute stored verification commands; those remain inert audit metadata even
+  for a UID-isolated verifier. A vacuous gate (`assert True`) or a hash of irrelevant bytes can still
+  look structurally valid. Whether evidence proves the claim remains a reviewer judgment.
 
 ## License
 

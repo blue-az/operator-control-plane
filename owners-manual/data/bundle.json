@@ -4,6 +4,7 @@
     "genre": "owners-manual",
     "title": "Owner's Manual for blue-az/operator-control-plane",
     "status": "review-ready",
+    "versionNotice": "Historical generated snapshot. Current identity and status behavior is governed by README.md and EXECUTOR_IDENTITY_SPEC.md.",
     "audience": "Non-technical or semi-technical software owners reviewing their own product.",
     "language": "en",
     "subtitle": "6 generated chapters from the reviewed repository snapshot",
@@ -540,7 +541,7 @@
         {
           "id": "verified-facts-copy",
           "type": "markdown",
-          "markdown": "The reviewed evidence supports a few concrete behaviors that matter to the owner:\n\n- Claim creation is not trust creation. A new claim begins unverified, with no verifier and no evidence refs, and it is linked back to its task.\n- Claim-backed evidence updates only enforce the verifier rule when a status is being recorded on a claim. That is the protected trust path; it is not a blanket rule for every evidence write.\n- Local evidence copying is best-effort. If the copy fails, the ledger write can still proceed, so the owner should not assume the file itself always landed safely just because the ledger entry exists.\n- Doctor is a diagnostic check, not a single binary gate. It separates self-verification errors, reviewer mismatch warnings, and legacy records that lack verifier metadata.\n- Briefs are meant to hand work to the next harness. They carry the latest handoff, the current task state, and the next action, and they tell builders to attach evidence while leaving verification to the review harness.\n- Usage has two lanes. Imported usage is tied to session history, while direct usage intake is a separate accounting write that goes straight into the dated usage ledger.\n- Executor identity is stamped on operational writes, but bootstrap is a known exception, and single-user mode can accept a write while still warning that verification is not identity-enforced.",
+          "markdown": "The reviewed evidence supports a few concrete behaviors that matter to the owner:\n\n- Claim creation is not trust creation. A new claim begins unverified, with no verifier and no evidence refs, and it is linked back to its task.\n- Claim-backed evidence updates only enforce the verifier rule when a status is being recorded on a claim. That is the protected trust path; it is not a blanket rule for every evidence write.\n- Local evidence copying is fail-closed. Copy or fingerprint failure prevents evidence and trust records from being written.\n- Doctor is a diagnostic check, not a single binary gate. It separates self-verification errors, reviewer mismatch warnings, and legacy records that lack verifier metadata.\n- Briefs are meant to hand work to the next harness. They carry the latest handoff, the current task state, and the next action, and they tell builders to attach evidence while leaving verification to the review harness.\n- Usage has two lanes. Imported usage is tied to session history, while direct usage intake is a separate accounting write that goes straight into the dated usage ledger.\n- Executor identity is stamped on operational writes, but bootstrap is a known exception, and single-user mode can accept a write while still warning that verification is not identity-enforced.",
           "knowledgeRefs": [
             "claim-creation",
             "evidence-verification-gate",
@@ -891,9 +892,9 @@
           "id": "verification-boundary",
           "type": "figure",
           "format": "mermaid",
-          "source": "flowchart TD\n  subgraph Protected path\n    C[Claim-backed evidence]\n    G[Verifier gate]\n    T[Task record]\n    C -->|status with a claim| G\n    G -->|approved write| T\n  end\n  B[Bare status evidence write]\n  B -->|skips that gate| T",
-          "caption": "The claim-based verifier gate is narrower than a blanket evidence rule, so a status write without a claim can still change the task path without passing the same check.",
-          "textFallback": "Claim-backed evidence goes through the verifier gate before it changes the task record. A bare status evidence write goes straight to the task record without that same gate, so verification is not universal across every evidence write.",
+          "source": "flowchart TD\n  E[Evidence attach] --> S{Status supplied?}\n  S -->|no| D[Record draft evidence]\n  S -->|yes| C{Claim supplied?}\n  C -->|no| R[Reject]\n  C -->|yes| G[Verification authority gate]\n  G --> T[Update claim and task]",
+          "caption": "Draft evidence and status-bearing evidence use separate paths; status requires a claim and authority check.",
+          "textFallback": "Draft evidence does not change claim status. A status-bearing attach without a claim fails before artifact, projection, or event writes.",
           "knowledgeRefs": [
             "claim-creation",
             "evidence-verification-gate"
@@ -937,7 +938,7 @@
         {
           "id": "attention-copy",
           "type": "markdown",
-          "markdown": "Some of the most important risks are not about whether records exist, but about when the product will accept them as trustworthy. A status-bearing evidence attach only enforces the verifier gate when a claim is present, so a status write without a claim can bypass the trust check the owner may assume is universal. A late quarantine can also overwrite a task that was already terminal, so closeout is not one-way. Usage import is permissive enough to widen beyond a strict exact match, and it can rewrite an open placeholder instead of always appending a fresh row. Direct usage intake bypasses the session-import trail, which means accounting can be correct while still being disconnected from the provenance path the owner might expect.",
+          "markdown": "Some of the most important risks are not about whether records exist, but about when the product will accept them as trustworthy. Status-bearing evidence now requires a claim and the configured authority gate. A late quarantine can still overwrite a task that was already terminal, so closeout is not one-way. Usage import is permissive enough to widen beyond a strict exact match, and it can rewrite an open placeholder instead of always appending a fresh row. Direct usage intake bypasses the session-import trail, which means accounting can be correct while still being disconnected from the provenance path the owner might expect.",
           "knowledgeRefs": [
             "evidence-verification-gate",
             "terminal-quarantine",
@@ -974,7 +975,7 @@
         {
           "id": "owner-decisions-copy",
           "type": "markdown",
-          "markdown": "Before relying on this chapter operationally, the owner should decide how strict the local workflow needs to be. If current-task fallback is convenient, task-bound writes can stay implicit; if not, the workflow should require explicit task identifiers. If the product must never accept a status-bearing evidence attach without a claim, that behavior needs to be treated as a boundary, not a convenience. If a verified or complete task must not move back to quarantined, then quarantine needs stricter handling. If imported usage should remain merge-friendly and permissive, the current import behavior may be acceptable; if not, it should be narrowed to more exact matches and clearer provenance rules.",
+          "markdown": "Before relying on this chapter operationally, the owner should decide how strict the local workflow needs to be. If current-task fallback is convenient, task-bound writes can stay implicit; if not, the workflow should require explicit task identifiers. Status-bearing evidence already fails closed without a claim. If a verified or complete task must not move back to quarantined, then quarantine needs stricter handling. If imported usage should remain merge-friendly and permissive, the current import behavior may be acceptable; if not, it should be narrowed to more exact matches and clearer provenance rules.",
           "knowledgeRefs": [
             "active-task-binding",
             "evidence-verification-gate",
@@ -1238,9 +1239,9 @@
           "id": "verifier-gate-boundary",
           "type": "figure",
           "format": "mermaid",
-          "source": "flowchart TD\nA[Bare evidence with status] --> B[Status is recorded]\nA -.-> C[No verifier check]\nD[Claim-backed status write] --> E{Verifier gate}\nE -->|enforced mode| F[Stop on mismatch]\nE -->|single-user mode| G[Allow write and warn]",
-          "caption": "The same write can carry different trust strength: claim-backed status updates hit a hard gate in enforced mode, but single-user mode only warns, and bare evidence updates can bypass verifier checks altogether.",
-          "textFallback": "Bare evidence with status moves straight to a recorded status and is shown outside the verifier gate. Claim-backed status writes pass through a verifier gate, where enforced mode stops mismatches and single-user mode allows the write but records a warning. The consequence is that not every status update carries the same trust guarantee.",
+          "source": "flowchart TD\nA[Evidence attach with status] --> B{Claim supplied?}\nB -->|no| C[Reject]\nB -->|yes| D{Identity mode}\nD -->|enforced| E{Registered verifier UID differs from author UID?}\nE -->|no| C\nE -->|yes| F[Record uid_isolated]\nD -->|single_user| G[Record advisory]",
+          "caption": "A bare status is rejected; claim-backed status writes are UID-isolated in enforced mode or advisory in single-user mode.",
+          "textFallback": "Status-bearing evidence requires a claim. Enforced verification requires a registered verifier UID distinct from the author; single-user verification is advisory.",
           "knowledgeRefs": [
             "evidence-verification-gate",
             "doctor-diagnostics",
@@ -2292,17 +2293,17 @@
     {
       "id": "attention-verifier-gap",
       "kind": "critical",
-      "title": "Status-bearing evidence can bypass the verifier gate when no claim is present",
-      "status": "open",
+      "title": "Status-bearing evidence requires a claim",
+      "status": "resolved",
       "severity": "critical",
       "chapterId": "surfaces-and-records",
-      "whatHappens": "A status write on evidence does not automatically go through the claim-based verifier check; that trust rule only applies when a claim is supplied.",
-      "whyItMatters": "An owner could mistake status for universal verification, but this path is narrower than it looks and can let unsupported trust state into the ledger.",
+      "whatHappens": "A status-bearing evidence attach without a claim fails before artifact, projection, or event writes.",
+      "whyItMatters": "The resolved boundary prevents a bare evidence write from silently changing claim trust state.",
       "knowledgeRefs": [
         "evidence-verification-gate"
       ],
       "resurfaceWhen": "When surfaces and records behavior or related owner decisions change.",
-      "requestedAttention": "Review this boundary and decide whether the current behavior is intentional."
+      "requestedAttention": "No action; this boundary is enforced."
     },
     {
       "id": "attention-terminal-quarantine",
@@ -2352,49 +2353,49 @@
     {
       "id": "trust-and-verification-attention-claim-status-gate",
       "kind": "critical",
-      "title": "Verifier gate is claim-bound",
-      "status": "open",
+      "title": "Status writes require a claim and authority gate",
+      "status": "resolved",
       "severity": "critical",
       "chapterId": "trust-and-verification",
-      "whatHappens": "Bare evidence attaches with status can skip verification logic when no claim is supplied.",
-      "whyItMatters": "If the owner assumes every status change enforces verification, unsupported evidence can look trusted.",
+      "whatHappens": "Bare status writes fail closed; claim-backed status writes pass the configured authority gate.",
+      "whyItMatters": "The resolved boundary keeps status changes on the claim verification path.",
       "knowledgeRefs": [
         "evidence-verification-gate"
       ],
       "resurfaceWhen": "When trust and verification behavior or related owner decisions change.",
-      "requestedAttention": "Review this boundary and decide whether the current behavior is intentional."
+      "requestedAttention": "No action; this boundary is enforced."
     },
     {
       "id": "attention-identity-mode",
       "kind": "critical",
-      "title": "Identity mode changes the guarantee",
+      "title": "Trusted verification requires distinct OS UIDs",
       "status": "open",
-      "severity": "critical",
+      "severity": "high",
       "chapterId": "trust-and-verification",
-      "whatHappens": "Enforced mode fail-closes on unknown or mismatched identities; single-user mode accepts the write and warns.",
-      "whyItMatters": "The same workflow carries different trust strength depending on configuration, so a trust promise is not universal.",
+      "whatHappens": "Enforced mode records uid_isolated only for a registered verifier UID distinct from the author; single-user mode records advisory.",
+      "whyItMatters": "Role labels alone do not create isolation, so the operating environment must provide genuinely distinct OS users.",
       "knowledgeRefs": [
         "evidence-verification-gate",
         "doctor-diagnostics",
         "executor-provenance"
       ],
       "resurfaceWhen": "When trust and verification behavior or related owner decisions change.",
-      "requestedAttention": "Review this boundary and decide whether the current behavior is intentional."
+      "requestedAttention": "Dogfood with genuinely distinct OS users before claiming real isolation."
     },
     {
       "id": "attention-evidence-copy",
       "kind": "watch",
-      "title": "Evidence copy is best-effort",
-      "status": "open",
+      "title": "Local evidence copy is fail-closed",
+      "status": "resolved",
       "severity": "high",
       "chapterId": "trust-and-verification",
-      "whatHappens": "The ledger can record the verification change even if the local file copy fails and the file never lands on disk.",
-      "whyItMatters": "The owner cannot assume the artifact exists just because the ledger says the claim was updated.",
+      "whatHappens": "Copy or fingerprint failure prevents the evidence and trust records from being written.",
+      "whyItMatters": "The resolved boundary prevents trust from advancing without the retained local artifact.",
       "knowledgeRefs": [
         "evidence-verification-gate"
       ],
       "resurfaceWhen": "When trust and verification behavior or related owner decisions change.",
-      "requestedAttention": "Review this boundary and decide whether the current behavior is intentional."
+      "requestedAttention": "No action; this boundary is enforced."
     },
     {
       "id": "attention-quarantine-downgrade",
@@ -2540,17 +2541,17 @@
     {
       "id": "attention-3",
       "kind": "watch",
-      "title": "Verification is not a blanket rule on every evidence write",
-      "status": "open",
-      "severity": "high",
+      "title": "Draft evidence and status writes use separate gates",
+      "status": "resolved",
+      "severity": "medium",
       "chapterId": "handoffs-and-operating-rhythm",
-      "whatHappens": "Status-based verification checks run only on claim-backed evidence writes. Bare evidence writes with a status do not enter the same guard.",
-      "whyItMatters": "If the owner assumes every status change is checked the same way, trust can drift without being noticed. This is an authority boundary, not just a convenience difference.",
+      "whatHappens": "Status-free evidence remains a draft action; any status-bearing write requires a claim and authority check.",
+      "whyItMatters": "The enforced split keeps draft evidence from being confused with verification.",
       "knowledgeRefs": [
         "evidence-verification-gate"
       ],
       "resurfaceWhen": "When handoffs and operating rhythm behavior or related owner decisions change.",
-      "requestedAttention": "Review this boundary and decide whether the current behavior is intentional."
+      "requestedAttention": "No action; this boundary is enforced."
     },
     {
       "id": "attention-4",
@@ -2628,7 +2629,7 @@
     },
     {
       "id": "decision-claim-trust-boundary",
-      "state": "open",
+      "state": "resolved",
       "priority": "critical",
       "question": "Should the manual treat claim-backed evidence status as the only trusted status path?",
       "authority": "Product owner",
@@ -2639,7 +2640,7 @@
         "evidence-verification-gate"
       ],
       "resurfaceWhen": "Before changing the related ledger lifecycle behavior.",
-      "currentMeaning": "If yes, keep the manual strict: claim creation is only an assertion, evidence supports it, and verification is the separate trust step. If no, define exactly what a bare evidence status is supposed to mean and how it becomes trusted."
+      "currentMeaning": "Resolved: every status-bearing evidence write requires a claim, and only enforced verification by a distinct registered verifier UID is trusted; other usable verification is advisory."
     },
     {
       "id": "decision-quarantine-rule",
@@ -2700,9 +2701,9 @@
     },
     {
       "id": "decision-claim-gate",
-      "state": "open",
+      "state": "resolved",
       "priority": "critical",
-      "question": "Should any status-bearing evidence write require a claim, or should bare evidence status writes remain allowed?",
+      "question": "Should any status-bearing evidence write require a claim?",
       "authority": "Product owner",
       "chapterId": "surfaces-and-records",
       "whyItMatters": "This is the boundary between a record that merely exists and a record that can advance trust state.",
@@ -2710,7 +2711,7 @@
         "evidence-verification-gate"
       ],
       "resurfaceWhen": "Before changing the related surfaces and records behavior.",
-      "currentMeaning": "If trust needs to be obvious, require a claim whenever status is set; if not, document that status without a claim skips the claim-based verifier path."
+      "currentMeaning": "Resolved: every status-bearing evidence write requires a claim and fails closed otherwise."
     },
     {
       "id": "decision-quarantine",
@@ -2743,9 +2744,9 @@
     },
     {
       "id": "decision-claim-status-without-claim",
-      "state": "open",
+      "state": "resolved",
       "priority": "critical",
-      "question": "Should evidence attaches with status be rejected when no claim is supplied?",
+      "question": "Should evidence attaches with status require a claim?",
       "authority": "Product owner",
       "chapterId": "trust-and-verification",
       "whyItMatters": "This decides whether verification is a universal gate or only a claim-backed one, which changes how much trust the operator can read from the status field.",
@@ -2753,13 +2754,13 @@
         "evidence-verification-gate"
       ],
       "resurfaceWhen": "Before changing the related trust and verification behavior.",
-      "currentMeaning": "Choose the trust bar first, then decide whether the command should fail closed or keep the current claim-bound behavior."
+      "currentMeaning": "Resolved: the command fails closed when status is supplied without a claim."
     },
     {
       "id": "decision-identity-mode",
-      "state": "open",
+      "state": "resolved",
       "priority": "critical",
-      "question": "Should single-user mode remain a warning-only trust mode, or should it fail closed when identity rules are configured?",
+      "question": "How should single-user verification be classified?",
       "authority": "Product owner",
       "chapterId": "trust-and-verification",
       "whyItMatters": "This sets whether identity mismatches are an audit warning or a hard stop, which directly affects how much the owner can rely on the ledger.",
@@ -2768,13 +2769,13 @@
         "doctor-diagnostics"
       ],
       "resurfaceWhen": "Before changing the related trust and verification behavior.",
-      "currentMeaning": "Decide whether the product should optimize for frictionless local work or for strict identity enforcement whenever the map is present."
+      "currentMeaning": "Resolved: single-user verification remains usable but is always advisory; only enforced distinct-UID verification is uid_isolated."
     },
     {
       "id": "decision-copy-failure",
-      "state": "open",
+      "state": "resolved",
       "priority": "critical",
-      "question": "Should a local evidence copy failure abort the write instead of letting verification continue?",
+      "question": "Should a local evidence copy failure abort the write?",
       "authority": "Product owner",
       "chapterId": "trust-and-verification",
       "whyItMatters": "This decides whether trust can advance without a durable artifact on disk, which is a concrete integrity boundary.",
@@ -2782,7 +2783,7 @@
         "evidence-verification-gate"
       ],
       "resurfaceWhen": "Before changing the related trust and verification behavior.",
-      "currentMeaning": "If the artifact matters as proof, require the copy to succeed before trust changes; if not, document that the ledger can outlive the file."
+      "currentMeaning": "Resolved: copy or fingerprint failure aborts before evidence or trust records are written."
     },
     {
       "id": "decision-quarantine-overwrite",

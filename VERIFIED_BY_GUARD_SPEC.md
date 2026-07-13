@@ -1,5 +1,10 @@
 # Operator `verified_by` Guard — Build Spec
 
+> **Historical P1 spec.** This document preserves the original string-level guard contract.
+> [`EXECUTOR_IDENTITY_SPEC.md`](EXECUTOR_IDENTITY_SPEC.md) is the current authority for roles,
+> executor binding, distinct-UID isolation, and advisory verification. Where the two differ, the
+> executor-identity spec supersedes this file.
+
 **For:** the implementing agent (Agy / Antigravity). **Reviewer:** Claude (this time the reviewer actually verifies).
 **Target:** extend `the operator CLI in this repo`. Match existing conventions.
 
@@ -9,7 +14,9 @@
 
 The operator's core task model is `assigned_harness` (builder) + `review_harness` (reviewer). Right now a claim's `verification_status` can be flipped to verified by **anyone** — including the claim's own maker — and the ledger doesn't record *who* verified it. That makes `VERIFIED` untrustworthy for **every** task (domains, papers, deploys, audits), not just any one experiment. Concretely: `claim-0007`/`claim-0008` were made *and* verified by `gemini-agy`; nothing caught it.
 
-This guard closes the **default self-verification footgun** and makes the verifier auditable. It does **not** attempt cryptographic identity — a deliberately falsified `--verified-by` is out of scope (that's an identity problem, not a ledger-integrity one). Scope is intentionally small: **one field, one doctor rule family, one brief-text change.** Do not build a roles/permissions system.
+This P1 guard closed the **default self-verification footgun** and made the verifier string auditable.
+It did not attempt executor identity or roles. P2 subsequently added those controls under the
+distinct-UID boundary defined in `EXECUTOR_IDENTITY_SPEC.md`.
 
 ---
 
@@ -22,7 +29,8 @@ verified_by: <actor|null>   # who set a terminal verification status; null = not
 ## 2. Command change — `evidence-attach`
 - Add arg `--verified-by ACTOR`.
 - When `--status` is supplied (`verified|false|quarantined`):
-  - record `claim["verified_by"] = args.verified_by`.
+  - record `claim["verified_by"] = args.verified_by` in `single_user`; in `enforced`, require the
+    assertion to match the registered executing verifier and record the registry name.
   - **`--verified-by` is REQUIRED when `--status` is set.** If absent → error and exit non-zero: `Error: --verified-by is required when setting --status (the verifier must identify themselves).` Do **not** silently default it to `assigned_harness` (the current footgun) or to `review_harness` (that would launder a builder's self-verification as reviewer-signed).
 - Keep the existing `--by` (evidence *producer*) separate and unchanged. Producer ≠ verifier.
 
@@ -48,8 +56,9 @@ In the evidence/handoff guidance, replace the "verify your claims" framing with 
 5. **legacy is Info, not failure:** hand-write a claim with `verification_status: true` and no `verified_by` → `doctor` prints `[Info]` and exits **0**.
 6. existing `tests/test_operator.py` still passes; `operator doctor` clean on the live ledger (the legacy `claim-0007/0008` land in the Info branch).
 
-## 6. Out of scope (do NOT add)
-- No roles/permissions/ACL system; no identity verification of `--verified-by`.
+## 6. Historical P1 exclusions
+- Roles and executor identity were excluded from P1 and added later by P2. ACL provisioning remains
+  out of scope.
 - No auto-backfill of legacy `verified_by`.
 - Do not change quarantine/verified status semantics beyond recording `verified_by`.
 

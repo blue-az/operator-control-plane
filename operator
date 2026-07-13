@@ -59,6 +59,45 @@ class EvidenceFingerprintError(RuntimeError):
     pass
 
 
+class IdentityPolicyError(RuntimeError):
+    pass
+
+
+class IdentityPolicyLoader(yaml.SafeLoader):
+    pass
+
+
+def construct_unique_identity_mapping(loader, node, deep=False):
+    loader.flatten_mapping(node)
+    mapping = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        try:
+            duplicate = key in mapping
+        except TypeError as exc:
+            raise yaml.constructor.ConstructorError(
+                "while constructing identity mapping",
+                node.start_mark,
+                "found an unhashable mapping key",
+                key_node.start_mark,
+            ) from exc
+        if duplicate:
+            raise yaml.constructor.ConstructorError(
+                "while constructing identity mapping",
+                node.start_mark,
+                f"found duplicate key {key!r}",
+                key_node.start_mark,
+            )
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+IdentityPolicyLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    construct_unique_identity_mapping,
+)
+
+
 def acquire_command_lock(command: str):
     operator_dir = find_operator_dir()
     if not operator_dir:
@@ -803,6 +842,111 @@ def get_executor_identity() -> dict:
         return res
 
 
+def load_identity_policy(operator_dir: str) -> dict:
+    identity_path = os.path.join(operator_dir, "identity.yaml")
+    if not os.path.exists(identity_path):
+        return {"mode": "single_user", "uids": {}}
+
+    try:
+        with open(identity_path, "r") as handle:
+            raw_policy = yaml.load(handle, Loader=IdentityPolicyLoader)
+    except (OSError, yaml.YAMLError) as exc:
+        raise IdentityPolicyError(f"could not read identity.yaml: {exc}") from exc
+
+    if raw_policy is None:
+        raw_policy = {}
+    if not isinstance(raw_policy, dict):
+        raise IdentityPolicyError("identity.yaml must contain a mapping")
+
+    mode = raw_policy.get("mode", "single_user")
+    if not isinstance(mode, str) or mode not in {"single_user", "enforced"}:
+        raise IdentityPolicyError("identity.yaml mode must be either 'single_user' or 'enforced'")
+
+    raw_uids = raw_policy.get("uids", {})
+    if raw_uids is None:
+        raw_uids = {}
+    if not isinstance(raw_uids, dict):
+        raise IdentityPolicyError("identity.yaml uids must contain a mapping")
+
+    identities = {}
+    for raw_uid, raw_identity in raw_uids.items():
+        if isinstance(raw_uid, bool):
+            raise IdentityPolicyError(f"identity UID key {raw_uid!r} is not a non-negative integer")
+        if isinstance(raw_uid, int):
+            uid = raw_uid
+        elif isinstance(raw_uid, str) and re.fullmatch(r"[0-9]+", raw_uid):
+            uid = int(raw_uid)
+        else:
+            raise IdentityPolicyError(f"identity UID key {raw_uid!r} is not a non-negative integer")
+        if uid < 0:
+            raise IdentityPolicyError(f"identity UID key {raw_uid!r} is not a non-negative integer")
+        if uid in identities:
+            raise IdentityPolicyError(f"identity UID {uid} is configured more than once")
+
+        legacy_scalar = isinstance(raw_identity, str)
+        if legacy_scalar:
+            name = raw_identity.strip()
+            roles = {"builder", "verifier"}
+        elif isinstance(raw_identity, dict):
+            name_value = raw_identity.get("name")
+            if not isinstance(name_value, str):
+                raise IdentityPolicyError(f"identity UID {uid} must have a string name")
+            name = name_value.strip()
+            raw_roles = raw_identity.get("roles")
+            if not isinstance(raw_roles, list) or any(
+                not isinstance(role, str) for role in raw_roles
+            ):
+                raise IdentityPolicyError(f"identity UID {uid} roles must be a list of role names")
+            roles = set(raw_roles)
+            unknown_roles = roles - {"builder", "verifier"}
+            if unknown_roles:
+                rendered = ", ".join(sorted(unknown_roles))
+                raise IdentityPolicyError(f"identity UID {uid} has unknown role(s): {rendered}")
+        else:
+            raise IdentityPolicyError(
+                f"identity UID {uid} must map to a name or a name/roles mapping"
+            )
+
+        if not name:
+            raise IdentityPolicyError(f"identity UID {uid} must have a non-empty name")
+        identities[uid] = {
+            "name": name,
+            "roles": frozenset(roles),
+            "legacy_scalar": legacy_scalar,
+        }
+
+    return {"mode": mode, "uids": identities}
+
+
+def identity_policy_for_write(operator_dir: str) -> dict | None:
+    try:
+        return load_identity_policy(operator_dir)
+    except IdentityPolicyError as exc:
+        print(f"Error: invalid identity policy: {exc}", file=sys.stderr)
+        return None
+
+
+def require_executor_role(policy: dict, executor: dict, role: str, action: str) -> dict | None:
+    if policy["mode"] != "enforced":
+        return None
+
+    uid = executor.get("uid")
+    identity = policy["uids"].get(uid)
+    if identity is None:
+        print(
+            f"Error: refusing to {action}: executor uid {uid} is not a known identity",
+            file=sys.stderr,
+        )
+        return None
+    if role not in identity["roles"]:
+        print(
+            f"Error: refusing to {action}: executor uid {uid} does not have the {role} role",
+            file=sys.stderr,
+        )
+        return None
+    return identity
+
+
 def slugify(text: str) -> str:
     """Slugify text to generate safe task IDs."""
     text = text.lower()
@@ -1484,6 +1628,16 @@ def claim_add_cmd(args) -> int:
     if not resolved_task:
         return 1
     task_id, task_path, task = resolved_task
+
+    exec_identity = get_executor_identity()
+    identity_policy = identity_policy_for_write(op_dir)
+    if identity_policy is None:
+        return 1
+    if identity_policy["mode"] == "enforced" and not require_executor_role(
+        identity_policy, exec_identity, "builder", "create claim"
+    ):
+        return 1
+
     preflight_projection(op_dir, task_path, task)
 
     claim_id = get_next_claim_id(op_dir)
@@ -1503,7 +1657,8 @@ def claim_add_cmd(args) -> int:
         "evidence_refs": [],
         "required_gate": args.gate,
         "supervision_layer": args.layer,
-        "executor": get_executor_identity(),
+        "executor": dict(exec_identity),
+        "author_executor": dict(exec_identity),
     }
 
     claim_path = os.path.join(op_dir, "claims", f"{claim_id}.yaml")
@@ -1543,7 +1698,11 @@ def evidence_attach_cmd(args) -> int:
     claim_id = args.claim
     claim = None
     exec_identity = get_executor_identity()
+    identity_policy = identity_policy_for_write(op_dir)
+    if identity_policy is None:
+        return 1
     verified_by_value = args.verified_by
+    verification_authority = None
 
     if claim_id:
         resolved_claim = resolve_claim_record(op_dir, claim_id)
@@ -1558,17 +1717,16 @@ def evidence_attach_cmd(args) -> int:
             )
             return 1
 
-    # A status advances trust and is only ever recorded on a claim; reject a bare status write so it
-    # can't silently succeed-and-drop, leaving the operator thinking trust advanced when it did not.
+    # A status changes claim trust state; reject a bare write so it cannot silently succeed and drop.
     if args.status and not claim:
         print(
-            "Error: --status requires --claim. A status advances trust on a claim; a bare evidence "
+            "Error: --status requires --claim. A status changes trust state on a claim; bare evidence "
             "write cannot carry one (the status would be silently dropped).",
             file=sys.stderr,
         )
         return 1
 
-    if claim and args.status:
+    if args.status:
         if not getattr(args, "verified_by", None):
             print(
                 "Error: --verified-by is required when setting --status (the verifier must identify themselves).",
@@ -1576,36 +1734,46 @@ def evidence_attach_cmd(args) -> int:
             )
             return 1
 
-        # Executor identity check and binding
-        identity_path = os.path.join(op_dir, "identity.yaml")
-        identity_map = {}
-        mode = "single_user"
-        if os.path.exists(identity_path):
-            id_data = load_yaml(identity_path) or {}
-            mode = id_data.get("mode", "single_user")
-            identity_map = id_data.get("uids", {})
-
-        actual_uid = exec_identity["uid"]
-        actual_verifier = identity_map.get(actual_uid)
-        if actual_verifier is None:
-            actual_verifier = identity_map.get(str(actual_uid))
-
-        if mode == "enforced":
+        if identity_policy["mode"] == "enforced":
+            actual_verifier = require_executor_role(
+                identity_policy, exec_identity, "verifier", "record verification"
+            )
             if not actual_verifier:
+                return 1
+            if args.verified_by != actual_verifier["name"]:
                 print(
-                    f"Error: refusing to record verification: executor uid {actual_uid} is not a known identity",
+                    f"Error: --verified-by '{args.verified_by}' does not match the executing "
+                    f"identity '{actual_verifier['name']}'",
                     file=sys.stderr,
                 )
                 return 1
-            if args.verified_by != actual_verifier:
+
+            author_executor = claim.get("author_executor")
+            author_uid = author_executor.get("uid") if isinstance(author_executor, dict) else None
+            if not isinstance(author_uid, int) or isinstance(author_uid, bool) or author_uid < 0:
                 print(
-                    f"Error: --verified-by '{args.verified_by}' does not match the executing identity '{actual_verifier}'",
+                    "Error: refusing to record verification: claim has no valid author UID; "
+                    "legacy authorship cannot be inferred",
                     file=sys.stderr,
                 )
                 return 1
-            verified_by_value = actual_verifier
+            if author_uid == exec_identity["uid"]:
+                print(
+                    "Error: refusing to record verification: verifier UID must differ from the "
+                    f"claim author UID ({author_uid})",
+                    file=sys.stderr,
+                )
+                return 1
+
+            verified_by_value = actual_verifier["name"]
+            verification_authority = "uid_isolated"
         else:
             verified_by_value = args.verified_by
+            verification_authority = "advisory"
+    elif identity_policy["mode"] == "enforced" and not require_executor_role(
+        identity_policy, exec_identity, "builder", "attach evidence"
+    ):
+        return 1
 
     expected_hash = None
     if args.hash is not None:
@@ -1751,6 +1919,9 @@ def evidence_attach_cmd(args) -> int:
         if args.status:
             claim["verified_by"] = verified_by_value
             claim["verification_outcome"] = args.status
+            claim["verification_executor"] = dict(exec_identity)
+            claim["verification_authority"] = verification_authority
+            claim["verification_mode"] = identity_policy["mode"]
             if args.status == "verified":
                 claim["verification_status"] = True
             else:
@@ -2718,6 +2889,11 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     md.append(
         "- **Only the review harness verifies**, with `evidence-attach --status verified --verified-by <reviewer>`."
     )
+    md.append(
+        "- **Trusted verification requires UID isolation.** `mode: enforced` must map the "
+        "executing OS UID to a verifier role, and that UID must differ from the claim author's "
+        "UID. `single_user` verification is advisory."
+    )
     md.append("- **`file_exists`**: Verify by providing file path or `stat` output.")
     md.append("- **`test_passes`**: Verify by providing output text of the test run.")
     md.append("- **`real_data`**: Provide physical/provenance chain for the data sources.")
@@ -2844,25 +3020,37 @@ def doctor_cmd(args) -> int:
     infos = []
     issues.extend(audit_event_store(op_dir))
 
-    # Load identity map
-    identity_path = os.path.join(op_dir, "identity.yaml")
-    identity_map = {}
-    mode = "single_user"
-    if os.path.exists(identity_path):
-        id_data = load_yaml(identity_path) or {}
-        mode = id_data.get("mode", "single_user")
-        identity_map = id_data.get("uids", {})
+    try:
+        identity_policy = load_identity_policy(op_dir)
+    except IdentityPolicyError as exc:
+        issues.append(f"[Error] Invalid identity policy: {exc}")
+        identity_policy = {"mode": "invalid", "uids": {}}
+    identity_map = identity_policy["uids"]
+    mode = identity_policy["mode"]
 
     def check_executor_block(item, source_name):
-        executor = item.get("executor")
-        if not executor:
-            return
-        if executor.get("test_override_active"):
-            issues.append(f"[Error] {source_name} contains write made with test-override active")
-        if executor.get("test_override_unauthorized"):
-            issues.append(
-                f"[Error] {source_name} contains write with unauthorized test-override attempt"
-            )
+        contains_test_identity = False
+        seen = set()
+        for field in ("executor", "author_executor", "verification_executor"):
+            executor = item.get(field)
+            if not isinstance(executor, dict):
+                continue
+            marker = id(executor)
+            if marker in seen:
+                continue
+            seen.add(marker)
+            if executor.get("test_override_active"):
+                contains_test_identity = True
+                issues.append(
+                    f"[Error] {source_name} {field} contains write made with test-override active"
+                )
+            if executor.get("test_override_unauthorized"):
+                contains_test_identity = True
+                issues.append(
+                    f"[Error] {source_name} {field} contains write with unauthorized "
+                    "test-override attempt"
+                )
+        return contains_test_identity
 
     for tf in task_files:
         task = load_yaml(tf)
@@ -2926,7 +3114,7 @@ def doctor_cmd(args) -> int:
                     f"{c_data.get('task_id')}"
                 )
 
-            check_executor_block(c_data, f"Claim {cid}")
+            claim_has_test_identity = check_executor_block(c_data, f"Claim {cid}")
 
             outcome = c_data.get("verification_outcome")
             verified = (outcome == "verified") or bool(c_data.get("verification_status"))
@@ -3059,48 +3247,198 @@ def doctor_cmd(args) -> int:
             made = c_data.get("made_by")
             vby = c_data.get("verified_by")
             review = task.get("review_harness")
+            authority = c_data.get("verification_authority")
+            recorded_mode = c_data.get("verification_mode")
 
             if verified:
-                if vby == made:
+                if authority != "uid_isolated" and vby == made:
                     issues.append(
                         f"[Error] claim {cid} is self-verified by '{made}' (maker cannot verify own claim)"
                     )
-                elif vby and review and vby != review:
+                if vby and review and vby != review:
                     issues.append(
                         f"[Warning] claim {cid} verified by '{vby}', not the task's review harness '{review}'"
                     )
 
-                # Executor verification checks
+            if authority == "uid_isolated":
+                authority_errors = []
+                author_executor = c_data.get("author_executor")
+                verification_executor = c_data.get("verification_executor")
+                compatibility_executor = c_data.get("executor")
+                author_uid = (
+                    author_executor.get("uid") if isinstance(author_executor, dict) else None
+                )
+                verifier_uid = (
+                    verification_executor.get("uid")
+                    if isinstance(verification_executor, dict)
+                    else None
+                )
+                compatibility_uid = (
+                    compatibility_executor.get("uid")
+                    if isinstance(compatibility_executor, dict)
+                    else None
+                )
+
+                if recorded_mode != "enforced":
+                    authority_errors.append(
+                        f"uid_isolated verification was not recorded in enforced mode "
+                        f"(found {recorded_mode!r})"
+                    )
+                if mode == "single_user":
+                    infos.append(
+                        f"[Warning] Claim {cid} was recorded as uid_isolated, but the "
+                        "current identity policy is single_user; policy immutability is "
+                        "outside P2"
+                    )
+                if (
+                    not isinstance(author_uid, int)
+                    or isinstance(author_uid, bool)
+                    or author_uid < 0
+                ):
+                    authority_errors.append("uid_isolated verification has no valid author UID")
+                if (
+                    not isinstance(verifier_uid, int)
+                    or isinstance(verifier_uid, bool)
+                    or verifier_uid < 0
+                ):
+                    authority_errors.append("uid_isolated verification has no valid verifier UID")
+                if (
+                    not isinstance(compatibility_uid, int)
+                    or isinstance(compatibility_uid, bool)
+                    or compatibility_uid < 0
+                ):
+                    authority_errors.append(
+                        "uid_isolated verification has no valid compatibility executor UID"
+                    )
+                elif (
+                    isinstance(verifier_uid, int)
+                    and not isinstance(verifier_uid, bool)
+                    and verifier_uid >= 0
+                    and compatibility_uid != verifier_uid
+                ):
+                    authority_errors.append(
+                        f"uid_isolated compatibility executor UID {compatibility_uid} disagrees "
+                        f"with verifier UID {verifier_uid}"
+                    )
+                if (
+                    isinstance(author_uid, int)
+                    and not isinstance(author_uid, bool)
+                    and author_uid >= 0
+                    and isinstance(verifier_uid, int)
+                    and not isinstance(verifier_uid, bool)
+                    and verifier_uid >= 0
+                    and author_uid == verifier_uid
+                ):
+                    authority_errors.append(
+                        f"uid_isolated verification uses the same author and verifier UID "
+                        f"({author_uid})"
+                    )
+
+                verifier_identity = (
+                    identity_map.get(verifier_uid)
+                    if isinstance(verifier_uid, int)
+                    and not isinstance(verifier_uid, bool)
+                    and verifier_uid >= 0
+                    else None
+                )
+                if verifier_uid is not None and verifier_identity is None:
+                    authority_errors.append(
+                        f"uid_isolated verification uses unregistered verifier UID {verifier_uid}"
+                    )
+                elif verifier_identity and "verifier" not in verifier_identity["roles"]:
+                    authority_errors.append(
+                        f"uid_isolated verification UID {verifier_uid} lacks the verifier role"
+                    )
+                elif verifier_identity and vby != verifier_identity["name"]:
+                    authority_errors.append(
+                        f"uid_isolated verification identity mismatch: verified_by is "
+                        f"'{vby}', but verifier UID {verifier_uid} maps to "
+                        f"'{verifier_identity['name']}'"
+                    )
+
+                if not vby:
+                    authority_errors.append("uid_isolated verification has no verified_by identity")
+                if claim_has_test_identity:
+                    authority_errors.append(
+                        "uid_isolated verification contains a guarded test identity and is not "
+                        "proof of real UID isolation"
+                    )
+
+                if authority_errors:
+                    issues.extend(f"[Error] Claim {cid} {message}" for message in authority_errors)
+                else:
+                    infos.append(
+                        f"[Info] Claim {cid} verification is uid_isolated "
+                        f"(author uid {author_uid}, verifier uid {verifier_uid})"
+                    )
+            elif authority == "advisory":
+                if recorded_mode != "single_user":
+                    issues.append(
+                        f"[Error] Claim {cid} advisory verification has invalid recorded mode "
+                        f"{recorded_mode!r}; expected 'single_user'"
+                    )
+                infos.append(
+                    f"[Warning] claim {cid} verification is advisory and NOT "
+                    "identity-enforced (single-user mode); see EXECUTOR_IDENTITY_SPEC.md"
+                )
+
+                verification_executor = c_data.get("verification_executor")
+                exec_uid = (
+                    verification_executor.get("uid")
+                    if isinstance(verification_executor, dict)
+                    else None
+                )
+                expected_verifier = identity_map.get(exec_uid)
+                if expected_verifier and vby != expected_verifier["name"]:
+                    infos.append(
+                        f"[Warning] claim {cid} would be REJECTED under enforced mode: "
+                        f"verified_by '{vby}' != identity '{expected_verifier['name']}' for "
+                        f"uid {exec_uid}; enforcement appears relaxed to single_user"
+                    )
+            elif authority is None and verified:
+                infos.append(
+                    f"[Info] Claim {cid} has legacy/advisory verification authority; "
+                    "it is not uid_isolated"
+                )
                 executor = c_data.get("executor")
-                if not vby or not executor:
+                if not vby or not isinstance(executor, dict):
                     infos.append(f"[Info] Claim {cid} has unknown verifier (legacy claim)")
                 else:
                     exec_uid = executor.get("uid")
                     expected_verifier = identity_map.get(exec_uid)
-                    if expected_verifier is None:
-                        expected_verifier = identity_map.get(str(exec_uid))
-
                     if mode == "enforced":
                         if not expected_verifier:
-                            issues.append(f"[Error] claim {cid} verified by unknown UID {exec_uid}")
-                        elif vby != expected_verifier:
-                            issues.append(
-                                f"[Error] claim {cid} verification identity mismatch (possible impersonation): verified_by is '{vby}', but executor maps to '{expected_verifier}' (uid {exec_uid})"
+                            infos.append(
+                                f"[Warning] legacy claim {cid} verifier UID {exec_uid} is not "
+                                "registered; verification remains advisory"
+                            )
+                        elif vby != expected_verifier["name"]:
+                            infos.append(
+                                f"[Warning] legacy claim {cid} verification identity mismatch: "
+                                f"verified_by is '{vby}', but executor maps to "
+                                f"'{expected_verifier['name']}' (uid {exec_uid}); verification "
+                                "remains advisory"
                             )
                     else:
-                        # mode is single_user or missing
                         infos.append(
-                            f"[Warning] claim {cid} verification is NOT identity-enforced (single-user mode); see EXECUTOR_IDENTITY_SPEC §5"
+                            f"[Warning] claim {cid} verification is NOT identity-enforced "
+                            "(single-user mode); see EXECUTOR_IDENTITY_SPEC.md"
                         )
-                        # Enforcement-downgrade detection (warn-only, exit unchanged):
-                        # the identity map IS configured and this claim's executor maps to a
-                        # known identity, yet verified_by does not match it. enforced mode would
-                        # reject this as impersonation; single_user silently accepts it. Surface
-                        # the relaxation so a config flip (enforced -> single_user) is not silent.
-                        if expected_verifier and vby != expected_verifier:
+                        if expected_verifier and vby != expected_verifier["name"]:
                             infos.append(
-                                f"[Warning] claim {cid} would be REJECTED under enforced mode: verified_by '{vby}' != identity '{expected_verifier}' for uid {exec_uid}; enforcement appears relaxed to single_user"
+                                f"[Warning] claim {cid} would be REJECTED under enforced mode: "
+                                f"verified_by '{vby}' != identity '{expected_verifier['name']}' "
+                                f"for uid {exec_uid}; enforcement appears relaxed to single_user"
                             )
+            elif authority is None and recorded_mode is not None:
+                issues.append(
+                    f"[Error] Claim {cid} has verification_mode {recorded_mode!r} but no "
+                    "verification_authority"
+                )
+            elif authority is not None:
+                issues.append(
+                    f"[Error] Claim {cid} has unknown verification_authority {authority!r}"
+                )
 
         if task_status in ["verified", "complete"] and quarantined_claims:
             issues.append(
@@ -3597,6 +3935,22 @@ def claim_show_cmd(args) -> int:
 
     status_str = str(outcome).upper()
     print(f"Verification status: {status_str} (Status boolean: {claim.get('verification_status')})")
+    print(f"Verified By:         {claim.get('verified_by') or 'N/A'}")
+    print(f"Authority:           {claim.get('verification_authority') or 'legacy/advisory'}")
+    print(f"Verification Mode:   {claim.get('verification_mode') or 'legacy'}")
+
+    author_executor = claim.get("author_executor")
+    if isinstance(author_executor, dict):
+        print(
+            f"Author Executor:      uid {author_executor.get('uid')} "
+            f"({author_executor.get('user')})"
+        )
+    verification_executor = claim.get("verification_executor")
+    if isinstance(verification_executor, dict):
+        print(
+            f"Verifier Executor:    uid {verification_executor.get('uid')} "
+            f"({verification_executor.get('user')})"
+        )
 
     if claim.get("verdict"):
         print(f"Verdict:             {claim.get('verdict')}")

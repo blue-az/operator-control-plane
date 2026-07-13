@@ -9,7 +9,8 @@ A local **governance ledger for multi-agent software work**. The core idea is a
 it has *evidence* attached and is *verified by a different identity*. The tool records the
 task → claim → evidence → verification → session → usage lifecycle as YAML projections plus an
 append-only SQLite event history under `.operator/`, binds each write to the executing OS identity,
-blocks self-verification, and ships a `doctor` consistency checker that fails closed.
+blocks same-UID trusted verification in enforced mode, and ships a `doctor` consistency checker that
+fails closed. Same-UID `single_user` verification remains usable but is explicitly advisory.
 
 When changing verification, identity, or `doctor` semantics, keep `doctor` structural and read-only. It
 may validate bindings and recompute fingerprints, but it must never execute a stored verification command.
@@ -52,13 +53,15 @@ full-snapshot versions for trust-relevant writes. Session commands version their
 `find_operator_dir()` walks upward from cwd to locate the active ledger.
 
 **Identity binding** (`get_executor_identity()`, EXECUTOR_IDENTITY_SPEC.md). Every write binds to
-`os.getuid()`. Policy lives in `.operator/identity.yaml`: `mode: enforced` rejects a claim whose
-`--verified-by` doesn't match the executing uid (impersonation guard); `mode: single_user` makes the
-binding advisory, and `doctor` warns when a claim *would* be rejected under enforced mode (an
-"enforcement downgrade").
+`os.getuid()`. Policy lives in `.operator/identity.yaml` as UID entries with `name` and `roles`.
+`mode: enforced` requires builders for claim/draft-evidence writes and verifiers for status writes.
+A status is `uid_isolated` only when the registered verifier UID differs from the claim's recorded
+author UID; `--verified-by` must match the registry name. `mode: single_user` stays usable but records
+every status as `advisory`. Legacy scalar UID entries normalize to both roles for compatibility.
 
 **Verification guard** (VERIFIED_BY_GUARD_SPEC.md). `evidence-attach --status` requires `--claim`
-(fail-closed), and a builder cannot sign off their own claim. Evidence prefers a re-runnable
+(fail-closed), and trusted verification requires a distinct OS UID, not just a different harness name.
+Evidence prefers a re-runnable
 `--verify-cmd` over a static blob. Local files are copied only after their bytes are fingerprinted with
 SHA-256, size, and modification time; `--hash` is treated as an expected digest and must match those bytes.
 The original local locator and fingerprint are retained separately from the copied snapshot. The raw

@@ -69,15 +69,9 @@ section_responsibilities:
 ```pbc:grounding
 status: draft
 attention:
-  - title: "Verifier gate is claim-bound"
-    severity: "critical"
-    why_it_matters: "If the owner assumes every status change enforces verification, unsupported evidence can look trusted."
-  - title: "Identity mode changes the guarantee"
-    severity: "critical"
-    why_it_matters: "The same workflow carries different trust strength depending on configuration, so a trust promise is not universal."
-  - title: "Evidence copy is best-effort"
+  - title: "Trusted verification requires distinct OS UIDs"
     severity: "high"
-    why_it_matters: "The owner cannot assume the artifact exists just because the ledger says the claim was updated."
+    why_it_matters: "Roles organize permissions, but only an enforced verifier UID distinct from the claim author creates UID-isolated authority."
   - title: "Quarantine can downgrade a finished task"
     severity: "high"
     why_it_matters: "Closeout is not one-way, so a late integrity finding can reopen a supposedly settled task."
@@ -94,15 +88,6 @@ attention:
 ```pbc:grounding
 status: draft
 decisions:
-  - question: "Should evidence attaches with status be rejected when no claim is supplied?"
-    state: "open"
-    why_it_matters: "This decides whether verification is a universal gate or only a claim-backed one, which changes how much trust the operator can read from the status field."
-  - question: "Should single-user mode remain a warning-only trust mode, or should it fail closed when identity rules are configured?"
-    state: "open"
-    why_it_matters: "This sets whether identity mismatches are an audit warning or a hard stop, which directly affects how much the owner can rely on the ledger."
-  - question: "Should a local evidence copy failure abort the write instead of letting verification continue?"
-    state: "open"
-    why_it_matters: "This decides whether trust can advance without a durable artifact on disk, which is a concrete integrity boundary."
   - question: "Should quarantine be allowed to overwrite verified or complete task status?"
     state: "open"
     why_it_matters: "This decides whether terminal status is final or whether a late integrity finding can still downgrade the task."
@@ -110,6 +95,13 @@ decisions:
     state: "open"
     why_it_matters: "This sets whether usage import is a flexible reconciliation path or a stricter provenance trail."
 ```
+
+## Resolved Boundaries
+
+- Status-bearing evidence requires a claim.
+- Local evidence copy or fingerprint failure aborts before trust records are written.
+- `single_user` status writes remain usable and are explicitly advisory.
+- `uid_isolated` requires enforced mode and a registered verifier OS UID distinct from the author.
 
 ## Provenance
 

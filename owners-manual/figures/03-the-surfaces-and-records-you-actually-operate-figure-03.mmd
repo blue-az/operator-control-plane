@@ -1,10 +1,7 @@
 flowchart TD
-  subgraph Protected path
-    C[Claim-backed evidence]
-    G[Verifier gate]
-    T[Task record]
-    C -->|status with a claim| G
-    G -->|approved write| T
-  end
-  B[Bare status evidence write]
-  B -->|skips that gate| T
+  E[Evidence attach] --> S{Status supplied?}
+  S -->|no| D[Record draft evidence]
+  S -->|yes| C{Claim supplied?}
+  C -->|no| R[Reject]
+  C -->|yes| G[Verification authority gate]
+  G --> T[Update claim and task]
