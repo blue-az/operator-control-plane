@@ -6,8 +6,10 @@ This repository is a compact Python CLI project. The executable entry point is t
 top-level `operator` script; most implementation changes happen there. Integration
 tests live in `tests/test_operator.py` and run the CLI in temporary workspaces.
 Static test inputs are under `tests/fixtures/`. Product and behavior specs live in
-top-level `*_SPEC.md` files, while the user-facing manual is in `owners-manual/`
-with chapters, PBC drafts, figures, and bundled data.
+top-level `*_SPEC.md` files. The standalone P3a authority component lives in
+`authority_broker.py` behind the separate top-level `operator-broker` executable; it must remain
+independent of the repo-local `operator` CLI and `.operator` state. The user-facing manual is in
+`owners-manual/` with chapters, PBC drafts, figures, and bundled data.
 
 The runtime ledger directory `.operator/` is local state and gitignored. Do not
 commit generated task, claim, evidence, session, or usage records.
@@ -19,6 +21,8 @@ commit generated task, claim, evidence, session, or usage records.
 - `./operator doctor` checks consistency of the local `.operator/` ledger.
 - `pytest tests/` runs the subprocess-driven integration suite.
 - `pytest tests/test_operator.py -q` is the fastest focused test command.
+- `pytest tests/test_authority_broker.py -q` runs the standalone broker/store suite.
+- `./operator-broker --help` lists the isolated P3a development surfaces.
 
 Run `./operator init` only in a throwaway or intended workspace; it creates local
 ledger files under `.operator/`.
@@ -34,10 +38,12 @@ and flags use kebab case, for example `task-create` and `--verified-by`.
 
 ## Testing Guidelines
 
-Tests use `unittest` assertions under pytest. Add coverage in `tests/test_operator.py`
+Tests use `unittest` assertions under pytest. Add repo CLI coverage in `tests/test_operator.py`
 for CLI behavior, file layout, YAML contents, exit codes, and stdout/stderr messages.
 Use temporary directories for ledger mutations, following the existing `setUp` and
-`tearDown` pattern. Put reusable synthetic logs or manifests in `tests/fixtures/`.
+`tearDown` pattern. Broker protocol, kernel-credential, transaction, CAS, and recovery coverage belongs
+in `tests/test_authority_broker.py`; it must not require sudo or simulated socket credentials. Put
+reusable synthetic logs or manifests in `tests/fixtures/`.
 
 ## Commit & Pull Request Guidelines
 

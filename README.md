@@ -30,6 +30,26 @@ pytest tests/                          # subprocess-driven tests + synthetic ses
 The ledger (`.operator/`) is gitignored — it's your work history, not the tool. Its durable local event
 history is stored in `.operator/ledger.sqlite3`.
 
+## P3 broker component (not installed)
+
+Issue #4 adds a standalone `operator-broker` process, external authority store, evidence CAS, receipts,
+and projection snapshots. It is isolated from the existing `operator` CLI: it does not read or promote
+`.operator` state, and development-fixture receipts confer no P3 authority on repo ledgers. Protected
+policy/service installation, CLI integration, and enrollment remain separate work.
+
+```bash
+# Test/development fixture only; use throwaway absolute paths.
+./operator-broker bootstrap-fixture --store /tmp/operator-authority.sqlite3 \
+    --content-dir /tmp/operator-authority-content --bootstrap-config /tmp/bootstrap.json
+./operator-broker serve --store /tmp/operator-authority.sqlite3 \
+    --content-dir /tmp/operator-authority-content --socket /tmp/operator-authority.sock
+./operator-broker audit --store /tmp/operator-authority.sqlite3 \
+    --content-dir /tmp/operator-authority-content
+```
+
+See [`AUTHORITY_BROKER_SPEC.md`](AUTHORITY_BROKER_SPEC.md) for the protocol, transaction, crash-recovery,
+and issue-boundary contracts.
+
 ## Commands
 
 The `operator` CLI exposes 20 subcommands across the task → claim → evidence → verification →
@@ -172,8 +192,9 @@ unverified claims are worthless):
 - **The durable ledger is still local-only.** SQLite preserves version history when a YAML projection
   is damaged or removed, but `.operator/` remains gitignored and has no off-machine backup. A disk
   loss can still remove both the event history and copied evidence.
-- **The policy gate is self-amendable.** Any agent with write access to the config can weaken the gate
-  it's supposed to be bound by. Wants out-of-band / immutable policy.
+- **The repo CLI policy gate is self-amendable.** Any agent with write access to the local config can
+  weaken the gate it is supposed to be bound by. The standalone P3 broker component is not yet installed
+  or integrated, so it does not remove this limitation from current `.operator` ledgers.
 - **Evidence binding.** Local attachment preserves both the original source fingerprint and a retained
   snapshot fingerprint, so later byte drift is visible. Remote evidence has no bytes to recompute and is
   reported as uncheckable. Prefer binding a *re-runnable structural test* over a captured blob or a

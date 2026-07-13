@@ -26,6 +26,8 @@ pip install -r requirements.txt          # only runtime dep is PyYAML
 pytest tests/                            # full subprocess-driven integration suite
 pytest tests/test_operator.py -q         # fastest focused run
 pytest tests/test_operator.py -q -k doctor   # run a single test by name pattern
+pytest tests/test_authority_broker.py -q     # standalone P3a broker/store tests
+./operator-broker --help                    # isolated broker development surfaces
 ruff check .                             # lint check configured in pyproject.toml
 black --check .                          # formatting check
 isort --check-only .                     # import sorting check
@@ -42,6 +44,13 @@ Python 3 stdlib + PyYAML). `main()` builds an argparse subparser per command and
 `cmd_map` dict near the end of the file (`init` → `init_cmd`, `task-create` → `task_create_cmd`, etc.).
 To add or change a command, edit both the `add_parser(...)` block in `main()` and the corresponding
 `*_cmd(args)` function.
+
+**Standalone P3a broker.** `operator-broker` dispatches to `authority_broker.py`, which owns the isolated
+length-framed Unix socket protocol, `SO_PEERCRED` authentication, external SQLite authority history,
+descriptor-backed evidence CAS, receipts, startup audit, and projection snapshots described in
+`AUTHORITY_BROKER_SPEC.md`. It must not import `operator`, inspect `.operator`, or project local state.
+Its `bootstrap-fixture` and raw `request` commands are test/development surfaces, not protected policy
+installation or repo CLI integration; those remain later P3 issues.
 
 **Ledger layout** (created by `init_cmd`):
 `.operator/{tasks,claims,evidence,handoffs,usage,briefs}/` plus `harnesses/<id>.yaml` (the
