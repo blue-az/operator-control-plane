@@ -175,9 +175,24 @@ auditability; it is not an off-machine backup or an adversarial tamper-proof bou
 The registry supplies role policy. The trusted boundary also requires the processes to run under
 genuinely distinct OS UIDs; the CLI does not provision those users or containers.
 
+### Root-managed external policy (P3b)
+
+Issue #5 adds the separate `operator-admin` installation and policy lifecycle described in
+[`AUTHORITY_POLICY_SPEC.md`](AUTHORITY_POLICY_SPEC.md). It installs the standalone broker under fixed
+root-controlled paths, creates SQLite only after dropping to the broker UID, and supports strict
+generation-one install, append-only rotation, terminal revocation, audit, and conservative privilege
+preflight.
+
+This is still not repo CLI integration. `operator` and existing `.operator` ledgers do not consult
+the external authority yet. The service is installed but not started or enabled, and real-host privilege
+proof remains issue #7. Initial installation must execute a root-owned staged copy of
+`operator-admin`; its privileged wrapper intentionally refuses a user-writable checkout.
+
 ## Design specs
 
 - [`EXECUTOR_IDENTITY_SPEC.md`](EXECUTOR_IDENTITY_SPEC.md) — process-level identity binding via `os.getuid()`.
+- [`AUTHORITY_BROKER_SPEC.md`](AUTHORITY_BROKER_SPEC.md) — standalone external broker and store.
+- [`AUTHORITY_POLICY_SPEC.md`](AUTHORITY_POLICY_SPEC.md) — root-managed installation and policy lifecycle.
 - [`VERIFIED_BY_GUARD_SPEC.md`](VERIFIED_BY_GUARD_SPEC.md) — fail-closed on self-verification (a builder can't sign off its own claim).
 - [`USAGE_AUTOIMPORT_SPEC.md`](USAGE_AUTOIMPORT_SPEC.md) — ingest per-session token/usage from Claude/Codex/Gemini harness logs without unit conflation.
 

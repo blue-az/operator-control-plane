@@ -8,7 +8,9 @@ tests live in `tests/test_operator.py` and run the CLI in temporary workspaces.
 Static test inputs are under `tests/fixtures/`. Product and behavior specs live in
 top-level `*_SPEC.md` files. The standalone P3a authority component lives in
 `authority_broker.py` behind the separate top-level `operator-broker` executable; it must remain
-independent of the repo-local `operator` CLI and `.operator` state. The user-facing manual is in
+independent of the repo-local `operator` CLI and `.operator` state. The P3b administrative layer
+lives in `authority_admin.py` behind `operator-admin`; it owns only root-managed installation and
+policy lifecycle. The user-facing manual is in
 `owners-manual/` with chapters, PBC drafts, figures, and bundled data.
 
 The runtime ledger directory `.operator/` is local state and gitignored. Do not
@@ -23,6 +25,9 @@ commit generated task, claim, evidence, session, or usage records.
 - `pytest tests/test_operator.py -q` is the fastest focused test command.
 - `pytest tests/test_authority_broker.py -q` runs the standalone broker/store suite.
 - `./operator-broker --help` lists the isolated P3a development surfaces.
+- `pytest tests/test_authority_admin.py -q` runs the P3b install/policy suite.
+- `./operator-admin --help` lists owner-only P3b commands. Production use requires a root-owned
+  staged or installed copy; do not run it through sudo from this checkout.
 
 Run `./operator init` only in a throwaway or intended workspace; it creates local
 ledger files under `.operator/`.
@@ -44,6 +49,9 @@ Use temporary directories for ledger mutations, following the existing `setUp` a
 `tearDown` pattern. Broker protocol, kernel-credential, transaction, CAS, and recovery coverage belongs
 in `tests/test_authority_broker.py`; it must not require sudo or simulated socket credentials. Put
 reusable synthetic logs or manifests in `tests/fixtures/`.
+Administrative path, privilege-drop, policy lifecycle, preflight, and crash recovery coverage belongs
+in `tests/test_authority_admin.py`. Keep issue #6 repo CLI integration and issue #7 real-host dogfood
+out of P3b.
 
 ## Commit & Pull Request Guidelines
 

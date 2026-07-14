@@ -52,6 +52,14 @@ descriptor-backed evidence CAS, receipts, startup audit, and projection snapshot
 Its `bootstrap-fixture` and raw `request` commands are test/development surfaces, not protected policy
 installation or repo CLI integration; those remain later P3 issues.
 
+**Root-managed P3b policy.** `operator-admin` dispatches to `authority_admin.py` for fixed-path,
+root-owned installation, strict policy generations, terminal revocation, audit, and conservative
+privilege preflight. `AUTHORITY_POLICY_SPEC.md` is the contract. SQLite creation and administrative
+transactions execute only after dropping permanently to the broker UID. The service is not started or
+enabled, and this layer must not import or modify the repo-local `operator` CLI. Initial production
+installation requires a root-owned staged release because the wrapper rejects privileged execution
+from a user-writable checkout.
+
 **Ledger layout** (created by `init_cmd`):
 `.operator/{tasks,claims,evidence,handoffs,usage,briefs}/` plus `harnesses/<id>.yaml` (the
 known AI harnesses — claude, codex, gemini-agy, copilot, gemma3_local, gemma4_local; their default
