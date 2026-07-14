@@ -23,6 +23,9 @@ import tempfile
 from pathlib import Path
 
 import yaml
+import authority_client
+import authority_projection
+
 
 LEDGER_DB_NAME = "ledger.sqlite3"
 LEDGER_HASH_FORMAT = "operator-ledger-event-v1"
@@ -1629,6 +1632,62 @@ def claim_add_cmd(args) -> int:
         return 1
     task_id, task_path, task = resolved_task
 
+    enrollment = authority_client.resolve_enrollment()
+    if enrollment:
+        ledger_id, socket_path = enrollment
+        claim_id = get_next_claim_id(op_dir)
+        
+        # Prepare request
+        operation_key = f"op-claim-add-{claim_id}"
+        expected = authority_projection.compile_expected(op_dir, "claim.create", task_id, claim_id)
+        
+        request = {
+            "action": "commit",
+            "ledger_id": ledger_id,
+            "operation_key": operation_key,
+            "operation": {
+                "kind": "claim.create",
+                "task_id": task_id,
+                "claim_id": claim_id,
+                "claim_type": args.type,
+                "text": args.text,
+            },
+            "expected": expected,
+            "blob": None,
+        }
+        if args.gate:
+            request["operation"]["required_gate"] = args.gate
+            
+        conn_journal = authority_projection.ensure_journal(op_dir)
+        authority_projection.prepare_transaction(conn_journal, operation_key, request)
+        
+        try:
+            client = authority_client.AuthorityClient(socket_path)
+            res = client.send_request(request)
+        except Exception as e:
+            print(f"Error: Broker dispatch failed: {e}", file=sys.stderr)
+            conn_journal.close()
+            return 1
+            
+        if not res.get("ok"):
+            print(f"Error: Claim creation rejected by broker: {res.get('error')}", file=sys.stderr)
+            conn_journal.close()
+            return 1
+            
+        receipt = res["receipt"]
+        authority_projection.commit_transaction(conn_journal, operation_key, receipt)
+        
+        try:
+            authority_projection.reconcile_projections(op_dir, ledger_id, client)
+        except Exception as e:
+            print(f"Warning: Projection reconciliation failed: {e}", file=sys.stderr)
+            
+        conn_journal.close()
+        print(f"Registered claim '{claim_id}' on task '{task_id}' via authority broker.")
+        return 0
+
+    task_id, task_path, task = resolved_task
+
     exec_identity = get_executor_identity()
     identity_policy = identity_policy_for_write(op_dir)
     if identity_policy is None:
@@ -1694,6 +1753,111 @@ def evidence_attach_cmd(args) -> int:
     if not resolved_task:
         return 1
     task_id, task_path, task = resolved_task
+
+    enrollment = authority_client.resolve_enrollment()
+    if enrollment:
+        ledger_id, socket_path = enrollment
+        
+        # Enrolled evidence requires claim
+        if not args.claim:
+            print("Error: --claim is required for evidence-attach in enrolled repositories.", file=sys.stderr)
+            return 1
+            
+        resolved_claim = resolve_claim_record(op_dir, args.claim)
+        if not resolved_claim:
+            return 1
+        claim_path, claim = resolved_claim
+        if claim.get("task_id") != task_id:
+            print(f"Error: Claim '{args.claim}' belongs to task '{claim.get('task_id')}', not '{task_id}'.", file=sys.stderr)
+            return 1
+            
+        # Get path_or_url
+        original_locator = args.path_or_url
+        if not os.path.exists(original_locator) or not os.path.isfile(original_locator):
+            print(f"Error: Evidence path does not exist or is not a file: {original_locator}", file=sys.stderr)
+            return 1
+            
+        # Calculate file size and sha256
+        size_bytes = os.path.getsize(original_locator)
+        h = hashlib.sha256()
+        with open(original_locator, "rb") as f:
+            while True:
+                chunk = f.read(65536)
+                if not chunk:
+                    break
+                h.update(chunk)
+        file_hash = h.hexdigest()
+        
+        if args.hash:
+            try:
+                expected_hash = normalize_sha256(args.hash)
+                if expected_hash != file_hash:
+                    print(f"Error: SHA-256 hash mismatch. Expected: {expected_hash}, Actual: {file_hash}", file=sys.stderr)
+                    return 1
+            except Exception as e:
+                print(f"Error: Invalid --hash: {e}", file=sys.stderr)
+                return 1
+                
+        # Generate evidence_id
+        evidence_id = get_next_evidence_id(op_dir, task_id)
+        
+        # Prepare operation
+        kind = "evidence.attach_status" if args.status else "evidence.attach_draft"
+        operation = {
+            "kind": kind,
+            "task_id": task_id,
+            "claim_id": args.claim,
+            "evidence_id": evidence_id,
+            "evidence_type": args.type,
+        }
+        if args.status:
+            operation["verification_status"] = args.status
+            
+        expected = authority_projection.compile_expected(op_dir, kind, task_id, args.claim, evidence_id)
+        
+        operation_key = f"op-evidence-attach-{evidence_id}"
+        request = {
+            "action": "commit",
+            "ledger_id": ledger_id,
+            "operation_key": operation_key,
+            "operation": operation,
+            "expected": expected,
+            "blob": {
+                "sha256": file_hash,
+                "size_bytes": size_bytes,
+            }
+        }
+        
+        conn_journal = authority_projection.ensure_journal(op_dir)
+        local_request = dict(request)
+        local_request["path_or_url"] = original_locator
+        authority_projection.prepare_transaction(conn_journal, operation_key, local_request)
+        
+        try:
+            client = authority_client.AuthorityClient(socket_path)
+            res = client.send_request(request, evidence_path=original_locator)
+        except Exception as e:
+            print(f"Error: Broker dispatch failed: {e}", file=sys.stderr)
+            conn_journal.close()
+            return 1
+            
+        if not res.get("ok"):
+            print(f"Error: Evidence attachment rejected by broker: {res.get('error')}", file=sys.stderr)
+            conn_journal.close()
+            return 1
+            
+        receipt = res["receipt"]
+        authority_projection.commit_transaction(conn_journal, operation_key, receipt)
+        
+        try:
+            authority_projection.reconcile_projections(op_dir, ledger_id, client)
+        except Exception as e:
+            print(f"Warning: Projection reconciliation failed: {e}", file=sys.stderr)
+            
+        conn_journal.close()
+        print(f"Registered evidence '{evidence_id}' on task '{task_id}' via authority broker.")
+        return 0
+
 
     claim_id = args.claim
     claim = None
@@ -3013,6 +3177,221 @@ def doctor_cmd(args) -> int:
         )
         return 1
 
+    # Check enrollment
+    enrollment = authority_client.resolve_enrollment()
+    if enrollment:
+        ledger_id, socket_path = enrollment
+        print("=" * 80)
+        print("OPERATOR DOCTOR - LEDGER CONSISTENCY REPORT")
+        print("=" * 80)
+        print("verification_authority: uid_isolated")
+        print("policy_authority: external_broker")
+        
+        # Connect to broker and fetch snapshot using pagination
+        client = None
+        records = []
+        broker_err = None
+        through_seq = None
+        snapshot_digest = None
+        try:
+            client = authority_client.AuthorityClient(socket_path)
+            after = None
+            while True:
+                res = client.send_request({
+                    "action": "projection.snapshot",
+                    "ledger_id": ledger_id,
+                    "through_commit_sequence": None,
+                    "after": after,
+                    "limit": 16,
+                })
+                if res.get("ok"):
+                    snapshot = res["snapshot"]
+                    through_seq = snapshot["through_commit_sequence"]
+                    snapshot_digest = snapshot["snapshot_digest"]
+                    records.extend(snapshot["records"])
+                    if not snapshot.get("has_more") or not snapshot.get("next_after"):
+                        break
+                    after = snapshot["next_after"]
+                else:
+                    err_obj = res.get("error")
+                    if isinstance(err_obj, dict):
+                        broker_err = err_obj.get("message", "unknown error")
+                    else:
+                        broker_err = str(err_obj or "unknown error")
+                    break
+        except Exception as e:
+            broker_err = str(e)
+            
+        if broker_err:
+            if "revoked" in broker_err.lower():
+                print("status: policy_revoked")
+                print(f"[Error] Broker policy has been revoked: {broker_err}")
+            elif "rotated" in broker_err.lower():
+                print("status: policy_rotated")
+                print(f"[Error] Broker policy has been rotated: {broker_err}")
+            else:
+                print("status: broker_unavailable")
+                print(f"[Error] Authority broker is unreachable or returned error: {broker_err}")
+            print("-" * 80)
+            return 1
+            
+        # Broker is available, check journal status
+        conn_journal = authority_projection.ensure_journal(op_dir)
+        last_applied = authority_projection.get_last_applied_sequence(conn_journal)
+        pending_count = conn_journal.execute(
+            "SELECT COUNT(*) FROM transaction_journal WHERE state IN ('prepared', 'committed')"
+        ).fetchone()[0]
+        conn_journal.close()
+        
+        if last_applied < through_seq or pending_count > 0:
+            print("status: projection_pending")
+            print(f"[Warning] Projections are pending. Local sequence: {last_applied}, Broker sequence: {through_seq}")
+            print("-" * 80)
+            return 1
+            
+        # last_applied == through_seq, check for divergence/forgeries
+        diverged = False
+        issues = []
+        
+        # Load local identity map
+        identity_map = authority_projection.load_identity_map(op_dir)
+        
+        # Connect to local ledger
+        db_path = os.path.join(op_dir, "ledger.sqlite3")
+        if not os.path.exists(db_path):
+            issues.append(f"[Error] Local database {db_path} is missing.")
+            diverged = True
+        else:
+            conn_ledger = sqlite3.connect(db_path)
+            conn_ledger.row_factory = sqlite3.Row
+            try:
+                # Compare snapshot records to local database and YAML projections
+                for record in records:
+                    rtype = record["record_type"]
+                    rid = record["record_id"]
+                    rversion = record["version"]
+                    revent_hash = record["event_hash"]
+                    rpayload = record["payload"]
+                    
+                    # Get local db version and hash
+                    local_ver, local_hash = authority_projection.get_local_record_version(conn_ledger, rtype, rid)
+                    if local_ver != rversion or local_hash != revent_hash:
+                        issues.append(f"[Error] Mismatch on {rtype} {rid}: Local version={local_ver}, hash={local_hash}; Broker version={rversion}, hash={revent_hash}")
+                        diverged = True
+                        continue
+                        
+                    # Get local YAML payload
+                    if rtype == "task":
+                        filepath = os.path.join(op_dir, "tasks", f"{rid}.yaml")
+                    elif rtype == "claim":
+                        filepath = os.path.join(op_dir, "claims", f"{rid}.yaml")
+                    elif rtype == "evidence":
+                        filepath = os.path.join(op_dir, "evidence", rpayload["task_id"], f"{rid}.yaml")
+                    elif rtype == "handoff":
+                        filepath = os.path.join(op_dir, "handoffs", rpayload["task_id"], f"{rid}.yaml")
+                    else:
+                        filepath = os.path.join(op_dir, f"{rtype}s", f"{rid}.yaml")
+                        
+                    if not os.path.exists(filepath):
+                        issues.append(f"[Error] YAML projection missing for {rtype} {rid}: {filepath}")
+                        diverged = True
+                        continue
+                        
+                    with open(filepath, "r") as f:
+                        try:
+                            local_payload = yaml.safe_load(f)
+                        except Exception as e:
+                            issues.append(f"[Error] Failed to load YAML for {rtype} {rid}: {e}")
+                            diverged = True
+                            continue
+                            
+                    if rtype == "evidence":
+                        expected_payload = {
+                            "evidence_id": rpayload["evidence_id"],
+                            "task_id": rpayload["task_id"],
+                            "claim_id": rpayload["claim_id"],
+                            "type": rpayload["evidence_type"],
+                            "path_or_url": local_payload.get("path_or_url", ""),
+                            "hash": rpayload["sha256"],
+                            "size": rpayload["size_bytes"],
+                            "verification_status": rpayload["verification_status"],
+                            "policy_authority": rpayload.get("policy_authority", "external_broker"),
+                            "verification_authority": rpayload.get("verification_authority"),
+                        }
+                    elif rtype == "claim":
+                        expected_payload = {
+                            "claim_id": rpayload["claim_id"],
+                            "task_id": rpayload["task_id"],
+                            "type": rpayload["claim_type"],
+                            "text": rpayload["text"],
+                            "required_gate": rpayload.get("required_gate"),
+                            "evidence_ids": rpayload.get("evidence_ids", []),
+                            "verification_status": rpayload["verification_status"],
+                            "policy_authority": rpayload.get("policy_authority", "external_broker"),
+                            "verification_authority": rpayload.get("verification_authority"),
+                        }
+                    elif rtype == "task":
+                        expected_payload = {
+                            "task_id": rpayload["task_id"],
+                            "objective": local_payload.get("objective", ""),
+                            "status": rpayload["status"],
+                            "claim_ids": rpayload.get("claim_ids", []),
+                            "evidence_ids": rpayload.get("evidence_ids", []),
+                            "verified_claim_ids": rpayload.get("verified_claim_ids", []),
+                            "policy_authority": rpayload.get("policy_authority", "external_broker"),
+                            "verification_authority": rpayload.get("verification_authority"),
+                        }
+                    else:
+                        expected_payload = rpayload
+
+                    if canonical_json(local_payload) != canonical_json(expected_payload):
+                        issues.append(f"[Error] YAML payload differs from broker for {rtype} {rid}")
+                        diverged = True
+                
+                # Check for local events not in snapshot (forgeries)
+                local_records = conn_ledger.execute(
+                    "SELECT record_type, record_id, MAX(version) as ver FROM ledger_events GROUP BY record_type, record_id"
+                ).fetchall()
+                snapshot_keys = {(r["record_type"], r["record_id"]) for r in records}
+                for lr in local_records:
+                    if (lr["record_type"], lr["record_id"]) not in snapshot_keys:
+                        issues.append(f"[Error] Local forged record found: {lr['record_type']} {lr['record_id']}")
+                        diverged = True
+                        
+            except Exception as e:
+                issues.append(f"[Error] Local database verification failed: {e}")
+                diverged = True
+            finally:
+                conn_ledger.close()
+                
+        if diverged:
+            print("status: divergent_or_forged_local")
+            for iss in issues:
+                print(iss)
+            print("-" * 80)
+            return 1
+            
+        print("status: current")
+        print("All records consistent with broker.")
+        print("-" * 80)
+        return 0
+
+    # Non-enrolled logic
+    try:
+        identity_policy = load_identity_policy(op_dir)
+        mode = identity_policy["mode"]
+    except Exception:
+        mode = "advisory"
+
+    print("=" * 80)
+    print("OPERATOR DOCTOR - LEDGER CONSISTENCY REPORT")
+    print("=" * 80)
+    auth_val = "uid_isolated" if mode == "enforced" else "advisory"
+    print(f"verification_authority: {auth_val}")
+    print("policy_authority: local_policy")
+    print("status: legacy_local_policy")
+    print("-" * 80)
+
     tasks_dir = os.path.join(op_dir, "tasks")
     task_files = glob.glob(os.path.join(tasks_dir, "*.yaml"))
 
@@ -3027,6 +3406,7 @@ def doctor_cmd(args) -> int:
         identity_policy = {"mode": "invalid", "uids": {}}
     identity_map = identity_policy["uids"]
     mode = identity_policy["mode"]
+
 
     def check_executor_block(item, source_name):
         contains_test_identity = False
@@ -4504,6 +4884,16 @@ def session_end_cmd(args) -> int:
         )
         return 1
 
+    if authority_client.resolve_enrollment():
+        if args.status in ("verified", "complete"):
+            print(
+                "Error: Task status transitions to 'verified' or 'complete' are restricted "
+                "under P3 authority. Use 'operator task-transition' instead.",
+                file=sys.stderr,
+            )
+            return 1
+
+
     usage_id = args.usage_id
     if not usage_id:
         print("Error: Specify a usage ID (e.g. usage-0001).", file=sys.stderr)
@@ -4630,7 +5020,135 @@ def session_list_cmd(args) -> int:
     return 0
 
 
+def task_transition_cmd(args) -> int:
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
+        return 1
+
+    enrollment = authority_client.resolve_enrollment()
+    if not enrollment:
+        print(
+            "Error: task-transition is only supported in enrolled repositories.",
+            file=sys.stderr,
+        )
+        return 1
+    ledger_id, socket_path = enrollment
+
+    # Resolve task record
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
+        return 1
+    task_id, task_path, task = resolved_task
+
+    # Validate status and claim
+    if args.status == "verified":
+        if not args.claim:
+            print("Error: --claim is required for verified status transition.", file=sys.stderr)
+            return 1
+        resolved_claim = resolve_claim_record(op_dir, args.claim)
+        if not resolved_claim:
+            return 1
+        claim_path, claim = resolved_claim
+        if claim.get("task_id") != task_id:
+            print(
+                f"Error: Claim '{args.claim}' belongs to task '{claim.get('task_id')}', not '{task_id}'.",
+                file=sys.stderr,
+            )
+            return 1
+        claim_id = args.claim
+    else:
+        if args.claim:
+            print("Error: complete transition does not accept claim_id.", file=sys.stderr)
+            return 1
+        claim_id = None
+
+    # Prepare request
+    operation_key = f"op-task-transition-{task_id}-{args.status}"
+    expected = authority_projection.compile_expected(
+        op_dir, "task.transition", task_id, claim_id
+    )
+
+    request = {
+        "action": "commit",
+        "ledger_id": ledger_id,
+        "operation_key": operation_key,
+        "operation": {
+            "kind": "task.transition",
+            "task_id": task_id,
+            "status": args.status,
+        },
+        "expected": expected,
+        "blob": None,
+    }
+    if claim_id:
+        request["operation"]["claim_id"] = claim_id
+
+    # 1. Connect journal, prepare transaction
+    conn_journal = authority_projection.ensure_journal(op_dir)
+    authority_projection.prepare_transaction(conn_journal, operation_key, request)
+
+    # 2. Connect client and send request
+    try:
+        client = authority_client.AuthorityClient(socket_path)
+        res = client.send_request(request)
+    except Exception as e:
+        print(f"Error: Broker dispatch failed: {e}", file=sys.stderr)
+        conn_journal.close()
+        return 1
+
+    if not res.get("ok"):
+        print(f"Error: Transition rejected by broker: {res.get('error')}", file=sys.stderr)
+        conn_journal.close()
+        return 1
+
+    # 3. Save receipt
+    receipt = res["receipt"]
+    authority_projection.commit_transaction(conn_journal, operation_key, receipt)
+
+    # 4. Reconcile
+    try:
+        authority_projection.reconcile_projections(op_dir, ledger_id, client)
+    except Exception as e:
+        print(f"Warning: Projection reconciliation failed: {e}", file=sys.stderr)
+        conn_journal.close()
+        return 0
+
+    conn_journal.close()
+    print(f"Successfully transitioned task '{task_id}' to status '{args.status}'.")
+    return 0
+
+
+def authority_reconcile_cmd(args) -> int:
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print("Error: No .operator directory found.", file=sys.stderr)
+        return 1
+
+    enrollment = authority_client.resolve_enrollment()
+    if not enrollment:
+        print(
+            "Error: authority-reconcile is only supported in enrolled repositories.",
+            file=sys.stderr,
+        )
+        return 1
+    ledger_id, socket_path = enrollment
+
+    try:
+        client = authority_client.AuthorityClient(socket_path)
+        last_digest, seq = authority_projection.reconcile_projections(op_dir, ledger_id, client)
+        print(f"Successfully reconciled with broker through commit sequence {seq}.")
+        return 0
+    except Exception as e:
+        print(f"Error: Reconciliation failed: {e}", file=sys.stderr)
+        return 1
+
+
 # --- CLI Setup ---
+
 
 
 def main() -> None:
@@ -5134,7 +5652,26 @@ def main() -> None:
         help="Path to the agent run directory (e.g. docs/domain_runs/DBB-001a/gemini_cli_ladder).",
     )
 
+    # operator task-transition
+    transition_parser = subparsers.add_parser(
+        "task-transition",
+        help="Transition task state (verified or complete) via the authority broker.",
+    )
+    transition_parser.add_argument("--task", dest="task_id", required=True, help="Task ID.")
+    transition_parser.add_argument(
+        "--status", required=True, choices=["verified", "complete"], help="Target status."
+    )
+    transition_parser.add_argument(
+        "--claim", default=None, help="Claim ID (required for status 'verified')."
+    )
+
+    # operator authority-reconcile
+    subparsers.add_parser(
+        "authority-reconcile", help="Reconcile local state with the authority broker."
+    )
+
     args = parser.parse_args()
+
     if getattr(args, "command", None) == "task-show" and getattr(args, "task_id_flag", None):
         args.task_id = args.task_id_flag
     if getattr(args, "command", None) == "claim-show" and getattr(args, "claim_id_flag", None):
@@ -5165,7 +5702,10 @@ def main() -> None:
         "export-brief": export_brief_cmd,
         "doctor": doctor_cmd,
         "verify": verify_cmd,
+        "task-transition": task_transition_cmd,
+        "authority-reconcile": authority_reconcile_cmd,
     }
+
 
     lock_handle = None
     try:
