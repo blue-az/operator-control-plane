@@ -6,12 +6,12 @@ import os
 import socket
 import stat
 import struct
+from dataclasses import dataclass
 from pathlib import Path
 
-def get_registry_path() -> Path:
-    return Path(
-        os.environ.get("OPERATOR_REGISTRY_PATH", "/etc/operator-control-plane-registry.json")
-    )
+REGISTRY_PATH = Path("/etc/operator-control-plane-registry.json")
+REGISTRY_OWNER_UID = 0
+REQUIRE_TRUSTED_ANCESTORS = True
 
 
 FRAME_HEADER_BYTES = 4
@@ -23,55 +23,117 @@ class BrokerClientError(Exception):
     pass
 
 
-def verify_registry_file(path: Path) -> bool:
-    if not path.exists():
-        return False
-    try:
-        metadata = path.lstat()
-        if stat.S_ISLNK(metadata.st_mode):
-            return False
-        is_test = "OPERATOR_REGISTRY_PATH" in os.environ
-        if not is_test and metadata.st_uid != 0:
-            return False
-        if metadata.st_mode & 0o022:  # group or other writable
-            return False
-        return True
-    except Exception:
-        return False
+class EnrollmentError(RuntimeError):
+    pass
 
 
-def resolve_enrollment(cwd: Path | None = None) -> tuple[str, str] | None:
-    reg_path = get_registry_path()
-    if not verify_registry_file(reg_path):
+@dataclass(frozen=True)
+class Enrollment:
+    ledger_id: str
+    socket_path: str
+    repository_path: Path
+
+
+def _validate_registry_path(path: Path) -> None:
+    if path != REGISTRY_PATH:
+        raise EnrollmentError("authority registry path is not the fixed production path")
+    if not REQUIRE_TRUSTED_ANCESTORS:
+        return
+    current = Path(path.anchor)
+    for part in path.parts[1:-1]:
+        current /= part
+        metadata = current.lstat()
+        if not stat.S_ISDIR(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+            raise EnrollmentError(f"authority registry ancestor is unsafe: {current}")
+        if metadata.st_uid != REGISTRY_OWNER_UID or metadata.st_mode & 0o022:
+            raise EnrollmentError(f"authority registry ancestor is writable by an agent: {current}")
+
+
+def _load_registry() -> dict | None:
+    if not REGISTRY_PATH.exists():
         return None
+    try:
+        _validate_registry_path(REGISTRY_PATH)
+        before = REGISTRY_PATH.lstat()
+        if (
+            not stat.S_ISREG(before.st_mode)
+            or stat.S_ISLNK(before.st_mode)
+            or before.st_uid != REGISTRY_OWNER_UID
+            or before.st_mode & 0o022
+            or before.st_nlink != 1
+        ):
+            raise EnrollmentError(f"authority registry file is unsafe: {REGISTRY_PATH}")
+        fd = os.open(REGISTRY_PATH, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        try:
+            opened = os.fstat(fd)
+            if (opened.st_dev, opened.st_ino) != (before.st_dev, before.st_ino):
+                raise EnrollmentError("authority registry changed while it was opened")
+            with os.fdopen(fd, "r", encoding="utf-8") as handle:
+                fd = -1
+                registry = json.load(handle)
+        finally:
+            if fd >= 0:
+                os.close(fd)
+    except EnrollmentError:
+        raise
+    except (OSError, ValueError, TypeError) as exc:
+        raise EnrollmentError(f"cannot safely read authority registry: {exc}") from exc
+    if not isinstance(registry, dict) or registry.get("schema_version") != 1:
+        raise EnrollmentError("authority registry has an unsupported schema")
+    registrations = registry.get("registrations")
+    if not isinstance(registrations, list):
+        raise EnrollmentError("authority registry registrations must be a list")
+    return registry
 
+
+def resolve_enrollment(cwd: Path | None = None) -> Enrollment | None:
+    registry = _load_registry()
+    if registry is None:
+        return None
     if cwd is None:
         cwd = Path.cwd()
-    resolved_cwd = cwd.resolve()
-
-    # Walk upward to find the repository containing .operator
-    repo_root = resolved_cwd
-    for parent in [resolved_cwd] + list(resolved_cwd.parents):
-        if (parent / ".operator").is_dir():
-            repo_root = parent
-            break
-
-    repo_root_str = str(repo_root)
-
-    try:
-        with open(reg_path, "r") as f:
-            registry = json.load(f)
-        for reg in registry.get("registrations", []):
-            reg_repo_path = os.path.realpath(os.path.expanduser(reg.get("repository_path", "")))
-            if reg_repo_path == repo_root_str:
-                return reg.get("ledger_id"), reg.get("socket_path")
-    except Exception:
+    resolved_cwd = cwd.resolve(strict=True)
+    matches: list[Enrollment] = []
+    for registration in registry["registrations"]:
+        if not isinstance(registration, dict):
+            raise EnrollmentError("authority registry contains a malformed registration")
+        try:
+            repository = Path(registration["repository_path"])
+            ledger_id = registration["ledger_id"]
+            socket_path = registration["socket_path"]
+        except KeyError as exc:
+            raise EnrollmentError(f"authority registration is missing {exc.args[0]}") from exc
+        if not repository.is_absolute() or not isinstance(ledger_id, str) or not ledger_id:
+            raise EnrollmentError(
+                "authority registration has invalid repository or ledger identity"
+            )
+        if not isinstance(socket_path, str) or not os.path.isabs(socket_path):
+            raise EnrollmentError("authority registration socket path must be absolute")
+        try:
+            resolved_repository = repository.resolve(strict=True)
+        except FileNotFoundError:
+            # A registration whose repository no longer exists on disk cannot
+            # contain the (existing, strictly-resolved) cwd. Skip it instead
+            # of letting one stale entry crash every command for every repo.
+            continue
+        if resolved_cwd == resolved_repository or resolved_repository in resolved_cwd.parents:
+            matches.append(Enrollment(ledger_id, socket_path, resolved_repository))
+    if not matches:
         return None
-    return None
+    matches.sort(key=lambda item: len(item.repository_path.parts), reverse=True)
+    if len(matches) > 1 and matches[0].repository_path == matches[1].repository_path:
+        raise EnrollmentError("authority registry contains duplicate repository registrations")
+    return matches[0]
 
 
 def canonical_json(value: object) -> str:
-    return json.dumps(value, separators=(",", ":"), sort_keys=True)
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    )
 
 
 class AuthorityClient:
@@ -79,8 +141,11 @@ class AuthorityClient:
         self.socket_path = socket_path
 
     def send_request(self, request: dict, evidence_path: str | None = None) -> dict:
-        request["protocol_version"] = 1
-        data = canonical_json(request).encode("utf-8")
+        wire_request = dict(request)
+        if wire_request.get("protocol_version", 1) != 1:
+            raise BrokerClientError("unsupported protocol_version")
+        wire_request["protocol_version"] = 1
+        data = canonical_json(wire_request).encode("utf-8")
         if len(data) > MAX_REQUEST_BYTES:
             raise BrokerClientError(f"Request too large: {len(data)} bytes")
 

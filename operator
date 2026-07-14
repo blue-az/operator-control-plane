@@ -23,9 +23,9 @@ import tempfile
 from pathlib import Path
 
 import yaml
+
 import authority_client
 import authority_projection
-
 
 LEDGER_DB_NAME = "ledger.sqlite3"
 LEDGER_HASH_FORMAT = "operator-ledger-event-v1"
@@ -777,6 +777,22 @@ def find_operator_dir(start_dir: str | None = None) -> str | None:
             break
         current = parent
     return None
+
+
+def resolve_operator_context() -> tuple[authority_client.Enrollment | None, str | None]:
+    enrollment = authority_client.resolve_enrollment()
+    if enrollment is None:
+        return None, find_operator_dir()
+    operator_dir = enrollment.repository_path / ".operator"
+    try:
+        metadata = operator_dir.lstat()
+    except FileNotFoundError:
+        return enrollment, None
+    if not stat.S_ISDIR(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        raise authority_client.EnrollmentError(
+            f"enrolled operator directory is not a real directory: {operator_dir}"
+        )
+    return enrollment, str(operator_dir)
 
 
 def get_current_utc_iso() -> str:
@@ -1619,7 +1635,7 @@ def task_show_cmd(args) -> int:
 
 
 def claim_add_cmd(args) -> int:
-    op_dir = find_operator_dir()
+    enrollment, op_dir = resolve_operator_context()
     if not op_dir:
         print(
             "Error: No .operator directory found. Run 'operator init' first.",
@@ -1632,15 +1648,15 @@ def claim_add_cmd(args) -> int:
         return 1
     task_id, task_path, task = resolved_task
 
-    enrollment = authority_client.resolve_enrollment()
     if enrollment:
-        ledger_id, socket_path = enrollment
+        ledger_id = enrollment.ledger_id
+        socket_path = enrollment.socket_path
         claim_id = get_next_claim_id(op_dir)
-        
+
         # Prepare request
         operation_key = f"op-claim-add-{claim_id}"
         expected = authority_projection.compile_expected(op_dir, "claim.create", task_id, claim_id)
-        
+
         request = {
             "action": "commit",
             "ledger_id": ledger_id,
@@ -1657,10 +1673,10 @@ def claim_add_cmd(args) -> int:
         }
         if args.gate:
             request["operation"]["required_gate"] = args.gate
-            
+
         conn_journal = authority_projection.ensure_journal(op_dir)
         authority_projection.prepare_transaction(conn_journal, operation_key, request)
-        
+
         try:
             client = authority_client.AuthorityClient(socket_path)
             res = client.send_request(request)
@@ -1668,20 +1684,21 @@ def claim_add_cmd(args) -> int:
             print(f"Error: Broker dispatch failed: {e}", file=sys.stderr)
             conn_journal.close()
             return 1
-            
+
         if not res.get("ok"):
+            authority_projection.discard_prepared_transaction(conn_journal, operation_key)
             print(f"Error: Claim creation rejected by broker: {res.get('error')}", file=sys.stderr)
             conn_journal.close()
             return 1
-            
+
         receipt = res["receipt"]
         authority_projection.commit_transaction(conn_journal, operation_key, receipt)
-        
+
         try:
             authority_projection.reconcile_projections(op_dir, ledger_id, client)
         except Exception as e:
             print(f"Warning: Projection reconciliation failed: {e}", file=sys.stderr)
-            
+
         conn_journal.close()
         print(f"Registered claim '{claim_id}' on task '{task_id}' via authority broker.")
         return 0
@@ -1741,7 +1758,7 @@ def claim_add_cmd(args) -> int:
 
 
 def evidence_attach_cmd(args) -> int:
-    op_dir = find_operator_dir()
+    enrollment, op_dir = resolve_operator_context()
     if not op_dir:
         print(
             "Error: No .operator directory found. Run 'operator init' first.",
@@ -1754,29 +1771,38 @@ def evidence_attach_cmd(args) -> int:
         return 1
     task_id, task_path, task = resolved_task
 
-    enrollment = authority_client.resolve_enrollment()
     if enrollment:
-        ledger_id, socket_path = enrollment
-        
+        ledger_id = enrollment.ledger_id
+        socket_path = enrollment.socket_path
+
         # Enrolled evidence requires claim
         if not args.claim:
-            print("Error: --claim is required for evidence-attach in enrolled repositories.", file=sys.stderr)
+            print(
+                "Error: --claim is required for evidence-attach in enrolled repositories.",
+                file=sys.stderr,
+            )
             return 1
-            
+
         resolved_claim = resolve_claim_record(op_dir, args.claim)
         if not resolved_claim:
             return 1
         claim_path, claim = resolved_claim
         if claim.get("task_id") != task_id:
-            print(f"Error: Claim '{args.claim}' belongs to task '{claim.get('task_id')}', not '{task_id}'.", file=sys.stderr)
+            print(
+                f"Error: Claim '{args.claim}' belongs to task '{claim.get('task_id')}', not '{task_id}'.",
+                file=sys.stderr,
+            )
             return 1
-            
+
         # Get path_or_url
         original_locator = args.path_or_url
         if not os.path.exists(original_locator) or not os.path.isfile(original_locator):
-            print(f"Error: Evidence path does not exist or is not a file: {original_locator}", file=sys.stderr)
+            print(
+                f"Error: Evidence path does not exist or is not a file: {original_locator}",
+                file=sys.stderr,
+            )
             return 1
-            
+
         # Calculate file size and sha256
         size_bytes = os.path.getsize(original_locator)
         h = hashlib.sha256()
@@ -1787,20 +1813,23 @@ def evidence_attach_cmd(args) -> int:
                     break
                 h.update(chunk)
         file_hash = h.hexdigest()
-        
+
         if args.hash:
             try:
                 expected_hash = normalize_sha256(args.hash)
                 if expected_hash != file_hash:
-                    print(f"Error: SHA-256 hash mismatch. Expected: {expected_hash}, Actual: {file_hash}", file=sys.stderr)
+                    print(
+                        f"Error: SHA-256 hash mismatch. Expected: {expected_hash}, Actual: {file_hash}",
+                        file=sys.stderr,
+                    )
                     return 1
             except Exception as e:
                 print(f"Error: Invalid --hash: {e}", file=sys.stderr)
                 return 1
-                
+
         # Generate evidence_id
         evidence_id = get_next_evidence_id(op_dir, task_id)
-        
+
         # Prepare operation
         kind = "evidence.attach_status" if args.status else "evidence.attach_draft"
         operation = {
@@ -1812,9 +1841,11 @@ def evidence_attach_cmd(args) -> int:
         }
         if args.status:
             operation["verification_status"] = args.status
-            
-        expected = authority_projection.compile_expected(op_dir, kind, task_id, args.claim, evidence_id)
-        
+
+        expected = authority_projection.compile_expected(
+            op_dir, kind, task_id, args.claim, evidence_id
+        )
+
         operation_key = f"op-evidence-attach-{evidence_id}"
         request = {
             "action": "commit",
@@ -1825,14 +1856,14 @@ def evidence_attach_cmd(args) -> int:
             "blob": {
                 "sha256": file_hash,
                 "size_bytes": size_bytes,
-            }
+            },
         }
-        
+
         conn_journal = authority_projection.ensure_journal(op_dir)
-        local_request = dict(request)
-        local_request["path_or_url"] = original_locator
-        authority_projection.prepare_transaction(conn_journal, operation_key, local_request)
-        
+        authority_projection.prepare_transaction(
+            conn_journal, operation_key, request, evidence_path=original_locator
+        )
+
         try:
             client = authority_client.AuthorityClient(socket_path)
             res = client.send_request(request, evidence_path=original_locator)
@@ -1840,24 +1871,27 @@ def evidence_attach_cmd(args) -> int:
             print(f"Error: Broker dispatch failed: {e}", file=sys.stderr)
             conn_journal.close()
             return 1
-            
+
         if not res.get("ok"):
-            print(f"Error: Evidence attachment rejected by broker: {res.get('error')}", file=sys.stderr)
+            authority_projection.discard_prepared_transaction(conn_journal, operation_key)
+            print(
+                f"Error: Evidence attachment rejected by broker: {res.get('error')}",
+                file=sys.stderr,
+            )
             conn_journal.close()
             return 1
-            
+
         receipt = res["receipt"]
         authority_projection.commit_transaction(conn_journal, operation_key, receipt)
-        
+
         try:
             authority_projection.reconcile_projections(op_dir, ledger_id, client)
         except Exception as e:
             print(f"Warning: Projection reconciliation failed: {e}", file=sys.stderr)
-            
+
         conn_journal.close()
         print(f"Registered evidence '{evidence_id}' on task '{task_id}' via authority broker.")
         return 0
-
 
     claim_id = args.claim
     claim = None
@@ -3169,7 +3203,7 @@ def export_brief_cmd(args) -> int:
 
 
 def doctor_cmd(args) -> int:
-    op_dir = find_operator_dir()
+    enrollment, op_dir = resolve_operator_context()
     if not op_dir:
         print(
             "Error: No .operator directory found. Run 'operator init' first.",
@@ -3177,37 +3211,42 @@ def doctor_cmd(args) -> int:
         )
         return 1
 
-    # Check enrollment
-    enrollment = authority_client.resolve_enrollment()
     if enrollment:
-        ledger_id, socket_path = enrollment
+        ledger_id = enrollment.ledger_id
+        socket_path = enrollment.socket_path
         print("=" * 80)
         print("OPERATOR DOCTOR - LEDGER CONSISTENCY REPORT")
         print("=" * 80)
         print("verification_authority: uid_isolated")
         print("policy_authority: external_broker")
-        
+
         # Connect to broker and fetch snapshot using pagination
         client = None
         records = []
         broker_err = None
+        broker_error_code = None
+        broker_policy = None
         through_seq = None
-        snapshot_digest = None
         try:
             client = authority_client.AuthorityClient(socket_path)
             after = None
+            pinned_seq = None
             while True:
-                res = client.send_request({
-                    "action": "projection.snapshot",
-                    "ledger_id": ledger_id,
-                    "through_commit_sequence": None,
-                    "after": after,
-                    "limit": 16,
-                })
+                res = client.send_request(
+                    {
+                        "action": "projection.snapshot",
+                        "ledger_id": ledger_id,
+                        "through_commit_sequence": pinned_seq,
+                        "after": after,
+                        "limit": 16,
+                    }
+                )
                 if res.get("ok"):
                     snapshot = res["snapshot"]
-                    through_seq = snapshot["through_commit_sequence"]
-                    snapshot_digest = snapshot["snapshot_digest"]
+                    if pinned_seq is None:
+                        pinned_seq = snapshot["through_commit_sequence"]
+                        through_seq = pinned_seq
+                        broker_policy = snapshot["policy"]
                     records.extend(snapshot["records"])
                     if not snapshot.get("has_more") or not snapshot.get("next_after"):
                         break
@@ -3215,18 +3254,19 @@ def doctor_cmd(args) -> int:
                 else:
                     err_obj = res.get("error")
                     if isinstance(err_obj, dict):
+                        broker_error_code = err_obj.get("code")
                         broker_err = err_obj.get("message", "unknown error")
                     else:
                         broker_err = str(err_obj or "unknown error")
                     break
         except Exception as e:
             broker_err = str(e)
-            
+
         if broker_err:
-            if "revoked" in broker_err.lower():
+            if broker_error_code == "policy_revoked":
                 print("status: policy_revoked")
                 print(f"[Error] Broker policy has been revoked: {broker_err}")
-            elif "rotated" in broker_err.lower():
+            elif broker_error_code == "policy_rotated":
                 print("status: policy_rotated")
                 print(f"[Error] Broker policy has been rotated: {broker_err}")
             else:
@@ -3234,28 +3274,61 @@ def doctor_cmd(args) -> int:
                 print(f"[Error] Authority broker is unreachable or returned error: {broker_err}")
             print("-" * 80)
             return 1
-            
-        # Broker is available, check journal status
-        conn_journal = authority_projection.ensure_journal(op_dir)
-        last_applied = authority_projection.get_last_applied_sequence(conn_journal)
-        pending_count = conn_journal.execute(
-            "SELECT COUNT(*) FROM transaction_journal WHERE state IN ('prepared', 'committed')"
-        ).fetchone()[0]
-        conn_journal.close()
-        
-        if last_applied < through_seq or pending_count > 0:
-            print("status: projection_pending")
-            print(f"[Warning] Projections are pending. Local sequence: {last_applied}, Broker sequence: {through_seq}")
+
+        # Broker is available, check journal status read-only
+        journal_path = os.path.join(op_dir, "client_journal.sqlite3")
+        journal_error = None
+        stored_policy = None
+        if not os.path.exists(journal_path):
+            last_applied = 0
+            pending_count = 0
+        else:
+            try:
+                conn_journal = sqlite3.connect(f"file:{journal_path}?mode=ro", uri=True)
+                conn_journal.row_factory = sqlite3.Row
+                last_applied = authority_projection.get_last_applied_sequence(conn_journal)
+                pending_count = conn_journal.execute(
+                    "SELECT COUNT(*) FROM transaction_journal WHERE state IN ('prepared', 'committed')"
+                ).fetchone()[0]
+                policy_row = conn_journal.execute(
+                    "SELECT value FROM journal_metadata WHERE key = 'policy_binding'"
+                ).fetchone()
+                if policy_row:
+                    stored_policy = json.loads(policy_row[0])
+                conn_journal.close()
+            except Exception as exc:
+                journal_error = str(exc)
+
+        print(
+            "policy_binding: "
+            f"{broker_policy['id']}@{broker_policy['generation']} {broker_policy['sha256']}"
+        )
+        if journal_error:
+            print("status: divergent_or_forged_local")
+            print(f"[Error] Client journal cannot be read safely: {journal_error}")
             print("-" * 80)
             return 1
-            
+        if stored_policy is not None and stored_policy != broker_policy:
+            print("status: policy_rotated")
+            print(
+                "[Error] Broker policy binding differs from the last projected binding: "
+                f"local={canonical_json(stored_policy)}, broker={canonical_json(broker_policy)}"
+            )
+            print("-" * 80)
+            return 1
+
+        if last_applied < through_seq or pending_count > 0:
+            print("status: projection_pending")
+            print(
+                f"[Warning] Projections are pending. Local sequence: {last_applied}, Broker sequence: {through_seq}"
+            )
+            print("-" * 80)
+            return 1
+
         # last_applied == through_seq, check for divergence/forgeries
         diverged = False
         issues = []
-        
-        # Load local identity map
-        identity_map = authority_projection.load_identity_map(op_dir)
-        
+
         # Connect to local ledger
         db_path = os.path.join(op_dir, "ledger.sqlite3")
         if not os.path.exists(db_path):
@@ -3264,6 +3337,32 @@ def doctor_cmd(args) -> int:
         else:
             conn_ledger = sqlite3.connect(db_path)
             conn_ledger.row_factory = sqlite3.Row
+            # Ensure schema added by newer code exists so pre-upgrade ledgers
+            # aren't misread as diverged; this only bootstraps empty tables
+            # and never touches existing ledger data.
+            authority_projection.ensure_ledger_schema(conn_ledger)
+
+            # A repo enrolled before authority_projection_events existed has
+            # ledger_events history but no rows in the new table yet, and
+            # nothing backfills it retroactively. Report that plainly instead
+            # of flagging every already-consistent record as diverged/forged.
+            projection_events_count = conn_ledger.execute(
+                "SELECT COUNT(*) FROM authority_projection_events"
+            ).fetchone()[0]
+            ledger_events_count = conn_ledger.execute(
+                "SELECT COUNT(*) FROM ledger_events"
+            ).fetchone()[0]
+            if projection_events_count == 0 and ledger_events_count > 0:
+                print("status: projection_schema_migration_required")
+                print(
+                    "[Warning] This ledger predates broker-projection-version tracking "
+                    "(authority_projection_events is empty but ledger_events is not). "
+                    "Divergence cannot be checked until the ledger is re-synced."
+                )
+                print("-" * 80)
+                conn_ledger.close()
+                return 1
+
             try:
                 # Compare snapshot records to local database and YAML projections
                 for record in records:
@@ -3272,31 +3371,41 @@ def doctor_cmd(args) -> int:
                     rversion = record["version"]
                     revent_hash = record["event_hash"]
                     rpayload = record["payload"]
-                    
+
                     # Get local db version and hash
-                    local_ver, local_hash = authority_projection.get_local_record_version(conn_ledger, rtype, rid)
+                    local_ver, local_hash = authority_projection.get_local_record_version(
+                        conn_ledger, rtype, rid
+                    )
                     if local_ver != rversion or local_hash != revent_hash:
-                        issues.append(f"[Error] Mismatch on {rtype} {rid}: Local version={local_ver}, hash={local_hash}; Broker version={rversion}, hash={revent_hash}")
+                        issues.append(
+                            f"[Error] Mismatch on {rtype} {rid}: Local version={local_ver}, hash={local_hash}; Broker version={rversion}, hash={revent_hash}"
+                        )
                         diverged = True
                         continue
-                        
+
                     # Get local YAML payload
                     if rtype == "task":
                         filepath = os.path.join(op_dir, "tasks", f"{rid}.yaml")
                     elif rtype == "claim":
                         filepath = os.path.join(op_dir, "claims", f"{rid}.yaml")
                     elif rtype == "evidence":
-                        filepath = os.path.join(op_dir, "evidence", rpayload["task_id"], f"{rid}.yaml")
+                        filepath = os.path.join(
+                            op_dir, "evidence", rpayload["task_id"], f"{rid}.yaml"
+                        )
                     elif rtype == "handoff":
-                        filepath = os.path.join(op_dir, "handoffs", rpayload["task_id"], f"{rid}.yaml")
+                        filepath = os.path.join(
+                            op_dir, "handoffs", rpayload["task_id"], f"{rid}.yaml"
+                        )
                     else:
                         filepath = os.path.join(op_dir, f"{rtype}s", f"{rid}.yaml")
-                        
+
                     if not os.path.exists(filepath):
-                        issues.append(f"[Error] YAML projection missing for {rtype} {rid}: {filepath}")
+                        issues.append(
+                            f"[Error] YAML projection missing for {rtype} {rid}: {filepath}"
+                        )
                         diverged = True
                         continue
-                        
+
                     with open(filepath, "r") as f:
                         try:
                             local_payload = yaml.safe_load(f)
@@ -3304,73 +3413,116 @@ def doctor_cmd(args) -> int:
                             issues.append(f"[Error] Failed to load YAML for {rtype} {rid}: {e}")
                             diverged = True
                             continue
-                            
-                    if rtype == "evidence":
-                        expected_payload = {
-                            "evidence_id": rpayload["evidence_id"],
-                            "task_id": rpayload["task_id"],
-                            "claim_id": rpayload["claim_id"],
-                            "type": rpayload["evidence_type"],
-                            "path_or_url": local_payload.get("path_or_url", ""),
-                            "hash": rpayload["sha256"],
-                            "size": rpayload["size_bytes"],
-                            "verification_status": rpayload["verification_status"],
-                            "policy_authority": rpayload.get("policy_authority", "external_broker"),
-                            "verification_authority": rpayload.get("verification_authority"),
-                        }
-                    elif rtype == "claim":
-                        expected_payload = {
-                            "claim_id": rpayload["claim_id"],
-                            "task_id": rpayload["task_id"],
-                            "type": rpayload["claim_type"],
-                            "text": rpayload["text"],
-                            "required_gate": rpayload.get("required_gate"),
-                            "evidence_ids": rpayload.get("evidence_ids", []),
-                            "verification_status": rpayload["verification_status"],
-                            "policy_authority": rpayload.get("policy_authority", "external_broker"),
-                            "verification_authority": rpayload.get("verification_authority"),
-                        }
-                    elif rtype == "task":
-                        expected_payload = {
-                            "task_id": rpayload["task_id"],
-                            "objective": local_payload.get("objective", ""),
-                            "status": rpayload["status"],
-                            "claim_ids": rpayload.get("claim_ids", []),
-                            "evidence_ids": rpayload.get("evidence_ids", []),
-                            "verified_claim_ids": rpayload.get("verified_claim_ids", []),
-                            "policy_authority": rpayload.get("policy_authority", "external_broker"),
-                            "verification_authority": rpayload.get("verification_authority"),
-                        }
-                    else:
-                        expected_payload = rpayload
+
+                    expected_payload, _, _ = authority_projection.normalize_record(
+                        op_dir, record, read_only=True
+                    )
 
                     if canonical_json(local_payload) != canonical_json(expected_payload):
                         issues.append(f"[Error] YAML payload differs from broker for {rtype} {rid}")
                         diverged = True
-                
+
                 # Check for local events not in snapshot (forgeries)
-                local_records = conn_ledger.execute(
-                    "SELECT record_type, record_id, MAX(version) as ver FROM ledger_events GROUP BY record_type, record_id"
-                ).fetchall()
+                projection_table = conn_ledger.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'authority_projection_events'"
+                ).fetchone()
+                local_records = []
+                if projection_table:
+                    local_records = conn_ledger.execute(
+                        """
+                        SELECT record_type, record_id, MAX(broker_version) AS ver
+                        FROM authority_projection_events
+                        GROUP BY record_type, record_id
+                        """
+                    ).fetchall()
                 snapshot_keys = {(r["record_type"], r["record_id"]) for r in records}
                 for lr in local_records:
                     if (lr["record_type"], lr["record_id"]) not in snapshot_keys:
-                        issues.append(f"[Error] Local forged record found: {lr['record_type']} {lr['record_id']}")
+                        issues.append(
+                            f"[Error] Local forged record found: {lr['record_type']} {lr['record_id']}"
+                        )
                         diverged = True
-                        
+
+                # Validate the complete projected chain without treating broker hashes as P0 hashes.
+                chain_rows = conn_ledger.execute(
+                    """
+                    SELECT event_id, record_type, record_id, version, payload_json,
+                           previous_event_hash, event_hash
+                    FROM ledger_events
+                    ORDER BY record_type, record_id, version
+                    """
+                ).fetchall()
+                chain_state = {}
+                for row in chain_rows:
+                    key = (row["record_type"], row["record_id"])
+                    previous = chain_state.get(key)
+                    expected_version = previous[0] + 1 if previous else 1
+                    expected_hash = previous[1] if previous else None
+                    if (
+                        row["version"] != expected_version
+                        or row["previous_event_hash"] != expected_hash
+                    ):
+                        issues.append(
+                            f"[Error] Local broker projection chain is broken for "
+                            f"{key[0]} {key[1]} at version {row['version']}"
+                        )
+                        diverged = True
+                    try:
+                        if canonical_json(json.loads(row["payload_json"])) != row["payload_json"]:
+                            raise ValueError("payload is not canonical")
+                    except (TypeError, ValueError, json.JSONDecodeError):
+                        issues.append(
+                            f"[Error] Local broker projection payload is invalid for "
+                            f"{key[0]} {key[1]} version {row['version']}"
+                        )
+                        diverged = True
+                    if row["event_id"] != row["event_hash"]:
+                        issues.append(
+                            f"[Error] Local broker projection event identity is invalid for "
+                            f"{key[0]} {key[1]} version {row['version']}"
+                        )
+                        diverged = True
+                    chain_state[key] = (row["version"], row["event_hash"])
+
+                audit_issues = audit_event_store(op_dir)
+                if audit_issues:
+                    issues.extend(audit_issues)
+                    diverged = True
+
+                expected_triggers = {
+                    "ledger_events_no_update": "create trigger ledger_events_no_update before update on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
+                    "ledger_events_no_delete": "create trigger ledger_events_no_delete before delete on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
+                    "authority_projection_events_no_update": "create trigger authority_projection_events_no_update before update on authority_projection_events begin select raise(abort, 'authority_projection_events is append-only'); end",
+                    "authority_projection_events_no_delete": "create trigger authority_projection_events_no_delete before delete on authority_projection_events begin select raise(abort, 'authority_projection_events is append-only'); end",
+                }
+                trigger_rows = conn_ledger.execute(
+                    "SELECT name, sql FROM sqlite_master WHERE type = 'trigger'"
+                ).fetchall()
+                actual_triggers = {
+                    row["name"]: " ".join(row["sql"].lower().split()) for row in trigger_rows
+                }
+                for name, expected_sql in expected_triggers.items():
+                    if name.startswith("authority_projection") and not projection_table:
+                        continue
+                    if actual_triggers.get(name) != expected_sql:
+                        issues.append(
+                            f"[Error] Local append-only trigger {name} is missing or modified."
+                        )
+                        diverged = True
+
             except Exception as e:
                 issues.append(f"[Error] Local database verification failed: {e}")
                 diverged = True
             finally:
                 conn_ledger.close()
-                
+
         if diverged:
             print("status: divergent_or_forged_local")
             for iss in issues:
                 print(iss)
             print("-" * 80)
             return 1
-            
+
         print("status: current")
         print("All records consistent with broker.")
         print("-" * 80)
@@ -3406,7 +3558,6 @@ def doctor_cmd(args) -> int:
         identity_policy = {"mode": "invalid", "uids": {}}
     identity_map = identity_policy["uids"]
     mode = identity_policy["mode"]
-
 
     def check_executor_block(item, source_name):
         contains_test_identity = False
@@ -4876,7 +5027,7 @@ def get_open_usage_ids_for_task(op_dir: str, task_id: str) -> list[str]:
 
 
 def session_end_cmd(args) -> int:
-    op_dir = find_operator_dir()
+    enrollment, op_dir = resolve_operator_context()
     if not op_dir:
         print(
             "Error: No .operator directory found. Run 'operator init' first.",
@@ -4884,7 +5035,7 @@ def session_end_cmd(args) -> int:
         )
         return 1
 
-    if authority_client.resolve_enrollment():
+    if enrollment:
         if args.status in ("verified", "complete"):
             print(
                 "Error: Task status transitions to 'verified' or 'complete' are restricted "
@@ -4892,7 +5043,6 @@ def session_end_cmd(args) -> int:
                 file=sys.stderr,
             )
             return 1
-
 
     usage_id = args.usage_id
     if not usage_id:
@@ -5021,7 +5171,7 @@ def session_list_cmd(args) -> int:
 
 
 def task_transition_cmd(args) -> int:
-    op_dir = find_operator_dir()
+    enrollment, op_dir = resolve_operator_context()
     if not op_dir:
         print(
             "Error: No .operator directory found. Run 'operator init' first.",
@@ -5029,14 +5179,14 @@ def task_transition_cmd(args) -> int:
         )
         return 1
 
-    enrollment = authority_client.resolve_enrollment()
     if not enrollment:
         print(
             "Error: task-transition is only supported in enrolled repositories.",
             file=sys.stderr,
         )
         return 1
-    ledger_id, socket_path = enrollment
+    ledger_id = enrollment.ledger_id
+    socket_path = enrollment.socket_path
 
     # Resolve task record
     resolved_task = resolve_task_record(op_dir, args.task_id)
@@ -5068,9 +5218,7 @@ def task_transition_cmd(args) -> int:
 
     # Prepare request
     operation_key = f"op-task-transition-{task_id}-{args.status}"
-    expected = authority_projection.compile_expected(
-        op_dir, "task.transition", task_id, claim_id
-    )
+    expected = authority_projection.compile_expected(op_dir, "task.transition", task_id, claim_id)
 
     request = {
         "action": "commit",
@@ -5101,6 +5249,7 @@ def task_transition_cmd(args) -> int:
         return 1
 
     if not res.get("ok"):
+        authority_projection.discard_prepared_transaction(conn_journal, operation_key)
         print(f"Error: Transition rejected by broker: {res.get('error')}", file=sys.stderr)
         conn_journal.close()
         return 1
@@ -5123,19 +5272,19 @@ def task_transition_cmd(args) -> int:
 
 
 def authority_reconcile_cmd(args) -> int:
-    op_dir = find_operator_dir()
+    enrollment, op_dir = resolve_operator_context()
     if not op_dir:
         print("Error: No .operator directory found.", file=sys.stderr)
         return 1
 
-    enrollment = authority_client.resolve_enrollment()
     if not enrollment:
         print(
             "Error: authority-reconcile is only supported in enrolled repositories.",
             file=sys.stderr,
         )
         return 1
-    ledger_id, socket_path = enrollment
+    ledger_id = enrollment.ledger_id
+    socket_path = enrollment.socket_path
 
     try:
         client = authority_client.AuthorityClient(socket_path)
@@ -5148,7 +5297,6 @@ def authority_reconcile_cmd(args) -> int:
 
 
 # --- CLI Setup ---
-
 
 
 def main() -> None:
@@ -5706,12 +5854,11 @@ def main() -> None:
         "authority-reconcile": authority_reconcile_cmd,
     }
 
-
     lock_handle = None
     try:
         lock_handle = acquire_command_lock(args.command)
         return_code = cmd_map[args.command](args)
-    except LedgerWriteError as exc:
+    except (LedgerWriteError, authority_client.EnrollmentError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return_code = 1
     finally:
