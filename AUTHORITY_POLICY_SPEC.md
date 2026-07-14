@@ -125,7 +125,27 @@ process control, credential delegation, and the live broker.
 
 Mode/owner/link/path checks can pass locally. ACLs, alternate service control, cached credentials,
 polkit, mount namespaces, capabilities, ptrace, and live-process confinement remain `unknown` until
-issue #7 supplies real-host evidence. Any failure or unknown keeps `boundary_ready: false`.
+root runs `operator-admin collect-evidence` and preflight loads a fresh, policy-bound, unforged evidence
+file (see `OPERATIONS_RUNBOOK.md`); any missing, stale, mismatched, or tampered evidence file falls back
+to the same conservative `unknown` result as before. Any failure or unknown keeps `boundary_ready:
+false`.
+
+## Issue #7 deployment-model decision
+
+This host had no `/usr/libexec/operator-control-plane`, `/etc/operator-control-plane`,
+`/var/lib/operator-control-plane`, `/run/operator-control-plane`, `operator-broker` account,
+`operator-clients` group, or `operator-control-plane-broker.service` unit at the time issue #7 began
+(verified by direct inspection, not assumed). Issue #7 therefore installs fresh and does not attempt,
+test, or claim an in-place upgrade path on this host.
+
+This is consistent with, not an exception to, the issue #5 boundary above: "there is no in-place code
+upgrade path in issue #5" already fails a changed-asset reinstall closed via `installation_conflict`
+before any mutation. Issue #7 does not add upgrade support on top of that. If a future host already
+carries a differing installation, `operator-admin install` still refuses to mutate over it; resolving
+that case is explicitly out of scope until a separate, reviewed migration design exists. Do not treat a
+successful fresh install anywhere as evidence that upgrade is supported.
+
+`OPERATIONS_RUNBOOK.md` documents the exact fresh-install sequence used to bring this host into service.
 
 ## Explicit non-goals
 
