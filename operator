@@ -3335,24 +3335,25 @@ def doctor_cmd(args) -> int:
             issues.append(f"[Error] Local database {db_path} is missing.")
             diverged = True
         else:
-            conn_ledger = sqlite3.connect(db_path)
+            conn_ledger = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
             conn_ledger.row_factory = sqlite3.Row
-            # Ensure schema added by newer code exists so pre-upgrade ledgers
-            # aren't misread as diverged; this only bootstraps empty tables
-            # and never touches existing ledger data.
-            authority_projection.ensure_ledger_schema(conn_ledger)
 
             # A repo enrolled before authority_projection_events existed has
             # ledger_events history but no rows in the new table yet, and
             # nothing backfills it retroactively. Report that plainly instead
             # of flagging every already-consistent record as diverged/forged.
-            projection_events_count = conn_ledger.execute(
-                "SELECT COUNT(*) FROM authority_projection_events"
-            ).fetchone()[0]
+            projection_table = conn_ledger.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'authority_projection_events'"
+            ).fetchone()
+            projection_events_count = 0
+            if projection_table:
+                projection_events_count = conn_ledger.execute(
+                    "SELECT COUNT(*) FROM authority_projection_events"
+                ).fetchone()[0]
             ledger_events_count = conn_ledger.execute(
                 "SELECT COUNT(*) FROM ledger_events"
             ).fetchone()[0]
-            if projection_events_count == 0 and ledger_events_count > 0:
+            if projection_events_count == 0 and (ledger_events_count > 0 or records):
                 print("status: projection_schema_migration_required")
                 print(
                     "[Warning] This ledger predates broker-projection-version tracking "

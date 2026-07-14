@@ -815,17 +815,9 @@ def compile_expected(
     # broker snapshot as soon as all of them have been seen instead of
     # always walking the entire ledger.
     wanted_keys = set()
-    if kind in (
-        "claim.create",
-        "evidence.attach_draft",
-        "evidence.attach_status",
-        "task.transition",
-    ):
-        wanted_keys.add(("task", task_id))
-    if kind in ("claim.create", "evidence.attach_draft", "evidence.attach_status") and claim_id:
+    wanted_keys.add(("task", task_id))
+    if kind in ("evidence.attach_draft", "evidence.attach_status") and claim_id:
         wanted_keys.add(("claim", claim_id))
-    if kind in ("evidence.attach_draft", "evidence.attach_status") and evidence_id:
-        wanted_keys.add(("evidence", evidence_id))
 
     # Fetch records from broker using pagination, using live broker state
     # (not the local projection cache) so the "expected" preconditions sent

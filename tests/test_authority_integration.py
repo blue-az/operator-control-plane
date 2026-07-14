@@ -185,6 +185,17 @@ class TestAuthorityIntegration(unittest.TestCase):
         conn.close()
 
     def test_enrollment_resolution(self) -> None:
+        registry = json.loads(self.registry_path.read_text())
+        registry["registrations"].insert(
+            0,
+            {
+                "repository_path": str(self.temp_dir / "deleted-repository"),
+                "ledger_id": "stale-ledger",
+                "socket_path": str(self.temp_dir / "stale.sock"),
+            },
+        )
+        self.registry_path.write_text(json.dumps(registry))
+
         nested = self.temp_dir / "nested" / "worktree"
         (nested / ".operator").mkdir(parents=True)
         os.chdir(nested)
@@ -469,6 +480,138 @@ class TestAuthorityIntegration(unittest.TestCase):
 
         # Verify client_journal database file was NOT created
         self.assertFalse(journal_path.exists())
+
+    def test_doctor_reports_pre_projection_schema_without_mutating(self) -> None:
+        res = self.run_operator(
+            "task-create", "--id", "legacy-task", "--objective", "Legacy local task"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        import sqlite3
+
+        db_path = self.temp_dir / ".operator" / "ledger.sqlite3"
+        before = db_path.read_bytes()
+        conn = sqlite3.connect(db_path)
+        table_before = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'authority_projection_events'"
+        ).fetchone()
+        conn.close()
+        self.assertIsNone(table_before)
+
+        res = self.run_operator("doctor")
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn("status: projection_schema_migration_required", res.stdout)
+        self.assertEqual(db_path.read_bytes(), before)
+
+        conn = sqlite3.connect(db_path)
+        table_after = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'authority_projection_events'"
+        ).fetchone()
+        conn.close()
+        self.assertIsNone(table_after)
+
+    def test_definitive_replay_rejection_discards_prepared_transaction(self) -> None:
+        import sqlite3
+
+        import authority_projection
+
+        res = self.run_operator("task-create", "--id", "task-1", "--objective", "Test objective")
+        self.assertEqual(res.returncode, 0)
+        res = self.run_operator(
+            "claim-add",
+            "--task",
+            "task-1",
+            "--type",
+            "deployment_state",
+            "--text",
+            "Test claim",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        operation_key = "op-rejected-replay"
+        request = {
+            "action": "commit",
+            "ledger_id": self.ledger_id,
+            "operation_key": operation_key,
+            "operation": {
+                "kind": "claim.create",
+                "task_id": "task-1",
+                "claim_id": "claim-9999",
+                "claim_type": "deployment_state",
+                "text": "Stale request",
+            },
+            "expected": [
+                {
+                    "record_type": "task",
+                    "record_id": "task-1",
+                    "version": 0,
+                    "event_hash": None,
+                },
+                {
+                    "record_type": "claim",
+                    "record_id": "claim-9999",
+                    "version": 0,
+                    "event_hash": None,
+                },
+            ],
+            "blob": None,
+        }
+        journal_path = self.temp_dir / ".operator" / "client_journal.sqlite3"
+        conn = authority_projection.ensure_journal(str(self.temp_dir / ".operator"))
+        authority_projection.prepare_transaction(conn, operation_key, request)
+        conn.close()
+
+        res = self.run_operator("authority-reconcile")
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+        conn = sqlite3.connect(journal_path)
+        remaining = conn.execute(
+            "SELECT COUNT(*) FROM transaction_journal WHERE operation_key = ?",
+            (operation_key,),
+        ).fetchone()[0]
+        conn.close()
+        self.assertEqual(remaining, 0)
+
+    def test_projection_helpers_preserve_contracts(self) -> None:
+        import math
+
+        import authority_broker
+        import authority_client
+        import authority_projection
+
+        value = {"unicode": "\u03c4", "nested": {"answer": 42}}
+        self.assertEqual(
+            authority_client.canonical_json(value), authority_broker.canonical_json(value)
+        )
+        with self.assertRaises(ValueError):
+            authority_client.canonical_json({"invalid": math.nan})
+
+        projection = self.temp_dir / "mode-preserved.yaml"
+        projection.write_text("old: value\n")
+        os.chmod(projection, 0o640)
+        authority_projection.save_yaml({"new": "value"}, str(projection))
+        self.assertEqual(projection.stat().st_mode & 0o777, 0o640)
+
+        def handoff_record(task_id: str) -> dict:
+            return {
+                "record_type": "handoff",
+                "record_id": "handoff-0001",
+                "version": 1,
+                "event_hash": "1" * 64,
+                "payload": {"task_id": task_id, "handoff_id": "handoff-0001"},
+                "authority": {
+                    "actor_uid": os.getuid(),
+                    "policy": {"id": "policy", "generation": 1, "sha256": "2" * 64},
+                },
+            }
+
+        _, first_path, _ = authority_projection.normalize_record(
+            str(self.temp_dir / ".operator"), handoff_record("task-1")
+        )
+        _, second_path, _ = authority_projection.normalize_record(
+            str(self.temp_dir / ".operator"), handoff_record("task-2")
+        )
+        self.assertNotEqual(first_path, second_path)
+        self.assertTrue(first_path.endswith("handoffs/task-1/handoff-0001.yaml"))
 
     def test_lost_evidence_response_recovery(self) -> None:
         import hashlib
