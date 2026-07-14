@@ -10,6 +10,7 @@ import errno
 import fcntl
 import grp
 import hashlib
+import json
 import os
 import pwd
 import re
@@ -30,6 +31,7 @@ MAX_ADMIN_FILE_BYTES = 1024 * 1024
 MAX_CHILD_RESULT_BYTES = 4 * 1024 * 1024
 DEFAULT_BROKER_USER = "operator-broker"
 DEFAULT_SOCKET_GROUP = "operator-clients"
+REGISTRY_PATH = Path("/etc/operator-control-plane-registry.json")
 SYSTEM_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_-]{0,63}")
 POLICY_FIELDS = {
     "policy_schema_version",
@@ -3074,6 +3076,469 @@ def privilege_preflight(
     }
 
 
+def validate_local_ledger(repo_path: Path) -> dict:
+    import yaml
+
+    op_dir = repo_path / ".operator"
+    if not op_dir.is_dir():
+        raise AdminError("unsafe_enrollment", f"Operator ledger is missing: {op_dir}")
+
+    ledger_db = op_dir / "ledger.sqlite3"
+    if not ledger_db.exists():
+        raise AdminError("unsafe_enrollment", f"Durable ledger store is missing: {ledger_db}")
+
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    directory_flags = flags | os.O_DIRECTORY
+    try:
+        with contextlib.ExitStack() as stack:
+            repo_fd = os.open(repo_path, directory_flags)
+            stack.callback(os.close, repo_fd)
+            op_fd = os.open(".operator", directory_flags, dir_fd=repo_fd)
+            stack.callback(os.close, op_fd)
+            db_fd = os.open("ledger.sqlite3", flags, dir_fd=op_fd)
+            stack.callback(os.close, db_fd)
+            identities = {
+                "repository": os.fstat(repo_fd),
+                "operator": os.fstat(op_fd),
+                "ledger": os.fstat(db_fd),
+            }
+            if identities["repository"].st_mode & 0o022:
+                raise AdminError("unsafe_enrollment", "repository path is group/other writable")
+            if identities["operator"].st_mode & 0o022:
+                raise AdminError("unsafe_enrollment", "operator path is group/other writable")
+            if identities["ledger"].st_mode & 0o022 or identities["ledger"].st_nlink != 1:
+                raise AdminError("unsafe_enrollment", "ledger database metadata is unsafe")
+            if identities["operator"].st_uid != identities["repository"].st_uid:
+                raise AdminError(
+                    "unsafe_enrollment", "operator directory owner differs from repository"
+                )
+            if identities["ledger"].st_uid != identities["repository"].st_uid:
+                raise AdminError(
+                    "unsafe_enrollment", "ledger database owner differs from repository"
+                )
+            for suffix in ("-wal", "-shm", "-journal"):
+                try:
+                    os.stat(f"ledger.sqlite3{suffix}", dir_fd=op_fd, follow_symlinks=False)
+                except FileNotFoundError:
+                    continue
+                raise AdminError("unsafe_enrollment", "ledger has active SQLite sidecar state")
+
+            conn = sqlite3.connect(f"file:/proc/self/fd/{db_fd}?mode=ro&immutable=1", uri=True)
+            conn.row_factory = sqlite3.Row
+            try:
+                schema_version = conn.execute("PRAGMA user_version").fetchone()[0]
+                if schema_version != 1:
+                    raise AdminError(
+                        "unsafe_enrollment",
+                        f"Durable ledger schema version {schema_version} is unsupported",
+                    )
+
+                triggers = {
+                    row["name"]: " ".join(row["sql"].lower().split())
+                    for row in conn.execute(
+                        "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' "
+                        "AND name IN ('ledger_events_no_update', 'ledger_events_no_delete')"
+                    )
+                }
+                expected_triggers = {
+                    "ledger_events_no_update": "create trigger ledger_events_no_update before update on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
+                    "ledger_events_no_delete": "create trigger ledger_events_no_delete before delete on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
+                }
+                if triggers != expected_triggers:
+                    raise AdminError(
+                        "unsafe_enrollment", "Durable ledger append-only triggers differ"
+                    )
+
+                rows = conn.execute(
+                    """
+                    SELECT event_id, record_type, record_id, version, event_type, payload_json,
+                           actor_uid, actor_name, created_at, source_command, previous_event_hash,
+                           event_hash
+                    FROM ledger_events
+                    ORDER BY record_type, record_id, version
+                    """
+                ).fetchall()
+            finally:
+                conn.close()
+    except sqlite3.Error as exc:
+        raise AdminError("unsafe_enrollment", f"Durable ledger cannot be read: {exc}")
+    except OSError as exc:
+        raise AdminError("unsafe_enrollment", f"Durable ledger path cannot be opened: {exc}")
+
+    chain_state = {}
+    latest_events = {}
+    for row in rows:
+        key = (row["record_type"], row["record_id"])
+        previous = chain_state.get(key)
+        expected_version = previous[0] + 1 if previous else 1
+        expected_previous_hash = previous[1] if previous else None
+
+        if row["version"] != expected_version:
+            raise AdminError(
+                "unsafe_enrollment",
+                f"Durable ledger version gap for {key[0]} {key[1]}: expected {expected_version}, got {row['version']}",
+            )
+        if row["previous_event_hash"] != expected_previous_hash:
+            raise AdminError(
+                "unsafe_enrollment",
+                f"Durable ledger hash chain is broken for {key[0]} {key[1]} at version {row['version']}",
+            )
+
+        try:
+            decoded_payload = json.loads(row["payload_json"])
+            if broker.canonical_json(decoded_payload) != row["payload_json"]:
+                raise AdminError(
+                    "unsafe_enrollment",
+                    f"Durable ledger payload is not canonical for {key[0]} {key[1]} version {row['version']}",
+                )
+        except (TypeError, ValueError, json.JSONDecodeError):
+            raise AdminError(
+                "unsafe_enrollment",
+                f"Durable ledger payload is invalid JSON for {key[0]} {key[1]} version {row['version']}",
+            )
+
+        hash_fields = {
+            "hash_format": "operator-ledger-event-v1",
+            "record_type": row["record_type"],
+            "record_id": row["record_id"],
+            "version": row["version"],
+            "event_type": row["event_type"],
+            "payload_json": row["payload_json"],
+            "actor_uid": row["actor_uid"],
+            "actor_name": row["actor_name"],
+            "created_at": row["created_at"],
+            "source_command": row["source_command"],
+            "previous_event_hash": row["previous_event_hash"],
+        }
+        computed_hash = hashlib.sha256(
+            broker.canonical_json(hash_fields).encode("utf-8")
+        ).hexdigest()
+        if row["event_hash"] != computed_hash or row["event_id"] != row["event_hash"]:
+            raise AdminError(
+                "unsafe_enrollment",
+                f"Durable ledger event hash mismatch for {key[0]} {key[1]} version {row['version']}",
+            )
+
+        chain_state[key] = (row["version"], row["event_hash"])
+        latest_events[key] = decoded_payload
+
+    for key, expected_fields in latest_events.items():
+        rtype, rid = key
+        if rtype == "task":
+            filepath = op_dir / "tasks" / f"{rid}.yaml"
+        elif rtype == "claim":
+            filepath = op_dir / "claims" / f"{rid}.yaml"
+        elif rtype == "evidence":
+            task_id = expected_fields.get("task_id")
+            if not task_id:
+                raise AdminError(
+                    "unsafe_enrollment", f"Evidence {rid} is missing task_id in database payload"
+                )
+            leaf_id = rid.split("/", 1)[-1]
+            filepath = op_dir / "evidence" / task_id / f"{leaf_id}.yaml"
+        elif rtype == "handoff":
+            task_id = expected_fields.get("task_id")
+            if not task_id:
+                raise AdminError(
+                    "unsafe_enrollment", f"Handoff {rid} is missing task_id in database payload"
+                )
+            leaf_id = rid.split("/", 1)[-1]
+            filepath = op_dir / "handoffs" / task_id / f"{leaf_id}.yaml"
+        else:
+            filepath = op_dir / f"{rtype}s" / f"{rid}.yaml"
+
+        if not filepath.exists():
+            raise AdminError(
+                "unsafe_enrollment", f"YAML projection missing for {rtype} {rid}: {filepath}"
+            )
+
+        try:
+            with open(filepath, "r") as f:
+                yaml_payload = yaml.safe_load(f)
+        except Exception as exc:
+            raise AdminError("unsafe_enrollment", f"Failed to load YAML for {rtype} {rid}: {exc}")
+
+        if broker.canonical_json(yaml_payload) != broker.canonical_json(expected_fields):
+            raise AdminError(
+                "unsafe_enrollment",
+                f"Durable ledger mismatch for {rtype} {rid}: YAML projection differs from database",
+            )
+
+    for label, path in (("repository", repo_path), ("operator", op_dir), ("ledger", ledger_db)):
+        after = path.lstat()
+        before = identities[label]
+        if (after.st_dev, after.st_ino) != (before.st_dev, before.st_ino):
+            raise AdminError("unsafe_enrollment", f"{label} path changed during preflight")
+
+    anchors = [
+        {
+            "record_type": record_type,
+            "record_id": record_id,
+            "version": version,
+            "event_hash": event_hash,
+        }
+        for (record_type, record_id), (version, event_hash) in sorted(chain_state.items())
+    ]
+    return {
+        "repository_identity": {
+            "repository_path": str(repo_path),
+            "repository_device": identities["repository"].st_dev,
+            "repository_inode": identities["repository"].st_ino,
+            "operator_device": identities["operator"].st_dev,
+            "operator_inode": identities["operator"].st_ino,
+            "ledger_device": identities["ledger"].st_dev,
+            "ledger_inode": identities["ledger"].st_ino,
+        },
+        "anchor_records": anchors,
+        "legacy_anchor_sha256": broker.sha256_text(broker.canonical_json(anchors)),
+    }
+
+
+def read_registry_file_safely(
+    path: Path,
+    expected_uid: int,
+    anchor: Path,
+    expected_gid: int = 0,
+    expected_mode: int = 0o644,
+) -> dict:
+    with open_admin_directory(path.parent, anchor, expected_uid) as parent_fd:
+        try:
+            fd, data, metadata = open_regular_at(parent_fd, path.name, MAX_ADMIN_FILE_BYTES)
+        except OSError as exc:
+            raise AdminError("registry_unavailable", f"could not read registry: {exc}")
+        try:
+            if (
+                metadata.st_uid != expected_uid
+                or metadata.st_gid != expected_gid
+                or stat.S_IMODE(metadata.st_mode) != expected_mode
+            ):
+                raise AdminError("unsafe_registry", "registry file has unsafe owner or permissions")
+            registry = broker.decode_json(data)
+            if not isinstance(registry, dict):
+                raise AdminError("unsafe_registry", "registry is not an object")
+            require_exact_keys(registry, {"schema_version", "registrations"}, "registry")
+            if registry["schema_version"] != 1 or not isinstance(registry["registrations"], list):
+                raise AdminError("unsafe_registry", "registry schema is invalid")
+            return registry
+        finally:
+            os.close(fd)
+
+
+def write_registry_file_safely(
+    path: Path,
+    data: bytes,
+    expected_mode: int = 0o644,
+    *,
+    replace: bool = False,
+    expected_uid: int = 0,
+    expected_gid: int = 0,
+    anchor: Path = Path("/"),
+) -> None:
+    with open_admin_directory(path.parent, anchor, expected_uid) as parent_fd:
+        try:
+            fd, existing, metadata = open_regular_at(parent_fd, path.name, len(data) + 1)
+        except FileNotFoundError:
+            fd = -1
+            existing = None
+            metadata = None
+
+        if metadata is not None and (
+            metadata.st_uid != expected_uid
+            or metadata.st_gid != expected_gid
+            or stat.S_IMODE(metadata.st_mode) != expected_mode
+            or metadata.st_nlink != 1
+        ):
+            if fd >= 0:
+                os.close(fd)
+            raise AdminError("unsafe_registry", f"registry file metadata differs: {path}")
+
+        if existing is not None and not replace:
+            try:
+                if (
+                    existing != data
+                    or metadata is None
+                    or metadata.st_uid != expected_uid
+                    or stat.S_IMODE(metadata.st_mode) != expected_mode
+                ):
+                    raise AdminError("protected_file_conflict", f"registry file differs: {path}")
+                os.fsync(fd)
+                os.fsync(parent_fd)
+            finally:
+                os.close(fd)
+            return
+
+        if fd >= 0:
+            os.close(fd)
+
+        pending = f".{path.name}.pending"
+        remove_stale_pending(
+            parent_fd,
+            pending,
+            data,
+            expected_uid,
+            expected_gid,
+            expected_mode,
+        )
+
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0)
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        temp_fd = os.open(pending, flags, expected_mode, dir_fd=parent_fd)
+        try:
+            os.fchown(temp_fd, expected_uid, expected_gid)
+            os.fchmod(temp_fd, expected_mode)
+            write_all(temp_fd, data)
+            os.fsync(temp_fd)
+        finally:
+            os.close(temp_fd)
+
+        try:
+            if replace:
+                os.replace(pending, path.name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
+            else:
+                rename_noreplace(parent_fd, pending, path.name)
+            os.fsync(parent_fd)
+        except FileExistsError:
+            os.unlink(pending, dir_fd=parent_fd)
+            os.fsync(parent_fd)
+            fd, existing, metadata = open_regular_at(parent_fd, path.name, len(data) + 1)
+            try:
+                if (
+                    existing != data
+                    or metadata.st_uid != expected_uid
+                    or stat.S_IMODE(metadata.st_mode) != expected_mode
+                ):
+                    raise AdminError("protected_file_conflict", f"registry file differs: {path}")
+                os.fsync(fd)
+                os.fsync(parent_fd)
+            finally:
+                os.close(fd)
+
+
+def enroll_repository(
+    registry_path: Path,
+    repo_path: Path,
+    ledger_id: str,
+    socket_path: Path,
+    *,
+    registry_owner_uid: int = 0,
+    registry_owner_gid: int = 0,
+    registry_anchor: Path = Path("/"),
+    request_sender: Callable[[Path, object], dict] = broker.send_request,
+) -> dict:
+    if repo_path.is_symlink():
+        raise AdminError("unsafe_enrollment", "repository path must not be a symlink")
+    canonical_repo = repo_path.resolve(strict=True)
+    migration = validate_local_ledger(canonical_repo)
+    registry_data = {"schema_version": 1, "registrations": []}
+    if registry_path.exists():
+        try:
+            registry_data = read_registry_file_safely(
+                registry_path,
+                registry_owner_uid,
+                registry_anchor,
+                registry_owner_gid,
+            )
+        except Exception as exc:
+            raise AdminError("registry_corrupt", f"Existing registry file is corrupt: {exc}")
+
+    operation = {"kind": "ledger.enroll", **migration}
+    operation_digest = broker.sha256_text(
+        broker.canonical_json({"ledger_id": ledger_id, "operation": operation})
+    )
+    request = {
+        "protocol_version": broker.PROTOCOL_VERSION,
+        "action": "commit",
+        "ledger_id": ledger_id,
+        "operation_key": f"enroll-{operation_digest[:48]}",
+        "operation": operation,
+        "expected": [],
+        "blob": None,
+    }
+    try:
+        response = request_sender(socket_path, request)
+    except (broker.BrokerError, OSError, TimeoutError) as exc:
+        raise AdminError("broker_unavailable", f"Enrollment broker request failed: {exc}")
+    if not isinstance(response, dict):
+        raise AdminError("invalid_broker_receipt", "Broker enrollment response is not an object")
+    if not response.get("ok") or not isinstance(response.get("receipt"), dict):
+        error = response.get("error", {})
+        raise AdminError(
+            "enrollment_rejected",
+            f"Broker rejected enrollment: {error.get('code', 'invalid_response')}",
+        )
+    receipt = response["receipt"]
+    policy = receipt.get("policy")
+    if (
+        receipt.get("ledger_id") != ledger_id
+        or receipt.get("operation") != "ledger.enroll"
+        or receipt.get("operation_key") != request["operation_key"]
+        or receipt.get("commit_sequence") != 1
+        or not isinstance(policy, dict)
+        or set(policy) != {"id", "generation", "sha256"}
+        or not isinstance(policy["id"], str)
+        or not policy["id"]
+        or not isinstance(policy["generation"], int)
+        or isinstance(policy["generation"], bool)
+        or policy["generation"] < 1
+        or not isinstance(policy["sha256"], str)
+        or not broker.VALID_SHA256.fullmatch(policy["sha256"])
+        or not isinstance(receipt.get("receipt_hash"), str)
+        or not broker.VALID_SHA256.fullmatch(receipt["receipt_hash"])
+    ):
+        raise AdminError("invalid_broker_receipt", "Broker enrollment receipt is inconsistent")
+
+    registration = {
+        "repository_path": str(canonical_repo),
+        "ledger_id": ledger_id,
+        "socket_path": str(socket_path),
+        **migration,
+        "policy_binding": receipt["policy"],
+        "first_broker_sequence": receipt["commit_sequence"],
+        "enrollment_receipt_hash": receipt["receipt_hash"],
+    }
+    registrations = []
+    matched = False
+    for existing in registry_data["registrations"]:
+        if not isinstance(existing, dict) or "repository_path" not in existing:
+            raise AdminError("unsafe_registry", "registry contains a malformed registration")
+        if Path(existing["repository_path"]).resolve() == canonical_repo:
+            if existing != registration:
+                raise AdminError("enrollment_conflict", "repository is enrolled differently")
+            matched = True
+        registrations.append(existing)
+    if not matched:
+        registrations.append(registration)
+    registry_data["registrations"] = registrations
+    content_bytes = (broker.canonical_json(registry_data) + "\n").encode("utf-8")
+    try:
+        write_registry_file_safely(
+            registry_path,
+            content_bytes,
+            expected_mode=0o644,
+            replace=True,
+            expected_uid=registry_owner_uid,
+            expected_gid=registry_owner_gid,
+            anchor=registry_anchor,
+        )
+    except Exception as exc:
+        raise AdminError(
+            "registry_publication_pending",
+            f"Broker committed enrollment but registry publication failed: {exc}",
+            receipt_hash=receipt["receipt_hash"],
+        )
+
+    return {
+        "ok": True,
+        "enrolled_path": str(canonical_repo),
+        "ledger_id": ledger_id,
+        "anchor_records_count": len(migration["anchor_records"]),
+        "legacy_anchor_sha256": migration["legacy_anchor_sha256"],
+        "first_broker_sequence": receipt["commit_sequence"],
+        "policy_binding": receipt["policy"],
+        "idempotent_replay": response.get("idempotent_replay", False) or matched,
+    }
+
+
 def absolute_path(value: str, field: str) -> Path:
     path = Path(value)
     if not path.is_absolute():
@@ -3096,6 +3561,10 @@ def build_parser() -> argparse.ArgumentParser:
     revoke.add_argument("--expected-policy-sha256", required=True)
     commands.add_parser("audit")
     commands.add_parser("preflight")
+
+    enroll = commands.add_parser("enroll")
+    enroll.add_argument("--repository-path", required=True)
+
     return parser
 
 
@@ -3134,6 +3603,29 @@ def main(argv: list[str] | None = None) -> int:
             )
         elif args.command == "audit":
             result = audit_deployment(layout, 0, 0)
+        elif args.command == "enroll":
+            repo_path = absolute_path(args.repository_path, "repository-path")
+            deployment = audit_deployment(layout, 0, 0)
+            if deployment["current"]["state"] != "active":
+                raise AdminError("policy_revoked", "cannot enroll under a revoked policy")
+            boundary = privilege_preflight(layout, 0, 0)
+            if not boundary["boundary_ready"]:
+                unresolved = [
+                    check["id"]
+                    for check in boundary["checks"]
+                    if check["status"] not in {"pass", "not_applicable"}
+                ]
+                raise AdminError(
+                    "privilege_precondition_unproven",
+                    "enrollment is blocked until every privilege precondition passes",
+                    unresolved_checks=unresolved,
+                )
+            result = enroll_repository(
+                REGISTRY_PATH,
+                repo_path,
+                deployment["ledger_id"],
+                layout.socket_path,
+            )
         else:
             result = privilege_preflight(layout, 0, 0)
         print(broker.canonical_json(result))

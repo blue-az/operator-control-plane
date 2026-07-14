@@ -321,6 +321,61 @@ class TestAuthorityBroker(unittest.TestCase):
         finally:
             conn.close()
 
+    def test_root_enrollment_is_first_idempotent_broker_commit(self) -> None:
+        self.init_store({os.getuid(): ["builder"]})
+        identity = {
+            "repository_path": str(self.temp_dir),
+            "repository_device": 1,
+            "repository_inode": 2,
+            "operator_device": 1,
+            "operator_inode": 3,
+            "ledger_device": 1,
+            "ledger_inode": 4,
+        }
+        anchors = [
+            {
+                "record_type": "task",
+                "record_id": "legacy-task",
+                "version": 2,
+                "event_hash": "a" * 64,
+            }
+        ]
+        request = {
+            "protocol_version": 1,
+            "action": "commit",
+            "ledger_id": "ledger-test",
+            "operation_key": "enroll-test-ledger",
+            "operation": {
+                "kind": "ledger.enroll",
+                "repository_identity": identity,
+                "anchor_records": anchors,
+                "legacy_anchor_sha256": authority_broker.sha256_text(
+                    authority_broker.canonical_json(anchors)
+                ),
+            },
+            "expected": [],
+            "blob": None,
+        }
+        broker = authority_broker.AuthorityBroker(
+            authority_broker.AuthorityStore(self.store_path, self.content_dir)
+        )
+        root_peer = authority_broker.PeerCredentials(123, 0, 0)
+        response, committed = broker.handle(request, root_peer)
+        self.assertTrue(committed)
+        self.assertEqual(response["receipt"]["commit_sequence"], 1)
+        self.assertEqual(response["receipt"]["operation"], "ledger.enroll")
+        replay, committed = broker.handle(request, root_peer)
+        self.assertFalse(committed)
+        self.assertTrue(replay["idempotent_replay"])
+        self.assertEqual(replay["receipt"], response["receipt"])
+
+        with self.assertRaises(authority_broker.BrokerError) as caught:
+            broker.handle(
+                {**request, "operation_key": "enroll-not-root"},
+                authority_broker.PeerCredentials(124, os.getuid(), os.getgid()),
+            )
+        self.assertEqual(caught.exception.code, "root_required")
+
     @staticmethod
     def event_for(receipt: dict, record_type: str) -> dict:
         return next(event for event in receipt["events"] if event["record_type"] == record_type)

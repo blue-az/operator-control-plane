@@ -3275,6 +3275,21 @@ def doctor_cmd(args) -> int:
             print("-" * 80)
             return 1
 
+        if broker_policy != enrollment.policy_binding:
+            print("status: policy_rotated")
+            print(
+                "[Error] Broker policy binding differs from the root-managed enrollment: "
+                f"enrolled={canonical_json(enrollment.policy_binding)}, "
+                f"broker={canonical_json(broker_policy)}"
+            )
+            print("-" * 80)
+            return 1
+        if through_seq < enrollment.first_broker_sequence:
+            print("status: divergent_or_forged_local")
+            print("[Error] Broker history predates the committed enrollment sequence.")
+            print("-" * 80)
+            return 1
+
         # Broker is available, check journal status read-only
         journal_path = os.path.join(op_dir, "client_journal.sqlite3")
         journal_error = None
@@ -3317,10 +3332,11 @@ def doctor_cmd(args) -> int:
             print("-" * 80)
             return 1
 
-        if last_applied < through_seq or pending_count > 0:
+        effective_sequence = max(last_applied, enrollment.first_broker_sequence)
+        if effective_sequence < through_seq or pending_count > 0:
             print("status: projection_pending")
             print(
-                f"[Warning] Projections are pending. Local sequence: {last_applied}, Broker sequence: {through_seq}"
+                f"[Warning] Projections are pending. Local sequence: {effective_sequence}, Broker sequence: {through_seq}"
             )
             print("-" * 80)
             return 1
@@ -3345,19 +3361,11 @@ def doctor_cmd(args) -> int:
             projection_table = conn_ledger.execute(
                 "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'authority_projection_events'"
             ).fetchone()
-            projection_events_count = 0
-            if projection_table:
-                projection_events_count = conn_ledger.execute(
-                    "SELECT COUNT(*) FROM authority_projection_events"
-                ).fetchone()[0]
-            ledger_events_count = conn_ledger.execute(
-                "SELECT COUNT(*) FROM ledger_events"
-            ).fetchone()[0]
-            if projection_events_count == 0 and (ledger_events_count > 0 or records):
+            if not projection_table and records:
                 print("status: projection_schema_migration_required")
                 print(
                     "[Warning] This ledger predates broker-projection-version tracking "
-                    "(authority_projection_events is empty but ledger_events is not). "
+                    "(authority_projection_events table is missing). "
                     "Divergence cannot be checked until the ledger is re-synced."
                 )
                 print("-" * 80)
@@ -3423,26 +3431,197 @@ def doctor_cmd(args) -> int:
                         issues.append(f"[Error] YAML payload differs from broker for {rtype} {rid}")
                         diverged = True
 
-                # Check for local events not in snapshot (forgeries)
-                projection_table = conn_ledger.execute(
-                    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'authority_projection_events'"
-                ).fetchone()
-                local_records = []
-                if projection_table:
-                    local_records = conn_ledger.execute(
-                        """
-                        SELECT record_type, record_id, MAX(broker_version) AS ver
-                        FROM authority_projection_events
-                        GROUP BY record_type, record_id
-                        """
-                    ).fetchall()
+                # Check for local events not in snapshot (forgeries or legacy records)
+                local_records = conn_ledger.execute(
+                    """
+                    SELECT record_type, record_id, MAX(version) AS ver
+                    FROM ledger_events
+                    GROUP BY record_type, record_id
+                    """
+                ).fetchall()
+
                 snapshot_keys = {(r["record_type"], r["record_id"]) for r in records}
+                anchor_map = {
+                    (r["record_type"], r["record_id"]): (r["version"], r["event_hash"])
+                    for r in enrollment.anchor_records
+                }
+
                 for lr in local_records:
-                    if (lr["record_type"], lr["record_id"]) not in snapshot_keys:
+                    # Strip task_id prefix for evidence/handoff types when checking snapshot
+                    snapshot_rid = lr["record_id"]
+                    if lr["record_type"] in {"evidence", "handoff"} and "/" in snapshot_rid:
+                        snapshot_rid = snapshot_rid.split("/", 1)[1]
+
+                    snapshot_key = (lr["record_type"], snapshot_rid)
+
+                    # 1. If it exists in the broker snapshot
+                    if snapshot_key in snapshot_keys:
+                        continue
+
+                    # 2. If it does not exist in the broker snapshot, it MUST be a legacy record in anchor_map
+                    lr_key = (lr["record_type"], lr["record_id"])
+                    if lr_key in anchor_map:
+                        anchor_ver, anchor_hash = anchor_map[lr_key]
+                        if lr["ver"] > anchor_ver:
+                            issues.append(
+                                f"[Error] Local forged record found: {lr['record_type']} {lr['record_id']} "
+                                f"(exceeds pre-enrollment anchor version {anchor_ver})"
+                            )
+                            diverged = True
+                            continue
+
+                        row_hash = conn_ledger.execute(
+                            "SELECT event_hash FROM ledger_events WHERE record_type = ? AND record_id = ? AND version = ?",
+                            (lr["record_type"], lr["record_id"], anchor_ver),
+                        ).fetchone()
+                        if not row_hash or row_hash[0] != anchor_hash:
+                            issues.append(
+                                f"[Error] Legacy record hash mismatch for {lr['record_type']} {lr['record_id']} "
+                                f"at version {anchor_ver}"
+                            )
+                            diverged = True
+                    else:
                         issues.append(
-                            f"[Error] Local forged record found: {lr['record_type']} {lr['record_id']}"
+                            f"[Error] Local forged record found: {lr['record_type']} {lr['record_id']} "
+                            f"(not present in broker snapshot or pre-enrollment anchor)"
                         )
                         diverged = True
+
+                # Check legacy-only records YAML projections match database
+                for reg in enrollment.anchor_records:
+                    rtype = reg["record_type"]
+                    rid = reg["record_id"]
+                    if (rtype, rid) not in snapshot_keys:
+                        # Legacy-only record! Check its YAML projection
+                        if rtype == "task":
+                            filepath = os.path.join(op_dir, "tasks", f"{rid}.yaml")
+                        elif rtype == "claim":
+                            filepath = os.path.join(op_dir, "claims", f"{rid}.yaml")
+                        elif rtype == "evidence":
+                            row = conn_ledger.execute(
+                                "SELECT payload_json FROM ledger_events WHERE record_type = ? AND record_id = ? AND version = ?",
+                                (rtype, rid, reg["version"]),
+                            ).fetchone()
+                            if row:
+                                try:
+                                    payload = json.loads(row[0])
+                                    task_id = payload["task_id"]
+                                    leaf_id = rid.split("/", 1)[-1]
+                                    filepath = os.path.join(
+                                        op_dir, "evidence", task_id, f"{leaf_id}.yaml"
+                                    )
+                                except Exception:
+                                    filepath = None
+                            else:
+                                filepath = None
+                        elif rtype == "handoff":
+                            row = conn_ledger.execute(
+                                "SELECT payload_json FROM ledger_events WHERE record_type = ? AND record_id = ? AND version = ?",
+                                (rtype, rid, reg["version"]),
+                            ).fetchone()
+                            if row:
+                                try:
+                                    payload = json.loads(row[0])
+                                    task_id = payload["task_id"]
+                                    leaf_id = rid.split("/", 1)[-1]
+                                    filepath = os.path.join(
+                                        op_dir, "handoffs", task_id, f"{leaf_id}.yaml"
+                                    )
+                                except Exception:
+                                    filepath = None
+                            else:
+                                filepath = None
+                        else:
+                            filepath = os.path.join(op_dir, f"{rtype}s", f"{rid}.yaml")
+
+                        if not filepath or not os.path.exists(filepath):
+                            issues.append(
+                                f"[Error] YAML projection missing for legacy record {rtype} {rid}"
+                            )
+                            diverged = True
+                            continue
+
+                        with open(filepath, "r") as f:
+                            try:
+                                local_payload = yaml.safe_load(f)
+                            except Exception as e:
+                                issues.append(
+                                    f"[Error] Failed to load YAML for legacy record {rtype} {rid}: {e}"
+                                )
+                                diverged = True
+                                continue
+
+                        row = conn_ledger.execute(
+                            "SELECT payload_json FROM ledger_events WHERE record_type = ? AND record_id = ? AND version = ?",
+                            (rtype, rid, reg["version"]),
+                        ).fetchone()
+                        if not row:
+                            issues.append(
+                                f"[Error] Legacy record {rtype} {rid} event not found in database"
+                            )
+                            diverged = True
+                            continue
+
+                        try:
+                            db_payload = json.loads(row[0])
+                        except Exception:
+                            issues.append(
+                                f"[Error] Invalid JSON payload in database for legacy record {rtype} {rid}"
+                            )
+                            diverged = True
+                            continue
+
+                        # Normalize db_payload to legacy YAML schema for comparison
+                        if rtype == "evidence":
+                            expected_payload = {
+                                "evidence_id": db_payload.get("evidence_id"),
+                                "task_id": db_payload.get("task_id"),
+                                "claim_id": db_payload.get("claim_id"),
+                                "type": db_payload.get("type"),
+                                "path_or_url": db_payload.get("path_or_url"),
+                                "hash": db_payload.get("hash"),
+                                "size": db_payload.get("size"),
+                                "verification_status": db_payload.get("verification_status"),
+                                "policy_authority": db_payload.get(
+                                    "policy_authority", "local_policy"
+                                ),
+                                "verification_authority": db_payload.get("verification_authority"),
+                            }
+                        elif rtype == "claim":
+                            expected_payload = {
+                                "claim_id": db_payload.get("claim_id"),
+                                "task_id": db_payload.get("task_id"),
+                                "type": db_payload.get("type"),
+                                "text": db_payload.get("text"),
+                                "required_gate": db_payload.get("required_gate"),
+                                "evidence_ids": db_payload.get("evidence_ids", []),
+                                "verification_status": db_payload.get("verification_status"),
+                                "policy_authority": db_payload.get(
+                                    "policy_authority", "local_policy"
+                                ),
+                                "verification_authority": db_payload.get("verification_authority"),
+                            }
+                        elif rtype == "task":
+                            expected_payload = {
+                                "task_id": db_payload.get("task_id"),
+                                "objective": db_payload.get("objective", ""),
+                                "status": db_payload.get("status"),
+                                "claim_ids": db_payload.get("claim_ids", []),
+                                "evidence_ids": db_payload.get("evidence_ids", []),
+                                "verified_claim_ids": db_payload.get("verified_claim_ids", []),
+                                "policy_authority": db_payload.get(
+                                    "policy_authority", "local_policy"
+                                ),
+                                "verification_authority": db_payload.get("verification_authority"),
+                            }
+                        else:
+                            expected_payload = db_payload
+
+                        if canonical_json(local_payload) != canonical_json(expected_payload):
+                            issues.append(
+                                f"[Error] YAML payload differs from database for legacy record {rtype} {rid}"
+                            )
+                            diverged = True
 
                 # Validate the complete projected chain without treating broker hashes as P0 hashes.
                 chain_rows = conn_ledger.execute(

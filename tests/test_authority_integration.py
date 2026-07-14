@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import array
+import hashlib
 import json
 import os
 import select
 import shutil
 import socket
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -19,6 +21,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 BROKER_BIN = REPO_ROOT / "operator-broker"
 OPERATOR_BIN = REPO_ROOT / "operator"
+
+import authority_broker  # noqa: E402
 
 
 class TestAuthorityIntegration(unittest.TestCase):
@@ -39,7 +43,24 @@ class TestAuthorityIntegration(unittest.TestCase):
         self.registry_path = self.temp_dir / "registry.json"
         self.ledger_id = "ledger-test"
 
-        # Generate mock registry
+        uid = os.getuid()
+        policy_document = {
+            "policy_id": "standalone-policy",
+            "policy_generation": 1,
+            "ledgers": ["ledger-test"],
+            "roles": {str(uid): ["builder", "verifier"]},
+        }
+        policy_sha256 = hashlib.sha256(
+            json.dumps(
+                policy_document,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=True,
+            ).encode("utf-8")
+        ).hexdigest()
+        repository_stat = self.temp_dir.lstat()
+        operator_stat = (self.temp_dir / ".operator").lstat()
+        ledger_stat = (self.temp_dir / ".operator" / "ledger.sqlite3").lstat()
         self.registry_path.write_text(
             json.dumps(
                 {
@@ -49,6 +70,24 @@ class TestAuthorityIntegration(unittest.TestCase):
                             "repository_path": str(self.temp_dir),
                             "ledger_id": "ledger-test",
                             "socket_path": str(self.socket_path),
+                            "repository_identity": {
+                                "repository_path": str(self.temp_dir),
+                                "repository_device": repository_stat.st_dev,
+                                "repository_inode": repository_stat.st_ino,
+                                "operator_device": operator_stat.st_dev,
+                                "operator_inode": operator_stat.st_ino,
+                                "ledger_device": ledger_stat.st_dev,
+                                "ledger_inode": ledger_stat.st_ino,
+                            },
+                            "anchor_records": [],
+                            "legacy_anchor_sha256": hashlib.sha256(b"[]").hexdigest(),
+                            "policy_binding": {
+                                "id": "standalone-policy",
+                                "generation": 1,
+                                "sha256": policy_sha256,
+                            },
+                            "first_broker_sequence": 1,
+                            "enrollment_receipt_hash": "0" * 64,
                         }
                     ],
                 }
@@ -80,17 +119,7 @@ class TestAuthorityIntegration(unittest.TestCase):
 
         # Set up policy config for broker
         # Assign roles: current UID gets both builder and verifier roles for tests
-        uid = os.getuid()
-        self.bootstrap_config_path.write_text(
-            json.dumps(
-                {
-                    "policy_id": "standalone-policy",
-                    "policy_generation": 1,
-                    "ledgers": ["ledger-test"],
-                    "roles": {str(uid): ["builder", "verifier"]},
-                }
-            )
-        )
+        self.bootstrap_config_path.write_text(json.dumps(policy_document))
 
         # Bootstrap broker store
         res = subprocess.run(
@@ -109,6 +138,33 @@ class TestAuthorityIntegration(unittest.TestCase):
             timeout=10,
         )
         self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        registry = json.loads(self.registry_path.read_text())
+        registration = registry["registrations"][0]
+        enrollment_request = {
+            "protocol_version": 1,
+            "action": "commit",
+            "ledger_id": self.ledger_id,
+            "operation_key": "integration-fixture-enrollment",
+            "operation": {
+                "kind": "ledger.enroll",
+                "repository_identity": registration["repository_identity"],
+                "anchor_records": [],
+                "legacy_anchor_sha256": registration["legacy_anchor_sha256"],
+            },
+            "expected": [],
+            "blob": None,
+        }
+        fixture_broker = authority_broker.AuthorityBroker(
+            authority_broker.AuthorityStore(self.store_path, self.content_dir)
+        )
+        enrollment_response, committed = fixture_broker.handle(
+            enrollment_request,
+            authority_broker.PeerCredentials(os.getpid(), 0, 0),
+        )
+        self.assertTrue(committed)
+        registration["enrollment_receipt_hash"] = enrollment_response["receipt"]["receipt_hash"]
+        self.registry_path.write_text(json.dumps(registry))
 
         # Start broker server
         self.start_broker_server()
@@ -481,7 +537,7 @@ class TestAuthorityIntegration(unittest.TestCase):
         # Verify client_journal database file was NOT created
         self.assertFalse(journal_path.exists())
 
-    def test_doctor_reports_pre_projection_schema_without_mutating(self) -> None:
+    def test_doctor_rejects_post_enrollment_local_write_without_mutating(self) -> None:
         res = self.run_operator(
             "task-create", "--id", "legacy-task", "--objective", "Legacy local task"
         )
@@ -500,7 +556,8 @@ class TestAuthorityIntegration(unittest.TestCase):
 
         res = self.run_operator("doctor")
         self.assertNotEqual(res.returncode, 0)
-        self.assertIn("status: projection_schema_migration_required", res.stdout)
+        self.assertIn("status: divergent_or_forged_local", res.stdout)
+        self.assertIn("Local forged record found: task legacy-task", res.stdout)
         self.assertEqual(db_path.read_bytes(), before)
 
         conn = sqlite3.connect(db_path)
@@ -765,19 +822,6 @@ class TestAuthorityIntegration(unittest.TestCase):
         conn_ledger.commit()
         conn_ledger.close()
 
-        # Write a forged claim YAML version 2
-        claim_yaml_path = self.temp_dir / ".operator" / "claims" / "claim-0001.yaml"
-        with open(claim_yaml_path, "w") as f:
-            yaml.safe_dump(payload, f)
-
-        # Verify doctor reports divergent_or_forged_local because version is higher
-        res = self.run_operator("doctor")
-        self.assertNotEqual(res.returncode, 0)
-
-        # Reconciliation must not disable append-only protections or erase local history.
-        res = self.run_operator("authority-reconcile")
-        self.assertNotEqual(res.returncode, 0)
-
         # The forged row remains forensic evidence and doctor continues to fail closed.
         conn_ledger = sqlite3.connect(str(db_path))
         max_ver = conn_ledger.execute(
@@ -788,6 +832,263 @@ class TestAuthorityIntegration(unittest.TestCase):
         res = self.run_operator("doctor")
         self.assertNotEqual(res.returncode, 0)
         self.assertIn("status: divergent_or_forged_local", res.stdout)
+
+    def test_migration_and_anchor_records(self) -> None:
+        import hashlib
+
+        import authority_client
+
+        def test_canonical_json(value: object) -> str:
+            return json.dumps(
+                value,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=True,
+                allow_nan=False,
+            )
+
+        def test_event_hash(
+            record_type: str,
+            record_id: str,
+            version: int,
+            event_type: str,
+            payload_json: str,
+            actor_uid: int | None,
+            actor_name: str | None,
+            created_at: str,
+            source_command: str | None,
+            previous_event_hash: str | None,
+        ) -> str:
+            hash_fields = {
+                "hash_format": "operator-ledger-event-v1",
+                "record_type": record_type,
+                "record_id": record_id,
+                "version": version,
+                "event_type": event_type,
+                "payload_json": payload_json,
+                "actor_uid": actor_uid,
+                "actor_name": actor_name,
+                "created_at": created_at,
+                "source_command": source_command,
+                "previous_event_hash": previous_event_hash,
+            }
+            return hashlib.sha256(test_canonical_json(hash_fields).encode("utf-8")).hexdigest()
+
+        # 1. Create a legacy task-legacy record
+        legacy_yaml = {
+            "task_id": "task-legacy",
+            "objective": "Legacy task",
+            "status": "proposed",
+            "claim_ids": [],
+            "evidence_ids": [],
+            "verified_claim_ids": [],
+            "policy_authority": "local_policy",
+            "verification_authority": None,
+        }
+
+        payload_json = test_canonical_json(legacy_yaml)
+        event_hash = test_event_hash(
+            record_type="task",
+            record_id="task-legacy",
+            version=1,
+            event_type="record_created",
+            payload_json=payload_json,
+            actor_uid=1000,
+            actor_name="blueaz",
+            created_at="2026-07-14T16:00:00Z",
+            source_command="task-create",
+            previous_event_hash=None,
+        )
+
+        db_path = self.temp_dir / ".operator" / "ledger.sqlite3"
+        conn_ledger = sqlite3.connect(str(db_path))
+        conn_ledger.execute(
+            """
+            INSERT INTO ledger_events (
+                event_id, record_type, record_id, version, event_type, payload_json,
+                actor_uid, actor_name, created_at, source_command, event_hash
+            ) VALUES (?, 'task', 'task-legacy', 1, 'record_created', ?, 1000, 'blueaz', '2026-07-14T16:00:00Z', 'task-create', ?)
+        """,
+            (event_hash, payload_json, event_hash),
+        )
+        conn_ledger.commit()
+        conn_ledger.close()
+
+        # Write legacy task YAML
+        tasks_dir = self.temp_dir / ".operator" / "tasks"
+        tasks_dir.mkdir(exist_ok=True)
+        with open(tasks_dir / "task-legacy.yaml", "w") as f:
+            yaml.safe_dump(legacy_yaml, f)
+
+        # Replace the synthetic Issue #6 registration with an explicit migration.
+        import authority_admin
+
+        self.registry_path.write_text(json.dumps({"schema_version": 1, "registrations": []}))
+
+        def committed_enrollment(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            return {
+                "ok": True,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.enroll",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 1,
+                    "policy": {
+                        "id": "standalone-policy",
+                        "generation": 1,
+                        "sha256": hashlib.sha256(
+                            json.dumps(
+                                {
+                                    "policy_id": "standalone-policy",
+                                    "policy_generation": 1,
+                                    "ledgers": ["ledger-test"],
+                                    "roles": {str(os.getuid()): ["builder", "verifier"]},
+                                },
+                                sort_keys=True,
+                                separators=(",", ":"),
+                            ).encode("utf-8")
+                        ).hexdigest(),
+                    },
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        res = authority_admin.enroll_repository(
+            self.registry_path,
+            self.temp_dir,
+            self.ledger_id,
+            self.socket_path,
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.temp_dir,
+            request_sender=committed_enrollment,
+        )
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["anchor_records_count"], 1)
+
+        # 2. Verify doctor reports current status (acknowledges legacy record)
+        res_doc = self.run_operator("doctor")
+        self.assertEqual(res_doc.returncode, 0, res_doc.stderr + res_doc.stdout)
+        self.assertIn("status: current", res_doc.stdout)
+
+        # 3. Create a local-only forged claim (without broker or registry enrollment)
+        forged_yaml = {
+            "claim_id": "claim-forged",
+            "task_id": "task-legacy",
+            "type": "deployment_state",
+            "text": "Forged claim",
+            "verification_status": "proposed",
+            "policy_authority": "local_policy",
+            "verification_authority": None,
+        }
+        payload_json_forged = test_canonical_json(forged_yaml)
+        event_hash_forged = test_event_hash(
+            record_type="claim",
+            record_id="claim-forged",
+            version=1,
+            event_type="record_created",
+            payload_json=payload_json_forged,
+            actor_uid=1000,
+            actor_name="blueaz",
+            created_at="2026-07-14T16:05:00Z",
+            source_command="claim-add",
+            previous_event_hash=None,
+        )
+
+        conn_ledger = sqlite3.connect(str(db_path))
+        conn_ledger.execute(
+            """
+            INSERT INTO ledger_events (
+                event_id, record_type, record_id, version, event_type, payload_json,
+                actor_uid, actor_name, created_at, source_command, event_hash
+            ) VALUES (?, 'claim', 'claim-forged', 1, 'record_created', ?, 1000, 'blueaz', '2026-07-14T16:05:00Z', 'claim-add', ?)
+        """,
+            (event_hash_forged, payload_json_forged, event_hash_forged),
+        )
+        conn_ledger.commit()
+        conn_ledger.close()
+
+        # Write forged claim YAML
+        claims_dir = self.temp_dir / ".operator" / "claims"
+        claims_dir.mkdir(exist_ok=True)
+        with open(claims_dir / "claim-forged.yaml", "w") as f:
+            yaml.safe_dump(forged_yaml, f)
+
+        # Verify doctor reports divergent_or_forged_local
+        res_doc = self.run_operator("doctor")
+        self.assertNotEqual(res_doc.returncode, 0)
+        self.assertIn("status: divergent_or_forged_local", res_doc.stdout)
+        self.assertIn("Local forged record found: claim claim-forged", res_doc.stdout)
+
+        # Clean up the forged claim from database and disk
+        conn_ledger = sqlite3.connect(str(db_path))
+        conn_ledger.execute("DROP TRIGGER IF EXISTS ledger_events_no_update")
+        conn_ledger.execute("DROP TRIGGER IF EXISTS ledger_events_no_delete")
+        conn_ledger.execute("DELETE FROM ledger_events WHERE record_id = 'claim-forged'")
+        conn_ledger.executescript(
+            """
+            CREATE TRIGGER IF NOT EXISTS ledger_events_no_update BEFORE UPDATE ON ledger_events BEGIN SELECT RAISE(ABORT, 'ledger_events is append-only'); END;
+            CREATE TRIGGER IF NOT EXISTS ledger_events_no_delete BEFORE DELETE ON ledger_events BEGIN SELECT RAISE(ABORT, 'ledger_events is append-only'); END;
+            """
+        )
+        conn_ledger.commit()
+        conn_ledger.close()
+        (claims_dir / "claim-forged.yaml").unlink()
+
+        # Verify doctor is current again
+        res_doc = self.run_operator("doctor")
+        self.assertEqual(res_doc.returncode, 0)
+
+        # 4. Mutate the legacy record locally to version 2 (exceeding anchor version)
+        legacy_yaml_v2 = dict(legacy_yaml)
+        legacy_yaml_v2["status"] = "complete"
+        payload_json_v2 = test_canonical_json(legacy_yaml_v2)
+        event_hash_v2 = test_event_hash(
+            record_type="task",
+            record_id="task-legacy",
+            version=2,
+            event_type="record_updated",
+            payload_json=payload_json_v2,
+            actor_uid=1000,
+            actor_name="blueaz",
+            created_at="2026-07-14T16:10:00Z",
+            source_command="task-transition",
+            previous_event_hash=event_hash,
+        )
+
+        conn_ledger = sqlite3.connect(str(db_path))
+        # Disable triggers temporarily to insert version 2
+        conn_ledger.execute("DROP TRIGGER IF EXISTS ledger_events_no_update")
+        conn_ledger.execute("DROP TRIGGER IF EXISTS ledger_events_no_delete")
+        conn_ledger.execute(
+            """
+            INSERT INTO ledger_events (
+                event_id, record_type, record_id, version, event_type, payload_json,
+                actor_uid, actor_name, created_at, source_command, previous_event_hash, event_hash
+            ) VALUES (?, 'task', 'task-legacy', 2, 'record_updated', ?, 1000, 'blueaz', '2026-07-14T16:10:00Z', 'task-transition', ?, ?)
+        """,
+            (event_hash_v2, payload_json_v2, event_hash, event_hash_v2),
+        )
+        # Recreate triggers
+        conn_ledger.executescript(
+            """
+            CREATE TRIGGER IF NOT EXISTS ledger_events_no_update BEFORE UPDATE ON ledger_events BEGIN SELECT RAISE(ABORT, 'ledger_events is append-only'); END;
+            CREATE TRIGGER IF NOT EXISTS ledger_events_no_delete BEFORE DELETE ON ledger_events BEGIN SELECT RAISE(ABORT, 'ledger_events is append-only'); END;
+            """
+        )
+        conn_ledger.commit()
+        conn_ledger.close()
+
+        # Write mutated legacy YAML
+        with open(tasks_dir / "task-legacy.yaml", "w") as f:
+            yaml.safe_dump(legacy_yaml_v2, f)
+
+        # Verify doctor reports divergent_or_forged_local because version exceeds anchor
+        res_doc = self.run_operator("doctor")
+        self.assertNotEqual(res_doc.returncode, 0)
+        self.assertIn("status: divergent_or_forged_local", res_doc.stdout)
+        self.assertIn("exceeds pre-enrollment anchor version 1", res_doc.stdout)
 
 
 if __name__ == "__main__":

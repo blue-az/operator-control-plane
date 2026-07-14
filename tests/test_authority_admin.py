@@ -1463,6 +1463,77 @@ class TestAuthorityAdmin(unittest.TestCase):
             2000,
         )
 
+    def test_enrollment_lifecycle(self) -> None:
+        registry_path = self.root / "test-registry.json"
+        repo_path = self.root / "test-repo"
+        repo_path.mkdir()
+        for arguments in (
+            ("init",),
+            ("task-create", "--objective", "Legacy task", "--id", "task-1"),
+        ):
+            completed = subprocess.run(
+                [str(REPO_ROOT / "operator"), *arguments],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr + completed.stdout)
+
+        def committed_enrollment(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            return {
+                "ok": True,
+                "idempotent_replay": False,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.enroll",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 1,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "2" * 64,
+                },
+            }
+
+        res = authority_admin.enroll_repository(
+            registry_path,
+            repo_path,
+            "ledger-test",
+            Path("/tmp/socket.sock"),
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.root,
+            request_sender=committed_enrollment,
+        )
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["ledger_id"], "ledger-test")
+        self.assertEqual(res["anchor_records_count"], 1)
+
+        # Verify registry file is written correctly
+        self.assertTrue(registry_path.exists())
+        with open(registry_path, "r") as f:
+            registry_data = json.load(f)
+        self.assertEqual(registry_data["schema_version"], 1)
+        self.assertEqual(len(registry_data["registrations"]), 1)
+        reg = registry_data["registrations"][0]
+        self.assertEqual(reg["ledger_id"], "ledger-test")
+        self.assertEqual(len(reg["anchor_records"]), 1)
+        self.assertEqual(reg["anchor_records"][0]["record_id"], "task-1")
+        self.assertEqual(reg["anchor_records"][0]["version"], 1)
+        self.assertEqual(reg["first_broker_sequence"], 1)
+        self.assertEqual(reg["policy_binding"]["sha256"], "1" * 64)
+
+        replay = authority_admin.enroll_repository(
+            registry_path,
+            repo_path,
+            "ledger-test",
+            Path("/tmp/socket.sock"),
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.root,
+            request_sender=committed_enrollment,
+        )
+        self.assertTrue(replay["idempotent_replay"])
+
 
 if __name__ == "__main__":
     unittest.main()

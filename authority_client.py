@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import array
+import hashlib
 import json
 import os
 import socket
@@ -32,6 +33,12 @@ class Enrollment:
     ledger_id: str
     socket_path: str
     repository_path: Path
+    repository_identity: dict
+    anchor_records: tuple[dict, ...]
+    legacy_anchor_sha256: str
+    policy_binding: dict
+    first_broker_sequence: int
+    enrollment_receipt_hash: str
 
 
 def _validate_registry_path(path: Path) -> None:
@@ -97,27 +104,133 @@ def resolve_enrollment(cwd: Path | None = None) -> Enrollment | None:
     for registration in registry["registrations"]:
         if not isinstance(registration, dict):
             raise EnrollmentError("authority registry contains a malformed registration")
+        repository_value = registration.get("repository_path")
+        if not isinstance(repository_value, str):
+            raise EnrollmentError("authority registration has an invalid repository path")
+        repository = Path(repository_value)
+        if not repository.is_absolute():
+            raise EnrollmentError("authority registration repository path must be absolute")
         try:
-            repository = Path(registration["repository_path"])
+            resolved_repository = repository.resolve(strict=True)
+        except FileNotFoundError:
+            # Deleted registrations cannot contain the strictly resolved cwd. Their
+            # remaining fields are irrelevant until an administrator removes them.
+            continue
+        expected_fields = {
+            "repository_path",
+            "ledger_id",
+            "socket_path",
+            "repository_identity",
+            "anchor_records",
+            "legacy_anchor_sha256",
+            "policy_binding",
+            "first_broker_sequence",
+            "enrollment_receipt_hash",
+        }
+        if set(registration) != expected_fields:
+            raise EnrollmentError("authority registration has an unsupported schema")
+        try:
             ledger_id = registration["ledger_id"]
             socket_path = registration["socket_path"]
         except KeyError as exc:
             raise EnrollmentError(f"authority registration is missing {exc.args[0]}") from exc
-        if not repository.is_absolute() or not isinstance(ledger_id, str) or not ledger_id:
-            raise EnrollmentError(
-                "authority registration has invalid repository or ledger identity"
-            )
+        if not isinstance(ledger_id, str) or not ledger_id:
+            raise EnrollmentError("authority registration has invalid ledger identity")
         if not isinstance(socket_path, str) or not os.path.isabs(socket_path):
             raise EnrollmentError("authority registration socket path must be absolute")
-        try:
-            resolved_repository = repository.resolve(strict=True)
-        except FileNotFoundError:
-            # A registration whose repository no longer exists on disk cannot
-            # contain the (existing, strictly-resolved) cwd. Skip it instead
-            # of letting one stale entry crash every command for every repo.
-            continue
+        repository_identity = registration["repository_identity"]
+        anchor_records = registration["anchor_records"]
+        anchor_sha256 = registration["legacy_anchor_sha256"]
+        policy_binding = registration["policy_binding"]
+        first_sequence = registration["first_broker_sequence"]
+        receipt_hash = registration["enrollment_receipt_hash"]
+        if (
+            not isinstance(repository_identity, dict)
+            or set(repository_identity)
+            != {
+                "repository_path",
+                "repository_device",
+                "repository_inode",
+                "operator_device",
+                "operator_inode",
+                "ledger_device",
+                "ledger_inode",
+            }
+            or not isinstance(anchor_records, list)
+            or not isinstance(anchor_sha256, str)
+            or len(anchor_sha256) != 64
+            or any(character not in "0123456789abcdef" for character in anchor_sha256)
+            or not isinstance(policy_binding, dict)
+            or set(policy_binding) != {"id", "generation", "sha256"}
+            or not isinstance(policy_binding.get("id"), str)
+            or not policy_binding["id"]
+            or not isinstance(policy_binding.get("generation"), int)
+            or isinstance(policy_binding["generation"], bool)
+            or policy_binding["generation"] < 1
+            or not isinstance(policy_binding.get("sha256"), str)
+            or len(policy_binding["sha256"]) != 64
+            or any(character not in "0123456789abcdef" for character in policy_binding["sha256"])
+            or not isinstance(first_sequence, int)
+            or isinstance(first_sequence, bool)
+            or first_sequence < 1
+            or not isinstance(receipt_hash, str)
+            or len(receipt_hash) != 64
+            or any(character not in "0123456789abcdef" for character in receipt_hash)
+        ):
+            raise EnrollmentError("authority registration contains invalid authority metadata")
+        for anchor in anchor_records:
+            if (
+                not isinstance(anchor, dict)
+                or set(anchor) != {"record_type", "record_id", "version", "event_hash"}
+                or not isinstance(anchor["record_type"], str)
+                or not isinstance(anchor["record_id"], str)
+                or not isinstance(anchor["version"], int)
+                or isinstance(anchor["version"], bool)
+                or anchor["version"] < 1
+                or not isinstance(anchor["event_hash"], str)
+                or len(anchor["event_hash"]) != 64
+                or any(character not in "0123456789abcdef" for character in anchor["event_hash"])
+            ):
+                raise EnrollmentError("authority registration contains a malformed anchor")
+        if canonical_json(anchor_records) != canonical_json(
+            sorted(anchor_records, key=lambda item: (item["record_type"], item["record_id"]))
+        ):
+            raise EnrollmentError("authority registration anchors are not canonical")
+        if (
+            hashlib.sha256(canonical_json(anchor_records).encode("utf-8")).hexdigest()
+            != anchor_sha256
+        ):
+            raise EnrollmentError("authority registration anchor digest differs")
         if resolved_cwd == resolved_repository or resolved_repository in resolved_cwd.parents:
-            matches.append(Enrollment(ledger_id, socket_path, resolved_repository))
+            try:
+                metadata = resolved_repository.lstat()
+                operator_metadata = (resolved_repository / ".operator").lstat()
+                ledger_metadata = (resolved_repository / ".operator" / "ledger.sqlite3").lstat()
+            except OSError as exc:
+                raise EnrollmentError(f"cannot inspect enrolled ledger identity: {exc}") from exc
+            if (
+                repository_identity.get("repository_path") != str(resolved_repository)
+                or repository_identity.get("repository_device") != metadata.st_dev
+                or repository_identity.get("repository_inode") != metadata.st_ino
+                or repository_identity.get("operator_device") != operator_metadata.st_dev
+                or repository_identity.get("operator_inode") != operator_metadata.st_ino
+                or repository_identity.get("ledger_device") != ledger_metadata.st_dev
+                or repository_identity.get("ledger_inode") != ledger_metadata.st_ino
+            ):
+                raise EnrollmentError("enrolled ledger identity has changed")
+            matches.append(
+                Enrollment(
+                    ledger_id,
+                    socket_path,
+                    resolved_repository,
+                    repository_identity,
+                    tuple(anchor_records),
+                    anchor_sha256,
+                    policy_binding,
+                    first_sequence,
+                    receipt_hash,
+                )
+            )
     if not matches:
         return None
     matches.sort(key=lambda item: len(item.repository_path.parts), reverse=True)

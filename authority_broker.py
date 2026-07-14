@@ -34,12 +34,14 @@ VALID_TOKEN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
 VALID_SHA256 = re.compile(r"[0-9a-f]{64}")
 VALID_ROLES = frozenset({"builder", "verifier"})
 OPERATION_ROLES = {
+    "ledger.enroll": None,
     "claim.create": "builder",
     "evidence.attach_draft": "builder",
     "evidence.attach_status": "verifier",
     "task.transition": "verifier",
 }
 OPERATION_RECORD_TYPES = {
+    "ledger.enroll": frozenset(),
     "claim.create": frozenset({"claim", "task"}),
     "evidence.attach_draft": frozenset({"evidence", "claim", "task"}),
     "evidence.attach_status": frozenset({"evidence", "claim", "task"}),
@@ -236,6 +238,8 @@ def read_bootstrap_config(path: Path) -> BootstrapConfig:
 
 
 def normalize_expected(raw_expected: object, operation: dict) -> list[dict]:
+    if operation["kind"] == "ledger.enroll" and raw_expected == []:
+        return []
     if not isinstance(raw_expected, list) or not raw_expected:
         raise BrokerError("invalid_request", "expected must be a non-empty list")
     expected = []
@@ -300,6 +304,93 @@ def normalize_operation(raw_operation: object) -> dict:
     kind = raw_operation.get("kind")
     if kind not in OPERATION_ROLES:
         raise BrokerError("invalid_operation", f"unsupported operation: {kind!r}")
+
+    if kind == "ledger.enroll":
+        require_exact_keys(
+            raw_operation,
+            {
+                "kind",
+                "repository_identity",
+                "anchor_records",
+                "legacy_anchor_sha256",
+            },
+            "operation",
+        )
+        identity = raw_operation.get("repository_identity")
+        if not isinstance(identity, dict):
+            raise BrokerError("invalid_request", "repository_identity must be an object")
+        require_exact_keys(
+            identity,
+            {
+                "repository_path",
+                "repository_device",
+                "repository_inode",
+                "operator_device",
+                "operator_inode",
+                "ledger_device",
+                "ledger_inode",
+            },
+            "repository_identity",
+        )
+        repository_path = identity.get("repository_path")
+        if not isinstance(repository_path, str) or not os.path.isabs(repository_path):
+            raise BrokerError("invalid_request", "repository_path must be absolute")
+        normalized_identity = {"repository_path": repository_path}
+        for field in (
+            "repository_device",
+            "repository_inode",
+            "operator_device",
+            "operator_inode",
+            "ledger_device",
+            "ledger_inode",
+        ):
+            value = identity.get(field)
+            if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+                raise BrokerError("invalid_request", f"{field} must be a positive integer")
+            normalized_identity[field] = value
+
+        raw_anchors = raw_operation.get("anchor_records")
+        if not isinstance(raw_anchors, list):
+            raise BrokerError("invalid_request", "anchor_records must be an array")
+        anchors = []
+        seen = set()
+        for index, raw_anchor in enumerate(raw_anchors):
+            if not isinstance(raw_anchor, dict):
+                raise BrokerError("invalid_request", f"anchor_records[{index}] must be an object")
+            require_exact_keys(
+                raw_anchor,
+                {"record_type", "record_id", "version", "event_hash"},
+                f"anchor_records[{index}]",
+            )
+            record_type = require_token(raw_anchor.get("record_type"), "record_type")
+            record_id = require_token(raw_anchor.get("record_id"), "record_id")
+            version = raw_anchor.get("version")
+            if not isinstance(version, int) or isinstance(version, bool) or version < 1:
+                raise BrokerError("invalid_request", "anchor version must be a positive integer")
+            key = (record_type, record_id)
+            if key in seen:
+                raise BrokerError("invalid_request", "anchor_records contains a duplicate record")
+            seen.add(key)
+            anchors.append(
+                {
+                    "record_type": record_type,
+                    "record_id": record_id,
+                    "version": version,
+                    "event_hash": require_sha256(raw_anchor.get("event_hash"), "event_hash"),
+                }
+            )
+        anchors.sort(key=lambda item: (item["record_type"], item["record_id"]))
+        anchor_digest = require_sha256(
+            raw_operation.get("legacy_anchor_sha256"), "legacy_anchor_sha256"
+        )
+        if anchor_digest != sha256_text(canonical_json(anchors)):
+            raise BrokerError("invalid_request", "legacy anchor digest does not match records")
+        return {
+            "kind": kind,
+            "repository_identity": normalized_identity,
+            "anchor_records": anchors,
+            "legacy_anchor_sha256": anchor_digest,
+        }
 
     if kind == "claim.create":
         require_exact_keys(
@@ -1197,6 +1288,25 @@ class AuthorityStore:
             raise BrokerError("unknown_ledger", f"ledger is not enrolled: {request['ledger_id']}")
         if policy["event_type"] == "revoke":
             raise BrokerError("policy_revoked", f"ledger policy is revoked: {request['ledger_id']}")
+        operation = request["operation"]
+        operation_kind = operation["kind"]
+        if operation_kind == "ledger.enroll":
+            if peer.uid != 0:
+                raise BrokerError(
+                    "root_required",
+                    "ledger enrollment requires a root SO_PEERCRED identity",
+                    peer_uid=peer.uid,
+                )
+            existing_commits = conn.execute(
+                "SELECT COUNT(*) FROM authority_commits",
+            ).fetchone()[0]
+            if existing_commits:
+                raise BrokerError(
+                    "ledger_already_active",
+                    "ledger enrollment must be the authority store's first broker commit",
+                )
+            return policy, []
+
         roles = {
             row["role"]
             for row in conn.execute(
@@ -1213,8 +1323,6 @@ class AuthorityStore:
                 f"peer UID {peer.uid} is not registered for ledger {request['ledger_id']}",
                 peer_uid=peer.uid,
             )
-        operation = request["operation"]
-        operation_kind = operation["kind"]
         required_role = OPERATION_ROLES[operation_kind]
         if required_role not in roles:
             raise BrokerError(
