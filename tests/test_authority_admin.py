@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -105,6 +106,48 @@ class TestAuthorityAdmin(unittest.TestCase):
             validate_accounts=False,
         )
         return result, policy, path
+
+    def make_evidence(
+        self,
+        policy: authority_admin.PolicyDocument,
+        *,
+        collected_at: int | None = None,
+        ledger_id: str | None = None,
+        policy_id: str | None = None,
+        policy_generation: int | None = None,
+        policy_sha256: str | None = None,
+        statuses: dict[str, str] | None = None,
+    ) -> dict:
+        checks = {
+            check_id: {
+                "status": (statuses or {}).get(check_id, "pass"),
+                "evidence": {"synthetic": True},
+            }
+            for check_id in authority_admin.EVIDENCE_CHECK_IDS
+        }
+        return {
+            "evidence_schema_version": authority_admin.EVIDENCE_SCHEMA_VERSION,
+            "ledger_id": ledger_id if ledger_id is not None else policy.ledger_id,
+            "policy_id": policy_id if policy_id is not None else policy.policy_id,
+            "policy_generation": (
+                policy_generation if policy_generation is not None else policy.generation
+            ),
+            "policy_sha256": policy_sha256 if policy_sha256 is not None else policy.sha256,
+            "collected_at": collected_at if collected_at is not None else int(time.time()),
+            "checks": checks,
+        }
+
+    def write_evidence(self, evidence: dict) -> None:
+        authority_admin.write_protected_file(
+            self.layout.evidence_path,
+            authority_admin.json_bytes(evidence),
+            0o600,
+            self.identity.admin_uid,
+            self.identity.admin_gid,
+            self.layout,
+            self.identity,
+            replace=True,
+        )
 
     def inspect(self) -> dict:
         return authority_admin.run_store_action(
@@ -1344,6 +1387,139 @@ class TestAuthorityAdmin(unittest.TestCase):
         self.assertFalse(report["boundary_ready"])
         self.assertTrue(any(item["status"] == "unknown" for item in report["checks"]))
         self.assertEqual(before, after)
+
+    def test_preflight_trusts_fresh_bound_evidence(self) -> None:
+        _, policy, _ = self.install()
+        self.write_evidence(self.make_evidence(policy))
+        report = authority_admin.privilege_preflight(
+            self.layout,
+            os.getuid(),
+            os.getgid(),
+            validate_binding=False,
+        )
+        evidence_backed = {
+            item["id"]: item["status"]
+            for item in report["checks"]
+            if item["id"] in authority_admin.EVIDENCE_CHECK_IDS
+        }
+        self.assertEqual(set(evidence_backed), set(authority_admin.EVIDENCE_CHECK_IDS))
+        self.assertTrue(all(status == "pass" for status in evidence_backed.values()))
+
+    def test_preflight_surfaces_evidence_reported_failures(self) -> None:
+        _, policy, _ = self.install()
+        self.write_evidence(self.make_evidence(policy, statuses={"process.control": "fail"}))
+        report = authority_admin.privilege_preflight(
+            self.layout,
+            os.getuid(),
+            os.getgid(),
+            validate_binding=False,
+        )
+        process_control = next(item for item in report["checks"] if item["id"] == "process.control")
+        self.assertEqual(process_control["status"], "fail")
+        self.assertFalse(report["boundary_ready"])
+
+    def test_preflight_ignores_stale_evidence(self) -> None:
+        _, policy, _ = self.install()
+        stale_time = int(time.time()) - authority_admin.EVIDENCE_MAX_AGE_SECONDS - 3600
+        self.write_evidence(self.make_evidence(policy, collected_at=stale_time))
+        report = authority_admin.privilege_preflight(
+            self.layout,
+            os.getuid(),
+            os.getgid(),
+            validate_binding=False,
+        )
+        evidence_backed = {
+            item["id"]: item["status"]
+            for item in report["checks"]
+            if item["id"] in authority_admin.EVIDENCE_CHECK_IDS
+        }
+        self.assertTrue(all(status == "unknown" for status in evidence_backed.values()))
+        self.assertFalse(report["boundary_ready"])
+
+    def test_preflight_ignores_evidence_bound_to_different_policy(self) -> None:
+        _, policy, _ = self.install()
+        self.write_evidence(self.make_evidence(policy, policy_sha256="0" * 64))
+        report = authority_admin.privilege_preflight(
+            self.layout,
+            os.getuid(),
+            os.getgid(),
+            validate_binding=False,
+        )
+        evidence_backed = {
+            item["id"]: item["status"]
+            for item in report["checks"]
+            if item["id"] in authority_admin.EVIDENCE_CHECK_IDS
+        }
+        self.assertTrue(all(status == "unknown" for status in evidence_backed.values()))
+        self.assertFalse(report["boundary_ready"])
+
+    def test_preflight_rejects_evidence_with_unsafe_ownership(self) -> None:
+        _, policy, _ = self.install()
+        self.write_evidence(self.make_evidence(policy))
+        os.chmod(self.layout.evidence_path, 0o644)
+        report = authority_admin.privilege_preflight(
+            self.layout,
+            os.getuid(),
+            os.getgid(),
+            validate_binding=False,
+        )
+        self.assertEqual(
+            tuple(item["id"] for item in report["checks"]),
+            authority_admin.PREFLIGHT_CHECK_IDS,
+        )
+        protected = next(
+            item for item in report["checks"] if item["id"] == "assets.protected_paths"
+        )
+        self.assertEqual(protected["status"], "fail")
+        self.assertFalse(report["boundary_ready"])
+
+    def test_preflight_rejects_symlinked_evidence_file(self) -> None:
+        _, policy, _ = self.install()
+        decoy = self.root / "decoy-evidence.json"
+        decoy.write_bytes(authority_admin.json_bytes(self.make_evidence(policy)))
+        os.chmod(decoy, 0o600)
+        os.symlink(decoy, self.layout.evidence_path)
+        report = authority_admin.privilege_preflight(
+            self.layout,
+            os.getuid(),
+            os.getgid(),
+            validate_binding=False,
+        )
+        self.assertEqual(
+            tuple(item["id"] for item in report["checks"]),
+            authority_admin.PREFLIGHT_CHECK_IDS,
+        )
+        protected = next(
+            item for item in report["checks"] if item["id"] == "assets.protected_paths"
+        )
+        self.assertEqual(protected["status"], "fail")
+        self.assertFalse(report["boundary_ready"])
+
+    def test_load_privilege_evidence_rejects_incomplete_catalog(self) -> None:
+        _, policy, _ = self.install()
+        evidence = self.make_evidence(policy)
+        del evidence["checks"]["process.control"]
+        self.write_evidence(evidence)
+        manifest, identity = authority_admin.load_manifest(
+            self.layout, os.getuid(), os.getgid(), validate_binding=False
+        )
+        with self.assertRaisesRegex(authority_admin.AdminError, "evidence catalog"):
+            authority_admin.load_privilege_evidence(self.layout, identity, policy)
+
+    def test_collect_evidence_deployment_writes_protected_file(self) -> None:
+        _, policy, _ = self.install()
+        synthetic = self.make_evidence(policy)
+        result = authority_admin.collect_evidence_deployment(
+            self.layout,
+            os.getuid(),
+            os.getgid(),
+            validate_binding=False,
+            collector=lambda _layout, _identity, _policy: synthetic,
+        )
+        self.assertEqual(result["ok"], True)
+        self.assertEqual(stat.S_IMODE(self.layout.evidence_path.stat().st_mode), 0o600)
+        stored = json.loads(self.layout.evidence_path.read_text(encoding="utf-8"))
+        self.assertEqual(stored, synthetic)
 
     def test_admin_lock_metadata_is_not_silently_repaired(self) -> None:
         _, first, _ = self.install()

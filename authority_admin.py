@@ -18,6 +18,7 @@ import sqlite3
 import stat
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterable, Iterator
@@ -83,6 +84,59 @@ PRIVILEGED_SOCKETS = (
     Path("/var/lib/incus/unix.socket"),
     Path("/run/containerd/containerd.sock"),
     Path("/run/crio/crio.sock"),
+)
+EVIDENCE_SCHEMA_VERSION = 1
+EVIDENCE_MAX_AGE_SECONDS = 24 * 60 * 60
+EVIDENCE_CHECK_IDS = (
+    "identity.broker_account_properties",
+    "assets.extended_acl_visibility",
+    "sudo.cached_credentials",
+    "polkit.authorization",
+    "service.delegated_control",
+    "service.unit_writability",
+    "mount.redirection",
+    "capabilities.setuid_helpers",
+    "process.control",
+    "credentials.delegation",
+)
+EVIDENCE_UNKNOWN_MESSAGES = {
+    "identity.broker_account_properties": (
+        "locked credentials, login shell, supplementary privileges, sudo, and polkit "
+        "require issue #7 host evidence"
+    ),
+    "assets.extended_acl_visibility": (
+        "mode, owner, link, inode, and traversal checks passed; ACL and mount "
+        "evidence remains issue #7"
+    ),
+    "sudo.cached_credentials": "cached and delegated credentials require issue #7 observation",
+    "polkit.authorization": "polkit rules and active agents require issue #7 observation",
+    "service.delegated_control": (
+        "sudo, polkit, D-Bus, and service delegation require issue #7 adjudication"
+    ),
+    "service.unit_writability": "drop-ins, generators, and alternate service-control paths",
+    "mount.redirection": "bind mounts, namespaces, FUSE, and mount capabilities require issue #7",
+    "capabilities.setuid_helpers": "system capabilities and setuid helpers require issue #7",
+    "process.control": "ptrace and live process control require issue #7",
+    "credentials.delegation": "delegated credentials and authentication agents require issue #7",
+}
+NOLOGIN_SHELLS = frozenset({"/usr/sbin/nologin", "/sbin/nologin", "/bin/false", "/usr/bin/false"})
+SUDO_TIMESTAMP_DIRS = (
+    Path("/run/sudo/ts"),
+    Path("/var/run/sudo/ts"),
+    Path("/var/db/sudo/ts"),
+)
+POLKIT_RULE_DIRS = (Path("/etc/polkit-1/rules.d"), Path("/usr/share/polkit-1/rules.d"))
+DBUS_SYSTEM_POLICY_DIRS = (Path("/etc/dbus-1/system.d"), Path("/usr/share/dbus-1/system.d"))
+CAPABILITY_SCAN_ROOTS = (Path("/usr/local/bin"), Path("/usr/local/sbin"), Path("/opt"))
+DANGEROUS_CAPABILITIES = (
+    "cap_setuid",
+    "cap_setgid",
+    "cap_sys_admin",
+    "cap_dac_override",
+    "cap_sys_ptrace",
+    "cap_net_admin",
+    "cap_chown",
+    "cap_fowner",
 )
 RENAME_NOREPLACE = 1
 LIBC = ctypes.CDLL(None, use_errno=True)
@@ -168,6 +222,10 @@ class InstallLayout:
     @property
     def revocations_root(self) -> Path:
         return self.config_root / "revocations"
+
+    @property
+    def evidence_path(self) -> Path:
+        return self.config_root / "privilege-evidence.json"
 
 
 @dataclass(frozen=True)
@@ -2592,6 +2650,419 @@ def run_sudo_listing(user: str) -> tuple[str, str]:
     return "unknown", output
 
 
+def run_probe(args: list[str], timeout: float = 5.0) -> tuple[int | None, str]:
+    try:
+        completed = subprocess.run(
+            args,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env={"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "LANG": "C"},
+            cwd="/",
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return None, str(exc)
+    return completed.returncode, (completed.stdout + completed.stderr).strip()
+
+
+def collect_broker_account_properties(identity: DeploymentIdentity) -> dict:
+    try:
+        import spwd
+
+        entry = spwd.getspnam(identity.broker_user)
+        if entry.sp_pwdp == "":
+            lock_status = "unknown"
+        else:
+            lock_status = "pass" if entry.sp_pwdp.startswith(("!", "*")) else "fail"
+        shadow_error = None
+    except (ImportError, KeyError, PermissionError, OSError) as exc:
+        lock_status = "unknown"
+        shadow_error = str(exc)
+    try:
+        shell = pwd.getpwnam(identity.broker_user).pw_shell
+    except KeyError as exc:
+        return check_result("identity.broker_account_properties", "unknown", {"error": str(exc)})
+    shell_status = "pass" if shell in NOLOGIN_SHELLS else "fail"
+    statuses = {lock_status, shell_status}
+    status = "fail" if "fail" in statuses else ("unknown" if "unknown" in statuses else "pass")
+    return check_result(
+        "identity.broker_account_properties",
+        status,
+        {
+            "locked_status": lock_status,
+            "shadow_error": shadow_error,
+            "shell": shell,
+            "shell_status": shell_status,
+        },
+    )
+
+
+def collect_extended_acl_visibility(layout: InstallLayout) -> dict:
+    paths = [
+        layout.install_root,
+        layout.config_root,
+        layout.state_root,
+        layout.runtime_root,
+        layout.database_path,
+        layout.socket_path,
+    ]
+    findings: dict[str, object] = {}
+    saw_error = False
+    for path in paths:
+        if not path.exists():
+            continue
+        code, output = run_probe(["/usr/bin/getfacl", "-p", "--omit-header", str(path)])
+        if code is None:
+            saw_error = True
+            findings[str(path)] = {"status": "unknown", "output": output}
+            continue
+        extra = [
+            line
+            for line in output.splitlines()
+            if line and not line.startswith(("user::", "group::", "other::", "mask::", "flags:"))
+        ]
+        findings[str(path)] = {"status": "fail" if extra else "pass", "entries": extra}
+    statuses = {entry["status"] for entry in findings.values()}
+    status = "fail" if "fail" in statuses else ("unknown" if saw_error or not findings else "pass")
+    return check_result("assets.extended_acl_visibility", status, findings)
+
+
+def collect_sudo_cached_credentials(uid_names: dict[int, str]) -> dict:
+    findings: dict[str, object] = {}
+    for uid, name in uid_names.items():
+        try:
+            account_name = pwd.getpwuid(uid).pw_name
+        except KeyError:
+            findings[name] = {"status": "unknown", "reason": "account lookup failed"}
+            continue
+        cached = []
+        for ts_dir in SUDO_TIMESTAMP_DIRS:
+            candidate = ts_dir / account_name
+            try:
+                metadata = candidate.stat()
+            except FileNotFoundError:
+                continue
+            except OSError as exc:
+                cached.append({"path": str(candidate), "error": str(exc)})
+                continue
+            cached.append({"path": str(candidate), "mtime": metadata.st_mtime})
+        findings[name] = {"status": "fail" if cached else "pass", "cached": cached}
+    statuses = {entry["status"] for entry in findings.values()}
+    status = "fail" if "fail" in statuses else ("unknown" if "unknown" in statuses else "pass")
+    return check_result("sudo.cached_credentials", status, findings)
+
+
+def collect_polkit_authorization(uid_names: dict[int, str]) -> dict:
+    if not any(directory.is_dir() for directory in POLKIT_RULE_DIRS):
+        return check_result(
+            "polkit.authorization", "not_applicable", "no polkit rules.d directory present"
+        )
+    names = set(uid_names.values())
+    matches = []
+    for directory in POLKIT_RULE_DIRS:
+        if not directory.is_dir():
+            continue
+        try:
+            entries = sorted(directory.iterdir())
+        except OSError as exc:
+            return check_result(
+                "polkit.authorization",
+                "unknown",
+                {"error": str(exc), "directory": str(directory)},
+            )
+        for entry in entries:
+            try:
+                text = entry.read_text(encoding="utf-8", errors="replace")
+            except OSError as exc:
+                matches.append({"file": str(entry), "error": str(exc)})
+                continue
+            if "unix-user:*" in text or "return polkit.Result.YES" in text:
+                matches.append({"file": str(entry), "reason": "broad grant pattern"})
+                continue
+            for name in names:
+                if name in text:
+                    matches.append({"file": str(entry), "reason": f"references {name}"})
+    return check_result("polkit.authorization", "fail" if matches else "pass", {"matches": matches})
+
+
+def collect_service_delegated_control(layout: InstallLayout, uid_names: dict[int, str]) -> dict:
+    names = set(uid_names.values())
+    matches = []
+    for directory in DBUS_SYSTEM_POLICY_DIRS:
+        if not directory.is_dir():
+            continue
+        try:
+            entries = sorted(directory.iterdir())
+        except OSError as exc:
+            return check_result(
+                "service.delegated_control",
+                "unknown",
+                {"error": str(exc), "directory": str(directory)},
+            )
+        for entry in entries:
+            try:
+                text = entry.read_text(encoding="utf-8", errors="replace")
+            except OSError as exc:
+                matches.append({"file": str(entry), "error": str(exc)})
+                continue
+            if "org.freedesktop.systemd1" not in text:
+                continue
+            for name in names:
+                if f'user="{name}"' in text or f"user='{name}'" in text:
+                    matches.append(
+                        {"file": str(entry), "reason": f"grants systemd1 access to {name}"}
+                    )
+    return check_result(
+        "service.delegated_control",
+        "fail" if matches else "pass",
+        {"unit": layout.unit_path.name, "matches": matches},
+    )
+
+
+def collect_service_unit_writability(layout: InstallLayout) -> dict:
+    dropin_dirs = [
+        Path(f"/etc/systemd/system/{layout.unit_path.name}.d"),
+        Path(f"/run/systemd/system/{layout.unit_path.name}.d"),
+        Path(f"/run/systemd/generator/{layout.unit_path.name}.d"),
+        Path(f"/run/systemd/generator.late/{layout.unit_path.name}.d"),
+    ]
+    findings: dict[str, object] = {}
+    for directory in dropin_dirs:
+        try:
+            metadata = directory.lstat()
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            findings[str(directory)] = {"status": "unknown", "error": str(exc)}
+            continue
+        unsafe = (
+            not stat.S_ISDIR(metadata.st_mode)
+            or metadata.st_uid != 0
+            or stat.S_IMODE(metadata.st_mode) & 0o022
+        )
+        findings[str(directory)] = {
+            "status": "fail" if unsafe else "pass",
+            "mode": oct(stat.S_IMODE(metadata.st_mode)),
+            "uid": metadata.st_uid,
+        }
+    statuses = {entry["status"] for entry in findings.values()}
+    status = "fail" if "fail" in statuses else ("unknown" if "unknown" in statuses else "pass")
+    return check_result("service.unit_writability", status, findings)
+
+
+def collect_mount_redirection(layout: InstallLayout) -> dict:
+    protected_roots = [
+        layout.install_root,
+        layout.config_root,
+        layout.state_root,
+        layout.runtime_root,
+    ]
+    try:
+        with open("/proc/mounts", encoding="utf-8", errors="replace") as handle:
+            mount_lines = handle.readlines()
+    except OSError as exc:
+        return check_result("mount.redirection", "unknown", {"error": str(exc)})
+    mount_points = [fields[1] for line in mount_lines if len(fields := line.split()) > 1]
+    overlaps = []
+    for root in protected_roots:
+        root_text = str(root)
+        for point in mount_points:
+            if point == root_text or point.startswith(root_text + "/"):
+                overlaps.append({"protected_root": root_text, "mount_point": point})
+    return check_result("mount.redirection", "fail" if overlaps else "pass", {"overlaps": overlaps})
+
+
+def collect_capabilities_setuid_helpers(layout: InstallLayout) -> dict:
+    scan_roots = [layout.install_root, *CAPABILITY_SCAN_ROOTS]
+    setuid_files = []
+    capability_findings = []
+    saw_error = False
+    for root in scan_roots:
+        if not root.is_dir():
+            continue
+        for dirpath, _dirnames, filenames in os.walk(root):
+            for filename in filenames:
+                candidate = Path(dirpath) / filename
+                try:
+                    metadata = candidate.lstat()
+                except OSError:
+                    continue
+                if stat.S_ISREG(metadata.st_mode) and metadata.st_mode & (
+                    stat.S_ISUID | stat.S_ISGID
+                ):
+                    setuid_files.append(str(candidate))
+        code, output = run_probe(["/usr/sbin/getcap", "-r", str(root)])
+        if code is None:
+            saw_error = True
+            continue
+        for line in output.splitlines():
+            if any(capability in line.lower() for capability in DANGEROUS_CAPABILITIES):
+                capability_findings.append(line)
+    status = "fail" if setuid_files or capability_findings else ("unknown" if saw_error else "pass")
+    return check_result(
+        "capabilities.setuid_helpers",
+        status,
+        {
+            "setuid_or_setgid_files": setuid_files,
+            "capabilities": capability_findings,
+            "scanned": [str(root) for root in scan_roots],
+        },
+    )
+
+
+def collect_process_control(identity: DeploymentIdentity) -> dict:
+    try:
+        scope = int(Path("/proc/sys/kernel/yama/ptrace_scope").read_text().strip())
+        scope_status = "pass" if scope >= 1 else "fail"
+    except (OSError, ValueError):
+        scope, scope_status = None, "unknown"
+    tracers = []
+    try:
+        for entry in Path("/proc").iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                status_text = (entry / "status").read_text(encoding="ascii", errors="replace")
+            except OSError:
+                continue
+            owner_uid = None
+            tracer_pid = None
+            for line in status_text.splitlines():
+                if line.startswith("Uid:"):
+                    owner_uid = int(line.split()[1])
+                elif line.startswith("TracerPid:"):
+                    tracer_pid = int(line.split()[1])
+            if owner_uid in (0, identity.broker_uid) and tracer_pid:
+                tracers.append(
+                    {"pid": entry.name, "tracer_pid": tracer_pid, "owner_uid": owner_uid}
+                )
+    except OSError as exc:
+        return check_result(
+            "process.control", "unknown", {"error": str(exc), "ptrace_scope": scope}
+        )
+    status = "fail" if tracers else scope_status
+    return check_result(
+        "process.control", status, {"ptrace_scope": scope, "traced_privileged_processes": tracers}
+    )
+
+
+def collect_credentials_delegation(uid_names: dict[int, str]) -> dict:
+    findings: dict[str, object] = {}
+    for uid, name in uid_names.items():
+        artifacts = []
+        for candidate in (Path(f"/tmp/krb5cc_{uid}"), Path(f"/run/user/{uid}/krb5cc")):
+            try:
+                candidate.lstat()
+            except FileNotFoundError:
+                continue
+            except OSError as exc:
+                artifacts.append({"path": str(candidate), "error": str(exc)})
+                continue
+            artifacts.append({"path": str(candidate)})
+        findings[name] = {"status": "fail" if artifacts else "pass", "artifacts": artifacts}
+    statuses = {entry["status"] for entry in findings.values()}
+    status = "fail" if "fail" in statuses else "pass"
+    return check_result("credentials.delegation", status, findings)
+
+
+def collect_privilege_evidence(
+    layout: InstallLayout,
+    identity: DeploymentIdentity,
+    policy: PolicyDocument,
+    *,
+    now: int | None = None,
+) -> dict:
+    checks = [
+        collect_broker_account_properties(identity),
+        collect_extended_acl_visibility(layout),
+        collect_sudo_cached_credentials(policy.uid_names),
+        collect_polkit_authorization(policy.uid_names),
+        collect_service_delegated_control(layout, policy.uid_names),
+        collect_service_unit_writability(layout),
+        collect_mount_redirection(layout),
+        collect_capabilities_setuid_helpers(layout),
+        collect_process_control(identity),
+        collect_credentials_delegation(policy.uid_names),
+    ]
+    if tuple(check["id"] for check in checks) != EVIDENCE_CHECK_IDS:
+        raise AdminError("evidence_catalog_error", "evidence catalog is incomplete")
+    return {
+        "evidence_schema_version": EVIDENCE_SCHEMA_VERSION,
+        "ledger_id": policy.ledger_id,
+        "policy_id": policy.policy_id,
+        "policy_generation": policy.generation,
+        "policy_sha256": policy.sha256,
+        "collected_at": now if now is not None else int(time.time()),
+        "checks": {
+            check["id"]: {"status": check["status"], "evidence": check["evidence"]}
+            for check in checks
+        },
+    }
+
+
+def load_privilege_evidence(
+    layout: InstallLayout,
+    identity: DeploymentIdentity,
+    policy: PolicyDocument,
+    *,
+    now: float | None = None,
+) -> dict | None:
+    try:
+        data = read_protected_file(
+            layout.evidence_path,
+            0o600,
+            identity.admin_uid,
+            identity.admin_gid,
+            layout,
+            identity,
+        )
+    except AdminError as exc:
+        if exc.code == "protected_file_missing":
+            return None
+        raise
+    evidence = decode_canonical(data, "privilege evidence")
+    require_exact_keys(
+        evidence,
+        {
+            "evidence_schema_version",
+            "ledger_id",
+            "policy_id",
+            "policy_generation",
+            "policy_sha256",
+            "collected_at",
+            "checks",
+        },
+        "privilege evidence",
+    )
+    if evidence["evidence_schema_version"] != EVIDENCE_SCHEMA_VERSION:
+        raise AdminError("unsupported_evidence_schema", "unsupported privilege evidence schema")
+    if not isinstance(evidence["checks"], dict) or set(evidence["checks"]) != set(
+        EVIDENCE_CHECK_IDS
+    ):
+        raise AdminError("evidence_catalog_error", "privilege evidence catalog is incomplete")
+    for check_id, entry in evidence["checks"].items():
+        if not isinstance(entry, dict) or set(entry) != {"status", "evidence"}:
+            raise AdminError("evidence_catalog_error", f"malformed evidence entry: {check_id}")
+        if entry["status"] not in {"pass", "fail", "unknown", "not_applicable"}:
+            raise AdminError("evidence_catalog_error", f"invalid evidence status: {check_id}")
+    current_time = now if now is not None else time.time()
+    bound = (
+        evidence["ledger_id"] == policy.ledger_id
+        and evidence["policy_id"] == policy.policy_id
+        and evidence["policy_generation"] == policy.generation
+        and evidence["policy_sha256"] == policy.sha256
+    )
+    collected_at = evidence["collected_at"]
+    fresh = (
+        isinstance(collected_at, (int, float))
+        and not isinstance(collected_at, bool)
+        and 0 <= current_time - collected_at <= EVIDENCE_MAX_AGE_SECONDS
+    )
+    evidence["trusted"] = bool(bound and fresh)
+    return evidence
+
+
 def mode_allows_write(metadata: os.stat_result, uid: int, groups: set[int]) -> bool:
     mode = stat.S_IMODE(metadata.st_mode)
     if uid == metadata.st_uid:
@@ -2850,6 +3321,7 @@ def privilege_preflight(
     *,
     sudo_probe: Callable[[str], tuple[str, str]] = run_sudo_listing,
     validate_binding: bool = True,
+    now: float | None = None,
 ) -> dict:
     try:
         manifest, identity = load_manifest(
@@ -2863,6 +3335,7 @@ def privilege_preflight(
                 "assets.protected_paths",
             )
         structural, policy = preflight_filesystem_deployment(layout, manifest, identity)
+        evidence = load_privilege_evidence(layout, identity, policy, now=now)
     except (AdminError, broker.BrokerError, OSError, sqlite3.Error) as exc:
         if isinstance(exc, AdminError):
             error = exc.as_dict()
@@ -2887,6 +3360,12 @@ def privilege_preflight(
             failed_check_id = "assets.protected_paths"
         return failed_preflight_report(admin_uid, error, failed_check_id)
 
+    def evidence_check(check_id: str) -> dict:
+        if evidence is not None and evidence["trusted"]:
+            entry = evidence["checks"][check_id]
+            return check_result(check_id, entry["status"], entry["evidence"])
+        return check_result(check_id, "unknown", EVIDENCE_UNKNOWN_MESSAGES[check_id])
+
     checks = [
         check_result("identity.admin_root", "pass" if admin_uid == 0 else "fail", admin_uid),
         check_result(
@@ -2900,12 +3379,7 @@ def privilege_preflight(
                 "socket_gid": identity.socket_gid,
             },
         ),
-        check_result(
-            "identity.broker_account_properties",
-            "unknown",
-            "locked credentials, login shell, supplementary privileges, sudo, and polkit "
-            "require issue #7 host evidence",
-        ),
+        evidence_check("identity.broker_account_properties"),
     ]
     unsafe_uids = sorted(set(policy.uid_names) & {0, identity.broker_uid})
     checks.append(
@@ -2975,12 +3449,7 @@ def privilege_preflight(
     checks.extend(
         [
             check_result("assets.protected_paths", "pass", structural),
-            check_result(
-                "assets.extended_acl_visibility",
-                "unknown",
-                "mode, owner, link, inode, and traversal checks passed; ACL and mount "
-                "evidence remains issue #7",
-            ),
+            evidence_check("assets.extended_acl_visibility"),
         ]
     )
     sudo_statuses = {entry["status"] for entry in sudo_evidence.values()}
@@ -2990,16 +3459,8 @@ def privilege_preflight(
     checks.append(check_result("sudo.authorization", sudo_status, sudo_evidence))
     checks.extend(
         [
-            check_result(
-                "sudo.cached_credentials",
-                "unknown",
-                "cached and delegated credentials require issue #7 observation",
-            ),
-            check_result(
-                "polkit.authorization",
-                "unknown",
-                "polkit rules and active agents require issue #7 observation",
-            ),
+            evidence_check("sudo.cached_credentials"),
+            evidence_check("polkit.authorization"),
         ]
     )
     risky = any(groups for groups in risky_memberships.values())
@@ -3025,40 +3486,12 @@ def privilege_preflight(
     )
     checks.extend(
         [
-            check_result(
-                "service.delegated_control",
-                "unknown",
-                "sudo, polkit, D-Bus, and service delegation require issue #7 adjudication",
-            ),
-            check_result(
-                "service.unit_writability",
-                "unknown",
-                {
-                    "canonical_unit": str(layout.unit_path),
-                    "canonical_unit_protected": True,
-                    "uninspected": "drop-ins, generators, and alternate service-control paths",
-                },
-            ),
-            check_result(
-                "mount.redirection",
-                "unknown",
-                "bind mounts, namespaces, FUSE, and mount capabilities require issue #7",
-            ),
-            check_result(
-                "capabilities.setuid_helpers",
-                "unknown",
-                "system capabilities and setuid helpers require issue #7",
-            ),
-            check_result(
-                "process.control",
-                "unknown",
-                "ptrace and live process control require issue #7",
-            ),
-            check_result(
-                "credentials.delegation",
-                "unknown",
-                "delegated credentials and authentication agents require issue #7",
-            ),
+            evidence_check("service.delegated_control"),
+            evidence_check("service.unit_writability"),
+            evidence_check("mount.redirection"),
+            evidence_check("capabilities.setuid_helpers"),
+            evidence_check("process.control"),
+            evidence_check("credentials.delegation"),
             check_result(
                 "broker.live_process",
                 "not_applicable",
@@ -3073,6 +3506,47 @@ def privilege_preflight(
         "boundary_ready": all(check["status"] in {"pass", "not_applicable"} for check in checks),
         "checks": checks,
         "stop_condition": "issue #7 real-host privilege proof is required",
+    }
+
+
+def collect_evidence_deployment(
+    layout: InstallLayout,
+    admin_uid: int,
+    admin_gid: int,
+    *,
+    validate_binding: bool = True,
+    collector: Callable[
+        [InstallLayout, DeploymentIdentity, PolicyDocument], dict
+    ] = collect_privilege_evidence,
+) -> dict:
+    manifest, identity = load_manifest(
+        layout, admin_uid, admin_gid, validate_binding=validate_binding
+    )
+    violations = collect_structural_preflight_violations(layout, manifest, identity)
+    if violations:
+        raise AdminError(
+            "boundary_violations",
+            "cannot collect privilege evidence over a broken deployment",
+            violations=violations,
+        )
+    _structural, policy = preflight_filesystem_deployment(layout, manifest, identity)
+    evidence = collector(layout, identity, policy)
+    write_protected_file(
+        layout.evidence_path,
+        json_bytes(evidence),
+        0o600,
+        identity.admin_uid,
+        identity.admin_gid,
+        layout,
+        identity,
+        replace=True,
+    )
+    return {
+        "ok": True,
+        "action": "collect-evidence",
+        "evidence_path": str(layout.evidence_path),
+        "policy_sha256": policy.sha256,
+        "checks": evidence["checks"],
     }
 
 
@@ -3561,6 +4035,7 @@ def build_parser() -> argparse.ArgumentParser:
     revoke.add_argument("--expected-policy-sha256", required=True)
     commands.add_parser("audit")
     commands.add_parser("preflight")
+    commands.add_parser("collect-evidence")
 
     enroll = commands.add_parser("enroll")
     enroll.add_argument("--repository-path", required=True)
@@ -3603,6 +4078,8 @@ def main(argv: list[str] | None = None) -> int:
             )
         elif args.command == "audit":
             result = audit_deployment(layout, 0, 0)
+        elif args.command == "collect-evidence":
+            result = collect_evidence_deployment(layout, 0, 0)
         elif args.command == "enroll":
             repo_path = absolute_path(args.repository_path, "repository-path")
             deployment = audit_deployment(layout, 0, 0)
