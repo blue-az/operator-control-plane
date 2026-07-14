@@ -69,3 +69,11 @@ Preserve fail-closed verification semantics: only an enforced, registered verifi
 OS UID distinct from the claim author is `uid_isolated`; `single_user` verification
 is advisory. Evidence should prefer re-runnable commands over static blobs, but the
 operator must never execute stored verification commands.
+
+## Lane Economics
+
+Cost is the driver's price, not the author's (see `usage-summary --by-lane`).
+Transcript chores — summaries, handoff briefs, session rehydration — are
+cheap-lane work and should never run in the most expensive seat at the table.
+If a long-session resume or compaction is about to bill to a scarce frontier
+seat, warn the operator before it starts.
