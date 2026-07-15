@@ -1675,7 +1675,13 @@ def claim_add_cmd(args) -> int:
 
         # Prepare request
         operation_key = f"op-claim-add-{claim_id}"
-        expected = authority_projection.compile_expected(op_dir, "claim.create", task_id, claim_id)
+        try:
+            expected = authority_projection.compile_expected(
+                op_dir, "claim.create", task_id, claim_id
+            )
+        except RuntimeError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
 
         request = {
             "action": "commit",
@@ -1864,9 +1870,13 @@ def evidence_attach_cmd(args) -> int:
         if args.status:
             operation["verification_status"] = args.status
 
-        expected = authority_projection.compile_expected(
-            op_dir, kind, task_id, args.claim, evidence_id
-        )
+        try:
+            expected = authority_projection.compile_expected(
+                op_dir, kind, task_id, args.claim, evidence_id
+            )
+        except RuntimeError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
 
         operation_key = f"op-evidence-attach-{evidence_id}"
         request = {
@@ -5422,7 +5432,13 @@ def task_transition_cmd(args) -> int:
 
     # Prepare request
     operation_key = f"op-task-transition-{task_id}-{args.status}"
-    expected = authority_projection.compile_expected(op_dir, "task.transition", task_id, claim_id)
+    try:
+        expected = authority_projection.compile_expected(
+            op_dir, "task.transition", task_id, claim_id
+        )
+    except RuntimeError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
 
     request = {
         "action": "commit",

@@ -826,30 +826,31 @@ def compile_expected(
     after = None
     pinned_seq = None
     while True:
+        req = {
+            "action": "projection.snapshot",
+            "ledger_id": ledger_id,
+            "through_commit_sequence": pinned_seq,
+            "after": after,
+            "limit": 16,
+        }
         try:
-            req = {
-                "action": "projection.snapshot",
-                "ledger_id": ledger_id,
-                "through_commit_sequence": pinned_seq,
-                "after": after,
-                "limit": 16,
-            }
             res = client.send_request(req)
-            if res.get("ok"):
-                snapshot = res["snapshot"]
-                if pinned_seq is None:
-                    pinned_seq = snapshot["through_commit_sequence"]
-                for rec in snapshot["records"]:
-                    broker_records[(rec["record_type"], rec["record_id"])] = rec
-                if wanted_keys.issubset(broker_records.keys()):
-                    break
-                if not snapshot.get("has_more") or not snapshot.get("next_after"):
-                    break
-                after = snapshot["next_after"]
-            else:
-                break
-        except Exception:
+        except Exception as exc:
+            raise RuntimeError(
+                f"cannot determine expected state: broker unreachable: {exc}"
+            ) from exc
+        if not res.get("ok"):
+            raise RuntimeError(f"cannot determine expected state: {res.get('error')}")
+        snapshot = res["snapshot"]
+        if pinned_seq is None:
+            pinned_seq = snapshot["through_commit_sequence"]
+        for rec in snapshot["records"]:
+            broker_records[(rec["record_type"], rec["record_id"])] = rec
+        if wanted_keys.issubset(broker_records.keys()):
             break
+        if not snapshot.get("has_more") or not snapshot.get("next_after"):
+            break
+        after = snapshot["next_after"]
 
     def get_expected_from_broker(record_type: str, record_id: str) -> dict:
         rec = broker_records.get((record_type, record_id))

@@ -464,11 +464,41 @@ class TestAuthorityIntegration(unittest.TestCase):
             "claim-add", "--task", "task-1", "--type", "deployment_state", "--text", "Fail claim"
         )
         self.assertNotEqual(res.returncode, 0)
-        self.assertIn("Broker dispatch failed", res.stderr + res.stdout)
+        self.assertIn("cannot determine expected state", res.stderr + res.stdout)
 
         # Verify no claim-0001 YAML file was written
         claim_yaml_path = self.temp_dir / ".operator" / "claims" / "claim-0001.yaml"
         self.assertFalse(claim_yaml_path.exists())
+
+    def test_retry_after_outage_creates_no_duplicate_commit(self) -> None:
+        # A failed attempt while the broker is down must not poison a later,
+        # successful retry with a stale operation-key collision: compile_expected
+        # must fail closed (not silently default to version=0) before any local
+        # journal row is ever written for the doomed attempt.
+        res = self.run_operator("task-create", "--id", "task-1", "--objective", "Test objective")
+        self.assertEqual(res.returncode, 0)
+
+        self.stop_broker_server()
+        res = self.run_operator(
+            "claim-add", "--task", "task-1", "--type", "deployment_state", "--text", "Retry claim"
+        )
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn("cannot determine expected state", res.stderr + res.stdout)
+
+        self.start_broker_server()
+        res = self.run_operator(
+            "claim-add", "--task", "task-1", "--type", "deployment_state", "--text", "Retry claim"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        conn = sqlite3.connect(str(self.store_path))
+        try:
+            (commit_count,) = conn.execute(
+                "SELECT COUNT(*) FROM authority_commits WHERE operation = 'claim.create'"
+            ).fetchone()
+        finally:
+            conn.close()
+        self.assertEqual(commit_count, 1)
 
     def test_doctor_reports(self) -> None:
         # 1. Check current status
