@@ -319,6 +319,59 @@ one the same way for issue-linked evidence:
 - A foreign, forked, or partially mismatched state is never auto-repaired — `audit` and `preflight` will
   report it, and it requires manual, evidenced investigation, not a scripted fix.
 
+## 15. Recover an enrolled ledger from device-identity drift (`repository-rebind`)
+
+Symptom: every ordinary command against a previously-working enrolled repository starts failing with
+`Error: enrolled ledger identity has changed`, even though nothing about the repository was moved,
+recreated, or tampered with. `resolve_enrollment` binds identity by kernel device/inode, not by path
+string; on filesystems that assign per-mount "anonymous" device numbers to a subvolume (btrfs subvolume
+mounts, notably including Fedora's default root+home layout), that device number can change across a
+reboot even though the subvolume's own inodes are stable. This is expected fail-closed behavior, not a
+bug — see [Issue #10](https://github.com/blue-az/operator-control-plane/issues/10) for the full forensic
+writeup that motivated this command.
+
+```bash
+sudo "/root/operator-control-plane-release/$REV/operator-admin" repository-rebind \
+    --ledger-id <ledger-id> \
+    --repository-path /path/to/enrolled/repo
+```
+
+Both flags are explicit and required — there is no cwd discovery, so this cannot be triggered by
+accident from an arbitrary directory. The command:
+
+1. Re-validates the local ledger exactly as `enroll` does (hash-chain integrity, append-only triggers,
+   YAML/SQLite agreement, safe ownership/permissions).
+2. Confirms every anchor recorded at the *prior* enrollment/rebind still resolves to the same
+   `(record_type, record_id, version) → event_hash` in the ledger now being bound to — i.e. the
+   previously-anchored history was not rewritten. Fails closed with `rebind_history_diverged` if not.
+3. Commits a `ledger.rebind` operation to the broker — a first-class, permanently retained commit
+   visible in `audit`, not a silent local file edit. Requires the real root `SO_PEERCRED` identity, same
+   as `enroll`.
+4. Atomically rewrites only the registry's `repository_identity` for this ledger, preserving
+   `first_broker_sequence`/`enrollment_receipt_hash` from the *original* enrollment — a rebind is a
+   recovery event layered on top of the original enrollment, not a re-enrollment.
+
+**What this does and does not prove.** Steps 1–3 establish internal consistency (the ledger content
+isn't corrupt or tampered) and policy continuity (the anchored past wasn't rewritten). They cannot and do
+not prove physical continuity — a byte-identical clone of the ledger placed at the given path would pass
+every one of them. The actual security authority for this operation is the trusted root administrator
+explicitly naming `--ledger-id` and `--repository-path`; do not run this against a path you have not
+personally verified is the genuine repository, and do not automate its invocation.
+
+Like `enroll`, `repository-rebind` is idempotent on a deterministic `operation_key` derived from the full
+operation content: if the broker commits but the subsequent registry write fails (`registry_publication_pending`,
+with the receipt hash included in the error), re-running the identical command reproduces the identical
+operation and hits the broker's replay path instead of minting a second rebind commit.
+
+The rebind commit itself produces no local record mutations (nothing changed about the ledger's task/
+claim/evidence history), but it does advance the broker's commit sequence, so run
+`operator authority-reconcile` once afterward before `doctor` reports `status: current` again — same as
+after any other broker-side event the local client hasn't caught up on yet.
+
+Also works for an administrator-approved *move* of an enrolled repository to a genuinely different path,
+not just in-place recovery — the command doesn't distinguish the two cases; it always re-validates
+whatever is at the given path from scratch.
+
 ## Evidence to post to issue #7
 
 For every command above actually run on this host: the exact command line, its JSON output (or

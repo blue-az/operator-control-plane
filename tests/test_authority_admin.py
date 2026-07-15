@@ -1904,6 +1904,269 @@ class TestAuthorityAdmin(unittest.TestCase):
         )
         self.assertTrue(replay["idempotent_replay"])
 
+    def _enroll_test_repo(self, registry_path: Path, repo_path: Path, ledger_id: str) -> None:
+        repo_path.mkdir()
+        for arguments in (
+            ("init",),
+            ("task-create", "--objective", "Legacy task", "--id", "task-1"),
+        ):
+            completed = subprocess.run(
+                [str(REPO_ROOT / "operator"), *arguments],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr + completed.stdout)
+
+        def committed_enrollment(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            return {
+                "ok": True,
+                "idempotent_replay": False,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.enroll",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 1,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "2" * 64,
+                },
+            }
+
+        authority_admin.enroll_repository(
+            registry_path,
+            repo_path,
+            ledger_id,
+            Path("/tmp/socket.sock"),
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.root,
+            request_sender=committed_enrollment,
+        )
+
+    def test_repository_rebind_recovers_from_device_identity_drift(self) -> None:
+        registry_path = self.root / "test-registry-rebind.json"
+        repo_path = self.root / "test-repo-rebind"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-test")
+
+        # Reproduce the real symptom (Issue #10): the registry still records the OLD kernel
+        # device numbers even though the repository's content, path, and inodes are untouched
+        # -- e.g. a reboot changed a btrfs subvolume's kernel-assigned device number. Hand-edit
+        # only the device fields to reproduce that exact drift without needing a real remount.
+        with open(registry_path) as f:
+            registry_data = json.load(f)
+        reg = registry_data["registrations"][0]
+        real_identity = dict(reg["repository_identity"])
+        reg["repository_identity"] = {
+            **real_identity,
+            "repository_device": real_identity["repository_device"] + 1,
+            "operator_device": real_identity["operator_device"] + 1,
+            "ledger_device": real_identity["ledger_device"] + 1,
+        }
+        with open(registry_path, "w") as f:
+            f.write(authority_broker.canonical_json(registry_data) + "\n")
+        os.chmod(registry_path, 0o644)
+
+        def committed_rebind(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            self.assertEqual(request["operation"]["kind"], "ledger.rebind")
+            self.assertEqual(
+                request["operation"]["previous_identity"]["repository_device"],
+                real_identity["repository_device"] + 1,
+            )
+            return {
+                "ok": True,
+                "idempotent_replay": False,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.rebind",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 2,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        result = authority_admin.rebind_repository(
+            registry_path,
+            repo_path,
+            "ledger-rebind-test",
+            Path("/tmp/socket.sock"),
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.root,
+            request_sender=committed_rebind,
+        )
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["rebind_commit_sequence"], 2)
+        self.assertEqual(
+            result["previous_identity"]["repository_device"],
+            real_identity["repository_device"] + 1,
+        )
+        self.assertEqual(result["repository_identity"], real_identity)
+
+        with open(registry_path) as f:
+            recovered = json.load(f)
+        recovered_reg = recovered["registrations"][0]
+        self.assertEqual(recovered_reg["repository_identity"], real_identity)
+        # first_broker_sequence / enrollment_receipt_hash trace the *original* enrollment
+        # commit, not the rebind's own commit -- the rebind is a distinct, later, auditable
+        # broker commit, not a re-enrollment.
+        self.assertEqual(recovered_reg["first_broker_sequence"], 1)
+        self.assertEqual(recovered_reg["enrollment_receipt_hash"], "2" * 64)
+
+    def test_repository_rebind_retry_after_registry_write_failure_reuses_operation_key(
+        self,
+    ) -> None:
+        registry_path = self.root / "test-registry-rebind-retry.json"
+        repo_path = self.root / "test-repo-rebind-retry"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-retry")
+
+        with open(registry_path) as f:
+            registry_data = json.load(f)
+        reg = registry_data["registrations"][0]
+        real_identity = dict(reg["repository_identity"])
+        reg["repository_identity"] = {
+            **real_identity,
+            "repository_device": real_identity["repository_device"] + 1,
+            "operator_device": real_identity["operator_device"] + 1,
+            "ledger_device": real_identity["ledger_device"] + 1,
+        }
+        with open(registry_path, "w") as f:
+            f.write(authority_broker.canonical_json(registry_data) + "\n")
+        os.chmod(registry_path, 0o644)
+
+        seen_operation_keys: list[str] = []
+
+        def committed_rebind(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            seen_operation_keys.append(request["operation_key"])
+            return {
+                "ok": True,
+                "idempotent_replay": len(seen_operation_keys) > 1,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.rebind",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 2,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        # First attempt: the broker commits, but the registry write itself fails -- the
+        # scenario decision #2 needs a real recovery path for. The corrupted registry is left
+        # exactly as it was, matching what a real crash/failure between the two steps would
+        # leave behind.
+        with mock.patch.object(
+            authority_admin,
+            "write_registry_file_safely",
+            side_effect=OSError("simulated registry write failure"),
+        ):
+            with self.assertRaisesRegex(authority_admin.AdminError, "registry publication failed"):
+                authority_admin.rebind_repository(
+                    registry_path,
+                    repo_path,
+                    "ledger-rebind-retry",
+                    Path("/tmp/socket.sock"),
+                    registry_owner_uid=os.getuid(),
+                    registry_owner_gid=os.getgid(),
+                    registry_anchor=self.root,
+                    request_sender=committed_rebind,
+                )
+        self.assertEqual(len(seen_operation_keys), 1)
+        with open(registry_path) as f:
+            still_corrupted = json.load(f)
+        self.assertEqual(
+            still_corrupted["registrations"][0]["repository_identity"]["repository_device"],
+            real_identity["repository_device"] + 1,
+        )
+
+        # Retry: nothing else about the local ledger or the prior corrupted registry state
+        # changed, so the retry constructs the identical operation and the identical
+        # operation_key -- this is what lets the broker's own idempotency path (proven at the
+        # broker layer in test_authority_broker.py) return the original receipt instead of
+        # minting a second rebind commit.
+        result = authority_admin.rebind_repository(
+            registry_path,
+            repo_path,
+            "ledger-rebind-retry",
+            Path("/tmp/socket.sock"),
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.root,
+            request_sender=committed_rebind,
+        )
+        self.assertTrue(result["ok"])
+        self.assertEqual(len(seen_operation_keys), 2)
+        self.assertEqual(seen_operation_keys[0], seen_operation_keys[1])
+
+        with open(registry_path) as f:
+            recovered = json.load(f)
+        self.assertEqual(recovered["registrations"][0]["repository_identity"], real_identity)
+
+    def test_repository_rebind_rejects_diverged_prior_anchor(self) -> None:
+        registry_path = self.root / "test-registry-rebind-diverged.json"
+        repo_path = self.root / "test-repo-rebind-diverged"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-diverged")
+
+        # Corrupt the registry's recorded anchor for task-1 so it no longer matches what the
+        # local ledger actually holds at that version -- simulating a rewritten/forged history
+        # that a rebind must refuse to bless, even when the device identity itself is fine.
+        with open(registry_path) as f:
+            registry_data = json.load(f)
+        reg = registry_data["registrations"][0]
+        reg["anchor_records"][0]["event_hash"] = "f" * 64
+        with open(registry_path, "w") as f:
+            f.write(authority_broker.canonical_json(registry_data) + "\n")
+        os.chmod(registry_path, 0o644)
+
+        def unreachable_sender(_socket_path: Path, request: object) -> dict:
+            self.fail("broker must not be contacted once prior-anchor continuity fails")
+
+        with self.assertRaisesRegex(authority_admin.AdminError, "no longer matches"):
+            authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-diverged",
+                Path("/tmp/socket.sock"),
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.root,
+                request_sender=unreachable_sender,
+            )
+
+    def test_repository_rebind_requires_existing_enrollment(self) -> None:
+        registry_path = self.root / "test-registry-rebind-missing.json"
+        repo_path = self.root / "test-repo-rebind-missing"
+        repo_path.mkdir()
+        completed = subprocess.run(
+            [str(REPO_ROOT / "operator"), "init"],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr + completed.stdout)
+        registry_path.write_text(
+            authority_broker.canonical_json({"schema_version": 1, "registrations": []}) + "\n"
+        )
+        os.chmod(registry_path, 0o644)
+
+        def unreachable_sender(_socket_path: Path, request: object) -> dict:
+            self.fail("broker must not be contacted for an unenrolled ledger_id")
+
+        with self.assertRaisesRegex(authority_admin.AdminError, "no existing registration"):
+            authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-never-enrolled",
+                Path("/tmp/socket.sock"),
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.root,
+                request_sender=unreachable_sender,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

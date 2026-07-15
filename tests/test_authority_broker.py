@@ -376,6 +376,88 @@ class TestAuthorityBroker(unittest.TestCase):
             )
         self.assertEqual(caught.exception.code, "root_required")
 
+    def test_rebind_requires_root_and_prior_enrollment(self) -> None:
+        self.init_store({os.getuid(): ["builder"]})
+        broker_obj = authority_broker.AuthorityBroker(
+            authority_broker.AuthorityStore(self.store_path, self.content_dir)
+        )
+        root_peer = authority_broker.PeerCredentials(123, 0, 0)
+        identity = {
+            "repository_path": str(self.temp_dir),
+            "repository_device": 1,
+            "repository_inode": 2,
+            "operator_device": 1,
+            "operator_inode": 3,
+            "ledger_device": 1,
+            "ledger_inode": 4,
+        }
+        new_identity = {
+            **identity,
+            "repository_device": 9,
+            "operator_device": 9,
+            "ledger_device": 9,
+        }
+        empty_anchor_digest = authority_broker.sha256_text(authority_broker.canonical_json([]))
+        rebind_request = {
+            "protocol_version": 1,
+            "action": "commit",
+            "ledger_id": "ledger-test",
+            "operation_key": "rebind-before-enroll",
+            "operation": {
+                "kind": "ledger.rebind",
+                "previous_identity": identity,
+                "repository_identity": new_identity,
+                "anchor_records": [],
+                "legacy_anchor_sha256": empty_anchor_digest,
+            },
+            "expected": [],
+            "blob": None,
+        }
+
+        # Before any enrollment commit exists, rebind must fail closed.
+        with self.assertRaises(authority_broker.BrokerError) as caught:
+            broker_obj.handle(rebind_request, root_peer)
+        self.assertEqual(caught.exception.code, "ledger_not_enrolled")
+
+        enroll_request = {
+            "protocol_version": 1,
+            "action": "commit",
+            "ledger_id": "ledger-test",
+            "operation_key": "enroll-for-rebind-test",
+            "operation": {
+                "kind": "ledger.enroll",
+                "repository_identity": identity,
+                "anchor_records": [],
+                "legacy_anchor_sha256": empty_anchor_digest,
+            },
+            "expected": [],
+            "blob": None,
+        }
+        response, committed = broker_obj.handle(enroll_request, root_peer)
+        self.assertTrue(committed)
+        self.assertEqual(response["receipt"]["commit_sequence"], 1)
+
+        # A non-root peer cannot rebind, even once the ledger is enrolled.
+        with self.assertRaises(authority_broker.BrokerError) as caught:
+            broker_obj.handle(
+                {**rebind_request, "operation_key": "rebind-not-root"},
+                authority_broker.PeerCredentials(124, os.getuid(), os.getgid()),
+            )
+        self.assertEqual(caught.exception.code, "root_required")
+
+        # Root can rebind once enrolled; it lands as a normal, later commit -- not a special
+        # first-commit slot the way ledger.enroll is.
+        response, committed = broker_obj.handle(rebind_request, root_peer)
+        self.assertTrue(committed)
+        self.assertEqual(response["receipt"]["commit_sequence"], 2)
+        self.assertEqual(response["receipt"]["operation"], "ledger.rebind")
+
+        # Retrying the identical rebind request is idempotent: same receipt, no duplicate commit.
+        replay, committed = broker_obj.handle(rebind_request, root_peer)
+        self.assertFalse(committed)
+        self.assertTrue(replay["idempotent_replay"])
+        self.assertEqual(replay["receipt"], response["receipt"])
+
     @staticmethod
     def event_for(receipt: dict, record_type: str) -> dict:
         return next(event for event in receipt["events"] if event["record_type"] == record_type)

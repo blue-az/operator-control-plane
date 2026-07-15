@@ -22,6 +22,7 @@ sys.path.insert(0, str(REPO_ROOT))
 BROKER_BIN = REPO_ROOT / "operator-broker"
 OPERATOR_BIN = REPO_ROOT / "operator"
 
+import authority_admin  # noqa: E402
 import authority_broker  # noqa: E402
 
 
@@ -328,6 +329,105 @@ class TestAuthorityIntegration(unittest.TestCase):
             os.chdir(self.temp_dir)
         self.assertNotEqual(res.returncode, 0)
         self.assertIn("enrolled ledger identity has changed", res.stderr + res.stdout)
+
+    def test_repository_rebind_recovers_device_identity_drift_end_to_end(self) -> None:
+        # Reproduces Issue #10 for real: the registry's recorded device numbers go stale
+        # (e.g. a reboot changes a btrfs subvolume's kernel-assigned device number) while the
+        # repository's path, inodes, and ledger content are completely untouched. Before any
+        # recovery path existed, this permanently locked every ordinary command out of the
+        # enrolled ledger. `operator-admin repository-rebind` is the explicit, root-only,
+        # auditable recovery: it talks to the real broker over the real socket and produces a
+        # real `ledger.rebind` commit, not a silent local file edit.
+        #
+        # A single `operator init` leaves WAL/SHM sidecar files present (normal SQLite WAL
+        # behavior); a real, actively-used ledger like the one this bug was found on has run
+        # many commands and settled cleanly, so bring the local ledger to that same realistic
+        # idle state before testing the recovery path itself.
+        res = self.run_operator(
+            "task-create", "--id", "warmup-task", "--objective", "settle WAL state"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        registry = json.loads(self.registry_path.read_text())
+        registration = registry["registrations"][0]
+        real_identity = dict(registration["repository_identity"])
+        registration["repository_identity"] = {
+            **real_identity,
+            "repository_device": real_identity["repository_device"] + 1,
+            "operator_device": real_identity["operator_device"] + 1,
+            "ledger_device": real_identity["ledger_device"] + 1,
+        }
+        self.registry_path.write_text(json.dumps(registry))
+
+        # Confirm the bug reproduces: every ordinary command fails closed.
+        res = self.run_operator("doctor")
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn("enrolled ledger identity has changed", res.stderr + res.stdout)
+
+        # Root-boundary proof: going through the real broker over the real socket, with this
+        # test process's actual (non-root) OS credentials, is rejected. SO_PEERCRED is
+        # kernel-derived -- there is no client-side argument or environment variable that can
+        # forge root here, matching the same boundary test_authority_broker.py's
+        # test_authorization_uses_real_peer_credentials proves for ordinary commits.
+        with self.assertRaisesRegex(authority_admin.AdminError, "root_required"):
+            authority_admin.rebind_repository(
+                self.registry_path,
+                self.temp_dir,
+                self.ledger_id,
+                self.socket_path,
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.temp_dir,
+                request_sender=authority_broker.send_request,
+            )
+        # The rejected attempt must not have mutated the registry.
+        self.assertEqual(json.loads(self.registry_path.read_text()), registry)
+
+        # Recover using the actual production rebind function, with a root-authorized request
+        # sent directly against the same running store (this test cannot become real root to
+        # exercise the socket's SO_PEERCRED path with uid 0; setUp's own enrollment fixture
+        # uses this identical simulated-root pattern for the same reason).
+        def simulate_root_broker(_socket_path: Path, request: object) -> dict:
+            direct_broker = authority_broker.AuthorityBroker(
+                authority_broker.AuthorityStore(self.store_path, self.content_dir)
+            )
+            response, _committed = direct_broker.handle(
+                request, authority_broker.PeerCredentials(os.getpid(), 0, 0)
+            )
+            return response
+
+        result = authority_admin.rebind_repository(
+            self.registry_path,
+            self.temp_dir,
+            self.ledger_id,
+            self.socket_path,
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.temp_dir,
+            request_sender=simulate_root_broker,
+        )
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["repository_identity"], real_identity)
+        self.assertEqual(
+            result["previous_identity"]["repository_device"],
+            real_identity["repository_device"] + 1,
+        )
+
+        recovered_registry = json.loads(self.registry_path.read_text())
+        self.assertEqual(
+            recovered_registry["registrations"][0]["repository_identity"], real_identity
+        )
+
+        # The rebind is itself a new broker commit (commit_sequence 2) that produces no local
+        # record mutations, so -- like any other broker-side event -- the client must catch up
+        # its local sequence via the normal reconcile step before doctor reports current.
+        res = self.run_operator("authority-reconcile")
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        # Ordinary commands work again, with no discontinuity in local ledger state.
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+        self.assertIn("status: current", res.stdout)
 
     def test_claim_add_routing(self) -> None:
         # 1. Create a task locally

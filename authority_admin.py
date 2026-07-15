@@ -4069,6 +4069,209 @@ def enroll_repository(
     }
 
 
+def verify_prior_anchors_continuity(repo_path: Path, prior_anchors: list) -> None:
+    """Confirm every anchor recorded at the prior enrollment/rebind is still present, at the
+    same version and event_hash, in the ledger now being rebound to. This proves the anchored
+    history was not rewritten -- it does not and cannot prove physical continuity (a
+    byte-identical clone of the ledger would pass this check too). Physical continuity is not
+    established by any automated check in this file; it is asserted by the root administrator
+    explicitly naming this ledger_id and repository_path on the command line.
+    """
+    if not prior_anchors:
+        return
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    directory_flags = flags | os.O_DIRECTORY
+    with contextlib.ExitStack() as stack:
+        repo_fd = os.open(repo_path, directory_flags)
+        stack.callback(os.close, repo_fd)
+        op_fd = os.open(".operator", directory_flags, dir_fd=repo_fd)
+        stack.callback(os.close, op_fd)
+        db_fd = os.open("ledger.sqlite3", flags, dir_fd=op_fd)
+        stack.callback(os.close, db_fd)
+        conn = sqlite3.connect(f"file:/proc/self/fd/{db_fd}?mode=ro&immutable=1", uri=True)
+        conn.row_factory = sqlite3.Row
+        try:
+            for anchor in prior_anchors:
+                local_record_id = (
+                    anchor["record_id"].replace(":", "/", 1)
+                    if anchor["record_type"] in {"evidence", "handoff"}
+                    else anchor["record_id"]
+                )
+                row = conn.execute(
+                    "SELECT event_hash FROM ledger_events "
+                    "WHERE record_type = ? AND record_id = ? AND version = ?",
+                    (anchor["record_type"], local_record_id, anchor["version"]),
+                ).fetchone()
+                if not row or row["event_hash"] != anchor["event_hash"]:
+                    raise AdminError(
+                        "rebind_history_diverged",
+                        f"previously anchored {anchor['record_type']} {local_record_id} at "
+                        f"version {anchor['version']} no longer matches at the rebind "
+                        "destination",
+                    )
+        finally:
+            conn.close()
+
+
+def rebind_repository(
+    registry_path: Path,
+    repo_path: Path,
+    ledger_id: str,
+    socket_path: Path,
+    *,
+    registry_owner_uid: int = 0,
+    registry_owner_gid: int = 0,
+    registry_anchor: Path = Path("/"),
+    request_sender: Callable[[Path, object], dict] = broker.send_request,
+) -> dict:
+    """Root-only recovery for an enrolled ledger whose recorded filesystem identity
+    (device/inode) no longer matches reality -- e.g. a reboot changing a btrfs subvolume's
+    kernel-assigned device number -- or for an administrator-approved move of an enrolled
+    repository to a new path. This does not weaken `resolve_enrollment`'s fail-closed identity
+    check; it is the explicit, audited recovery path for it.
+
+    Security note: the checks performed here (ledger hash-chain integrity, prior-anchor
+    continuity, broker enrollment/policy continuity, safe ownership) prove internal
+    consistency and policy continuity. They do not and cannot prove physical continuity -- a
+    byte-identical clone of the ledger placed at the given path would pass every one of them.
+    The actual security authority for this operation is the trusted root administrator
+    explicitly naming `ledger_id` and `repository_path`; there is no cwd discovery and nothing
+    else in this codebase calls this function automatically.
+    """
+    if repo_path.is_symlink():
+        raise AdminError("unsafe_rebind", "repository path must not be a symlink")
+    canonical_repo = repo_path.resolve(strict=True)
+
+    try:
+        registry_data = read_registry_file_safely(
+            registry_path,
+            registry_owner_uid,
+            registry_anchor,
+            registry_owner_gid,
+        )
+    except Exception as exc:
+        raise AdminError("registry_corrupt", f"Existing registry file is corrupt: {exc}")
+
+    existing_registration = None
+    for registration in registry_data["registrations"]:
+        if not isinstance(registration, dict) or "ledger_id" not in registration:
+            raise AdminError("unsafe_registry", "registry contains a malformed registration")
+        if registration["ledger_id"] == ledger_id:
+            existing_registration = registration
+            break
+    if existing_registration is None:
+        raise AdminError(
+            "ledger_not_enrolled",
+            f"no existing registration for ledger_id={ledger_id}; use enroll instead",
+        )
+
+    migration = validate_local_ledger(canonical_repo)
+    verify_prior_anchors_continuity(canonical_repo, existing_registration["anchor_records"])
+
+    operation = {
+        "kind": "ledger.rebind",
+        "previous_identity": existing_registration["repository_identity"],
+        **migration,
+    }
+    operation_digest = broker.sha256_text(
+        broker.canonical_json({"ledger_id": ledger_id, "operation": operation})
+    )
+    request = {
+        "protocol_version": broker.PROTOCOL_VERSION,
+        "action": "commit",
+        "ledger_id": ledger_id,
+        "operation_key": f"rebind-{operation_digest[:48]}",
+        "operation": operation,
+        "expected": [],
+        "blob": None,
+    }
+    try:
+        response = request_sender(socket_path, request)
+    except (broker.BrokerError, OSError, TimeoutError) as exc:
+        raise AdminError("broker_unavailable", f"Rebind broker request failed: {exc}")
+    if not isinstance(response, dict):
+        raise AdminError("invalid_broker_receipt", "Broker rebind response is not an object")
+    if not response.get("ok") or not isinstance(response.get("receipt"), dict):
+        error = response.get("error", {})
+        raise AdminError(
+            "rebind_rejected",
+            f"Broker rejected rebind: {error.get('code', 'invalid_response')}",
+        )
+    receipt = response["receipt"]
+    policy = receipt.get("policy")
+    if (
+        receipt.get("ledger_id") != ledger_id
+        or receipt.get("operation") != "ledger.rebind"
+        or receipt.get("operation_key") != request["operation_key"]
+        or not isinstance(receipt.get("commit_sequence"), int)
+        or isinstance(receipt.get("commit_sequence"), bool)
+        or receipt["commit_sequence"] < 1
+        or not isinstance(policy, dict)
+        or set(policy) != {"id", "generation", "sha256"}
+        or not isinstance(policy["id"], str)
+        or not policy["id"]
+        or not isinstance(policy["generation"], int)
+        or isinstance(policy["generation"], bool)
+        or policy["generation"] < 1
+        or not isinstance(policy["sha256"], str)
+        or not broker.VALID_SHA256.fullmatch(policy["sha256"])
+        or not isinstance(receipt.get("receipt_hash"), str)
+        or not broker.VALID_SHA256.fullmatch(receipt["receipt_hash"])
+    ):
+        raise AdminError("invalid_broker_receipt", "Broker rebind receipt is inconsistent")
+
+    registration = {
+        "repository_path": str(canonical_repo),
+        "ledger_id": ledger_id,
+        "socket_path": str(socket_path),
+        **migration,
+        "policy_binding": receipt["policy"],
+        "first_broker_sequence": existing_registration["first_broker_sequence"],
+        "enrollment_receipt_hash": existing_registration["enrollment_receipt_hash"],
+    }
+    registrations = []
+    replaced = False
+    for existing in registry_data["registrations"]:
+        if existing.get("ledger_id") == ledger_id:
+            registrations.append(registration)
+            replaced = True
+        else:
+            registrations.append(existing)
+    if not replaced:
+        raise AdminError("unsafe_registry", "registration disappeared while rebinding")
+    registry_data["registrations"] = registrations
+    content_bytes = (broker.canonical_json(registry_data) + "\n").encode("utf-8")
+    try:
+        write_registry_file_safely(
+            registry_path,
+            content_bytes,
+            expected_mode=0o644,
+            replace=True,
+            expected_uid=registry_owner_uid,
+            expected_gid=registry_owner_gid,
+            anchor=registry_anchor,
+        )
+    except Exception as exc:
+        raise AdminError(
+            "registry_publication_pending",
+            f"Broker committed rebind but registry publication failed: {exc}",
+            receipt_hash=receipt["receipt_hash"],
+        )
+
+    return {
+        "ok": True,
+        "rebound_path": str(canonical_repo),
+        "ledger_id": ledger_id,
+        "previous_identity": existing_registration["repository_identity"],
+        "repository_identity": migration["repository_identity"],
+        "anchor_records_count": len(migration["anchor_records"]),
+        "legacy_anchor_sha256": migration["legacy_anchor_sha256"],
+        "rebind_commit_sequence": receipt["commit_sequence"],
+        "policy_binding": receipt["policy"],
+        "idempotent_replay": response.get("idempotent_replay", False),
+    }
+
+
 def absolute_path(value: str, field: str) -> Path:
     path = Path(value)
     if not path.is_absolute():
@@ -4095,6 +4298,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     enroll = commands.add_parser("enroll")
     enroll.add_argument("--repository-path", required=True)
+
+    rebind = commands.add_parser("repository-rebind")
+    rebind.add_argument("--ledger-id", required=True)
+    rebind.add_argument("--repository-path", required=True)
 
     return parser
 
@@ -4157,6 +4364,35 @@ def main(argv: list[str] | None = None) -> int:
                 REGISTRY_PATH,
                 repo_path,
                 deployment["ledger_id"],
+                layout.socket_path,
+            )
+        elif args.command == "repository-rebind":
+            repo_path = absolute_path(args.repository_path, "repository-path")
+            deployment = audit_deployment(layout, 0, 0)
+            if deployment["current"]["state"] != "active":
+                raise AdminError("policy_revoked", "cannot rebind under a revoked policy")
+            if args.ledger_id != deployment["ledger_id"]:
+                raise AdminError(
+                    "unknown_ledger",
+                    f"ledger_id {args.ledger_id!r} does not match the installed deployment's "
+                    f"ledger_id {deployment['ledger_id']!r}",
+                )
+            boundary = privilege_preflight(layout, 0, 0)
+            if not boundary["boundary_ready"]:
+                unresolved = [
+                    check["id"]
+                    for check in boundary["checks"]
+                    if check["status"] not in {"pass", "not_applicable"}
+                ]
+                raise AdminError(
+                    "privilege_precondition_unproven",
+                    "rebind is blocked until every privilege precondition passes",
+                    unresolved_checks=unresolved,
+                )
+            result = rebind_repository(
+                REGISTRY_PATH,
+                repo_path,
+                args.ledger_id,
                 layout.socket_path,
             )
         else:

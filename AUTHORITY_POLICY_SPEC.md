@@ -153,6 +153,39 @@ successful fresh install anywhere as evidence that upgrade is supported.
 
 `OPERATIONS_RUNBOOK.md` documents the exact fresh-install sequence used to bring this host into service.
 
+## Repository identity rebind (Issue #10)
+
+`resolve_enrollment` binds an enrolled repository's identity by kernel device/inode, recorded in
+`/etc/operator-control-plane-registry.json` at enrollment time. On filesystems that assign per-mount
+"anonymous" device numbers to a subvolume (btrfs subvolume mounts, including Fedora's default root+home
+layout), that device number can legitimately change across a reboot with no path, content, or inode
+change at all. The fail-closed identity check has no exception for this — by design — so the only
+sanctioned recovery is `operator-admin repository-rebind --ledger-id <id> --repository-path <path>`
+(documented operationally in `OPERATIONS_RUNBOOK.md`).
+
+`ledger.rebind` is a new broker operation, authorized the same way as `ledger.enroll` (root
+`SO_PEERCRED` required), but requires the ledger to *already* be enrolled (the inverse precondition of
+`ledger.enroll`, which requires it be the store's first commit). It commits as a normal, later
+`commit_sequence` entry — a permanent, auditable broker record, not a local-only registry edit — and its
+`operation_key` is a deterministic digest of its full content, giving it the same retry-after-partial-
+failure idempotency `ledger.enroll` already relies on for the broker-committed/registry-write-pending
+crash window.
+
+Before committing, `operator-admin` re-validates the target ledger exactly as `enroll` does (hash-chain
+integrity, append-only triggers, YAML/SQLite agreement, safe ownership) and additionally confirms every
+anchor recorded at the *prior* enrollment/rebind still resolves to the same
+`(record_type, record_id, version) → event_hash` in the ledger now being bound to, i.e. the anchored
+history was not rewritten.
+
+**Security model.** None of the above proves physical continuity — a byte-identical clone of the ledger
+placed at the named path would pass every check. The checks establish internal consistency (the ledger
+isn't corrupt or tampered) and policy continuity (the anchored past wasn't rewritten); they are not, and
+are not claimed to be, proof that this is the same physical inode as before. The actual security
+authority for this operation is the trusted root administrator explicitly naming `ledger_id` and
+`repository_path` on the command line — the same trust boundary every other `operator-admin` mutating
+command already relies on. There is no cwd discovery and nothing in this codebase invokes
+`rebind_repository` automatically.
+
 ## Explicit non-goals
 
 - Modifying `authority_broker.py`, `operator-broker`, or the repo-local `operator`

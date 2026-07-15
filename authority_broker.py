@@ -36,6 +36,7 @@ VALID_SHA256 = re.compile(r"[0-9a-f]{64}")
 VALID_ROLES = frozenset({"builder", "verifier"})
 OPERATION_ROLES = {
     "ledger.enroll": None,
+    "ledger.rebind": None,
     "claim.create": "builder",
     "evidence.attach_draft": "builder",
     "evidence.attach_status": "verifier",
@@ -43,6 +44,7 @@ OPERATION_ROLES = {
 }
 OPERATION_RECORD_TYPES = {
     "ledger.enroll": frozenset(),
+    "ledger.rebind": frozenset(),
     "claim.create": frozenset({"claim", "task"}),
     "evidence.attach_draft": frozenset({"evidence", "claim", "task"}),
     "evidence.attach_status": frozenset({"evidence", "claim", "task"}),
@@ -239,7 +241,7 @@ def read_bootstrap_config(path: Path) -> BootstrapConfig:
 
 
 def normalize_expected(raw_expected: object, operation: dict) -> list[dict]:
-    if operation["kind"] == "ledger.enroll" and raw_expected == []:
+    if operation["kind"] in {"ledger.enroll", "ledger.rebind"} and raw_expected == []:
         return []
     if not isinstance(raw_expected, list) or not raw_expected:
         raise BrokerError("invalid_request", "expected must be a non-empty list")
@@ -299,6 +301,81 @@ def normalize_expected(raw_expected: object, operation: dict) -> list[dict]:
     return sorted(expected, key=lambda item: RECORD_TYPE_ORDER[item["record_type"]])
 
 
+def _normalize_repository_identity(raw_identity: object, field_name: str) -> dict:
+    if not isinstance(raw_identity, dict):
+        raise BrokerError("invalid_request", f"{field_name} must be an object")
+    require_exact_keys(
+        raw_identity,
+        {
+            "repository_path",
+            "repository_device",
+            "repository_inode",
+            "operator_device",
+            "operator_inode",
+            "ledger_device",
+            "ledger_inode",
+        },
+        field_name,
+    )
+    repository_path = raw_identity.get("repository_path")
+    if not isinstance(repository_path, str) or not os.path.isabs(repository_path):
+        raise BrokerError("invalid_request", "repository_path must be absolute")
+    normalized_identity = {"repository_path": repository_path}
+    for field in (
+        "repository_device",
+        "repository_inode",
+        "operator_device",
+        "operator_inode",
+        "ledger_device",
+        "ledger_inode",
+    ):
+        value = raw_identity.get(field)
+        if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+            raise BrokerError("invalid_request", f"{field} must be a positive integer")
+        normalized_identity[field] = value
+    return normalized_identity
+
+
+def _normalize_anchor_records_with_digest(raw_operation: dict) -> tuple[list[dict], str]:
+    raw_anchors = raw_operation.get("anchor_records")
+    if not isinstance(raw_anchors, list):
+        raise BrokerError("invalid_request", "anchor_records must be an array")
+    anchors = []
+    seen = set()
+    for index, raw_anchor in enumerate(raw_anchors):
+        if not isinstance(raw_anchor, dict):
+            raise BrokerError("invalid_request", f"anchor_records[{index}] must be an object")
+        require_exact_keys(
+            raw_anchor,
+            {"record_type", "record_id", "version", "event_hash"},
+            f"anchor_records[{index}]",
+        )
+        record_type = require_token(raw_anchor.get("record_type"), "record_type")
+        record_id = require_token(raw_anchor.get("record_id"), "record_id")
+        version = raw_anchor.get("version")
+        if not isinstance(version, int) or isinstance(version, bool) or version < 1:
+            raise BrokerError("invalid_request", "anchor version must be a positive integer")
+        key = (record_type, record_id)
+        if key in seen:
+            raise BrokerError("invalid_request", "anchor_records contains a duplicate record")
+        seen.add(key)
+        anchors.append(
+            {
+                "record_type": record_type,
+                "record_id": record_id,
+                "version": version,
+                "event_hash": require_sha256(raw_anchor.get("event_hash"), "event_hash"),
+            }
+        )
+    anchors.sort(key=lambda item: (item["record_type"], item["record_id"]))
+    anchor_digest = require_sha256(
+        raw_operation.get("legacy_anchor_sha256"), "legacy_anchor_sha256"
+    )
+    if anchor_digest != sha256_text(canonical_json(anchors)):
+        raise BrokerError("invalid_request", "legacy anchor digest does not match records")
+    return anchors, anchor_digest
+
+
 def normalize_operation(raw_operation: object) -> dict:
     if not isinstance(raw_operation, dict):
         raise BrokerError("invalid_request", "operation must be an object")
@@ -317,78 +394,40 @@ def normalize_operation(raw_operation: object) -> dict:
             },
             "operation",
         )
-        identity = raw_operation.get("repository_identity")
-        if not isinstance(identity, dict):
-            raise BrokerError("invalid_request", "repository_identity must be an object")
-        require_exact_keys(
-            identity,
-            {
-                "repository_path",
-                "repository_device",
-                "repository_inode",
-                "operator_device",
-                "operator_inode",
-                "ledger_device",
-                "ledger_inode",
-            },
-            "repository_identity",
+        normalized_identity = _normalize_repository_identity(
+            raw_operation.get("repository_identity"), "repository_identity"
         )
-        repository_path = identity.get("repository_path")
-        if not isinstance(repository_path, str) or not os.path.isabs(repository_path):
-            raise BrokerError("invalid_request", "repository_path must be absolute")
-        normalized_identity = {"repository_path": repository_path}
-        for field in (
-            "repository_device",
-            "repository_inode",
-            "operator_device",
-            "operator_inode",
-            "ledger_device",
-            "ledger_inode",
-        ):
-            value = identity.get(field)
-            if not isinstance(value, int) or isinstance(value, bool) or value < 1:
-                raise BrokerError("invalid_request", f"{field} must be a positive integer")
-            normalized_identity[field] = value
-
-        raw_anchors = raw_operation.get("anchor_records")
-        if not isinstance(raw_anchors, list):
-            raise BrokerError("invalid_request", "anchor_records must be an array")
-        anchors = []
-        seen = set()
-        for index, raw_anchor in enumerate(raw_anchors):
-            if not isinstance(raw_anchor, dict):
-                raise BrokerError("invalid_request", f"anchor_records[{index}] must be an object")
-            require_exact_keys(
-                raw_anchor,
-                {"record_type", "record_id", "version", "event_hash"},
-                f"anchor_records[{index}]",
-            )
-            record_type = require_token(raw_anchor.get("record_type"), "record_type")
-            record_id = require_token(raw_anchor.get("record_id"), "record_id")
-            version = raw_anchor.get("version")
-            if not isinstance(version, int) or isinstance(version, bool) or version < 1:
-                raise BrokerError("invalid_request", "anchor version must be a positive integer")
-            key = (record_type, record_id)
-            if key in seen:
-                raise BrokerError("invalid_request", "anchor_records contains a duplicate record")
-            seen.add(key)
-            anchors.append(
-                {
-                    "record_type": record_type,
-                    "record_id": record_id,
-                    "version": version,
-                    "event_hash": require_sha256(raw_anchor.get("event_hash"), "event_hash"),
-                }
-            )
-        anchors.sort(key=lambda item: (item["record_type"], item["record_id"]))
-        anchor_digest = require_sha256(
-            raw_operation.get("legacy_anchor_sha256"), "legacy_anchor_sha256"
-        )
-        if anchor_digest != sha256_text(canonical_json(anchors)):
-            raise BrokerError("invalid_request", "legacy anchor digest does not match records")
+        anchors, anchor_digest = _normalize_anchor_records_with_digest(raw_operation)
         return {
             "kind": kind,
             "repository_identity": normalized_identity,
+            "anchor_records": anchors,
+            "legacy_anchor_sha256": anchor_digest,
+        }
+
+    if kind == "ledger.rebind":
+        require_exact_keys(
+            raw_operation,
+            {
+                "kind",
+                "previous_identity",
+                "repository_identity",
+                "anchor_records",
+                "legacy_anchor_sha256",
+            },
+            "operation",
+        )
+        previous_identity = _normalize_repository_identity(
+            raw_operation.get("previous_identity"), "previous_identity"
+        )
+        repository_identity = _normalize_repository_identity(
+            raw_operation.get("repository_identity"), "repository_identity"
+        )
+        anchors, anchor_digest = _normalize_anchor_records_with_digest(raw_operation)
+        return {
+            "kind": kind,
+            "previous_identity": previous_identity,
+            "repository_identity": repository_identity,
             "anchor_records": anchors,
             "legacy_anchor_sha256": anchor_digest,
         }
@@ -1305,6 +1344,22 @@ class AuthorityStore:
                 raise BrokerError(
                     "ledger_already_active",
                     "ledger enrollment must be the authority store's first broker commit",
+                )
+            return policy, []
+        if operation_kind == "ledger.rebind":
+            if peer.uid != 0:
+                raise BrokerError(
+                    "root_required",
+                    "ledger rebind requires a root SO_PEERCRED identity",
+                    peer_uid=peer.uid,
+                )
+            existing_commits = conn.execute(
+                "SELECT COUNT(*) FROM authority_commits",
+            ).fetchone()[0]
+            if not existing_commits:
+                raise BrokerError(
+                    "ledger_not_enrolled",
+                    "ledger rebind requires the ledger to already be enrolled",
                 )
             return policy, []
 
