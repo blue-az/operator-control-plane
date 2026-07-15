@@ -1120,6 +1120,134 @@ class TestAuthorityIntegration(unittest.TestCase):
         self.assertIn("status: divergent_or_forged_local", res_doc.stdout)
         self.assertIn("exceeds pre-enrollment anchor version 1", res_doc.stdout)
 
+    def test_evidence_anchor_record_ids_are_wire_safe_and_collision_free(self) -> None:
+        # Locally, evidence record IDs are task-scoped ("<task>/<leaf>") and reset per task
+        # (get_next_evidence_id numbers each task's evidence independently), so two different
+        # tasks can each have a local "evidence-0001". validate_local_ledger must produce
+        # anchor record_ids that (a) pass the broker's record_id character class (no "/") and
+        # (b) stay distinct across tasks -- stripping the task prefix instead of re-encoding it
+        # would silently collide them.
+        import authority_admin
+        import authority_broker as broker
+
+        def canonical(value: object) -> str:
+            return json.dumps(
+                value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False
+            )
+
+        def event_hash(
+            record_type: str,
+            record_id: str,
+            payload_json: str,
+            created_at: str,
+            source_command: str,
+        ) -> str:
+            hash_fields = {
+                "hash_format": "operator-ledger-event-v1",
+                "record_type": record_type,
+                "record_id": record_id,
+                "version": 1,
+                "event_type": "record_created",
+                "payload_json": payload_json,
+                "actor_uid": 1000,
+                "actor_name": "blueaz",
+                "created_at": created_at,
+                "source_command": source_command,
+                "previous_event_hash": None,
+            }
+            return hashlib.sha256(canonical(hash_fields).encode("utf-8")).hexdigest()
+
+        db_path = self.temp_dir / ".operator" / "ledger.sqlite3"
+        op_dir = self.temp_dir / ".operator"
+        conn_ledger = sqlite3.connect(str(db_path))
+        rows = []
+        for task_id in ("task-a", "task-b"):
+            task_yaml = {
+                "task_id": task_id,
+                "objective": f"Objective for {task_id}",
+                "status": "open",
+                "claim_ids": [],
+                "evidence_ids": ["evidence-0001"],
+                "verified_claim_ids": [],
+                "policy_authority": "local_policy",
+                "verification_authority": None,
+            }
+            created_at = "2026-07-15T12:00:00Z"
+            task_payload = canonical(task_yaml)
+            task_hash = event_hash("task", task_id, task_payload, created_at, "task-create")
+            rows.append(("task", task_id, task_payload, created_at, "task-create", task_hash))
+            (op_dir / "tasks").mkdir(exist_ok=True)
+            with open(op_dir / "tasks" / f"{task_id}.yaml", "w") as f:
+                yaml.safe_dump(task_yaml, f)
+
+            evidence_record_id = f"{task_id}/evidence-0001"
+            evidence_yaml = {
+                "evidence_id": "evidence-0001",
+                "task_id": task_id,
+                "claim_id": None,
+                "evidence_type": "test_output",
+                "policy_authority": "local_policy",
+                "verification_authority": None,
+            }
+            evidence_payload = canonical(evidence_yaml)
+            evidence_evt_hash = event_hash(
+                "evidence", evidence_record_id, evidence_payload, created_at, "evidence-attach"
+            )
+            rows.append(
+                (
+                    "evidence",
+                    evidence_record_id,
+                    evidence_payload,
+                    created_at,
+                    "evidence-attach",
+                    evidence_evt_hash,
+                )
+            )
+            (op_dir / "evidence" / task_id).mkdir(parents=True, exist_ok=True)
+            with open(op_dir / "evidence" / task_id / "evidence-0001.yaml", "w") as f:
+                yaml.safe_dump(evidence_yaml, f)
+
+        for record_type, record_id, payload_json, created_at, source_command, ev_hash in rows:
+            conn_ledger.execute(
+                """
+                INSERT INTO ledger_events (
+                    event_id, record_type, record_id, version, event_type, payload_json,
+                    actor_uid, actor_name, created_at, source_command, event_hash
+                ) VALUES (?, ?, ?, 1, 'record_created', ?, 1000, 'blueaz', ?, ?, ?)
+                """,
+                (
+                    ev_hash,
+                    record_type,
+                    record_id,
+                    payload_json,
+                    created_at,
+                    source_command,
+                    ev_hash,
+                ),
+            )
+        conn_ledger.commit()
+        conn_ledger.close()
+
+        migration = authority_admin.validate_local_ledger(self.temp_dir)
+        evidence_anchors = [
+            a for a in migration["anchor_records"] if a["record_type"] == "evidence"
+        ]
+        self.assertEqual(len(evidence_anchors), 2)
+        record_ids = {a["record_id"] for a in evidence_anchors}
+        self.assertEqual(record_ids, {"task-a:evidence-0001", "task-b:evidence-0001"})
+        for anchor in migration["anchor_records"]:
+            # Must not raise: proves the broker's own record_id validation accepts this.
+            broker.require_token(anchor["record_id"], "record_id")
+
+        # The client-computed digest must match what the broker recomputes after its own
+        # (record_type, record_id) sort over the wire-safe anchors -- not the pre-transform order.
+        recomputed = sorted(
+            migration["anchor_records"], key=lambda item: (item["record_type"], item["record_id"])
+        )
+        self.assertEqual(
+            migration["legacy_anchor_sha256"], broker.sha256_text(broker.canonical_json(recomputed))
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

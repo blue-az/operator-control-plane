@@ -3788,15 +3788,27 @@ def validate_local_ledger(repo_path: Path) -> dict:
         if (after.st_dev, after.st_ino) != (before.st_dev, before.st_ino):
             raise AdminError("unsafe_enrollment", f"{label} path changed during preflight")
 
-    anchors = [
-        {
-            "record_type": record_type,
-            "record_id": record_id,
-            "version": version,
-            "event_hash": event_hash,
-        }
-        for (record_type, record_id), (version, event_hash) in sorted(chain_state.items())
-    ]
+    # Locally, evidence/handoff record IDs are task-scoped ("<task_id>/<leaf_id>", assigned
+    # independently per task by get_next_evidence_id) to avoid collisions between tasks that
+    # each start their own evidence-0001. The broker's record_id character class disallows "/",
+    # so re-encode with a wire-safe separator rather than stripping the task_id -- stripping
+    # would silently collide two different tasks' evidence-0001 into one anchor record.
+    anchors = sorted(
+        (
+            {
+                "record_type": record_type,
+                "record_id": (
+                    record_id.replace("/", ":", 1)
+                    if record_type in {"evidence", "handoff"}
+                    else record_id
+                ),
+                "version": version,
+                "event_hash": event_hash,
+            }
+            for (record_type, record_id), (version, event_hash) in chain_state.items()
+        ),
+        key=lambda item: (item["record_type"], item["record_id"]),
+    )
     return {
         "repository_identity": {
             "repository_path": str(repo_path),
