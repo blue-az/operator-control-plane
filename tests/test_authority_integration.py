@@ -427,29 +427,51 @@ class TestAuthorityIntegration(unittest.TestCase):
             task_data = yaml.safe_load(f)
             self.assertEqual(task_data["status"], "complete")
 
+    def _operator_dir_snapshot(self) -> dict[str, tuple[int, int, bytes | None]]:
+        op_dir = self.temp_dir / ".operator"
+        return {
+            str(path.relative_to(op_dir)): (
+                path.lstat().st_mode,
+                path.lstat().st_mtime_ns,
+                path.read_bytes() if path.is_file() else None,
+            )
+            for path in op_dir.rglob("*")
+        }
+
     def test_session_end_rejection(self) -> None:
-        # 1. Setup task and start session
+        # Acceptance #6 requires BOTH forbidden status values to be rejected atomically,
+        # before closing the usage session or changing any local/external record -- not
+        # just that an error is printed. Snapshot the whole .operator tree around each
+        # rejected attempt and require it byte-for-byte, mtime-for-mtime identical, rather
+        # than only checking a handful of hand-picked fields.
         res = self.run_operator("task-create", "--id", "task-1", "--objective", "Test objective")
         self.assertEqual(res.returncode, 0)
         res = self.run_operator("session-start", "--task", "task-1", "--harness", "gemini-agy")
         self.assertEqual(res.returncode, 0, res.stderr)
 
-        # 2. Attempt to run session-end with verified status; should be rejected
-        res = self.run_operator(
-            "session-end",
-            "usage-0001",
-            "--outcome",
-            "useful",
-            "--cost",
-            "0.05",
-            "--status",
-            "verified",
-        )
-        self.assertNotEqual(res.returncode, 0)
-        self.assertIn(
-            "Task status transitions to 'verified' or 'complete' are restricted",
-            res.stderr + res.stdout,
-        )
+        for status in ("verified", "complete"):
+            before = self._operator_dir_snapshot()
+            res = self.run_operator(
+                "session-end",
+                "usage-0001",
+                "--outcome",
+                "useful",
+                "--cost",
+                "0.05",
+                "--status",
+                status,
+            )
+            self.assertNotEqual(res.returncode, 0)
+            self.assertIn(
+                "Task status transitions to 'verified' or 'complete' are restricted",
+                res.stderr + res.stdout,
+            )
+            after = self._operator_dir_snapshot()
+            self.assertEqual(
+                before,
+                after,
+                f"--status {status} rejection must not touch any local/external record",
+            )
 
     def test_fail_closed_if_broker_unavailable(self) -> None:
         # 1. Setup task
