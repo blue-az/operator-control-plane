@@ -51,11 +51,19 @@ id -u operator-verifier
 
 Before continuing, confirm none of `operator-broker`, `operator-builder`, `operator-verifier` has:
 
-- an entry in `/etc/sudoers` or `/etc/sudoers.d/*` (`sudo -l -U <name>` as root should report "not
-  allowed to run sudo");
+- an entry in `/etc/sudoers` or `/etc/sudoers.d/*` (`sudo -n -l -U <name>` as root should print "User
+  <name> is not allowed to run sudo on <host>." and exit 0 — that exit code is normal for this query
+  form and does not itself mean the account has access; only the message text does);
 - membership in `wheel`, `sudo`, `adm`, `docker`, `podman`, `lxd`, `incus-admin`, or `libvirt`
   (`id <name>`);
 - a login shell other than `nologin`/`false`.
+
+**Freshly created accounts are not automatically clean.** A real dogfood run on a host with pre-existing
+host-specific sudoers rules found that `sudo grep -rl ALL /etc/sudoers.d/` turned up rules written as
+`ALL ALL=NOPASSWD: /usr/local/bin/<tool>` — a blanket grant to *every* account on the host, including
+ones that didn't exist yet when the rule was written. Run `sudo grep -rn '^ALL ' /etc/sudoers
+/etc/sudoers.d/*` and rewrite any match found there to name the specific human account instead of `ALL`,
+validating with `sudo visudo -cf <file>` before installing it.
 
 This is a sanity check, not the authoritative check — `operator-admin collect-evidence` (step 5) and
 `operator-admin preflight` (step 6) are authoritative and must be rerun after any account change.
@@ -173,7 +181,43 @@ first event, atomically binding repository inode identity, legacy anchors, the a
 and the first broker sequence. Retrying the identical enrollment is idempotent and returns the original
 receipt rather than creating a duplicate.
 
-## 8. Ordinary operation
+**`REGISTRY_PATH` lives outside the config root.** The client-side enrollment registry is
+`/etc/operator-control-plane-registry.json` — a fixed path, but a *sibling* of `/etc/operator-control-plane/`,
+not inside it. Tearing down and recreating the store (`rm -rf /etc/operator-control-plane
+/var/lib/operator-control-plane ...`) does **not** clear it. A stale registry entry from a previous store
+instance causes `enrollment_conflict` on the next enroll attempt even though the store itself is fresh —
+hit live in this form during dogfood. If you are deliberately starting over (not just retrying a failed
+attempt), remove it explicitly: `sudo rm -f /etc/operator-control-plane-registry.json`.
+
+## 8. Open the repository up for builder/verifier writes
+
+`enroll` (step 7) requires the repository and its `.operator` tree to be **owner-only** — not
+group/other writable — as proof no one else could have tampered with it before migration
+(`unsafe_enrollment: operator path is group/other writable` if this isn't true). Do this *before*
+enrolling, not after: reopening permissions and then re-enrolling on top of stale state is exactly the
+kind of sequencing mistake that produces `enrollment_conflict` against a leftover registry entry (see
+the `REGISTRY_PATH` note above).
+
+Only once `enroll` has succeeded, open the tree up for the builder and verifier accounts to write local
+YAML/journal projections. Plain `chmod g+w` is not enough — it only fixes files that already exist;
+directories created *after* enrollment (e.g. `.operator/evidence/<new-task>/`) inherit their creating
+process's umask, not the parent's write bit, so a second account can still hit `Permission denied`
+creating a new subdirectory even though the parent looks group-writable. Use a POSIX default ACL so new
+entries inherit correctly regardless of umask:
+
+```bash
+sudo chgrp -R operator-clients /path/to/enrolled/repo/.operator
+sudo chmod -R g+w /path/to/enrolled/repo/.operator
+sudo find /path/to/enrolled/repo/.operator -type d -exec chmod g+s {} \;
+sudo setfacl -d -m group:operator-clients:rwx /path/to/enrolled/repo/.operator
+sudo setfacl -R -m group:operator-clients:rwx /path/to/enrolled/repo/.operator
+```
+
+This is host filesystem configuration, not something `operator-admin`/`operator` do automatically —
+consistent with the explicit non-goal of not provisioning accounts, groups, or ACLs on the application's
+behalf.
+
+## 9. Ordinary operation
 
 From inside the enrolled repository, as the **builder** or **verifier** account (not root, not
 `blueaz`):
@@ -190,11 +234,14 @@ repositories and that only this dedicated transition reaches those states. `auth
 replays the broker's projection into the local `.operator` YAML/SQLite state; run it after any broker
 interaction that reports `committed, projection pending`.
 
-## 9. Outage diagnosis
+## 10. Outage diagnosis
 
-Symptoms: `operator authority-reconcile` or `task-transition` raise a raw connection error
-(`ConnectionRefusedError`/`FileNotFoundError` surfaced from `authority_broker.send_request`) instead of
-a `BrokerError`.
+Symptoms: `operator authority-reconcile` or `task-transition` print `Error: cannot determine expected
+state: broker unreachable: ...` (compile_expected failed to reach the broker while gathering CAS
+preconditions) or `Error: Broker dispatch failed: ...` (the broker was reachable long enough to compute
+preconditions but not to accept the commit). Both fail closed with a nonzero exit and write no local
+YAML claiming success; verified live by stopping the broker mid-session and confirming `task-show`
+reported no change.
 
 ```bash
 sudo systemctl status operator-control-plane-broker.service --no-pager
@@ -205,9 +252,11 @@ sudo "/root/operator-control-plane-release/$REV/operator-admin" audit
 
 There is no local fallback by design — do not treat a reachable `.operator` YAML file as a substitute
 for the broker being up. Restart the unit (`sudo systemctl restart ...`) and re-run `audit` before
-resuming builder/verifier work.
+resuming builder/verifier work. Retrying the exact same failed command after the broker recovers is
+safe and produces exactly one commit, not a duplicate — verified live (commit count went 5→6, event
+count 8→10, matching one `claim.create`'s two-record mutation, on a retry after a real outage).
 
-## 10. Rotation
+## 11. Rotation
 
 ```bash
 sudoedit /root/operator-control-plane-policy/generation-2.json   # generation = 2, previous_policy_sha256 = generation-1's sha256
@@ -219,11 +268,14 @@ sudo "/root/operator-control-plane-release/$REV/operator-admin" preflight
 ```
 
 Rotation records a new generation and digest in the same `BEGIN IMMEDIATE` transaction as the policy
-event; it never rewrites event-time history. Because privilege evidence is bound to
+event; it never rewrites event-time history — verified live by querying `authority_commits` directly
+after a real rotation: all five pre-rotation commits still carried the generation-1 policy digest, only
+the new `ledger_policy_events` row referenced generation 2. Because privilege evidence is bound to
 `policy_generation`/`policy_sha256`, every rotation silently reverts the ten evidence-backed preflight
 checks to `unknown` until evidence is re-collected — this is intentional, not a bug to route around.
+Generation persists across a broker restart (`systemctl restart` then `audit`), verified live.
 
-## 11. Revocation
+## 12. Revocation
 
 ```bash
 sudo "/root/operator-control-plane-release/$REV/operator-admin" revoke \
@@ -234,10 +286,13 @@ sudo "/root/operator-control-plane-release/$REV/operator-admin" revoke \
 Revocation is terminal for that ledger: `audit` will show `state: revoked`, and any subsequent `rotate`
 fails closed with `policy_revoked`. There is no un-revoke command.
 
-## 12. Rollback-rejection (expected failures, not incidents)
+## 13. Rollback-rejection (expected failures, not incidents)
 
-These are the fail-closed behaviors the design guarantees — reproduce at least one for the issue-linked
-dogfood evidence in step 7 of the plan, don't just cite this table:
+These are the fail-closed behaviors the design guarantees. `installation_conflict`,
+`policy_history_fork`, and `policy_digest_mismatch` were each reproduced live on a real host, with
+`sha256sum` of the authority store and every `/etc/operator-control-plane/*` config file confirmed
+byte-identical before and after each rejected attempt — don't just cite this table, reproduce at least
+one the same way for issue-linked evidence:
 
 | Attempted action | Failure mode |
 | --- | --- |
@@ -245,13 +300,13 @@ dogfood evidence in step 7 of the plan, don't just cite this table:
 | `install` with changed assets/policy over an existing deployment | `installation_conflict` |
 | `rotate` with a non-contiguous generation or wrong `previous_policy_sha256` | `policy_history_fork` |
 | `rotate` after `revoke` | `policy_revoked` |
-| `revoke` with a stale/wrong `--expected-policy-sha256` | `policy_digest_mismatch` |
+| `revoke` with a stale/wrong `--expected-policy-sha256` | `policy_digest_mismatch` (the digest must still be exactly 64 lowercase hex characters — a malformed length fails earlier with `invalid_policy` instead, which is a real but less interesting rejection) |
 | `enroll` a ledger that already has broker commits (not the store's first commit) | `enrollment_rejected` |
-| `enroll` the same repository path again with a differing registration | `enrollment_conflict` |
+| `enroll` the same repository path again with a differing registration | `enrollment_conflict` (also fires if `/etc/operator-control-plane-registry.json` — see the note in step 7 — holds a stale entry from a wiped-and-recreated store; delete it if you are deliberately starting over, not just retrying) |
 | local `.operator` ledger fails hash-chain/append-only/YAML-agreement validation | `unsafe_enrollment` |
 | tampered/stale/foreign-policy `privilege-evidence.json` | silently degrades to `unknown`, never to `pass` |
 
-## 13. Crash / recovery
+## 14. Crash / recovery
 
 - Interrupted `install`/`rotate`/`revoke` before the pending policy file is fsynced: no database event
   references the generation; rerun the same command.

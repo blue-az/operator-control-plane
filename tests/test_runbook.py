@@ -65,7 +65,10 @@ class TestRunbookMatchesCli(unittest.TestCase):
             [OPERATOR_BIN, "--help"], capture_output=True, text=True, check=True
         )
         valid = choices_from_usage(completed.stdout)
-        mentioned = set(re.findall(r"(?<!\.)\boperator\s+([a-z][a-z0-9-]*)", self.text))
+        # Only treat "operator <word>" as an invocation when "operator" opens a code line or
+        # an inline code span -- otherwise ordinary prose quoting error text (e.g. "operator
+        # path is group/other writable") gets misread as a bogus subcommand.
+        mentioned = set(re.findall(r"(?:^|`)operator\s+([a-z][a-z0-9-]*)", self.text, re.MULTILINE))
         self.assertTrue(mentioned, "expected at least one repo CLI command in the runbook")
         unknown = mentioned - valid
         self.assertFalse(unknown, f"runbook references unknown operator commands: {unknown}")

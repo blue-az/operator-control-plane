@@ -23,6 +23,12 @@ Production paths are fixed:
 | `/var/lib/operator-control-plane` | broker UID:GID | `0700` | SQLite store and evidence CAS |
 | `/run/operator-control-plane` | broker UID:client GID | `2750` | broker socket parent |
 | systemd unit and tmpfiles files | root:root | `0644` | service definition and runtime directory |
+| `/etc/operator-control-plane-registry.json` | root:root | `0644` | client-side repository enrollment registry (issue #7) |
+
+`/etc/operator-control-plane-registry.json` is a **sibling** of `/etc/operator-control-plane/`, not a
+child of it — tearing down and recreating `/etc/operator-control-plane` does not clear it. A stale entry
+from a previous store instance produces `enrollment_conflict` on the next enroll attempt even though the
+store itself is fresh; remove it explicitly when deliberately starting over.
 
 Root-owned ancestors are required through the install, configuration, unit, and tmpfiles paths. The
 allowed owner changes only at the exact state and runtime roots. Traversal uses directory descriptors
