@@ -14,6 +14,7 @@ import json
 import os
 import pwd
 import re
+import socket
 import sqlite3
 import stat
 import subprocess
@@ -50,6 +51,10 @@ INSTALLED_SOURCE_ASSETS = {
     "operator-admin": 0o755,
     "socket_permission_helper.py": 0o644,
 }
+RELEASE_MANIFEST_NAME = "release.json"
+UPGRADE_JOURNAL_SCHEMA_VERSION = 1
+UPGRADE_TERMINAL_STATES = frozenset({"completed", "rolled_back"})
+STORE_SCHEMA_VERSION_PATTERN = re.compile(rb"^STORE_SCHEMA_VERSION\s*=\s*(\d+)\s*$", re.MULTILINE)
 PREFLIGHT_CHECK_IDS = (
     "identity.admin_root",
     "identity.broker_binding",
@@ -232,6 +237,18 @@ class InstallLayout:
     @property
     def evidence_path(self) -> Path:
         return self.config_root / "privilege-evidence.json"
+
+    @property
+    def releases_root(self) -> Path:
+        return self.install_root.parent / f"{self.install_root.name}-releases"
+
+    @property
+    def upgrade_journal_path(self) -> Path:
+        return self.config_root / "upgrade.json"
+
+    @property
+    def upgrade_history_path(self) -> Path:
+        return self.config_root / "upgrade-history.jsonl"
 
 
 @dataclass(frozen=True)
@@ -661,7 +678,8 @@ def write_protected_file(
 ) -> None:
     with open_layout_directory(path.parent, layout, identity) as parent_fd:
         try:
-            fd, existing, metadata = open_regular_at(parent_fd, path.name, len(data) + 1)
+            limit = MAX_ADMIN_FILE_BYTES if replace else (len(data) + 1)
+            fd, existing, metadata = open_regular_at(parent_fd, path.name, limit)
         except FileNotFoundError:
             fd = -1
             existing = None
@@ -2504,6 +2522,712 @@ def rotate_deployment(
     }
 
 
+def hash_source_assets(assets: dict[str, bytes]) -> dict[str, str]:
+    return {name: sha256_bytes(data) for name, data in assets.items()}
+
+
+def compute_release_digest(asset_hashes: dict[str, str]) -> str:
+    ordered = {name: asset_hashes[name] for name in sorted(asset_hashes)}
+    return sha256_bytes(broker.canonical_json(ordered).encode("ascii"))
+
+
+def upgrade_idempotency_key(old_digest: str, new_digest: str) -> str:
+    return sha256_bytes(f"{old_digest}:{new_digest}".encode("ascii"))
+
+
+def release_manifest_payload(digest: str, asset_hashes: dict[str, str], staged_by_uid: int) -> dict:
+    return {
+        "release_schema_version": 1,
+        "release_digest": digest,
+        "assets": {
+            name: {"sha256": asset_hashes[name], "mode": mode}
+            for name, mode in sorted(INSTALLED_SOURCE_ASSETS.items())
+        },
+        "staged_by_uid": staged_by_uid,
+    }
+
+
+def read_release_assets(
+    release_dir: Path, layout: InstallLayout, identity: DeploymentIdentity
+) -> dict[str, bytes]:
+    # Deliberately reuses read_source_assets: a release directory and an install --source-dir
+    # are the same shape (the four INSTALLED_SOURCE_ASSETS files, admin-controlled, root-owned
+    # ancestors), staged the same way, so the same ancestor-safety walk and per-file read apply.
+    return read_source_assets(release_dir, layout, identity)
+
+
+def prepare_release(release_dir: Path, layout: InstallLayout, identity: DeploymentIdentity) -> dict:
+    """Hash a staged candidate release, require its directory name to be its own digest (so
+    admins can only stage at the correct, self-describing path -- no separate digest-lookup step
+    is needed), and write (or verify, if already present) its release.json manifest."""
+    if release_dir.is_symlink():
+        raise AdminError("unsafe_release", "release directory must not be a symlink")
+    assets = read_release_assets(release_dir, layout, identity)
+    asset_hashes = hash_source_assets(assets)
+    digest = compute_release_digest(asset_hashes)
+    if release_dir.name != digest:
+        raise AdminError(
+            "release_digest_mismatch",
+            f"release directory name {release_dir.name!r} does not match its computed digest "
+            f"{digest}; stage it at {layout.releases_root / digest}",
+        )
+    payload = release_manifest_payload(digest, asset_hashes, identity.admin_uid)
+    manifest_metadata = entry_metadata_if_present(
+        release_dir / RELEASE_MANIFEST_NAME, layout, identity
+    )
+    if manifest_metadata is None:
+        write_protected_file(
+            release_dir / RELEASE_MANIFEST_NAME,
+            json_bytes(payload),
+            0o600,
+            identity.admin_uid,
+            identity.admin_gid,
+            layout,
+            identity,
+        )
+    else:
+        existing = read_protected_file(
+            release_dir / RELEASE_MANIFEST_NAME,
+            0o600,
+            identity.admin_uid,
+            identity.admin_gid,
+            layout,
+            identity,
+        )
+        if decode_canonical(existing, "release manifest") != payload:
+            raise AdminError(
+                "release_manifest_conflict",
+                f"release.json does not match staged assets: {release_dir}",
+            )
+    return {"digest": digest, "assets": assets, "manifest": payload}
+
+
+def extract_store_schema_version(source: bytes) -> int:
+    match = STORE_SCHEMA_VERSION_PATTERN.search(source)
+    if not match:
+        raise AdminError(
+            "schema_version_unreadable",
+            "could not read STORE_SCHEMA_VERSION from candidate release",
+        )
+    return int(match.group(1))
+
+
+def service_unit_name(layout: InstallLayout) -> str:
+    return layout.unit_path.name
+
+
+def stop_service(layout: InstallLayout) -> None:
+    code, output = run_probe(["systemctl", "stop", service_unit_name(layout)], timeout=15.0)
+    if code != 0:
+        raise AdminError("service_stop_failed", f"systemctl stop failed: {output}")
+
+
+def start_service(layout: InstallLayout) -> None:
+    code, output = run_probe(["systemctl", "start", service_unit_name(layout)], timeout=15.0)
+    if code != 0:
+        raise AdminError("service_start_failed", f"systemctl start failed: {output}")
+
+
+def probe_service_active(layout: InstallLayout) -> bool:
+    code, _ = run_probe(["systemctl", "is-active", service_unit_name(layout)])
+    return code == 0
+
+
+def probe_socket_health(layout: InstallLayout, timeout: float = 5.0) -> bool:
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        sock.settimeout(timeout)
+        sock.connect(str(layout.socket_path))
+        return True
+    except OSError:
+        return False
+    finally:
+        sock.close()
+
+
+def default_health_probe(
+    layout: InstallLayout,
+    admin_uid: int,
+    admin_gid: int,
+    *,
+    expected_digest: str | None = None,
+    validate_binding: bool = True,
+) -> bool:
+    if not probe_service_active(layout):
+        return False
+    if not probe_socket_health(layout):
+        return False
+    try:
+        if expected_digest is not None:
+            manifest, identity = load_manifest(
+                layout, admin_uid, admin_gid, validate_binding=validate_binding
+            )
+            release_dir = layout.releases_root / expected_digest
+            release_manifest_data = read_protected_file(
+                release_dir / RELEASE_MANIFEST_NAME,
+                0o600,
+                identity.admin_uid,
+                identity.admin_gid,
+                layout,
+                identity,
+            )
+            release_manifest = decode_canonical(release_manifest_data, "release manifest")
+            candidate_assets = release_manifest["assets"]
+            candidate_manifest = dict(manifest)
+            updated_assets = dict(manifest["assets"])
+            for name, entry in candidate_assets.items():
+                dest_path = str(layout.install_root / name)
+                updated_assets[dest_path] = {
+                    "sha256": entry["sha256"],
+                    "mode": entry["mode"],
+                    "uid": identity.admin_uid,
+                    "gid": identity.admin_gid,
+                }
+            candidate_manifest["assets"] = updated_assets
+            verify_deployment(
+                layout, candidate_manifest, identity, validate_binding=validate_binding
+            )
+        else:
+            audit_deployment(layout, admin_uid, admin_gid, validate_binding=validate_binding)
+    except (AdminError, broker.BrokerError, OSError, sqlite3.Error):
+        return False
+    return True
+
+
+def activate_release_assets(
+    layout: InstallLayout, identity: DeploymentIdentity, assets: dict[str, bytes]
+) -> dict[str, dict]:
+    entries: dict[str, dict] = {}
+    for name, mode in INSTALLED_SOURCE_ASSETS.items():
+        destination = layout.install_root / name
+        data = assets[name]
+        write_protected_file(
+            destination,
+            data,
+            mode,
+            identity.admin_uid,
+            identity.admin_gid,
+            layout,
+            identity,
+            replace=True,
+        )
+        entries[str(destination)] = {
+            "sha256": sha256_bytes(data),
+            "mode": mode,
+            "uid": identity.admin_uid,
+            "gid": identity.admin_gid,
+        }
+    return entries
+
+
+def validate_upgrade_journal(journal: dict, identity: DeploymentIdentity) -> None:
+    if not isinstance(journal, dict):
+        raise AdminError("corrupt_upgrade_journal", "upgrade journal must be a JSON object")
+    if journal.get("upgrade_journal_schema_version") != 1:
+        raise AdminError(
+            "corrupt_upgrade_journal", "invalid or unsupported upgrade journal schema version"
+        )
+    required_keys = {
+        "idempotency_key",
+        "old_release_digest",
+        "new_release_digest",
+        "state",
+        "started_at",
+        "admin_uid",
+    }
+    for key in required_keys:
+        if key not in journal:
+            raise AdminError("corrupt_upgrade_journal", f"missing required field: {key}")
+
+    # Validate admin_uid
+    if not isinstance(journal["admin_uid"], int) or journal["admin_uid"] != identity.admin_uid:
+        raise AdminError("corrupt_upgrade_journal", "upgrade journal admin_uid mismatch")
+
+    # Validate states
+    allowed_states = {
+        "prepared",
+        "service_stopped",
+        "activated",
+        "rolling_back",
+        "health_verified",
+        "rolled_back",
+        "completed",
+    }
+    if journal["state"] not in allowed_states:
+        raise AdminError("corrupt_upgrade_journal", f"unknown upgrade state: {journal['state']}")
+
+    # Validate digests (must be 64-character hex strings)
+    def is_sha256_hex(val) -> bool:
+        if not isinstance(val, str) or len(val) != 64:
+            return False
+        try:
+            int(val, 16)
+            return True
+        except ValueError:
+            return False
+
+    if not is_sha256_hex(journal["old_release_digest"]) or not is_sha256_hex(
+        journal["new_release_digest"]
+    ):
+        raise AdminError(
+            "corrupt_upgrade_journal",
+            "release digests in upgrade journal must be 64-character SHA-256 hex strings",
+        )
+
+    # Validate idempotency_key
+    expected_idempotency_key = upgrade_idempotency_key(
+        journal["old_release_digest"], journal["new_release_digest"]
+    )
+    if journal.get("idempotency_key") != expected_idempotency_key:
+        raise AdminError(
+            "corrupt_upgrade_journal",
+            "idempotency_key mismatch in upgrade journal",
+        )
+
+    if not isinstance(journal["started_at"], str) or not journal["started_at"]:
+        raise AdminError(
+            "corrupt_upgrade_journal", "invalid started_at timestamp in upgrade journal"
+        )
+
+
+def load_upgrade_journal(layout: InstallLayout, identity: DeploymentIdentity) -> dict | None:
+    metadata = entry_metadata_if_present(layout.upgrade_journal_path, layout, identity)
+    if metadata is None:
+        return None
+    data = read_protected_file(
+        layout.upgrade_journal_path, 0o600, identity.admin_uid, identity.admin_gid, layout, identity
+    )
+    try:
+        journal = decode_canonical(data, "upgrade journal")
+    except AdminError as exc:
+        if exc.code == "invalid_admin_state":
+            raise AdminError(
+                "corrupt_upgrade_journal", f"upgrade journal is corrupt: {exc.message}"
+            ) from exc
+        raise
+    validate_upgrade_journal(journal, identity)
+    return journal
+
+
+def read_upgrade_history(layout: InstallLayout, identity: DeploymentIdentity) -> list[dict]:
+    metadata = entry_metadata_if_present(layout.upgrade_history_path, layout, identity)
+    if metadata is None:
+        return []
+    data = read_protected_file(
+        layout.upgrade_history_path, 0o600, identity.admin_uid, identity.admin_gid, layout, identity
+    )
+    records = []
+    for line in data.decode("ascii").splitlines():
+        if line.strip():
+            records.append(decode_canonical(line.encode("ascii") + b"\n", "upgrade history record"))
+    return records
+
+
+def reconcile_upgrade_history(
+    layout: InstallLayout, identity: DeploymentIdentity, journal: dict
+) -> None:
+    records = read_upgrade_history(layout, identity)
+    if not any(r.get("idempotency_key") == journal["idempotency_key"] for r in records):
+        append_upgrade_history(layout, identity, dict(journal))
+
+
+def write_upgrade_journal(
+    layout: InstallLayout, identity: DeploymentIdentity, journal: dict
+) -> None:
+    write_protected_file(
+        layout.upgrade_journal_path,
+        json_bytes(journal),
+        0o600,
+        identity.admin_uid,
+        identity.admin_gid,
+        layout,
+        identity,
+        replace=True,
+    )
+
+
+def append_upgrade_history(
+    layout: InstallLayout, identity: DeploymentIdentity, record: dict
+) -> None:
+    line = (broker.canonical_json(record) + "\n").encode("ascii")
+    with open_layout_directory(layout.upgrade_history_path.parent, layout, identity) as parent_fd:
+        flags = os.O_WRONLY | os.O_CREAT | os.O_APPEND | getattr(os, "O_CLOEXEC", 0)
+        flags |= getattr(os, "O_NOFOLLOW", 0)
+        fd = os.open(layout.upgrade_history_path.name, flags, 0o600, dir_fd=parent_fd)
+        try:
+            metadata = os.fstat(fd)
+            if (
+                not stat.S_ISREG(metadata.st_mode)
+                or metadata.st_uid != identity.admin_uid
+                or stat.S_IMODE(metadata.st_mode) != 0o600
+            ):
+                raise AdminError(
+                    "unsafe_path_metadata",
+                    f"upgrade history file is unsafe: {layout.upgrade_history_path}",
+                )
+            write_all(fd, line)
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        os.fsync(parent_fd)
+
+
+def upgrade_deployment(
+    layout: InstallLayout,
+    release_dir: Path,
+    admin_uid: int,
+    admin_gid: int,
+    *,
+    validate_accounts: bool,
+    health_probe: Callable = default_health_probe,
+    service_stop: Callable[[InstallLayout], None] | None = None,
+    service_start: Callable[[InstallLayout], None] | None = None,
+) -> dict:
+    """Schema-compatible code upgrade: moves an already-installed host from its currently
+    active release to a new one, preserving the broker store, policy, registry, receipts, and
+    evidence untouched. See AUTHORITY_POLICY_SPEC.md's "Atomic code upgrade" section and issue
+    #11 for the full design (journal states, rollback, and what this deliberately does not
+    attempt -- schema migrations).
+    """
+    if service_stop is None:
+        service_stop = stop_service
+    if service_start is None:
+        service_start = start_service
+    import inspect
+
+    def invoke_health_probe(
+        probe: Callable,
+        lay: InstallLayout,
+        uid: int,
+        gid: int,
+        expected_digest: str | None,
+    ) -> bool:
+        sig = inspect.signature(probe)
+        kwargs = {}
+        if "expected_digest" in sig.parameters or any(
+            p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()
+        ):
+            kwargs["expected_digest"] = expected_digest
+        if "validate_binding" in sig.parameters or any(
+            p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()
+        ):
+            kwargs["validate_binding"] = validate_accounts
+        return probe(lay, uid, gid, **kwargs)
+
+    # 1. Load manifest and identity using a provisional identity.
+    provisional = DeploymentIdentity(
+        admin_uid, admin_gid, "unknown", admin_uid, admin_gid, "unknown", admin_gid
+    )
+
+    candidate = prepare_release(release_dir, layout, provisional)
+    new_digest = candidate["digest"]
+
+    new_entries: dict[str, dict] | None = None
+    with administration_lock(layout, provisional):
+        # Reload manifest and identity inside the lock!
+        manifest, identity = load_manifest(
+            layout, admin_uid, admin_gid, validate_binding=validate_accounts
+        )
+
+        # Reload journal inside the lock!
+        journal = load_upgrade_journal(layout, identity)
+        is_recovery = journal is not None and journal["state"] not in UPGRADE_TERMINAL_STATES
+
+        if is_recovery:
+            # Check for competing upgrades
+            if journal["new_release_digest"] != new_digest:
+                raise AdminError(
+                    "upgrade_in_progress",
+                    f"a different upgrade is already in progress (state={journal['state']}); "
+                    f"resume or resolve it before starting another",
+                )
+            old_digest = journal["old_release_digest"]
+            rollback_assets = read_release_assets(
+                layout.releases_root / old_digest, layout, identity
+            )
+            idempotency_key = journal["idempotency_key"]
+        else:
+            # Normal path: verify installed assets against manifest, and ensure no conflicts.
+            current_assets = {
+                name: read_protected_file(
+                    layout.install_root / name,
+                    mode,
+                    identity.admin_uid,
+                    identity.admin_gid,
+                    layout,
+                    identity,
+                )
+                for name, mode in INSTALLED_SOURCE_ASSETS.items()
+            }
+            current_hashes = hash_source_assets(current_assets)
+            old_digest = compute_release_digest(current_hashes)
+            for name, mode in INSTALLED_SOURCE_ASSETS.items():
+                recorded = manifest["assets"].get(str(layout.install_root / name))
+                if (
+                    recorded is None
+                    or recorded["sha256"] != current_hashes[name]
+                    or recorded["mode"] != mode
+                ):
+                    raise AdminError(
+                        "installation_conflict", f"installed asset differs from manifest: {name}"
+                    )
+
+            if old_digest == new_digest:
+                if (
+                    journal is not None
+                    and journal["state"] == "completed"
+                    and journal["idempotency_key"]
+                    == upgrade_idempotency_key(journal["old_release_digest"], new_digest)
+                ):
+                    reconcile_upgrade_history(layout, identity, journal)
+                return {
+                    "ok": True,
+                    "action": "upgrade",
+                    "idempotent_replay": True,
+                    "old_release_digest": old_digest,
+                    "new_release_digest": new_digest,
+                }
+
+            idempotency_key = upgrade_idempotency_key(old_digest, new_digest)
+            # Recheck terminal journal key to verify if this is an idempotent replay of an already terminal state
+            if journal is not None and journal["idempotency_key"] == idempotency_key:
+                reconcile_upgrade_history(layout, identity, journal)
+                if journal["state"] == "completed":
+                    # Inconsistent state: journal says completed, but files on disk do not match candidate!
+                    raise AdminError(
+                        "invalid_admin_state",
+                        "upgrade journal state is completed, but installed assets on disk do not match the new release",
+                    )
+                if journal["state"] == "rolled_back":
+                    rollback_healthy = invoke_health_probe(
+                        health_probe,
+                        layout,
+                        identity.admin_uid,
+                        identity.admin_gid,
+                        expected_digest=old_digest,
+                    )
+                    if not rollback_healthy:
+                        raise AdminError(
+                            "rollback_unhealthy",
+                            "upgrade failed its health check and rollback to the previous release "
+                            "also failed its health check; manual intervention required",
+                        )
+                    raise AdminError(
+                        "upgrade_health_check_failed",
+                        f"candidate release {new_digest} failed its post-activation health check; "
+                        f"automatically rolled back to {old_digest}",
+                    )
+                # Replay of a completed upgrade
+                return {
+                    "ok": True,
+                    "action": "upgrade",
+                    "idempotent_replay": True,
+                    "old_release_digest": old_digest,
+                    "new_release_digest": new_digest,
+                }
+
+            # Run preflights and compatibility checks
+            audit_deployment(layout, admin_uid, admin_gid, validate_binding=validate_accounts)
+            boundary = privilege_preflight(
+                layout, admin_uid, admin_gid, validate_binding=validate_accounts
+            )
+            if not boundary["boundary_ready"]:
+                unresolved = [
+                    check["id"]
+                    for check in boundary["checks"]
+                    if check["status"] not in {"pass", "not_applicable"}
+                ]
+                raise AdminError(
+                    "privilege_precondition_unproven",
+                    "upgrade is blocked until every privilege precondition passes",
+                    unresolved_checks=unresolved,
+                )
+
+            current_schema = extract_store_schema_version(current_assets["authority_broker.py"])
+            candidate_schema = extract_store_schema_version(
+                candidate["assets"]["authority_broker.py"]
+            )
+            if current_schema != candidate_schema:
+                raise AdminError(
+                    "schema_incompatible_upgrade",
+                    f"candidate schema {candidate_schema} differs from installed schema "
+                    f"{current_schema}; only schema-compatible upgrades are supported",
+                )
+
+            # Create releases directory backup of old assets
+            archive_dir = layout.releases_root / old_digest
+            ensure_directory(
+                archive_dir, 0o700, identity.admin_uid, identity.admin_gid, layout, identity
+            )
+            for name, mode in INSTALLED_SOURCE_ASSETS.items():
+                write_protected_file(
+                    archive_dir / name,
+                    current_assets[name],
+                    mode,
+                    identity.admin_uid,
+                    identity.admin_gid,
+                    layout,
+                    identity,
+                )
+            write_protected_file(
+                archive_dir / RELEASE_MANIFEST_NAME,
+                json_bytes(
+                    release_manifest_payload(old_digest, current_hashes, identity.admin_uid)
+                ),
+                0o600,
+                identity.admin_uid,
+                identity.admin_gid,
+                layout,
+                identity,
+            )
+
+            journal = {
+                "upgrade_journal_schema_version": UPGRADE_JOURNAL_SCHEMA_VERSION,
+                "idempotency_key": idempotency_key,
+                "old_release_digest": old_digest,
+                "new_release_digest": new_digest,
+                "state": "prepared",
+                "started_at": broker.utc_now(),
+                "completed_at": None,
+                "admin_uid": identity.admin_uid,
+            }
+            write_upgrade_journal(layout, identity, journal)
+            rollback_assets = read_release_assets(
+                layout.releases_root / old_digest, layout, identity
+            )
+
+        # Durable State: "prepared"
+        # - Authoritative Installed Digest: old_digest (disk files match original release)
+        # - Authoritative Manifest Digest: old_digest (manifest assets match original hashes)
+        if journal["state"] == "prepared":
+            service_stop(layout)
+            journal = {**journal, "state": "service_stopped"}
+            write_upgrade_journal(layout, identity, journal)
+
+        # Durable State: "service_stopped"
+        # - Authoritative Installed Digest: old_digest (before activate_release_assets)
+        #   or new_digest (after activate_release_assets completes)
+        # - Authoritative Manifest Digest: old_digest (manifest.json still has original hashes)
+        if journal["state"] == "service_stopped":
+            service_stop(layout)  # Call idempotent stop before replacement!
+            new_entries = activate_release_assets(layout, identity, candidate["assets"])
+            journal = {**journal, "state": "activated"}
+            write_upgrade_journal(layout, identity, journal)
+
+        # Durable State: "activated"
+        # - Authoritative Installed Digest: new_digest (new code activated on disk)
+        # - Authoritative Manifest Digest: old_digest (manifest.json still has original hashes)
+        if journal["state"] == "activated":
+            service_start(layout)
+            if not invoke_health_probe(
+                health_probe,
+                layout,
+                identity.admin_uid,
+                identity.admin_gid,
+                expected_digest=new_digest,
+            ):
+                # Candidate health probe failed! Initiate rollback sequence.
+                service_stop(layout)
+                journal = {**journal, "state": "rolling_back"}
+                write_upgrade_journal(layout, identity, journal)
+            else:
+                journal = {**journal, "state": "health_verified"}
+                write_upgrade_journal(layout, identity, journal)
+
+        # Durable State: "rolling_back"
+        # - Authoritative Installed Digest: new_digest (before restoration)
+        #   or old_digest (after restoration completes)
+        # - Authoritative Manifest Digest: old_digest
+        if journal["state"] == "rolling_back":
+            service_stop(layout)  # Call idempotent stop before replacement!
+            # Restore all old assets before starting anything!
+            activate_release_assets(layout, identity, rollback_assets)
+
+            # Restore manifest assets to match original release (old_digest)
+            restored_assets = {}
+            for name, mode in INSTALLED_SOURCE_ASSETS.items():
+                restored_assets[str(layout.install_root / name)] = {
+                    "sha256": sha256_bytes(rollback_assets[name]),
+                    "mode": mode,
+                    "uid": identity.admin_uid,
+                    "gid": identity.admin_gid,
+                }
+            updated_assets = dict(manifest["assets"])
+            updated_assets.update(restored_assets)
+            write_protected_file(
+                layout.manifest_path,
+                json_bytes({**manifest, "assets": updated_assets}),
+                0o600,
+                identity.admin_uid,
+                identity.admin_gid,
+                layout,
+                identity,
+                replace=True,
+            )
+            service_start(layout)
+
+            rollback_healthy = invoke_health_probe(
+                health_probe,
+                layout,
+                identity.admin_uid,
+                identity.admin_gid,
+                expected_digest=old_digest,
+            )
+            journal = {**journal, "state": "rolled_back", "completed_at": broker.utc_now()}
+            write_upgrade_journal(layout, identity, journal)
+            append_upgrade_history(layout, identity, dict(journal))
+            if not rollback_healthy:
+                raise AdminError(
+                    "rollback_unhealthy",
+                    "upgrade failed its health check and rollback to the previous release "
+                    "also failed its health check; manual intervention required",
+                )
+            raise AdminError(
+                "upgrade_health_check_failed",
+                f"candidate release {new_digest} failed its post-activation health check; "
+                f"automatically rolled back to {old_digest}",
+            )
+
+        # Durable State: "health_verified"
+        # - Authoritative Installed Digest: new_digest (new code activated on disk)
+        # - Authoritative Manifest Digest: old_digest (before manifest write)
+        #   or new_digest (after manifest write completes)
+        if journal["state"] == "health_verified":
+            if new_entries is None:
+                new_entries = {
+                    str(layout.install_root / name): {
+                        "sha256": sha256_bytes(candidate["assets"][name]),
+                        "mode": mode,
+                        "uid": identity.admin_uid,
+                        "gid": identity.admin_gid,
+                    }
+                    for name, mode in INSTALLED_SOURCE_ASSETS.items()
+                }
+            updated_assets = dict(manifest["assets"])
+            updated_assets.update(new_entries)
+            write_protected_file(
+                layout.manifest_path,
+                json_bytes({**manifest, "assets": updated_assets}),
+                0o600,
+                identity.admin_uid,
+                identity.admin_gid,
+                layout,
+                identity,
+                replace=True,
+            )
+            journal = {**journal, "state": "completed", "completed_at": broker.utc_now()}
+            write_upgrade_journal(layout, identity, journal)
+            append_upgrade_history(layout, identity, dict(journal))
+
+    return {
+        "ok": True,
+        "action": "upgrade",
+        "idempotent_replay": False,
+        "old_release_digest": old_digest,
+        "new_release_digest": new_digest,
+    }
+
+
 def revoke_deployment(
     layout: InstallLayout,
     ledger_id: str,
@@ -4303,6 +5027,9 @@ def build_parser() -> argparse.ArgumentParser:
     rebind.add_argument("--ledger-id", required=True)
     rebind.add_argument("--repository-path", required=True)
 
+    upgrade = commands.add_parser("upgrade")
+    upgrade.add_argument("--release-dir", required=True)
+
     return parser
 
 
@@ -4395,6 +5122,9 @@ def main(argv: list[str] | None = None) -> int:
                 args.ledger_id,
                 layout.socket_path,
             )
+        elif args.command == "upgrade":
+            release_dir = absolute_path(args.release_dir, "release-dir")
+            result = upgrade_deployment(layout, release_dir, 0, 0, validate_accounts=True)
         else:
             result = privilege_preflight(layout, 0, 0)
         print(broker.canonical_json(result))

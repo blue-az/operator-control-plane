@@ -186,6 +186,58 @@ authority for this operation is the trusted root administrator explicitly naming
 command already relies on. There is no cwd discovery and nothing in this codebase invokes
 `rebind_repository` automatically.
 
+## Atomic code upgrade (Issue #11)
+
+An in-place upgrade migrates an installed host's executable and source files (defined in `INSTALLED_SOURCE_ASSETS`) to a new candidate release digest without disturbing the database, policy, active index, or history logs.
+
+The upgrade process is governed by a **journal-first state machine** that coordinates the service lifecycle (starting, stopping, probing) and file activation, with explicit recovery pathways for interruptions (crashes) at any phase.
+
+### Durable States and Authoritative Digests
+
+The upgrade journal (`upgrade.json`) tracks progress through seven durable states. Each state defines the authoritative installed code digest (on disk) and manifest digest (in `install.json`):
+
+1. **`prepared`**
+   - **Installed Digest:** `old_digest` (the active deployment prior to upgrade).
+   - **Manifest Digest:** `old_digest`.
+   - **Transition:** Created when a new candidate release digest is validated. Next, the broker service is stopped.
+
+2. **`service_stopped`**
+   - **Installed Digest:** `old_digest` (before file activation) or `new_digest` (after file activation).
+   - **Manifest Digest:** `old_digest`.
+   - **Transition:** The candidate files are activated to `install_root`. If file copying fails (e.g., disk full), the state remains `service_stopped`.
+
+3. **`activated`**
+   - **Installed Digest:** `new_digest`.
+   - **Manifest Digest:** `old_digest`.
+   - **Transition:** The broker service is started, and a candidate-aware health probe executes. If it fails, the service is stopped and the state transitions to `rolling_back`.
+
+4. **`rolling_back`**
+   - **Installed Digest:** `new_digest` (before file restoration) or `old_digest` (after restoration completes).
+   - **Manifest Digest:** `old_digest`.
+   - **Transition:** Rebuilt or recovered when rollback is initiated. Original files are restored, the manifest is restored, and the broker service is started to check rollback health.
+
+5. **`health_verified`**
+   - **Installed Digest:** `new_digest`.
+   - **Manifest Digest:** `old_digest` (before write) or `new_digest` (after write).
+   - **Transition:** The health probe succeeded. The active manifest (`install.json`) is overwritten with candidate metadata.
+
+6. **`rolled_back` (Terminal)**
+   - **Installed Digest:** `old_digest`.
+   - **Manifest Digest:** `old_digest`.
+   - **Transition:** Reached after successfully restoring the old release assets and manifest, and verifying rollback health.
+
+7. **`completed` (Terminal)**
+   - **Installed Digest:** `new_digest`.
+   - **Manifest Digest:** `new_digest`.
+   - **Transition:** Reached after successfully writing the new manifest.
+
+### Crash Recovery and Rollback Guarantees
+
+- **Journal-first loading:** Before executing any upgrade action, `upgrade_deployment` inspects the journal. If an upgrade is interrupted midway, the process resumes from the last recorded state.
+- **Unambiguous interrupted rollback:** If a crash occurs during rollback (state `rolling_back` with file restoration underway), the next invocation detects the `rolling_back` state, completes the restoration of all original assets before starting the service or running health checks, and ensures the system reaches `rolled_back` cleanly.
+- **Registry and database independence:** The upgrade operates independently of the ledger registration file and does not modify the SQLite store schema or policy files.
+- **Competing upgrades:** An upgrade is rejected with `upgrade_in_progress` if a different candidate digest's journal is active.
+
 ## Explicit non-goals
 
 - Modifying `authority_broker.py`, `operator-broker`, or the repo-local `operator`
