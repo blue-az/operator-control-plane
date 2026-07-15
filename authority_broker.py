@@ -1454,6 +1454,14 @@ class AuthorityStore:
             ]
 
         if kind.startswith("evidence."):
+            if not heads["task"]:
+                raise BrokerError(
+                    "unknown_task", f"task is not authoritative: {operation['task_id']}"
+                )
+            if not heads["claim"]:
+                raise BrokerError(
+                    "unknown_claim", f"claim is not authoritative: {operation['claim_id']}"
+                )
             task = json.loads(heads["task"]["payload_json"])
             claim = json.loads(heads["claim"]["payload_json"])
             if task.get("task_id") != operation["task_id"]:
@@ -1517,6 +1525,8 @@ class AuthorityStore:
                 self._mutation(expected["evidence"], evidence),
             ]
 
+        if not heads["task"]:
+            raise BrokerError("unknown_task", f"task is not authoritative: {operation['task_id']}")
         task = json.loads(heads["task"]["payload_json"])
         if task.get("task_id") != operation["task_id"]:
             raise BrokerError("store_corrupt", "task payload identity does not match its record")

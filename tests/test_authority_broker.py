@@ -603,6 +603,49 @@ class TestAuthorityBroker(unittest.TestCase):
         self.assertEqual(payload["status"], "open")
         self.assertEqual(payload["claim_ids"], ["claim-0001"])
 
+    def test_transition_against_nonexistent_task_fails_closed_not_crash(self) -> None:
+        self.init_store({os.getuid(): ["builder", "verifier"]})
+        self.start_server()
+        transition = {
+            "protocol_version": 1,
+            "action": "commit",
+            "ledger_id": "ledger-test",
+            "operation_key": "transition-missing-task-0001",
+            "operation": {
+                "kind": "task.transition",
+                "task_id": "task-0001",
+                "status": "verified",
+                "claim_id": "claim-0001",
+            },
+            "expected": [
+                {
+                    "record_type": "task",
+                    "record_id": "task-0001",
+                    "version": 0,
+                    "event_hash": None,
+                }
+            ],
+        }
+        _, completed, response = self.request(transition)
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertEqual(response["error"]["code"], "unknown_task")
+        self.assertEqual(self.table_count("authority_commits"), 0)
+
+    def test_evidence_against_nonexistent_task_fails_closed_not_crash(self) -> None:
+        self.init_store({os.getuid(): ["builder", "verifier"]})
+        self.start_server()
+        request = self.evidence_request(
+            "evidence-missing-task-0001",
+            {"version": 0, "event_hash": None},
+            {"version": 0, "event_hash": None},
+            "0" * 64,
+            0,
+        )
+        _, completed, response = self.request(request)
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertEqual(response["error"]["code"], "unknown_task")
+        self.assertEqual(self.table_count("authority_commits"), 0)
+
     def test_stale_preconditions_and_unverified_transitions_fail_closed(self) -> None:
         self.init_store({os.getuid(): ["builder", "verifier"]})
         self.start_server()
