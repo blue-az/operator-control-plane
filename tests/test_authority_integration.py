@@ -269,6 +269,66 @@ class TestAuthorityIntegration(unittest.TestCase):
         self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
         self.assertIn("policy_authority: external_broker", res.stdout)
 
+    def test_symlink_substitution_of_enrolled_repository_is_rejected(self) -> None:
+        # acceptance #2: symlink substitution must not let a different, unenrolled
+        # directory be mistaken for the enrolled repository just because it now sits
+        # at the registered path. resolve_enrollment binds identity by device/inode,
+        # not by path string, so a path-string match after a symlink swap must still
+        # be rejected once the underlying device/inode no longer matches what was
+        # recorded at enrollment time.
+        fake_repo = self.temp_dir / "fake-repo"
+        fake_repo.mkdir()
+        (fake_repo / ".operator").mkdir()
+        (fake_repo / ".operator" / "ledger.sqlite3").write_bytes(b"")
+        original_repo_stat = fake_repo.lstat()
+        original_op_stat = (fake_repo / ".operator").lstat()
+        original_db_stat = (fake_repo / ".operator" / "ledger.sqlite3").lstat()
+
+        registry = json.loads(self.registry_path.read_text())
+        registry["registrations"].append(
+            {
+                "repository_path": str(fake_repo),
+                "ledger_id": "ledger-test",
+                "socket_path": str(self.socket_path),
+                "repository_identity": {
+                    "repository_path": str(fake_repo),
+                    "repository_device": original_repo_stat.st_dev,
+                    "repository_inode": original_repo_stat.st_ino,
+                    "operator_device": original_op_stat.st_dev,
+                    "operator_inode": original_op_stat.st_ino,
+                    "ledger_device": original_db_stat.st_dev,
+                    "ledger_inode": original_db_stat.st_ino,
+                },
+                "anchor_records": [],
+                "legacy_anchor_sha256": hashlib.sha256(b"[]").hexdigest(),
+                "policy_binding": {
+                    "id": "standalone-policy",
+                    "generation": 1,
+                    "sha256": "0" * 64,
+                },
+                "first_broker_sequence": 1,
+                "enrollment_receipt_hash": "0" * 64,
+            }
+        )
+        self.registry_path.write_text(json.dumps(registry))
+
+        # Attack: delete the enrolled directory and replace it with a symlink to a
+        # different, unenrolled directory with a genuinely different device/inode.
+        decoy = self.temp_dir / "decoy"
+        decoy.mkdir()
+        (decoy / ".operator").mkdir()
+        (decoy / ".operator" / "ledger.sqlite3").write_bytes(b"")
+        shutil.rmtree(fake_repo)
+        fake_repo.symlink_to(decoy)
+
+        os.chdir(fake_repo)
+        try:
+            res = self.run_operator("doctor")
+        finally:
+            os.chdir(self.temp_dir)
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn("enrolled ledger identity has changed", res.stderr + res.stdout)
+
     def test_claim_add_routing(self) -> None:
         # 1. Create a task locally
         res = self.run_operator("task-create", "--id", "task-1", "--objective", "Test objective")
