@@ -2649,10 +2649,11 @@ def run_sudo_listing(user: str) -> tuple[str, str]:
     except (OSError, subprocess.SubprocessError) as exc:
         return "unknown", str(exc)
     output = (completed.stdout + completed.stderr).strip()
+    lowered = output.lower()
+    if "not allowed to run sudo" in lowered or "may not run sudo" in lowered:
+        return "pass", output
     if completed.returncode == 0:
         return "fail", output
-    if "not allowed to run sudo" in output.lower():
-        return "pass", output
     return "unknown", output
 
 

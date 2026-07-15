@@ -1521,6 +1521,53 @@ class TestAuthorityAdmin(unittest.TestCase):
         stored = json.loads(self.layout.evidence_path.read_text(encoding="utf-8"))
         self.assertEqual(stored, synthetic)
 
+    def test_run_sudo_listing_pass_when_root_query_reports_no_privileges(self) -> None:
+        # sudo -n -l -U <user> run by root exits 0 even when the target has no
+        # privileges at all -- the denial is only signalled by the message text.
+        completed = subprocess.CompletedProcess(
+            args=["sudo"],
+            returncode=0,
+            stdout="User operator-builder is not allowed to run sudo on z13.\n",
+            stderr="",
+        )
+        with mock.patch.object(authority_admin.subprocess, "run", return_value=completed):
+            status, output = authority_admin.run_sudo_listing("operator-builder")
+        self.assertEqual(status, "pass")
+        self.assertIn("not allowed to run sudo", output)
+
+    def test_run_sudo_listing_fail_when_root_query_reports_real_privileges(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=["sudo"],
+            returncode=0,
+            stdout=(
+                "User operator-builder may run the following commands on z13:\n"
+                "    (root) NOPASSWD: /usr/local/bin/pwrcfg\n"
+            ),
+            stderr="",
+        )
+        with mock.patch.object(authority_admin.subprocess, "run", return_value=completed):
+            status, _ = authority_admin.run_sudo_listing("operator-builder")
+        self.assertEqual(status, "fail")
+
+    def test_run_sudo_listing_pass_on_self_query_denial_phrasing(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=["sudo"],
+            returncode=1,
+            stdout="",
+            stderr="Sorry, user operator-builder may not run sudo on z13.\n",
+        )
+        with mock.patch.object(authority_admin.subprocess, "run", return_value=completed):
+            status, _ = authority_admin.run_sudo_listing("operator-builder")
+        self.assertEqual(status, "pass")
+
+    def test_run_sudo_listing_unknown_on_unrecognized_failure(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=["sudo"], returncode=1, stdout="", stderr="sudo: unexpected error\n"
+        )
+        with mock.patch.object(authority_admin.subprocess, "run", return_value=completed):
+            status, _ = authority_admin.run_sudo_listing("operator-builder")
+        self.assertEqual(status, "unknown")
+
     def test_collect_broker_account_properties_reads_shadow_directly(self) -> None:
         shadow = self.root / "shadow-locked"
         shadow.write_text(
