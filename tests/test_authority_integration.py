@@ -1248,6 +1248,165 @@ class TestAuthorityIntegration(unittest.TestCase):
             migration["legacy_anchor_sha256"], broker.sha256_text(broker.canonical_json(recomputed))
         )
 
+    def test_doctor_does_not_false_flag_legacy_evidence_after_enrollment(self) -> None:
+        # doctor_cmd compares local ledger_events.record_id (always "<task>/<leaf>" for
+        # evidence/handoff) against enrollment.anchor_records, whose record_id is now the
+        # wire-safe "<task>:<leaf>" form (see test_evidence_anchor_record_ids_are_wire_safe...).
+        # Without decoding back to the local form at the comparison points, every enrolled
+        # repo with pre-existing evidence would be permanently misreported as forged/divergent.
+        # Also covers a second, independent bug in the same code: the "legacy YAML must match
+        # database" check used to reconstruct a hand-picked field subset with stale field names
+        # (e.g. "type"/"size" instead of the real local schema's "evidence_type"/"fingerprint"),
+        # which could never match a real local evidence YAML regardless of the record_id issue.
+        import authority_admin
+
+        def canonical(value: object) -> str:
+            return json.dumps(
+                value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False
+            )
+
+        def event_hash(record_type: str, record_id: str, payload_json: str, created_at: str) -> str:
+            hash_fields = {
+                "hash_format": "operator-ledger-event-v1",
+                "record_type": record_type,
+                "record_id": record_id,
+                "version": 1,
+                "event_type": "record_created",
+                "payload_json": payload_json,
+                "actor_uid": 1000,
+                "actor_name": "blueaz",
+                "created_at": created_at,
+                "source_command": "test",
+                "previous_event_hash": None,
+            }
+            return hashlib.sha256(canonical(hash_fields).encode("utf-8")).hexdigest()
+
+        task_id = "task-with-evidence"
+        created_at = "2026-07-15T12:00:00Z"
+        op_dir = self.temp_dir / ".operator"
+        db_path = op_dir / "ledger.sqlite3"
+        evidence_path_or_url = "/tmp/legacy-evidence-fixture.txt"
+
+        # Field names match the real local (pre-enrollment) schema written by
+        # evidence_attach_cmd's local-write path, not authority_projection.py's post-broker
+        # normalize_record shape -- the two differ (e.g. no verification_status/policy_authority
+        # here, since those don't exist until a claim status or enrollment introduces them).
+        task_yaml = {
+            "task_id": task_id,
+            "repo": str(self.temp_dir),
+            "objective": "Task with pre-enrollment evidence",
+            "status": "open",
+            "assigned_harness": None,
+            "review_harness": None,
+            "created_at": created_at,
+            "updated_at": created_at,
+            "operator_decision": None,
+            "next_action": None,
+            "open_assumptions": [],
+            "claims": [],
+            "evidence": [evidence_path_or_url],
+            "executor": {"uid": 1000, "user": "blueaz"},
+        }
+        evidence_yaml = {
+            "evidence_id": "evidence-0001",
+            "task_id": task_id,
+            "claim_id": None,
+            "path_or_url": evidence_path_or_url,
+            "evidence_type": "test_output",
+            "produced_by": "blueaz",
+            "produced_at": created_at,
+            "provenance": None,
+            "hash": "0" * 64,
+            "fingerprint": {
+                "algorithm": "sha256",
+                "value": "0" * 64,
+                "size_bytes": 0,
+                "mtime_ns": None,
+            },
+            "source": None,
+            "verification_command": None,
+            "notes": None,
+            "executor": {"uid": 1000, "user": "blueaz"},
+        }
+        evidence_record_id = f"{task_id}/evidence-0001"
+
+        (op_dir / "tasks").mkdir(exist_ok=True)
+        with open(op_dir / "tasks" / f"{task_id}.yaml", "w") as f:
+            yaml.safe_dump(task_yaml, f)
+        (op_dir / "evidence" / task_id).mkdir(parents=True, exist_ok=True)
+        with open(op_dir / "evidence" / task_id / "evidence-0001.yaml", "w") as f:
+            yaml.safe_dump(evidence_yaml, f)
+
+        conn_ledger = sqlite3.connect(str(db_path))
+        for record_type, record_id, payload in (
+            ("task", task_id, canonical(task_yaml)),
+            ("evidence", evidence_record_id, canonical(evidence_yaml)),
+        ):
+            ev_hash = event_hash(record_type, record_id, payload, created_at)
+            conn_ledger.execute(
+                """
+                INSERT INTO ledger_events (
+                    event_id, record_type, record_id, version, event_type, payload_json,
+                    actor_uid, actor_name, created_at, source_command, event_hash
+                ) VALUES (?, ?, ?, 1, 'record_created', ?, 1000, 'blueaz', ?, 'test', ?)
+                """,
+                (ev_hash, record_type, record_id, payload, created_at, ev_hash),
+            )
+        conn_ledger.commit()
+        conn_ledger.close()
+
+        self.registry_path.write_text(json.dumps({"schema_version": 1, "registrations": []}))
+
+        def committed_enrollment(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            return {
+                "ok": True,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.enroll",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 1,
+                    "policy": {
+                        "id": "standalone-policy",
+                        "generation": 1,
+                        "sha256": hashlib.sha256(
+                            json.dumps(
+                                {
+                                    "policy_id": "standalone-policy",
+                                    "policy_generation": 1,
+                                    "ledgers": ["ledger-test"],
+                                    "roles": {str(os.getuid()): ["builder", "verifier"]},
+                                },
+                                sort_keys=True,
+                                separators=(",", ":"),
+                            ).encode("utf-8")
+                        ).hexdigest(),
+                    },
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        res = authority_admin.enroll_repository(
+            self.registry_path,
+            self.temp_dir,
+            self.ledger_id,
+            self.socket_path,
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.temp_dir,
+            request_sender=committed_enrollment,
+        )
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["anchor_records_count"], 2)
+
+        res_doc = self.run_operator("doctor")
+        self.assertEqual(res_doc.returncode, 0, res_doc.stderr + res_doc.stdout)
+        self.assertIn("status: current", res_doc.stdout)
+        self.assertNotIn("Local forged record found", res_doc.stdout)
+        self.assertNotIn("YAML projection missing for legacy record", res_doc.stdout)
+        self.assertNotIn("YAML payload differs from database", res_doc.stdout)
+        self.assertNotIn("is not referenced by owning task", res_doc.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

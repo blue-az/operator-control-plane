@@ -3236,6 +3236,16 @@ def export_brief_cmd(args) -> int:
     return 0
 
 
+def anchor_record_id_to_local(record_type: str, anchor_record_id: str) -> str:
+    """Reverse validate_local_ledger's wire-safe ":" encoding for evidence/handoff anchor
+    record IDs back to the local "<task_id>/<leaf_id>" form used in ledger_events.record_id.
+    The broker's record_id character class disallows "/", so anchors sent to (and read back
+    from) the broker use ":" instead; local storage never changed and still uses "/"."""
+    if record_type in {"evidence", "handoff"} and ":" in anchor_record_id:
+        return anchor_record_id.replace(":", "/", 1)
+    return anchor_record_id
+
+
 def doctor_cmd(args) -> int:
     enrollment, op_dir = resolve_operator_context()
     if not op_dir:
@@ -3476,7 +3486,10 @@ def doctor_cmd(args) -> int:
 
                 snapshot_keys = {(r["record_type"], r["record_id"]) for r in records}
                 anchor_map = {
-                    (r["record_type"], r["record_id"]): (r["version"], r["event_hash"])
+                    (
+                        r["record_type"],
+                        anchor_record_id_to_local(r["record_type"], r["record_id"]),
+                    ): (r["version"], r["event_hash"])
                     for r in enrollment.anchor_records
                 }
 
@@ -3524,7 +3537,7 @@ def doctor_cmd(args) -> int:
                 # Check legacy-only records YAML projections match database
                 for reg in enrollment.anchor_records:
                     rtype = reg["record_type"]
-                    rid = reg["record_id"]
+                    rid = anchor_record_id_to_local(rtype, reg["record_id"])
                     if (rtype, rid) not in snapshot_keys:
                         # Legacy-only record! Check its YAML projection
                         if rtype == "task":
@@ -3605,51 +3618,14 @@ def doctor_cmd(args) -> int:
                             diverged = True
                             continue
 
-                        # Normalize db_payload to legacy YAML schema for comparison
-                        if rtype == "evidence":
-                            expected_payload = {
-                                "evidence_id": db_payload.get("evidence_id"),
-                                "task_id": db_payload.get("task_id"),
-                                "claim_id": db_payload.get("claim_id"),
-                                "type": db_payload.get("type"),
-                                "path_or_url": db_payload.get("path_or_url"),
-                                "hash": db_payload.get("hash"),
-                                "size": db_payload.get("size"),
-                                "verification_status": db_payload.get("verification_status"),
-                                "policy_authority": db_payload.get(
-                                    "policy_authority", "local_policy"
-                                ),
-                                "verification_authority": db_payload.get("verification_authority"),
-                            }
-                        elif rtype == "claim":
-                            expected_payload = {
-                                "claim_id": db_payload.get("claim_id"),
-                                "task_id": db_payload.get("task_id"),
-                                "type": db_payload.get("type"),
-                                "text": db_payload.get("text"),
-                                "required_gate": db_payload.get("required_gate"),
-                                "evidence_ids": db_payload.get("evidence_ids", []),
-                                "verification_status": db_payload.get("verification_status"),
-                                "policy_authority": db_payload.get(
-                                    "policy_authority", "local_policy"
-                                ),
-                                "verification_authority": db_payload.get("verification_authority"),
-                            }
-                        elif rtype == "task":
-                            expected_payload = {
-                                "task_id": db_payload.get("task_id"),
-                                "objective": db_payload.get("objective", ""),
-                                "status": db_payload.get("status"),
-                                "claim_ids": db_payload.get("claim_ids", []),
-                                "evidence_ids": db_payload.get("evidence_ids", []),
-                                "verified_claim_ids": db_payload.get("verified_claim_ids", []),
-                                "policy_authority": db_payload.get(
-                                    "policy_authority", "local_policy"
-                                ),
-                                "verification_authority": db_payload.get("verification_authority"),
-                            }
-                        else:
-                            expected_payload = db_payload
+                        # validate_local_ledger already requires, at enrollment time, that every
+                        # record's full YAML payload canonically equals its database payload with
+                        # no field subsetting (authority_admin.py: "YAML projection differs from
+                        # database"). Re-derive that same full comparison here rather than
+                        # reconstructing a hand-picked field subset, which can drift from the
+                        # real local schema (evidence/claim/task each carry more fields locally --
+                        # produced_by, provenance, executor, etc. -- than any fixed subset lists).
+                        expected_payload = db_payload
 
                         if canonical_json(local_payload) != canonical_json(expected_payload):
                             issues.append(
