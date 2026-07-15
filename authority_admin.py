@@ -2889,6 +2889,22 @@ def collect_mount_redirection(layout: InstallLayout) -> dict:
     return check_result("mount.redirection", "fail" if overlaps else "pass", {"overlaps": overlaps})
 
 
+def verify_allowlisted_setuid_helper(path: Path) -> bool:
+    try:
+        metadata = path.lstat()
+    except OSError:
+        return False
+    if (
+        not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_uid != 0
+        or metadata.st_nlink != 1
+        or stat.S_IMODE(metadata.st_mode) & 0o022
+    ):
+        return False
+    code, output = run_probe(["/usr/bin/rpm", "-Vf", str(path)])
+    return code == 0 and output.strip() == ""
+
+
 def collect_capabilities_setuid_helpers(layout: InstallLayout) -> dict:
     scan_roots = [layout.install_root, *CAPABILITY_SCAN_ROOTS]
     setuid_files = []
@@ -2908,7 +2924,9 @@ def collect_capabilities_setuid_helpers(layout: InstallLayout) -> dict:
                 if stat.S_ISREG(metadata.st_mode) and metadata.st_mode & (
                     stat.S_ISUID | stat.S_ISGID
                 ):
-                    if str(candidate) in KNOWN_SAFE_SETUID_HELPERS:
+                    if str(
+                        candidate
+                    ) in KNOWN_SAFE_SETUID_HELPERS and verify_allowlisted_setuid_helper(candidate):
                         allowlisted.append(str(candidate))
                     else:
                         setuid_files.append(str(candidate))
@@ -2920,7 +2938,7 @@ def collect_capabilities_setuid_helpers(layout: InstallLayout) -> dict:
             if not any(capability in line.lower() for capability in DANGEROUS_CAPABILITIES):
                 continue
             path = line.split("=", 1)[0].strip()
-            if path in KNOWN_SAFE_SETUID_HELPERS:
+            if path in KNOWN_SAFE_SETUID_HELPERS and verify_allowlisted_setuid_helper(Path(path)):
                 allowlisted.append(line)
             else:
                 capability_findings.append(line)

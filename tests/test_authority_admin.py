@@ -1625,7 +1625,12 @@ class TestAuthorityAdmin(unittest.TestCase):
             )
         self.assertEqual(result["status"], "fail")
 
-    def test_collect_capabilities_setuid_helpers_allowlists_known_safe_binary(self) -> None:
+    def test_collect_capabilities_setuid_helpers_does_not_trust_allowlist_by_path_alone(
+        self,
+    ) -> None:
+        # A path matching KNOWN_SAFE_SETUID_HELPERS but not actually root-owned (as here,
+        # since the test runs unprivileged) must NOT be trusted -- path matching alone is
+        # not verification.
         scan_root = self.root / "opt-fixture"
         scan_root.mkdir()
         safe_path = scan_root / "chrome-sandbox"
@@ -1645,8 +1650,70 @@ class TestAuthorityAdmin(unittest.TestCase):
             result = authority_admin.collect_capabilities_setuid_helpers(layout)
         self.assertEqual(result["status"], "fail")
         self.assertIn(str(unsafe_path), result["evidence"]["setuid_or_setgid_files"])
-        self.assertNotIn(str(safe_path), result["evidence"]["setuid_or_setgid_files"])
+        self.assertIn(str(safe_path), result["evidence"]["setuid_or_setgid_files"])
+        self.assertEqual(result["evidence"]["allowlisted"], [])
+
+    def test_collect_capabilities_setuid_helpers_allowlists_verified_root_owned_binary(
+        self,
+    ) -> None:
+        scan_root = self.root / "opt-fixture"
+        scan_root.mkdir()
+        safe_path = scan_root / "chrome-sandbox"
+        layout = authority_admin.InstallLayout.under(self.root / "layout-root")
+        with (
+            mock.patch.object(authority_admin, "CAPABILITY_SCAN_ROOTS", (scan_root,)),
+            mock.patch.object(
+                authority_admin, "KNOWN_SAFE_SETUID_HELPERS", frozenset({str(safe_path)})
+            ),
+            mock.patch.object(authority_admin, "run_probe", return_value=(0, "")),
+            mock.patch.object(
+                authority_admin, "verify_allowlisted_setuid_helper", return_value=True
+            ),
+        ):
+            (scan_root / "chrome-sandbox").write_bytes(b"\x7fELF")
+            os.chmod(safe_path, 0o4755)
+            result = authority_admin.collect_capabilities_setuid_helpers(layout)
+        self.assertEqual(result["status"], "pass")
+        self.assertEqual(result["evidence"]["setuid_or_setgid_files"], [])
         self.assertIn(str(safe_path), result["evidence"]["allowlisted"])
+
+    def test_verify_allowlisted_setuid_helper_rejects_non_root_owner(self) -> None:
+        target = self.root / "chrome-sandbox"
+        target.write_bytes(b"\x7fELF")
+        os.chmod(target, 0o4755)
+        with mock.patch.object(authority_admin, "run_probe", return_value=(0, "")):
+            self.assertFalse(authority_admin.verify_allowlisted_setuid_helper(target))
+
+    def test_verify_allowlisted_setuid_helper_passes_root_owned_clean_rpm_verify(self) -> None:
+        target = Path("/opt/example/fake-helper")
+        fake_stat = os.stat_result((stat.S_IFREG | 0o4755, 1, 1, 1, 0, 0, 4, 0, 0, 0))
+        with (
+            mock.patch.object(Path, "lstat", return_value=fake_stat),
+            mock.patch.object(authority_admin, "run_probe", return_value=(0, "")),
+        ):
+            self.assertTrue(authority_admin.verify_allowlisted_setuid_helper(target))
+
+    def test_verify_allowlisted_setuid_helper_rejects_rpm_verify_discrepancy(self) -> None:
+        target = Path("/opt/example/fake-helper")
+        fake_stat = os.stat_result((stat.S_IFREG | 0o4755, 1, 1, 1, 0, 0, 4, 0, 0, 0))
+        with (
+            mock.patch.object(Path, "lstat", return_value=fake_stat),
+            mock.patch.object(
+                authority_admin,
+                "run_probe",
+                return_value=(1, "S.5....T.  c /opt/example/fake-helper"),
+            ),
+        ):
+            self.assertFalse(authority_admin.verify_allowlisted_setuid_helper(target))
+
+    def test_verify_allowlisted_setuid_helper_rejects_group_writable_mode(self) -> None:
+        target = Path("/opt/example/fake-helper")
+        fake_stat = os.stat_result((stat.S_IFREG | 0o4775, 1, 1, 1, 0, 0, 4, 0, 0, 0))
+        with (
+            mock.patch.object(Path, "lstat", return_value=fake_stat),
+            mock.patch.object(authority_admin, "run_probe", return_value=(0, "")),
+        ):
+            self.assertFalse(authority_admin.verify_allowlisted_setuid_helper(target))
 
     def test_admin_lock_metadata_is_not_silently_repaired(self) -> None:
         _, first, _ = self.install()
