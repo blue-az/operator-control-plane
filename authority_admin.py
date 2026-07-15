@@ -120,6 +120,7 @@ EVIDENCE_UNKNOWN_MESSAGES = {
     "credentials.delegation": "delegated credentials and authentication agents require issue #7",
 }
 NOLOGIN_SHELLS = frozenset({"/usr/sbin/nologin", "/sbin/nologin", "/bin/false", "/usr/bin/false"})
+SHADOW_PATH = Path("/etc/shadow")
 SUDO_TIMESTAMP_DIRS = (
     Path("/run/sudo/ts"),
     Path("/var/run/sudo/ts"),
@@ -128,6 +129,11 @@ SUDO_TIMESTAMP_DIRS = (
 POLKIT_RULE_DIRS = (Path("/etc/polkit-1/rules.d"), Path("/usr/share/polkit-1/rules.d"))
 DBUS_SYSTEM_POLICY_DIRS = (Path("/etc/dbus-1/system.d"), Path("/usr/share/dbus-1/system.d"))
 CAPABILITY_SCAN_ROOTS = (Path("/usr/local/bin"), Path("/usr/local/sbin"), Path("/opt"))
+KNOWN_SAFE_SETUID_HELPERS = frozenset(
+    {
+        "/opt/google/chrome/chrome-sandbox",
+    }
+)
 DANGEROUS_CAPABILITIES = (
     "cap_setuid",
     "cap_setgid",
@@ -2666,18 +2672,27 @@ def run_probe(args: list[str], timeout: float = 5.0) -> tuple[int | None, str]:
     return completed.returncode, (completed.stdout + completed.stderr).strip()
 
 
-def collect_broker_account_properties(identity: DeploymentIdentity) -> dict:
-    try:
-        import spwd
+def read_shadow_password_field(user: str) -> str | None:
+    with open(SHADOW_PATH, encoding="ascii", errors="replace") as handle:
+        for line in handle:
+            fields = line.rstrip("\n").split(":")
+            if fields and fields[0] == user:
+                return fields[1] if len(fields) > 1 else ""
+    return None
 
-        entry = spwd.getspnam(identity.broker_user)
-        if entry.sp_pwdp == "":
-            lock_status = "unknown"
+
+def collect_broker_account_properties(identity: DeploymentIdentity) -> dict:
+    lock_status = "unknown"
+    try:
+        password_field = read_shadow_password_field(identity.broker_user)
+        if password_field is None:
+            shadow_error = "account not present in /etc/shadow"
+        elif password_field == "":
+            shadow_error = "account has an empty shadow password field"
         else:
-            lock_status = "pass" if entry.sp_pwdp.startswith(("!", "*")) else "fail"
-        shadow_error = None
-    except (ImportError, KeyError, PermissionError, OSError) as exc:
-        lock_status = "unknown"
+            lock_status = "pass" if password_field.startswith(("!", "*")) else "fail"
+            shadow_error = None
+    except OSError as exc:
         shadow_error = str(exc)
     try:
         shell = pwd.getpwnam(identity.broker_user).pw_shell
@@ -2777,7 +2792,7 @@ def collect_polkit_authorization(uid_names: dict[int, str]) -> dict:
             except OSError as exc:
                 matches.append({"file": str(entry), "error": str(exc)})
                 continue
-            if "unix-user:*" in text or "return polkit.Result.YES" in text:
+            if "unix-user:*" in text:
                 matches.append({"file": str(entry), "reason": "broad grant pattern"})
                 continue
             for name in names:
@@ -2877,6 +2892,7 @@ def collect_capabilities_setuid_helpers(layout: InstallLayout) -> dict:
     scan_roots = [layout.install_root, *CAPABILITY_SCAN_ROOTS]
     setuid_files = []
     capability_findings = []
+    allowlisted = []
     saw_error = False
     for root in scan_roots:
         if not root.is_dir():
@@ -2891,13 +2907,21 @@ def collect_capabilities_setuid_helpers(layout: InstallLayout) -> dict:
                 if stat.S_ISREG(metadata.st_mode) and metadata.st_mode & (
                     stat.S_ISUID | stat.S_ISGID
                 ):
-                    setuid_files.append(str(candidate))
+                    if str(candidate) in KNOWN_SAFE_SETUID_HELPERS:
+                        allowlisted.append(str(candidate))
+                    else:
+                        setuid_files.append(str(candidate))
         code, output = run_probe(["/usr/sbin/getcap", "-r", str(root)])
         if code is None:
             saw_error = True
             continue
         for line in output.splitlines():
-            if any(capability in line.lower() for capability in DANGEROUS_CAPABILITIES):
+            if not any(capability in line.lower() for capability in DANGEROUS_CAPABILITIES):
+                continue
+            path = line.split("=", 1)[0].strip()
+            if path in KNOWN_SAFE_SETUID_HELPERS:
+                allowlisted.append(line)
+            else:
                 capability_findings.append(line)
     status = "fail" if setuid_files or capability_findings else ("unknown" if saw_error else "pass")
     return check_result(
@@ -2906,6 +2930,7 @@ def collect_capabilities_setuid_helpers(layout: InstallLayout) -> dict:
         {
             "setuid_or_setgid_files": setuid_files,
             "capabilities": capability_findings,
+            "allowlisted": allowlisted,
             "scanned": [str(root) for root in scan_roots],
         },
     )

@@ -1521,6 +1521,86 @@ class TestAuthorityAdmin(unittest.TestCase):
         stored = json.loads(self.layout.evidence_path.read_text(encoding="utf-8"))
         self.assertEqual(stored, synthetic)
 
+    def test_collect_broker_account_properties_reads_shadow_directly(self) -> None:
+        shadow = self.root / "shadow-locked"
+        shadow.write_text(
+            f"someone-else:x:1:2:3:4:5:6:\n{self.identity.broker_user}:!locked-hash:1:2:3:4:5:6:\n",
+            encoding="ascii",
+        )
+        with mock.patch.object(authority_admin, "SHADOW_PATH", shadow):
+            result = authority_admin.collect_broker_account_properties(self.identity)
+        self.assertEqual(result["evidence"]["locked_status"], "pass")
+        self.assertIsNone(result["evidence"]["shadow_error"])
+
+    def test_collect_broker_account_properties_flags_unlocked_password(self) -> None:
+        shadow = self.root / "shadow-unlocked"
+        shadow.write_text(
+            f"{self.identity.broker_user}:$6$realhash:1:2:3:4:5:6:\n", encoding="ascii"
+        )
+        with mock.patch.object(authority_admin, "SHADOW_PATH", shadow):
+            result = authority_admin.collect_broker_account_properties(self.identity)
+        self.assertEqual(result["evidence"]["locked_status"], "fail")
+
+    def test_collect_broker_account_properties_missing_shadow_entry(self) -> None:
+        shadow = self.root / "shadow-empty"
+        shadow.write_text("someone-else:x:1:2:3:4:5:6:\n", encoding="ascii")
+        with mock.patch.object(authority_admin, "SHADOW_PATH", shadow):
+            result = authority_admin.collect_broker_account_properties(self.identity)
+        self.assertEqual(result["evidence"]["locked_status"], "unknown")
+        self.assertIn("not present", result["evidence"]["shadow_error"])
+
+    def test_collect_polkit_authorization_ignores_generic_yes_return(self) -> None:
+        rules_dir = self.root / "polkit-rules-generic"
+        rules_dir.mkdir()
+        (rules_dir / "10-example.rules").write_text(
+            "polkit.addRule(function(action, subject) {\n"
+            "    if (subject.isInGroup('wheel')) { return polkit.Result.YES; }\n"
+            "});\n",
+            encoding="utf-8",
+        )
+        with mock.patch.object(authority_admin, "POLKIT_RULE_DIRS", (rules_dir,)):
+            result = authority_admin.collect_polkit_authorization(
+                {self.builder_uid: "fixture-builder"}
+            )
+        self.assertEqual(result["status"], "pass")
+        self.assertEqual(result["evidence"]["matches"], [])
+
+    def test_collect_polkit_authorization_flags_wildcard_grant(self) -> None:
+        rules_dir = self.root / "polkit-rules-wildcard"
+        rules_dir.mkdir()
+        (rules_dir / "99-broad.rules").write_text(
+            'if (subject.isInGroup("unix-user:*")) { return polkit.Result.YES; }\n',
+            encoding="utf-8",
+        )
+        with mock.patch.object(authority_admin, "POLKIT_RULE_DIRS", (rules_dir,)):
+            result = authority_admin.collect_polkit_authorization(
+                {self.builder_uid: "fixture-builder"}
+            )
+        self.assertEqual(result["status"], "fail")
+
+    def test_collect_capabilities_setuid_helpers_allowlists_known_safe_binary(self) -> None:
+        scan_root = self.root / "opt-fixture"
+        scan_root.mkdir()
+        safe_path = scan_root / "chrome-sandbox"
+        safe_path.write_bytes(b"\x7fELF")
+        os.chmod(safe_path, 0o4755)
+        unsafe_path = scan_root / "mystery-setuid-helper"
+        unsafe_path.write_bytes(b"\x7fELF")
+        os.chmod(unsafe_path, 0o4755)
+        layout = authority_admin.InstallLayout.under(self.root / "layout-root")
+        with (
+            mock.patch.object(authority_admin, "CAPABILITY_SCAN_ROOTS", (scan_root,)),
+            mock.patch.object(
+                authority_admin, "KNOWN_SAFE_SETUID_HELPERS", frozenset({str(safe_path)})
+            ),
+            mock.patch.object(authority_admin, "run_probe", return_value=(0, "")),
+        ):
+            result = authority_admin.collect_capabilities_setuid_helpers(layout)
+        self.assertEqual(result["status"], "fail")
+        self.assertIn(str(unsafe_path), result["evidence"]["setuid_or_setgid_files"])
+        self.assertNotIn(str(safe_path), result["evidence"]["setuid_or_setgid_files"])
+        self.assertIn(str(safe_path), result["evidence"]["allowlisted"])
+
     def test_admin_lock_metadata_is_not_silently_repaired(self) -> None:
         _, first, _ = self.install()
         second_path, _ = self.write_policy("generation-2.json", 2, first.sha256)
