@@ -1634,6 +1634,26 @@ def task_show_cmd(args) -> int:
     return 0
 
 
+def prepare_journal_transaction(
+    conn_journal, operation_key: str, request: dict, *, evidence_path: str | None = None
+) -> int | None:
+    """Wrap authority_projection.prepare_transaction; returns an exit code on failure, else None."""
+    try:
+        authority_projection.prepare_transaction(
+            conn_journal, operation_key, request, evidence_path=evidence_path
+        )
+        return None
+    except RuntimeError as e:
+        print(
+            f"Error: {e}. A prior attempt with this operation key may have already "
+            "completed; check current state or run 'operator authority-reconcile' "
+            "before retrying.",
+            file=sys.stderr,
+        )
+        conn_journal.close()
+        return 1
+
+
 def claim_add_cmd(args) -> int:
     enrollment, op_dir = resolve_operator_context()
     if not op_dir:
@@ -1675,7 +1695,9 @@ def claim_add_cmd(args) -> int:
             request["operation"]["required_gate"] = args.gate
 
         conn_journal = authority_projection.ensure_journal(op_dir)
-        authority_projection.prepare_transaction(conn_journal, operation_key, request)
+        failure = prepare_journal_transaction(conn_journal, operation_key, request)
+        if failure is not None:
+            return failure
 
         try:
             client = authority_client.AuthorityClient(socket_path)
@@ -1860,9 +1882,11 @@ def evidence_attach_cmd(args) -> int:
         }
 
         conn_journal = authority_projection.ensure_journal(op_dir)
-        authority_projection.prepare_transaction(
+        failure = prepare_journal_transaction(
             conn_journal, operation_key, request, evidence_path=original_locator
         )
+        if failure is not None:
+            return failure
 
         try:
             client = authority_client.AuthorityClient(socket_path)
@@ -5417,7 +5441,9 @@ def task_transition_cmd(args) -> int:
 
     # 1. Connect journal, prepare transaction
     conn_journal = authority_projection.ensure_journal(op_dir)
-    authority_projection.prepare_transaction(conn_journal, operation_key, request)
+    failure = prepare_journal_transaction(conn_journal, operation_key, request)
+    if failure is not None:
+        return failure
 
     # 2. Connect client and send request
     try:
