@@ -18,6 +18,7 @@ import struct
 import sys
 import tempfile
 import threading
+import traceback
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
@@ -2064,6 +2065,7 @@ class BrokerServer:
                     except BrokerError as exc:
                         response = exc.response()
                     except Exception:
+                        traceback.print_exc(file=sys.stderr)
                         response = BrokerError(
                             "internal_error",
                             "broker failed while processing the request",
