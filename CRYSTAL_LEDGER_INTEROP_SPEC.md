@@ -54,17 +54,25 @@ enforcement middle that ties both to evidence.
   (SHA-256, byte size, mtime) exactly like other local evidence. The existing doctor fail-closed
   rule for changed verified sources applies with no exemption: if a crystal's bytes drift after a
   claim citing it was verified, doctor fails closed.
+- **T6 — Heading uniqueness and canonical ordering.** Operator must validate and enforce structural uniqueness and canonical ordering of recognized headings (from `requiredSections`):
+  - `Header` and `Reality Checks` must occur **exactly once**.
+  - All other recognized headings must occur **at most once**, and when present, must follow the strict canonical ordering defined in §2.
+  - Any file containing duplicate recognized headings or headings that violate the canonical order must be rejected at the boundary as structurally corrupt (exiting non-zero, preventing ledger write), mitigating middle-of-text section forging.
+  - Non-security-critical sections that are entirely missing are reported as warnings under P1, not hard rejections.
+- **T7 — Independent validation.** Operator must run its own structural validation on crystals
+  at the boundary, maintaining its own safety guarantees even if the upstream tool is modified to
+  add or fix its validator later.
 
 ## 2. Upstream artifact contract (what the parser may assume)
 
 Layout: `.agent-crystals/checkpoints/<timestamp>-<slug>.md` and
 `.agent-crystals/sessions/<timestamp>-<slug>.md`; optional `manifest.json` index.
 
-Sections rendered by 0.1.9 (`requiredSections` + extras): Header, Current Focus, Durable Framing,
-Checkpoint Trail, (optional Continuity Tail), Topics, Relation Hints, Session Provenance,
-Decisions, Findings, Reality Checks, Artifacts Changed (Git Status / Diff Stat / Changed Files /
-Instruction Files Present / Evidence Pointers), Tests And Verification, Open Loops, Memory
-Candidates, Next Actions, Resume Prompt.
+Sections rendered by 0.1.9 (`requiredSections` + extras) in canonical order: Header, Current Focus,
+Durable Framing, Checkpoint Trail, (optional Continuity Tail), Topics, Relation Hints, Session
+Provenance, Decisions, Findings, Reality Checks, Artifacts Changed (Git Status / Diff Stat /
+Changed Files / Instruction Files Present / Evidence Pointers), Tests And Verification, Open Loops,
+Memory Candidates, Next Actions, Resume Prompt.
 
 Header bullets: `Scope`, `Project`, `Source window`, `Budget`, `Surface`, `Repo`,
 `Observed at` (ISO-8601). Reality Checks carries `Git commit` / `Git branch` / `Git root`.
@@ -78,6 +86,11 @@ Header bullets: `Scope`, `Project`, `Source window`, `Budget`, `Surface`, `Repo`
   fallback strings and treat those sections as empty — importing boilerplate as a claim is a bug.
 - P3: Pin the recognized-section list and fallback strings in one module-level table with the
   upstream version noted, so a schema bump is a one-table diff.
+- P4: No AGENTS.md metadata lookup. Do not attempt to parse `AGENTS.md` to resolve metadata
+  (like the project name or path). `AGENTS.md` is agent/human instruction guidance and is not a
+  stable machine database. All machine-readable schema and project metadata must be read from the
+  crystal Header itself, a schema-versioned `manifest.json` field, or a dedicated `.agent-crystals`
+  metadata file.
 
 ## 3. Shared relation vocabulary (zero code, both sides — do this first)
 
@@ -151,22 +164,25 @@ artifacts — same hygiene as upstream's `examples/`):
    SHA-256 matches, header metadata captured.
 2. **no status laundering:** `crystal-attach --status verified` (or any status) → exits non-zero;
    claim untouched. (T2)
-3. **import extracts real bullets only:** fixture with 2 test bullets + fallback-string sections →
+3. **duplicate or out-of-order headings rejected:** `crystal-attach` a fixture containing duplicate
+   recognized headings (e.g. duplicate `## Decisions` in body) or out-of-order recognized headings
+   (violating layout order in §2) → exits non-zero, rejects attachment before any ledger write. (T6)
+4. **import extracts real bullets only:** fixture with 2 test bullets + fallback-string sections →
    exactly 2 draft `test_passes` claims; Decisions/Resume Prompt content appears in no claim text.
    (P2, T3)
-4. **import idempotent:** second `crystal-import` of same file → no new claims, notice printed.
-5. **doctor unknown-commit warning:** fixture citing sha `deadbeef` → `[Warning]`, exit 0
+5. **import idempotent:** second `crystal-import` of same file → no new claims, notice printed.
+6. **doctor unknown-commit warning:** fixture citing sha `deadbeef` → `[Warning]`, exit 0
    (advisory).
-6. **doctor drift fail-closed:** verify an extracted claim properly (distinct `--verified-by`),
+7. **doctor drift fail-closed:** verify an extracted claim properly (distinct `--verified-by`),
    then mutate the attached crystal copy's source → doctor exit 1.
-7. Existing `tests/test_operator.py` still passes; live-ledger `doctor` unaffected.
+8. Existing `tests/test_operator.py` still passes; live-ledger `doctor` unaffected.
 
 ## 8. Phases
 
 - **Phase 1** (smallest reviewable unit): §4 evidence type + §5.1 `crystal-attach` + §6 doctor
-  rules 1–2 + tests 1, 2, 5. Local-lane candidate per `LOCAL_LANE_CONTRACT_SPEC.md` — the parser
+  rules 1–2 + tests 1, 2, 3, 6. Local-lane candidate per `LOCAL_LANE_CONTRACT_SPEC.md` — the parser
   table (P3) makes it plan-shaped.
-- **Phase 2:** §5.2 `crystal-import` + tests 3, 4, 6.
+- **Phase 2:** §5.2 `crystal-import` + tests 4, 5, 7.
 - **Phase 3** (only if Phases 1–2 prove useful in dogfood): hook/session bridging — crystallize's
   hook runner fires SessionStart/PreCompact/Stop; a thin wrapper opens `session-start` on
   SessionStart and attaches the rolled-up session crystal at `session-end`. Separate mini-spec
