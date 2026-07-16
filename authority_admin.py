@@ -5317,6 +5317,8 @@ def rebind_repository(
         operation = {
             "kind": "ledger.rebind",
             "previous_identity": existing_registration["repository_identity"],
+            "previous_anchor_records": existing_registration["anchor_records"],
+            "previous_legacy_anchor_sha256": existing_registration["legacy_anchor_sha256"],
             **migration,
         }
         operation_digest = broker.sha256_text(

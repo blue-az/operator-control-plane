@@ -230,6 +230,25 @@ class TestAuthorityIntegration(unittest.TestCase):
             env=self.test_env,
         )
 
+    def root_broker_sender(self, _socket_path: Path, request: object) -> dict:
+        direct_broker = authority_broker.AuthorityBroker(
+            authority_broker.AuthorityStore(self.store_path, self.content_dir)
+        )
+        try:
+            response, _committed = direct_broker.handle(
+                request, authority_broker.PeerCredentials(os.getpid(), 0, 0)
+            )
+            return response
+        except authority_broker.BrokerError as exc:
+            return exc.response()
+
+    def broker_counts(self) -> tuple[int, int]:
+        with sqlite3.connect(self.store_path) as conn:
+            return (
+                conn.execute("SELECT COUNT(*) FROM authority_commits").fetchone()[0],
+                conn.execute("SELECT COUNT(*) FROM authority_events").fetchone()[0],
+            )
+
     def mock_claim_author_uid(self) -> None:
         import sqlite3
 
@@ -330,46 +349,153 @@ class TestAuthorityIntegration(unittest.TestCase):
         self.assertNotEqual(res.returncode, 0)
         self.assertIn("enrolled ledger identity has changed", res.stderr + res.stdout)
 
-    def test_repository_rebind_recovers_device_identity_drift_end_to_end(self) -> None:
-        # Reproduces Issue #10 for real: the registry's recorded device numbers go stale
-        # (e.g. a reboot changes a btrfs subvolume's kernel-assigned device number) while the
-        # repository's path, inodes, and ledger content are completely untouched. Before any
-        # recovery path existed, this permanently locked every ordinary command out of the
-        # enrolled ledger. `operator-admin repository-rebind` is the explicit, root-only,
-        # auditable recovery: it talks to the real broker over the real socket and produces a
-        # real `ledger.rebind` commit, not a silent local file edit.
-        #
-        # A single `operator init` leaves WAL/SHM sidecar files present (normal SQLite WAL
-        # behavior); a real, actively-used ledger like the one this bug was found on has run
-        # many commands and settled cleanly, so bring the local ledger to that same realistic
-        # idle state before testing the recovery path itself.
-        res = self.run_operator(
-            "task-create", "--id", "warmup-task", "--objective", "settle WAL state"
-        )
-        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+    def test_repository_rebind_recovers_real_identity_drift_end_to_end(self) -> None:
+        moved_repo = self.temp_dir / "moved-repository"
+        moved_repo.mkdir()
+        shutil.copytree(self.temp_dir / ".operator", moved_repo / ".operator")
 
+        registry_before = json.loads(self.registry_path.read_text())
+        old_identity = registry_before["registrations"][0]["repository_identity"]
+        counts_before = self.broker_counts()
+
+        with self.assertRaisesRegex(authority_admin.AdminError, "root_required"):
+            authority_admin.rebind_repository(
+                self.registry_path,
+                moved_repo,
+                self.ledger_id,
+                self.socket_path,
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.temp_dir,
+                request_sender=authority_broker.send_request,
+            )
+        self.assertEqual(self.broker_counts(), counts_before)
+        self.assertEqual(json.loads(self.registry_path.read_text()), registry_before)
+
+        result = authority_admin.rebind_repository(
+            self.registry_path,
+            moved_repo,
+            self.ledger_id,
+            self.socket_path,
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.temp_dir,
+            request_sender=self.root_broker_sender,
+        )
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["previous_identity"], old_identity)
+        self.assertEqual(result["repository_identity"]["repository_path"], str(moved_repo))
+        self.assertNotEqual(result["repository_identity"], old_identity)
+
+        reconcile = subprocess.run(
+            [str(self.operator_bin), "authority-reconcile"],
+            cwd=moved_repo,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(reconcile.returncode, 0, reconcile.stderr + reconcile.stdout)
+        doctor = subprocess.run(
+            [str(self.operator_bin), "doctor"],
+            cwd=moved_repo,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(doctor.returncode, 0, doctor.stderr + doctor.stdout)
+        self.assertIn("status: current", doctor.stdout)
+
+    def test_rebind_allows_legitimate_anchor_version_advancement(self) -> None:
+        created = subprocess.run(
+            [
+                str(OPERATOR_BIN),
+                "task-create",
+                "--id",
+                "advanced-task",
+                "--objective",
+                "version one",
+            ],
+            cwd=self.temp_dir,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(created.returncode, 0, created.stderr + created.stdout)
+
+        first = authority_admin.rebind_repository(
+            self.registry_path,
+            self.temp_dir,
+            self.ledger_id,
+            self.socket_path,
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.temp_dir,
+            request_sender=self.root_broker_sender,
+        )
+        self.assertEqual(first["rebind_commit_sequence"], 2)
+        registry_v1 = json.loads(self.registry_path.read_text())
+        anchors_v1 = registry_v1["registrations"][0]["anchor_records"]
+        task_v1 = next(item for item in anchors_v1 if item["record_id"] == "advanced-task")
+        self.assertEqual(task_v1["version"], 1)
+
+        advanced = subprocess.run(
+            [
+                str(OPERATOR_BIN),
+                "claim-add",
+                "--task",
+                "advanced-task",
+                "--type",
+                "file_exists",
+                "--text",
+                "legitimate version two",
+                "--by",
+                "tester",
+            ],
+            cwd=self.temp_dir,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(advanced.returncode, 0, advanced.stderr + advanced.stdout)
+
+        second = authority_admin.rebind_repository(
+            self.registry_path,
+            self.temp_dir,
+            self.ledger_id,
+            self.socket_path,
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.temp_dir,
+            request_sender=self.root_broker_sender,
+        )
+        self.assertEqual(second["rebind_commit_sequence"], 3)
+
+        with sqlite3.connect(self.store_path) as conn:
+            request_json = conn.execute(
+                "SELECT request_json FROM authority_commits WHERE commit_sequence = 3"
+            ).fetchone()[0]
+        operation = json.loads(request_json)["operation"]
+        previous_task = next(
+            item
+            for item in operation["previous_anchor_records"]
+            if item["record_id"] == "advanced-task"
+        )
+        current_task = next(
+            item for item in operation["anchor_records"] if item["record_id"] == "advanced-task"
+        )
+        self.assertEqual(previous_task, task_v1)
+        self.assertEqual(current_task["version"], 2)
+
+    def test_rebind_rejects_registry_only_identity_mutation_without_commits(self) -> None:
         registry = json.loads(self.registry_path.read_text())
-        registration = registry["registrations"][0]
-        real_identity = dict(registration["repository_identity"])
-        registration["repository_identity"] = {
-            **real_identity,
-            "repository_device": real_identity["repository_device"] + 1,
-            "operator_device": real_identity["operator_device"] + 1,
-            "ledger_device": real_identity["ledger_device"] + 1,
+        identity = registry["registrations"][0]["repository_identity"]
+        registry["registrations"][0]["repository_identity"] = {
+            **identity,
+            "repository_device": identity["repository_device"] + 1,
         }
         self.registry_path.write_text(json.dumps(registry))
+        counts_before = self.broker_counts()
 
-        # Confirm the bug reproduces: every ordinary command fails closed.
-        res = self.run_operator("doctor")
-        self.assertNotEqual(res.returncode, 0)
-        self.assertIn("enrolled ledger identity has changed", res.stderr + res.stdout)
-
-        # Root-boundary proof: going through the real broker over the real socket, with this
-        # test process's actual (non-root) OS credentials, is rejected. SO_PEERCRED is
-        # kernel-derived -- there is no client-side argument or environment variable that can
-        # forge root here, matching the same boundary test_authority_broker.py's
-        # test_authorization_uses_real_peer_credentials proves for ordinary commits.
-        with self.assertRaisesRegex(authority_admin.AdminError, "root_required"):
+        with self.assertRaisesRegex(
+            authority_admin.AdminError,
+            "Broker rejected rebind: rebind_continuity_mismatch",
+        ):
             authority_admin.rebind_repository(
                 self.registry_path,
                 self.temp_dir,
@@ -378,25 +504,28 @@ class TestAuthorityIntegration(unittest.TestCase):
                 registry_owner_uid=os.getuid(),
                 registry_owner_gid=os.getgid(),
                 registry_anchor=self.temp_dir,
-                request_sender=authority_broker.send_request,
+                request_sender=self.root_broker_sender,
             )
-        # The rejected attempt must not have mutated the registry.
+
+        self.assertEqual(self.broker_counts(), counts_before)
         self.assertEqual(json.loads(self.registry_path.read_text()), registry)
 
-        # Recover using the actual production rebind function, with a root-authorized request
-        # sent directly against the same running store (this test cannot become real root to
-        # exercise the socket's SO_PEERCRED path with uid 0; setUp's own enrollment fixture
-        # uses this identical simulated-root pattern for the same reason).
-        def simulate_root_broker(_socket_path: Path, request: object) -> dict:
-            direct_broker = authority_broker.AuthorityBroker(
-                authority_broker.AuthorityStore(self.store_path, self.content_dir)
-            )
-            response, _committed = direct_broker.handle(
-                request, authority_broker.PeerCredentials(os.getpid(), 0, 0)
-            )
-            return response
-
-        result = authority_admin.rebind_repository(
+    def test_rebind_rejects_rewritten_ledger_and_registry_before_commit(self) -> None:
+        created = subprocess.run(
+            [
+                str(OPERATOR_BIN),
+                "task-create",
+                "--id",
+                "rewritten-task",
+                "--objective",
+                "authoritative history",
+            ],
+            cwd=self.temp_dir,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(created.returncode, 0, created.stderr + created.stdout)
+        authority_admin.rebind_repository(
             self.registry_path,
             self.temp_dir,
             self.ledger_id,
@@ -404,30 +533,89 @@ class TestAuthorityIntegration(unittest.TestCase):
             registry_owner_uid=os.getuid(),
             registry_owner_gid=os.getgid(),
             registry_anchor=self.temp_dir,
-            request_sender=simulate_root_broker,
-        )
-        self.assertTrue(result["ok"])
-        self.assertEqual(result["repository_identity"], real_identity)
-        self.assertEqual(
-            result["previous_identity"]["repository_device"],
-            real_identity["repository_device"] + 1,
+            request_sender=self.root_broker_sender,
         )
 
-        recovered_registry = json.loads(self.registry_path.read_text())
-        self.assertEqual(
-            recovered_registry["registrations"][0]["repository_identity"], real_identity
+        rewritten_repo = self.temp_dir / "rewritten-repository"
+        rewritten_repo.mkdir()
+        for arguments in (
+            ("init",),
+            (
+                "task-create",
+                "--id",
+                "rewritten-task",
+                "--objective",
+                "altered history",
+            ),
+        ):
+            completed = subprocess.run(
+                [str(OPERATOR_BIN), *arguments],
+                cwd=rewritten_repo,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr + completed.stdout)
+
+        rewritten_migration = authority_admin.validate_local_ledger(rewritten_repo)
+        registry = json.loads(self.registry_path.read_text())
+        registration = registry["registrations"][0]
+        authoritative_anchors = registration["anchor_records"]
+        registration["anchor_records"] = rewritten_migration["anchor_records"]
+        registration["legacy_anchor_sha256"] = rewritten_migration["legacy_anchor_sha256"]
+        self.registry_path.write_text(json.dumps(registry))
+        self.assertNotEqual(registration["anchor_records"], authoritative_anchors)
+        counts_before = self.broker_counts()
+
+        with self.assertRaisesRegex(
+            authority_admin.AdminError,
+            "Broker rejected rebind: rebind_continuity_mismatch",
+        ):
+            authority_admin.rebind_repository(
+                self.registry_path,
+                rewritten_repo,
+                self.ledger_id,
+                self.socket_path,
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.temp_dir,
+                request_sender=self.root_broker_sender,
+            )
+
+        self.assertEqual(self.broker_counts(), counts_before)
+        self.assertEqual(json.loads(self.registry_path.read_text()), registry)
+
+    def test_rebind_exact_retry_is_idempotent(self) -> None:
+        moved_repo = self.temp_dir / "retry-repository"
+        moved_repo.mkdir()
+        shutil.copytree(self.temp_dir / ".operator", moved_repo / ".operator")
+        registry_before = self.registry_path.read_text()
+
+        first = authority_admin.rebind_repository(
+            self.registry_path,
+            moved_repo,
+            self.ledger_id,
+            self.socket_path,
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.temp_dir,
+            request_sender=self.root_broker_sender,
         )
+        counts_after_first = self.broker_counts()
+        self.registry_path.write_text(registry_before)
 
-        # The rebind is itself a new broker commit (commit_sequence 2) that produces no local
-        # record mutations, so -- like any other broker-side event -- the client must catch up
-        # its local sequence via the normal reconcile step before doctor reports current.
-        res = self.run_operator("authority-reconcile")
-        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
-
-        # Ordinary commands work again, with no discontinuity in local ledger state.
-        res = self.run_operator("doctor")
-        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
-        self.assertIn("status: current", res.stdout)
+        replay = authority_admin.rebind_repository(
+            self.registry_path,
+            moved_repo,
+            self.ledger_id,
+            self.socket_path,
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.temp_dir,
+            request_sender=self.root_broker_sender,
+        )
+        self.assertEqual(replay["rebind_commit_sequence"], first["rebind_commit_sequence"])
+        self.assertTrue(replay["idempotent_replay"])
+        self.assertEqual(self.broker_counts(), counts_after_first)
 
     def test_claim_add_routing(self) -> None:
         # 1. Create a task locally

@@ -171,6 +171,23 @@ sanctioned recovery is `operator-admin repository-rebind --ledger-id <id> --repo
 failure idempotency `ledger.enroll` already relies on for the broker-committed/registry-write-pending
 crash window.
 
+The rebind operation carries two distinct binding proofs. `previous_identity`,
+`previous_anchor_records`, and `previous_legacy_anchor_sha256` are copied from the client registry as
+the claimed prior proof. `repository_identity`, `anchor_records`, and `legacy_anchor_sha256` describe
+the newly validated filesystem and its current record heads. The registry is not authoritative: before
+committing, the broker compares all three claimed previous fields exactly with the corresponding fields
+in its latest authoritative `ledger.enroll` or `ledger.rebind` commit. A mismatch fails closed as
+`rebind_continuity_mismatch` without adding a commit or event. Once that continuity check passes, the
+new anchor set may contain normally advanced record versions; a v1 previous proof does not require v1
+to remain a current head when the newly validated head is v2. An exact retry is returned by the normal
+operation-key idempotency path before continuity is evaluated against any later binding.
+
+The previous-proof fields are a rebind protocol compatibility boundary. A broker that requires them
+must be deployed atomically with the `operator-admin` that sends them; piecemeal replacement is not a
+supported upgrade. The Issue #11 journaled upgrade keeps the broker stopped while the complete asset
+set is activated, preventing a mixed old-admin/new-broker serving window. Any stale client that still
+submits the older rebind shape is rejected fail-closed as `invalid_request`.
+
 Before committing, `operator-admin` validates the target ledger with a **rebind-specific operational
 validator** (`pin_operational_ledger`), distinct from the pristine gate `enroll` uses
 (`validate_local_ledger`). The enrollment gate demands an untouched tree — no group/other write bits

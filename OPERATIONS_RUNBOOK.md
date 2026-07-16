@@ -339,6 +339,12 @@ sudo "/root/operator-control-plane-release/$REV/operator-admin" repository-rebin
 Both flags are explicit and required — there is no cwd discovery, so this cannot be triggered by
 accident from an arbitrary directory. The command:
 
+> **Upgrade compatibility boundary:** the previous-proof fields are mandatory in the rebind request.
+> Deploy the matching broker and `operator-admin` together through the Issue #11 journaled `upgrade`
+> command, which stops the broker while the full asset set is activated. Do not copy either file into
+> a live installation independently. An older admin client is rejected fail-closed as
+> `invalid_request` by a broker that requires the new request shape.
+
 1. Re-validates the local ledger using a rebind-specific operational validator (`pin_operational_ledger`),
    which accepts the group-writable layout of an active deployment (group-writable directories and files
    within the socket client group, and SQLite WAL sidecars) while locking the database with `BEGIN IMMEDIATE`
@@ -346,10 +352,16 @@ accident from an arbitrary directory. The command:
 2. Confirms every anchor recorded at the *prior* enrollment/rebind still resolves to the same
    `(record_type, record_id, version) → event_hash` in the ledger now being bound to — i.e. the
    previously-anchored history was not rewritten. Fails closed with `rebind_history_diverged` if not.
-3. Commits a `ledger.rebind` operation to the broker — a first-class, permanently retained commit
-   visible in `audit`, not a silent local file edit. Requires the real root `SO_PEERCRED` identity, same
-   as `enroll`.
-4. Atomically rewrites only the registry's `repository_identity` for this ledger, preserving
+3. Sends the broker separate previous and new proofs. The previous proof is
+   `previous_identity` + `previous_anchor_records` + `previous_legacy_anchor_sha256`, claimed from the
+   registry; the new proof is `repository_identity` + the current-head `anchor_records` +
+   `legacy_anchor_sha256`, derived from the pinned ledger. The broker treats its latest `ledger.enroll`
+   or `ledger.rebind` commit as authoritative and requires the claimed previous proof to match it
+   exactly. Registry-only identity or anchor edits therefore fail as `rebind_continuity_mismatch`
+   before any commit. Current heads may advance normally from a previously anchored v1 to v2.
+4. Commits `ledger.rebind` as a first-class, permanently retained broker commit visible in `audit`,
+   not a silent local file edit. Requires the real root `SO_PEERCRED` identity, same as `enroll`.
+5. Atomically rewrites the registry binding for this ledger, preserving
    `first_broker_sequence`/`enrollment_receipt_hash` from the *original* enrollment — a rebind is a
    recovery event layered on top of the original enrollment, not a re-enrollment.
 

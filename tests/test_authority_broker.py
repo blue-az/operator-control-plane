@@ -397,7 +397,21 @@ class TestAuthorityBroker(unittest.TestCase):
             "operator_device": 9,
             "ledger_device": 9,
         }
-        empty_anchor_digest = authority_broker.sha256_text(authority_broker.canonical_json([]))
+        prior_anchors = [
+            {
+                "record_type": "task",
+                "record_id": "advanced-task",
+                "version": 1,
+                "event_hash": "a" * 64,
+            }
+        ]
+        current_anchors = [{**prior_anchors[0], "version": 2, "event_hash": "b" * 64}]
+        prior_anchor_digest = authority_broker.sha256_text(
+            authority_broker.canonical_json(prior_anchors)
+        )
+        current_anchor_digest = authority_broker.sha256_text(
+            authority_broker.canonical_json(current_anchors)
+        )
         rebind_request = {
             "protocol_version": 1,
             "action": "commit",
@@ -406,9 +420,11 @@ class TestAuthorityBroker(unittest.TestCase):
             "operation": {
                 "kind": "ledger.rebind",
                 "previous_identity": identity,
+                "previous_anchor_records": prior_anchors,
+                "previous_legacy_anchor_sha256": prior_anchor_digest,
                 "repository_identity": new_identity,
-                "anchor_records": [],
-                "legacy_anchor_sha256": empty_anchor_digest,
+                "anchor_records": current_anchors,
+                "legacy_anchor_sha256": current_anchor_digest,
             },
             "expected": [],
             "blob": None,
@@ -427,8 +443,8 @@ class TestAuthorityBroker(unittest.TestCase):
             "operation": {
                 "kind": "ledger.enroll",
                 "repository_identity": identity,
-                "anchor_records": [],
-                "legacy_anchor_sha256": empty_anchor_digest,
+                "anchor_records": prior_anchors,
+                "legacy_anchor_sha256": prior_anchor_digest,
             },
             "expected": [],
             "blob": None,
@@ -445,8 +461,28 @@ class TestAuthorityBroker(unittest.TestCase):
             )
         self.assertEqual(caught.exception.code, "root_required")
 
-        # Root can rebind once enrolled; it lands as a normal, later commit -- not a special
-        # first-commit slot the way ledger.enroll is.
+        counts_before = (
+            self.table_count("authority_commits"),
+            self.table_count("authority_events"),
+        )
+        wrong_previous = json.loads(json.dumps(rebind_request))
+        wrong_previous["operation_key"] = "rebind-wrong-previous"
+        wrong_previous["operation"]["previous_anchor_records"][0]["event_hash"] = "c" * 64
+        wrong_previous["operation"]["previous_legacy_anchor_sha256"] = authority_broker.sha256_text(
+            authority_broker.canonical_json(wrong_previous["operation"]["previous_anchor_records"])
+        )
+        with self.assertRaises(authority_broker.BrokerError) as caught:
+            broker_obj.handle(wrong_previous, root_peer)
+        self.assertEqual(caught.exception.code, "rebind_continuity_mismatch")
+        self.assertEqual(
+            (
+                self.table_count("authority_commits"),
+                self.table_count("authority_events"),
+            ),
+            counts_before,
+        )
+
+        # The previous proof remains at v1 while the new current head advances to v2.
         response, committed = broker_obj.handle(rebind_request, root_peer)
         self.assertTrue(committed)
         self.assertEqual(response["receipt"]["commit_sequence"], 2)

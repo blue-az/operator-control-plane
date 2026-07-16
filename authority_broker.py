@@ -336,44 +336,57 @@ def _normalize_repository_identity(raw_identity: object, field_name: str) -> dic
     return normalized_identity
 
 
-def _normalize_anchor_records_with_digest(raw_operation: dict) -> tuple[list[dict], str]:
-    raw_anchors = raw_operation.get("anchor_records")
+def _normalize_anchor_records_list_with_digest(
+    raw_anchors: object, raw_digest: object, prefix: str
+) -> tuple[list[dict], str]:
     if not isinstance(raw_anchors, list):
-        raise BrokerError("invalid_request", "anchor_records must be an array")
+        raise BrokerError("invalid_request", f"{prefix}anchor_records must be an array")
     anchors = []
     seen = set()
     for index, raw_anchor in enumerate(raw_anchors):
         if not isinstance(raw_anchor, dict):
-            raise BrokerError("invalid_request", f"anchor_records[{index}] must be an object")
+            raise BrokerError(
+                "invalid_request", f"{prefix}anchor_records[{index}] must be an object"
+            )
         require_exact_keys(
             raw_anchor,
             {"record_type", "record_id", "version", "event_hash"},
-            f"anchor_records[{index}]",
+            f"{prefix}anchor_records[{index}]",
         )
         record_type = require_token(raw_anchor.get("record_type"), "record_type")
         record_id = require_token(raw_anchor.get("record_id"), "record_id")
         version = raw_anchor.get("version")
         if not isinstance(version, int) or isinstance(version, bool) or version < 1:
-            raise BrokerError("invalid_request", "anchor version must be a positive integer")
+            raise BrokerError(
+                "invalid_request", f"{prefix}anchor version must be a positive integer"
+            )
         key = (record_type, record_id)
         if key in seen:
-            raise BrokerError("invalid_request", "anchor_records contains a duplicate record")
+            raise BrokerError(
+                "invalid_request", f"{prefix}anchor_records contains a duplicate record"
+            )
         seen.add(key)
         anchors.append(
             {
                 "record_type": record_type,
                 "record_id": record_id,
                 "version": version,
-                "event_hash": require_sha256(raw_anchor.get("event_hash"), "event_hash"),
+                "event_hash": require_sha256(raw_anchor.get("event_hash"), f"{prefix}event_hash"),
             }
         )
     anchors.sort(key=lambda item: (item["record_type"], item["record_id"]))
-    anchor_digest = require_sha256(
-        raw_operation.get("legacy_anchor_sha256"), "legacy_anchor_sha256"
-    )
+    anchor_digest = require_sha256(raw_digest, f"{prefix}legacy_anchor_sha256")
     if anchor_digest != sha256_text(canonical_json(anchors)):
-        raise BrokerError("invalid_request", "legacy anchor digest does not match records")
+        raise BrokerError("invalid_request", f"{prefix}legacy anchor digest does not match records")
     return anchors, anchor_digest
+
+
+def _normalize_anchor_records_with_digest(raw_operation: dict) -> tuple[list[dict], str]:
+    return _normalize_anchor_records_list_with_digest(
+        raw_operation.get("anchor_records"),
+        raw_operation.get("legacy_anchor_sha256"),
+        "",
+    )
 
 
 def normalize_operation(raw_operation: object) -> dict:
@@ -411,6 +424,8 @@ def normalize_operation(raw_operation: object) -> dict:
             {
                 "kind",
                 "previous_identity",
+                "previous_anchor_records",
+                "previous_legacy_anchor_sha256",
                 "repository_identity",
                 "anchor_records",
                 "legacy_anchor_sha256",
@@ -423,10 +438,21 @@ def normalize_operation(raw_operation: object) -> dict:
         repository_identity = _normalize_repository_identity(
             raw_operation.get("repository_identity"), "repository_identity"
         )
-        anchors, anchor_digest = _normalize_anchor_records_with_digest(raw_operation)
+        previous_anchors, previous_anchor_digest = _normalize_anchor_records_list_with_digest(
+            raw_operation.get("previous_anchor_records"),
+            raw_operation.get("previous_legacy_anchor_sha256"),
+            "previous_",
+        )
+        anchors, anchor_digest = _normalize_anchor_records_list_with_digest(
+            raw_operation.get("anchor_records"),
+            raw_operation.get("legacy_anchor_sha256"),
+            "",
+        )
         return {
             "kind": kind,
             "previous_identity": previous_identity,
+            "previous_anchor_records": previous_anchors,
+            "previous_legacy_anchor_sha256": previous_anchor_digest,
             "repository_identity": repository_identity,
             "anchor_records": anchors,
             "legacy_anchor_sha256": anchor_digest,
@@ -1361,6 +1387,38 @@ class AuthorityStore:
                     "ledger_not_enrolled",
                     "ledger rebind requires the ledger to already be enrolled",
                 )
+
+            last_binding_row = conn.execute(
+                """
+                SELECT request_json FROM authority_commits
+                WHERE ledger_id = ? AND operation IN ('ledger.enroll', 'ledger.rebind')
+                ORDER BY commit_sequence DESC LIMIT 1
+                """,
+                (request["ledger_id"],),
+            ).fetchone()
+            if not last_binding_row:
+                raise BrokerError(
+                    "ledger_not_enrolled",
+                    "ledger rebind requires the ledger to already be enrolled",
+                )
+            last_binding_req = json.loads(last_binding_row["request_json"])
+            last_op = last_binding_req["operation"]
+            if operation["previous_identity"] != last_op["repository_identity"]:
+                raise BrokerError(
+                    "rebind_continuity_mismatch",
+                    "previous identity does not match the authoritative broker binding",
+                )
+            if operation["previous_anchor_records"] != last_op["anchor_records"]:
+                raise BrokerError(
+                    "rebind_continuity_mismatch",
+                    "previous anchor records do not match the authoritative broker binding",
+                )
+            if operation["previous_legacy_anchor_sha256"] != last_op["legacy_anchor_sha256"]:
+                raise BrokerError(
+                    "rebind_continuity_mismatch",
+                    "previous legacy anchor digest does not match the authoritative broker binding",
+                )
+
             return policy, []
 
         roles = {
