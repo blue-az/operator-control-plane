@@ -4368,38 +4368,10 @@ def validate_local_ledger(repo_path: Path) -> dict:
             conn = sqlite3.connect(f"file:/proc/self/fd/{db_fd}?mode=ro&immutable=1", uri=True)
             conn.row_factory = sqlite3.Row
             try:
-                schema_version = conn.execute("PRAGMA user_version").fetchone()[0]
-                if schema_version != 1:
-                    raise AdminError(
-                        "unsafe_enrollment",
-                        f"Durable ledger schema version {schema_version} is unsupported",
-                    )
-
-                triggers = {
-                    row["name"]: " ".join(row["sql"].lower().split())
-                    for row in conn.execute(
-                        "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' "
-                        "AND name IN ('ledger_events_no_update', 'ledger_events_no_delete')"
-                    )
-                }
-                expected_triggers = {
-                    "ledger_events_no_update": "create trigger ledger_events_no_update before update on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
-                    "ledger_events_no_delete": "create trigger ledger_events_no_delete before delete on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
-                }
-                if triggers != expected_triggers:
-                    raise AdminError(
-                        "unsafe_enrollment", "Durable ledger append-only triggers differ"
-                    )
-
-                rows = conn.execute(
-                    """
-                    SELECT event_id, record_type, record_id, version, event_type, payload_json,
-                           actor_uid, actor_name, created_at, source_command, previous_event_hash,
-                           event_hash
-                    FROM ledger_events
-                    ORDER BY record_type, record_id, version
-                    """
-                ).fetchall()
+                _verify_ledger_schema_and_triggers(conn, "unsafe_enrollment")
+                chain_state, latest_events, history_index = _verify_ledger_chain(
+                    conn, "unsafe_enrollment"
+                )
             finally:
                 conn.close()
     except sqlite3.Error as exc:
@@ -4407,104 +4379,7 @@ def validate_local_ledger(repo_path: Path) -> dict:
     except OSError as exc:
         raise AdminError("unsafe_enrollment", f"Durable ledger path cannot be opened: {exc}")
 
-    chain_state = {}
-    latest_events = {}
-    for row in rows:
-        key = (row["record_type"], row["record_id"])
-        previous = chain_state.get(key)
-        expected_version = previous[0] + 1 if previous else 1
-        expected_previous_hash = previous[1] if previous else None
-
-        if row["version"] != expected_version:
-            raise AdminError(
-                "unsafe_enrollment",
-                f"Durable ledger version gap for {key[0]} {key[1]}: expected {expected_version}, got {row['version']}",
-            )
-        if row["previous_event_hash"] != expected_previous_hash:
-            raise AdminError(
-                "unsafe_enrollment",
-                f"Durable ledger hash chain is broken for {key[0]} {key[1]} at version {row['version']}",
-            )
-
-        try:
-            decoded_payload = json.loads(row["payload_json"])
-            if broker.canonical_json(decoded_payload) != row["payload_json"]:
-                raise AdminError(
-                    "unsafe_enrollment",
-                    f"Durable ledger payload is not canonical for {key[0]} {key[1]} version {row['version']}",
-                )
-        except (TypeError, ValueError, json.JSONDecodeError):
-            raise AdminError(
-                "unsafe_enrollment",
-                f"Durable ledger payload is invalid JSON for {key[0]} {key[1]} version {row['version']}",
-            )
-
-        hash_fields = {
-            "hash_format": "operator-ledger-event-v1",
-            "record_type": row["record_type"],
-            "record_id": row["record_id"],
-            "version": row["version"],
-            "event_type": row["event_type"],
-            "payload_json": row["payload_json"],
-            "actor_uid": row["actor_uid"],
-            "actor_name": row["actor_name"],
-            "created_at": row["created_at"],
-            "source_command": row["source_command"],
-            "previous_event_hash": row["previous_event_hash"],
-        }
-        computed_hash = hashlib.sha256(
-            broker.canonical_json(hash_fields).encode("utf-8")
-        ).hexdigest()
-        if row["event_hash"] != computed_hash or row["event_id"] != row["event_hash"]:
-            raise AdminError(
-                "unsafe_enrollment",
-                f"Durable ledger event hash mismatch for {key[0]} {key[1]} version {row['version']}",
-            )
-
-        chain_state[key] = (row["version"], row["event_hash"])
-        latest_events[key] = decoded_payload
-
-    for key, expected_fields in latest_events.items():
-        rtype, rid = key
-        if rtype == "task":
-            filepath = op_dir / "tasks" / f"{rid}.yaml"
-        elif rtype == "claim":
-            filepath = op_dir / "claims" / f"{rid}.yaml"
-        elif rtype == "evidence":
-            task_id = expected_fields.get("task_id")
-            if not task_id:
-                raise AdminError(
-                    "unsafe_enrollment", f"Evidence {rid} is missing task_id in database payload"
-                )
-            leaf_id = rid.split("/", 1)[-1]
-            filepath = op_dir / "evidence" / task_id / f"{leaf_id}.yaml"
-        elif rtype == "handoff":
-            task_id = expected_fields.get("task_id")
-            if not task_id:
-                raise AdminError(
-                    "unsafe_enrollment", f"Handoff {rid} is missing task_id in database payload"
-                )
-            leaf_id = rid.split("/", 1)[-1]
-            filepath = op_dir / "handoffs" / task_id / f"{leaf_id}.yaml"
-        else:
-            filepath = op_dir / f"{rtype}s" / f"{rid}.yaml"
-
-        if not filepath.exists():
-            raise AdminError(
-                "unsafe_enrollment", f"YAML projection missing for {rtype} {rid}: {filepath}"
-            )
-
-        try:
-            with open(filepath, "r") as f:
-                yaml_payload = yaml.safe_load(f)
-        except Exception as exc:
-            raise AdminError("unsafe_enrollment", f"Failed to load YAML for {rtype} {rid}: {exc}")
-
-        if broker.canonical_json(yaml_payload) != broker.canonical_json(expected_fields):
-            raise AdminError(
-                "unsafe_enrollment",
-                f"Durable ledger mismatch for {rtype} {rid}: YAML projection differs from database",
-            )
+    _verify_ledger_projections(op_dir, latest_events, "unsafe_enrollment")
 
     for label, path in (("repository", repo_path), ("operator", op_dir), ("ledger", ledger_db)):
         after = path.lstat()
@@ -4512,11 +4387,10 @@ def validate_local_ledger(repo_path: Path) -> dict:
         if (after.st_dev, after.st_ino) != (before.st_dev, before.st_ino):
             raise AdminError("unsafe_enrollment", f"{label} path changed during preflight")
 
-    # Locally, evidence/handoff record IDs are task-scoped ("<task_id>/<leaf_id>", assigned
-    # independently per task by get_next_evidence_id) to avoid collisions between tasks that
-    # each start their own evidence-0001. The broker's record_id character class disallows "/",
-    # so re-encode with a wire-safe separator rather than stripping the task_id -- stripping
-    # would silently collide two different tasks' evidence-0001 into one anchor record.
+    return _ledger_migration_payload(repo_path, identities, chain_state)
+
+
+def _ledger_migration_payload(repo_path: Path, identities: dict, chain_state: dict) -> dict:
     anchors = sorted(
         (
             {
@@ -4546,6 +4420,559 @@ def validate_local_ledger(repo_path: Path) -> dict:
         "anchor_records": anchors,
         "legacy_anchor_sha256": broker.sha256_text(broker.canonical_json(anchors)),
     }
+
+
+def _verify_ledger_schema_and_triggers(conn: sqlite3.Connection, error_code: str) -> None:
+    schema_version = conn.execute("PRAGMA user_version").fetchone()[0]
+    if schema_version != 1:
+        raise AdminError(
+            error_code,
+            f"Durable ledger schema version {schema_version} is unsupported",
+        )
+
+    triggers = {
+        row["name"]: " ".join(row["sql"].lower().split())
+        for row in conn.execute(
+            "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' "
+            "AND name IN ('ledger_events_no_update', 'ledger_events_no_delete')"
+        )
+    }
+    expected_triggers = {
+        "ledger_events_no_update": "create trigger ledger_events_no_update before update on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
+        "ledger_events_no_delete": "create trigger ledger_events_no_delete before delete on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
+    }
+    if triggers != expected_triggers:
+        raise AdminError(error_code, "Durable ledger append-only triggers differ")
+
+
+def _verify_ledger_chain(conn: sqlite3.Connection, error_code: str) -> tuple[dict, dict, dict]:
+    rows = conn.execute(
+        """
+        SELECT event_id, record_type, record_id, version, event_type, payload_json,
+               actor_uid, actor_name, created_at, source_command, previous_event_hash,
+               event_hash
+        FROM ledger_events
+        ORDER BY record_type, record_id, version
+        """
+    ).fetchall()
+
+    chain_state = {}
+    latest_events = {}
+    history_index = {}
+    for row in rows:
+        key = (row["record_type"], row["record_id"])
+        previous = chain_state.get(key)
+        expected_version = previous[0] + 1 if previous else 1
+        expected_previous_hash = previous[1] if previous else None
+
+        if row["version"] != expected_version:
+            raise AdminError(
+                error_code,
+                f"Durable ledger version gap for {key[0]} {key[1]}: expected {expected_version}, got {row['version']}",
+            )
+        if row["previous_event_hash"] != expected_previous_hash:
+            raise AdminError(
+                error_code,
+                f"Durable ledger hash chain is broken for {key[0]} {key[1]} at version {row['version']}",
+            )
+
+        try:
+            decoded_payload = json.loads(row["payload_json"])
+            if broker.canonical_json(decoded_payload) != row["payload_json"]:
+                raise AdminError(
+                    error_code,
+                    f"Durable ledger payload is not canonical for {key[0]} {key[1]} version {row['version']}",
+                )
+        except (TypeError, ValueError, json.JSONDecodeError):
+            raise AdminError(
+                error_code,
+                f"Durable ledger payload is invalid JSON for {key[0]} {key[1]} version {row['version']}",
+            )
+
+        hash_fields = {
+            "hash_format": "operator-ledger-event-v1",
+            "record_type": row["record_type"],
+            "record_id": row["record_id"],
+            "version": row["version"],
+            "event_type": row["event_type"],
+            "payload_json": row["payload_json"],
+            "actor_uid": row["actor_uid"],
+            "actor_name": row["actor_name"],
+            "created_at": row["created_at"],
+            "source_command": row["source_command"],
+            "previous_event_hash": row["previous_event_hash"],
+        }
+        computed_hash = hashlib.sha256(
+            broker.canonical_json(hash_fields).encode("utf-8")
+        ).hexdigest()
+        if row["event_hash"] != computed_hash or row["event_id"] != row["event_hash"]:
+            raise AdminError(
+                error_code,
+                f"Durable ledger event hash mismatch for {key[0]} {key[1]} version {row['version']}",
+            )
+
+        chain_state[key] = (row["version"], row["event_hash"])
+        latest_events[key] = decoded_payload
+        history_index[(row["record_type"], row["record_id"], row["version"])] = row["event_hash"]
+
+    return chain_state, latest_events, history_index
+
+
+def open_path_safely(op_fd: int, rel_path_parts: list[str]) -> tuple[int, list[int]]:
+    # rel_path_parts is a list of path components relative to .operator
+    cur_fd = op_fd
+    fds_to_close = []
+    try:
+        for part in rel_path_parts[:-1]:
+            # Open directory with O_RDONLY | O_DIRECTORY | O_NOFOLLOW
+            flags = (
+                os.O_RDONLY
+                | os.O_DIRECTORY
+                | getattr(os, "O_CLOEXEC", 0)
+                | getattr(os, "O_NOFOLLOW", 0)
+            )
+            next_fd = os.open(part, flags, dir_fd=cur_fd)
+            if cur_fd != op_fd:
+                fds_to_close.append(cur_fd)
+            cur_fd = next_fd
+
+        # Open the final file
+        file_flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+        file_fd = os.open(rel_path_parts[-1], file_flags, dir_fd=cur_fd)
+        if cur_fd != op_fd:
+            fds_to_close.append(cur_fd)
+        return file_fd, fds_to_close
+    except OSError as exc:
+        if cur_fd != op_fd and cur_fd not in fds_to_close:
+            try:
+                os.close(cur_fd)
+            except OSError:
+                pass
+        for fd in fds_to_close:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        raise exc
+
+
+def verify_and_fingerprint_file(
+    op_fd: int,
+    rel_path_parts: list[str],
+    label: str,
+    allowed_uids: set[int] | None,
+    operational_gid: int | None,
+    check_metadata: bool = True,
+    return_content: bool = False,
+) -> dict:
+    try:
+        with contextlib.ExitStack() as stack:
+            file_fd, fds_to_close = open_path_safely(op_fd, rel_path_parts)
+            stack.callback(os.close, file_fd)
+            for fd in fds_to_close:
+                stack.callback(os.close, fd)
+
+            metadata = os.fstat(file_fd)
+            if check_metadata:
+                _require_operational_entry(
+                    label,
+                    metadata,
+                    expected_kind="file",
+                    allowed_uids=allowed_uids,
+                    operational_gid=operational_gid,
+                )
+
+            # Read content and compute hash incrementally
+            hasher = hashlib.sha256()
+            content_chunks = [] if return_content else None
+            while True:
+                chunk = os.read(file_fd, 65536)
+                if not chunk:
+                    break
+                hasher.update(chunk)
+                if content_chunks is not None:
+                    content_chunks.append(chunk)
+
+            content = b"".join(content_chunks) if content_chunks is not None else None
+            return {
+                "st_dev": metadata.st_dev,
+                "st_ino": metadata.st_ino,
+                "sha256": hasher.hexdigest(),
+                "content": content,
+            }
+    except FileNotFoundError as exc:
+        raise exc
+    except Exception as exc:
+        if isinstance(exc, AdminError):
+            raise exc
+        raise AdminError("unsafe_rebind", f"{label} verification failed: {exc}")
+
+
+def _get_projection_rel_path_parts(key: tuple, expected_fields: dict, error_code: str) -> list[str]:
+    rtype, rid = key
+    if rtype == "task":
+        return ["tasks", f"{rid}.yaml"]
+    elif rtype == "claim":
+        return ["claims", f"{rid}.yaml"]
+    elif rtype == "evidence":
+        task_id = expected_fields.get("task_id")
+        if not task_id:
+            raise AdminError(error_code, f"Evidence {rid} is missing task_id in database payload")
+        leaf_id = rid.split("/", 1)[-1]
+        return ["evidence", task_id, f"{leaf_id}.yaml"]
+    elif rtype == "handoff":
+        task_id = expected_fields.get("task_id")
+        if not task_id:
+            raise AdminError(error_code, f"Handoff {rid} is missing task_id in database payload")
+        leaf_id = rid.split("/", 1)[-1]
+        return ["handoffs", task_id, f"{leaf_id}.yaml"]
+    else:
+        return [f"{rtype}s", f"{rid}.yaml"]
+
+
+def _verify_ledger_projections(op_dir: Path, latest_events: dict, error_code: str) -> None:
+    import yaml
+
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    directory_flags = flags | os.O_DIRECTORY
+    try:
+        op_fd = os.open(op_dir, directory_flags)
+    except OSError as exc:
+        raise AdminError(error_code, f"Failed to open operator directory: {exc}")
+
+    try:
+        op_metadata = os.fstat(op_fd)
+        owner_uid = op_metadata.st_uid
+        for key, expected_fields in latest_events.items():
+            rel_path_parts = _get_projection_rel_path_parts(key, expected_fields, error_code)
+            label = f"projection {key}"
+            info = verify_and_fingerprint_file(
+                op_fd,
+                rel_path_parts,
+                label,
+                allowed_uids={owner_uid},
+                operational_gid=None,
+                check_metadata=True,
+                return_content=True,
+            )
+            try:
+                yaml_payload = yaml.safe_load(info["content"].decode("utf-8", errors="replace"))
+            except Exception as exc:
+                raise AdminError(error_code, f"Failed to load YAML for {label}: {exc}")
+
+            if broker.canonical_json(yaml_payload) != broker.canonical_json(expected_fields):
+                raise AdminError(
+                    error_code,
+                    f"Durable ledger mismatch for {label}: YAML projection differs from database",
+                )
+    finally:
+        os.close(op_fd)
+
+
+def _require_operational_entry(
+    label: str,
+    metadata: os.stat_result,
+    *,
+    expected_kind: str,
+    allowed_uids: set[int] | None,
+    operational_gid: int | None,
+) -> None:
+    mode = stat.S_IMODE(metadata.st_mode)
+    if expected_kind == "directory":
+        if not stat.S_ISDIR(metadata.st_mode):
+            raise AdminError("unsafe_rebind", f"{label} is not a directory")
+    else:
+        if not stat.S_ISREG(metadata.st_mode):
+            raise AdminError("unsafe_rebind", f"{label} is not a regular file")
+        if metadata.st_nlink != 1:
+            raise AdminError("unsafe_rebind", f"{label} has multiple hard links")
+    if mode & 0o002:
+        raise AdminError("unsafe_rebind", f"{label} is other-writable")
+    if mode & stat.S_ISUID:
+        raise AdminError("unsafe_rebind", f"{label} is setuid")
+    if mode & 0o020:
+        if operational_gid is None or metadata.st_gid != operational_gid:
+            raise AdminError(
+                "unsafe_rebind",
+                f"{label} is group-writable outside the operational client group",
+            )
+        if expected_kind == "directory" and not mode & stat.S_ISGID:
+            raise AdminError(
+                "unsafe_rebind",
+                f"{label} is a group-writable directory without setgid",
+            )
+    if allowed_uids is not None and metadata.st_uid not in allowed_uids:
+        raise AdminError("unsafe_rebind", f"{label} owner differs from repository owner")
+
+
+@contextlib.contextmanager
+def pin_operational_ledger(
+    repo_path: Path,
+    operational_gid: int | None,
+    allowed_uids: set[int] | None = None,
+    busy_timeout_ms: int = 3000,
+):
+    op_dir = repo_path / ".operator"
+    if not op_dir.is_dir():
+        raise AdminError("unsafe_rebind", f"Operator ledger is missing: {op_dir}")
+
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    directory_flags = flags | os.O_DIRECTORY
+    with contextlib.ExitStack() as stack:
+        try:
+            repo_fd = os.open(repo_path, directory_flags)
+            stack.callback(os.close, repo_fd)
+            op_fd = os.open(".operator", directory_flags, dir_fd=repo_fd)
+            stack.callback(os.close, op_fd)
+            db_fd = os.open("ledger.sqlite3", flags, dir_fd=op_fd)
+            stack.callback(os.close, db_fd)
+        except OSError as exc:
+            raise AdminError("unsafe_rebind", f"ledger tree cannot be opened: {exc}")
+
+        identities = {
+            "repository": os.fstat(repo_fd),
+            "operator": os.fstat(op_fd),
+            "ledger": os.fstat(db_fd),
+        }
+        owner_uid = identities["repository"].st_uid
+        final_allowed_uids = (
+            (allowed_uids | {owner_uid}) if allowed_uids is not None else {owner_uid}
+        )
+
+        _require_operational_entry(
+            "repository path",
+            identities["repository"],
+            expected_kind="directory",
+            allowed_uids=None,
+            operational_gid=None,
+        )
+        _require_operational_entry(
+            "operator path",
+            identities["operator"],
+            expected_kind="directory",
+            allowed_uids={owner_uid},
+            operational_gid=operational_gid,
+        )
+        _require_operational_entry(
+            "ledger database",
+            identities["ledger"],
+            expected_kind="file",
+            allowed_uids={owner_uid},
+            operational_gid=operational_gid,
+        )
+
+        pinned_db_path = f"/proc/self/fd/{op_fd}/ledger.sqlite3"
+
+        try:
+            conn = sqlite3.connect(pinned_db_path, timeout=max(busy_timeout_ms, 0) / 1000.0)
+        except sqlite3.Error as exc:
+            raise AdminError("unsafe_rebind", f"Durable ledger cannot be opened: {exc}")
+        stack.callback(conn.close)
+        conn.row_factory = sqlite3.Row
+        conn.isolation_level = None
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as exc:
+            if "locked" in str(exc).lower() or "busy" in str(exc).lower():
+                raise AdminError(
+                    "ledger_busy",
+                    f"could not obtain a stable ledger snapshot (writer active?): {exc}",
+                )
+            raise AdminError("unsafe_rebind", f"Durable ledger cannot be read: {exc}")
+        except sqlite3.Error as exc:
+            raise AdminError("unsafe_rebind", f"Durable ledger cannot be read: {exc}")
+        stack.callback(conn.rollback)
+
+        def _stat_recheck_only() -> None:
+            for label, path, pinned in (
+                ("repository path", repo_path, identities["repository"]),
+                ("operator path", op_dir, identities["operator"]),
+                ("ledger database", Path(pinned_db_path), identities["ledger"]),
+            ):
+                try:
+                    current = os.stat(path, follow_symlinks=False)
+                except OSError as exc:
+                    raise AdminError(
+                        "rebind_path_changed", f"{label} disappeared during rebind: {exc}"
+                    )
+                if (current.st_dev, current.st_ino) != (pinned.st_dev, pinned.st_ino):
+                    raise AdminError("rebind_path_changed", f"{label} changed during rebind")
+
+        _stat_recheck_only()
+
+        try:
+            _verify_ledger_schema_and_triggers(conn, "unsafe_rebind")
+            chain_state, latest_events, history_index = _verify_ledger_chain(conn, "unsafe_rebind")
+        except sqlite3.Error as exc:
+            raise AdminError("unsafe_rebind", f"Durable ledger cannot be read: {exc}")
+
+        db_fingerprint = verify_and_fingerprint_file(
+            op_fd,
+            ["ledger.sqlite3"],
+            "ledger database",
+            allowed_uids={owner_uid},
+            operational_gid=operational_gid,
+            check_metadata=False,
+            return_content=False,
+        )
+        ledger_sha256 = db_fingerprint["sha256"]
+
+        import yaml
+
+        projection_pins = {}
+        for key, expected_fields in latest_events.items():
+            rel_path_parts = _get_projection_rel_path_parts(key, expected_fields, "unsafe_rebind")
+            label = f"projection {key}"
+            info = verify_and_fingerprint_file(
+                op_fd,
+                rel_path_parts,
+                label,
+                final_allowed_uids,
+                operational_gid,
+                check_metadata=True,
+                return_content=True,
+            )
+
+            try:
+                yaml_payload = yaml.safe_load(info["content"].decode("utf-8", errors="replace"))
+            except Exception as exc:
+                raise AdminError("unsafe_rebind", f"Failed to load YAML for {label}: {exc}")
+            if broker.canonical_json(yaml_payload) != broker.canonical_json(expected_fields):
+                raise AdminError(
+                    "unsafe_rebind",
+                    f"Durable ledger mismatch for {label}: YAML projection differs from database",
+                )
+
+            projection_pins[key] = {
+                "rel_path_parts": rel_path_parts,
+                "st_dev": info["st_dev"],
+                "st_ino": info["st_ino"],
+                "sha256": info["sha256"],
+            }
+
+        sidecar_pins = {}
+        for suffix in ("-wal", "-shm", "-journal"):
+            rel_path_parts = [f"ledger.sqlite3{suffix}"]
+            label = f"ledger sidecar {suffix}"
+            try:
+                info = verify_and_fingerprint_file(
+                    op_fd,
+                    rel_path_parts,
+                    label,
+                    {owner_uid},
+                    operational_gid,
+                    check_metadata=True,
+                    return_content=False,
+                )
+            except FileNotFoundError:
+                continue
+            except OSError as exc:
+                raise AdminError(
+                    "unsafe_rebind", f"ledger sidecar {suffix} cannot be opened: {exc}"
+                )
+
+            sidecar_pins[suffix] = {
+                "rel_path_parts": rel_path_parts,
+                "st_dev": info["st_dev"],
+                "st_ino": info["st_ino"],
+                "sha256": info["sha256"] if suffix != "-shm" else None,
+            }
+
+        def recheck() -> None:
+            _stat_recheck_only()
+
+            info = verify_and_fingerprint_file(
+                op_fd,
+                ["ledger.sqlite3"],
+                "ledger database",
+                allowed_uids={owner_uid},
+                operational_gid=operational_gid,
+                check_metadata=False,
+                return_content=False,
+            )
+            if info["sha256"] != ledger_sha256:
+                raise AdminError(
+                    "rebind_path_changed", "ledger database content changed during rebind"
+                )
+
+            for key, pin in projection_pins.items():
+                rel_path = pin["rel_path_parts"]
+                label = f"projection {key}"
+                try:
+                    info = verify_and_fingerprint_file(
+                        op_fd,
+                        rel_path,
+                        label,
+                        final_allowed_uids,
+                        operational_gid,
+                        check_metadata=False,
+                        return_content=False,
+                    )
+                except Exception as exc:
+                    raise AdminError(
+                        "rebind_path_changed", f"{label} verification failed during recheck: {exc}"
+                    )
+
+                if (info["st_dev"], info["st_ino"]) != (pin["st_dev"], pin["st_ino"]):
+                    raise AdminError("rebind_path_changed", f"{label} inode changed during rebind")
+                if info["sha256"] != pin["sha256"]:
+                    raise AdminError(
+                        "rebind_path_changed", f"{label} content changed during rebind"
+                    )
+
+            for suffix in ("-wal", "-shm", "-journal"):
+                rel_path = [f"ledger.sqlite3{suffix}"]
+                label = f"ledger sidecar {suffix}"
+                pin = sidecar_pins.get(suffix)
+                if pin is not None:
+                    try:
+                        info = verify_and_fingerprint_file(
+                            op_fd,
+                            rel_path,
+                            label,
+                            {owner_uid},
+                            operational_gid,
+                            check_metadata=False,
+                            return_content=False,
+                        )
+                    except Exception as exc:
+                        raise AdminError(
+                            "rebind_path_changed",
+                            f"{label} verification failed during recheck: {exc}",
+                        )
+
+                    if (info["st_dev"], info["st_ino"]) != (pin["st_dev"], pin["st_ino"]):
+                        raise AdminError(
+                            "rebind_path_changed", f"{label} inode changed during rebind"
+                        )
+                    if suffix != "-shm" and info["sha256"] != pin["sha256"]:
+                        raise AdminError(
+                            "rebind_path_changed", f"{label} content changed during rebind"
+                        )
+                else:
+                    try:
+                        test_fd = os.open(
+                            rel_path[0], os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0), dir_fd=op_fd
+                        )
+                        os.close(test_fd)
+                        raise AdminError(
+                            "rebind_path_changed", f"unexpected sidecar file created: {label}"
+                        )
+                    except FileNotFoundError:
+                        pass
+                    except OSError as exc:
+                        raise AdminError(
+                            "rebind_path_changed",
+                            f"unexpected sidecar file created: {label}: {exc}",
+                        )
+
+        recheck()
+
+        yield {
+            "migration": _ledger_migration_payload(repo_path, identities, chain_state),
+            "history_index": history_index,
+            "recheck": recheck,
+        }
 
 
 def read_registry_file_safely(
@@ -4590,7 +5017,8 @@ def write_registry_file_safely(
 ) -> None:
     with open_admin_directory(path.parent, anchor, expected_uid) as parent_fd:
         try:
-            fd, existing, metadata = open_regular_at(parent_fd, path.name, len(data) + 1)
+            limit = MAX_ADMIN_FILE_BYTES if replace else (len(data) + 1)
+            fd, existing, metadata = open_regular_at(parent_fd, path.name, limit)
         except FileNotFoundError:
             fd = -1
             existing = None
@@ -4793,48 +5221,23 @@ def enroll_repository(
     }
 
 
-def verify_prior_anchors_continuity(repo_path: Path, prior_anchors: list) -> None:
-    """Confirm every anchor recorded at the prior enrollment/rebind is still present, at the
-    same version and event_hash, in the ledger now being rebound to. This proves the anchored
-    history was not rewritten -- it does not and cannot prove physical continuity (a
-    byte-identical clone of the ledger would pass this check too). Physical continuity is not
-    established by any automated check in this file; it is asserted by the root administrator
-    explicitly naming this ledger_id and repository_path on the command line.
-    """
+def verify_prior_anchors_continuity(history_index: dict, prior_anchors: list) -> None:
     if not prior_anchors:
         return
-    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
-    directory_flags = flags | os.O_DIRECTORY
-    with contextlib.ExitStack() as stack:
-        repo_fd = os.open(repo_path, directory_flags)
-        stack.callback(os.close, repo_fd)
-        op_fd = os.open(".operator", directory_flags, dir_fd=repo_fd)
-        stack.callback(os.close, op_fd)
-        db_fd = os.open("ledger.sqlite3", flags, dir_fd=op_fd)
-        stack.callback(os.close, db_fd)
-        conn = sqlite3.connect(f"file:/proc/self/fd/{db_fd}?mode=ro&immutable=1", uri=True)
-        conn.row_factory = sqlite3.Row
-        try:
-            for anchor in prior_anchors:
-                local_record_id = (
-                    anchor["record_id"].replace(":", "/", 1)
-                    if anchor["record_type"] in {"evidence", "handoff"}
-                    else anchor["record_id"]
-                )
-                row = conn.execute(
-                    "SELECT event_hash FROM ledger_events "
-                    "WHERE record_type = ? AND record_id = ? AND version = ?",
-                    (anchor["record_type"], local_record_id, anchor["version"]),
-                ).fetchone()
-                if not row or row["event_hash"] != anchor["event_hash"]:
-                    raise AdminError(
-                        "rebind_history_diverged",
-                        f"previously anchored {anchor['record_type']} {local_record_id} at "
-                        f"version {anchor['version']} no longer matches at the rebind "
-                        "destination",
-                    )
-        finally:
-            conn.close()
+    for anchor in prior_anchors:
+        local_record_id = (
+            anchor["record_id"].replace(":", "/", 1)
+            if anchor["record_type"] in {"evidence", "handoff"}
+            else anchor["record_id"]
+        )
+        found = history_index.get((anchor["record_type"], local_record_id, anchor["version"]))
+        if found != anchor["event_hash"]:
+            raise AdminError(
+                "rebind_history_diverged",
+                f"previously anchored {anchor['record_type']} {local_record_id} at "
+                f"version {anchor['version']} no longer matches at the rebind "
+                "destination",
+            )
 
 
 def rebind_repository(
@@ -4846,7 +5249,10 @@ def rebind_repository(
     registry_owner_uid: int = 0,
     registry_owner_gid: int = 0,
     registry_anchor: Path = Path("/"),
-    request_sender: Callable[[Path, object], dict] = broker.send_request,
+    request_sender: Callable[[Path, object], dict] | None = None,
+    operational_gid: int | None = None,
+    busy_timeout_ms: int = 3000,
+    allowed_uids: set[int] | None = None,
 ) -> dict:
     """Root-only recovery for an enrolled ledger whose recorded filesystem identity
     (device/inode) no longer matches reality -- e.g. a reboot changing a btrfs subvolume's
@@ -4865,6 +5271,8 @@ def rebind_repository(
     if repo_path.is_symlink():
         raise AdminError("unsafe_rebind", "repository path must not be a symlink")
     canonical_repo = repo_path.resolve(strict=True)
+
+    sender = request_sender if request_sender is not None else broker.send_request
 
     try:
         registry_data = read_registry_file_safely(
@@ -4889,111 +5297,123 @@ def rebind_repository(
             f"no existing registration for ledger_id={ledger_id}; use enroll instead",
         )
 
-    migration = validate_local_ledger(canonical_repo)
-    verify_prior_anchors_continuity(canonical_repo, existing_registration["anchor_records"])
-
-    operation = {
-        "kind": "ledger.rebind",
-        "previous_identity": existing_registration["repository_identity"],
-        **migration,
-    }
-    operation_digest = broker.sha256_text(
-        broker.canonical_json({"ledger_id": ledger_id, "operation": operation})
-    )
-    request = {
-        "protocol_version": broker.PROTOCOL_VERSION,
-        "action": "commit",
-        "ledger_id": ledger_id,
-        "operation_key": f"rebind-{operation_digest[:48]}",
-        "operation": operation,
-        "expected": [],
-        "blob": None,
-    }
-    try:
-        response = request_sender(socket_path, request)
-    except (broker.BrokerError, OSError, TimeoutError) as exc:
-        raise AdminError("broker_unavailable", f"Rebind broker request failed: {exc}")
-    if not isinstance(response, dict):
-        raise AdminError("invalid_broker_receipt", "Broker rebind response is not an object")
-    if not response.get("ok") or not isinstance(response.get("receipt"), dict):
-        error = response.get("error", {})
-        raise AdminError(
-            "rebind_rejected",
-            f"Broker rejected rebind: {error.get('code', 'invalid_response')}",
-        )
-    receipt = response["receipt"]
-    policy = receipt.get("policy")
-    if (
-        receipt.get("ledger_id") != ledger_id
-        or receipt.get("operation") != "ledger.rebind"
-        or receipt.get("operation_key") != request["operation_key"]
-        or not isinstance(receipt.get("commit_sequence"), int)
-        or isinstance(receipt.get("commit_sequence"), bool)
-        or receipt["commit_sequence"] < 1
-        or not isinstance(policy, dict)
-        or set(policy) != {"id", "generation", "sha256"}
-        or not isinstance(policy["id"], str)
-        or not policy["id"]
-        or not isinstance(policy["generation"], int)
-        or isinstance(policy["generation"], bool)
-        or policy["generation"] < 1
-        or not isinstance(policy["sha256"], str)
-        or not broker.VALID_SHA256.fullmatch(policy["sha256"])
-        or not isinstance(receipt.get("receipt_hash"), str)
-        or not broker.VALID_SHA256.fullmatch(receipt["receipt_hash"])
-    ):
-        raise AdminError("invalid_broker_receipt", "Broker rebind receipt is inconsistent")
-
-    registration = {
-        "repository_path": str(canonical_repo),
-        "ledger_id": ledger_id,
-        "socket_path": str(socket_path),
-        **migration,
-        "policy_binding": receipt["policy"],
-        "first_broker_sequence": existing_registration["first_broker_sequence"],
-        "enrollment_receipt_hash": existing_registration["enrollment_receipt_hash"],
-    }
-    registrations = []
-    replaced = False
-    for existing in registry_data["registrations"]:
-        if existing.get("ledger_id") == ledger_id:
-            registrations.append(registration)
-            replaced = True
-        else:
-            registrations.append(existing)
-    if not replaced:
-        raise AdminError("unsafe_registry", "registration disappeared while rebinding")
-    registry_data["registrations"] = registrations
-    content_bytes = (broker.canonical_json(registry_data) + "\n").encode("utf-8")
-    try:
-        write_registry_file_safely(
-            registry_path,
-            content_bytes,
-            expected_mode=0o644,
-            replace=True,
-            expected_uid=registry_owner_uid,
-            expected_gid=registry_owner_gid,
-            anchor=registry_anchor,
-        )
-    except Exception as exc:
-        raise AdminError(
-            "registry_publication_pending",
-            f"Broker committed rebind but registry publication failed: {exc}",
-            receipt_hash=receipt["receipt_hash"],
+    with pin_operational_ledger(
+        canonical_repo,
+        operational_gid,
+        allowed_uids=allowed_uids,
+        busy_timeout_ms=busy_timeout_ms,
+    ) as pinned:
+        migration = pinned["migration"]
+        verify_prior_anchors_continuity(
+            pinned["history_index"], existing_registration["anchor_records"]
         )
 
-    return {
-        "ok": True,
-        "rebound_path": str(canonical_repo),
-        "ledger_id": ledger_id,
-        "previous_identity": existing_registration["repository_identity"],
-        "repository_identity": migration["repository_identity"],
-        "anchor_records_count": len(migration["anchor_records"]),
-        "legacy_anchor_sha256": migration["legacy_anchor_sha256"],
-        "rebind_commit_sequence": receipt["commit_sequence"],
-        "policy_binding": receipt["policy"],
-        "idempotent_replay": response.get("idempotent_replay", False),
-    }
+        operation = {
+            "kind": "ledger.rebind",
+            "previous_identity": existing_registration["repository_identity"],
+            **migration,
+        }
+        operation_digest = broker.sha256_text(
+            broker.canonical_json({"ledger_id": ledger_id, "operation": operation})
+        )
+        request = {
+            "protocol_version": broker.PROTOCOL_VERSION,
+            "action": "commit",
+            "ledger_id": ledger_id,
+            "operation_key": f"rebind-{operation_digest[:48]}",
+            "operation": operation,
+            "expected": [],
+            "blob": None,
+        }
+        try:
+            response = sender(socket_path, request)
+        except (broker.BrokerError, OSError, TimeoutError) as exc:
+            raise AdminError("broker_unavailable", f"Rebind broker request failed: {exc}")
+        if not isinstance(response, dict):
+            raise AdminError("invalid_broker_receipt", "Broker rebind response is not an object")
+        if not response.get("ok") or not isinstance(response.get("receipt"), dict):
+            error = response.get("error", {})
+            raise AdminError(
+                "rebind_rejected",
+                f"Broker rejected rebind: {error.get('code', 'invalid_response')}",
+            )
+        receipt = response["receipt"]
+        policy = receipt.get("policy")
+        if (
+            receipt.get("ledger_id") != ledger_id
+            or receipt.get("operation") != "ledger.rebind"
+            or receipt.get("operation_key") != request["operation_key"]
+            or not isinstance(receipt.get("commit_sequence"), int)
+            or isinstance(receipt.get("commit_sequence"), bool)
+            or receipt["commit_sequence"] < 1
+            or not isinstance(policy, dict)
+            or set(policy) != {"id", "generation", "sha256"}
+            or not isinstance(policy["id"], str)
+            or not policy["id"]
+            or not isinstance(policy["generation"], int)
+            or isinstance(policy["generation"], bool)
+            or policy["generation"] < 1
+            or not isinstance(policy["sha256"], str)
+            or not broker.VALID_SHA256.fullmatch(policy["sha256"])
+            or not isinstance(receipt.get("receipt_hash"), str)
+            or not broker.VALID_SHA256.fullmatch(receipt["receipt_hash"])
+        ):
+            raise AdminError("invalid_broker_receipt", "Broker rebind receipt is inconsistent")
+
+        registration = {
+            "repository_path": str(canonical_repo),
+            "ledger_id": ledger_id,
+            "socket_path": str(socket_path),
+            **migration,
+            "policy_binding": receipt["policy"],
+            "first_broker_sequence": existing_registration["first_broker_sequence"],
+            "enrollment_receipt_hash": existing_registration["enrollment_receipt_hash"],
+        }
+        registrations = []
+        replaced = False
+        for existing in registry_data["registrations"]:
+            if existing.get("ledger_id") == ledger_id:
+                registrations.append(registration)
+                replaced = True
+            else:
+                registrations.append(existing)
+        if not replaced:
+            raise AdminError("unsafe_registry", "registration disappeared while rebinding")
+        registry_data["registrations"] = registrations
+        content_bytes = (broker.canonical_json(registry_data) + "\n").encode("utf-8")
+
+        # Invoke the yielded recheck() callback right before publishing the registry write
+        pinned["recheck"]()
+
+        try:
+            write_registry_file_safely(
+                registry_path,
+                content_bytes,
+                expected_mode=0o644,
+                replace=True,
+                expected_uid=registry_owner_uid,
+                expected_gid=registry_owner_gid,
+                anchor=registry_anchor,
+            )
+        except Exception as exc:
+            raise AdminError(
+                "registry_publication_pending",
+                f"Broker committed rebind but registry publication failed: {exc}",
+                receipt_hash=receipt["receipt_hash"],
+            )
+
+        return {
+            "ok": True,
+            "rebound_path": str(canonical_repo),
+            "ledger_id": ledger_id,
+            "previous_identity": existing_registration["repository_identity"],
+            "repository_identity": migration["repository_identity"],
+            "anchor_records_count": len(migration["anchor_records"]),
+            "legacy_anchor_sha256": migration["legacy_anchor_sha256"],
+            "rebind_commit_sequence": receipt["commit_sequence"],
+            "policy_binding": receipt["policy"],
+            "idempotent_replay": response.get("idempotent_replay", False),
+        }
 
 
 def absolute_path(value: str, field: str) -> Path:
@@ -5116,11 +5536,41 @@ def main(argv: list[str] | None = None) -> int:
                     "rebind is blocked until every privilege precondition passes",
                     unresolved_checks=unresolved,
                 )
+            # Resolve allowed UIDs and operational gid from the active policy and manifest
+            manifest, identity = load_manifest(layout, 0, 0, validate_binding=True)
+            policy_file_name = (
+                f"{deployment['current']['policy_generation']:020d}-"
+                f"{deployment['current']['policy_sha256']}.json"
+            )
+            archive_policy_path = layout.policies_root / deployment["ledger_id"] / policy_file_name
+            policy_data = read_protected_file(
+                archive_policy_path,
+                0o600,
+                0,
+                0,
+                layout,
+                identity,
+            )
+            policy = parse_policy_object(decode_canonical(policy_data, "policy archive"))
+            if (
+                policy.ledger_id != deployment["ledger_id"]
+                or policy.policy_id != deployment["current"]["policy_id"]
+                or policy.generation != deployment["current"]["policy_generation"]
+                or policy.sha256 != deployment["current"]["policy_sha256"]
+            ):
+                raise AdminError(
+                    "wrong_ledger_policy", "archived policy does not match active index"
+                )
+
+            allowed_uids = set(policy.uid_names)
+
             result = rebind_repository(
                 REGISTRY_PATH,
                 repo_path,
                 args.ledger_id,
                 layout.socket_path,
+                allowed_uids=allowed_uids,
+                operational_gid=identity.socket_gid,
             )
         elif args.command == "upgrade":
             release_dir = absolute_path(args.release_dir, "release-dir")

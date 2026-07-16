@@ -339,8 +339,10 @@ sudo "/root/operator-control-plane-release/$REV/operator-admin" repository-rebin
 Both flags are explicit and required — there is no cwd discovery, so this cannot be triggered by
 accident from an arbitrary directory. The command:
 
-1. Re-validates the local ledger exactly as `enroll` does (hash-chain integrity, append-only triggers,
-   YAML/SQLite agreement, safe ownership/permissions).
+1. Re-validates the local ledger using a rebind-specific operational validator (`pin_operational_ledger`),
+   which accepts the group-writable layout of an active deployment (group-writable directories and files
+   within the socket client group, and SQLite WAL sidecars) while locking the database with `BEGIN IMMEDIATE`
+   and holding the pinned file descriptors and transactions through the entire broker-commit and registry-write sequence.
 2. Confirms every anchor recorded at the *prior* enrollment/rebind still resolves to the same
    `(record_type, record_id, version) → event_hash` in the ledger now being bound to — i.e. the
    previously-anchored history was not rewritten. Fails closed with `rebind_history_diverged` if not.

@@ -171,11 +171,48 @@ sanctioned recovery is `operator-admin repository-rebind --ledger-id <id> --repo
 failure idempotency `ledger.enroll` already relies on for the broker-committed/registry-write-pending
 crash window.
 
-Before committing, `operator-admin` re-validates the target ledger exactly as `enroll` does (hash-chain
-integrity, append-only triggers, YAML/SQLite agreement, safe ownership) and additionally confirms every
-anchor recorded at the *prior* enrollment/rebind still resolves to the same
-`(record_type, record_id, version) → event_hash` in the ledger now being bound to, i.e. the anchored
-history was not rewritten.
+Before committing, `operator-admin` validates the target ledger with a **rebind-specific operational
+validator** (`pin_operational_ledger`), distinct from the pristine gate `enroll` uses
+(`validate_local_ledger`). The enrollment gate demands an untouched tree — no group/other write bits
+anywhere, no SQLite sidecars — and reads the database with `immutable=1`, which is only sound because
+sidecars were proven absent. An enrolled ledger in real multi-actor use legitimately violates all of
+that: the documented deployment hands `.operator` and the projection tree to the socket client group
+(setgid directories, group-writable files), and a WAL-mode database keeps `-wal`/`-shm` sidecars alive,
+with committed content that may exist only in the WAL. The first live rebind attempt (2026-07-16, on the
+Issue #10 reproduction itself) was rejected `unsafe_enrollment` for exactly this reason.
+
+The operational validator accepts that documented state and nothing looser, and closes the race the
+tolerance opens (an operational-group member writing or replacing ledger files mid-rebind):
+
+- **Permitted modes:** other-writable is always rejected, as is setuid anywhere. Group-writable entries
+  are permitted only when their group is the operational client group (the broker socket's group, which
+  is how the CLI resolves it; a gid of 0 grants no allowance), and group-writable directories must also
+  be setgid — the documented deployment shape. The database and any `-wal`/`-shm`/`-journal` sidecars
+  must be regular, non-symlinked, single-hard-link files owned by the repository owner.
+- **Pinned snapshot:** the validator holds open file descriptors for the repository, `.operator`, and
+  the database; opens SQLite *through the pinned directory fd* without `immutable=1` (so committed WAL
+  content is visible and sidecar names resolve inside the pinned directory); and takes `BEGIN IMMEDIATE`
+  with a short busy timeout. This transaction blocks cooperative SQLite writers on the same ledger for
+  that whole window by design, preventing them from advancing the ledger database between validation
+  and publication. Because the files are group-writable, non-cooperative raw filesystem writes by group
+  members bypass SQLite locks; protection against raw filesystem mutations relies on explicit metadata
+  and hash revalidation at the end of the window (if protection from arbitrary raw group writes is required,
+  an actual administrative quiesce boundary is unavoidable). The fds and the transaction are held through
+  anchor extraction, the broker commit, and registry publication (releasing only after the registry write
+  returns), and the path→fd device/inode/content bindings are rechecked immediately before the registry write begins.
+- **Fail-closed errors:** `ledger_busy` when the writer reservation cannot be obtained in time (hard
+  faults like a read-only filesystem or corrupt WAL surface as `unsafe_rebind`, not `ledger_busy`, so
+  retry loops cannot spin on them);
+  `rebind_path_changed` when a path stops resolving to its pinned inode; `unsafe_rebind` for metadata
+  violations. A broker commit followed by blocked publication remains safely retryable — the retry
+  recomputes the same `operation_key` and replays idempotently.
+
+It runs the same hash-chain integrity, append-only trigger, and YAML/SQLite agreement checks as
+enrollment (against the pinned snapshot), and additionally confirms every anchor recorded at the *prior*
+enrollment/rebind still resolves to the same `(record_type, record_id, version) → event_hash` in that
+same snapshot, i.e. the anchored history was not rewritten. The continuity check deliberately reads the
+pinned snapshot's anchor list rather than re-opening the database, so it cannot see a different view of
+the ledger than the one whose anchors the rebind publishes.
 
 **Security model.** None of the above proves physical continuity — a byte-identical clone of the ledger
 placed at the named path would pass every check. The checks establish internal consistency (the ledger

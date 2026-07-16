@@ -264,6 +264,117 @@ class TestAuthorityAdminRootBoundary(unittest.TestCase):
         self.assertNotEqual(rejected.returncode, 0)
         self.assertIn("unsafe privileged code path", rejected.stderr)
 
+    def test_repository_rebind_accepts_mixed_uid_projections_cli(self) -> None:
+        # Overwrite policy value to include nobody as a builder/verifier
+        nobody_uid = pwd.getpwnam("nobody").pw_uid
+        self.policy_value["uid_names"][str(nobody_uid)] = "nobody"
+        self.policy_value["roles"][str(nobody_uid)] = ["builder"]
+        self.policy_file.write_text(json.dumps(self.policy_value) + "\n", encoding="ascii")
+
+        # Install deployment with our policy
+        install_res = authority_admin.install_deployment(
+            self.layout,
+            self.source,
+            self.policy_file,
+            self.identity,
+            validate_accounts=False,
+        )
+        installed_policy_sha = install_res["policy"]["sha256"]
+
+        registry_dir = Path(tempfile.mkdtemp(prefix="operator-admin-registry-", dir="/root")).resolve()
+        registry_path = registry_dir / "test-registry-rebind-mixed-cli.json"
+        repo_path = self.root / "test-repo-rebind-mixed-cli"
+        repo_path.mkdir()
+
+        try:
+            # Initialize repository files
+            for arguments in (
+                ("init",),
+                ("task-create", "--objective", "Legacy task", "--id", "task-1"),
+            ):
+                subprocess.run(
+                    [str(REPO_ROOT / "operator"), *arguments],
+                    cwd=repo_path,
+                    capture_output=True,
+                    check=True,
+                )
+
+            # 1. Build migration data before changing ownership (pristine validator runs here)
+            migration = authority_admin.validate_local_ledger(repo_path)
+
+            # Set up registry file manually with enrollment data
+            registry_data = {
+                "schema_version": 1,
+                "registrations": [
+                    {
+                        "repository_path": str(repo_path),
+                        "ledger_id": self.policy_value["ledger_id"],
+                        "socket_path": str(self.layout.socket_path),
+                        **migration,
+                        "policy_binding": {
+                            "id": self.policy_value["policy_id"],
+                            "generation": 1,
+                            "sha256": installed_policy_sha,
+                        },
+                        "first_broker_sequence": 1,
+                        "enrollment_receipt_hash": "2" * 64,
+                    }
+                ],
+            }
+            registry_path.write_text(json.dumps(registry_data) + "\n")
+
+            # 2. Modify projection ownership and permissions to replicate nobody:nobody 0674
+            proj_path = repo_path / ".operator" / "tasks" / "task-1.yaml"
+            os.chown(proj_path, nobody_uid, self.identity.socket_gid)
+            os.chmod(proj_path, 0o674)
+
+            # Apply operational setgid directories and group-writable files
+            os.chown(repo_path / ".operator", -1, self.identity.socket_gid)
+            os.chmod(repo_path / ".operator", 0o2775)
+            os.chown(repo_path / ".operator" / "tasks", -1, self.identity.socket_gid)
+            os.chmod(repo_path / ".operator" / "tasks", 0o2775)
+            os.chown(repo_path / ".operator" / "ledger.sqlite3", -1, self.identity.socket_gid)
+            os.chmod(repo_path / ".operator" / "ledger.sqlite3", 0o664)
+
+            # Mock committed rebind response from broker
+            def committed_sender(_socket_path: Path, request: object) -> dict:
+                assert isinstance(request, dict)
+                return {
+                    "ok": True,
+                    "idempotent_replay": False,
+                    "receipt": {
+                        "ledger_id": request["ledger_id"],
+                        "operation": "ledger.rebind",
+                        "operation_key": request["operation_key"],
+                        "commit_sequence": 2,
+                        "policy": {
+                            "id": self.policy_value["policy_id"],
+                            "generation": 1,
+                            "sha256": installed_policy_sha,
+                        },
+                        "receipt_hash": "3" * 64,
+                    },
+                }
+
+            with (
+                mock.patch("authority_broker.send_request", committed_sender),
+                mock.patch("authority_admin.REGISTRY_PATH", registry_path),
+                mock.patch("authority_admin.privilege_preflight", return_value={"boundary_ready": True}),
+                mock.patch.object(authority_admin.InstallLayout, "production", return_value=self.layout),
+            ):
+                exit_code = authority_admin.main(
+                    [
+                        "repository-rebind",
+                        "--ledger-id",
+                        self.policy_value["ledger_id"],
+                        "--repository-path",
+                        str(repo_path),
+                    ]
+                )
+                self.assertEqual(exit_code, 0)
+        finally:
+            shutil.rmtree(registry_dir, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()

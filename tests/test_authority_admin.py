@@ -2167,6 +2167,677 @@ class TestAuthorityAdmin(unittest.TestCase):
                 request_sender=unreachable_sender,
             )
 
+    def test_repository_rebind_accepts_operational_multi_actor_tree(self) -> None:
+        # An enrolled ledger in real use is not pristine: .operator is a setgid
+        # group-writable directory, projection files and the database carry group write
+        # bits, and a WAL-mode database keeps -wal/-shm sidecars alive with committed
+        # content that exists only in the WAL. The rebind validator must accept exactly
+        # this documented state -- and must see the WAL-only content (an immutable=1 read,
+        # the enrollment gate's view, cannot).
+        registry_path = self.root / "test-registry-rebind-operational.json"
+        repo_path = self.root / "test-repo-rebind-operational"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-operational")
+        db_path = repo_path / ".operator" / "ledger.sqlite3"
+
+        # Convert to WAL and pin a read snapshot so nothing can checkpoint past it; the
+        # holder stays open through the rebind, exactly like a live client process.
+        holder = sqlite3.connect(db_path)
+        try:
+            holder.execute("PRAGMA journal_mode=WAL")
+            holder.execute("PRAGMA wal_autocheckpoint=0")
+            holder.execute("BEGIN")
+            holder.execute("SELECT count(*) FROM ledger_events").fetchone()
+
+            completed = subprocess.run(
+                [
+                    str(REPO_ROOT / "operator"),
+                    "task-create",
+                    "--objective",
+                    "WAL-only task",
+                    "--id",
+                    "task-2",
+                ],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr + completed.stdout)
+            self.assertTrue((repo_path / ".operator" / "ledger.sqlite3-wal").exists())
+
+            # Prove the new event is invisible to the enrollment gate's immutable view.
+            immutable = sqlite3.connect(f"file:{db_path}?mode=ro&immutable=1", uri=True)
+            try:
+                walled = immutable.execute(
+                    "SELECT count(*) FROM ledger_events WHERE record_id = 'task-2'"
+                ).fetchone()[0]
+            finally:
+                immutable.close()
+            self.assertEqual(walled, 0)
+
+            operational_gid = os.getgid()
+            os.chmod(repo_path / ".operator", 0o2775)
+            os.chmod(db_path, 0o664)
+            for suffix in ("-wal", "-shm"):
+                sidecar = repo_path / ".operator" / f"ledger.sqlite3{suffix}"
+                if sidecar.exists():
+                    os.chmod(sidecar, 0o664)
+
+            def committed_rebind(_socket_path: Path, request: object) -> dict:
+                assert isinstance(request, dict)
+                self.assertEqual(request["operation"]["kind"], "ledger.rebind")
+                return {
+                    "ok": True,
+                    "idempotent_replay": False,
+                    "receipt": {
+                        "ledger_id": request["ledger_id"],
+                        "operation": "ledger.rebind",
+                        "operation_key": request["operation_key"],
+                        "commit_sequence": 2,
+                        "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                        "receipt_hash": "3" * 64,
+                    },
+                }
+
+            result = authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-operational",
+                Path("/tmp/socket.sock"),
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.root,
+                request_sender=committed_rebind,
+                operational_gid=operational_gid,
+            )
+        finally:
+            holder.close()
+
+        self.assertTrue(result["ok"])
+        with open(registry_path) as f:
+            published = json.load(f)
+        anchors = published["registrations"][0]["anchor_records"]
+        self.assertIn(
+            ("task", "task-2", 1),
+            [(a["record_type"], a["record_id"], a["version"]) for a in anchors],
+        )
+
+    def test_repository_rebind_accepts_anchored_records_that_have_advanced(self) -> None:
+        # The registry anchors each record at the version it had when the enrollment (or
+        # last rebind) happened. Normal operation then advances those records to later
+        # versions -- the append-only ledger keeps the anchored rows forever, so a later
+        # version is continuity, not divergence. A rebind of any ledger that has seen
+        # activity since enrollment must therefore look prior anchors up in the full
+        # version history, not only in the per-record latest version.
+        registry_path = self.root / "test-registry-rebind-advanced.json"
+        repo_path = self.root / "test-repo-rebind-advanced"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-advanced")
+
+        # Advance the anchored task-1 record to version 2 (claim-add updates the task
+        # payload), exactly like real post-enrollment activity.
+        completed = subprocess.run(
+            [
+                str(REPO_ROOT / "operator"),
+                "claim-add",
+                "--task",
+                "task-1",
+                "--type",
+                "file_exists",
+                "--text",
+                "post-enrollment activity",
+                "--by",
+                "tester",
+            ],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr + completed.stdout)
+        with sqlite3.connect(repo_path / ".operator" / "ledger.sqlite3") as check:
+            latest = check.execute(
+                "SELECT max(version) FROM ledger_events WHERE record_id = 'task-1'"
+            ).fetchone()[0]
+        self.assertGreaterEqual(latest, 2)
+
+        def committed_rebind(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            return {
+                "ok": True,
+                "idempotent_replay": False,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.rebind",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 2,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        result = authority_admin.rebind_repository(
+            registry_path,
+            repo_path,
+            "ledger-rebind-advanced",
+            Path("/tmp/socket.sock"),
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.root,
+            request_sender=committed_rebind,
+        )
+        self.assertTrue(result["ok"])
+
+    def test_repository_rebind_rejects_unexpected_group_writability(self) -> None:
+        registry_path = self.root / "test-registry-rebind-groupw.json"
+        repo_path = self.root / "test-repo-rebind-groupw"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-groupw")
+        os.chmod(repo_path / ".operator", 0o2775)
+
+        def unreachable_sender(_socket_path: Path, request: object) -> dict:
+            self.fail("broker must not be contacted when the ledger tree is unsafe")
+
+        common = dict(
+            registry_owner_uid=os.getuid(),
+            registry_owner_gid=os.getgid(),
+            registry_anchor=self.root,
+            request_sender=unreachable_sender,
+        )
+
+        # Group-writable with no operational group allowance at all.
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-groupw",
+                Path("/tmp/socket.sock"),
+                operational_gid=None,
+                **common,
+            )
+        self.assertEqual(ctx.exception.code, "unsafe_rebind")
+
+        # Group-writable, but by a group other than the operational client group.
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-groupw",
+                Path("/tmp/socket.sock"),
+                operational_gid=os.getgid() + 12345,
+                **common,
+            )
+        self.assertEqual(ctx.exception.code, "unsafe_rebind")
+
+        # Other-writable is rejected regardless of any group allowance.
+        os.chmod(repo_path / ".operator", 0o777)
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-groupw",
+                Path("/tmp/socket.sock"),
+                operational_gid=os.getgid(),
+                **common,
+            )
+        self.assertEqual(ctx.exception.code, "unsafe_rebind")
+        self.assertIn("other-writable", ctx.exception.message)
+
+    def test_repository_rebind_ledger_busy_when_writer_holds_reservation(self) -> None:
+        registry_path = self.root / "test-registry-rebind-busy.json"
+        repo_path = self.root / "test-repo-rebind-busy"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-busy")
+        db_path = repo_path / ".operator" / "ledger.sqlite3"
+
+        def unreachable_sender(_socket_path: Path, request: object) -> dict:
+            self.fail("broker must not be contacted without a stable ledger snapshot")
+
+        writer = sqlite3.connect(db_path)
+        try:
+            writer.isolation_level = None
+            writer.execute("BEGIN IMMEDIATE")
+            with self.assertRaises(authority_admin.AdminError) as ctx:
+                authority_admin.rebind_repository(
+                    registry_path,
+                    repo_path,
+                    "ledger-rebind-busy",
+                    Path("/tmp/socket.sock"),
+                    registry_owner_uid=os.getuid(),
+                    registry_owner_gid=os.getgid(),
+                    registry_anchor=self.root,
+                    request_sender=unreachable_sender,
+                    busy_timeout_ms=100,
+                )
+            self.assertEqual(ctx.exception.code, "ledger_busy")
+        finally:
+            writer.rollback()
+            writer.close()
+
+    def test_repository_rebind_path_change_blocks_registry_publication(self) -> None:
+        # A broker commit can succeed and the registry publication must still refuse to
+        # bless an identity whose paths no longer resolve to the pinned inodes -- e.g. a
+        # group member replacing the database file mid-rebind. The content is identical;
+        # only the inode changes.
+        registry_path = self.root / "test-registry-rebind-swap.json"
+        repo_path = self.root / "test-repo-rebind-swap"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-swap")
+        db_path = repo_path / ".operator" / "ledger.sqlite3"
+        registry_before = registry_path.read_bytes()
+
+        def swapping_sender(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            data = db_path.read_bytes()
+            db_path.unlink()
+            db_path.write_bytes(data)
+            return {
+                "ok": True,
+                "idempotent_replay": False,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.rebind",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 2,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-swap",
+                Path("/tmp/socket.sock"),
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.root,
+                request_sender=swapping_sender,
+            )
+        self.assertEqual(ctx.exception.code, "rebind_path_changed")
+        self.assertEqual(registry_path.read_bytes(), registry_before)
+
+    def test_repository_rebind_rejects_projection_symlink_or_substitution(self) -> None:
+        # If a projection file (e.g. tasks/task-1.yaml) is substituted or replaced by a symlink
+        # mid-rebind (during the broker request/callback), the recheck must detect it and fail.
+        registry_path = self.root / "test-registry-rebind-proj-swap.json"
+        repo_path = self.root / "test-repo-rebind-proj-swap"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-proj-swap")
+        proj_path = repo_path / ".operator" / "tasks" / "task-1.yaml"
+        registry_before = registry_path.read_bytes()
+
+        def swapping_sender(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            # Delete projection file and replace it with a symlink to somewhere else
+            proj_path.unlink()
+            proj_path.symlink_to(repo_path / "somewhere_else")
+            return {
+                "ok": True,
+                "idempotent_replay": False,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.rebind",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 2,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-proj-swap",
+                Path("/tmp/socket.sock"),
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.root,
+                request_sender=swapping_sender,
+            )
+        self.assertEqual(ctx.exception.code, "rebind_path_changed")
+        self.assertEqual(registry_path.read_bytes(), registry_before)
+
+    def test_repository_rebind_rejects_inplace_projection_mutation(self) -> None:
+        # If a projection file content is modified in place (same inode, but content modified)
+        # mid-rebind, the recheck must detect the content hash change and fail.
+        registry_path = self.root / "test-registry-rebind-proj-mut.json"
+        repo_path = self.root / "test-repo-rebind-proj-mut"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-proj-mut")
+        proj_path = repo_path / ".operator" / "tasks" / "task-1.yaml"
+        registry_before = registry_path.read_bytes()
+
+        def mutating_sender(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            # Append spaces or modify content of projection in place
+            with open(proj_path, "a") as f:
+                f.write("\nmodified: true\n")
+            return {
+                "ok": True,
+                "idempotent_replay": False,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.rebind",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 2,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-proj-mut",
+                Path("/tmp/socket.sock"),
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.root,
+                request_sender=mutating_sender,
+            )
+        self.assertEqual(ctx.exception.code, "rebind_path_changed")
+        self.assertEqual(registry_path.read_bytes(), registry_before)
+
+    def test_repository_rebind_rejects_wal_substitution(self) -> None:
+        # If an active SQLite sidecar (e.g. -wal) is substituted mid-rebind,
+        # the recheck must reject it.
+        registry_path = self.root / "test-registry-rebind-wal-swap.json"
+        repo_path = self.root / "test-repo-rebind-wal-swap"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-wal-swap")
+        db_path = repo_path / ".operator" / "ledger.sqlite3"
+        wal_path = repo_path / ".operator" / "ledger.sqlite3-wal"
+
+        # Convert to WAL and keep connection open so WAL exists
+        holder = sqlite3.connect(db_path)
+        try:
+            holder.execute("PRAGMA journal_mode=WAL")
+            holder.execute("PRAGMA wal_autocheckpoint=0")
+            holder.execute("BEGIN")
+            holder.execute("SELECT count(*) FROM ledger_events").fetchone()
+
+            # Write something to database using subprocess (external process writing)
+            completed = subprocess.run(
+                [
+                    str(REPO_ROOT / "operator"),
+                    "task-create",
+                    "--objective",
+                    "WAL task",
+                    "--id",
+                    "task-wal-test",
+                ],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr + completed.stdout)
+            self.assertTrue(wal_path.exists())
+            registry_before = registry_path.read_bytes()
+
+            def swapping_sender(_socket_path: Path, request: object) -> dict:
+                assert isinstance(request, dict)
+                # Substitute the WAL file
+                data = wal_path.read_bytes()
+                wal_path.unlink()
+                wal_path.write_bytes(data)  # Creates same content but different inode
+                return {
+                    "ok": True,
+                    "idempotent_replay": False,
+                    "receipt": {
+                        "ledger_id": request["ledger_id"],
+                        "operation": "ledger.rebind",
+                        "operation_key": request["operation_key"],
+                        "commit_sequence": 2,
+                        "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                        "receipt_hash": "3" * 64,
+                    },
+                }
+
+            with self.assertRaises(authority_admin.AdminError) as ctx:
+                authority_admin.rebind_repository(
+                    registry_path,
+                    repo_path,
+                    "ledger-rebind-wal-swap",
+                    Path("/tmp/socket.sock"),
+                    registry_owner_uid=os.getuid(),
+                    registry_owner_gid=os.getgid(),
+                    registry_anchor=self.root,
+                    request_sender=swapping_sender,
+                )
+            self.assertEqual(ctx.exception.code, "rebind_path_changed")
+            self.assertEqual(registry_path.read_bytes(), registry_before)
+        finally:
+            holder.close()
+
+    def test_repository_rebind_holds_database_lock_through_publication(self) -> None:
+        # Prove the SQLite transaction lock (BEGIN IMMEDIATE) is held continuously
+        # throughout both the broker request/callback AND the registry publication.
+        registry_path = self.root / "test-registry-rebind-lock.json"
+        repo_path = self.root / "test-repo-rebind-lock"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-lock")
+        db_path = repo_path / ".operator" / "ledger.sqlite3"
+
+        # We will attempt to write (BEGIN IMMEDIATE) from a separate connection.
+        # This attempt must fail with "database is locked" during the broker callback
+        # and during the registry publication.
+        def try_external_write():
+            ext_conn = sqlite3.connect(db_path, timeout=0.01)
+            try:
+                ext_conn.isolation_level = None
+                ext_conn.execute("BEGIN IMMEDIATE")
+                ext_conn.close()
+                self.fail("expected database locked, but write lock succeeded")
+            except sqlite3.OperationalError as exc:
+                self.assertIn("locked", str(exc).lower())
+
+        def locking_sender(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            # Try to write mid-broker-callback; it must be blocked.
+            try_external_write()
+            return {
+                "ok": True,
+                "idempotent_replay": False,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.rebind",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 2,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        # Patch write_registry_file_safely to check database lock status right during registry write
+        original_write_registry = authority_admin.write_registry_file_safely
+
+        def checking_write_registry(*args, **kwargs):
+            # Check database lock status during registry write; it must still be blocked.
+            try_external_write()
+            return original_write_registry(*args, **kwargs)
+
+        with mock.patch.object(
+            authority_admin, "write_registry_file_safely", checking_write_registry
+        ):
+            result = authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-lock",
+                Path("/tmp/socket.sock"),
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.root,
+                request_sender=locking_sender,
+            )
+        self.assertTrue(result["ok"])
+
+    def test_repository_rebind_accepts_mixed_uid_projections(self) -> None:
+        # Verify that projections owned by distinct policy UIDs (e.g. 200001)
+        # are accepted if those UIDs are in the allowed UIDs set, but rejected otherwise.
+        registry_path = self.root / "test-registry-rebind-mixed.json"
+        repo_path = self.root / "test-repo-rebind-mixed"
+        self._enroll_test_repo(registry_path, repo_path, "ledger-rebind-mixed")
+
+        projection_fds = set()
+        original_open = os.open
+        original_close = os.close
+        original_fstat = os.fstat
+
+        def mocked_open(path, flags, *args, **kwargs):
+            fd = original_open(path, flags, *args, **kwargs)
+            if "task-1.yaml" in str(path):
+                projection_fds.add(fd)
+            return fd
+
+        def mocked_close(fd, *args, **kwargs):
+            projection_fds.discard(fd)
+            return original_close(fd, *args, **kwargs)
+
+        def mocked_fstat(fd):
+            stat_res = original_fstat(fd)
+            if fd in projection_fds:
+
+                class MockStat:
+                    def __init__(self, orig):
+                        self._orig = orig
+                        self.st_uid = 200001
+                        self.st_gid = orig.st_gid
+                        self.st_mode = orig.st_mode
+                        self.st_dev = orig.st_dev
+                        self.st_ino = orig.st_ino
+                        self.st_nlink = orig.st_nlink
+                        self.st_size = orig.st_size
+
+                return MockStat(stat_res)
+            return stat_res
+
+        # Set up a sender that is committed
+        def committed_sender(_socket_path: Path, request: object) -> dict:
+            assert isinstance(request, dict)
+            return {
+                "ok": True,
+                "idempotent_replay": False,
+                "receipt": {
+                    "ledger_id": request["ledger_id"],
+                    "operation": "ledger.rebind",
+                    "operation_key": request["operation_key"],
+                    "commit_sequence": 2,
+                    "policy": {"id": "policy-test", "generation": 1, "sha256": "1" * 64},
+                    "receipt_hash": "3" * 64,
+                },
+            }
+
+        # 1. Rebind without allowed_uids must fail (owner 200001 is not the repo owner)
+        with (
+            mock.patch("os.open", mocked_open),
+            mock.patch("os.close", mocked_close),
+            mock.patch("os.fstat", mocked_fstat),
+        ):
+            with self.assertRaises(authority_admin.AdminError) as ctx:
+                authority_admin.rebind_repository(
+                    registry_path,
+                    repo_path,
+                    "ledger-rebind-mixed",
+                    Path("/tmp/socket.sock"),
+                    registry_owner_uid=os.getuid(),
+                    registry_owner_gid=os.getgid(),
+                    registry_anchor=self.root,
+                    request_sender=committed_sender,
+                )
+            self.assertEqual(ctx.exception.code, "unsafe_rebind")
+            self.assertIn("owner differs from repository owner", ctx.exception.message)
+
+        # 2. Rebind with allowed_uids={os.getuid(), 200001} must succeed
+        with (
+            mock.patch("os.open", mocked_open),
+            mock.patch("os.close", mocked_close),
+            mock.patch("os.fstat", mocked_fstat),
+        ):
+            result = authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-mixed",
+                Path("/tmp/socket.sock"),
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.root,
+                request_sender=committed_sender,
+                allowed_uids={os.getuid(), 200001},
+            )
+            self.assertTrue(result["ok"])
+
+    def test_main_rebind_passes_allowed_uids_and_operational_gid(self) -> None:
+        # Verify that main()'s rebind CLI command resolves allowed_uids and operational_gid
+        # from the archived policy and passes them to rebind_repository.
+        fake_deployment = {
+            "ledger_id": "test-ledger",
+            "current": {
+                "state": "active",
+                "policy_id": "test-policy",
+                "policy_generation": 2,
+                "policy_sha256": "5" * 64,
+            },
+        }
+
+        fake_manifest = {
+            "install_schema_version": 1,
+            "broker_user": "nobody",
+            "broker_uid": 65534,
+            "broker_gid": 65534,
+            "socket_group": "root",
+            "socket_gid": 98765,
+            "ledger_id": "test-ledger",
+            "policy_id": "test-policy",
+            "paths": {},
+            "assets": {},
+        }
+
+        fake_identity = authority_admin.DeploymentIdentity(
+            0, 0, "nobody", 65534, 65534, "root", 98765
+        )
+
+        fake_policy = authority_admin.PolicyDocument(
+            "test-policy",
+            "test-ledger",
+            2,
+            "4" * 64,
+            {12345: "user1", 67890: "user2"},
+            {12345: ["builder"], 67890: ["verifier"]},
+            "{}",
+            "5" * 64,
+        )
+
+        def mock_read_protected_file(*args, **kwargs):
+            return b"{}\n"
+
+        def mock_rebind(
+            registry_path, repo_path, ledger_id, socket_path, *, allowed_uids, operational_gid
+        ):
+            self.assertEqual(allowed_uids, {12345, 67890})
+            self.assertEqual(operational_gid, 98765)
+            self.assertEqual(ledger_id, "test-ledger")
+            self.assertEqual(repo_path, Path("/some/repo/path"))
+            return {"ok": True}
+
+        with (
+            mock.patch("authority_admin.require_root", lambda: None),
+            mock.patch("authority_admin.InstallLayout.production", return_value=self.layout),
+            mock.patch("authority_admin.audit_deployment", return_value=fake_deployment),
+            mock.patch(
+                "authority_admin.privilege_preflight", return_value={"boundary_ready": True}
+            ),
+            mock.patch(
+                "authority_admin.load_manifest", return_value=(fake_manifest, fake_identity)
+            ),
+            mock.patch("authority_admin.read_protected_file", mock_read_protected_file),
+            mock.patch("authority_admin.parse_policy_object", return_value=fake_policy),
+            mock.patch("authority_admin.rebind_repository", mock_rebind),
+        ):
+            exit_code = authority_admin.main(
+                [
+                    "repository-rebind",
+                    "--ledger-id",
+                    "test-ledger",
+                    "--repository-path",
+                    "/some/repo/path",
+                ]
+            )
+            self.assertEqual(exit_code, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
