@@ -3377,6 +3377,14 @@ def doctor_cmd(args) -> int:
             return 1
 
         effective_sequence = max(last_applied, enrollment.first_broker_sequence)
+        if through_seq < effective_sequence:
+            print("status: divergent_or_forged_local")
+            print(
+                f"[Error] Local sequence {effective_sequence} exceeds broker sequence {through_seq}."
+            )
+            print("-" * 80)
+            return 1
+
         if effective_sequence < through_seq or pending_count > 0:
             print("status: projection_pending")
             print(

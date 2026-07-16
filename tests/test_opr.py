@@ -1,13 +1,12 @@
+import importlib.machinery
+import importlib.util
 import os
 import shutil
 import sys
 import tempfile
 import unittest
-from unittest import mock
 from pathlib import Path
-
-import importlib.machinery
-import importlib.util
+from unittest import mock
 
 # Dynamically load the extensionless 'opr' script as a module
 opr_path = str(Path(__file__).resolve().parents[1] / "opr")
@@ -28,7 +27,7 @@ class TestOprSafePath(unittest.TestCase):
         target = self.temp_dir / "subdir" / "file.txt"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text("hello")
-        
+
         resolved = opr.resolve_safe_path("subdir/file.txt", self.temp_dir)
         self.assertEqual(resolved, target)
 
@@ -64,7 +63,7 @@ tools:
 """
         cfg_file = self.temp_dir / "custom_opr.yaml"
         cfg_file.write_text(yaml_content)
-        
+
         config = opr.load_config(str(cfg_file))
         self.assertEqual(config["default_model"], "my-custom-model")
         self.assertTrue(config["frontier"]["enabled"])

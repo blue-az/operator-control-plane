@@ -1589,6 +1589,103 @@ class TestAuthorityIntegration(unittest.TestCase):
         self.assertNotIn("YAML payload differs from database", res_doc.stdout)
         self.assertNotIn("is not referenced by owning task", res_doc.stdout)
 
+    def test_reconcile_projections_detects_broker_rebuild(self) -> None:
+        import authority_broker
+
+        # 1. Create a task and a claim to advance sequence on the broker
+        res = self.run_operator(
+            "task-create", "--id", "task-rebuild-1", "--objective", "Rebuild test"
+        )
+        self.assertEqual(res.returncode, 0)
+        res = self.run_operator(
+            "claim-add",
+            "--task",
+            "task-rebuild-1",
+            "--type",
+            "deployment_state",
+            "--text",
+            "Test claim",
+        )
+        self.assertEqual(res.returncode, 0)
+
+        # Verify doctor status is current
+        res_doc = self.run_operator("doctor")
+        self.assertEqual(
+            res_doc.returncode,
+            0,
+            f"doctor failed:\nstdout: {res_doc.stdout}\nstderr: {res_doc.stderr}",
+        )
+        self.assertIn("status: current", res_doc.stdout)
+
+        # 2. Stop broker and wipe store
+        self.stop_broker_server()
+
+        for suffix in ("", "-shm", "-wal"):
+            p = Path(str(self.store_path) + suffix)
+            if p.exists():
+                p.unlink()
+        if self.content_dir.exists():
+            shutil.rmtree(self.content_dir)
+        self.content_dir.mkdir()
+
+        # 3. Re-bootstrap broker store
+        res = subprocess.run(
+            [
+                str(BROKER_BIN),
+                "bootstrap-fixture",
+                "--store",
+                str(self.store_path),
+                "--content-dir",
+                str(self.content_dir),
+                "--bootstrap-config",
+                str(self.bootstrap_config_path),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        # Re-enroll
+        registry = json.loads(self.registry_path.read_text())
+        registration = registry["registrations"][0]
+        enrollment_request = {
+            "protocol_version": 1,
+            "action": "commit",
+            "ledger_id": self.ledger_id,
+            "operation_key": "integration-fixture-enrollment",
+            "operation": {
+                "kind": "ledger.enroll",
+                "repository_identity": registration["repository_identity"],
+                "anchor_records": [],
+                "legacy_anchor_sha256": registration["legacy_anchor_sha256"],
+            },
+            "expected": [],
+            "blob": None,
+        }
+        fixture_broker = authority_broker.AuthorityBroker(
+            authority_broker.AuthorityStore(self.store_path, self.content_dir)
+        )
+        enrollment_response, committed = fixture_broker.handle(
+            enrollment_request,
+            authority_broker.PeerCredentials(os.getpid(), 0, 0),
+        )
+        self.assertTrue(committed)
+
+        # Start broker server again
+        self.start_broker_server()
+
+        # 4. Run doctor - expect divergent_or_forged_local because local sequence (2) exceeds broker sequence (1)
+        res_doc2 = self.run_operator("doctor")
+        self.assertNotEqual(res_doc2.returncode, 0)
+        self.assertIn("status: divergent_or_forged_local", res_doc2.stdout)
+        self.assertIn("Local sequence 2 exceeds broker sequence 1.", res_doc2.stdout)
+
+        # 5. Run authority-reconcile - expect it to fail with sequence error
+        res_rec = self.run_operator("authority-reconcile")
+        self.assertNotEqual(res_rec.returncode, 0)
+        self.assertIn("local sequence 2 exceeds broker sequence 1", res_rec.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

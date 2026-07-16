@@ -742,6 +742,52 @@ def reconcile_projections(op_dir: str, ledger_id: str, client: AuthorityClient) 
     # 3. Sequential reconciliation
     validate_projection_heads(op_dir)
     last_applied = get_last_applied_sequence(conn_journal)
+
+    if broker_seq < last_applied:
+        raise RuntimeError(f"local sequence {last_applied} exceeds broker sequence {broker_seq}")
+
+    if last_applied > 0:
+        broker_records = []
+        after_ptr = None
+        while True:
+            chk_req = {
+                "action": "projection.snapshot",
+                "ledger_id": ledger_id,
+                "through_commit_sequence": last_applied,
+                "after": after_ptr,
+                "limit": 16,
+            }
+            chk_res = client.send_request(chk_req)
+            if not chk_res.get("ok"):
+                raise RuntimeError(
+                    f"Broker consistency check failed at sequence {last_applied}: {chk_res.get('error')}"
+                )
+            snap = chk_res["snapshot"]
+            broker_records.extend(snap["records"])
+            if not snap.get("has_more") or not snap.get("next_after"):
+                break
+            after_ptr = snap["next_after"]
+
+        ledger_db = os.path.join(op_dir, "ledger.sqlite3")
+        if not os.path.exists(ledger_db):
+            raise RuntimeError("local ledger database is missing")
+        conn_chk = sqlite3.connect(ledger_db)
+        try:
+            for record in broker_records:
+                rtype = record["record_type"]
+                rid = record["record_id"]
+                rver = record["version"]
+                rhash = record["event_hash"]
+
+                local_ver, local_hash = get_local_record_version(conn_chk, rtype, rid)
+                if local_ver != rver or local_hash != rhash:
+                    raise RuntimeError(
+                        f"local {rtype} {rid} version {local_ver} (hash {local_hash}) "
+                        f"diverges from broker version {rver} (hash {rhash}) at sequence {last_applied}"
+                    )
+        finally:
+            conn_chk.close()
+
     last_digest = None
     for seq in range(last_applied + 1, broker_seq + 1):
         last_digest = project_sequence(op_dir, ledger_id, seq, client, conn_journal)

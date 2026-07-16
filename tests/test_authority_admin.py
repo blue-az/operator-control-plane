@@ -2838,6 +2838,50 @@ class TestAuthorityAdmin(unittest.TestCase):
             )
             self.assertEqual(exit_code, 0)
 
+    def test_probe_socket_health_retry_behavior(self) -> None:
+        mock_socket_instance = mock.MagicMock()
+
+        call_count = 0
+
+        def mock_connect(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count < 3:
+                raise OSError("connection refused")
+            return None
+
+        mock_socket_instance.connect = mock_connect
+
+        with (
+            mock.patch("socket.socket", return_value=mock_socket_instance),
+            mock.patch("time.sleep") as mock_sleep,
+        ):
+            layout = authority_admin.InstallLayout.production()
+            res = authority_admin.probe_socket_health(layout, timeout=5.0)
+            self.assertTrue(res)
+            self.assertEqual(call_count, 3)
+            self.assertEqual(mock_sleep.call_count, 2)
+            mock_sleep.assert_has_calls([mock.call(0.1), mock.call(0.1)])
+
+    def test_probe_socket_health_retry_timeout(self) -> None:
+        mock_socket_instance = mock.MagicMock()
+        mock_socket_instance.connect.side_effect = OSError("connection refused")
+
+        time_values = [10.0, 11.0, 12.0, 16.0]
+        time_iter = iter(time_values)
+
+        def mock_monotonic():
+            return next(time_iter)
+
+        with (
+            mock.patch("socket.socket", return_value=mock_socket_instance),
+            mock.patch("time.sleep"),
+            mock.patch("time.monotonic", mock_monotonic),
+        ):
+            layout = authority_admin.InstallLayout.production()
+            res = authority_admin.probe_socket_health(layout, timeout=5.0)
+            self.assertFalse(res)
+
 
 if __name__ == "__main__":
     unittest.main()

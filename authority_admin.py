@@ -2634,15 +2634,21 @@ def probe_service_active(layout: InstallLayout) -> bool:
 
 
 def probe_socket_health(layout: InstallLayout, timeout: float = 5.0) -> bool:
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    try:
-        sock.settimeout(timeout)
-        sock.connect(str(layout.socket_path))
-        return True
-    except OSError:
-        return False
-    finally:
-        sock.close()
+    import time
+
+    deadline = time.monotonic() + timeout
+    while True:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        try:
+            sock.settimeout(1.0)
+            sock.connect(str(layout.socket_path))
+            return True
+        except OSError:
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(0.1)
+        finally:
+            sock.close()
 
 
 def default_health_probe(

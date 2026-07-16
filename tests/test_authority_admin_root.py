@@ -281,7 +281,9 @@ class TestAuthorityAdminRootBoundary(unittest.TestCase):
         )
         installed_policy_sha = install_res["policy"]["sha256"]
 
-        registry_dir = Path(tempfile.mkdtemp(prefix="operator-admin-registry-", dir="/root")).resolve()
+        registry_dir = Path(
+            tempfile.mkdtemp(prefix="operator-admin-registry-", dir="/root")
+        ).resolve()
         registry_path = registry_dir / "test-registry-rebind-mixed-cli.json"
         repo_path = self.root / "test-repo-rebind-mixed-cli"
         repo_path.mkdir()
@@ -359,8 +361,12 @@ class TestAuthorityAdminRootBoundary(unittest.TestCase):
             with (
                 mock.patch("authority_broker.send_request", committed_sender),
                 mock.patch("authority_admin.REGISTRY_PATH", registry_path),
-                mock.patch("authority_admin.privilege_preflight", return_value={"boundary_ready": True}),
-                mock.patch.object(authority_admin.InstallLayout, "production", return_value=self.layout),
+                mock.patch(
+                    "authority_admin.privilege_preflight", return_value={"boundary_ready": True}
+                ),
+                mock.patch.object(
+                    authority_admin.InstallLayout, "production", return_value=self.layout
+                ),
             ):
                 exit_code = authority_admin.main(
                     [
