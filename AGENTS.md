@@ -14,6 +14,12 @@ Canonical taxonomy: `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md`. If a spec
 or entry in this repo appears to contradict that doc, the doc wins — flag the
 drift instead of propagating it.
 
+Cross-repo vocabulary: **BN** = `~/Python/project-phoenix/BOTTLENECKS.md` — the
+open-work board that schedules work across BT (Bulkhead Tau, which lives inside
+`~/Python/project-phoenix/`) and this repo. BN's header carries the canonical
+glossary; BN ≠ BT. All three harnesses (Claude Code, Codex, Antigravity) use
+these names.
+
 ## Project Structure & Module Organization
 
 This repository is a compact Python CLI project. The executable entry point is the
