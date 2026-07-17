@@ -5,7 +5,7 @@
 One engine room; PBC above; GT-KB Logbook below; crystals are how narration
 arrives; Farm is whose work arrives; LabWired is where hardware evidence comes
 from. This CLI is the engine room — the enforcement middle. The **upper boundary**
-is PBC (behavior charters: what work is allowed). The **lower boundary** is the
+is PBC (Product Behavior Contracts: what work is allowed). The **lower boundary** is the
 GT-KB-derived evidence layer (the Logbook: "do not trust the narration — verify
 against the evidence"). `agent-crystallize` crystals and similar session
 artifacts are **narration formats arriving at** the lower boundary — untrusted
