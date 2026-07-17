@@ -1,5 +1,19 @@
 # Repository Guidelines
 
+## Where This Repo Sits (read before reasoning about boundaries)
+
+One engine room; PBC above; GT-KB Logbook below; crystals are how narration
+arrives; Farm is whose work arrives; LabWired is where hardware evidence comes
+from. This CLI is the engine room — the enforcement middle. The **upper boundary**
+is PBC (behavior charters: what work is allowed). The **lower boundary** is the
+GT-KB-derived evidence layer (the Logbook: "do not trust the narration — verify
+against the evidence"). `agent-crystallize` crystals and similar session
+artifacts are **narration formats arriving at** the lower boundary — untrusted
+input in a parseable envelope, never a boundary and never trusted status.
+Canonical taxonomy: `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md`. If a spec
+or entry in this repo appears to contradict that doc, the doc wins — flag the
+drift instead of propagating it.
+
 ## Project Structure & Module Organization
 
 This repository is a compact Python CLI project. The executable entry point is the

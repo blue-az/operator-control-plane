@@ -14,9 +14,12 @@ repo. Match existing conventions (`EXECUTOR_IDENTITY_SPEC.md` remains the identi
 
 PBC already bounds this system **from above**: `owners-manual/pbc/` carries draft behavior
 contracts — what the product *should* do — with a draft-until-human-accepted trust model that
-matches the ledger's. `agent-crystallize` is the natural **lower** boundary: Markdown "checkpoint"
+matches the ledger's. The **lower** boundary is the GT-KB-derived evidence layer (the Logbook:
+"do not trust the narration — verify against the evidence"; see
+`project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md`). `agent-crystallize` is **not** a boundary —
+it is the standard *narration format* arriving AT that boundary: Markdown "checkpoint"
 and "crystal" artifacts narrating an agent session's in-flight state (focus, decisions, findings,
-open loops, test claims, resume prompt).
+open loops, test claims, resume prompt). Untrusted content in a parseable envelope.
 
 The gap: a crystal is **self-narrated and unverified** — mutable Markdown, no hash, no identity
 binding, no append-only history. Its `Tests And Verification` section is free text like
@@ -207,5 +210,6 @@ artifacts — same hygiene as upstream's `examples/`):
 
 ---
 *Continues the boundary-composition lane: PBC (upper, merged — pbc-spec PR #6) → operator
-(enforcement) → crystals (lower, this spec). Surfaced by the 2026-07-15 agent-crystallize
-evaluation session.*
+(enforcement) → GT-KB-derived Logbook (lower); crystals are the narration format at the lower
+boundary (this spec). Surfaced by the 2026-07-15 agent-crystallize evaluation session; taxonomy
+corrected 2026-07-17 (see BOTTLENECKS boundary-drift entry).*
