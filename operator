@@ -49,6 +49,7 @@ MUTATING_COMMANDS = {
     "claim-add",
     "evidence-attach",
     "crystal-attach",
+    "crystal-import",
     "usage-add",
     "usage-import",
     "usage-annotate",
@@ -2333,6 +2334,206 @@ def crystal_attach_cmd(args) -> int:
             f"commit={parsed.git_commit}, test_bullets={parsed.test_bullet_count}"
         )
     return rc
+
+
+def find_session_crystal_by_fingerprint(
+    operator_dir: str, task_id: str, sha256_value: str
+) -> dict | None:
+    """Return existing session_crystal evidence dict if fingerprint already on task."""
+    ev_dir = os.path.join(operator_dir, "evidence", task_id)
+    if not os.path.isdir(ev_dir):
+        return None
+    for path in sorted(glob.glob(os.path.join(ev_dir, "evidence-*.yaml"))):
+        data = load_yaml(path)
+        if not data or data.get("evidence_type") != "session_crystal":
+            continue
+        stored, _ = parse_stored_fingerprint(data.get("fingerprint"), data.get("hash"))
+        if stored and stored.get("value") == sha256_value:
+            return data
+    return None
+
+
+def crystal_import_cmd(args) -> int:
+    """Extract draft claims from a crystal (Phase 2). Always draft-tier (T2).
+
+    - Tests And Verification real bullets → draft test_passes claims prefixed
+      ``[crystal-narrated]``, crystal auto-attached as status-less evidence.
+    - Open Loops → new tasks only with ``--open-loops-as-tasks``.
+    - Decisions / Findings / Memory Candidates / Resume Prompt / Continuity Tail
+      are never extracted (T3 + Phase 2 scope).
+    - Same fingerprint re-import is a no-op with a notice.
+    """
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
+        return 1
+
+    enrollment, _ = resolve_operator_context()
+    if enrollment:
+        print(
+            "Error: crystal-import Phase 2 supports local (non-enrolled) ledgers only.",
+            file=sys.stderr,
+        )
+        return 1
+
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
+        return 1
+    task_id, task_path, task = resolved_task
+
+    exec_identity = get_executor_identity()
+    identity_policy = identity_policy_for_write(op_dir)
+    if identity_policy is None:
+        return 1
+    if identity_policy["mode"] == "enforced" and not require_executor_role(
+        identity_policy, exec_identity, "builder", "import crystal"
+    ):
+        return 1
+
+    original_locator = args.path
+    if not os.path.exists(original_locator):
+        print(f"Error: Crystal path does not exist: {original_locator}", file=sys.stderr)
+        return 1
+    if not os.path.isfile(original_locator):
+        print(f"Error: Crystal path is not a regular file: {original_locator}", file=sys.stderr)
+        return 1
+
+    try:
+        source_fp = fingerprint_regular_file(os.path.abspath(original_locator))
+    except EvidenceFingerprintError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    existing = find_session_crystal_by_fingerprint(op_dir, task_id, source_fp["value"])
+    if existing:
+        print(
+            f"Notice: crystal fingerprint {source_fp['value'][:12]}… already imported as "
+            f"{existing.get('evidence_id')} on task '{task_id}'; no-op (idempotent)."
+        )
+        return 0
+
+    parsed = crystal_parse.load_and_parse_crystal(original_locator)
+    for warning in parsed.warnings:
+        print(f"[Warning] {warning}")
+    if not parsed.ok:
+        for err in parsed.errors:
+            print(f"Error: crystal rejected (structural): {err}", file=sys.stderr)
+        return 1
+
+    # Attach once as shared draft evidence (no claim_id so multiple claims may cite it).
+    attach_args = argparse.Namespace(
+        path=original_locator,
+        claim=None,
+        task_id=task_id,
+        by=args.by,
+        hash=None,
+        notes=args.notes or "crystal-import auto-attach",
+        status=None,
+        verified_by=None,
+        verdict=None,
+    )
+    rc = crystal_attach_cmd(attach_args)
+    if rc != 0:
+        return rc
+
+    attached = find_session_crystal_by_fingerprint(op_dir, task_id, source_fp["value"])
+    if not attached:
+        print(
+            "Error: crystal-attach succeeded but evidence record was not found.",
+            file=sys.stderr,
+        )
+        return 1
+    evidence_id = attached["evidence_id"]
+    ref_str = f"evidence/{task_id}/{evidence_id}.yaml"
+
+    # Never pull Decisions / Findings / Resume Prompt / Continuity Tail into claims.
+    created_claims: list[str] = []
+    for bullet in parsed.test_bullets:
+        claim_args = argparse.Namespace(
+            type="test_passes",
+            text=f"[crystal-narrated] {bullet}",
+            task_id=task_id,
+            by=args.by,
+            gate=None,
+            layer=None,
+        )
+        claim_rc = claim_add_cmd(claim_args)
+        if claim_rc != 0:
+            print(
+                f"Error: failed creating draft claim for crystal bullet: {bullet!r}",
+                file=sys.stderr,
+            )
+            return claim_rc
+        # Reload task to pick up the claim id just registered.
+        task = load_yaml(task_path) or {}
+        claims_list = task.get("claims") or []
+        if not claims_list:
+            print("Error: claim-add did not register a claim on the task.", file=sys.stderr)
+            return 1
+        claim_id = claims_list[-1]
+        resolved_claim = resolve_claim_record(op_dir, claim_id)
+        if not resolved_claim:
+            return 1
+        claim_path, claim = resolved_claim
+        claim["evidence_refs"] = claim.get("evidence_refs") or []
+        if ref_str not in claim["evidence_refs"]:
+            claim["evidence_refs"].append(ref_str)
+        # Keep draft: never set verification fields from crystal text.
+        claim["crystal_import_evidence"] = evidence_id
+        save_yaml(claim, claim_path)
+        created_claims.append(claim_id)
+
+    created_tasks: list[str] = []
+    if getattr(args, "open_loops_as_tasks", False):
+        for loop_text in parsed.open_loop_bullets:
+            loop_id = slugify(loop_text)[:50] or None
+            create_args = argparse.Namespace(
+                objective=f"[crystal-open-loop] {loop_text}",
+                task_id=loop_id,
+                repo=task.get("repo") or ".",
+                assign=None,
+                review=None,
+                assumptions=[f"Extracted from crystal {evidence_id}; may be stale."],
+            )
+            # Avoid collisions if slug already exists.
+            if loop_id:
+                existing_path = os.path.join(op_dir, "tasks", f"{loop_id}.yaml")
+                if os.path.exists(existing_path) or durable_record_exists(op_dir, "task", loop_id):
+                    create_args.task_id = None
+            create_rc = task_create_cmd(create_args)
+            if create_rc != 0:
+                print(
+                    f"Warning: could not create task for open loop: {loop_text!r}",
+                    file=sys.stderr,
+                )
+                continue
+            # task-create sets current_task; recover id from operator.yaml
+            config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
+            new_id = config.get("current_task")
+            if new_id:
+                created_tasks.append(new_id)
+        # Restore original current task after optional open-loop task creation.
+        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
+        config["current_task"] = task_id
+        save_yaml(config, os.path.join(op_dir, "operator.yaml"))
+
+    print(
+        f"Crystal import on task '{task_id}': evidence={evidence_id}, "
+        f"draft_claims={len(created_claims)}"
+        + (f", open_loop_tasks={len(created_tasks)}" if created_tasks else "")
+    )
+    if created_claims:
+        print("  claims: " + ", ".join(created_claims))
+    if created_tasks:
+        print("  open-loop tasks: " + ", ".join(created_tasks))
+    if not created_claims and not created_tasks:
+        print(
+            "  (no real test bullets to extract; crystal attached as draft evidence only)"
+        )
+    return 0
 
 
 def git_commit_exists_in_repo(repo_path: str, commit: str) -> bool | None:
@@ -5977,6 +6178,44 @@ def main() -> None:
         default=None,
         help="Optional notes about the crystal attach.",
     )
+
+    # operator crystal import (Crystal↔Ledger Phase 2)
+    crystal_import_parser = subparsers.add_parser(
+        "crystal-import",
+        help=(
+            "Import a crystal as draft session_crystal evidence and extract "
+            "Tests And Verification bullets as draft test_passes claims "
+            "(never sets verification status)."
+        ),
+    )
+    crystal_import_parser.add_argument(
+        "path",
+        help="Path to a local crystal Markdown file.",
+    )
+    crystal_import_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+    crystal_import_parser.add_argument(
+        "--by", default=None, help="Actor who performed the crystal import."
+    )
+    crystal_import_parser.add_argument(
+        "--notes",
+        "-n",
+        default=None,
+        help="Optional notes stored on the auto-attached crystal evidence.",
+    )
+    crystal_import_parser.add_argument(
+        "--open-loops-as-tasks",
+        action="store_true",
+        default=False,
+        help=(
+            "Also create new tasks from real Open Loops bullets "
+            "(default: off; open loops are often stale)."
+        ),
+    )
     evidence_parser.add_argument(
         "--task",
         dest="task_id",
@@ -6398,6 +6637,7 @@ def main() -> None:
         "claim-list": claim_list_cmd,
         "evidence-attach": evidence_attach_cmd,
         "crystal-attach": crystal_attach_cmd,
+        "crystal-import": crystal_import_cmd,
         "usage-add": usage_add_cmd,
         "usage-import": usage_import_cmd,
         "usage-annotate": usage_annotate_cmd,

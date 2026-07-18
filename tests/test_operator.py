@@ -3546,6 +3546,183 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef", doc.stdout)
         self.assertIn("crystal narrates 2 verification claims; none registered", doc.stdout)
 
+    def test_crystal_import_extracts_real_bullets_only(self) -> None:
+        """Test 4: two real test bullets → two draft test_passes; no Decisions/Resume text."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Crystal import extract",
+                "--id",
+                "crystal-import-task",
+            ).returncode,
+            0,
+        )
+        crystal = self._crystal_fixture("valid-checkpoint.md")
+        res = self.run_operator("crystal-import", str(crystal), "--by", "codex")
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+        self.assertIn("draft_claims=2", res.stdout)
+
+        claims_dir = Path(self.temp_dir) / ".operator" / "claims"
+        claim_files = sorted(claims_dir.glob("claim-*.yaml"))
+        self.assertEqual(len(claim_files), 2)
+        texts = []
+        for path in claim_files:
+            claim = yaml.safe_load(path.read_text())
+            self.assertEqual(claim["type"], "test_passes")
+            self.assertFalse(claim.get("verification_status"))
+            self.assertIsNone(claim.get("verification_outcome"))
+            self.assertIsNone(claim.get("verified_by"))
+            text = claim["text"]
+            self.assertTrue(text.startswith("[crystal-narrated] "), text)
+            texts.append(text)
+            # Crystal evidence linked
+            self.assertTrue(any("evidence-0001.yaml" in ref for ref in claim.get("evidence_refs") or []))
+            # Forbidden section content must not leak into claim text (T3 / Phase 2 scope).
+            self.assertNotIn("Resume from Current Focus", text)
+            self.assertNotIn("Do not execute this block", text)
+            self.assertNotIn("No separate decisions captured", text)
+            self.assertNotIn("Crystallization preserves durable work context", text)
+
+        joined = "\n".join(texts)
+        self.assertIn("unit tests: median even-length case passes", joined)
+        self.assertIn("lint: ruff clean", joined)
+
+        # Evidence is session_crystal draft
+        evidence = yaml.safe_load(
+            (
+                Path(self.temp_dir)
+                / ".operator"
+                / "evidence"
+                / "crystal-import-task"
+                / "evidence-0001.yaml"
+            ).read_text()
+        )
+        self.assertEqual(evidence["evidence_type"], "session_crystal")
+        self.assertEqual(evidence["crystal_test_bullet_count"], 2)
+
+    def test_crystal_import_idempotent(self) -> None:
+        """Test 5: second crystal-import of same file is a no-op with notice."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Crystal import idempotent",
+                "--id",
+                "crystal-idem-task",
+            ).returncode,
+            0,
+        )
+        crystal = self._crystal_fixture("valid-checkpoint.md")
+        first = self.run_operator("crystal-import", str(crystal), "--by", "codex")
+        self.assertEqual(first.returncode, 0, first.stderr)
+        before_claims = list((Path(self.temp_dir) / ".operator" / "claims").glob("claim-*.yaml"))
+        before_evidence = list(
+            (Path(self.temp_dir) / ".operator" / "evidence" / "crystal-idem-task").glob(
+                "evidence-*.yaml"
+            )
+        )
+        self.assertEqual(len(before_claims), 2)
+        self.assertEqual(len(before_evidence), 1)
+
+        second = self.run_operator("crystal-import", str(crystal), "--by", "codex")
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertIn("already imported", second.stdout)
+        self.assertIn("no-op", second.stdout.lower())
+
+        after_claims = list((Path(self.temp_dir) / ".operator" / "claims").glob("claim-*.yaml"))
+        after_evidence = list(
+            (Path(self.temp_dir) / ".operator" / "evidence" / "crystal-idem-task").glob(
+                "evidence-*.yaml"
+            )
+        )
+        self.assertEqual(len(after_claims), len(before_claims))
+        self.assertEqual(len(after_evidence), len(before_evidence))
+
+    def test_doctor_crystal_drift_fail_closed_after_verified_import(self) -> None:
+        """Test 7: verified imported claim + mutated crystal snapshot → doctor exit 1."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Crystal drift fail-closed",
+                "--id",
+                "crystal-drift-task",
+                "--assign",
+                "codex",
+                "--review",
+                "claude",
+            ).returncode,
+            0,
+        )
+        self.write_identity_registry(
+            "enforced",
+            {
+                1001: {"name": "codex", "roles": ["builder"]},
+                1002: {"name": "claude", "roles": ["verifier"]},
+            },
+        )
+        crystal = self._crystal_fixture("valid-checkpoint.md")
+        imp = self.run_operator(
+            "crystal-import",
+            str(crystal),
+            "--by",
+            "codex",
+            env={"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertEqual(imp.returncode, 0, imp.stderr + imp.stdout)
+
+        gate = Path(self.temp_dir) / "crystal-drift-gate"
+        gate.write_text("structural gate for crystal-narrated claim\n")
+        claim_path = Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml"
+        claim = yaml.safe_load(claim_path.read_text())
+        claim["required_gate"] = str(gate)
+        claim_path.write_text(yaml.safe_dump(claim, sort_keys=False))
+        self.rebaseline_ledger()
+
+        # Distinct verifier records status; crystal remains the cited artifact.
+        verify_blob = Path(self.temp_dir) / "verifier-note.txt"
+        verify_blob.write_text("independent check\n")
+        ver = self.run_operator(
+            "evidence-attach",
+            str(verify_blob),
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+            "--verify-cmd",
+            "true",
+            env={"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertEqual(ver.returncode, 0, ver.stderr + ver.stdout)
+
+        claim = yaml.safe_load(claim_path.read_text())
+        self.assertTrue(claim.get("verification_status"))
+        self.assertEqual(claim.get("verification_authority"), "uid_isolated")
+
+        crystal_ev_path = (
+            Path(self.temp_dir)
+            / ".operator"
+            / "evidence"
+            / "crystal-drift-task"
+            / "evidence-0001.yaml"
+        )
+        crystal_ev = yaml.safe_load(crystal_ev_path.read_text())
+        snapshot = Path(crystal_ev["path_or_url"])
+        self.assertTrue(snapshot.is_file())
+        snapshot.write_text(snapshot.read_text() + "\n# mutated after verification\n")
+
+        doc = self.run_operator("doctor")
+        self.assertEqual(doc.returncode, 1, doc.stdout + "\n" + doc.stderr)
+        self.assertIn("retained snapshot content changed", doc.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,4 +1,4 @@
-"""Crystal Markdown structural parse for Operator (Crystal↔Ledger Phase 1).
+"""Crystal Markdown structural parse for Operator (Crystal↔Ledger Phases 1–2).
 
 Reads agent-crystallize checkpoint/session Markdown as untrusted narration.
 Does not execute content, shell out on body text, or feed models (T3).
@@ -74,6 +74,8 @@ class CrystalParseResult:
     git_branch: str | None = None
     git_root: str | None = None
     test_bullet_count: int = 0
+    test_bullets: list[str] = field(default_factory=list)
+    open_loop_bullets: list[str] = field(default_factory=list)
     sections_present: list[str] = field(default_factory=list)
 
 
@@ -256,24 +258,37 @@ def _parse_reality_checks(body: str) -> dict[str, str]:
     return fields
 
 
-def count_real_test_bullets(body: str) -> int:
-    """Count non-fallback bullets under Tests And Verification (P2)."""
+def _is_fallback_line(content: str) -> bool:
+    normalized = _normalize_fallback_text(content)
+    fallback_norm = {_normalize_fallback_text(s) for s in FALLBACK_SECTION_STRINGS}
+    fallback_norm |= {s.rstrip(".") for s in fallback_norm}
+    return normalized in fallback_norm or normalized.rstrip(".") in fallback_norm
+
+
+def extract_real_bullets(body: str) -> list[str]:
+    """Non-fallback ``-`` / ``*`` bullets from a section body (P2).
+
+    Numbered lists and free prose are ignored — crystals use list bullets for
+    Tests And Verification / Open Loops. Never used for Resume Prompt (T3).
+    """
     if is_fallback_body(body):
-        return 0
-    count = 0
+        return []
+    bullets: list[str] = []
     for line in body.splitlines():
         stripped = line.strip()
         m = _BULLET_RE.match(stripped)
         if not m:
             continue
         content = m.group(1).strip()
-        normalized = _normalize_fallback_text(content)
-        if normalized in FALLBACK_SECTION_STRINGS or normalized.rstrip(".") in {
-            s.rstrip(".") for s in FALLBACK_SECTION_STRINGS
-        }:
+        if not content or _is_fallback_line(content):
             continue
-        count += 1
-    return count
+        bullets.append(content)
+    return bullets
+
+
+def count_real_test_bullets(body: str) -> int:
+    """Count non-fallback bullets under Tests And Verification (P2)."""
+    return len(extract_real_bullets(body))
 
 
 def parse_crystal(text: str, path: str | Path | None = None) -> CrystalParseResult:
@@ -305,7 +320,11 @@ def parse_crystal(text: str, path: str | Path | None = None) -> CrystalParseResu
     result.git_root = reality.get("git root") or None
 
     tests_body = sections.get("Tests And Verification", "")
-    result.test_bullet_count = count_real_test_bullets(tests_body)
+    result.test_bullets = extract_real_bullets(tests_body)
+    result.test_bullet_count = len(result.test_bullets)
+
+    open_loops_body = sections.get("Open Loops", "")
+    result.open_loop_bullets = extract_real_bullets(open_loops_body)
 
     result.kind = infer_crystal_kind(path, result.source_window)
     return result
