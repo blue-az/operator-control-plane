@@ -61,6 +61,36 @@ def load_config(config_path_opt=None):
     return default_config
 
 
+BN_GLOSSARY_DEFAULT = "~/Python/project-phoenix/BOTTLENECKS.md"
+
+
+def load_bn_glossary(config) -> str:
+    """Extract the canonical vocabulary block (the leading blockquote) from the BN header.
+
+    BN's header is the only place the cross-repo names (BN, BT, Operator, PBC) are
+    defined; local models get it injected so bare questions like "Tell me about BT"
+    resolve against project vocabulary instead of world knowledge.
+    """
+    raw_path = config.get("bn_glossary_file", BN_GLOSSARY_DEFAULT)
+    if not raw_path:
+        return ""
+    path = Path(os.path.expanduser(raw_path))
+    if not path.is_file():
+        return ""
+    lines = []
+    started = False
+    try:
+        for line in path.read_text(errors="ignore").splitlines():
+            if line.startswith(">"):
+                started = True
+                lines.append(line.lstrip(">").strip())
+            elif started:
+                break
+    except Exception:
+        return ""
+    return "\n".join(lines).strip()
+
+
 def find_operator_bin(config=None):
     configured_bin = (config or {}).get("operator_bin")
     if configured_bin:
@@ -332,14 +362,20 @@ class Dispatcher:
     def _map_harness(self, provider: str, model: str) -> str:
         prov = provider.lower()
         mod = model.lower()
-        if "agy" in prov or "antigravity" in prov:
+        if "agy" in prov or "antigravity" in prov or "agy" in mod or "antigravity" in mod:
             return "gemini-agy"
-        elif "codex" in prov:
+        elif "codex" in prov or "codex" in mod:
             return "codex"
-        elif "claude" in prov or "anthropic" in prov:
+        elif "claude" in prov or "anthropic" in prov or "claude" in mod:
             return "claude"
-        else:
-            return "gemma4_local"
+        # Label remaining harnesses by the model actually serving them, not a
+        # fixed name — default models differ per machine (gemma4 on the
+        # desktop, gpt-oss on the z13). gemma4:26b still maps to
+        # "gemma4_local", preserving existing ledger history.
+        base = re.sub(r"[^a-z0-9_.-]", "_", mod.split(":")[0]) or "unknown"
+        if "frontier" in prov or "openai" in prov:
+            return base
+        return f"{base}_local"
 
     def _dispatch_ollama(self, model: str, task: str, ollama_url: str) -> str:
         url = f"{ollama_url.rstrip('/')}/api/generate"
@@ -601,8 +637,14 @@ def execute_model_tool(
     return output, allowed and not output.startswith("Error:")
 
 
-def prepare_prompt(task_input: str, accumulated_context: str) -> str:
+def prepare_prompt(task_input: str, accumulated_context: str, glossary: str = "") -> str:
     parts = [SYSTEM_INSTRUCTIONS]
+    if glossary:
+        parts.append(
+            "Project vocabulary (canonical definitions from the BN board header; "
+            "prefer these over general-knowledge meanings of the same acronyms):\n"
+            + glossary
+        )
     if accumulated_context:
         parts.append(f"Context:\n{accumulated_context}")
     parts.append(f"Task:\n{task_input}")
@@ -670,6 +712,7 @@ def run_agent_loop(
     dispatcher: Dispatcher,
     config: dict,
     initial_context: str = "",
+    glossary: str = "",
 ) -> str:
     accumulated_context = initial_context
     task_input = initial_prompt
@@ -678,8 +721,13 @@ def run_agent_loop(
     seen_tool_calls = set()
     terminal_tools = {"write_file", "patch_file", "run_command"}
 
+    # Vocabulary rides outside accumulated_context: local models get it every
+    # turn, frontier models never see it and it never trips the context-sharing
+    # confirmation gate.
+    local_glossary = "" if is_effective_frontier_model(current_model, config) else glossary
+
     while turn < max_turns:
-        prompt = prepare_prompt(task_input, accumulated_context)
+        prompt = prepare_prompt(task_input, accumulated_context, local_glossary)
 
         # Context confirmation check for frontier models
         if is_effective_frontier_model(current_model, config) and accumulated_context:
@@ -766,6 +814,11 @@ def main():
         default=None,
         help="Direct frontier run with a specified model/provider (e.g. claude, codex, gpt-4o).",
     )
+    parser.add_argument(
+        "--no-bn",
+        action="store_true",
+        help="Skip injecting the BN header vocabulary into local-model prompts.",
+    )
     args = parser.parse_args()
 
     # Load configuration
@@ -800,6 +853,8 @@ def main():
         else:
             print(f"Error: Context file not found: {args.context_file}", file=sys.stderr)
             sys.exit(1)
+
+    bn_glossary = "" if args.no_bn else load_bn_glossary(config)
 
     dispatcher = Dispatcher(
         govern=govern_enabled,
@@ -867,6 +922,7 @@ def main():
             dispatcher,
             config,
             initial_context=context_str,
+            glossary=bn_glossary,
         )
 
         outcome = "useful"
@@ -926,6 +982,11 @@ def main():
         print(" opr — Governed LLM CLI (REPL Mode)")
         print(" Commands: /model <name> (switch model), /exit or /quit")
         print("============================================================")
+        if bn_glossary:
+            print(
+                f"[BN vocabulary loaded ({len(bn_glossary.splitlines())} lines) — "
+                "injected for local models only; --no-bn to disable]"
+            )
 
         start_repl_session(current_model)
 
@@ -1271,6 +1332,7 @@ def main():
                 dispatcher,
                 config,
                 initial_context=accumulated_context,
+                glossary=bn_glossary,
             )
 
             print("\n--- Output ---")

@@ -62,8 +62,10 @@ from a user-writable checkout.
 
 **Ledger layout** (created by `init_cmd`):
 `.operator/{tasks,claims,evidence,handoffs,usage,briefs}/` plus `harnesses/<id>.yaml` (the
-known AI harnesses — claude, codex, gemini-agy, copilot, gemma3_local, gemma4_local; their default
-definitions are hardcoded in `init_cmd`'s `harnesses_data`). `operator.yaml` holds top-level state like
+known AI harnesses — claude, codex, gemini-agy, copilot, gemma3_local, gemma4_local, gpt-oss_local;
+their default definitions are hardcoded in `init_cmd`'s `harnesses_data`). `opr` derives local harness
+labels from the serving model (`<model-base>_local`, e.g. gpt-oss:20b → gpt-oss_local — defaults differ
+per machine), so a new local default model needs a matching `harnesses/<id>.yaml` in existing ledgers. `operator.yaml` holds top-level state like
 `current_task`. Record IDs are sequential and zero-padded: `claim-0001`, `evidence-0001`, `usage-0001`,
 `handoff-0001`. These YAML files are current projections; `.operator/ledger.sqlite3` retains immutable
 full-snapshot versions for trust-relevant writes. Session commands version their `usage-XXXX` record.
