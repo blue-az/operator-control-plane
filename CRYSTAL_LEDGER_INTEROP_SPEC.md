@@ -1,9 +1,10 @@
 # Crystal ↔ Ledger Interop — Build Spec
 
-> **Status: DRAFT / proposal.** Dual audience: (a) Erik + Vinh Nguyen (author of
-> `@stewie-sh/agent-crystallize` and the PBC spec) as a collaboration proposal; (b) an implementing
-> agent once the boundary is agreed. Nothing here is built yet. Upstream schema facts were read
-> against `agent-crystallize@0.1.9` source (`src/index.ts`, `renderCrystal`).
+> **Status: Phase 1 implemented (2026-07-18).** Dual audience: (a) Erik + Vinh Nguyen (author of
+> `@stewie-sh/agent-crystallize` and the PBC spec); (b) implementing agents. Phase 1 ships
+> `session_crystal` evidence type, `crystal-attach`, T6 structural validation, and advisory doctor
+> rules. Phase 2+ (`crystal-import`, hook bridging) remain unbuilt. Upstream schema pin:
+> `agent-crystallize@0.1.9/0.1.10` (`crystal_parse.CRYSTAL_UPSTREAM_PIN`).
 
 **For:** the implementing agent. **Reviewer:** Erik. **Target:** extend the `operator` CLI in this
 repo. Match existing conventions (`EXECUTOR_IDENTITY_SPEC.md` remains the identity authority).
@@ -184,7 +185,8 @@ artifacts — same hygiene as upstream's `examples/`):
 
 - **Phase 1** (smallest reviewable unit): §4 evidence type + §5.1 `crystal-attach` + §6 doctor
   rules 1–2 + tests 1, 2, 3, 6. Local-lane candidate per `LOCAL_LANE_CONTRACT_SPEC.md` — the parser
-  table (P3) makes it plan-shaped.
+  table (P3) makes it plan-shaped. **DONE 2026-07-18:** `crystal_parse.py` + `./operator crystal-attach`;
+  fixtures under `tests/fixtures/crystals/`; coverage in `tests/test_operator.py` (`test_crystal_*`).
 - **Phase 2:** §5.2 `crystal-import` + tests 4, 5, 7.
 - **Phase 3** (only if Phases 1–2 prove useful in dogfood): hook/session bridging — crystallize's
   hook runner fires SessionStart/PreCompact/Stop; a thin wrapper opens `session-start` on

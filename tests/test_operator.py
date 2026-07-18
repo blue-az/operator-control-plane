@@ -3367,6 +3367,185 @@ class TestOperatorCLI(unittest.TestCase):
             res.stdout,
         )
 
+    # ------------------------------------------------------------------
+    # Crystal↔Ledger Phase 1 (CRYSTAL_LEDGER_INTEROP_SPEC.md §8 tests 1,2,3,6)
+    # ------------------------------------------------------------------
+
+    def _crystal_fixture(self, name: str) -> Path:
+        src = Path(__file__).resolve().parent / "fixtures" / "crystals" / name
+        dest = Path(self.temp_dir) / name
+        shutil.copy2(src, dest)
+        return dest
+
+    def test_crystal_attach_fingerprint_and_metadata(self) -> None:
+        """Test 1: crystal-attach records session_crystal + SHA-256 + header metadata."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Crystal attach metadata",
+                "--id",
+                "crystal-meta-task",
+            ).returncode,
+            0,
+        )
+        claim = self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Crystal bound to claim",
+        )
+        self.assertEqual(claim.returncode, 0, claim.stderr)
+        crystal = self._crystal_fixture("valid-checkpoint.md")
+        expected_hash = hashlib.sha256(crystal.read_bytes()).hexdigest()
+
+        res = self.run_operator(
+            "crystal-attach",
+            str(crystal),
+            "--claim",
+            "claim-0001",
+            "--by",
+            "codex",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+        self.assertIn("Crystal metadata captured", res.stdout)
+
+        evidence_path = (
+            Path(self.temp_dir) / ".operator" / "evidence" / "crystal-meta-task" / "evidence-0001.yaml"
+        )
+        self.assertTrue(evidence_path.is_file(), evidence_path)
+        evidence = yaml.safe_load(evidence_path.read_text())
+        self.assertEqual(evidence["evidence_type"], "session_crystal")
+        self.assertEqual(evidence["fingerprint"]["algorithm"], "sha256")
+        self.assertEqual(evidence["fingerprint"]["value"], expected_hash)
+        self.assertEqual(evidence["hash"], expected_hash)
+        self.assertEqual(evidence["crystal_kind"], "checkpoint")
+        self.assertEqual(evidence["crystal_project"], "crystal-fixture")
+        self.assertEqual(evidence["crystal_observed_at"], "2026-07-18T12:00:00.000Z")
+        self.assertEqual(
+            evidence["crystal_source_commit"],
+            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+        )
+        self.assertEqual(evidence["crystal_source_branch"], "master")
+        self.assertEqual(evidence["crystal_test_bullet_count"], 2)
+        # Snapshot copy exists and matches
+        snapshot = Path(evidence["path_or_url"])
+        self.assertTrue(snapshot.is_file())
+        self.assertEqual(hashlib.sha256(snapshot.read_bytes()).hexdigest(), expected_hash)
+        # Claim was not auto-verified
+        claim_data = yaml.safe_load(
+            (Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml").read_text()
+        )
+        self.assertNotEqual(claim_data.get("verification_status"), True)
+        self.assertIsNone(claim_data.get("verification_outcome"))
+
+    def test_crystal_attach_rejects_status_laundering(self) -> None:
+        """Test 2: crystal-attach never accepts --status (T2)."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create", "--objective", "No status launder", "--id", "crystal-status-task"
+            ).returncode,
+            0,
+        )
+        self.assertEqual(
+            self.run_operator(
+                "claim-add", "--type", "test_passes", "--text", "Should stay draft", "--gate", "g"
+            ).returncode,
+            0,
+        )
+        crystal = self._crystal_fixture("valid-checkpoint.md")
+        res = self.run_operator(
+            "crystal-attach",
+            str(crystal),
+            "--claim",
+            "claim-0001",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+        )
+        self.assertNotEqual(res.returncode, 0)
+        claim_data = yaml.safe_load(
+            (Path(self.temp_dir) / ".operator" / "claims" / "claim-0001.yaml").read_text()
+        )
+        self.assertNotEqual(claim_data.get("verification_status"), True)
+        # No evidence written
+        ev_dir = Path(self.temp_dir) / ".operator" / "evidence" / "crystal-status-task"
+        self.assertEqual(list(ev_dir.glob("evidence-*.yaml")), [])
+
+    def test_crystal_attach_rejects_duplicate_or_out_of_order_headings(self) -> None:
+        """Test 3: T6 structural corruption rejected before ledger write."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create", "--objective", "Structural reject", "--id", "crystal-struct-task"
+            ).returncode,
+            0,
+        )
+        before = self.trust_state_snapshot()
+
+        for name in ("duplicate-heading.md", "out-of-order.md"):
+            crystal = self._crystal_fixture(name)
+            res = self.run_operator("crystal-attach", str(crystal), "--by", "codex")
+            self.assertNotEqual(res.returncode, 0, f"{name} should fail: {res.stdout}")
+            self.assertIn("structural", res.stderr.lower() + res.stdout.lower())
+
+        after = self.trust_state_snapshot()
+        self.assertEqual(before, after, "rejected crystal-attach must not mutate ledger")
+
+    def test_doctor_crystal_unknown_commit_warning_is_advisory(self) -> None:
+        """Test 6: unknown crystal_source_commit → [Warning], doctor exit 0."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        # Task repo = temp workspace; init a real git repo without the fixture commit.
+        subprocess.run(["git", "init"], cwd=self.temp_dir, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@example.com"],
+            cwd=self.temp_dir,
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test"],
+            cwd=self.temp_dir,
+            check=True,
+            capture_output=True,
+        )
+        readme = Path(self.temp_dir) / "README.md"
+        readme.write_text("fixture repo\n")
+        subprocess.run(["git", "add", "README.md"], cwd=self.temp_dir, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "init"],
+            cwd=self.temp_dir,
+            check=True,
+            capture_output=True,
+        )
+
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Crystal doctor advisory",
+                "--id",
+                "crystal-doctor-task",
+                "--repo",
+                self.temp_dir,
+            ).returncode,
+            0,
+        )
+        crystal = self._crystal_fixture("valid-checkpoint.md")
+        # Attach without claim so narration-gap Info is also exercised.
+        res = self.run_operator("crystal-attach", str(crystal), "--by", "codex")
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        doc = self.run_operator("doctor")
+        self.assertEqual(doc.returncode, 0, doc.stdout + "\n" + doc.stderr)
+        self.assertIn("crystal cites unknown commit", doc.stdout)
+        self.assertIn("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef", doc.stdout)
+        self.assertIn("crystal narrates 2 verification claims; none registered", doc.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

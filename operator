@@ -19,6 +19,7 @@ import shutil
 import socket
 import sqlite3
 import stat
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -27,6 +28,7 @@ import yaml
 
 import authority_client
 import authority_projection
+import crystal_parse
 
 LEDGER_DB_NAME = "ledger.sqlite3"
 LEDGER_HASH_FORMAT = "operator-ledger-event-v1"
@@ -46,6 +48,7 @@ MUTATING_COMMANDS = {
     "task-create",
     "claim-add",
     "evidence-attach",
+    "crystal-attach",
     "usage-add",
     "usage-import",
     "usage-annotate",
@@ -53,6 +56,19 @@ MUTATING_COMMANDS = {
     "session-start",
     "session-end",
 }
+
+EVIDENCE_TYPES = [
+    "run_log",
+    "manifest",
+    "database_query",
+    "test_output",
+    "git_commit",
+    "screenshot",
+    "transcript",
+    "paper_section",
+    "external_doc",
+    "session_crystal",
+]
 
 
 class LedgerWriteError(RuntimeError):
@@ -2189,6 +2205,11 @@ def evidence_attach_cmd(args) -> int:
         "notes": args.notes,
         "executor": exec_identity,
     }
+    crystal_metadata = getattr(args, "crystal_metadata", None)
+    if isinstance(crystal_metadata, dict):
+        for key, value in crystal_metadata.items():
+            if key and key not in evidence_data:
+                evidence_data[key] = value
 
     ev_path = os.path.join(op_dir, "evidence", task_id, f"{evidence_id}.yaml")
     save_yaml(evidence_data, ev_path)
@@ -2239,6 +2260,114 @@ def evidence_attach_cmd(args) -> int:
             f"Associated with claim '{claim_id}' (Verification status: {claim.get('verification_status')})."
         )
     return 0
+
+
+def crystal_attach_cmd(args) -> int:
+    """Attach a session crystal as draft session_crystal evidence (Phase 1).
+
+    Never accepts verification status (T2). Validates heading structure before
+    any ledger write (T6). Does not execute crystal body content (T3).
+    """
+    # Fail closed if a future caller smuggles status onto the namespace.
+    if getattr(args, "status", None) is not None:
+        print(
+            "Error: crystal-attach does not accept verification status "
+            "(T2 — use evidence-attach --status as a distinct verifier on the "
+            "already-attached crystal).",
+            file=sys.stderr,
+        )
+        return 1
+    if getattr(args, "verified_by", None) is not None or getattr(args, "verdict", None) is not None:
+        print(
+            "Error: crystal-attach does not accept --verified-by or --verdict "
+            "(verification is a separate verifier action).",
+            file=sys.stderr,
+        )
+        return 1
+
+    original_locator = args.path
+    if not os.path.exists(original_locator):
+        print(f"Error: Crystal path does not exist: {original_locator}", file=sys.stderr)
+        return 1
+    if not os.path.isfile(original_locator):
+        print(f"Error: Crystal path is not a regular file: {original_locator}", file=sys.stderr)
+        return 1
+
+    parsed = crystal_parse.load_and_parse_crystal(original_locator)
+    for warning in parsed.warnings:
+        print(f"[Warning] {warning}")
+    if not parsed.ok:
+        for err in parsed.errors:
+            print(f"Error: crystal rejected (structural): {err}", file=sys.stderr)
+        return 1
+
+    crystal_metadata = {
+        "crystal_kind": parsed.kind,
+        "crystal_project": parsed.project,
+        "crystal_observed_at": parsed.observed_at,
+        "crystal_source_commit": parsed.git_commit,
+        "crystal_source_branch": parsed.git_branch,
+        "crystal_test_bullet_count": parsed.test_bullet_count,
+        "crystal_upstream_pin": crystal_parse.CRYSTAL_UPSTREAM_PIN,
+    }
+
+    attach_args = argparse.Namespace(
+        path_or_url=original_locator,
+        claim=args.claim,
+        type="session_crystal",
+        task_id=args.task_id,
+        by=args.by,
+        hash=args.hash,
+        notes=args.notes,
+        verify_cmd=None,
+        status=None,
+        verdict=None,
+        verified_by=None,
+        crystal_metadata=crystal_metadata,
+    )
+    rc = evidence_attach_cmd(attach_args)
+    if rc == 0:
+        print(
+            "Crystal metadata captured: "
+            f"kind={parsed.kind}, project={parsed.project}, "
+            f"commit={parsed.git_commit}, test_bullets={parsed.test_bullet_count}"
+        )
+    return rc
+
+
+def git_commit_exists_in_repo(repo_path: str, commit: str) -> bool | None:
+    """Return True/False if git can resolve commit; None if repo unusable.
+
+    Uses fixed argv only — commit is a single argument, never shell-interpolated.
+    """
+    if not repo_path or not commit or not isinstance(commit, str):
+        return None
+    commit = commit.strip()
+    if not commit or commit.lower() in {"unknown", "unavailable", "(none)", "none"}:
+        return None
+    if not os.path.isdir(repo_path):
+        return None
+    try:
+        probe = subprocess.run(
+            ["git", "-C", repo_path, "rev-parse", "--is-inside-work-tree"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if probe.returncode != 0 or probe.stdout.strip() != "true":
+            return None
+        # ^{commit} ensures we resolve an object that is a commit.
+        check = subprocess.run(
+            ["git", "-C", repo_path, "cat-file", "-e", f"{commit}^{{commit}}"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        return check.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return None
 
 
 def usage_add_cmd(args) -> int:
@@ -4303,6 +4432,18 @@ def doctor_cmd(args) -> int:
                             f"[Warning] Task {task_id} next_action differs from the latest handoff recommended next action. Task: '{task_next}', Handoff: '{ho_next}'"
                         )
 
+        # Paths of evidence YAML cited by any claim on this task (for crystal gap reporting).
+        cited_evidence_abs: set[str] = set()
+        for cid in task.get("claims") or []:
+            claim_path = os.path.join(op_dir, "claims", f"{cid}.yaml")
+            if not os.path.exists(claim_path):
+                continue
+            c_data = load_yaml(claim_path)
+            if not c_data:
+                continue
+            for ev_ref in c_data.get("evidence_refs") or []:
+                cited_evidence_abs.add(os.path.abspath(os.path.join(op_dir, ev_ref)))
+
         ev_dir = os.path.join(op_dir, "evidence", task_id)
         if os.path.isdir(ev_dir):
             ev_files = glob.glob(os.path.join(ev_dir, "evidence-*.yaml"))
@@ -4321,6 +4462,25 @@ def doctor_cmd(args) -> int:
                 )
                 issues.extend(freshness_issues)
                 infos.extend(freshness_infos)
+
+                # Crystal↔Ledger Phase 1 doctor rules (advisory; foreign artifacts).
+                # Spec §6: unknown-commit and narration-gap are non-fatal (exit 0).
+                if ev_data.get("evidence_type") == "session_crystal":
+                    crystal_commit = ev_data.get("crystal_source_commit")
+                    if crystal_commit and repo_path:
+                        known = git_commit_exists_in_repo(repo_path, str(crystal_commit))
+                        if known is False:
+                            infos.append(
+                                f"[Warning] crystal cites unknown commit '{crystal_commit}' "
+                                f"(evidence {ev_id})"
+                            )
+                    test_n = ev_data.get("crystal_test_bullet_count")
+                    if isinstance(test_n, int) and test_n > 0:
+                        if os.path.abspath(ef) not in cited_evidence_abs:
+                            infos.append(
+                                f"[Info] crystal narrates {test_n} verification claims; "
+                                f"none registered (evidence {ev_id})"
+                            )
 
         if args.audit and task_status == "verified":
             # Check for independent supervisor_verdict.md (Phase 3.2)
@@ -5782,18 +5942,40 @@ def main() -> None:
         "--type",
         "-t",
         default="run_log",
-        choices=[
-            "run_log",
-            "manifest",
-            "database_query",
-            "test_output",
-            "git_commit",
-            "screenshot",
-            "transcript",
-            "paper_section",
-            "external_doc",
-        ],
+        choices=EVIDENCE_TYPES,
         help="Type of evidence.",
+    )
+
+    # operator crystal attach (Crystal↔Ledger Phase 1)
+    crystal_parser = subparsers.add_parser(
+        "crystal-attach",
+        help=(
+            "Attach an agent-crystallize checkpoint/session Markdown file as draft "
+            "session_crystal evidence (never sets verification status)."
+        ),
+    )
+    crystal_parser.add_argument(
+        "path",
+        help="Path to a local crystal Markdown file under .agent-crystals/ (or a fixture).",
+    )
+    crystal_parser.add_argument("--claim", "-c", default=None, help="Associated Claim ID.")
+    crystal_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+    crystal_parser.add_argument("--by", default=None, help="Actor who produced the crystal attach.")
+    crystal_parser.add_argument(
+        "--hash",
+        default=None,
+        help="Expected SHA-256 digest (validated against crystal file bytes before write).",
+    )
+    crystal_parser.add_argument(
+        "--notes",
+        "-n",
+        default=None,
+        help="Optional notes about the crystal attach.",
     )
     evidence_parser.add_argument(
         "--task",
@@ -6215,6 +6397,7 @@ def main() -> None:
         "claim-show": claim_show_cmd,
         "claim-list": claim_list_cmd,
         "evidence-attach": evidence_attach_cmd,
+        "crystal-attach": crystal_attach_cmd,
         "usage-add": usage_add_cmd,
         "usage-import": usage_import_cmd,
         "usage-annotate": usage_annotate_cmd,

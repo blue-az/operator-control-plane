@@ -75,7 +75,9 @@ YAML-only ledger baselines those records into SQLite without changing their visi
   fingerprinted with SHA-256, byte size, and modification time; `--hash` is an expected digest that
   must match the local bytes before any evidence write. Missing filesystem paths are rejected;
   non-file external references must use an explicit URI scheme. Evidence types: `run_log, manifest,
-  database_query, test_output, git_commit, screenshot, transcript, paper_section, external_doc`.
+  database_query, test_output, git_commit, screenshot, transcript, paper_section, external_doc,
+  session_crystal`. Crystal Markdown attaches via `crystal-attach` (draft only; see
+  `CRYSTAL_LEDGER_INTEROP_SPEC.md`).
   Under enforced identity policy, draft attachment is a builder action and any status attachment is a
   verifier action from an OS UID distinct from the claim author.
 - `verify RUN_DIR` — automated audit of a run directory's artifacts.
