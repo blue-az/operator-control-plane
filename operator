@@ -16,6 +16,7 @@ import os
 import pwd
 import re
 import shutil
+import socket
 import sqlite3
 import stat
 import sys
@@ -829,6 +830,24 @@ def save_yaml(data: any, filepath: str) -> bool:
         raise LedgerWriteError(f"Error saving YAML {filepath}: {e}") from e
 
 
+def get_machine_identity() -> str:
+    """Short machine name for record provenance.
+
+    `OPERATOR_MACHINE` overrides detection (also the test hook); otherwise the
+    short hostname. The ledger itself stays single-machine — this field only
+    records WHERE a session/usage/evidence record was produced.
+    """
+    override = os.environ.get("OPERATOR_MACHINE")
+    if override and override.strip():
+        return override.strip()
+    try:
+        host = socket.gethostname()
+    except Exception:
+        return "unknown"
+    short = host.split(".")[0].strip()
+    return short or "unknown"
+
+
 def get_executor_identity() -> dict:
     test_uid_env = os.environ.get("OPERATOR_TEST_UID")
     test_sentinel_env = os.environ.get("OPERATOR_TEST_SENTINEL")
@@ -848,14 +867,19 @@ def get_executor_identity() -> dict:
             user = pwd.getpwuid(uid).pw_name
         except Exception:
             user = f"uid-{uid}"
-        return {"uid": uid, "user": user, "test_override_active": True}
+        return {
+            "uid": uid,
+            "user": user,
+            "machine": get_machine_identity(),
+            "test_override_active": True,
+        }
     else:
         uid = os.getuid()
         try:
             user = pwd.getpwuid(uid).pw_name
         except Exception:
             user = f"uid-{uid}"
-        res = {"uid": uid, "user": user}
+        res = {"uid": uid, "user": user, "machine": get_machine_identity()}
         if spoof_attempt:
             res["test_override_unauthorized"] = True
         return res
@@ -2745,8 +2769,19 @@ def usage_import_cmd(args) -> int:
     preflight_projection(op_dir, task_path, task)
     abs_repo = os.path.abspath(task.get("repo", "."))
     harness_id = args.harness
+    source_dir_override = getattr(args, "source_dir", None)
+    if source_dir_override:
+        source_dir_override = os.path.expanduser(source_dir_override)
+        if not os.path.exists(source_dir_override):
+            print(
+                f"Error: --source-dir path does not exist: {source_dir_override}",
+                file=sys.stderr,
+            )
+            return 1
     if harness_id == "claude":
-        base_dir = os.environ.get("OPERATOR_TEST_CLAUDE_DIR", os.path.expanduser("~/.claude"))
+        base_dir = source_dir_override or os.environ.get(
+            "OPERATOR_TEST_CLAUDE_DIR", os.path.expanduser("~/.claude")
+        )
         files = []
         if os.path.isfile(base_dir):
             if base_dir.endswith(".jsonl"):
@@ -2762,7 +2797,9 @@ def usage_import_cmd(args) -> int:
             if res:
                 all_sessions.append(res)
     elif harness_id == "codex":
-        base_dir = os.environ.get("OPERATOR_TEST_CODEX_DIR", os.path.expanduser("~/.codex"))
+        base_dir = source_dir_override or os.environ.get(
+            "OPERATOR_TEST_CODEX_DIR", os.path.expanduser("~/.codex")
+        )
         files = []
         if os.path.isfile(base_dir):
             if base_dir.endswith(".jsonl"):
@@ -2778,7 +2815,7 @@ def usage_import_cmd(args) -> int:
             if res:
                 all_sessions.append(res)
     elif harness_id == "gemini-agy":
-        base_dir = os.environ.get(
+        base_dir = source_dir_override or os.environ.get(
             "OPERATOR_TEST_GEMINI_DIR", os.path.expanduser("~/.gemini/antigravity-cli")
         )
         files = []
@@ -2966,6 +3003,10 @@ def usage_import_cmd(args) -> int:
             set_nested(rec, "activity.active_s", None)
 
         rec["executor"] = get_executor_identity()
+        if getattr(args, "machine", None):
+            # Logs synced from another machine: provenance is the producer, not the importer.
+            rec["executor"]["machine"] = args.machine
+            rec["executor"]["machine_source"] = "manual"
         if args.dry_run:
             print("---")
             print(f"# Dry-run import for session: {ref}")
@@ -4959,6 +5000,47 @@ def usage_summary_cmd(args) -> int:
                 print(f"Avoidable Rollup Cost: ${avoidable_cost:.4f} USD")
             print("=" * 80)
 
+        if getattr(args, "by_machine", False):
+            print("\n" + "=" * 80)
+            print(f"SUMMARY BY MACHINE × HARNESS ({title})")
+            print("=" * 80)
+            machine_groups = {}
+            for r in recs:
+                executor = r.get("executor") or {}
+                mc = executor.get("machine") or "unknown"
+                hid = r.get("harness_id") or "unknown"
+                cost = (
+                    float(r.get("cost_estimate_usd") or 0.0)
+                    if r.get("cost_estimate_usd") is not None
+                    else 0.0
+                )
+                t_in = int(r.get("tokens_in") or 0) if r.get("tokens_in") is not None else 0
+                t_out = int(r.get("tokens_out") or 0) if r.get("tokens_out") is not None else 0
+
+                key = (mc, hid)
+                if key not in machine_groups:
+                    machine_groups[key] = {
+                        "cost": 0.0,
+                        "runs": 0,
+                        "tokens_in": 0,
+                        "tokens_out": 0,
+                    }
+                machine_groups[key]["cost"] += cost
+                machine_groups[key]["runs"] += 1
+                machine_groups[key]["tokens_in"] += t_in
+                machine_groups[key]["tokens_out"] += t_out
+
+            for (mc, hid), data in sorted(machine_groups.items(), key=lambda item: item[0]):
+                print(f"Machine:      {mc}")
+                print(f"Harness:      {hid}")
+                print(f"  Runs:       {data['runs']}")
+                if show_cost:
+                    print(f"  Est. Cost:  ${data['cost']:.4f} USD")
+                print(f"  Tokens In:  {data['tokens_in']}")
+                print(f"  Tokens Out: {data['tokens_out']}")
+                print("-" * 40)
+            print("=" * 80)
+
     if args.metering:
         tokens_recs = []
         activity_recs = []
@@ -5785,6 +5867,11 @@ def main() -> None:
         "--by-lane", action="store_true", help="Group summary by lane × task_class."
     )
     usage_summary_parser.add_argument(
+        "--by-machine",
+        action="store_true",
+        help="Group summary by machine × harness (executor provenance).",
+    )
+    usage_summary_parser.add_argument(
         "--offload-audit",
         action="store_true",
         help="Produce one-line offload audit report.",
@@ -5825,6 +5912,16 @@ def main() -> None:
         "--dry-run",
         action="store_true",
         help="Print the record(s) that would be imported without writing them.",
+    )
+    usage_import_parser.add_argument(
+        "--source-dir",
+        default=None,
+        help="Alternate harness log directory (e.g. synced logs from another machine).",
+    )
+    usage_import_parser.add_argument(
+        "--machine",
+        default=None,
+        help="Machine label for imported records (the producer, not the importer).",
     )
 
     # operator usage-annotate

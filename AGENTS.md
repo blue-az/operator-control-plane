@@ -97,6 +97,8 @@ Test identity hooks (preserve both halves of the spoof guard):
   UID without sentinel is a spoof attempt that `doctor` must flag as Error.
 - `OPERATOR_TEST_CLAUDE_DIR` / `OPERATOR_TEST_CODEX_DIR` / `OPERATOR_TEST_GEMINI_DIR`
   redirect usage import to fixtures.
+- `OPERATOR_MACHINE` overrides the `executor.machine` provenance stamp
+  (see `MACHINE_PROVENANCE_SPEC.md`).
 
 ## Commit & Pull Request Guidelines
 

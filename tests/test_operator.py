@@ -1756,6 +1756,124 @@ class TestOperatorCLI(unittest.TestCase):
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 0, res.stdout)
 
+    def test_machine_provenance_and_by_machine_summary(self) -> None:
+        import datetime
+        import socket
+
+        self.run_operator("init")
+        fixtures_dir = Path(__file__).resolve().parent / "fixtures"
+        op_path = Path(self.temp_dir) / ".operator"
+        shutil.copy(fixtures_dir / "pricing.yaml", op_path / "pricing.yaml")
+
+        res = self.run_operator(
+            "task-create",
+            "--objective",
+            "Test machine provenance",
+            "--id",
+            "machine-task",
+            "--repo",
+            str(Path(self.temp_dir) / "project-phoenix"),
+            "--assign",
+            "claude",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        payload_file = Path(self.temp_dir) / "payload.txt"
+        payload_file.write_text("machine provenance payload")
+
+        today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        usage_file = op_path / "usage" / f"{today}.yaml"
+
+        # 1. usage-import --source-dir + --machine: provenance is the producer,
+        # not the importer (synced-logs-from-another-machine path). The session
+        # placeholder is the only unmatched record, so matching is deterministic.
+        res = self.run_operator("session-start", "--task", "machine-task", "--harness", "claude")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        data = yaml.safe_load(usage_file.read_text())
+        for r in data:
+            if r.get("usage_id") == "usage-0001":
+                r["started_at"] = "2026-05-29T06:00:00Z"
+        usage_file.write_text(yaml.safe_dump(data))
+        self.rebaseline_ledger()
+
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "claude",
+            "--task",
+            "machine-task",
+            "--source-dir",
+            str(fixtures_dir / "claude"),
+            "--machine",
+            "z13-test",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("usage-0001", res.stdout)
+        records = yaml.safe_load(usage_file.read_text())
+        rec = next(r for r in records if r["usage_id"] == "usage-0001")
+        self.assertEqual(rec["executor"]["machine"], "z13-test")
+        self.assertEqual(rec["executor"]["machine_source"], "manual")
+
+        # 2. OPERATOR_MACHINE override stamps the executor on new records.
+        res = self.run_operator(
+            "usage-add",
+            "--harness",
+            "claude",
+            "--model",
+            "claude-opus-4-8",
+            "--cost",
+            "0.0",
+            "--outcome",
+            "useful",
+            "--file",
+            str(payload_file),
+            env={"OPERATOR_MACHINE": "desktop-test"},
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        records = yaml.safe_load(usage_file.read_text())
+        rec = next(r for r in records if r["usage_id"] == "usage-0002")
+        self.assertEqual(rec["executor"]["machine"], "desktop-test")
+
+        # 3. Without override, machine defaults to the short hostname.
+        res = self.run_operator(
+            "usage-add",
+            "--harness",
+            "claude",
+            "--model",
+            "claude-opus-4-8",
+            "--cost",
+            "0.0",
+            "--outcome",
+            "useful",
+            "--file",
+            str(payload_file),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        records = yaml.safe_load(usage_file.read_text())
+        rec = next(r for r in records if r["usage_id"] == "usage-0003")
+        expected_host = socket.gethostname().split(".")[0] or "unknown"
+        self.assertEqual(rec["executor"]["machine"], expected_host)
+
+        # 4. A missing --source-dir path fails loudly, not silently.
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "claude",
+            "--task",
+            "machine-task",
+            "--source-dir",
+            str(Path(self.temp_dir) / "does-not-exist"),
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("--source-dir path does not exist", res.stderr)
+
+        # 5. --by-machine groups executor provenance.
+        res = self.run_operator("usage-summary", "--by-machine")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("SUMMARY BY MACHINE × HARNESS", res.stdout)
+        self.assertIn("desktop-test", res.stdout)
+        self.assertIn("z13-test", res.stdout)
+
     def test_usage_autoimport_and_annotation(self) -> None:
         import datetime
 
