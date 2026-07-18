@@ -19,6 +19,7 @@ import sys
 import tempfile
 import threading
 import traceback
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
@@ -816,6 +817,30 @@ class AuthorityStore:
         fsync_directory(self.database_path.parent)
         fsync_directory(self.content_root)
 
+    def ensure_store_incarnation_id(self) -> str:
+        """Return the persistent store incarnation, minting one if an older store lacks it.
+
+        Incarnation is stable for the lifetime of a store file. Recreating the SQLite
+        file (rebuild) mints a new ID. Clients remember the ID and fail closed on change.
+        """
+        conn = self.connect()
+        try:
+            row = conn.execute(
+                "SELECT value FROM store_meta WHERE key = ?",
+                ("store_incarnation_id",),
+            ).fetchone()
+            if row and row["value"]:
+                return row["value"]
+            minted = uuid.uuid4().hex
+            conn.execute(
+                "INSERT INTO store_meta(key, value) VALUES (?, ?)",
+                ("store_incarnation_id", minted),
+            )
+            conn.commit()
+            return minted
+        finally:
+            conn.close()
+
     def validate(self) -> None:
         if not self.database_path.is_file():
             raise BrokerError(
@@ -1016,6 +1041,18 @@ class AuthorityStore:
                 raise BrokerError("store_corrupt", f"store metadata mismatch for {key}")
             if not existing:
                 conn.execute("INSERT INTO store_meta(key, value) VALUES (?, ?)", (key, value))
+        # Persistent store incarnation: minted once per store lifetime. A rebuild
+        # that recreates the SQLite file mints a new ID; clients use this to detect
+        # discontinuity that sequence numbers alone cannot express (issue #9).
+        existing_incarnation = conn.execute(
+            "SELECT value FROM store_meta WHERE key = ?",
+            ("store_incarnation_id",),
+        ).fetchone()
+        if not existing_incarnation:
+            conn.execute(
+                "INSERT INTO store_meta(key, value) VALUES (?, ?)",
+                ("store_incarnation_id", uuid.uuid4().hex),
+            )
         for table in APPEND_ONLY_TABLES:
             conn.executescript(
                 f"""
@@ -1307,9 +1344,20 @@ class AuthorityStore:
                 else:
                     has_more = True
 
+            incarnation_row = conn.execute(
+                "SELECT value FROM store_meta WHERE key = ?",
+                ("store_incarnation_id",),
+            ).fetchone()
+            if not incarnation_row or not incarnation_row["value"]:
+                raise BrokerError(
+                    "store_corrupt",
+                    "store_incarnation_id is missing from store_meta",
+                )
+            store_incarnation_id = incarnation_row["value"]
             snapshot_identity = {
                 "ledger_id": ledger_id,
                 "through_commit_sequence": through_sequence,
+                "store_incarnation_id": store_incarnation_id,
                 "policy": {
                     "id": policy["policy_id"],
                     "generation": policy["generation"],
@@ -2293,7 +2341,11 @@ def audit_store(store: AuthorityStore) -> dict:
             "hash_format": "sha256-canonical-json-v1",
             "schema_manifest_sha256": schema_manifest_sha256(conn),
         }
-        if metadata != expected_metadata:
+        incarnation = metadata.get("store_incarnation_id")
+        if not incarnation or not re.fullmatch(r"[0-9a-f]{32}", incarnation):
+            issues.append("store_incarnation_id is missing or malformed")
+        comparable = {key: value for key, value in metadata.items() if key != "store_incarnation_id"}
+        if comparable != expected_metadata:
             issues.append("store metadata does not match schema version 1")
 
         foreign_key_issues = conn.execute("PRAGMA foreign_key_check").fetchall()
@@ -2702,6 +2754,8 @@ def main(argv: list[str] | None = None) -> int:
             content_root = require_absolute_path(args.content_dir, "content-dir")
             socket_path = require_absolute_path(args.socket, "socket")
             store = AuthorityStore(store_path, content_root)
+            store.validate()
+            store.ensure_store_incarnation_id()
             server = BrokerServer(
                 AuthorityBroker(store),
                 socket_path,

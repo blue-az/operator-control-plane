@@ -159,11 +159,24 @@ def set_last_applied_sequence(conn: sqlite3.Connection, seq: int) -> None:
     conn.commit()
 
 
+def get_metadata(conn: sqlite3.Connection, key: str) -> str | None:
+    row = conn.execute(
+        "SELECT value FROM journal_metadata WHERE key = ?",
+        (key,),
+    ).fetchone()
+    if row is None or row["value"] is None:
+        return None
+    return str(row["value"])
+
+
 def set_metadata(conn: sqlite3.Connection, key: str, value: str) -> None:
     conn.execute(
         "INSERT OR REPLACE INTO journal_metadata (key, value) VALUES (?, ?)",
         (key, value),
     )
+
+
+STORE_INCARNATION_KEY = "store_incarnation_id"
 
 
 def save_yaml(data: any, filepath: str) -> None:
@@ -675,7 +688,13 @@ def validate_projection_heads(op_dir: str) -> None:
         conn.close()
 
 
-def reconcile_projections(op_dir: str, ledger_id: str, client: AuthorityClient) -> tuple[str, int]:
+def reconcile_projections(
+    op_dir: str,
+    ledger_id: str,
+    client: AuthorityClient,
+    *,
+    acknowledge_store_reset: bool = False,
+) -> tuple[str, int]:
     conn_journal = ensure_journal(op_dir)
 
     # 1. Recover any locally prepared transactions that may have been committed by broker
@@ -694,6 +713,41 @@ def reconcile_projections(op_dir: str, ledger_id: str, client: AuthorityClient) 
 
     broker_seq = res["snapshot"]["through_commit_sequence"]
     broker_policy = res["snapshot"]["policy"]
+    broker_incarnation = res["snapshot"].get("store_incarnation_id")
+    if not broker_incarnation:
+        conn_journal.close()
+        raise RuntimeError(
+            "broker projection.snapshot is missing store_incarnation_id "
+            "(upgrade the authority broker)"
+        )
+
+    local_incarnation = get_metadata(conn_journal, STORE_INCARNATION_KEY)
+    if local_incarnation is not None and local_incarnation != broker_incarnation:
+        if not acknowledge_store_reset:
+            conn_journal.close()
+            raise RuntimeError(
+                "store incarnation discontinuity: "
+                f"local journal remembers {local_incarnation}, "
+                f"broker reports {broker_incarnation}. "
+                "The authority store appears to have been rebuilt or replaced. "
+                "Reconciliation refuses to silently no-op or project across stores. "
+                "If this rebuild was intentional, re-run: "
+                "operator authority-reconcile --acknowledge-store-reset"
+            )
+        # Explicit operator acknowledgment: drop sequence progress and adopt the
+        # new incarnation before any projection work. Prior projected YAML is
+        # treated as untrusted until re-derived from the new store's history.
+        set_last_applied_sequence(conn_journal, 0)
+        set_metadata(conn_journal, STORE_INCARNATION_KEY, broker_incarnation)
+        conn_journal.commit()
+        # Discard prepared ops bound to the dead store; they cannot be safely
+        # replayed against a new incarnation.
+        conn_journal.execute("DELETE FROM transaction_journal WHERE state = 'prepared'")
+        conn_journal.commit()
+    elif local_incarnation is None and acknowledge_store_reset:
+        # No prior binding: treat as adopt-and-continue (first-time upgrade path).
+        set_metadata(conn_journal, STORE_INCARNATION_KEY, broker_incarnation)
+        conn_journal.commit()
 
     # 2. Check if we have prepared transactions that have since been committed on the broker
     prepared_rows = conn_journal.execute(
@@ -803,6 +857,7 @@ def reconcile_projections(op_dir: str, ledger_id: str, client: AuthorityClient) 
         (broker_seq,),
     )
     set_metadata(conn_journal, "policy_binding", canonical_json(broker_policy))
+    set_metadata(conn_journal, STORE_INCARNATION_KEY, broker_incarnation)
     conn_journal.commit()
 
     conn_journal.close()

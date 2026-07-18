@@ -36,7 +36,12 @@ To map a repository to a root-managed ledger and its Unix socket, we define a ro
 
 We treat the broker's `projection_outbox` table as an **unacknowledged durable recovery source**.
 - **Decision**: No wire-level `projection.ack` is added. The broker's audit rules expect `projection_outbox` rows to remain immutable and match commits 1:1.
-- **Recovery & Reconciliation**: The client CLI tracks the `last_applied_sequence` in its local client journal. During startup, `doctor`, or an explicit `authority-reconcile` execution, the client requests `projection.snapshot` from the broker, reconciles the latest record heads starting from its last applied sequence, and applies them sequentially.
+- **Recovery & Reconciliation**: The client CLI tracks the `last_applied_sequence` and
+  `store_incarnation_id` in its local client journal. During startup, `doctor`, or an explicit
+  `authority-reconcile` execution, the client requests `projection.snapshot` from the broker, checks
+  that the broker's `store_incarnation_id` matches the journal (failing closed on discontinuity —
+  issue #9), reconciles the latest record heads starting from its last applied sequence, and applies
+  them sequentially. Intentional store rebuilds require `authority-reconcile --acknowledge-store-reset`.
 
 ---
 

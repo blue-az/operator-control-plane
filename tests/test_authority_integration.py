@@ -1863,16 +1863,147 @@ class TestAuthorityIntegration(unittest.TestCase):
         # Start broker server again
         self.start_broker_server()
 
-        # 4. Run doctor - expect divergent_or_forged_local because local sequence (2) exceeds broker sequence (1)
+        # 4. Run doctor - expect store incarnation discontinuity (not a silent "current")
         res_doc2 = self.run_operator("doctor")
         self.assertNotEqual(res_doc2.returncode, 0)
         self.assertIn("status: divergent_or_forged_local", res_doc2.stdout)
-        self.assertIn("Local sequence 2 exceeds broker sequence 1.", res_doc2.stdout)
+        self.assertIn("Store incarnation discontinuity", res_doc2.stdout)
 
-        # 5. Run authority-reconcile - expect it to fail with sequence error
+        # 5. Run authority-reconcile - fail closed on incarnation mismatch (issue #9)
         res_rec = self.run_operator("authority-reconcile")
         self.assertNotEqual(res_rec.returncode, 0)
-        self.assertIn("local sequence 2 exceeds broker sequence 1", res_rec.stderr)
+        self.assertIn("store incarnation discontinuity", res_rec.stderr)
+        self.assertIn("--acknowledge-store-reset", res_rec.stderr)
+
+        # 6. Explicit acknowledge must not silently no-op: it adopts the new
+        # incarnation. Local YAML left from the dead store may still look
+        # "forged" relative to the new broker history — that is expected and is
+        # not a false "Successfully reconciled" with zero work.
+        res_ack = self.run_operator("authority-reconcile", "--acknowledge-store-reset")
+        self.assertEqual(
+            res_ack.returncode,
+            0,
+            f"acknowledge failed:\nstdout: {res_ack.stdout}\nstderr: {res_ack.stderr}",
+        )
+        self.assertIn("Acknowledged store reset", res_ack.stdout)
+
+        import authority_projection
+        import sqlite3
+
+        journal_path = self.temp_dir / ".operator" / "client_journal.sqlite3"
+        conn = sqlite3.connect(journal_path)
+        conn.row_factory = sqlite3.Row
+        new_incarnation = authority_projection.get_metadata(
+            conn, authority_projection.STORE_INCARNATION_KEY
+        )
+        conn.close()
+        self.assertIsNotNone(new_incarnation)
+        # Subsequent reconcile without acknowledge must succeed (same incarnation).
+        res_rec2 = self.run_operator("authority-reconcile")
+        self.assertEqual(res_rec2.returncode, 0, res_rec2.stderr)
+        self.assertIn("Successfully reconciled", res_rec2.stdout)
+
+    def test_reconcile_detects_incarnation_change_even_when_sequence_is_not_lower(
+        self,
+    ) -> None:
+        """Issue #9 acceptance #2: do not rely on broker_seq < last_applied alone.
+
+        After a store rebuild, force the client journal last_applied down so a
+        pure sequence comparison would *not* fail, while incarnation still must.
+        """
+        import authority_projection
+        import sqlite3
+
+        res = self.run_operator(
+            "task-create", "--id", "task-inc-1", "--objective", "Incarnation test"
+        )
+        self.assertEqual(res.returncode, 0)
+        res = self.run_operator(
+            "claim-add",
+            "--task",
+            "task-inc-1",
+            "--type",
+            "deployment_state",
+            "--text",
+            "Incarnation claim",
+        )
+        self.assertEqual(res.returncode, 0)
+
+        # Remember the pre-rebuild incarnation via a successful reconcile path
+        res = self.run_operator("authority-reconcile")
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        journal_path = self.temp_dir / ".operator" / "client_journal.sqlite3"
+        conn = sqlite3.connect(journal_path)
+        conn.row_factory = sqlite3.Row
+        old_incarnation = authority_projection.get_metadata(
+            conn, authority_projection.STORE_INCARNATION_KEY
+        )
+        self.assertIsNotNone(old_incarnation)
+        # Force last_applied to 0 so sequence alone cannot detect the rebuild.
+        authority_projection.set_last_applied_sequence(conn, 0)
+        conn.close()
+
+        self.stop_broker_server()
+        for suffix in ("", "-shm", "-wal"):
+            p = Path(str(self.store_path) + suffix)
+            if p.exists():
+                p.unlink()
+        if self.content_dir.exists():
+            shutil.rmtree(self.content_dir)
+        self.content_dir.mkdir()
+
+        res = subprocess.run(
+            [
+                str(BROKER_BIN),
+                "bootstrap-fixture",
+                "--store",
+                str(self.store_path),
+                "--content-dir",
+                str(self.content_dir),
+                "--bootstrap-config",
+                str(self.bootstrap_config_path),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        import authority_broker
+
+        registry = json.loads(self.registry_path.read_text())
+        registration = registry["registrations"][0]
+        enrollment_request = {
+            "protocol_version": 1,
+            "action": "commit",
+            "ledger_id": self.ledger_id,
+            "operation_key": "integration-fixture-enrollment-inc",
+            "operation": {
+                "kind": "ledger.enroll",
+                "repository_identity": registration["repository_identity"],
+                "anchor_records": [],
+                "legacy_anchor_sha256": registration["legacy_anchor_sha256"],
+            },
+            "expected": [],
+            "blob": None,
+        }
+        fixture_broker = authority_broker.AuthorityBroker(
+            authority_broker.AuthorityStore(self.store_path, self.content_dir)
+        )
+        enrollment_response, committed = fixture_broker.handle(
+            enrollment_request,
+            authority_broker.PeerCredentials(os.getpid(), 0, 0),
+        )
+        self.assertTrue(committed)
+        self.start_broker_server()
+
+        # Sequence is not lower (last_applied=0, broker has at least enroll seq),
+        # but incarnation differs — must still fail closed.
+        res_rec = self.run_operator("authority-reconcile")
+        self.assertNotEqual(res_rec.returncode, 0)
+        self.assertIn("store incarnation discontinuity", res_rec.stderr)
+        self.assertIn(old_incarnation, res_rec.stderr)
 
 
 if __name__ == "__main__":

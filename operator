@@ -3343,6 +3343,7 @@ def doctor_cmd(args) -> int:
         broker_error_code = None
         broker_policy = None
         through_seq = None
+        broker_incarnation = None
         try:
             client = authority_client.AuthorityClient(socket_path)
             after = None
@@ -3363,6 +3364,7 @@ def doctor_cmd(args) -> int:
                         pinned_seq = snapshot["through_commit_sequence"]
                         through_seq = pinned_seq
                         broker_policy = snapshot["policy"]
+                        broker_incarnation = snapshot.get("store_incarnation_id")
                     records.extend(snapshot["records"])
                     if not snapshot.get("has_more") or not snapshot.get("next_after"):
                         break
@@ -3410,6 +3412,7 @@ def doctor_cmd(args) -> int:
         journal_path = os.path.join(op_dir, "client_journal.sqlite3")
         journal_error = None
         stored_policy = None
+        local_incarnation = None
         if not os.path.exists(journal_path):
             last_applied = 0
             pending_count = 0
@@ -3426,6 +3429,9 @@ def doctor_cmd(args) -> int:
                 ).fetchone()
                 if policy_row:
                     stored_policy = json.loads(policy_row[0])
+                local_incarnation = authority_projection.get_metadata(
+                    conn_journal, authority_projection.STORE_INCARNATION_KEY
+                )
                 conn_journal.close()
             except Exception as exc:
                 journal_error = str(exc)
@@ -3434,6 +3440,8 @@ def doctor_cmd(args) -> int:
             "policy_binding: "
             f"{broker_policy['id']}@{broker_policy['generation']} {broker_policy['sha256']}"
         )
+        if broker_incarnation:
+            print(f"store_incarnation_id: {broker_incarnation}")
         if journal_error:
             print("status: divergent_or_forged_local")
             print(f"[Error] Client journal cannot be read safely: {journal_error}")
@@ -3444,6 +3452,20 @@ def doctor_cmd(args) -> int:
             print(
                 "[Error] Broker policy binding differs from the last projected binding: "
                 f"local={canonical_json(stored_policy)}, broker={canonical_json(broker_policy)}"
+            )
+            print("-" * 80)
+            return 1
+        if (
+            local_incarnation is not None
+            and broker_incarnation is not None
+            and local_incarnation != broker_incarnation
+        ):
+            print("status: divergent_or_forged_local")
+            print(
+                "[Error] Store incarnation discontinuity: "
+                f"local journal={local_incarnation}, broker={broker_incarnation}. "
+                "The authority store appears rebuilt/replaced. "
+                "Run 'operator authority-reconcile --acknowledge-store-reset' only if intentional."
             )
             print("-" * 80)
             return 1
@@ -5604,11 +5626,23 @@ def authority_reconcile_cmd(args) -> int:
         return 1
     ledger_id = enrollment.ledger_id
     socket_path = enrollment.socket_path
+    acknowledge = bool(getattr(args, "acknowledge_store_reset", False))
 
     try:
         client = authority_client.AuthorityClient(socket_path)
-        last_digest, seq = authority_projection.reconcile_projections(op_dir, ledger_id, client)
-        print(f"Successfully reconciled with broker through commit sequence {seq}.")
+        last_digest, seq = authority_projection.reconcile_projections(
+            op_dir,
+            ledger_id,
+            client,
+            acknowledge_store_reset=acknowledge,
+        )
+        if acknowledge:
+            print(
+                "Acknowledged store reset; re-projected from the current broker incarnation "
+                f"through commit sequence {seq}."
+            )
+        else:
+            print(f"Successfully reconciled with broker through commit sequence {seq}.")
         return 0
     except Exception as e:
         print(f"Error: Reconciliation failed: {e}", file=sys.stderr)
@@ -6148,8 +6182,17 @@ def main() -> None:
     )
 
     # operator authority-reconcile
-    subparsers.add_parser(
+    reconcile_parser = subparsers.add_parser(
         "authority-reconcile", help="Reconcile local state with the authority broker."
+    )
+    reconcile_parser.add_argument(
+        "--acknowledge-store-reset",
+        action="store_true",
+        help=(
+            "Explicitly acknowledge that the authority store was rebuilt/replaced "
+            "(store incarnation discontinuity). Resets local last_applied_sequence "
+            "and re-projects from the new store. Never use this for ordinary outages."
+        ),
     )
 
     args = parser.parse_args()

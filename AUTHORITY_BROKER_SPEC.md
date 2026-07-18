@@ -181,12 +181,37 @@ An authorized enrolled UID can request the latest canonical record heads:
 The first response pins `through_commit_sequence` and returns up to 16 sorted latest records. When
 `has_more` is true, the client repeats the request with that sequence and the returned `next_after`
 record key. Every page carries the same total record count, streaming records digest, policy binding,
-and snapshot digest; commits after the pinned sequence cannot leak into later pages. It returns current
-state rather than an old event delta, so a reconciler cannot apply an older event over a newer projection.
-Each record head also carries the kernel actor UID and exact policy ID, generation, and digest from the
-commit that produced that event; the top-level policy binding describes the ledger's current policy.
-The #4 broker does not write repo paths or acknowledge/materialize a projection; #6 owns that consumer
-and its operational acknowledgement behavior.
+`store_incarnation_id`, and snapshot digest; commits after the pinned sequence cannot leak into later
+pages. It returns current state rather than an old event delta, so a reconciler cannot apply an older
+event over a newer projection. Each record head also carries the kernel actor UID and exact policy ID,
+generation, and digest from the commit that produced that event; the top-level policy binding describes
+the ledger's current policy. The #4 broker does not write repo paths or acknowledge/materialize a
+projection; #6 owns that consumer and its operational acknowledgement behavior.
+
+### Store incarnation (issue #9)
+
+Each authority store mints a random `store_incarnation_id` (32 hex chars) once in `store_meta` at schema
+creation (or on first post-upgrade open of a legacy store). The ID is stable for the lifetime of that
+SQLite file and is included in every `projection.snapshot` payload and in the snapshot identity digest.
+
+**What this detects:** a client journal that remembers a prior incarnation while the broker now reports a
+different one — the observed dogfood failure mode where the store was rebuilt and sequence numbers
+restarted low (or even advanced again) while the local `last_applied_sequence` still referred to the
+dead store. Sequence comparison alone is not sufficient: a rebuild can present `broker_seq >=
+last_applied` after the client journal is partially reset, which would otherwise project foreign
+history as if continuous.
+
+**What this does not claim:** a coherent root rewrite that preserves both the SQLite file identity and
+all sequence numbers remains outside the design (same framing as policy-spec "root rewrite is
+undetectable and unclaimed"). Incarnation is a store-lifetime signal, not a cryptographic seal against
+a malicious broker UID.
+
+**Client behavior:** enrolled `authority-reconcile` / projection recovery compares the broker
+incarnation to `client_journal` metadata key `store_incarnation_id`. On mismatch it **fails closed**
+(no success message, no empty projection loop). Operators who intentionally rebuilt a disposable store
+must pass `--acknowledge-store-reset`, which drops local sequence progress, adopts the new incarnation,
+and re-projects from the new store's history. Ordinary outages, policy rotation, and revocation keep
+their existing distinct error paths.
 
 ## Idempotency and receipts
 
