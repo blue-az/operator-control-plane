@@ -52,7 +52,7 @@ and issue-boundary contracts.
 
 ## Commands
 
-The `operator` CLI exposes 20 subcommands across the task → claim → evidence → verification →
+The `operator` CLI exposes 22 subcommands across the task → claim → evidence → verification →
 session → usage lifecycle. Run `./operator <command> --help` for full flags.
 
 **Setup** — `init` creates the `.operator/` ledger in the current repo. Re-running it on an existing
@@ -97,7 +97,8 @@ YAML-only ledger baselines those records into SQLite without changing their visi
 **Usage / quota accounting**
 - `usage-add --harness H [--model M] [--outcome …]` — capture a pasted usage snippet.
 - `usage-import --harness {claude,codex,gemini-agy} [--since …] [--dry-run]` — auto-ingest
-  token/usage from harness session logs.
+  token/usage from implemented harness session-log adapters. Other registered harnesses, including Grok,
+  can use `session-start`, `usage-add`, and manual annotation until an adapter exists.
 - `usage-summary [--by-task] [--by-harness] [--by-model] [--by-lane] [--offload-audit] [--metering]` / `usage-annotate [--cost …] [--note …]`.
 
 **Briefs & handoff**

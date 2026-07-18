@@ -1380,7 +1380,7 @@ def init_cmd(args) -> int:
             "permission_profile": "default",
             "usage_source": "status",
             "transcript_source": "local",
-            "strengths": ["implementation", "local verification"],
+            "strengths": ["repo-local implementation", "local verification"],
             "known_failure_modes": [
                 "narration overclaim without evidence gates",
                 "context and usage budget pressure",
@@ -1396,9 +1396,9 @@ def init_cmd(args) -> int:
             "permission_profile": "full",
             "usage_source": "usage",
             "transcript_source": "local",
-            "strengths": ["design", "critique", "architecture", "prose"],
+            "strengths": ["architecture", "code review", "prose"],
             "known_failure_modes": [
-                "supervision recommendations can rely on unchecked data-source assumptions",
+                "recommendations can rely on unchecked data-source assumptions",
                 "high-volume execution costs",
             ],
         },
@@ -1412,10 +1412,26 @@ def init_cmd(args) -> int:
             "permission_profile": "default",
             "usage_source": "quota",
             "transcript_source": "cloud",
-            "strengths": ["broad context", "alternate review", "high-volume work"],
+            "strengths": ["broad context", "alternate implementation", "high-volume work"],
             "known_failure_modes": [
                 "execution narration can outrun evidence",
                 "fine-grained local file manipulation without tool support",
+            ],
+        },
+        "grok": {
+            "harness_id": "grok",
+            "display_name": "Grok",
+            "kind": "grok",
+            "command": None,
+            "working_directory": None,
+            "model": "configured-grok-model",
+            "permission_profile": "default",
+            "usage_source": "manual",
+            "transcript_source": "cloud",
+            "strengths": ["alternate implementation", "alternate review", "broad context"],
+            "known_failure_modes": [
+                "execution narration can outrun evidence",
+                "unimplemented automatic usage import adapter",
             ],
         },
         "copilot": {
@@ -2880,15 +2896,13 @@ def usage_import_cmd(args) -> int:
                     "raw_payload": f"Auto-imported from {ref}",
                 }
 
-        # Default lane and task_class heuristics if missing or unknown
-        if rec.get("lane") is None or rec.get("lane") == "unknown":
-            if harness_id == "gemini-agy":
-                set_record_field(rec, "lane", "local", "auto")
-            elif harness_id in ("codex", "claude"):
-                set_record_field(rec, "lane", "frontier_driver", "auto")
-            else:
-                set_record_field(rec, "lane", "unknown", "auto")
-        elif "lane" not in rec.get("field_sources", {}):
+        # Lane is an explicit economics tag, not a harness-brand inference.
+        field_sources = rec.get("field_sources", {})
+        if rec.get("lane") is None or (
+            rec.get("lane") == "unknown" and "lane" not in field_sources
+        ):
+            set_record_field(rec, "lane", "unknown", "auto")
+        elif "lane" not in field_sources:
             set_record_field(rec, "lane", rec.get("lane"), "manual")
 
         if rec.get("task_class") is None or rec.get("task_class") == "unknown":
@@ -3133,10 +3147,10 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     md.append("")
     md.append("## 6. Required Evidence")
     md.append(
-        "- **Builders attach evidence but do NOT set `--status`.** Register claims and attach evidence (`evidence-attach --claim ... --by <you>`). Leave verification to the review harness."
+        "- **Builders attach evidence but do NOT set `--status`.** Register claims and attach evidence (`evidence-attach --claim ... --by <you>`). Leave verification to a distinct verifier identity."
     )
     md.append(
-        "- **Only the review harness verifies**, with `evidence-attach --status verified --verified-by <reviewer>`."
+        "- **Only the verifier verifies**, with `evidence-attach --status verified --verified-by <reviewer>`."
     )
     md.append(
         "- **Trusted verification requires UID isolation.** `mode: enforced` must map the "
@@ -4755,7 +4769,7 @@ def usage_summary_cmd(args) -> int:
                     avoidable_spend += cost
         pct = (avoidable_spend / frontier_spend * 100.0) if frontier_spend > 0 else 0.0
         print(
-            f"{pct:.1f}% of frontier spend went to bounded work (avoidable → route to the cheap stack)."
+            f"{pct:.1f}% of frontier spend went to bounded work (avoidable -> route to an explicit lower-cost lane)."
         )
         return 0
 

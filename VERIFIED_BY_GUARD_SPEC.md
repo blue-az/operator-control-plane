@@ -5,7 +5,7 @@
 > executor binding, distinct-UID isolation, and advisory verification. Where the two differ, the
 > executor-identity spec supersedes this file.
 
-**For:** the implementing agent (Agy / Antigravity). **Reviewer:** Claude (this time the reviewer actually verifies).
+**For:** any implementing harness. **Reviewer:** a distinct verifier identity selected for the task.
 **Target:** extend `the operator CLI in this repo`. Match existing conventions.
 
 ---
@@ -45,8 +45,8 @@ For each claim, let `made = made_by`, `vby = verified_by`, `verified = (verifica
 
 ## 4. Brief generator (`generate_brief_markdown`) text change
 In the evidence/handoff guidance, replace the "verify your claims" framing with the split:
-- "**Builders attach evidence but do NOT set `--status`.** Register claims and attach evidence (`evidence-attach --claim ... --by <you>`). Leave verification to the review harness."
-- "**Only the review harness verifies**, with `evidence-attach --status verified --verified-by <reviewer>`."
+- "**Builders attach evidence but do NOT set `--status`.** Register claims and attach evidence (`evidence-attach --claim ... --by <you>`). Leave verification to a distinct verifier identity."
+- "**Only the verifier verifies**, with `evidence-attach --status verified --verified-by <reviewer>`."
 
 ## 5. Tests (`tests/test_operator.py`, subprocess style — no fixtures needed, pure ledger logic)
 1. **self-verify blocked by doctor:** task(assign=codex, review=claude); claim made_by codex; `evidence-attach --status verified --verified-by codex` → `verified_by==codex`; `doctor` → `[Error]` self-verified, exit 1.

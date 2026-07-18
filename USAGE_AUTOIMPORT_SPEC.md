@@ -1,14 +1,18 @@
 # Operator Usage Auto-Import + Activity + Manual-Override — Build Spec
 
 **For:** the implementing agent (Agy / Antigravity).
-**Supervisor / spec author:** Claude. **Reviewer:** Claude.
+**Original spec author/reviewer:** Claude. Historical author labels are provenance only; they do not
+define standing supervisor status for any harness.
 **Target:** extend the existing `operator` CLI at `the operator CLI in this repo` (single-file Python, file-backed YAML ledger under `.operator/`). Match the existing code conventions (argparse subcommands, `find_operator_dir`, `load_yaml`/`save_yaml`, `get_next_*_id`, the `doctor` issue-list pattern, subprocess-driven tests in `tests/test_operator.py`).
 
 ---
 
 ## 0. Why this exists (do not skip)
 
-This is the prerequisite for a multi-agent **domain bake-off experiment**: Claude supervises/judges, Codex and Agy each build a tau-bench domain on public data, and the operator must track **usage automatically** so the experiment's cost/effort numbers are evidence, not pasted claims. **Build this system before running the experiment.**
+This is the prerequisite for a multi-agent **domain bake-off experiment**: one or more assigned
+harnesses build a tau-bench domain on public data, one or more distinct review identities judge the
+result, and the operator must track **usage automatically** so the experiment's cost/effort numbers are
+evidence, not pasted claims. **Build this system before running the experiment.**
 
 **Hard rule — never conflate units.** Three harnesses expose different things. The system must keep them in separate, provenance-tagged fields and must never sum unlike units into one number.
 

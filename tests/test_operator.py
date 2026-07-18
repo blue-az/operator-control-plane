@@ -152,6 +152,7 @@ class TestOperatorCLI(unittest.TestCase):
         # Verify default harnesses
         self.assertTrue((op_path / "harnesses" / "codex.yaml").exists())
         self.assertTrue((op_path / "harnesses" / "claude.yaml").exists())
+        self.assertTrue((op_path / "harnesses" / "grok.yaml").exists())
 
     def test_durable_event_ledger_tracks_record_history(self) -> None:
         self.assertEqual(self.run_operator("init").returncode, 0)
@@ -2990,7 +2991,7 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(rec["lane"], "local")
         self.assertEqual(rec["task_class"], "bounded")
 
-        # 3. usage-import heuristics
+        # 3. usage-import defaults untagged lane to unknown, without brand inference.
         # Create a task for claude-import
         res = self.run_operator("task-create", "--objective", "claude-imp", "--id", "claude-task")
         self.assertEqual(res.returncode, 0)
@@ -3025,7 +3026,7 @@ class TestOperatorCLI(unittest.TestCase):
 
         data = yaml.safe_load(usage_file.read_text())
         rec = next(r for r in data if r["usage_id"] == "usage-0003")
-        self.assertEqual(rec["lane"], "frontier_driver")
+        self.assertEqual(rec["lane"], "unknown")
         self.assertEqual(rec["task_class"], "unknown")
         self.assertEqual(rec.get("field_sources", {}).get("lane"), "auto")
         self.assertEqual(rec.get("field_sources", {}).get("task_class"), "auto")
