@@ -85,6 +85,15 @@ known) and/or stdout note the evidence id. Attach itself is ordinary
 
 ## 4. Example harness wiring (Claude Code fragment)
 
+Full file: `examples/crystal-bridge-claude-hooks.fragment.json`. Uses `npx -y
+@stewie-sh/agent-crystallize` rather than a bare `agent-crystallize` binary
+name — hook subprocesses do not necessarily inherit the interactive shell
+PATH, so a bare binary name can silently fail with `command not found` while
+the `;`-chained `operator crystal-bridge` call still runs (the Operator half
+degrades gracefully either way; this only affects whether crystallize's own
+half of the chain fires). If you have the binary installed globally or at a
+known absolute path, replace the `npx -y …` prefix to skip resolve overhead.
+
 ```json
 {
   "hooks": {
@@ -92,14 +101,14 @@ known) and/or stdout note the evidence id. Attach itself is ordinary
       "matcher": "startup|resume|clear|compact",
       "hooks": [{
         "type": "command",
-        "command": "agent-crystallize hook --harness claude-code --event SessionStart; operator crystal-bridge --event SessionStart --harness claude",
+        "command": "npx -y @stewie-sh/agent-crystallize hook --harness claude-code --event SessionStart; operator crystal-bridge --event SessionStart --harness claude",
         "timeout": 45
       }]
     }],
     "Stop": [{
       "hooks": [{
         "type": "command",
-        "command": "agent-crystallize hook --harness claude-code --event Stop; operator crystal-bridge --event Stop",
+        "command": "npx -y @stewie-sh/agent-crystallize hook --harness claude-code --event Stop; operator crystal-bridge --event Stop",
         "timeout": 45
       }]
     }]

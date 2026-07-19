@@ -1,5 +1,5 @@
 {
-  "_comment": "Example Claude Code hooks fragment: crystallize first, then Operator crystal-bridge. Trust/review hooks in the harness UI before relying on them. Absolute paths to binaries recommended if NVM/PATH is unreliable in hook processes.",
+  "_comment": "Example Claude Code hooks fragment: crystallize first, then Operator crystal-bridge. Trust/review hooks in the harness UI before relying on them. Hook subprocesses do not necessarily inherit your interactive shell PATH, so this invokes agent-crystallize via 'npx -y' rather than assuming a bare binary is resolvable. If you have agent-crystallize installed globally (or at a known absolute path) and want to skip npx's resolve/version-check overhead, replace 'npx -y @stewie-sh/agent-crystallize' with that binary's absolute path (e.g. /usr/local/bin/agent-crystallize or $(npm root -g)/@stewie-sh/agent-crystallize/bin/...). 'operator' below is assumed to already be resolvable (installed/on PATH); use an absolute path to your checkout's ./operator if not.",
   "hooks": {
     "SessionStart": [
       {
@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "agent-crystallize hook --harness claude-code --event SessionStart; operator crystal-bridge --event SessionStart --harness claude",
+            "command": "npx -y @stewie-sh/agent-crystallize hook --harness claude-code --event SessionStart; operator crystal-bridge --event SessionStart --harness claude",
             "timeout": 45
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "agent-crystallize hook --harness claude-code --event Stop; operator crystal-bridge --event Stop",
+            "command": "npx -y @stewie-sh/agent-crystallize hook --harness claude-code --event Stop; operator crystal-bridge --event Stop",
             "timeout": 45
           }
         ]
