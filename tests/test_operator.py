@@ -3723,6 +3723,178 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(doc.returncode, 1, doc.stdout + "\n" + doc.stderr)
         self.assertIn("retained snapshot content changed", doc.stdout)
 
+    # ------------------------------------------------------------------
+    # Crystal↔Ledger Phase 3 (CRYSTAL_SESSION_BRIDGE_SPEC.md)
+    # ------------------------------------------------------------------
+
+    def _install_session_crystal(self, name: str = "valid-session.md") -> Path:
+        """Place a session crystal under the temp repo .agent-crystals/sessions/."""
+        sessions = Path(self.temp_dir) / ".agent-crystals" / "sessions"
+        sessions.mkdir(parents=True, exist_ok=True)
+        dest = sessions / name
+        shutil.copy2(
+            Path(__file__).resolve().parent / "fixtures" / "crystals" / name,
+            dest,
+        )
+        return dest
+
+    def test_crystal_bridge_soft_noop_without_ledger(self) -> None:
+        """No .operator → exit 0 (hooks must not brick the harness)."""
+        # setUp already chdirs to empty temp_dir without init
+        res = self.run_operator(
+            "crystal-bridge", "--event", "SessionStart", "--harness", "claude"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("soft no-op", res.stdout.lower())
+
+    def test_crystal_bridge_session_start_opens_usage(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Bridge session start",
+                "--id",
+                "bridge-start-task",
+                "--repo",
+                self.temp_dir,
+            ).returncode,
+            0,
+        )
+        res = self.run_operator(
+            "crystal-bridge",
+            "--event",
+            "SessionStart",
+            "--harness",
+            "claude-code",  # alias → claude
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+        self.assertIn("usage-", res.stdout)
+
+        task = yaml.safe_load(
+            (Path(self.temp_dir) / ".operator" / "tasks" / "bridge-start-task.yaml").read_text()
+        )
+        self.assertEqual(task["status"], "running")
+
+        usage_dir = Path(self.temp_dir) / ".operator" / "usage"
+        usage_files = list(usage_dir.glob("*.yaml"))
+        self.assertTrue(usage_files)
+        records = yaml.safe_load(usage_files[0].read_text())
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["harness_id"], "claude")
+        self.assertIsNone(records[0].get("ended_at"))
+        self.assertEqual(records[0].get("crystal_bridge", {}).get("event"), "SessionStart")
+
+        # Second SessionStart without --force is soft no-op
+        again = self.run_operator(
+            "crystal-bridge", "--event", "SessionStart", "--harness", "claude"
+        )
+        self.assertEqual(again.returncode, 0, again.stderr)
+        self.assertIn("already running", again.stdout)
+        records2 = yaml.safe_load(usage_files[0].read_text())
+        self.assertEqual(len(records2), 1)
+
+    def test_session_end_attach_crystal_auto(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Session end attach",
+                "--id",
+                "bridge-end-task",
+                "--repo",
+                self.temp_dir,
+            ).returncode,
+            0,
+        )
+        crystal = self._install_session_crystal()
+        start = self.run_operator(
+            "crystal-bridge", "--event", "SessionStart", "--harness", "codex"
+        )
+        self.assertEqual(start.returncode, 0, start.stderr)
+
+        end = self.run_operator(
+            "session-end",
+            "usage-0001",
+            "--outcome",
+            "useful",
+            "--cost",
+            "0",
+            "--attach-crystal",
+            "auto",
+        )
+        self.assertEqual(end.returncode, 0, end.stderr + end.stdout)
+        self.assertIn("attached crystal", end.stdout.lower())
+
+        ev_path = (
+            Path(self.temp_dir)
+            / ".operator"
+            / "evidence"
+            / "bridge-end-task"
+            / "evidence-0001.yaml"
+        )
+        self.assertTrue(ev_path.is_file(), ev_path)
+        evidence = yaml.safe_load(ev_path.read_text())
+        self.assertEqual(evidence["evidence_type"], "session_crystal")
+        self.assertEqual(
+            evidence["fingerprint"]["value"],
+            hashlib.sha256(crystal.read_bytes()).hexdigest(),
+        )
+        # Usage closed + bridge metadata
+        usage_files = list((Path(self.temp_dir) / ".operator" / "usage").glob("*.yaml"))
+        records = yaml.safe_load(usage_files[0].read_text())
+        self.assertIsNotNone(records[0].get("ended_at"))
+        self.assertEqual(records[0]["outcome"], "useful")
+        self.assertEqual(records[0]["crystal_bridge"].get("evidence_id"), "evidence-0001")
+
+    def test_crystal_bridge_stop_attach_idempotent(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Bridge stop attach",
+                "--id",
+                "bridge-stop-task",
+                "--repo",
+                self.temp_dir,
+            ).returncode,
+            0,
+        )
+        self._install_session_crystal()
+        self.assertEqual(
+            self.run_operator(
+                "crystal-bridge", "--event", "SessionStart", "--harness", "claude"
+            ).returncode,
+            0,
+        )
+        first = self.run_operator("crystal-bridge", "--event", "Stop")
+        self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
+        second = self.run_operator("crystal-bridge", "--event", "Stop")
+        self.assertEqual(second.returncode, 0, second.stderr + second.stdout)
+        self.assertIn("skipping duplicate", second.stdout.lower())
+
+        evidence_files = list(
+            (Path(self.temp_dir) / ".operator" / "evidence" / "bridge-stop-task").glob(
+                "evidence-*.yaml"
+            )
+        )
+        self.assertEqual(len(evidence_files), 1)
+
+    def test_crystal_bridge_rejects_status_laundering(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        res = self.run_operator(
+            "crystal-bridge",
+            "--event",
+            "SessionStart",
+            "--harness",
+            "claude",
+            "--status",
+            "verified",
+        )
+        self.assertNotEqual(res.returncode, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

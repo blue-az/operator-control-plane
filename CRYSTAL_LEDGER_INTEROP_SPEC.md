@@ -1,10 +1,11 @@
 # Crystal ↔ Ledger Interop — Build Spec
 
-> **Status: Phases 1–2 implemented (2026-07-18).** Dual audience: (a) Erik + Vinh Nguyen (author of
+> **Status: Phases 1–3 implemented (2026-07-18).** Dual audience: (a) Erik + Vinh Nguyen (author of
 > `@stewie-sh/agent-crystallize` and the PBC spec); (b) implementing agents. Phase 1 ships
 > `session_crystal` evidence type, `crystal-attach`, T6 structural validation, and advisory doctor
 > rules. Phase 2 ships `crystal-import` (draft `test_passes` extraction, fingerprint idempotency).
-> Phase 3 (hook/session bridging) remains unbuilt. Upstream schema pin:
+> Phase 3 ships the session bridge (`crystal-bridge` + `session-end --attach-crystal`); mini-spec:
+> `CRYSTAL_SESSION_BRIDGE_SPEC.md`. Upstream schema pin:
 > `agent-crystallize@0.1.9/0.1.10` (`crystal_parse.CRYSTAL_UPSTREAM_PIN`).
 
 **For:** the implementing agent. **Reviewer:** Erik. **Target:** extend the `operator` CLI in this
@@ -193,8 +194,10 @@ artifacts — same hygiene as upstream's `examples/`):
   existing evidence freshness + `test_doctor_crystal_drift_fail_closed_after_verified_import`.
 - **Phase 3** (only if Phases 1–2 prove useful in dogfood): hook/session bridging — crystallize's
   hook runner fires SessionStart/PreCompact/Stop; a thin wrapper opens `session-start` on
-  SessionStart and attaches the rolled-up session crystal at `session-end`. Separate mini-spec
-  when reached; not designed here.
+  SessionStart and attaches the rolled-up session crystal at `session-end`. **DONE 2026-07-18:**
+  mini-spec `CRYSTAL_SESSION_BRIDGE_SPEC.md`; `./operator crystal-bridge --event SessionStart|Stop`;
+  `session-end --attach-crystal auto|PATH`; example fragment
+  `examples/crystal-bridge-claude-hooks.fragment.json`.
 
 ## 9. Upstream asks (Vinh — all non-blocking; the spec works against 0.1.9 as-is)
 

@@ -1,0 +1,28 @@
+{
+  "_comment": "Example Claude Code hooks fragment: crystallize first, then Operator crystal-bridge. Trust/review hooks in the harness UI before relying on them. Absolute paths to binaries recommended if NVM/PATH is unreliable in hook processes.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "agent-crystallize hook --harness claude-code --event SessionStart; operator crystal-bridge --event SessionStart --harness claude",
+            "timeout": 45
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "agent-crystallize hook --harness claude-code --event Stop; operator crystal-bridge --event Stop",
+            "timeout": 45
+          }
+        ]
+      }
+    ]
+  }
+}

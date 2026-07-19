@@ -50,6 +50,7 @@ MUTATING_COMMANDS = {
     "evidence-attach",
     "crystal-attach",
     "crystal-import",
+    "crystal-bridge",
     "usage-add",
     "usage-import",
     "usage-annotate",
@@ -2533,6 +2534,285 @@ def crystal_import_cmd(args) -> int:
         print(
             "  (no real test bullets to extract; crystal attached as draft evidence only)"
         )
+    return 0
+
+
+CRYSTAL_BRIDGE_EVENTS = (
+    "SessionStart",
+    "UserPromptSubmit",
+    "PostToolUse",
+    "PostToolBatch",
+    "PreCompact",
+    "PostCompact",
+    "Stop",
+)
+
+CRYSTAL_HARNESS_ALIASES = {
+    "claude-code": "claude",
+    "claude": "claude",
+    "codex": "codex",
+    "gemini-agy": "gemini-agy",
+    "gemini": "gemini-agy",
+}
+
+
+def map_crystal_harness(name: str | None) -> str | None:
+    """Map crystallize/hook harness names to Operator registry ids."""
+    if not name:
+        return None
+    key = name.strip().lower()
+    if key in CRYSTAL_HARNESS_ALIASES:
+        return CRYSTAL_HARNESS_ALIASES[key]
+    return name.strip()
+
+
+def find_latest_session_crystal(repo_path: str) -> str | None:
+    """Newest session crystal under repo/.agent-crystals/sessions/*.md by mtime."""
+    if not repo_path:
+        return None
+    sessions_dir = os.path.join(os.path.abspath(repo_path), ".agent-crystals", "sessions")
+    if not os.path.isdir(sessions_dir):
+        return None
+    candidates = [
+        p
+        for p in glob.glob(os.path.join(sessions_dir, "*.md"))
+        if os.path.isfile(p)
+    ]
+    if not candidates:
+        return None
+    candidates.sort(key=lambda p: os.path.getmtime(p), reverse=True)
+    return candidates[0]
+
+
+def resolve_attach_crystal_path(
+    attach_crystal: str, repo_path: str | None
+) -> tuple[str | None, str | None]:
+    """Resolve auto|PATH for session crystal attach.
+
+    Returns (path, error_message). error_message set when resolution fails hard.
+    """
+    if not attach_crystal or not str(attach_crystal).strip():
+        return None, "empty --attach-crystal value"
+    value = str(attach_crystal).strip()
+    if value.lower() == "auto":
+        if not repo_path:
+            return None, "cannot resolve auto crystal: task has no repo path"
+        path = find_latest_session_crystal(repo_path)
+        if not path:
+            return None, (
+                f"no session crystal found under {os.path.join(repo_path, '.agent-crystals', 'sessions')}"
+            )
+        return path, None
+    path = os.path.abspath(value)
+    if not os.path.isfile(path):
+        return None, f"crystal path is not a regular file: {path}"
+    return path, None
+
+
+def attach_session_crystal_for_task(
+    op_dir: str,
+    task_id: str,
+    crystal_path: str,
+    *,
+    by: str | None = None,
+    notes: str | None = None,
+) -> tuple[int, str | None]:
+    """Attach crystal as draft evidence; idempotent on fingerprint.
+
+    Returns (exit_code, evidence_id_or_None).
+    """
+    try:
+        source_fp = fingerprint_regular_file(os.path.abspath(crystal_path))
+    except EvidenceFingerprintError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1, None
+
+    existing = find_session_crystal_by_fingerprint(op_dir, task_id, source_fp["value"])
+    if existing:
+        print(
+            f"Notice: crystal fingerprint {source_fp['value'][:12]}… already attached as "
+            f"{existing.get('evidence_id')} on task '{task_id}'; skipping duplicate attach."
+        )
+        return 0, existing.get("evidence_id")
+
+    attach_args = argparse.Namespace(
+        path=crystal_path,
+        claim=None,
+        task_id=task_id,
+        by=by,
+        hash=None,
+        notes=notes or "crystal-bridge session attach",
+        status=None,
+        verified_by=None,
+        verdict=None,
+    )
+    rc = crystal_attach_cmd(attach_args)
+    if rc != 0:
+        return rc, None
+    attached = find_session_crystal_by_fingerprint(op_dir, task_id, source_fp["value"])
+    return 0, (attached or {}).get("evidence_id")
+
+
+def tag_usage_crystal_bridge(op_dir: str, usage_id: str, bridge_info: dict) -> None:
+    """Merge crystal_bridge metadata onto an existing usage record (best-effort)."""
+    filepath, records, idx = find_usage_record(op_dir, usage_id)
+    if not filepath or records is None or idx is None:
+        return
+    rec = records[idx]
+    existing = rec.get("crystal_bridge")
+    if isinstance(existing, dict):
+        merged = dict(existing)
+        merged.update(bridge_info)
+        rec["crystal_bridge"] = merged
+    else:
+        rec["crystal_bridge"] = bridge_info
+    rec["executor"] = get_executor_identity()
+    save_yaml(records, filepath)
+
+
+def crystal_bridge_cmd(args) -> int:
+    """Phase 3 hook/session bridge (see CRYSTAL_SESSION_BRIDGE_SPEC.md).
+
+    Soft-fails (exit 0) when no ledger is present so harness hooks stay safe.
+    Never sets verification status (T2). Never writes .agent-crystals/ (T1).
+    """
+    event = getattr(args, "event", None) or "SessionStart"
+    if event not in CRYSTAL_BRIDGE_EVENTS:
+        print(
+            f"Error: unknown bridge event '{event}'; expected one of "
+            f"{', '.join(CRYSTAL_BRIDGE_EVENTS)}",
+            file=sys.stderr,
+        )
+        return 1
+
+    # Fail closed if status smuggled onto namespace.
+    if getattr(args, "status", None) is not None:
+        print(
+            "Error: crystal-bridge does not accept verification status (T2).",
+            file=sys.stderr,
+        )
+        return 1
+
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print(
+            "Notice: crystal-bridge: no .operator ledger here; soft no-op "
+            f"(event={event})."
+        )
+        return 0
+
+    # Events other than SessionStart/Stop are crystallize-owned.
+    if event not in {"SessionStart", "Stop"}:
+        print(f"Notice: crystal-bridge: event {event} is a soft no-op (crystallize-owned).")
+        return 0
+
+    if event == "SessionStart":
+        harness_id = map_crystal_harness(getattr(args, "harness", None))
+        if not harness_id:
+            print(
+                "Error: crystal-bridge SessionStart requires --harness "
+                "(e.g. claude, codex, claude-code).",
+                file=sys.stderr,
+            )
+            return 1
+        harness_path = os.path.join(op_dir, "harnesses", f"{harness_id}.yaml")
+        if not os.path.exists(harness_path):
+            print(
+                f"Error: harness '{harness_id}' not registered under .operator/harnesses/.",
+                file=sys.stderr,
+            )
+            return 1
+
+        resolved_task = resolve_task_record(op_dir, getattr(args, "task_id", None))
+        if not resolved_task:
+            if getattr(args, "task_id", None):
+                return 1  # explicit task missing → hard fail
+            print(
+                "Notice: crystal-bridge SessionStart: no current task; soft no-op."
+            )
+            return 0
+        task_id, _task_path, task = resolved_task
+
+        if task.get("status") == "running" and not getattr(args, "force", False):
+            open_ids = get_open_usage_ids_for_task(op_dir, task_id)
+            print(
+                f"Notice: crystal-bridge SessionStart: task '{task_id}' already running "
+                f"(open usage: {', '.join(open_ids) or 'none'}); soft no-op."
+            )
+            return 0
+
+        start_args = argparse.Namespace(
+            task_id=task_id,
+            harness_id=harness_id,
+            force=bool(getattr(args, "force", False)),
+            lane=getattr(args, "lane", None),
+            task_class=getattr(args, "task_class", None),
+        )
+        rc = session_start_cmd(start_args)
+        if rc != 0:
+            return rc
+
+        open_ids = get_open_usage_ids_for_task(op_dir, task_id)
+        usage_id = open_ids[-1] if open_ids else None
+        if usage_id:
+            tag_usage_crystal_bridge(
+                op_dir,
+                usage_id,
+                {
+                    "event": "SessionStart",
+                    "harness": harness_id,
+                    "bridged_at": get_current_utc_iso(),
+                },
+            )
+            print(f"crystal-bridge: SessionStart linked usage '{usage_id}' on task '{task_id}'.")
+        return 0
+
+    # Stop — attach latest session crystal; do not close usage.
+    resolved_task = resolve_task_record(op_dir, getattr(args, "task_id", None))
+    if not resolved_task:
+        if getattr(args, "task_id", None):
+            return 1
+        print("Notice: crystal-bridge Stop: no current task; soft no-op.")
+        return 0
+    task_id, _task_path, task = resolved_task
+    repo_path = task.get("repo")
+
+    crystal_arg = getattr(args, "crystal", None) or "auto"
+    crystal_path, err = resolve_attach_crystal_path(crystal_arg, repo_path)
+    if err or not crystal_path:
+        msg = err or "crystal path unresolved"
+        if getattr(args, "require_crystal", False):
+            print(f"Error: crystal-bridge Stop: {msg}", file=sys.stderr)
+            return 1
+        print(f"Notice: crystal-bridge Stop: {msg}; soft no-op.")
+        return 0
+
+    rc, evidence_id = attach_session_crystal_for_task(
+        op_dir,
+        task_id,
+        crystal_path,
+        by=getattr(args, "by", None),
+        notes="crystal-bridge Stop attach",
+    )
+    if rc != 0:
+        return rc
+
+    open_ids = get_open_usage_ids_for_task(op_dir, task_id)
+    if open_ids and evidence_id:
+        tag_usage_crystal_bridge(
+            op_dir,
+            open_ids[-1],
+            {
+                "event": "Stop",
+                "attached_at": get_current_utc_iso(),
+                "crystal_path": os.path.abspath(crystal_path),
+                "evidence_id": evidence_id,
+            },
+        )
+    print(
+        f"crystal-bridge: Stop attached {os.path.basename(crystal_path)} "
+        f"as {evidence_id or 'evidence'} on task '{task_id}'."
+    )
     return 0
 
 
@@ -5766,6 +6046,56 @@ def session_end_cmd(args) -> int:
         _, task_path, task = resolved_task
         preflight_projection(op_dir, task_path, task)
 
+    # Phase 3: optional session crystal attach before closing usage (draft only).
+    attach_crystal = getattr(args, "attach_crystal", None)
+    if attach_crystal:
+        if not task_id or not task:
+            msg = "session-end --attach-crystal requires the usage record to reference a task"
+            if getattr(args, "require_crystal", False):
+                print(f"Error: {msg}.", file=sys.stderr)
+                return 1
+            print(f"Warning: {msg}; closing session without crystal attach.")
+        else:
+            crystal_path, err = resolve_attach_crystal_path(attach_crystal, task.get("repo"))
+            if err or not crystal_path:
+                msg = err or "crystal path unresolved"
+                if getattr(args, "require_crystal", False):
+                    print(f"Error: session-end --attach-crystal: {msg}", file=sys.stderr)
+                    return 1
+                print(f"Warning: session-end --attach-crystal: {msg}; closing without attach.")
+            else:
+                attach_rc, evidence_id = attach_session_crystal_for_task(
+                    op_dir,
+                    task_id,
+                    crystal_path,
+                    by=getattr(args, "by", None),
+                    notes=f"session-end attach for {usage_id}",
+                )
+                if attach_rc != 0:
+                    if getattr(args, "require_crystal", False):
+                        return attach_rc
+                    print(
+                        "Warning: session-end crystal attach failed; closing session anyway.",
+                        file=sys.stderr,
+                    )
+                else:
+                    bridge = usage_record.get("crystal_bridge")
+                    if not isinstance(bridge, dict):
+                        bridge = {}
+                    bridge = dict(bridge)
+                    bridge.update(
+                        {
+                            "session_end_attach_at": get_current_utc_iso(),
+                            "crystal_path": os.path.abspath(crystal_path),
+                            "evidence_id": evidence_id,
+                        }
+                    )
+                    usage_record["crystal_bridge"] = bridge
+                    print(
+                        f"session-end: attached crystal {os.path.basename(crystal_path)} "
+                        f"as {evidence_id or 'evidence'}."
+                    )
+
     utc_now = get_current_utc_iso()
     usage_record["ended_at"] = utc_now
     usage_record["outcome"] = args.outcome
@@ -6216,6 +6546,65 @@ def main() -> None:
             "(default: off; open loops are often stale)."
         ),
     )
+
+    # operator crystal-bridge (Crystal↔Ledger Phase 3)
+    crystal_bridge_parser = subparsers.add_parser(
+        "crystal-bridge",
+        help=(
+            "Hook/session bridge: SessionStart opens operator session-start; "
+            "Stop attaches the latest session crystal (draft only). "
+            "Soft-no-op when no ledger is present."
+        ),
+    )
+    crystal_bridge_parser.add_argument(
+        "--event",
+        default="SessionStart",
+        choices=list(CRYSTAL_BRIDGE_EVENTS),
+        help="Crystallize-compatible hook event name (default: SessionStart).",
+    )
+    crystal_bridge_parser.add_argument(
+        "--harness",
+        default=None,
+        help="Harness id or crystallize alias (required for SessionStart: claude, codex, …).",
+    )
+    crystal_bridge_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+    crystal_bridge_parser.add_argument(
+        "--crystal",
+        default=None,
+        help="For Stop: crystal path or 'auto' (default auto under .agent-crystals/sessions/).",
+    )
+    crystal_bridge_parser.add_argument(
+        "--by", default=None, help="Actor recorded on attach (Stop path)."
+    )
+    crystal_bridge_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="SessionStart: force session-start even if task is already running.",
+    )
+    crystal_bridge_parser.add_argument(
+        "--require-crystal",
+        action="store_true",
+        default=False,
+        help="Stop: exit non-zero if no session crystal can be attached.",
+    )
+    crystal_bridge_parser.add_argument(
+        "--lane",
+        choices=["local", "frontier_driver", "frontier_author"],
+        default=None,
+        help="Optional lane passed through to session-start.",
+    )
+    crystal_bridge_parser.add_argument(
+        "--class",
+        dest="task_class",
+        choices=["bounded", "hard"],
+        default=None,
+        help="Optional task class passed through to session-start.",
+    )
     evidence_parser.add_argument(
         "--task",
         dest="task_id",
@@ -6567,6 +6956,22 @@ def main() -> None:
         action="store_true",
         help="Interactively paste final status notes from stdin.",
     )
+    session_end_parser.add_argument(
+        "--attach-crystal",
+        default=None,
+        metavar="AUTO_OR_PATH",
+        help=(
+            "Before closing, attach a session crystal as draft session_crystal evidence: "
+            "'auto' picks the newest file under <task.repo>/.agent-crystals/sessions/, "
+            "or pass an explicit Markdown path (Crystal↔Ledger Phase 3)."
+        ),
+    )
+    session_end_parser.add_argument(
+        "--require-crystal",
+        action="store_true",
+        default=False,
+        help="With --attach-crystal, abort session-end if the crystal cannot be attached.",
+    )
 
     # operator session-list
     session_list_parser = subparsers.add_parser("session-list", help="List coding sessions.")
@@ -6638,6 +7043,7 @@ def main() -> None:
         "evidence-attach": evidence_attach_cmd,
         "crystal-attach": crystal_attach_cmd,
         "crystal-import": crystal_import_cmd,
+        "crystal-bridge": crystal_bridge_cmd,
         "usage-add": usage_add_cmd,
         "usage-import": usage_import_cmd,
         "usage-annotate": usage_annotate_cmd,
