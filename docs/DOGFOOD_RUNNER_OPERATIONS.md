@@ -3,7 +3,7 @@
 **Repo:** `blue-az/operator-control-plane`
 **Issue:** [#8](https://github.com/blue-az/operator-control-plane/issues/8) — *Operations: Add a typed, resumable privileged dogfood runner*
 **Module:** `dogfood_runner.py`, wired into `operator-admin dogfood-plan|dogfood-run|dogfood-status|dogfood-resume`
-**Status:** Slices 1–5 shipped (8 of 9 named phase types, one deliberately not added — see §4). See §4 for exactly what that does and does not cover.
+**Status:** Slices 1–5 shipped (8 of 9 named phase types, one deliberately not added — see §4). AC9's live disposable-ledger run happened 2026-07-20 (`docs/DOGFOOD_AC9_TRACK_A_RUN.md`, `docs/DOGFOOD_AC9_TRACK_B_RUN.md`) and found two real bugs unit tests missed, both fixed. See §4 for exactly what that does and does not cover.
 
 This module replaces the manual `sudo` relay used during Issue #7 dogfood
 with a typed, digest-bound, checkpointed plan/run model. It is **operational
@@ -219,7 +219,7 @@ for real elsewhere in the suite.
 
 | # | Acceptance criterion (issue #8) | Status | Why |
 |---|---|---|---|
-| 1 | Complete disposable-ledger sequence, fewer relays | **Not met** | 8 of 9 named phase types exist; only `reconciliation` intentionally not built (§4) — the remaining gap is a real disposable-ledger run (AC9), not missing code |
+| 1 | Complete disposable-ledger sequence, fewer relays | **Partially met** | `installation_verification`/`privilege_evidence`/`enrollment`/`rotation`/`revocation_checks`/`final_audit` all demonstrated live end-to-end (Track A+B, below); `service_lifecycle`/`outage_recovery` against a real production unit name (Track C) deliberately still skipped as highest host risk; `reconciliation` intentionally not built (§4) |
 | 2 | Unknown ops/fields, arbitrary-command attempts fail before state change | **Met** | Enumerated catalog, exact-key **and** value-level validation (`validate_args`), no shell/exec surface; unit-tested |
 | 3 | Bindings can't be redirected by cwd/env/symlink/repo state/agent UID | **Met** for bindings this module touches | Independent recomputation against live state, path-safety primitives reused unchanged |
 | 4 | Exact retries idempotent; interruption resumes without duplicates | **Met** for all eight implemented phase types | `operation_key`/`request_digest`, fault-injection-tested crash recovery; `service_lifecycle`'s idempotency rests on an explicitly noted `systemctl` behavior assumption (§3) rather than content-comparison; `rotation`'s and `revocation_checks`'s rest on `rotate_deployment`'s/`revoke_deployment`'s own already-active/already-revoked no-op detection; `outage_recovery`'s rests on its own already-healthy check plus that same `systemctl` assumption |
@@ -227,7 +227,7 @@ for real elsewhere in the suite.
 | 6 | Run-state/evidence writes atomic, durable, race-resistant, auditable | Atomicity/durability **met**; unprivileged-read auditing **deferred** | `dogfood-status` still requires root — export today is admin-mediated, not a separate read path |
 | 7 | Builder/verifier accounts can't gain privileged access through the runner | **Met, proven with a real root test** | `require_root()` gates every dogfood subcommand identically to every existing admin command |
 | 8 | Focused tests + guarded real-root tests | **Met** for the phase types/attack classes implemented so far | `tests/test_dogfood_runner.py` (74 tests), `tests/test_dogfood_runner_root.py` (4 tests) |
-| 9 | Real disposable-ledger run before production recommendation | **Not met** | All code is in place; what's missing is the actual live run demonstrating review, execution, interruption, resume, final audit, and evidence export end-to-end — not more phase types |
+| 9 | Real disposable-ledger run before production recommendation | **Met** | Live on the desktop host, 2026-07-20: review (`dogfood-plan`), execution, a genuine (not simulated) `SIGKILL` interruption mid-handler, resume without duplication, final audit, and evidence export all demonstrated for real against ledger `dogfood-desktop-ac9`, plus enrollment/rotation/terminal revocation in a second run — `docs/DOGFOOD_AC9_TRACK_A_RUN.md`, `docs/DOGFOOD_AC9_TRACK_B_RUN.md`. Still not a recommendation for a *production* ledger — that determination is separate and unmade. |
 
 Per the issue's own stop condition: this module does not claim the P3
 boundary is reduced. It replaces the manual relay only for the phase types
