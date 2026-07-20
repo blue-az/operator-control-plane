@@ -391,6 +391,100 @@ class TestDogfoodRunnerRootBoundary(unittest.TestCase):
         self.assertEqual(result["status"], "awaiting_approval")
         self.assertFalse(result["executed"][0]["idempotent_replay"])
 
+    # -- rotation and revocation_checks against their REAL, unmocked underlying
+    # functions (rotate_deployment/revoke_deployment) -- unlike enrollment and
+    # service_lifecycle, these don't need a live broker process or real systemctl
+    # (they operate directly against the sqlite store via run_store_action), so
+    # there's no reason to mock them here the way the other root tests must.
+    # Added after a live AC9 campaign proved this path manually but the automated
+    # root suite had never exercised it for real.
+
+    def test_real_rotation_then_real_terminal_revocation(self) -> None:
+        policy = self.install()
+
+        generation_2 = dict(self.policy_value)
+        generation_2["policy_generation"] = 2
+        generation_2["previous_policy_sha256"] = policy.sha256
+        policy_file_2 = self.inputs / "generation-2.json"
+        policy_file_2.write_text(json.dumps(generation_2) + "\n", encoding="ascii")
+        os.chmod(policy_file_2, 0o600)
+        policy_2 = authority_admin.parse_policy_object(generation_2)
+
+        rotation_plan = self.valid_plan_object(policy)
+        rotation_plan["phases"] = [
+            {"phase_id": 1, "operation": "installation_verification", "args": {}, "mutating": False},
+            {
+                "phase_id": 2,
+                "operation": "rotation",
+                "args": {"policy_file": str(policy_file_2)},
+                "mutating": True,
+            },
+            {"phase_id": 3, "operation": "final_audit", "args": {}, "mutating": False},
+        ]
+        plan_path = self.inputs / "rotation-plan.json"
+        plan_path.write_text(json.dumps(rotation_plan) + "\n", encoding="ascii")
+        os.chmod(plan_path, 0o600)
+
+        planned = dogfood_runner.dogfood_plan_command(
+            self.layout, self.dogfood_layout, plan_path, 0, 0
+        )
+        first = dogfood_runner.dogfood_run_command(
+            self.layout, self.dogfood_layout, planned["plan_digest"], None, None, 0, 0
+        )
+        self.assertEqual(first["status"], "awaiting_approval")
+        run_id = first["run_id"]
+        rotated = dogfood_runner.dogfood_run_command(
+            self.layout, self.dogfood_layout, planned["plan_digest"], run_id, 2, 0, 0
+        )
+        self.assertEqual(rotated["status"], "completed")
+
+        deployment = authority_admin.audit_deployment(self.layout, 0, 0, validate_binding=False)
+        self.assertEqual(deployment["current"]["policy_generation"], 2)
+        self.assertEqual(deployment["current"]["policy_sha256"], policy_2.sha256)
+        self.assertEqual(deployment["current"]["state"], "active")
+
+        revoke_plan = self.valid_plan_object(policy_2)
+        revoke_plan["phases"] = [
+            {"phase_id": 1, "operation": "installation_verification", "args": {}, "mutating": False},
+            {
+                "phase_id": 2,
+                "operation": "revocation_checks",
+                "args": {"expected_policy_sha256": policy_2.sha256},
+                "mutating": True,
+            },
+            {"phase_id": 3, "operation": "final_audit", "args": {}, "mutating": False},
+        ]
+        revoke_plan_path = self.inputs / "revoke-plan.json"
+        revoke_plan_path.write_text(json.dumps(revoke_plan) + "\n", encoding="ascii")
+        os.chmod(revoke_plan_path, 0o600)
+
+        revoke_planned = dogfood_runner.dogfood_plan_command(
+            self.layout, self.dogfood_layout, revoke_plan_path, 0, 0
+        )
+        revoke_first = dogfood_runner.dogfood_run_command(
+            self.layout, self.dogfood_layout, revoke_planned["plan_digest"], None, None, 0, 0
+        )
+        self.assertEqual(revoke_first["status"], "awaiting_approval")
+        revoke_run_id = revoke_first["run_id"]
+        revoked = dogfood_runner.dogfood_run_command(
+            self.layout, self.dogfood_layout, revoke_planned["plan_digest"], revoke_run_id, 2, 0, 0
+        )
+        self.assertEqual(revoked["status"], "completed")
+
+        final_deployment = authority_admin.audit_deployment(self.layout, 0, 0, validate_binding=False)
+        self.assertEqual(final_deployment["current"]["state"], "revoked")
+
+        # Revocation is terminal: any further dogfood run against this ledger must
+        # fail closed on the state check specifically -- reusing revoke_planned's own
+        # digest (still correctly bound to generation 2's policy_id/sha) isolates
+        # this from policy_binding_mismatch, which would fire first against a plan
+        # bound to the now-superseded generation 1 policy.
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.dogfood_run_command(
+                self.layout, self.dogfood_layout, revoke_planned["plan_digest"], None, None, 0, 0
+            )
+        self.assertEqual(ctx.exception.code, "policy_revoked")
+
 
 if __name__ == "__main__":
     unittest.main()
