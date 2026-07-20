@@ -552,6 +552,100 @@ class OutageRecoveryArgsTests(unittest.TestCase):
         self.assertEqual(ctx.exception.code, "mutating_flag_mismatch")
 
 
+class RevocationChecksArgsTests(unittest.TestCase):
+    """Slice 5: expected_policy_sha256 gets the same require_sha256 shape already used
+    for policy_binding.sha256/expected_release_digest elsewhere in the plan schema.
+    Deliberately no ledger_id field -- see phase_revocation_checks's own comment on
+    why that would be a redirection vector rather than a convenience."""
+
+    def valid_raw_with_phase(self, phase: dict) -> dict:
+        return {
+            "plan_schema_version": 1,
+            "created_at": "2026-07-20T00:00:00Z",
+            "created_by_uid": 0,
+            "ledger_id": "ledger-x",
+            "policy_binding": {"policy_id": "policy-x", "generation": 1, "sha256": "a" * 64},
+            "expected_release_digest": "b" * 64,
+            "host_paths": {
+                "install_root": "/usr/libexec/operator-control-plane",
+                "config_root": "/etc/operator-control-plane",
+                "state_root": "/var/lib/operator-control-plane",
+                "runtime_root": "/run/operator-control-plane",
+            },
+            "phases": [phase],
+        }
+
+    def test_valid_sha256_accepted(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "revocation_checks",
+                "args": {"expected_policy_sha256": "c" * 64},
+                "mutating": True,
+            }
+        )
+        plan = dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(plan.phases[0]["args"], {"expected_policy_sha256": "c" * 64})
+
+    def test_uppercase_sha256_normalized_to_lowercase(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "revocation_checks",
+                "args": {"expected_policy_sha256": "C" * 64},
+                "mutating": True,
+            }
+        )
+        plan = dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(plan.phases[0]["args"], {"expected_policy_sha256": "c" * 64})
+
+    def test_malformed_sha256_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "revocation_checks",
+                "args": {"expected_policy_sha256": "not-a-real-digest"},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError):
+            dogfood_runner.parse_plan_object(raw)
+
+    def test_ledger_id_field_not_accepted(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "revocation_checks",
+                "args": {"expected_policy_sha256": "c" * 64, "ledger_id": "some-other-ledger"},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "unknown_field")
+
+    def test_missing_expected_policy_sha256_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {"phase_id": 1, "operation": "revocation_checks", "args": {}, "mutating": True}
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "missing_field")
+
+    def test_mutating_false_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "revocation_checks",
+                "args": {"expected_policy_sha256": "c" * 64},
+                "mutating": False,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "mutating_flag_mismatch")
+
+
 # ---------------------------------------------------------------------------
 # validate_plan_bindings -- redirection/tamper resistance
 # ---------------------------------------------------------------------------
@@ -1077,6 +1171,28 @@ class RotationPhaseHandlerTests(unittest.TestCase):
             )
         mocked.assert_called_once_with(
             self.layout, Path("/home/erik/generation-2.json"), 0, 0, validate_accounts=True
+        )
+        self.assertIs(result, sentinel)
+
+
+class RevocationChecksPhaseHandlerTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.layout = authority_admin.InstallLayout.production()
+
+    def test_derives_ledger_id_from_live_audit_not_from_args(self) -> None:
+        sentinel = object()
+        deployment = {"ledger_id": "ledger-from-live-audit", "current": {"state": "active"}}
+        with mock.patch.object(
+            authority_admin, "audit_deployment", return_value=deployment
+        ) as audit_mock, mock.patch.object(
+            authority_admin, "revoke_deployment", return_value=sentinel
+        ) as revoke_mock:
+            result = dogfood_runner.phase_revocation_checks(
+                self.layout, 0, 0, {"expected_policy_sha256": "c" * 64}
+            )
+        audit_mock.assert_called_once_with(self.layout, 0, 0)
+        revoke_mock.assert_called_once_with(
+            self.layout, "ledger-from-live-audit", "c" * 64, 0, 0
         )
         self.assertIs(result, sentinel)
 

@@ -280,19 +280,49 @@ def phase_rotation(layout: InstallLayout, admin_uid: int, admin_gid: int, args: 
     )
 
 
+def validate_revocation_checks_args(args: dict) -> dict:
+    return {"expected_policy_sha256": authority_admin.require_sha256(
+        args["expected_policy_sha256"], "expected_policy_sha256"
+    )}
+
+
+def phase_revocation_checks(
+    layout: InstallLayout, admin_uid: int, admin_gid: int, args: dict
+) -> dict:
+    # ledger_id is deliberately NOT a phase argument here (unlike the CLI's "revoke"
+    # command, which takes both --ledger-id and --expected-policy-sha256): the plan is
+    # already ledger-scoped at the top level and validate_plan_bindings already checked
+    # that against live state, so re-accepting an independent ledger_id in this phase's
+    # own args would only create a redirection vector (a plan whose top-level ledger_id
+    # says one thing and whose revocation phase quietly targets another). Deriving it
+    # from a fresh audit_deployment call instead mirrors phase_enrollment's own pattern.
+    # revoke_deployment itself already handles an already-revoked ledger as a no-op
+    # rather than erroring, which is what makes a pending-checkpoint resume of this
+    # phase safe -- but note revocation is terminal for that ledger (no un-revoke),
+    # so this phase should only ever run against a disposable dogfood ledger.
+    deployment = authority_admin.audit_deployment(layout, admin_uid, admin_gid)
+    return authority_admin.revoke_deployment(
+        layout,
+        deployment["ledger_id"],
+        args["expected_policy_sha256"],
+        admin_uid,
+        admin_gid,
+    )
+
+
 # Slice 1 shipped the two read-only phase types with an existing clean primitive to
 # wrap plus the one mutating phase type with an existing clean primitive to wrap.
 # Slice 2 added service_lifecycle and enrollment; slice 3 added rotation; slice 4
-# adds outage_recovery -- all additive catalog entries against the same engine, not
-# architectural changes, exactly as slice 1 anticipated. "Reconciliation" from the
-# issue's own phase list was deliberately NOT added here: there is no clean
+# added outage_recovery; slice 5 adds revocation_checks -- all additive catalog
+# entries against the same engine, not architectural changes, exactly as slice 1
+# anticipated. This is the last named phase type: "reconciliation" from the
+# issue's own phase list was deliberately NOT added -- there is no clean
 # root-owned primitive behind it (see docs/DOGFOOD_RUNNER_OPERATIONS.md) -- the
 # client-side reconcile flow (`operator authority-reconcile`) runs as the repo's own
 # UID, not root, and pulling it into this module would mean the admin acting as
 # that UID for that repo's local state, the wrong direction across the P3 actor
 # boundary. The store-integrity half of "reconciliation" is already exercised
-# inside audit_deployment, which installation_verification/final_audit already
-# wrap. Remaining phase type: revocation checks.
+# inside audit_deployment, which installation_verification/final_audit already wrap.
 PHASE_CATALOG: dict[str, PhaseSpec] = {
     "installation_verification": PhaseSpec(
         mutating=False,
@@ -335,6 +365,12 @@ PHASE_CATALOG: dict[str, PhaseSpec] = {
         args_schema=frozenset(),
         handler=phase_outage_recovery,
         validate_args=validate_no_args,
+    ),
+    "revocation_checks": PhaseSpec(
+        mutating=True,
+        args_schema=frozenset({"expected_policy_sha256"}),
+        handler=phase_revocation_checks,
+        validate_args=validate_revocation_checks_args,
     ),
 }
 
