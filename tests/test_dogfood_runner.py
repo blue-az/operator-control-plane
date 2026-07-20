@@ -941,6 +941,48 @@ class ExecutionEngineTests(DogfoodRunnerTestBase):
         self.assertEqual(recovered["status"], "awaiting_approval")
         self.assertEqual(recovered["next_phase"], 2)
 
+    def test_acknowledge_recovered_survives_past_an_earlier_completed_phase(self) -> None:
+        # Regression test for a real bug caught during a live AC9 Track B run: phase 1
+        # succeeding first (a pure idempotent replay on retry) silently cleared
+        # acknowledge_recovered before phase 2 -- the phase that actually needed it --
+        # was ever reached, so a correctly-flagged resume was rejected as if the flag
+        # had never been passed at all.
+        calls = {"count": 0}
+
+        def fails_once(layout, uid, gid, args):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise authority_admin.AdminError("synthetic_failure", "boom")
+            return {"ok": True}
+
+        fake_catalog = fake_phase_catalog(
+            installation_verification=lambda layout, uid, gid, args: {"ok": True},
+            privilege_evidence=fails_once,
+            final_audit=lambda layout, uid, gid, args: {"ok": True},
+        )
+        with mock.patch.object(dogfood_runner, "PHASE_CATALOG", fake_catalog):
+            first = self.run_command()
+            self.assertEqual(first["status"], "awaiting_approval")
+            run_id = first["run_id"]
+
+            with self.assertRaises(authority_admin.AdminError) as ctx:
+                self.run_command(run_id=run_id, approve_phase=2)
+            self.assertEqual(ctx.exception.code, "synthetic_failure")
+
+            status = self.status(run_id)
+            self.assertEqual(status["phases"][0]["state"], "completed")
+            self.assertEqual(status["phases"][1]["state"], "failed")
+
+            # approve_phase and acknowledge_recovered together, exactly as required
+            # live -- phase 1 (already completed) must not consume/clear the
+            # acknowledgement before phase 2 is reached.
+            recovered = self.resume_command(run_id, approve_phase=2, acknowledge_recovered=True)
+        self.assertEqual(recovered["status"], "completed")
+        by_phase = {p["phase_id"]: p["idempotent_replay"] for p in recovered["executed"]}
+        self.assertTrue(by_phase[1])
+        self.assertFalse(by_phase[2])
+        self.assertFalse(by_phase[3])
+
     def test_tampered_completed_checkpoint_fails_closed_on_next_read(self) -> None:
         with mock.patch.object(dogfood_runner, "PHASE_CATALOG", fake_phase_catalog(
             installation_verification=lambda layout, uid, gid, args: {"ok": True}

@@ -989,7 +989,12 @@ def execute_run(
         )
         # acknowledge_recovered authorizes at most one retry of one previously-failed
         # phase per resume invocation; later phases in the same pass never inherit it.
-        acknowledge_recovered = False
+        # Only consume it once it has actually reached a phase that wasn't already
+        # completed -- an already-completed phase earlier in the plan takes the pure
+        # idempotent-replay path inside execute_phase without ever consulting the flag,
+        # so it must not clear it before it reaches the phase it was meant for.
+        if state != "completed":
+            acknowledge_recovered = False
         write_run_state(
             dogfood_layout, run_id, plan, phase["phase_id"] + 1, "running", install_layout, identity
         )
