@@ -3,7 +3,7 @@
 **Repo:** `blue-az/operator-control-plane`
 **Issue:** [#8](https://github.com/blue-az/operator-control-plane/issues/8) — *Operations: Add a typed, resumable privileged dogfood runner*
 **Module:** `dogfood_runner.py`, wired into `operator-admin dogfood-plan|dogfood-run|dogfood-status|dogfood-resume`
-**Status:** Slice 1 (P0+P1) shipped. See §4 for exactly what that does and does not cover.
+**Status:** Slices 1 and 2 shipped (5 of 9 phase types). See §4 for exactly what that does and does not cover.
 
 This module replaces the manual `sudo` relay used during Issue #7 dogfood
 with a typed, digest-bound, checkpointed plan/run model. It is **operational
@@ -17,9 +17,16 @@ separate privilege path.
 ## 1. Concepts
 
 **Plan.** A reviewed, canonical JSON document naming an enumerated,
-sequential list of phases (`installation_verification`, `privilege_evidence`,
-`final_audit` in this slice), each a typed operation with a fixed (currently
-empty) argument schema — no shell strings, no arbitrary executables. A plan
+sequential list of phases, each a typed operation with a fixed argument
+schema — no shell strings, no arbitrary executables. Five operations exist
+so far: `installation_verification`, `privilege_evidence`, `final_audit`
+(empty args), `service_lifecycle` (one field, `action`, a closed enum of
+`stop`/`start`/`restart` — not a free-form string), and `enrollment` (one
+field, `repository_path`, validated as a non-empty absolute path). Every
+operation's args are validated both by key-set (`require_exact_keys`) and,
+where the schema is non-empty, by value (`PhaseSpec.validate_args`) before a
+plan is ever stored — an unrecognized `action` or a relative
+`repository_path` fails at parse time, not at execution time. A plan
 is bound to a `ledger_id`, a `policy_binding` (policy id/generation/sha256),
 an `expected_release_digest`, and the four fixed `InstallLayout` paths.
 `operator-admin dogfood-plan` parses, validates those bindings against live
@@ -85,16 +92,23 @@ starts a new run and executes every consecutive read-only phase
 automatically. It stops **immediately before** the first phase marked
 `mutating: true`, prints that phase's id/operation, and does not touch it.
 Re-invoke with `--run-id <id> --approve-phase <N>` to authorize exactly that
-one phase; execution then continues automatically through any trailing
-read-only phases (in this slice, `final_audit`).
+one phase; execution then continues automatically until the next mutating
+phase (if any) or the end of the plan. A plan with several mutating phases
+back-to-back (e.g. `service_lifecycle` then `privilege_evidence`) needs a
+separate `--approve-phase` call for each one — approving one mutating phase
+never authorizes the next.
 
 **Interruption.** If the process dies between the durable `pending`
 checkpoint write and the phase's own completion, the next `dogfood-run` or
 `dogfood-resume` against the same run sees `pending` (not `not_started`) and
-re-invokes the handler — no duplicate authority commits or evidence records,
-because the handlers this slice wraps (`audit_deployment`,
-`collect_evidence_deployment`) are themselves read-mostly or
-content-comparing.
+re-invokes the handler — no duplicate authority commits or evidence records.
+`installation_verification`/`final_audit`/`privilege_evidence` are safe to
+re-invoke because their underlying `authority_admin` calls are read-mostly or
+content-comparing; `service_lifecycle`'s safety rests on a different,
+explicitly noted assumption instead — `systemctl stop`/`start` are
+themselves no-ops against a service already in the target state, so retrying
+`stop`/`start`/`restart` is safe, but this is an assumption about `systemctl`
+being well-behaved, not something this module independently re-verifies.
 
 **Recovery from a failed phase.** A phase whose handler raised leaves a
 `failed` checkpoint and halts the run. Neither `dogfood-run` nor
@@ -108,32 +122,54 @@ for review carries no mutation risk. In this slice that is still an
 admin-mediated export (the command itself still requires root) rather than a
 separately-readable path — see §4.
 
-## 4. What this slice implements, and what's still open
+## 4. What's implemented, and what's still open
 
-Three phase types are wired: `installation_verification` and `final_audit`
-(both wrap `authority_admin.audit_deployment`), and `privilege_evidence`
-(wraps `authority_admin.collect_evidence_deployment`, the one mutating phase
-type in this slice — it writes `layout.evidence_path`). Adding the
-remaining phase types the issue names — `service_lifecycle`, `enrollment`,
-`reconciliation`, `rotation`, `outage_recovery`, `revocation_checks` — is a
-`PHASE_CATALOG` entry plus a thin handler against this same engine, not an
-architectural change; each already has an existing `authority_admin.py`
-function to wrap (`stop_service`/`start_service`/`probe_*`,
-`enroll_repository`, `rotate_deployment`, `revoke_deployment`).
+Five phase types are wired:
+
+- `installation_verification`, `final_audit` — wrap `authority_admin.audit_deployment` (read-only).
+- `privilege_evidence` — wraps `authority_admin.collect_evidence_deployment` (mutating: writes `layout.evidence_path`).
+- `service_lifecycle` (slice 2) — wraps `stop_service`/`start_service`/`probe_service_active`/`probe_socket_health`, one typed `action` field (`stop`/`start`/`restart`). Mutating.
+- `enrollment` (slice 2) — wraps `enroll_repository`, gated by the same policy-state and `privilege_preflight`/`boundary_ready` checks `authority_admin.main()`'s own `enroll` command already enforces (re-homed into a phase handler, not weakened). One typed `repository_path` field. Mutating.
+
+Adding the remaining phase types the issue names —
+`reconciliation`, `rotation`, `outage_recovery`, `revocation_checks` — is
+still just a `PHASE_CATALOG` entry plus a thin handler against this same
+engine, not an architectural change; each already has an existing
+`authority_admin.py` function to wrap (`rotate_deployment`,
+`revoke_deployment`). Slice 2 is the confirmation of that claim: two more
+phase types landed with zero changes to the checkpoint/idempotency engine,
+`execute_run`, or the command entry points — only new `PHASE_CATALOG`
+entries, handlers, and `validate_args` functions. Slice 2 also proved
+something slice 1 couldn't: a plan with several mutating phases in a row
+requires a *separate* `--approve-phase` for each one, not one approval that
+silently covers the rest (`tests/test_dogfood_runner_root.py`'s
+`test_real_install_multi_mutating_phase_plan_requires_separate_approvals`).
+
+A known, deliberate testing gap: `stop_service`/`start_service`/
+`probe_service_active` shell out to real `systemctl` against a unit *name*
+that does not respect a disposable test root — unlike the rest of this
+module's primitives, they cannot be safely exercised for real under a temp
+`InstallLayout.under(root)` fixture (a real `systemctl` call there would
+target whatever unit happens to be registered on the real host under that
+name, if any). The pre-existing `authority_admin.py` test suite already
+avoids this for the same reason; `dogfood_runner`'s tests follow the same
+convention and always mock these three functions. `probe_socket_health` is
+exempt from this concern (it is a plain Unix-socket connect that does
+respect the test root) and is exercised for real elsewhere in the suite.
 
 | # | Acceptance criterion (issue #8) | Status | Why |
 |---|---|---|---|
-| 1 | Complete disposable-ledger sequence, fewer relays | **Not met** | Only 3 of 9 phase types exist |
-| 2 | Unknown ops/fields, arbitrary-command attempts fail before state change | **Met** | Enumerated catalog, exact-key validation, no shell/exec surface; unit-tested |
-| 3 | Bindings can't be redirected by cwd/env/symlink/repo state/agent UID | **Met** for bindings this slice touches | Independent recomputation against live state, path-safety primitives reused unchanged |
-| 4 | Exact retries idempotent; interruption resumes without duplicates | **Met** for the one mutating phase type that exists | `operation_key`/`request_digest`, fault-injection-tested crash recovery |
-| 5 | Failed assertions stop the phase; resume can't skip a failed gate | **Met** for slice-1 phases | Enforced by the completed-checkpoint scan every phase now goes through |
+| 1 | Complete disposable-ledger sequence, fewer relays | **Not met** | 5 of 9 phase types exist; reconciliation/rotation/outage-recovery/revocation-checks still missing |
+| 2 | Unknown ops/fields, arbitrary-command attempts fail before state change | **Met** | Enumerated catalog, exact-key **and** value-level validation (`validate_args`), no shell/exec surface; unit-tested |
+| 3 | Bindings can't be redirected by cwd/env/symlink/repo state/agent UID | **Met** for bindings this module touches | Independent recomputation against live state, path-safety primitives reused unchanged |
+| 4 | Exact retries idempotent; interruption resumes without duplicates | **Met** for all five implemented phase types | `operation_key`/`request_digest`, fault-injection-tested crash recovery; `service_lifecycle`'s idempotency rests on an explicitly noted `systemctl` behavior assumption (§3) rather than content-comparison |
+| 5 | Failed assertions stop the phase; resume can't skip a failed gate | **Met** | Enforced by the completed-checkpoint scan every phase goes through; proven with multiple back-to-back mutating phases in slice 2 |
 | 6 | Run-state/evidence writes atomic, durable, race-resistant, auditable | Atomicity/durability **met**; unprivileged-read auditing **deferred** | `dogfood-status` still requires root — export today is admin-mediated, not a separate read path |
 | 7 | Builder/verifier accounts can't gain privileged access through the runner | **Met, proven with a real root test** | `require_root()` gates every dogfood subcommand identically to every existing admin command |
-| 8 | Focused tests + guarded real-root tests | **Met** for the phase types/attack classes this slice covers | `tests/test_dogfood_runner.py`, `tests/test_dogfood_runner_root.py` |
+| 8 | Focused tests + guarded real-root tests | **Met** for the phase types/attack classes implemented so far | `tests/test_dogfood_runner.py` (52 tests), `tests/test_dogfood_runner_root.py` (4 tests) |
 | 9 | Real disposable-ledger run before production recommendation | **Not met** | Requires the remaining phase types |
 
-Per the issue's own stop condition: this slice does not claim the P3
+Per the issue's own stop condition: this module does not claim the P3
 boundary is reduced. It replaces the manual relay only for the phase types
 implemented so far, under the same `require_root()` / root-owned-code
 boundary that already existed.
@@ -145,7 +181,12 @@ python3 -m pytest tests/test_dogfood_runner.py -v          # unprivileged, herme
 sudo python3 -m pytest tests/test_dogfood_runner_root.py -v  # guarded, real root required
 ```
 
-The root-gated suite proves the non-root-UID denial (acceptance criterion 7)
-and a real crash-window recovery via `write_protected_file`'s fault hook
-against genuinely root-owned files; it is skipped automatically when not run
-as root.
+The root-gated suite proves the non-root-UID denial (acceptance criterion 7),
+a real end-to-end plan/run/approve/status/resume flow against a genuinely
+root-owned install, the separate-approval-per-mutating-phase property with
+multiple mutating phases in one plan, and a real crash-window recovery via
+`write_protected_file`'s fault hook against genuinely root-owned files; it is
+skipped automatically when not run as root. `sudo` must invoke the project
+venv's interpreter directly (`sudo /path/to/venv/bin/python3 -m pytest ...`)
+— the system Python `sudo` defaults to under most distros won't have pytest
+installed.

@@ -111,6 +111,15 @@ class PhaseSpec:
     mutating: bool
     args_schema: frozenset[str]
     handler: Callable[[InstallLayout, int, int, dict], dict]
+    # Pure function: validates and returns a normalized args dict, or raises AdminError.
+    # Called only after require_exact_keys has already confirmed the key set matches
+    # args_schema -- this is the value-level check (closed vocabulary, no free-form
+    # strings) for operations whose args_schema is non-empty.
+    validate_args: Callable[[dict], dict]
+
+
+def validate_no_args(args: dict) -> dict:
+    return {}
 
 
 def phase_installation_verification(
@@ -129,22 +138,114 @@ def phase_final_audit(layout: InstallLayout, admin_uid: int, admin_gid: int, arg
     return authority_admin.audit_deployment(layout, admin_uid, admin_gid)
 
 
-# Slice 1 covers only the two read-only phase types with an existing clean
-# primitive to wrap plus the one mutating phase type with an existing clean
-# primitive to wrap. Remaining phase types (service lifecycle, enrollment,
-# reconciliation, rotation, outage/recovery, revocation checks) are deferred
-# to later slices and are added here as additional catalog entries against
-# this same engine -- not architectural changes. See
-# docs/DOGFOOD_RUNNER_OPERATIONS.md.
+SERVICE_LIFECYCLE_ACTIONS = frozenset({"stop", "start", "restart"})
+
+
+def validate_service_lifecycle_args(args: dict) -> dict:
+    action = args["action"]
+    if not isinstance(action, str) or action not in SERVICE_LIFECYCLE_ACTIONS:
+        raise AdminError(
+            "invalid_plan",
+            f"service_lifecycle action must be one of {sorted(SERVICE_LIFECYCLE_ACTIONS)}",
+        )
+    return {"action": action}
+
+
+def phase_service_lifecycle(
+    layout: InstallLayout, admin_uid: int, admin_gid: int, args: dict
+) -> dict:
+    # systemctl stop/start are idempotent no-ops against an already-stopped/started unit,
+    # which is what makes this handler safe to re-invoke on a pending-checkpoint resume --
+    # the same assumption every other slice-1/2 handler in this catalog relies on, just
+    # resting on systemctl's own behavior here instead of read-only/content-comparing
+    # authority_admin calls.
+    action = args["action"]
+    if action in ("stop", "restart"):
+        authority_admin.stop_service(layout)
+    if action in ("start", "restart"):
+        authority_admin.start_service(layout)
+        if not authority_admin.probe_socket_health(layout):
+            raise AdminError(
+                "service_not_healthy", f"service did not become healthy after {action}"
+            )
+        return {"action": action, "active": True, "socket_healthy": True}
+    active = authority_admin.probe_service_active(layout)
+    if active:
+        raise AdminError("service_still_active", "service did not stop")
+    return {"action": action, "active": active}
+
+
+def validate_enrollment_args(args: dict) -> dict:
+    value = args["repository_path"]
+    if not isinstance(value, str) or not value:
+        raise AdminError("invalid_plan", "enrollment repository_path must be a non-empty string")
+    path = Path(value)
+    if not path.is_absolute():
+        raise AdminError("invalid_plan", "enrollment repository_path must be an absolute path")
+    return {"repository_path": str(path)}
+
+
+def phase_enrollment(layout: InstallLayout, admin_uid: int, admin_gid: int, args: dict) -> dict:
+    # Mirrors authority_admin.main()'s own "enroll" dispatch branch exactly (same
+    # policy-state and boundary_ready gates) -- this phase does not weaken or bypass
+    # either precondition, it just re-homes the same sequence into a phase handler.
+    repo_path = Path(args["repository_path"])
+    deployment = authority_admin.audit_deployment(layout, admin_uid, admin_gid)
+    if deployment["current"]["state"] != "active":
+        raise AdminError("policy_revoked", "cannot enroll under a revoked policy")
+    boundary = authority_admin.privilege_preflight(layout, admin_uid, admin_gid)
+    if not boundary["boundary_ready"]:
+        unresolved = [
+            check["id"]
+            for check in boundary["checks"]
+            if check["status"] not in {"pass", "not_applicable"}
+        ]
+        raise AdminError(
+            "privilege_precondition_unproven",
+            "enrollment is blocked until every privilege precondition passes",
+            unresolved_checks=unresolved,
+        )
+    return authority_admin.enroll_repository(
+        authority_admin.REGISTRY_PATH, repo_path, deployment["ledger_id"], layout.socket_path
+    )
+
+
+# Slice 1 shipped the two read-only phase types with an existing clean primitive to
+# wrap plus the one mutating phase type with an existing clean primitive to wrap.
+# Slice 2 adds service_lifecycle and enrollment -- both additive catalog entries
+# against the same engine, not architectural changes, exactly as slice 1 anticipated.
+# Remaining phase types (reconciliation, rotation, outage/recovery, revocation checks)
+# are still deferred. See docs/DOGFOOD_RUNNER_OPERATIONS.md.
 PHASE_CATALOG: dict[str, PhaseSpec] = {
     "installation_verification": PhaseSpec(
-        mutating=False, args_schema=frozenset(), handler=phase_installation_verification
+        mutating=False,
+        args_schema=frozenset(),
+        handler=phase_installation_verification,
+        validate_args=validate_no_args,
     ),
     "privilege_evidence": PhaseSpec(
-        mutating=True, args_schema=frozenset(), handler=phase_privilege_evidence
+        mutating=True,
+        args_schema=frozenset(),
+        handler=phase_privilege_evidence,
+        validate_args=validate_no_args,
     ),
     "final_audit": PhaseSpec(
-        mutating=False, args_schema=frozenset(), handler=phase_final_audit
+        mutating=False,
+        args_schema=frozenset(),
+        handler=phase_final_audit,
+        validate_args=validate_no_args,
+    ),
+    "service_lifecycle": PhaseSpec(
+        mutating=True,
+        args_schema=frozenset({"action"}),
+        handler=phase_service_lifecycle,
+        validate_args=validate_service_lifecycle_args,
+    ),
+    "enrollment": PhaseSpec(
+        mutating=True,
+        args_schema=frozenset({"repository_path"}),
+        handler=phase_enrollment,
+        validate_args=validate_enrollment_args,
     ),
 }
 
@@ -234,6 +335,7 @@ def parse_plan_object(raw: object) -> DogfoodPlan:
         if not isinstance(args, dict):
             raise AdminError("invalid_plan", f"phase {index} args must be an object")
         authority_admin.require_exact_keys(args, spec.args_schema, f"phase {index} args")
+        normalized_args = spec.validate_args(args)
         mutating = phase["mutating"]
         if not isinstance(mutating, bool):
             raise AdminError("invalid_plan", f"phase {index} mutating must be a boolean")
@@ -244,7 +346,12 @@ def parse_plan_object(raw: object) -> DogfoodPlan:
                 f"{operation!r} is mutating={spec.mutating!r}",
             )
         phases.append(
-            {"phase_id": index, "operation": operation, "args": args, "mutating": spec.mutating}
+            {
+                "phase_id": index,
+                "operation": operation,
+                "args": normalized_args,
+                "mutating": spec.mutating,
+            }
         )
 
     normalized = {

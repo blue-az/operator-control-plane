@@ -196,7 +196,7 @@ class TestDogfoodRunnerRootBoundary(unittest.TestCase):
 
         fake_catalog["privilege_evidence"] = dogfood_runner.PhaseSpec(
             mutating=real_spec.mutating, args_schema=real_spec.args_schema,
-            handler=synthetic_privilege_evidence,
+            handler=synthetic_privilege_evidence, validate_args=real_spec.validate_args,
         )
 
         with mock.patch.object(dogfood_runner, "PHASE_CATALOG", fake_catalog):
@@ -244,6 +244,95 @@ class TestDogfoodRunnerRootBoundary(unittest.TestCase):
             self.assertEqual(resumed["status"], "completed")
             self.assertTrue(all(p["idempotent_replay"] for p in resumed["executed"]))
 
+    # -- Slice 2: a plan with more than one mutating phase (service_lifecycle,
+    # privilege_evidence, enrollment) requires a SEPARATE approval for each one
+    # -- approving phase 2 must not also let phase 3 or phase 4 run without
+    # their own approvals. service_lifecycle and enrollment wrap the same
+    # mocked/synthetic primitives used above and in the unprivileged suite --
+    # real systemctl and a real broker socket are out of scope for the reasons
+    # documented at the top of this file. -------------------------------------
+
+    def test_real_install_multi_mutating_phase_plan_requires_separate_approvals(self) -> None:
+        policy = self.install()
+        raw = self.valid_plan_object(policy)
+        raw["phases"] = [
+            {"phase_id": 1, "operation": "installation_verification", "args": {}, "mutating": False},
+            {"phase_id": 2, "operation": "service_lifecycle", "args": {"action": "restart"}, "mutating": True},
+            {"phase_id": 3, "operation": "privilege_evidence", "args": {}, "mutating": True},
+            {"phase_id": 4, "operation": "enrollment", "args": {"repository_path": str(self.root / "enroll-target")}, "mutating": True},
+            {"phase_id": 5, "operation": "final_audit", "args": {}, "mutating": False},
+        ]
+        plan_path = self.inputs / "multi-plan.json"
+        plan_path.write_text(json.dumps(raw) + "\n", encoding="ascii")
+        os.chmod(plan_path, 0o600)
+
+        fake_catalog = dict(dogfood_runner.PHASE_CATALOG)
+        evidence_spec = fake_catalog["privilege_evidence"]
+        enrollment_spec = fake_catalog["enrollment"]
+
+        def synthetic_privilege_evidence(layout, admin_uid, admin_gid, args):
+            return authority_admin.collect_evidence_deployment(
+                layout, admin_uid, admin_gid,
+                collector=lambda _layout, _identity, _policy: self.synthetic_evidence(policy),
+            )
+
+        def synthetic_enrollment(layout, admin_uid, admin_gid, args):
+            return {"ok": True, "synthetic_enrollment_of": args["repository_path"]}
+
+        fake_catalog["privilege_evidence"] = dogfood_runner.PhaseSpec(
+            mutating=evidence_spec.mutating, args_schema=evidence_spec.args_schema,
+            handler=synthetic_privilege_evidence, validate_args=evidence_spec.validate_args,
+        )
+        fake_catalog["enrollment"] = dogfood_runner.PhaseSpec(
+            mutating=enrollment_spec.mutating, args_schema=enrollment_spec.args_schema,
+            handler=synthetic_enrollment, validate_args=enrollment_spec.validate_args,
+        )
+
+        with mock.patch.object(dogfood_runner, "PHASE_CATALOG", fake_catalog), \
+             mock.patch.object(authority_admin, "stop_service") as stop_mock, \
+             mock.patch.object(authority_admin, "start_service") as start_mock, \
+             mock.patch.object(authority_admin, "probe_socket_health", return_value=True):
+            plan_result = dogfood_runner.dogfood_plan_command(
+                self.layout, self.dogfood_layout, plan_path, 0, 0
+            )
+            first = dogfood_runner.dogfood_run_command(
+                self.layout, self.dogfood_layout, plan_result["plan_digest"], None, None, 0, 0
+            )
+            self.assertEqual(first["status"], "awaiting_approval")
+            self.assertEqual(first["next_phase"], 2)
+            run_id = first["run_id"]
+            stop_mock.assert_not_called()
+            start_mock.assert_not_called()
+
+            second = dogfood_runner.dogfood_run_command(
+                self.layout, self.dogfood_layout, plan_result["plan_digest"], run_id, 2, 0, 0
+            )
+            # Approving phase 2 (service_lifecycle) must not also execute phase 3
+            # (privilege_evidence, also mutating) -- each mutating phase needs its
+            # own separate approval, even back-to-back ones.
+            self.assertEqual(second["status"], "awaiting_approval")
+            self.assertEqual(second["next_phase"], 3)
+            stop_mock.assert_called_once_with(self.layout)
+            start_mock.assert_called_once_with(self.layout)
+
+            third = dogfood_runner.dogfood_run_command(
+                self.layout, self.dogfood_layout, plan_result["plan_digest"], run_id, 3, 0, 0
+            )
+            self.assertEqual(third["status"], "awaiting_approval")
+            self.assertEqual(third["next_phase"], 4)
+
+            fourth = dogfood_runner.dogfood_run_command(
+                self.layout, self.dogfood_layout, plan_result["plan_digest"], run_id, 4, 0, 0
+            )
+            self.assertEqual(fourth["status"], "completed")
+
+        status = dogfood_runner.dogfood_status_command(
+            self.layout, self.dogfood_layout, run_id, 0, 0
+        )
+        self.assertEqual(status["status"], "completed")
+        enrollment_checkpoint = next(p for p in status["phases"] if p["operation"] == "enrollment")
+        self.assertEqual(enrollment_checkpoint["state"], "completed")
+
     # -- Acceptance criterion 4: a durable crash between "phase attempt
     # recorded" and "handler invoked" recovers deterministically. -----------
 
@@ -277,7 +366,8 @@ class TestDogfoodRunnerRootBoundary(unittest.TestCase):
         fake_catalog = dict(dogfood_runner.PHASE_CATALOG)
         real_spec = fake_catalog["installation_verification"]
         fake_catalog["installation_verification"] = dogfood_runner.PhaseSpec(
-            mutating=real_spec.mutating, args_schema=real_spec.args_schema, handler=counting_handler
+            mutating=real_spec.mutating, args_schema=real_spec.args_schema,
+            handler=counting_handler, validate_args=real_spec.validate_args,
         )
 
         with mock.patch.object(dogfood_runner, "PHASE_CATALOG", fake_catalog):

@@ -48,7 +48,10 @@ def fake_phase_catalog(**overrides) -> dict:
     for operation, handler in overrides.items():
         spec = catalog[operation]
         catalog[operation] = dogfood_runner.PhaseSpec(
-            mutating=spec.mutating, args_schema=spec.args_schema, handler=handler
+            mutating=spec.mutating,
+            args_schema=spec.args_schema,
+            handler=handler,
+            validate_args=spec.validate_args,
         )
     return catalog
 
@@ -255,6 +258,151 @@ class PlanParsingTests(unittest.TestCase):
     def test_non_dict_plan_rejected(self) -> None:
         with self.assertRaises(authority_admin.AdminError):
             dogfood_runner.parse_plan_object(["not", "a", "dict"])
+
+
+class ServiceLifecycleAndEnrollmentArgsTests(unittest.TestCase):
+    """Slice 2: value-level (not just key-set) validation for the two operations
+    with non-empty args_schema -- closed vocabulary, no free-form strings."""
+
+    def valid_raw_with_phase(self, phase: dict) -> dict:
+        return {
+            "plan_schema_version": 1,
+            "created_at": "2026-07-20T00:00:00Z",
+            "created_by_uid": 0,
+            "ledger_id": "ledger-x",
+            "policy_binding": {"policy_id": "policy-x", "generation": 1, "sha256": "a" * 64},
+            "expected_release_digest": "b" * 64,
+            "host_paths": {
+                "install_root": "/usr/libexec/operator-control-plane",
+                "config_root": "/etc/operator-control-plane",
+                "state_root": "/var/lib/operator-control-plane",
+                "runtime_root": "/run/operator-control-plane",
+            },
+            "phases": [phase],
+        }
+
+    def test_service_lifecycle_valid_actions_accepted(self) -> None:
+        for action in sorted(dogfood_runner.SERVICE_LIFECYCLE_ACTIONS):
+            with self.subTest(action=action):
+                raw = self.valid_raw_with_phase(
+                    {
+                        "phase_id": 1,
+                        "operation": "service_lifecycle",
+                        "args": {"action": action},
+                        "mutating": True,
+                    }
+                )
+                plan = dogfood_runner.parse_plan_object(raw)
+                self.assertEqual(plan.phases[0]["args"], {"action": action})
+
+    def test_service_lifecycle_unknown_action_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "service_lifecycle",
+                "args": {"action": "reboot_the_host"},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "invalid_plan")
+
+    def test_service_lifecycle_missing_action_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {"phase_id": 1, "operation": "service_lifecycle", "args": {}, "mutating": True}
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "missing_field")
+
+    def test_service_lifecycle_arbitrary_command_in_action_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "service_lifecycle",
+                "args": {"action": "start; rm -rf /"},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "invalid_plan")
+
+    def test_enrollment_valid_absolute_path_accepted(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "enrollment",
+                "args": {"repository_path": "/home/erik/some-repo"},
+                "mutating": True,
+            }
+        )
+        plan = dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(plan.phases[0]["args"], {"repository_path": "/home/erik/some-repo"})
+
+    def test_enrollment_relative_path_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "enrollment",
+                "args": {"repository_path": "some-repo"},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "invalid_plan")
+
+    def test_enrollment_empty_path_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "enrollment",
+                "args": {"repository_path": ""},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError):
+            dogfood_runner.parse_plan_object(raw)
+
+    def test_enrollment_non_string_path_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "enrollment",
+                "args": {"repository_path": 12345},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError):
+            dogfood_runner.parse_plan_object(raw)
+
+    def test_enrollment_extra_field_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "enrollment",
+                "args": {"repository_path": "/x", "shell": "rm -rf /"},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "unknown_field")
+
+    def test_mutating_false_rejected_for_both_new_operations(self) -> None:
+        for operation, args in (
+            ("service_lifecycle", {"action": "start"}),
+            ("enrollment", {"repository_path": "/x"}),
+        ):
+            with self.subTest(operation=operation):
+                raw = self.valid_raw_with_phase(
+                    {"phase_id": 1, "operation": operation, "args": args, "mutating": False}
+                )
+                with self.assertRaises(authority_admin.AdminError) as ctx:
+                    dogfood_runner.parse_plan_object(raw)
+                self.assertEqual(ctx.exception.code, "mutating_flag_mismatch")
 
 
 # ---------------------------------------------------------------------------
@@ -600,6 +748,105 @@ class PhaseHandlerWiringTests(unittest.TestCase):
             result = dogfood_runner.phase_privilege_evidence("layout", 0, 0, {})
         mocked.assert_called_once_with("layout", 0, 0)
         self.assertIs(result, sentinel)
+
+
+class ServiceLifecyclePhaseHandlerTests(unittest.TestCase):
+    """Never invokes real systemctl -- stop_service/start_service/probe_service_active
+    shell out against a unit *name*, not anything relative to a disposable test root
+    (unlike probe_socket_health, which is a real Unix-socket connect and so is safe to
+    exercise for real); the existing authority_admin test suite avoids this for the
+    same reason (grep shows zero unmocked calls to those three anywhere in it)."""
+
+    def test_stop_action_calls_stop_service_and_confirms_inactive(self) -> None:
+        with mock.patch.object(authority_admin, "stop_service") as stop_mock, \
+             mock.patch.object(authority_admin, "start_service") as start_mock, \
+             mock.patch.object(authority_admin, "probe_service_active", return_value=False) as probe_mock:
+            result = dogfood_runner.phase_service_lifecycle("layout", 0, 0, {"action": "stop"})
+        stop_mock.assert_called_once_with("layout")
+        start_mock.assert_not_called()
+        probe_mock.assert_called_once_with("layout")
+        self.assertEqual(result, {"action": "stop", "active": False})
+
+    def test_stop_action_raises_if_service_still_active(self) -> None:
+        with mock.patch.object(authority_admin, "stop_service"), \
+             mock.patch.object(authority_admin, "probe_service_active", return_value=True):
+            with self.assertRaises(authority_admin.AdminError) as ctx:
+                dogfood_runner.phase_service_lifecycle("layout", 0, 0, {"action": "stop"})
+        self.assertEqual(ctx.exception.code, "service_still_active")
+
+    def test_start_action_calls_start_service_and_confirms_healthy(self) -> None:
+        with mock.patch.object(authority_admin, "stop_service") as stop_mock, \
+             mock.patch.object(authority_admin, "start_service") as start_mock, \
+             mock.patch.object(authority_admin, "probe_socket_health", return_value=True) as probe_mock:
+            result = dogfood_runner.phase_service_lifecycle("layout", 0, 0, {"action": "start"})
+        stop_mock.assert_not_called()
+        start_mock.assert_called_once_with("layout")
+        probe_mock.assert_called_once_with("layout")
+        self.assertEqual(result, {"action": "start", "active": True, "socket_healthy": True})
+
+    def test_start_action_raises_if_socket_not_healthy(self) -> None:
+        with mock.patch.object(authority_admin, "start_service"), \
+             mock.patch.object(authority_admin, "probe_socket_health", return_value=False):
+            with self.assertRaises(authority_admin.AdminError) as ctx:
+                dogfood_runner.phase_service_lifecycle("layout", 0, 0, {"action": "start"})
+        self.assertEqual(ctx.exception.code, "service_not_healthy")
+
+    def test_restart_action_calls_stop_then_start(self) -> None:
+        calls = []
+        with mock.patch.object(authority_admin, "stop_service", side_effect=lambda layout: calls.append("stop")), \
+             mock.patch.object(authority_admin, "start_service", side_effect=lambda layout: calls.append("start")), \
+             mock.patch.object(authority_admin, "probe_socket_health", return_value=True):
+            result = dogfood_runner.phase_service_lifecycle("layout", 0, 0, {"action": "restart"})
+        self.assertEqual(calls, ["stop", "start"])
+        self.assertEqual(result, {"action": "restart", "active": True, "socket_healthy": True})
+
+
+class EnrollmentPhaseHandlerTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.layout = authority_admin.InstallLayout.production()
+
+    def test_success_delegates_through_audit_and_preflight_to_enroll_repository(self) -> None:
+        sentinel = object()
+        deployment = {"current": {"state": "active"}, "ledger_id": "ledger-x"}
+        boundary = {"boundary_ready": True, "checks": []}
+        with mock.patch.object(authority_admin, "audit_deployment", return_value=deployment) as audit_mock, \
+             mock.patch.object(authority_admin, "privilege_preflight", return_value=boundary) as preflight_mock, \
+             mock.patch.object(authority_admin, "enroll_repository", return_value=sentinel) as enroll_mock:
+            result = dogfood_runner.phase_enrollment(
+                self.layout, 0, 0, {"repository_path": "/home/erik/repo"}
+            )
+        audit_mock.assert_called_once_with(self.layout, 0, 0)
+        preflight_mock.assert_called_once_with(self.layout, 0, 0)
+        enroll_mock.assert_called_once_with(
+            authority_admin.REGISTRY_PATH, Path("/home/erik/repo"), "ledger-x", self.layout.socket_path
+        )
+        self.assertIs(result, sentinel)
+
+    def test_revoked_policy_blocks_before_preflight_or_enroll(self) -> None:
+        deployment = {"current": {"state": "revoked"}, "ledger_id": "ledger-x"}
+        with mock.patch.object(authority_admin, "audit_deployment", return_value=deployment), \
+             mock.patch.object(authority_admin, "privilege_preflight") as preflight_mock, \
+             mock.patch.object(authority_admin, "enroll_repository") as enroll_mock:
+            with self.assertRaises(authority_admin.AdminError) as ctx:
+                dogfood_runner.phase_enrollment(self.layout, 0, 0, {"repository_path": "/x"})
+        self.assertEqual(ctx.exception.code, "policy_revoked")
+        preflight_mock.assert_not_called()
+        enroll_mock.assert_not_called()
+
+    def test_boundary_not_ready_blocks_before_enroll(self) -> None:
+        deployment = {"current": {"state": "active"}, "ledger_id": "ledger-x"}
+        boundary = {
+            "boundary_ready": False,
+            "checks": [{"id": "sudo.authorization", "status": "fail"}],
+        }
+        with mock.patch.object(authority_admin, "audit_deployment", return_value=deployment), \
+             mock.patch.object(authority_admin, "privilege_preflight", return_value=boundary), \
+             mock.patch.object(authority_admin, "enroll_repository") as enroll_mock:
+            with self.assertRaises(authority_admin.AdminError) as ctx:
+                dogfood_runner.phase_enrollment(self.layout, 0, 0, {"repository_path": "/x"})
+        self.assertEqual(ctx.exception.code, "privilege_precondition_unproven")
+        self.assertEqual(ctx.exception.details["unresolved_checks"], ["sudo.authorization"])
+        enroll_mock.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
