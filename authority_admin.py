@@ -50,6 +50,7 @@ INSTALLED_SOURCE_ASSETS = {
     "authority_admin.py": 0o644,
     "operator-admin": 0o755,
     "socket_permission_helper.py": 0o644,
+    "dogfood_runner.py": 0o644,
 }
 RELEASE_MANIFEST_NAME = "release.json"
 UPGRADE_JOURNAL_SCHEMA_VERSION = 1
@@ -2551,7 +2552,7 @@ def read_release_assets(
     release_dir: Path, layout: InstallLayout, identity: DeploymentIdentity
 ) -> dict[str, bytes]:
     # Deliberately reuses read_source_assets: a release directory and an install --source-dir
-    # are the same shape (the four INSTALLED_SOURCE_ASSETS files, admin-controlled, root-owned
+    # are the same shape (the INSTALLED_SOURCE_ASSETS files, admin-controlled, root-owned
     # ancestors), staged the same way, so the same ancestor-safety walk and per-file read apply.
     return read_source_assets(release_dir, layout, identity)
 

@@ -32,6 +32,7 @@ This repository is a compact Python CLI project (requires Python ≥ 3.12).
 | `operator-admin` / `authority_admin.py` | Root-managed P3b policy install/lifecycle |
 | `authority_client.py` / `authority_projection.py` | Enrolled CLI ↔ broker integration |
 | `socket_permission_helper.py` | Socket permission helpers for broker paths |
+| `dogfood_runner.py` | Typed, resumable dogfood plan/run engine (issue #8), invoked via `operator-admin dogfood-*` |
 | `tests/test_operator.py` | Repo CLI integration suite (temp workspaces) |
 | `tests/test_opr.py` | Governed REPL coverage |
 | `tests/test_authority_*.py` | Broker, admin, integration, upgrade suites |

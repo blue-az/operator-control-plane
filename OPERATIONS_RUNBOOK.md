@@ -77,7 +77,7 @@ into a root-owned directory first:
 ```bash
 REV=$(git -C ~/operator-control-plane rev-parse HEAD)   # pin and record this commit
 sudo install -d -m 0700 -o root -g root "/root/operator-control-plane-release/$REV"
-for f in authority_broker.py authority_admin.py operator-admin socket_permission_helper.py; do
+for f in authority_broker.py authority_admin.py operator-admin socket_permission_helper.py dogfood_runner.py; do
   sudo install -m 0600 -o root -g root \
       "$HOME/operator-control-plane/$f" \
       "/root/operator-control-plane-release/$REV/$f"
