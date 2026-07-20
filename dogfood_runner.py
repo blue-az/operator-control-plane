@@ -210,12 +210,42 @@ def phase_enrollment(layout: InstallLayout, admin_uid: int, admin_gid: int, args
     )
 
 
+def validate_rotation_args(args: dict) -> dict:
+    value = args["policy_file"]
+    if not isinstance(value, str) or not value:
+        raise AdminError("invalid_plan", "rotation policy_file must be a non-empty string")
+    path = Path(value)
+    if not path.is_absolute():
+        raise AdminError("invalid_plan", "rotation policy_file must be an absolute path")
+    return {"policy_file": str(path)}
+
+
+def phase_rotation(layout: InstallLayout, admin_uid: int, admin_gid: int, args: dict) -> dict:
+    # Mirrors authority_admin.main()'s own "rotate" dispatch branch exactly
+    # (validate_accounts=True, the real default) -- this phase does not weaken that
+    # precondition. rotate_deployment is itself already idempotent-safe to re-invoke:
+    # it detects an already-active rotation (same generation/sha256 at the ledger head)
+    # and treats it as a no-op rather than erroring, which is what makes a pending-state
+    # resume of this phase safe.
+    policy_file = Path(args["policy_file"])
+    return authority_admin.rotate_deployment(
+        layout, policy_file, admin_uid, admin_gid, validate_accounts=True
+    )
+
+
 # Slice 1 shipped the two read-only phase types with an existing clean primitive to
 # wrap plus the one mutating phase type with an existing clean primitive to wrap.
-# Slice 2 adds service_lifecycle and enrollment -- both additive catalog entries
-# against the same engine, not architectural changes, exactly as slice 1 anticipated.
-# Remaining phase types (reconciliation, rotation, outage/recovery, revocation checks)
-# are still deferred. See docs/DOGFOOD_RUNNER_OPERATIONS.md.
+# Slice 2 added service_lifecycle and enrollment; slice 3 adds rotation -- all
+# additive catalog entries against the same engine, not architectural changes,
+# exactly as slice 1 anticipated. "Reconciliation" from the issue's own phase list
+# was deliberately NOT added here: there is no clean root-owned primitive behind
+# it (see docs/DOGFOOD_RUNNER_OPERATIONS.md) -- the client-side reconcile flow
+# (`operator authority-reconcile`) runs as the repo's own UID, not root, and pulling
+# it into this module would mean the admin acting as that UID for that repo's local
+# state, the wrong direction across the P3 actor boundary. The store-integrity half
+# of "reconciliation" is already exercised inside audit_deployment, which
+# installation_verification/final_audit already wrap. Remaining phase types
+# (outage/recovery, revocation checks) are still deferred.
 PHASE_CATALOG: dict[str, PhaseSpec] = {
     "installation_verification": PhaseSpec(
         mutating=False,
@@ -246,6 +276,12 @@ PHASE_CATALOG: dict[str, PhaseSpec] = {
         args_schema=frozenset({"repository_path"}),
         handler=phase_enrollment,
         validate_args=validate_enrollment_args,
+    ),
+    "rotation": PhaseSpec(
+        mutating=True,
+        args_schema=frozenset({"policy_file"}),
+        handler=phase_rotation,
+        validate_args=validate_rotation_args,
     ),
 }
 

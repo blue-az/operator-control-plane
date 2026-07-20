@@ -405,6 +405,101 @@ class ServiceLifecycleAndEnrollmentArgsTests(unittest.TestCase):
                 self.assertEqual(ctx.exception.code, "mutating_flag_mismatch")
 
 
+class RotationArgsTests(unittest.TestCase):
+    """Slice 3: rotation's policy_file arg gets the same value-level, closed-shape
+    validation as enrollment's repository_path -- an absolute path, not a free string."""
+
+    def valid_raw_with_phase(self, phase: dict) -> dict:
+        return {
+            "plan_schema_version": 1,
+            "created_at": "2026-07-20T00:00:00Z",
+            "created_by_uid": 0,
+            "ledger_id": "ledger-x",
+            "policy_binding": {"policy_id": "policy-x", "generation": 1, "sha256": "a" * 64},
+            "expected_release_digest": "b" * 64,
+            "host_paths": {
+                "install_root": "/usr/libexec/operator-control-plane",
+                "config_root": "/etc/operator-control-plane",
+                "state_root": "/var/lib/operator-control-plane",
+                "runtime_root": "/run/operator-control-plane",
+            },
+            "phases": [phase],
+        }
+
+    def test_valid_absolute_policy_file_accepted(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "rotation",
+                "args": {"policy_file": "/home/erik/generation-2.json"},
+                "mutating": True,
+            }
+        )
+        plan = dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(plan.phases[0]["args"], {"policy_file": "/home/erik/generation-2.json"})
+
+    def test_relative_policy_file_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "rotation",
+                "args": {"policy_file": "generation-2.json"},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "invalid_plan")
+
+    def test_empty_policy_file_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {"phase_id": 1, "operation": "rotation", "args": {"policy_file": ""}, "mutating": True}
+        )
+        with self.assertRaises(authority_admin.AdminError):
+            dogfood_runner.parse_plan_object(raw)
+
+    def test_non_string_policy_file_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {"phase_id": 1, "operation": "rotation", "args": {"policy_file": 42}, "mutating": True}
+        )
+        with self.assertRaises(authority_admin.AdminError):
+            dogfood_runner.parse_plan_object(raw)
+
+    def test_missing_policy_file_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {"phase_id": 1, "operation": "rotation", "args": {}, "mutating": True}
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "missing_field")
+
+    def test_extra_field_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "rotation",
+                "args": {"policy_file": "/x", "shell": "rm -rf /"},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "unknown_field")
+
+    def test_mutating_false_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "rotation",
+                "args": {"policy_file": "/x"},
+                "mutating": False,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "mutating_flag_mismatch")
+
+
 # ---------------------------------------------------------------------------
 # validate_plan_bindings -- redirection/tamper resistance
 # ---------------------------------------------------------------------------
@@ -847,6 +942,24 @@ class EnrollmentPhaseHandlerTests(unittest.TestCase):
         self.assertEqual(ctx.exception.code, "privilege_precondition_unproven")
         self.assertEqual(ctx.exception.details["unresolved_checks"], ["sudo.authorization"])
         enroll_mock.assert_not_called()
+
+
+class RotationPhaseHandlerTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.layout = authority_admin.InstallLayout.production()
+
+    def test_delegates_to_rotate_deployment_with_validate_accounts_true(self) -> None:
+        sentinel = object()
+        with mock.patch.object(
+            authority_admin, "rotate_deployment", return_value=sentinel
+        ) as mocked:
+            result = dogfood_runner.phase_rotation(
+                self.layout, 0, 0, {"policy_file": "/home/erik/generation-2.json"}
+            )
+        mocked.assert_called_once_with(
+            self.layout, Path("/home/erik/generation-2.json"), 0, 0, validate_accounts=True
+        )
+        self.assertIs(result, sentinel)
 
 
 # ---------------------------------------------------------------------------
