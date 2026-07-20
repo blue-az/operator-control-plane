@@ -3,7 +3,7 @@
 **Repo:** `blue-az/operator-control-plane`
 **Issue:** [#8](https://github.com/blue-az/operator-control-plane/issues/8) — *Operations: Add a typed, resumable privileged dogfood runner*
 **Module:** `dogfood_runner.py`, wired into `operator-admin dogfood-plan|dogfood-run|dogfood-status|dogfood-resume`
-**Status:** Slices 1–3 shipped (6 of 9 named phase types, one deliberately not added — see §4). See §4 for exactly what that does and does not cover.
+**Status:** Slices 1–4 shipped (7 of 9 named phase types, one deliberately not added — see §4). See §4 for exactly what that does and does not cover.
 
 This module replaces the manual `sudo` relay used during Issue #7 dogfood
 with a typed, digest-bound, checkpointed plan/run model. It is **operational
@@ -18,12 +18,14 @@ separate privilege path.
 
 **Plan.** A reviewed, canonical JSON document naming an enumerated,
 sequential list of phases, each a typed operation with a fixed argument
-schema — no shell strings, no arbitrary executables. Six operations exist
+schema — no shell strings, no arbitrary executables. Seven operations exist
 so far: `installation_verification`, `privilege_evidence`, `final_audit`
 (empty args), `service_lifecycle` (one field, `action`, a closed enum of
 `stop`/`start`/`restart` — not a free-form string), `enrollment` (one
-field, `repository_path`, validated as a non-empty absolute path), and
-`rotation` (one field, `policy_file`, same absolute-path validation). Every
+field, `repository_path`, validated as a non-empty absolute path),
+`rotation` (one field, `policy_file`, same absolute-path validation), and
+`outage_recovery` (empty args — its recovery timeout is fixed, not a plan-
+supplied knob, see §4). Every
 operation's args are validated both by key-set (`require_exact_keys`) and,
 where the schema is non-empty, by value (`PhaseSpec.validate_args`) before a
 plan is ever stored — an unrecognized `action` or a relative
@@ -125,27 +127,51 @@ separately-readable path — see §4.
 
 ## 4. What's implemented, and what's still open
 
-Six phase types are wired:
+Seven phase types are wired:
 
 - `installation_verification`, `final_audit` — wrap `authority_admin.audit_deployment` (read-only).
 - `privilege_evidence` — wraps `authority_admin.collect_evidence_deployment` (mutating: writes `layout.evidence_path`).
 - `service_lifecycle` (slice 2) — wraps `stop_service`/`start_service`/`probe_service_active`/`probe_socket_health`, one typed `action` field (`stop`/`start`/`restart`). Mutating.
 - `enrollment` (slice 2) — wraps `enroll_repository`, gated by the same policy-state and `privilege_preflight`/`boundary_ready` checks `authority_admin.main()`'s own `enroll` command already enforces (re-homed into a phase handler, not weakened). One typed `repository_path` field. Mutating.
 - `rotation` (slice 3) — wraps `rotate_deployment` with `validate_accounts=True`, matching `authority_admin.main()`'s own `rotate` command exactly. One typed `policy_file` field. Mutating. `rotate_deployment` already detects an already-active rotation (same generation/sha256 at the ledger head) and no-ops rather than erroring, which is what makes a pending-checkpoint resume of this phase safe.
+- `outage_recovery` (slice 4) — composes `probe_service_active`/`probe_socket_health`/`stop_service`/`start_service`. Empty args, mutating. See below for why this earned its own phase type rather than being "`service_lifecycle(restart)` then `installation_verification`" composed by hand.
 
-Adding the remaining phase types the issue names —
-`outage_recovery`, `revocation_checks` — is still just a `PHASE_CATALOG`
-entry plus a thin handler against this same engine, not an architectural
-change; `revocation_checks` already has an existing `authority_admin.py`
-function to wrap (`revoke_deployment`). Slices 2 and 3 are the confirmation
-of that claim: three more phase types landed across two slices with zero
-changes to the checkpoint/idempotency engine, `execute_run`, or the command
-entry points — only new `PHASE_CATALOG` entries, handlers, and
-`validate_args` functions. Slice 2 also proved something slice 1 couldn't: a
-plan with several mutating phases in a row requires a *separate*
-`--approve-phase` for each one, not one approval that silently covers the
-rest (`tests/test_dogfood_runner_root.py`'s
+Adding the remaining phase type the issue names —
+`revocation_checks` — is still just a `PHASE_CATALOG` entry plus a thin
+handler against this same engine, not an architectural change; it already
+has an existing `authority_admin.py` function to wrap (`revoke_deployment`).
+Slices 2–4 are the confirmation of that claim: four more phase types landed
+across three slices with zero changes to the checkpoint/idempotency engine,
+`execute_run`, or the command entry points — only new `PHASE_CATALOG`
+entries, handlers, and `validate_args` functions. Slice 2 also proved
+something slice 1 couldn't: a plan with several mutating phases in a row
+requires a *separate* `--approve-phase` for each one, not one approval that
+silently covers the rest (`tests/test_dogfood_runner_root.py`'s
 `test_real_install_multi_mutating_phase_plan_requires_separate_approvals`).
+
+**Why `outage_recovery` is its own phase type and not just documentation
+telling operators to compose `service_lifecycle(restart)` +
+`installation_verification`.** Investigation before building it (mirroring
+the reconciliation dig) found the runbook's own "Outage diagnosis" §10 is
+almost entirely composed of primitives already wrapped elsewhere
+(`systemctl status`/restart → `service_lifecycle`; `audit` before and after
+→ `installation_verification`/`final_audit`; the crash-recovery guarantees
+in §14 are already self-healing inside `install`/`rotate`/`revoke`
+themselves). The one genuine, non-redundant behavioral difference:
+`service_lifecycle`'s start/restart rely on `probe_socket_health`'s bare
+5-second default, tuned for an administrator-initiated restart where the
+operator is watching. A real post-crash recovery reasonably needs more
+patience — journal replay, filesystem sync, a cold page cache — before
+declaring failure, so `phase_outage_recovery` calls `probe_socket_health`
+with an explicit `OUTAGE_RECOVERY_HEALTH_TIMEOUT_SECONDS = 60.0` instead. It
+also checks whether the service is already active and healthy before doing
+anything, so it doesn't restart a service that isn't actually down — both a
+sensible operational default and what keeps a pending-checkpoint resume
+idempotent (a prior attempt's restart having already succeeded doesn't
+trigger a second one). No plan-supplied timeout knob: the value is fixed in
+code, not a plan argument, so there's no unbounded/arbitrary numeric surface
+to validate or abuse — consistent with the closed-vocabulary approach taken
+everywhere else in this module.
 
 **`reconciliation` was deliberately not added, and won't be until there's a
 genuine root-owned primitive behind it.** The issue names it as one of nine
@@ -172,31 +198,32 @@ were for rotation/revocation:
 If a genuinely new root-owned reconcile action shows up later (not a
 repackaging of an existing phase, not a client-actor operation performed by
 the wrong UID), it gets its own `PHASE_CATALOG` entry then. Until then, the
-acceptance-criterion-1 phase count is honestly 6 of 9 planned, with this one
+acceptance-criterion-1 phase count is honestly 7 of 9 planned, with this one
 named-but-intentionally-unbuilt.
 
-A known, deliberate testing gap: `stop_service`/`start_service`/
-`probe_service_active` shell out to real `systemctl` against a unit *name*
-that does not respect a disposable test root — unlike the rest of this
-module's primitives, they cannot be safely exercised for real under a temp
-`InstallLayout.under(root)` fixture (a real `systemctl` call there would
-target whatever unit happens to be registered on the real host under that
-name, if any). The pre-existing `authority_admin.py` test suite already
-avoids this for the same reason; `dogfood_runner`'s tests follow the same
-convention and always mock these three functions. `probe_socket_health` is
-exempt from this concern (it is a plain Unix-socket connect that does
-respect the test root) and is exercised for real elsewhere in the suite.
+A known, deliberate testing gap, applying to both `service_lifecycle` and
+`outage_recovery`: `stop_service`/`start_service`/`probe_service_active`
+shell out to real `systemctl` against a unit *name* that does not respect a
+disposable test root — unlike the rest of this module's primitives, they
+cannot be safely exercised for real under a temp `InstallLayout.under(root)`
+fixture (a real `systemctl` call there would target whatever unit happens to
+be registered on the real host under that name, if any). The pre-existing
+`authority_admin.py` test suite already avoids this for the same reason;
+`dogfood_runner`'s tests follow the same convention and always mock these
+three functions. `probe_socket_health` is exempt from this concern (it is a
+plain Unix-socket connect that does respect the test root) and is exercised
+for real elsewhere in the suite.
 
 | # | Acceptance criterion (issue #8) | Status | Why |
 |---|---|---|---|
-| 1 | Complete disposable-ledger sequence, fewer relays | **Not met** | 6 of 9 named phase types exist; `outage_recovery`/`revocation_checks` still missing, `reconciliation` intentionally not built (§4) |
+| 1 | Complete disposable-ledger sequence, fewer relays | **Not met** | 7 of 9 named phase types exist; `revocation_checks` still missing, `reconciliation` intentionally not built (§4) |
 | 2 | Unknown ops/fields, arbitrary-command attempts fail before state change | **Met** | Enumerated catalog, exact-key **and** value-level validation (`validate_args`), no shell/exec surface; unit-tested |
 | 3 | Bindings can't be redirected by cwd/env/symlink/repo state/agent UID | **Met** for bindings this module touches | Independent recomputation against live state, path-safety primitives reused unchanged |
-| 4 | Exact retries idempotent; interruption resumes without duplicates | **Met** for all six implemented phase types | `operation_key`/`request_digest`, fault-injection-tested crash recovery; `service_lifecycle`'s idempotency rests on an explicitly noted `systemctl` behavior assumption (§3) rather than content-comparison; `rotation`'s rests on `rotate_deployment`'s own already-active no-op detection |
+| 4 | Exact retries idempotent; interruption resumes without duplicates | **Met** for all seven implemented phase types | `operation_key`/`request_digest`, fault-injection-tested crash recovery; `service_lifecycle`'s idempotency rests on an explicitly noted `systemctl` behavior assumption (§3) rather than content-comparison; `rotation`'s rests on `rotate_deployment`'s own already-active no-op detection; `outage_recovery`'s rests on its own already-healthy check plus that same `systemctl` assumption |
 | 5 | Failed assertions stop the phase; resume can't skip a failed gate | **Met** | Enforced by the completed-checkpoint scan every phase goes through; proven with multiple back-to-back mutating phases in slice 2 |
 | 6 | Run-state/evidence writes atomic, durable, race-resistant, auditable | Atomicity/durability **met**; unprivileged-read auditing **deferred** | `dogfood-status` still requires root — export today is admin-mediated, not a separate read path |
 | 7 | Builder/verifier accounts can't gain privileged access through the runner | **Met, proven with a real root test** | `require_root()` gates every dogfood subcommand identically to every existing admin command |
-| 8 | Focused tests + guarded real-root tests | **Met** for the phase types/attack classes implemented so far | `tests/test_dogfood_runner.py` (60 tests), `tests/test_dogfood_runner_root.py` (4 tests) |
+| 8 | Focused tests + guarded real-root tests | **Met** for the phase types/attack classes implemented so far | `tests/test_dogfood_runner.py` (67 tests), `tests/test_dogfood_runner_root.py` (4 tests) |
 | 9 | Real disposable-ledger run before production recommendation | **Not met** | Requires the remaining phase types |
 
 Per the issue's own stop condition: this module does not claim the P3

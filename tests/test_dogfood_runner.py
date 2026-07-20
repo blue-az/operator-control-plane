@@ -500,6 +500,58 @@ class RotationArgsTests(unittest.TestCase):
         self.assertEqual(ctx.exception.code, "mutating_flag_mismatch")
 
 
+class OutageRecoveryArgsTests(unittest.TestCase):
+    """Slice 4: outage_recovery has an empty args_schema like installation_verification/
+    privilege_evidence/final_audit, but is mutating (unlike those three read-only ones),
+    so it needs its own mutating-flag and empty-args coverage rather than inheriting it
+    from the other empty-args operations."""
+
+    def valid_raw_with_phase(self, phase: dict) -> dict:
+        return {
+            "plan_schema_version": 1,
+            "created_at": "2026-07-20T00:00:00Z",
+            "created_by_uid": 0,
+            "ledger_id": "ledger-x",
+            "policy_binding": {"policy_id": "policy-x", "generation": 1, "sha256": "a" * 64},
+            "expected_release_digest": "b" * 64,
+            "host_paths": {
+                "install_root": "/usr/libexec/operator-control-plane",
+                "config_root": "/etc/operator-control-plane",
+                "state_root": "/var/lib/operator-control-plane",
+                "runtime_root": "/run/operator-control-plane",
+            },
+            "phases": [phase],
+        }
+
+    def test_empty_args_accepted(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {"phase_id": 1, "operation": "outage_recovery", "args": {}, "mutating": True}
+        )
+        plan = dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(plan.phases[0]["args"], {})
+
+    def test_extra_field_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {
+                "phase_id": 1,
+                "operation": "outage_recovery",
+                "args": {"max_wait_seconds": 300},
+                "mutating": True,
+            }
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "unknown_field")
+
+    def test_mutating_false_rejected(self) -> None:
+        raw = self.valid_raw_with_phase(
+            {"phase_id": 1, "operation": "outage_recovery", "args": {}, "mutating": False}
+        )
+        with self.assertRaises(authority_admin.AdminError) as ctx:
+            dogfood_runner.parse_plan_object(raw)
+        self.assertEqual(ctx.exception.code, "mutating_flag_mismatch")
+
+
 # ---------------------------------------------------------------------------
 # validate_plan_bindings -- redirection/tamper resistance
 # ---------------------------------------------------------------------------
@@ -894,6 +946,73 @@ class ServiceLifecyclePhaseHandlerTests(unittest.TestCase):
             result = dogfood_runner.phase_service_lifecycle("layout", 0, 0, {"action": "restart"})
         self.assertEqual(calls, ["stop", "start"])
         self.assertEqual(result, {"action": "restart", "active": True, "socket_healthy": True})
+
+
+class OutageRecoveryPhaseHandlerTests(unittest.TestCase):
+    """Never invokes real systemctl, same rationale as ServiceLifecyclePhaseHandlerTests."""
+
+    def test_already_healthy_is_a_no_op(self) -> None:
+        with mock.patch.object(authority_admin, "probe_service_active", return_value=True), \
+             mock.patch.object(authority_admin, "probe_socket_health", return_value=True), \
+             mock.patch.object(authority_admin, "stop_service") as stop_mock, \
+             mock.patch.object(authority_admin, "start_service") as start_mock:
+            result = dogfood_runner.phase_outage_recovery("layout", 0, 0, {})
+        stop_mock.assert_not_called()
+        start_mock.assert_not_called()
+        self.assertEqual(
+            result,
+            {
+                "action": "outage_recovery",
+                "already_healthy": True,
+                "restarted": False,
+                "active": True,
+                "socket_healthy": True,
+            },
+        )
+
+    def test_active_but_socket_unhealthy_restarts_and_recovers(self) -> None:
+        with mock.patch.object(authority_admin, "probe_service_active", return_value=True), \
+             mock.patch.object(authority_admin, "probe_socket_health", return_value=True) as probe_mock, \
+             mock.patch.object(authority_admin, "stop_service") as stop_mock, \
+             mock.patch.object(authority_admin, "start_service") as start_mock:
+            # First call (the already-healthy check) reports unhealthy; the second call
+            # (post-restart recovery probe) reports healthy.
+            probe_mock.side_effect = [False, True]
+            result = dogfood_runner.phase_outage_recovery("layout", 0, 0, {})
+        stop_mock.assert_called_once_with("layout")
+        start_mock.assert_called_once_with("layout")
+        self.assertEqual(probe_mock.call_count, 2)
+        # The recovery probe uses a generous, explicitly-longer timeout than the bare
+        # default service_lifecycle relies on -- the one real behavioral difference from
+        # "service_lifecycle(restart) then installation_verification" composed by hand.
+        _, recovery_kwargs = probe_mock.call_args_list[1]
+        self.assertEqual(
+            recovery_kwargs.get("timeout"), dogfood_runner.OUTAGE_RECOVERY_HEALTH_TIMEOUT_SECONDS
+        )
+        self.assertTrue(result["restarted"])
+        self.assertFalse(result["already_healthy"])
+
+    def test_inactive_service_skips_initial_socket_probe_then_restarts(self) -> None:
+        with mock.patch.object(authority_admin, "probe_service_active", return_value=False), \
+             mock.patch.object(authority_admin, "probe_socket_health", return_value=True) as probe_mock, \
+             mock.patch.object(authority_admin, "stop_service") as stop_mock, \
+             mock.patch.object(authority_admin, "start_service") as start_mock:
+            result = dogfood_runner.phase_outage_recovery("layout", 0, 0, {})
+        stop_mock.assert_called_once_with("layout")
+        start_mock.assert_called_once_with("layout")
+        # Short-circuited: probe_service_active already False, so the initial
+        # already-healthy socket check never runs -- only the post-restart recovery probe.
+        self.assertEqual(probe_mock.call_count, 1)
+        self.assertTrue(result["restarted"])
+
+    def test_raises_if_service_never_becomes_healthy_within_timeout(self) -> None:
+        with mock.patch.object(authority_admin, "probe_service_active", return_value=False), \
+             mock.patch.object(authority_admin, "probe_socket_health", return_value=False), \
+             mock.patch.object(authority_admin, "stop_service"), \
+             mock.patch.object(authority_admin, "start_service"):
+            with self.assertRaises(authority_admin.AdminError) as ctx:
+                dogfood_runner.phase_outage_recovery("layout", 0, 0, {})
+        self.assertEqual(ctx.exception.code, "service_not_healthy")
 
 
 class EnrollmentPhaseHandlerTests(unittest.TestCase):

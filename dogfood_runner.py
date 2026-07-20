@@ -175,6 +175,53 @@ def phase_service_lifecycle(
     return {"action": action, "active": active}
 
 
+# service_lifecycle's start/restart use probe_socket_health's own 5s default -- fine for
+# an administrator-initiated restart, where the operator is watching and will re-run if
+# it's slow. A genuine post-crash recovery reasonably needs more patience (journal
+# replay, filesystem sync, a cold page cache) before declaring failure, which is the one
+# real behavioral difference between outage_recovery and "service_lifecycle(restart)
+# then installation_verification" composed by hand -- not just a relabeling of the same
+# two calls.
+OUTAGE_RECOVERY_HEALTH_TIMEOUT_SECONDS = 60.0
+
+
+def phase_outage_recovery(
+    layout: InstallLayout, admin_uid: int, admin_gid: int, args: dict
+) -> dict:
+    if authority_admin.probe_service_active(layout) and authority_admin.probe_socket_health(
+        layout
+    ):
+        # Already healthy -- do not restart a service that isn't actually down. This also
+        # keeps a pending-checkpoint resume idempotent: if a prior attempt's restart
+        # already succeeded before the phase itself was interrupted, resume must not
+        # blindly restart a second time.
+        return {
+            "action": "outage_recovery",
+            "already_healthy": True,
+            "restarted": False,
+            "active": True,
+            "socket_healthy": True,
+        }
+    authority_admin.stop_service(layout)
+    authority_admin.start_service(layout)
+    healthy = authority_admin.probe_socket_health(
+        layout, timeout=OUTAGE_RECOVERY_HEALTH_TIMEOUT_SECONDS
+    )
+    if not healthy:
+        raise AdminError(
+            "service_not_healthy",
+            f"service did not become healthy within "
+            f"{OUTAGE_RECOVERY_HEALTH_TIMEOUT_SECONDS}s of outage recovery restart",
+        )
+    return {
+        "action": "outage_recovery",
+        "already_healthy": False,
+        "restarted": True,
+        "active": True,
+        "socket_healthy": True,
+    }
+
+
 def validate_enrollment_args(args: dict) -> dict:
     value = args["repository_path"]
     if not isinstance(value, str) or not value:
@@ -235,17 +282,17 @@ def phase_rotation(layout: InstallLayout, admin_uid: int, admin_gid: int, args: 
 
 # Slice 1 shipped the two read-only phase types with an existing clean primitive to
 # wrap plus the one mutating phase type with an existing clean primitive to wrap.
-# Slice 2 added service_lifecycle and enrollment; slice 3 adds rotation -- all
-# additive catalog entries against the same engine, not architectural changes,
-# exactly as slice 1 anticipated. "Reconciliation" from the issue's own phase list
-# was deliberately NOT added here: there is no clean root-owned primitive behind
-# it (see docs/DOGFOOD_RUNNER_OPERATIONS.md) -- the client-side reconcile flow
-# (`operator authority-reconcile`) runs as the repo's own UID, not root, and pulling
-# it into this module would mean the admin acting as that UID for that repo's local
-# state, the wrong direction across the P3 actor boundary. The store-integrity half
-# of "reconciliation" is already exercised inside audit_deployment, which
-# installation_verification/final_audit already wrap. Remaining phase types
-# (outage/recovery, revocation checks) are still deferred.
+# Slice 2 added service_lifecycle and enrollment; slice 3 added rotation; slice 4
+# adds outage_recovery -- all additive catalog entries against the same engine, not
+# architectural changes, exactly as slice 1 anticipated. "Reconciliation" from the
+# issue's own phase list was deliberately NOT added here: there is no clean
+# root-owned primitive behind it (see docs/DOGFOOD_RUNNER_OPERATIONS.md) -- the
+# client-side reconcile flow (`operator authority-reconcile`) runs as the repo's own
+# UID, not root, and pulling it into this module would mean the admin acting as
+# that UID for that repo's local state, the wrong direction across the P3 actor
+# boundary. The store-integrity half of "reconciliation" is already exercised
+# inside audit_deployment, which installation_verification/final_audit already
+# wrap. Remaining phase type: revocation checks.
 PHASE_CATALOG: dict[str, PhaseSpec] = {
     "installation_verification": PhaseSpec(
         mutating=False,
@@ -282,6 +329,12 @@ PHASE_CATALOG: dict[str, PhaseSpec] = {
         args_schema=frozenset({"policy_file"}),
         handler=phase_rotation,
         validate_args=validate_rotation_args,
+    ),
+    "outage_recovery": PhaseSpec(
+        mutating=True,
+        args_schema=frozenset(),
+        handler=phase_outage_recovery,
+        validate_args=validate_no_args,
     ),
 }
 
