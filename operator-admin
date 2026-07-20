@@ -25,6 +25,7 @@ if os.geteuid() == 0:
     require_root_owned_code(INSTALL_ROOT / "operator-admin")
     require_root_owned_code(INSTALL_ROOT / "authority_admin.py")
     require_root_owned_code(INSTALL_ROOT / "authority_broker.py")
+    require_root_owned_code(INSTALL_ROOT / "dogfood_runner.py")
 
 os.chdir("/")
 os.environ.clear()

@@ -5458,6 +5458,22 @@ def build_parser() -> argparse.ArgumentParser:
     upgrade = commands.add_parser("upgrade")
     upgrade.add_argument("--release-dir", required=True)
 
+    dogfood_plan = commands.add_parser("dogfood-plan")
+    dogfood_plan.add_argument("--plan", required=True)
+
+    dogfood_run = commands.add_parser("dogfood-run")
+    dogfood_run.add_argument("--plan-digest", required=True)
+    dogfood_run.add_argument("--run-id")
+    dogfood_run.add_argument("--approve-phase", type=int)
+
+    dogfood_status = commands.add_parser("dogfood-status")
+    dogfood_status.add_argument("--run-id", required=True)
+
+    dogfood_resume = commands.add_parser("dogfood-resume")
+    dogfood_resume.add_argument("--run-id", required=True)
+    dogfood_resume.add_argument("--approve-phase", type=int)
+    dogfood_resume.add_argument("--acknowledge-recovered", action="store_true")
+
     return parser
 
 
@@ -5583,6 +5599,46 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "upgrade":
             release_dir = absolute_path(args.release_dir, "release-dir")
             result = upgrade_deployment(layout, release_dir, 0, 0, validate_accounts=True)
+        elif args.command == "dogfood-plan":
+            import dogfood_runner
+
+            result = dogfood_runner.dogfood_plan_command(
+                layout,
+                dogfood_runner.DogfoodLayout.production(),
+                absolute_path(args.plan, "plan"),
+                0,
+                0,
+            )
+        elif args.command == "dogfood-run":
+            import dogfood_runner
+
+            result = dogfood_runner.dogfood_run_command(
+                layout,
+                dogfood_runner.DogfoodLayout.production(),
+                args.plan_digest,
+                args.run_id,
+                args.approve_phase,
+                0,
+                0,
+            )
+        elif args.command == "dogfood-status":
+            import dogfood_runner
+
+            result = dogfood_runner.dogfood_status_command(
+                layout, dogfood_runner.DogfoodLayout.production(), args.run_id, 0, 0
+            )
+        elif args.command == "dogfood-resume":
+            import dogfood_runner
+
+            result = dogfood_runner.dogfood_resume_command(
+                layout,
+                dogfood_runner.DogfoodLayout.production(),
+                args.run_id,
+                args.approve_phase,
+                args.acknowledge_recovered,
+                0,
+                0,
+            )
         else:
             result = privilege_preflight(layout, 0, 0)
         print(broker.canonical_json(result))
