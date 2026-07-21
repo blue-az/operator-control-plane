@@ -20,7 +20,14 @@ from pathlib import Path
 
 import yaml
 
+import importlib.machinery
+import importlib.util
+
 OPERATOR_BIN = str(Path(__file__).resolve().parents[1] / "operator")
+_op_loader = importlib.machinery.SourceFileLoader("operator_mod", OPERATOR_BIN)
+_op_spec = importlib.util.spec_from_file_location("operator_mod", OPERATOR_BIN, loader=_op_loader)
+op_mod = importlib.util.module_from_spec(_op_spec)
+_op_loader.exec_module(op_mod)
 
 
 class TestOperatorCLI(unittest.TestCase):
@@ -3894,6 +3901,233 @@ class TestOperatorCLI(unittest.TestCase):
             "verified",
         )
         self.assertNotEqual(res.returncode, 0)
+
+    def test_evidence_attach_diff_type_success(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        repo_dir = Path(self.temp_dir) / "test_repo"
+        repo_dir.mkdir()
+        subprocess.run(["git", "init"], cwd=repo_dir, check=True, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "Test"], cwd=repo_dir, check=True)
+        subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo_dir, check=True)
+        (repo_dir / "foo.txt").write_text("initial content\n")
+        subprocess.run(["git", "add", "foo.txt"], cwd=repo_dir, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_dir, check=True, capture_output=True)
+        base_sha = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=repo_dir, check=True, capture_output=True, text=True
+        ).stdout.strip()
+
+        (repo_dir / "foo.txt").write_text("modified content\n")
+        subprocess.run(["git", "commit", "-am", "second"], cwd=repo_dir, check=True, capture_output=True)
+
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Diff task",
+                "--id",
+                "diff-task",
+                "--repo",
+                str(repo_dir),
+            ).returncode,
+            0,
+        )
+
+        dummy_path = Path(self.temp_dir) / "dummy.txt"
+        dummy_path.write_text("stub\n")
+
+        res = self.run_operator(
+            "evidence-attach",
+            str(dummy_path),
+            "--task",
+            "diff-task",
+            "--type",
+            "diff",
+            "--diff-base",
+            base_sha,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        ev_yaml = Path(self.temp_dir) / ".operator" / "evidence" / "diff-task" / "evidence-0001.yaml"
+        self.assertTrue(ev_yaml.exists())
+        ev_data = yaml.safe_load(ev_yaml.read_text())
+        self.assertEqual(ev_data.get("evidence_type"), "diff")
+        self.assertEqual(ev_data.get("diff_base"), base_sha)
+        self.assertIn("1 file changed", ev_data.get("diff_stat", ""))
+
+    def test_evidence_attach_diff_type_fail_open(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Diff task fail open",
+                "--id",
+                "diff-task-fail",
+                "--repo",
+                "/nonexistent/repo/path",
+            ).returncode,
+            0,
+        )
+
+        dummy_path = Path(self.temp_dir) / "dummy.txt"
+        dummy_path.write_text("stub\n")
+
+        res = self.run_operator(
+            "evidence-attach",
+            str(dummy_path),
+            "--task",
+            "diff-task-fail",
+            "--type",
+            "diff",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+
+        ev_yaml = Path(self.temp_dir) / ".operator" / "evidence" / "diff-task-fail" / "evidence-0001.yaml"
+        self.assertTrue(ev_yaml.exists())
+        ev_data = yaml.safe_load(ev_yaml.read_text())
+        self.assertEqual(ev_data.get("evidence_type"), "diff")
+        self.assertNotIn("diff_base", ev_data)
+
+    def test_doctor_flags_stale_assignment(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Stale task",
+                "--id",
+                "stale-task",
+                "--assign",
+                "codex",
+            ).returncode,
+            0,
+        )
+
+        t_path = Path(self.temp_dir) / ".operator" / "tasks" / "stale-task.yaml"
+        t_data = yaml.safe_load(t_path.read_text())
+        t_data["updated_at"] = "2020-01-01T00:00:00Z"
+        t_path.write_text(yaml.safe_dump(t_data, sort_keys=False))
+
+        db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        if db_path.exists():
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            row = conn.execute(
+                "SELECT * FROM ledger_events WHERE record_type = 'task' AND record_id = 'stale-task' ORDER BY version DESC LIMIT 1"
+            ).fetchone()
+            if row:
+                new_payload = op_mod.canonical_json(t_data)
+                new_hash = op_mod.event_hash_for_fields(
+                    row["record_type"],
+                    row["record_id"],
+                    row["version"],
+                    row["event_type"],
+                    new_payload,
+                    row["actor_uid"],
+                    row["actor_name"],
+                    row["created_at"],
+                    row["source_command"],
+                    row["previous_event_hash"],
+                )
+                conn.execute("DROP TRIGGER IF EXISTS ledger_events_no_update")
+                conn.execute(
+                    "UPDATE ledger_events SET payload_json = ?, event_id = ?, event_hash = ? WHERE record_type = 'task' AND record_id = 'stale-task' AND version = ?",
+                    (new_payload, new_hash, new_hash, row["version"]),
+                )
+                conn.execute(
+                    "CREATE TRIGGER ledger_events_no_update BEFORE UPDATE ON ledger_events BEGIN SELECT RAISE(ABORT, 'ledger_events is append-only'); END"
+                )
+                conn.commit()
+            conn.close()
+
+        res = self.run_operator("doctor", "--stale-days", "0")
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+        self.assertIn(
+            "[Warning] Task stale-task assigned to codex with no claim/evidence/handoff activity in",
+            res.stdout,
+        )
+
+    def test_doctor_silent_on_fresh_assignment(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Fresh task",
+                "--id",
+                "fresh-task",
+                "--assign",
+                "codex",
+            ).returncode,
+            0,
+        )
+
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+        self.assertNotIn(
+            "Task fresh-task assigned to codex with no claim/evidence/handoff activity",
+            res.stdout,
+        )
+
+    def test_doctor_stale_ignored_for_terminal_status(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Terminal task",
+                "--id",
+                "term-task",
+                "--assign",
+                "codex",
+            ).returncode,
+            0,
+        )
+
+        t_path = Path(self.temp_dir) / ".operator" / "tasks" / "term-task.yaml"
+        t_data = yaml.safe_load(t_path.read_text())
+        t_data["updated_at"] = "2020-01-01T00:00:00Z"
+        t_data["status"] = "verified"
+        t_path.write_text(yaml.safe_dump(t_data, sort_keys=False))
+
+        db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        if db_path.exists():
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            row = conn.execute(
+                "SELECT * FROM ledger_events WHERE record_type = 'task' AND record_id = 'term-task' ORDER BY version DESC LIMIT 1"
+            ).fetchone()
+            if row:
+                new_payload = op_mod.canonical_json(t_data)
+                new_hash = op_mod.event_hash_for_fields(
+                    row["record_type"],
+                    row["record_id"],
+                    row["version"],
+                    row["event_type"],
+                    new_payload,
+                    row["actor_uid"],
+                    row["actor_name"],
+                    row["created_at"],
+                    row["source_command"],
+                    row["previous_event_hash"],
+                )
+                conn.execute("DROP TRIGGER IF EXISTS ledger_events_no_update")
+                conn.execute(
+                    "UPDATE ledger_events SET payload_json = ?, event_id = ?, event_hash = ? WHERE record_type = 'task' AND record_id = 'term-task' AND version = ?",
+                    (new_payload, new_hash, new_hash, row["version"]),
+                )
+                conn.execute(
+                    "CREATE TRIGGER ledger_events_no_update BEFORE UPDATE ON ledger_events BEGIN SELECT RAISE(ABORT, 'ledger_events is append-only'); END"
+                )
+                conn.commit()
+            conn.close()
+
+        res = self.run_operator("doctor", "--stale-days", "0")
+        self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
+        self.assertNotIn(
+            "Task term-task assigned to codex with no claim/evidence/handoff activity",
+            res.stdout,
+        )
 
 
 if __name__ == "__main__":

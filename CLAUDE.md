@@ -28,10 +28,9 @@ pytest tests/                            # full subprocess-driven integration su
 pytest tests/test_operator.py -q         # fastest focused repo-CLI run
 pytest tests/test_operator.py -q -k doctor   # run a single test by name pattern
 pytest tests/test_authority_broker.py -q     # standalone P3a broker/store tests
-pytest tests/test_authority_admin.py -q      # P3b install/policy suite
-pytest tests/test_authority_integration.py -q  # CLI ↔ broker integration
+pytest tests/test_dogfood_runner.py -q   # dogfood runner unit suite
 ./operator-broker --help                    # isolated P3a development surfaces
-./operator-admin --help                     # root-managed P3b policy surfaces
+./operator-admin --help                     # root-managed P3b policy & dogfood runner surfaces
 ruff check .                             # lint check configured in pyproject.toml
 black --check .                          # formatting check
 isort --check-only .                     # import sorting check
@@ -48,7 +47,7 @@ SQLite without changing visible IDs or files.
 Python 3 stdlib + PyYAML). `main()` builds an argparse subparser per command and dispatches through the
 `cmd_map` dict near the end of the file (`init` → `init_cmd`, `task-create` → `task_create_cmd`, etc.).
 To add or change a command, edit both the `add_parser(...)` block in `main()` and the corresponding
-`*_cmd(args)` function.
+`*_cmd(args)` function. Supports `--type diff` evidence attachments (generating git diffs relative to `--diff-base` or `task.created_at`) and `doctor --stale-days N` (flagging inactive assigned tasks).
 
 **Subcommands (22):** `init`, `task-create`, `task-show`, `task-list`, `task-transition`,
 `claim-add`, `claim-show`, `claim-list`, `evidence-attach`, `handoff-add`, `verify`, `doctor`,
@@ -62,9 +61,9 @@ descriptor-backed evidence CAS, receipts, startup audit, and projection snapshot
 Its `bootstrap-fixture` and raw `request` commands are test/development surfaces, not protected policy
 installation or repo CLI integration.
 
-**Root-managed P3b policy.** `operator-admin` dispatches to `authority_admin.py` for fixed-path,
-root-owned installation, strict policy generations, terminal revocation, audit, and conservative
-privilege preflight. `AUTHORITY_POLICY_SPEC.md` is the contract. SQLite creation and administrative
+**Root-managed P3b policy & Dogfood runner.** `operator-admin` dispatches to `authority_admin.py` and `dogfood_runner.py` for fixed-path,
+root-owned installation, strict policy generations, terminal revocation, audit, conservative
+privilege preflight, and typed resumable dogfood plans (`dogfood-plan`, `dogfood-run`, `dogfood-status`, `dogfood-resume`). `AUTHORITY_POLICY_SPEC.md` and `docs/DOGFOOD_RUNNER_OPERATIONS.md` are the contracts. SQLite creation and administrative
 transactions execute only after dropping permanently to the broker UID. The service is not started or
 enabled, and this layer must not import or modify the repo-local `operator` CLI. Initial production
 installation requires a root-owned staged release because the wrapper rejects privileged execution

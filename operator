@@ -70,6 +70,7 @@ EVIDENCE_TYPES = [
     "paper_section",
     "external_doc",
     "session_crystal",
+    "diff",
 ]
 
 
@@ -1874,6 +1875,88 @@ def evidence_attach_cmd(args) -> int:
         return 1
     task_id, task_path, task = resolved_task
 
+    diff_base = None
+    diff_stat = None
+    generated_diff_tmp = None
+
+    if args.type == "diff":
+        repo_path = task.get("repo")
+        if not repo_path or not os.path.isdir(repo_path):
+            repo_path = "."
+
+        base_commit = getattr(args, "diff_base", None)
+        if not base_commit and task.get("created_at"):
+            try:
+                res = subprocess.run(
+                    [
+                        "git",
+                        "-C",
+                        repo_path,
+                        "log",
+                        "-1",
+                        f"--before={task['created_at']}",
+                        "--format=%H",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if res.returncode == 0 and res.stdout.strip():
+                    base_commit = res.stdout.strip()
+            except Exception as e:
+                print(f"Warning: Failed to resolve base commit for diff: {e}", file=sys.stderr)
+
+        if base_commit:
+            try:
+                diff_res = subprocess.run(
+                    ["git", "-C", repo_path, "diff", f"{base_commit}...HEAD"],
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                )
+                stat_res = subprocess.run(
+                    ["git", "-C", repo_path, "diff", "--shortstat", f"{base_commit}...HEAD"],
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                )
+                if diff_res.returncode == 0 and stat_res.returncode == 0:
+                    tmp_file = tempfile.NamedTemporaryFile(
+                        mode="w", delete=False, suffix=".diff"
+                    )
+                    tmp_file.write(diff_res.stdout)
+                    tmp_file.close()
+                    generated_diff_tmp = tmp_file.name
+                    diff_base = base_commit
+                    diff_stat = stat_res.stdout.strip()
+                    args.path_or_url = generated_diff_tmp
+                else:
+                    print(
+                        f"Warning: git diff failed (returncode {diff_res.returncode}): {diff_res.stderr.strip()}",
+                        file=sys.stderr,
+                    )
+            except Exception as e:
+                print(f"Warning: Failed to generate git diff: {e}", file=sys.stderr)
+        else:
+            print(
+                "Warning: Could not resolve diff base commit; attaching evidence without diff fields.",
+                file=sys.stderr,
+            )
+
+    ret = _evidence_attach_cmd_impl(
+        args, enrollment, op_dir, task_id, task_path, task, diff_base, diff_stat
+    )
+    if generated_diff_tmp and os.path.exists(generated_diff_tmp):
+        try:
+            os.unlink(generated_diff_tmp)
+        except Exception:
+            pass
+    return ret
+
+
+def _evidence_attach_cmd_impl(
+    args, enrollment, op_dir, task_id, task_path, task, diff_base, diff_stat
+) -> int:
     if enrollment:
         ledger_id = enrollment.ledger_id
         socket_path = enrollment.socket_path
@@ -1942,6 +2025,10 @@ def evidence_attach_cmd(args) -> int:
             "evidence_id": evidence_id,
             "evidence_type": args.type,
         }
+        if diff_base:
+            operation["diff_base"] = diff_base
+        if diff_stat:
+            operation["diff_stat"] = diff_stat
         if args.status:
             operation["verification_status"] = args.status
 
@@ -2207,6 +2294,10 @@ def evidence_attach_cmd(args) -> int:
         "notes": args.notes,
         "executor": exec_identity,
     }
+    if diff_base:
+        evidence_data["diff_base"] = diff_base
+    if diff_stat:
+        evidence_data["diff_stat"] = diff_stat
     crystal_metadata = getattr(args, "crystal_metadata", None)
     if isinstance(crystal_metadata, dict):
         for key, value in crystal_metadata.items():
@@ -4969,6 +5060,56 @@ def doctor_cmd(args) -> int:
             # We'll try to find a directory matching task_id (or similar)
             pass
 
+        # Stale-assignment check (Feature B)
+        assigned_harness = task.get("assigned_harness")
+        if assigned_harness and task_status not in {"verified", "complete", "quarantined"}:
+            activity_timestamps = []
+            if task.get("updated_at"):
+                activity_timestamps.append(str(task["updated_at"]))
+            elif task.get("created_at"):
+                activity_timestamps.append(str(task["created_at"]))
+
+            for cid in task.get("claims") or []:
+                if isinstance(cid, str):
+                    c_path = os.path.join(op_dir, "claims", f"{cid}.yaml")
+                    if os.path.exists(c_path):
+                        c_data = load_yaml(c_path)
+                        if isinstance(c_data, dict) and c_data.get("made_at"):
+                            activity_timestamps.append(str(c_data["made_at"]))
+
+            for ho_ref in task.get("handoffs") or []:
+                if isinstance(ho_ref, str):
+                    ho_path = os.path.join(op_dir, ho_ref)
+                    if os.path.exists(ho_path):
+                        ho_data = load_yaml(ho_path)
+                        if isinstance(ho_data, dict):
+                            if ho_data.get("created_at"):
+                                activity_timestamps.append(str(ho_data["created_at"]))
+                            elif ho_data.get("timestamp"):
+                                activity_timestamps.append(str(ho_data["timestamp"]))
+
+            ev_dir = os.path.join(op_dir, "evidence", task_id)
+            if os.path.isdir(ev_dir):
+                for ef in glob.glob(os.path.join(ev_dir, "*.yaml")):
+                    ev_data = load_yaml(ef)
+                    if isinstance(ev_data, dict) and ev_data.get("produced_at"):
+                        activity_timestamps.append(str(ev_data["produced_at"]))
+
+            if activity_timestamps:
+                most_recent_activity = max(activity_timestamps)
+                latest_dt = parse_iso_to_datetime(most_recent_activity)
+                if latest_dt:
+                    if latest_dt.tzinfo is None:
+                        latest_dt = latest_dt.replace(tzinfo=datetime.timezone.utc)
+                    now_utc = datetime.datetime.now(datetime.timezone.utc)
+                    idle_seconds = (now_utc - latest_dt).total_seconds()
+                    stale_days_threshold = getattr(args, "stale_days", 3)
+                    if idle_seconds > stale_days_threshold * 86400:
+                        days_idle = int(idle_seconds / 86400)
+                        infos.append(
+                            f"[Warning] Task {task_id} assigned to {assigned_harness} with no claim/evidence/handoff activity in {days_idle} days (last activity: {most_recent_activity})"
+                        )
+
     usage_by_task = {}
     pricing_table = load_pricing_table(op_dir)
 
@@ -6476,6 +6617,11 @@ def main() -> None:
         choices=EVIDENCE_TYPES,
         help="Type of evidence.",
     )
+    evidence_parser.add_argument(
+        "--diff-base",
+        default=None,
+        help="Git base ref or commit sha for --type diff evidence.",
+    )
 
     # operator crystal attach (Crystal↔Ledger Phase 1)
     crystal_parser = subparsers.add_parser(
@@ -6836,6 +6982,12 @@ def main() -> None:
         "--audit",
         action="store_true",
         help="Perform additional independent-supervision checks (Phase 3.2).",
+    )
+    doctor_parser.add_argument(
+        "--stale-days",
+        type=int,
+        default=3,
+        help="Days of inactivity before flagging an assigned task as stale (default 3).",
     )
 
     # operator task-list

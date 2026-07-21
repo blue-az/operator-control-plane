@@ -17,8 +17,12 @@ drift instead of propagating it.
 Cross-repo vocabulary: **BN** = `~/Python/project-phoenix/BOTTLENECKS.md` — the
 open-work board that schedules work across BT (Bulkhead Tau, which lives inside
 `~/Python/project-phoenix/`) and this repo. BN's header carries the canonical
-glossary; BN ≠ BT. All three harnesses (Claude Code, Codex, Antigravity) use
-these names.
+glossary; BN ≠ BT. Harnesses are **peers** (Claude Code, Codex, Antigravity, Grok,
+local lanes — not ranked brands). Frontier seats are expected to **build into the
+system**: recover this boundary map from the funnel, calibrate from Phoenix
+failure-mode catalogs when working across repos, and leave residue (commits,
+catalog entries, handoffs) under the human’s rules — see
+`project-phoenix/docs/AGENT_AUDIT_PROTOCOL.md` § “Frontier seat fitness”.
 
 ## Project Structure & Module Organization
 
