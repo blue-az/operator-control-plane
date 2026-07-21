@@ -15,6 +15,8 @@ from pathlib import Path
 import requests
 import yaml
 
+import task_lint
+
 
 def load_config(config_path_opt=None):
     default_config = {
@@ -440,6 +442,22 @@ def route_task(task_prompt: str, config: dict) -> RoutingResult:
         return get_routing_for_model(model, task_prompt, config)
     else:
         return get_routing_for_model(default_model, task_prompt, config)
+
+
+def print_local_lane_lint_verdict(task_text: str) -> None:
+    """LOCAL_LANE_CONTRACT_SPEC.md Deliverable 4: one advisory line when
+    dispatching a task to a local model, naming the deterministic
+    task_lint.py verdict. Warning only -- prints nothing when the prompt is
+    already plan-shaped, and never changes routing, the model chosen, or
+    whether the dispatch proceeds."""
+    verdict = task_lint.lint(task_text).overall
+    if verdict == "plan-shaped":
+        return
+    advice = (
+        "consider L2 phrasing (exact paths, an anchor, numbered steps, a success "
+        "check) or a frontier lane"
+    )
+    print(f"[contract: {verdict} — local models likely to flail; {advice}]")
 
 
 def confirm_model_action(prompt: str, config: dict) -> str:
@@ -953,6 +971,7 @@ def main():
         else:
             lane = "local"
             task_class = "hard" if args.hard else "bounded"
+            print_local_lane_lint_verdict(result.task)
 
         task_id, usage_id = dispatcher._govern_session_start(result.task, harness, lane, task_class)
 
@@ -1366,6 +1385,8 @@ def main():
                     continue
 
             # Run agent loop for prompt
+            if not is_effective_frontier_model(current_model, config):
+                print_local_lane_lint_verdict(user_input)
             output = run_agent_loop(
                 user_input,
                 current_model,

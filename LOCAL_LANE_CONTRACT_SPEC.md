@@ -1,8 +1,10 @@
 # Local Lane Contract Spec (task shaping for local models)
 
-Status: SPEC — not yet implemented. Written 2026-07-02.
-Implementation target: a fresh agent with no prior context. Everything needed is in this file
-plus the referenced code. Read this repo's `AGENTS.md` before starting.
+Status: IMPLEMENTED. Written 2026-07-02; all four deliverables shipped 2026-07-20/21.
+`LOCAL_LANE_CONTRACT.md` (contract), `task_lint.py` (linter, `tests/test_task_lint.py`),
+`evals/local_lane_ladder/` (eval ladder — see `ANALYSIS.md` for the first real sweep's
+results), and `opr`'s one-line lint-verdict wiring are all in place. README section:
+"Local-lane task contract (`opr`)".
 
 ## Purpose
 

@@ -193,6 +193,37 @@ the external authority yet. The service is installed but not started or enabled,
 proof remains issue #7. Initial installation must execute a root-owned staged copy of
 `operator-admin`; its privileged wrapper intentionally refuses a user-writable checkout.
 
+## Local-lane task contract (`opr`)
+
+`opr` is a governed, local-first LLM CLI alongside `operator`: it routes tasks to
+Ollama models or a frontier pass-through, gates every model-initiated write or
+shell command behind an explicit `[y/N]` confirmation, and tags sessions into
+the same ledger `operator` reads.
+
+Local models fail on **degrees of freedom, not knowledge** — a task phrased as
+open-ended intent invites discovery loops and wandering; the same task phrased
+as a concrete plan (exact paths, a verbatim anchor, numbered steps, a
+machine-checkable success criterion) converts search into lookup. Three pieces
+formalize and measure this:
+
+- [`LOCAL_LANE_CONTRACT.md`](LOCAL_LANE_CONTRACT.md) — the contract itself, rules R1–R6, each
+  tied to the failure mode it prevents.
+- [`task_lint.py`](task_lint.py) — a deterministic (no LLM calls) checker against those rules.
+  CLI: `task_lint.py <file|-> [--json]`, exit 0/1/2 = plan-shaped/semi-shaped/goal-shaped.
+  `opr` prints the verdict as a one-line advisory warning whenever it dispatches
+  a non-plan-shaped prompt to a local model — it never changes routing, the
+  model chosen, or whether dispatch proceeds.
+- [`evals/local_lane_ladder/`](evals/local_lane_ladder/) — the measurement instrument: a task ×
+  specificity-level (L0 goal-shaped / L1 file-named / L2 plan-shaped) × model ×
+  trial grid, graded deterministically against a postcondition (grep/exec/output-match,
+  no LLM judging), run against disposable fixtures only, resumable, and
+  ledger-tagged (`lane=local`, `task_class=bounded`).
+  [`ANALYSIS.md`](evals/local_lane_ladder/ANALYSIS.md) has the first real sweep's results (6 tasks
+  × 3 levels × 4 models × 3 trials = 216 cells): the monotonic pass-rate claim
+  holds for 3 of 4 models tested and is honestly reported as refuted for the
+  fourth, plus a per-task breakdown of exactly where each model needs how much
+  specificity. Full design: [`LOCAL_LANE_CONTRACT_SPEC.md`](LOCAL_LANE_CONTRACT_SPEC.md).
+
 ## Design specs
 
 - [`EXECUTOR_IDENTITY_SPEC.md`](EXECUTOR_IDENTITY_SPEC.md) — process-level identity binding via `os.getuid()`.
@@ -200,6 +231,7 @@ proof remains issue #7. Initial installation must execute a root-owned staged co
 - [`AUTHORITY_POLICY_SPEC.md`](AUTHORITY_POLICY_SPEC.md) — root-managed installation and policy lifecycle.
 - [`VERIFIED_BY_GUARD_SPEC.md`](VERIFIED_BY_GUARD_SPEC.md) — fail-closed on self-verification (a builder can't sign off its own claim).
 - [`USAGE_AUTOIMPORT_SPEC.md`](USAGE_AUTOIMPORT_SPEC.md) — ingest per-session token/usage from Claude/Codex/Gemini harness logs without unit conflation.
+- [`LOCAL_LANE_CONTRACT_SPEC.md`](LOCAL_LANE_CONTRACT_SPEC.md) — task-shaping contract, linter, and eval ladder for routing local models (see "Local-lane task contract" above).
 
 ## Known limitations — help wanted
 
