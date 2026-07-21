@@ -1,0 +1,24 @@
+task_id: doc-fix
+description: Correct a stale command in a README.
+
+files:
+  README.md: |
+    # Sample project
+
+    Run `python setup.py install` to install.
+
+prompts:
+  L0: "Fix the outdated install command in my readme."
+  L1: >
+    In README.md, replace the outdated install command with
+    `pip install -e .`.
+  L2: |
+    1. In README.md, replace the line "Run `python setup.py install` to install." with "Run `pip install -e .` to install.".
+    2. Verify the file now contains "pip install -e .".
+    Only touch README.md.
+
+postcondition:
+  type: grep
+  file: README.md
+  pattern: "pip install -e ."
+  must_not_contain: "python setup.py install"

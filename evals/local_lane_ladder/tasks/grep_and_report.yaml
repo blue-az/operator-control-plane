@@ -1,0 +1,24 @@
+task_id: grep-and-report
+description: >
+  Read-only. Find and quote a value -- no writes, tests discovery alone
+  (isolates the loop/repeat-call failure mode from any patch-anchoring
+  failure mode).
+
+files:
+  config/api_config.ini: |
+    [api]
+    endpoint = https://api.example.com/v2
+    timeout = 30
+
+prompts:
+  L0: "What's the API endpoint configured in this project?"
+  L1: >
+    Find the API endpoint value in config/api_config.ini and report it.
+  L2: |
+    1. Read config/api_config.ini.
+    2. Confirm that the file contains an "endpoint" key, then report its value.
+    Do not modify any files.
+
+postcondition:
+  type: output_contains
+  value: "https://api.example.com/v2"

@@ -1,0 +1,26 @@
+task_id: function-add
+description: Add a pure function to an existing Python module.
+
+files:
+  src/math_helpers.py: |
+    def add(a, b):
+        return a + b
+
+prompts:
+  L0: "Add a function to compute the square of a number to my math helpers."
+  L1: >
+    Add a pure function square(n) that returns n*n to src/math_helpers.py.
+  L2: |
+    1. In src/math_helpers.py, after the line "    return a + b", add a new function:
+    "def square(n):
+        return n * n"
+    2. Verify the file now contains the line "def square(n):".
+    Only touch src/math_helpers.py.
+
+postcondition:
+  type: exec
+  file: src/math_helpers.py
+  # Run from the fixture root with the fixture root on sys.path.
+  command: >-
+    python3 -c "import sys; sys.path.insert(0, '.'); from src.math_helpers
+    import square; assert square(4) == 16, square(4)"

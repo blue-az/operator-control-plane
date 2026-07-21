@@ -1,0 +1,37 @@
+task_id: multi-file-rename-reference
+description: >
+  Hard case. src/models.py was moved to src/domain/models.py, but
+  src/utils.py still imports from the old location. Fix the stale import.
+
+files:
+  src/domain/models.py: |
+    class Placeholder:
+        pass
+  src/utils.py: |
+    from src.models import Placeholder
+
+
+    def noop():
+        pass
+
+# The distractor scaffolding includes src/models.py by default -- remove it
+# so the fixture actually reflects "this file was moved", not "this file
+# still exists at both locations".
+remove:
+  - src/models.py
+
+prompts:
+  L0: "I moved a models file and now an import is broken somewhere, fix it."
+  L1: >
+    In src/utils.py, fix the import of Placeholder to point at its new
+    location src/domain/models.py instead of src/models.py.
+  L2: |
+    1. In src/utils.py, replace the line "from src.models import Placeholder" with "from src.domain.models import Placeholder".
+    2. Verify the file now contains "from src.domain.models import Placeholder".
+    Only touch src/utils.py.
+
+postcondition:
+  type: grep
+  file: src/utils.py
+  pattern: "from src.domain.models import Placeholder"
+  must_not_contain: "from src.models import Placeholder"

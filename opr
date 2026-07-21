@@ -9,6 +9,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import requests
@@ -441,6 +442,19 @@ def route_task(task_prompt: str, config: dict) -> RoutingResult:
         return get_routing_for_model(default_model, task_prompt, config)
 
 
+def confirm_model_action(prompt: str, config: dict) -> str:
+    """Wraps the [y/N] confirmation gate for model-initiated terminal-tool
+    calls. When config["eval_auto_confirm"] is set, auto-answers "y" instead
+    of blocking on input() -- but that flag is only ever set by main() after
+    verifying workspace_root is a descendant of tempfile.gettempdir(), so
+    this can only silently auto-confirm inside a disposable eval fixture,
+    never a real workspace. See --eval-auto-confirm in main()'s argparse
+    setup and the check right after workspace_root is resolved."""
+    if config.get("eval_auto_confirm"):
+        return "y"
+    return input(prompt).strip().lower()
+
+
 def execute_model_tool(
     tool_call: dict,
     workspace_root: Path,
@@ -482,7 +496,9 @@ def execute_model_tool(
                 )
 
             resolved = resolve_safe_path(path, workspace_root)
-            confirm = input(f"Confirm model-initiated write to {path}? [y/N]: ").strip().lower()
+            confirm = confirm_model_action(
+                f"Confirm model-initiated write to {path}? [y/N]: ", config
+            )
             if confirm != "y":
                 raise ValueError("Write cancelled by user.")
 
@@ -512,7 +528,9 @@ def execute_model_tool(
             if target_content not in existing_content:
                 raise ValueError("Target content to replace not found in the file.")
 
-            confirm = input(f"Confirm model-initiated patch to {path}? [y/N]: ").strip().lower()
+            confirm = confirm_model_action(
+                f"Confirm model-initiated patch to {path}? [y/N]: ", config
+            )
             if confirm != "y":
                 raise ValueError("Patch cancelled by user.")
 
@@ -531,7 +549,9 @@ def execute_model_tool(
                     "Shell execution is disabled. Run opr with --allow-run or configure tools.shell to enable."
                 )
 
-            confirm = input(f"Confirm model-initiated execution of: {cmd}? [y/N]: ").strip().lower()
+            confirm = confirm_model_action(
+                f"Confirm model-initiated execution of: {cmd}? [y/N]: ", config
+            )
             if confirm != "y":
                 raise ValueError("Command execution cancelled by user.")
 
@@ -819,11 +839,22 @@ def main():
         action="store_true",
         help="Skip injecting the BN header vocabulary into local-model prompts.",
     )
+    parser.add_argument(
+        "--eval-auto-confirm",
+        action="store_true",
+        help=(
+            "Auto-confirm model-initiated write_file/patch_file/run_command instead of "
+            "blocking on [y/N] input. Only for the local-lane eval ladder driving disposable "
+            "fixtures -- refuses to start unless --workspace resolves under the system temp "
+            "directory (tempfile.gettempdir()), so this can never silently skip confirmation "
+            "for a real workspace."
+        ),
+    )
     args = parser.parse_args()
 
     # Load configuration
     config = load_config(args.config)
-    
+
     # Command line overrides
     if args.workspace:
         config["workspace_root"] = os.path.abspath(os.path.expanduser(args.workspace))
@@ -833,11 +864,23 @@ def main():
         config["tools"]["write"] = True
     if args.allow_frontier:
         config["frontier"]["enabled"] = True
+    config["eval_auto_confirm"] = args.eval_auto_confirm
 
     govern_enabled = not args.no_govern
     operator_bin = find_operator_bin(config) if govern_enabled else ""
     ledger_dir = initialize_ledger(config["ledger_root"], operator_bin, govern=govern_enabled)
     workspace_root = Path(config["workspace_root"]).resolve()
+
+    if config["eval_auto_confirm"]:
+        temp_root = Path(tempfile.gettempdir()).resolve()
+        if temp_root != workspace_root and temp_root not in workspace_root.parents:
+            print(
+                f"Error: --eval-auto-confirm requires --workspace to resolve under "
+                f"{temp_root} (got {workspace_root}). Refusing to auto-confirm "
+                f"model-initiated writes/commands against a non-disposable workspace.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
 
     # Load context if specified
     context_str = ""
