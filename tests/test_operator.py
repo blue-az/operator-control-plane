@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import concurrent.futures
 import hashlib
+import importlib.machinery
+import importlib.util
 import json
 import os
 import shutil
@@ -19,9 +21,6 @@ import unittest
 from pathlib import Path
 
 import yaml
-
-import importlib.machinery
-import importlib.util
 
 OPERATOR_BIN = str(Path(__file__).resolve().parents[1] / "operator")
 _op_loader = importlib.machinery.SourceFileLoader("operator_mod", OPERATOR_BIN)
@@ -160,6 +159,8 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertTrue((op_path / "harnesses" / "codex.yaml").exists())
         self.assertTrue((op_path / "harnesses" / "claude.yaml").exists())
         self.assertTrue((op_path / "harnesses" / "grok.yaml").exists())
+        self.assertTrue((op_path / "harnesses" / "openrouter.yaml").exists())
+        self.assertTrue((op_path / "harnesses" / "fable.yaml").exists())
 
     def test_durable_event_ledger_tracks_record_history(self) -> None:
         self.assertEqual(self.run_operator("init").returncode, 0)
@@ -3420,7 +3421,11 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("Crystal metadata captured", res.stdout)
 
         evidence_path = (
-            Path(self.temp_dir) / ".operator" / "evidence" / "crystal-meta-task" / "evidence-0001.yaml"
+            Path(self.temp_dir)
+            / ".operator"
+            / "evidence"
+            / "crystal-meta-task"
+            / "evidence-0001.yaml"
         )
         self.assertTrue(evidence_path.is_file(), evidence_path)
         evidence = yaml.safe_load(evidence_path.read_text())
@@ -3522,7 +3527,9 @@ class TestOperatorCLI(unittest.TestCase):
         )
         readme = Path(self.temp_dir) / "README.md"
         readme.write_text("fixture repo\n")
-        subprocess.run(["git", "add", "README.md"], cwd=self.temp_dir, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "add", "README.md"], cwd=self.temp_dir, check=True, capture_output=True
+        )
         subprocess.run(
             ["git", "commit", "-m", "init"],
             cwd=self.temp_dir,
@@ -3585,7 +3592,9 @@ class TestOperatorCLI(unittest.TestCase):
             self.assertTrue(text.startswith("[crystal-narrated] "), text)
             texts.append(text)
             # Crystal evidence linked
-            self.assertTrue(any("evidence-0001.yaml" in ref for ref in claim.get("evidence_refs") or []))
+            self.assertTrue(
+                any("evidence-0001.yaml" in ref for ref in claim.get("evidence_refs") or [])
+            )
             # Forbidden section content must not leak into claim text (T3 / Phase 2 scope).
             self.assertNotIn("Resume from Current Focus", text)
             self.assertNotIn("Do not execute this block", text)
@@ -3748,9 +3757,7 @@ class TestOperatorCLI(unittest.TestCase):
     def test_crystal_bridge_soft_noop_without_ledger(self) -> None:
         """No .operator → exit 0 (hooks must not brick the harness)."""
         # setUp already chdirs to empty temp_dir without init
-        res = self.run_operator(
-            "crystal-bridge", "--event", "SessionStart", "--harness", "claude"
-        )
+        res = self.run_operator("crystal-bridge", "--event", "SessionStart", "--harness", "claude")
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertIn("soft no-op", res.stdout.lower())
 
@@ -3816,9 +3823,7 @@ class TestOperatorCLI(unittest.TestCase):
             0,
         )
         crystal = self._install_session_crystal()
-        start = self.run_operator(
-            "crystal-bridge", "--event", "SessionStart", "--harness", "codex"
-        )
+        start = self.run_operator("crystal-bridge", "--event", "SessionStart", "--harness", "codex")
         self.assertEqual(start.returncode, 0, start.stderr)
 
         end = self.run_operator(
@@ -3908,16 +3913,22 @@ class TestOperatorCLI(unittest.TestCase):
         repo_dir.mkdir()
         subprocess.run(["git", "init"], cwd=repo_dir, check=True, capture_output=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=repo_dir, check=True)
-        subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo_dir, check=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@example.com"], cwd=repo_dir, check=True
+        )
         (repo_dir / "foo.txt").write_text("initial content\n")
         subprocess.run(["git", "add", "foo.txt"], cwd=repo_dir, check=True, capture_output=True)
-        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_dir, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "initial"], cwd=repo_dir, check=True, capture_output=True
+        )
         base_sha = subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=repo_dir, check=True, capture_output=True, text=True
         ).stdout.strip()
 
         (repo_dir / "foo.txt").write_text("modified content\n")
-        subprocess.run(["git", "commit", "-am", "second"], cwd=repo_dir, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-am", "second"], cwd=repo_dir, check=True, capture_output=True
+        )
 
         self.assertEqual(
             self.run_operator(
@@ -3947,7 +3958,9 @@ class TestOperatorCLI(unittest.TestCase):
         )
         self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
 
-        ev_yaml = Path(self.temp_dir) / ".operator" / "evidence" / "diff-task" / "evidence-0001.yaml"
+        ev_yaml = (
+            Path(self.temp_dir) / ".operator" / "evidence" / "diff-task" / "evidence-0001.yaml"
+        )
         self.assertTrue(ev_yaml.exists())
         ev_data = yaml.safe_load(ev_yaml.read_text())
         self.assertEqual(ev_data.get("evidence_type"), "diff")
@@ -3982,7 +3995,9 @@ class TestOperatorCLI(unittest.TestCase):
         )
         self.assertEqual(res.returncode, 0, res.stderr + res.stdout)
 
-        ev_yaml = Path(self.temp_dir) / ".operator" / "evidence" / "diff-task-fail" / "evidence-0001.yaml"
+        ev_yaml = (
+            Path(self.temp_dir) / ".operator" / "evidence" / "diff-task-fail" / "evidence-0001.yaml"
+        )
         self.assertTrue(ev_yaml.exists())
         ev_data = yaml.safe_load(ev_yaml.read_text())
         self.assertEqual(ev_data.get("evidence_type"), "diff")

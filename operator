@@ -1537,6 +1537,46 @@ def init_cmd(args) -> int:
             ],
             "known_failure_modes": ["structural regressions", "context limitations"],
         },
+        "openrouter": {
+            "harness_id": "openrouter",
+            "display_name": "OpenRouter (API)",
+            "kind": "openrouter",
+            "command": None,
+            "working_directory": None,
+            "model": "deepseek/deepseek-r1",
+            "permission_profile": "default",
+            "usage_source": "api",
+            "transcript_source": "local",
+            "strengths": [
+                "Chinese open-source models (DeepSeek V3/R1, Qwen 2.5 Coder, GLM-4)",
+                "cost-effective reasoning and coding benchmarks",
+                "API pay-as-you-go metering",
+            ],
+            "known_failure_modes": [
+                "provider routing latency variability",
+                "context window variance across providers",
+            ],
+        },
+        "fable": {
+            "harness_id": "fable",
+            "display_name": "Claude Fable (API)",
+            "kind": "fable",
+            "command": None,
+            "working_directory": None,
+            "model": "claude-3-5-sonnet-20241022",
+            "permission_profile": "full",
+            "usage_source": "api",
+            "transcript_source": "local",
+            "strengths": [
+                "frontier reasoning and architectural design",
+                "code review and critique",
+                "direct Anthropic API credits metering",
+            ],
+            "known_failure_modes": [
+                "higher per-token cost compared to OS models",
+                "credit balance consumption",
+            ],
+        },
     }
 
     for hid, hdata in harnesses_data.items():
@@ -1921,9 +1961,7 @@ def evidence_attach_cmd(args) -> int:
                     timeout=15,
                 )
                 if diff_res.returncode == 0 and stat_res.returncode == 0:
-                    tmp_file = tempfile.NamedTemporaryFile(
-                        mode="w", delete=False, suffix=".diff"
-                    )
+                    tmp_file = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".diff")
                     tmp_file.write(diff_res.stdout)
                     tmp_file.close()
                     generated_diff_tmp = tmp_file.name
@@ -2622,9 +2660,7 @@ def crystal_import_cmd(args) -> int:
     if created_tasks:
         print("  open-loop tasks: " + ", ".join(created_tasks))
     if not created_claims and not created_tasks:
-        print(
-            "  (no real test bullets to extract; crystal attached as draft evidence only)"
-        )
+        print("  (no real test bullets to extract; crystal attached as draft evidence only)")
     return 0
 
 
@@ -2664,11 +2700,7 @@ def find_latest_session_crystal(repo_path: str) -> str | None:
     sessions_dir = os.path.join(os.path.abspath(repo_path), ".agent-crystals", "sessions")
     if not os.path.isdir(sessions_dir):
         return None
-    candidates = [
-        p
-        for p in glob.glob(os.path.join(sessions_dir, "*.md"))
-        if os.path.isfile(p)
-    ]
+    candidates = [p for p in glob.glob(os.path.join(sessions_dir, "*.md")) if os.path.isfile(p)]
     if not candidates:
         return None
     candidates.sort(key=lambda p: os.path.getmtime(p), reverse=True)
@@ -2786,10 +2818,7 @@ def crystal_bridge_cmd(args) -> int:
 
     op_dir = find_operator_dir()
     if not op_dir:
-        print(
-            "Notice: crystal-bridge: no .operator ledger here; soft no-op "
-            f"(event={event})."
-        )
+        print("Notice: crystal-bridge: no .operator ledger here; soft no-op " f"(event={event}).")
         return 0
 
     # Events other than SessionStart/Stop are crystallize-owned.
@@ -2818,9 +2847,7 @@ def crystal_bridge_cmd(args) -> int:
         if not resolved_task:
             if getattr(args, "task_id", None):
                 return 1  # explicit task missing → hard fail
-            print(
-                "Notice: crystal-bridge SessionStart: no current task; soft no-op."
-            )
+            print("Notice: crystal-bridge SessionStart: no current task; soft no-op.")
             return 0
         task_id, _task_path, task = resolved_task
 
