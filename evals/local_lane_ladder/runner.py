@@ -152,13 +152,31 @@ def _ledger_session_start(ledger_dir: Path, task_slug: str, objective: str) -> s
         return None
 
 
+# session-end's --outcome is a fixed vocabulary evaluating the session's
+# work, not a bare pass/fail -- there is no exact match, so a trial that
+# cleared its postcondition is tagged "useful" and one that didn't is
+# "no_go". --cost is required=True by operator's own argparse (a local
+# model has no API cost, but the flag must still be supplied or the command
+# fails closed with an argparse error).
+_LEDGER_OUTCOME = {"pass": "useful", "fail": "no_go"}
+
+
 def _ledger_session_end(ledger_dir: Path, usage_id: str, outcome: str) -> None:
     try:
-        subprocess.run(
-            [str(OPERATOR_BIN), "session-end", usage_id, "--outcome", outcome],
+        result = subprocess.run(
+            [
+                str(OPERATOR_BIN), "session-end", usage_id,
+                "--outcome", _LEDGER_OUTCOME[outcome],
+                "--cost", "0.0",
+            ],
             cwd=ledger_dir, capture_output=True, text=True, timeout=15, check=False,
         )
-    except Exception as exc:  # noqa: BLE001
+        if result.returncode != 0:
+            print(
+                f"  [ledger] session-end failed (non-fatal): {result.stderr.strip()[:200]}",
+                file=sys.stderr,
+            )
+    except Exception as exc:  # noqa: BLE001 -- ledger recording is best-effort by design
         print(f"  [ledger] session-end error (non-fatal): {exc}", file=sys.stderr)
 
 
