@@ -2,11 +2,15 @@ import importlib.machinery
 import importlib.util
 import os
 import shutil
+import stat
 import sys
 import tempfile
+import textwrap
 import unittest
 from pathlib import Path
 from unittest import mock
+
+import harness_adapter as ha
 
 # Dynamically load the extensionless 'opr' script as a module
 opr_path = str(Path(__file__).resolve().parents[1] / "opr")
@@ -100,8 +104,15 @@ class TestOprRouting(unittest.TestCase):
         self.assertTrue(opr.is_frontier_model("claude-3-5-sonnet"))
         self.assertTrue(opr.is_frontier_model("gpt-4o"))
         self.assertTrue(opr.is_frontier_model("antigravity-v2"))
+        self.assertTrue(opr.is_frontier_model("grok-4"))
+        self.assertTrue(opr.is_frontier_model("copilot"))
         self.assertFalse(opr.is_frontier_model("gemma4:26b"))
         self.assertFalse(opr.is_frontier_model("llama3:8b"))
+
+    def test_default_config_agy_fallback_is_real_binary(self):
+        config = opr.load_config("/nonexistent/opr.yaml")
+        self.assertEqual(config["frontier"]["commands"]["agy"], "agy")
+        self.assertNotEqual(config["frontier"]["commands"]["agy"], "antigravity")
 
     def test_local_ollama_model_overrides_frontier_name_heuristic(self):
         config = opr.load_config("/nonexistent/opr.yaml")
@@ -140,6 +151,103 @@ class TestOprRouting(unittest.TestCase):
         result = opr.route_task("implement feature", config)
         self.assertEqual(result.worker["model"], "gpt-oss:latest")
         self.assertEqual(result.worker["provider"], "local_ollama")
+
+
+def write_fake_cli(directory: Path, name: str, body: str) -> str:
+    path = directory / name
+    path.write_text("#!/usr/bin/env python3\n" + textwrap.dedent(body))
+    path.chmod(path.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+    return str(path)
+
+
+class TestOprDispatchFrontier(unittest.TestCase):
+    """opr's dispatch_frontier() must use the typed harness_adapter profile by
+    default, and only fall back to the deprecated shlex string-template path
+    when opr.yaml explicitly customizes a harness's command."""
+
+    def setUp(self) -> None:
+        self.temp_dir = Path(tempfile.mkdtemp()).resolve()
+        self.workspace = self.temp_dir / "workspace"
+        self.workspace.mkdir()
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.temp_dir)
+
+    def test_resolve_frontier_harness_id(self):
+        self.assertEqual(opr.resolve_frontier_harness_id("claude-3-5-sonnet"), "claude")
+        self.assertEqual(opr.resolve_frontier_harness_id("codex-large"), "codex")
+        self.assertEqual(opr.resolve_frontier_harness_id("grok-4"), "grok")
+        self.assertEqual(opr.resolve_frontier_harness_id("gemini-agy"), "agy")
+        self.assertEqual(opr.resolve_frontier_harness_id("antigravity"), "agy")
+        self.assertIsNone(opr.resolve_frontier_harness_id("gemma4:26b"))
+
+    def test_dispatch_frontier_uses_typed_adapter_by_default(self):
+        exe = write_fake_cli(
+            self.temp_dir,
+            "fake-claude",
+            """
+            import sys, json
+            data = sys.stdin.read()
+            print(json.dumps({"result": f"typed-adapter-saw:{data}"}))
+            """,
+        )
+        real_profile = ha.PROFILES["claude"]
+        ha.PROFILES["claude"] = ha.HarnessProfile(
+            harness_id="claude",
+            executable=exe,
+            base_args=real_profile.base_args,
+            prompt_transport=ha.PromptTransport.STDIN,
+            output_format="json",
+            role_args=real_profile.role_args,
+        )
+        try:
+            config = opr.load_config("/nonexistent/opr.yaml")
+            response = opr.dispatch_frontier("claude-3-5-sonnet", "hello", self.workspace, config)
+        finally:
+            ha.PROFILES["claude"] = real_profile
+        self.assertEqual(response, "typed-adapter-saw:hello")
+
+    def test_dispatch_frontier_falls_back_to_legacy_when_customized(self):
+        exe = write_fake_cli(
+            self.temp_dir,
+            "fake-legacy-claude",
+            """
+            import sys
+            print("legacy-path-response:" + sys.stdin.read())
+            """,
+        )
+        config = opr.load_config("/nonexistent/opr.yaml")
+        config["frontier"]["commands"]["claude"] = exe
+        response = opr.dispatch_frontier("claude-3-5-sonnet", "hello", self.workspace, config)
+        self.assertIn("legacy-path-response:hello", response)
+
+    def test_dispatch_frontier_reports_typed_nonzero_exit_without_apparent_success(self):
+        exe = write_fake_cli(
+            self.temp_dir,
+            "fake-claude-broken",
+            """
+            import sys
+            sys.stderr.write("internal harness failure\\n")
+            sys.exit(3)
+            """,
+        )
+        real_profile = ha.PROFILES["claude"]
+        ha.PROFILES["claude"] = ha.HarnessProfile(
+            harness_id="claude",
+            executable=exe,
+            base_args=real_profile.base_args,
+            prompt_transport=ha.PromptTransport.STDIN,
+            output_format="json",
+            role_args=real_profile.role_args,
+        )
+        try:
+            config = opr.load_config("/nonexistent/opr.yaml")
+            response = opr.dispatch_frontier("claude-3-5-sonnet", "hello", self.workspace, config)
+        finally:
+            ha.PROFILES["claude"] = real_profile
+        self.assertIn("Frontier Subprocess Dispatch Error", response)
+        self.assertIn("exited 3", response)
+        self.assertIn("internal harness failure", response)
 
 
 if __name__ == "__main__":

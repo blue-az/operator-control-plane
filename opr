@@ -15,6 +15,7 @@ from pathlib import Path
 import requests
 import yaml
 
+import harness_adapter
 import task_lint
 
 
@@ -31,7 +32,11 @@ def load_config(config_path_opt=None):
             "commands": {
                 "claude": "claude",
                 "codex": "codex",
-                "agy": "antigravity"
+                # "antigravity" is not a real invocable command on any known
+                # machine or in any documented CLI -- the real headless
+                # binary is `agy`. See harness_adapter.LEGACY_FALLBACK_COMMANDS.
+                "agy": "agy",
+                "grok": "grok"
             }
         },
         "tools": {
@@ -232,6 +237,8 @@ def is_frontier_model(model_name: str) -> bool:
             "gemini",
             "agy",
             "antigravity",
+            "grok",
+            "copilot",
         ]
     )
 
@@ -689,30 +696,94 @@ def prepare_prompt(task_input: str, accumulated_context: str, glossary: str = ""
     return "\n\n".join(parts)
 
 
-def dispatch_frontier(model_name: str, prompt: str, workspace_root: Path, config: dict) -> str:
+def resolve_frontier_harness_id(model_name: str) -> str | None:
     model_lower = model_name.lower()
-    
-    # Resolve cmd from config
-    cmds = config.get("frontier", {}).get("commands", {})
     if "claude" in model_lower:
-        cmd_template = cmds.get("claude", "claude")
-    elif "codex" in model_lower:
-        cmd_template = cmds.get("codex", "codex")
-    elif "gemini" in model_lower or "agy" in model_lower or "antigravity" in model_lower:
-        cmd_template = cmds.get("agy", "antigravity")
-    else:
-        cmd_template = model_name
+        return "claude"
+    if "codex" in model_lower:
+        return "codex"
+    if "grok" in model_lower:
+        return "grok"
+    if "gemini" in model_lower or "agy" in model_lower or "antigravity" in model_lower:
+        return "agy"
+    return None
 
-    cmd_args = shlex.split(cmd_template)
 
-    has_placeholder = False
-    for i in range(len(cmd_args)):
-        if "{prompt}" in cmd_args[i]:
-            cmd_args[i] = cmd_args[i].replace("{prompt}", prompt)
-            has_placeholder = True
-        if "{task}" in cmd_args[i]:
-            cmd_args[i] = cmd_args[i].replace("{task}", prompt)
-            has_placeholder = True
+def render_adapter_result(harness_id: str, result: "harness_adapter.AdapterResult") -> str:
+    """Turn a typed AdapterResult back into the plain response string
+    run_agent_loop expects. Never turns stderr or a non-success exit state
+    into apparent success text."""
+    ExitState = harness_adapter.ExitState
+
+    if result.exit_state == ExitState.SUCCESS:
+        if result.parsed_output is not None:
+            # CLI JSON envelope shapes vary by harness and aren't all
+            # independently confirmed here (only claude's was checked against
+            # a real response); try the common field names used for "the
+            # model's text answer" and fall back to the raw envelope rather
+            # than guessing wrong silently.
+            for key in ("result", "response", "output", "text", "message"):
+                value = result.parsed_output.get(key)
+                if isinstance(value, str):
+                    return value
+            return json.dumps(result.parsed_output)
+        return result.stdout
+
+    if result.exit_state == ExitState.MISSING_EXECUTABLE:
+        return (
+            f"Frontier Subprocess Dispatch Error: executable not found for harness "
+            f"'{harness_id}'."
+        )
+    if result.exit_state == ExitState.TIMEOUT:
+        return f"Frontier Subprocess Dispatch Error: '{harness_id}' call timed out."
+    if result.exit_state == ExitState.QUOTA_EXHAUSTED:
+        return (
+            f"Frontier Subprocess Dispatch Error: '{harness_id}' quota/rate limit "
+            f"exhausted. {result.stderr.strip()}"
+        )
+    if result.exit_state == ExitState.MALFORMED_OUTPUT:
+        return (
+            f"Frontier Subprocess Dispatch Error: '{harness_id}' returned malformed "
+            f"output.\nstdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+    # NONZERO_EXIT
+    return (
+        f"Frontier Subprocess Dispatch Error: '{harness_id}' exited "
+        f"{result.returncode}.\n{result.stderr.strip()}"
+    )
+
+
+def dispatch_frontier(model_name: str, prompt: str, workspace_root: Path, config: dict) -> str:
+    harness_id = resolve_frontier_harness_id(model_name)
+    cmds = config.get("frontier", {}).get("commands", {})
+    custom_template = cmds.get(harness_id) if harness_id else None
+    default_legacy = (
+        harness_adapter.LEGACY_FALLBACK_COMMANDS.get(harness_id) if harness_id else None
+    )
+
+    # Typed adapter profiles take precedence over the deprecated string-
+    # template path, unless the operator explicitly customized this
+    # harness's command in opr.yaml (anything other than its own plain
+    # binary name), in which case honor that override.
+    is_uncustomized = custom_template is None or custom_template in (
+        default_legacy,
+        harness_id,
+    )
+    if harness_id in harness_adapter.PROFILES and is_uncustomized:
+        result = harness_adapter.invoke(
+            harness_id,
+            harness_adapter.Role.IMPLEMENTER,
+            model_name,
+            prompt,
+            workspace_root,
+            timeout_seconds=config.get("frontier", {}).get("timeout_seconds", 300),
+        )
+        return render_adapter_result(harness_id, result)
+
+    # Deprecated legacy string-template path: still shlex.split + list-argv,
+    # never shell=True.
+    cmd_template = custom_template if custom_template else model_name
+    cmd_args, has_placeholder = harness_adapter.build_legacy_argv(cmd_template, prompt)
 
     try:
         if not has_placeholder:
