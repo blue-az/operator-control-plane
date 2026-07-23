@@ -16,6 +16,7 @@ equivalent on a given CLI, none is added -- see ROLE_ARGS.
 from __future__ import annotations
 
 import json
+import os
 import shlex
 import shutil
 import subprocess
@@ -179,6 +180,35 @@ class AdapterResult:
     parsed_output: Optional[dict]
     duration_seconds: float
     argv: tuple[str, ...]
+    # Caller provenance: who invoked this adapter, if they said so. See
+    # resolve_initiator_identity() -- None unless the calling process
+    # explicitly declares itself via environment variables. Nothing here
+    # auto-detects a caller; a process shelling out to Python (e.g. a live
+    # agy or claude session's own run_command-style tool) has no built-in
+    # way to know who its parent is, so this is opt-in, not inferred.
+    initiator: Optional[dict]
+
+
+INITIATOR_HARNESS_ENV = "OPERATOR_INITIATOR_HARNESS"
+INITIATOR_SESSION_ENV = "OPERATOR_INITIATOR_SESSION_ID"
+
+
+def resolve_initiator_identity() -> Optional[dict]:
+    """Reads the calling process's self-declared identity, if any, from
+    OPERATOR_INITIATOR_HARNESS / OPERATOR_INITIATOR_SESSION_ID. Mirrors the
+    same explicit, opt-in environment-variable convention `operator` itself
+    uses for get_executor_identity()'s OPERATOR_TEST_UID/
+    OPERATOR_TEST_SENTINEL -- provenance is declared, never inferred."""
+    harness = os.environ.get(INITIATOR_HARNESS_ENV, "").strip()
+    session_id = os.environ.get(INITIATOR_SESSION_ENV, "").strip()
+    if not harness and not session_id:
+        return None
+    identity: dict = {}
+    if harness:
+        identity["harness"] = harness
+    if session_id:
+        identity["session_id"] = session_id
+    return identity
 
 
 def get_profile(harness_id: str) -> HarnessProfile:
@@ -349,6 +379,7 @@ def invoke(
     AdapterResult with raw stdout/stderr preserved, never silently treated as
     success."""
     profile = get_profile(harness_id)
+    initiator = resolve_initiator_identity()
     executable_path = shutil.which(profile.executable)
     if not executable_path:
         return AdapterResult(
@@ -359,6 +390,7 @@ def invoke(
             parsed_output=None,
             duration_seconds=0.0,
             argv=tuple(),
+            initiator=initiator,
         )
 
     prompt_file_path = None
@@ -398,6 +430,7 @@ def invoke(
                 parsed_output=None,
                 duration_seconds=duration,
                 argv=tuple(argv),
+                initiator=initiator,
             )
         except OSError as exc:
             duration = time.monotonic() - start
@@ -409,6 +442,7 @@ def invoke(
                 parsed_output=None,
                 duration_seconds=duration,
                 argv=tuple(argv),
+                initiator=initiator,
             )
         duration = time.monotonic() - start
 
@@ -421,6 +455,7 @@ def invoke(
             parsed_output=parsed,
             duration_seconds=duration,
             argv=tuple(argv),
+            initiator=initiator,
         )
     finally:
         if temp_prompt_file:

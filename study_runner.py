@@ -712,6 +712,7 @@ def _render_transcript(result: harness_adapter.AdapterResult) -> str:
         f"returncode: {result.returncode}",
         f"duration_seconds: {result.duration_seconds}",
         f"argv: {list(result.argv)}",
+        f"initiator: {result.initiator}",
         "--- stdout ---",
         result.stdout,
         "--- stderr ---",
@@ -770,13 +771,16 @@ def _run_harness_phase(ctx: PhaseContext, phase: dict, role: harness_adapter.Rol
         # be gotten right here rather than relying on that check.
         outcome = "useful" if result.exit_state == harness_adapter.ExitState.SUCCESS else "no_go"
         _close_session(ctx.ledger_ops, usage_id, outcome)
+        note = f"study phase {phase['phase_id']} ({phase['operation']}) transcript"
+        if result.initiator:
+            note += f" (initiated by {result.initiator})"
         _attach_evidence(
             ctx.ledger_ops,
             task_id,
             str(transcript_path),
             "transcript",
             phase["harness_id"],
-            f"study phase {phase['phase_id']} ({phase['operation']}) transcript",
+            note,
         )
         if phase["harness_id"] in USAGE_IMPORT_SUPPORTED:
             _import_usage(
@@ -797,6 +801,10 @@ def _run_harness_phase(ctx: PhaseContext, phase: dict, role: harness_adapter.Rol
         "exit_state": result.exit_state.value,
         "returncode": result.returncode,
         "argv": list(result.argv),
+        # Caller provenance -- see harness_adapter.resolve_initiator_identity().
+        # None unless the calling process explicitly declared itself via
+        # OPERATOR_INITIATOR_HARNESS/OPERATOR_INITIATOR_SESSION_ID.
+        "initiator": result.initiator,
     }
     return payload, result
 

@@ -8,6 +8,7 @@ states, prompt transport, and legacy-config paths can be exercised for free.
 
 from __future__ import annotations
 
+import os
 import shutil
 import stat
 import sys
@@ -15,6 +16,7 @@ import tempfile
 import textwrap
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -411,6 +413,64 @@ class TestHarnessAdapter(unittest.TestCase):
         self.assertIn("acceptEdits", frozen.argv)
         self.assertIn("--model", frozen.argv)
         self.assertIn("test-model-x", frozen.argv)
+
+    # ---- caller provenance (resolve_initiator_identity / AdapterResult.initiator) ----
+
+    def test_no_initiator_by_default(self) -> None:
+        exe = write_fake_cli(self.tmp, "fake-noop", "print('{}')")
+        profile = self.make_profile(exe)
+        ha.PROFILES["_test_claude"] = profile
+        # mock.patch.dict("os.environ") saves+restores the real environment
+        # on exit; explicitly deleting these two keys inside it (rather than
+        # assuming they're already absent) proves this doesn't accidentally
+        # pick up a real caller's env from whatever session is actually
+        # running this test suite.
+        with mock.patch.dict("os.environ"):
+            os.environ.pop(ha.INITIATOR_HARNESS_ENV, None)
+            os.environ.pop(ha.INITIATOR_SESSION_ENV, None)
+            try:
+                result = ha.invoke("_test_claude", ha.Role.SUPERVISOR, "m", "hi", self.workspace)
+            finally:
+                del ha.PROFILES["_test_claude"]
+        self.assertIsNone(result.initiator)
+
+    def test_initiator_recorded_when_caller_declares_itself(self) -> None:
+        exe = write_fake_cli(self.tmp, "fake-noop2", "print('{}')")
+        profile = self.make_profile(exe)
+        ha.PROFILES["_test_claude"] = profile
+        env = {
+            ha.INITIATOR_HARNESS_ENV: "gemini-agy",
+            ha.INITIATOR_SESSION_ENV: "28c1df5f-b3e8-40de-8051-777502107649",
+        }
+        try:
+            with mock.patch.dict("os.environ", env):
+                result = ha.invoke("_test_claude", ha.Role.SUPERVISOR, "m", "hi", self.workspace)
+        finally:
+            del ha.PROFILES["_test_claude"]
+        self.assertEqual(
+            result.initiator,
+            {"harness": "gemini-agy", "session_id": "28c1df5f-b3e8-40de-8051-777502107649"},
+        )
+
+    def test_initiator_recorded_on_missing_executable_too(self) -> None:
+        # Caller provenance is about who's asking, not whether the call
+        # succeeded -- it must be present even on a MISSING_EXECUTABLE result.
+        profile = self.make_profile(str(self.tmp / "does-not-exist"))
+        ha.PROFILES["_test_claude"] = profile
+        env = {ha.INITIATOR_HARNESS_ENV: "gemini-agy", ha.INITIATOR_SESSION_ENV: "sess-1"}
+        try:
+            with mock.patch.dict("os.environ", env):
+                result = ha.invoke("_test_claude", ha.Role.SUPERVISOR, "m", "hi", self.workspace)
+        finally:
+            del ha.PROFILES["_test_claude"]
+        self.assertEqual(result.exit_state, ha.ExitState.MISSING_EXECUTABLE)
+        self.assertEqual(result.initiator, {"harness": "gemini-agy", "session_id": "sess-1"})
+
+    def test_partial_initiator_harness_only(self) -> None:
+        with mock.patch.dict("os.environ", {ha.INITIATOR_HARNESS_ENV: "gemini-agy"}):
+            os.environ.pop(ha.INITIATOR_SESSION_ENV, None)
+            identity = ha.resolve_initiator_identity()
+        self.assertEqual(identity, {"harness": "gemini-agy"})
 
     # ---- role_args wiring for the real profiles ----
 
