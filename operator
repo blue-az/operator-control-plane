@@ -4807,9 +4807,16 @@ def doctor_cmd(args) -> int:
                         f"[Error] claim {cid} is self-verified by '{made}' (maker cannot verify own claim)"
                     )
                 if vby and review and vby != review:
-                    issues.append(
-                        f"[Warning] claim {cid} verified by '{vby}', not the task's review harness '{review}'"
-                    )
+                    if args.audit and c_data.get("type") == "supervision_credit":
+                        issues.append(
+                            f"[Error] claim {cid} is a verified supervision_credit claim "
+                            f"verified by '{vby}', not the task's registered review harness "
+                            f"'{review}' (--audit treats this mismatch as an error)"
+                        )
+                    else:
+                        issues.append(
+                            f"[Warning] claim {cid} verified by '{vby}', not the task's review harness '{review}'"
+                        )
 
             if authority == "uid_isolated":
                 authority_errors = []
@@ -5080,12 +5087,15 @@ def doctor_cmd(args) -> int:
                                 f"[Info] crystal narrates {test_n} verification claims; "
                                 f"none registered (evidence {ev_id})"
                             )
-
-        if args.audit and task_status == "verified":
-            # Check for independent supervisor_verdict.md (Phase 3.2)
-            # Assumption: run directories are under docs/domain_runs/DBB-001a/
-            # We'll try to find a directory matching task_id (or similar)
-            pass
+        # Meta-supervision integrity (supersedes the old Phase 3.2 --audit stub,
+        # which was a hard-coded, never-built assumption that verdicts lived
+        # under a fixed docs/domain_runs/DBB-001a/-shaped directory and did
+        # nothing). A named supervision layer, verified-claim evidence, and
+        # self-verification rejection are already enforced unconditionally
+        # above for every claim regardless of --audit; the one behavior that
+        # is genuinely specific to --audit is handled inline at the
+        # reviewer-mismatch check above, which relabels a supervision_credit
+        # mismatch as a fail-closed Error instead of a Warning under --audit.
 
         # Stale-assignment check (Feature B)
         assigned_harness = task.get("assigned_harness")
@@ -7008,7 +7018,11 @@ def main() -> None:
     doctor_parser.add_argument(
         "--audit",
         action="store_true",
-        help="Perform additional independent-supervision checks (Phase 3.2).",
+        help=(
+            "Require a named supervision layer on supervision_credit claims and "
+            "escalate a reviewer/verifier mismatch on verified supervision_credit "
+            "claims from a Warning to a fail-closed Error."
+        ),
     )
     doctor_parser.add_argument(
         "--stale-days",

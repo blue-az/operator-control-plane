@@ -1463,6 +1463,109 @@ class TestOperatorCLI(unittest.TestCase):
         claim2 = yaml.safe_load((op_path / "claims" / "claim-0002.yaml").read_text())
         self.assertEqual(claim2.get("supervision_layer"), "execution")
 
+    def test_doctor_audit_supervision_credit_mismatch_escalates(self) -> None:
+        """--audit relabels a supervision_credit reviewer/verifier mismatch as
+        a fail-closed Error instead of a Warning. The exit code is already 1
+        either way (the message sits in `issues`, not `infos`, regardless of
+        its text label) -- this test checks the message text changes, not a
+        change in whether doctor fails."""
+        self.run_operator("init")
+        self.run_operator(
+            "task-create",
+            "--objective",
+            "Meta-supervision integrity",
+            "--id",
+            "audit-task",
+            "--assign",
+            "codex",
+            "--review",
+            "claude",
+        )
+        res = self.run_operator(
+            "claim-add",
+            "--type",
+            "supervision_credit",
+            "--text",
+            "Codex supervised this work.",
+            "--gate",
+            "explicit supervision layer",
+            "--layer",
+            "end_to_end",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        evidence_file = Path(self.temp_dir) / "supervision_evidence.txt"
+        evidence_file.write_text("supervision evidence")
+
+        res = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "gemini-agy",
+            "--verify-cmd",
+            "pytest",
+            str(evidence_file),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        # Without --audit: mismatch is labeled a Warning (still fails closed --
+        # the message lives in `issues`, not `infos`).
+        res = self.run_operator("doctor")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn(
+            "[Warning] claim claim-0001 verified by 'gemini-agy', not the task's review harness 'claude'",
+            res.stdout,
+        )
+
+        # With --audit: the same mismatch on a supervision_credit claim is
+        # relabeled a fail-closed Error.
+        res = self.run_operator("doctor", "--audit")
+        self.assertEqual(res.returncode, 1)
+        self.assertIn(
+            "[Error] claim claim-0001 is a verified supervision_credit claim "
+            "verified by 'gemini-agy', not the task's registered review harness "
+            "'claude' (--audit treats this mismatch as an error)",
+            res.stdout,
+        )
+        self.assertNotIn(
+            "[Warning] claim claim-0001 verified by 'gemini-agy', not the task's review harness",
+            res.stdout,
+        )
+
+        # Reviewer verify clean, under --audit too.
+        res = self.run_operator(
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "claude",
+            "--verify-cmd",
+            "pytest",
+            str(evidence_file),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        res = self.run_operator("doctor", "--audit")
+        self.assertEqual(res.returncode, 0, res.stdout)
+
+    def test_doctor_audit_help_text_no_longer_promises_phase_3_2(self) -> None:
+        """The --audit flag's help text used to promise 'Phase 3.2' checks it
+        never implemented (the body was a literal `pass`). It should now
+        describe what it actually checks."""
+        res = self.run_operator("doctor", "--help")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertNotIn("Phase 3.2", res.stdout)
+        self.assertIn("supervision_credit", res.stdout)
+
     def test_session_start(self) -> None:
         import yaml
 
