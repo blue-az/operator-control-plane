@@ -397,7 +397,6 @@ else:
 
 AGY_ROLE_AWARE = """
 import sys
-sys.stdin.read()
 if "accept-edits" in sys.argv:
     import os
     os.makedirs("allowed_dir", exist_ok=True)
@@ -481,6 +480,7 @@ class OperatorCliIntegrationTestCase(unittest.TestCase):
             output_format=real.output_format,
             role_args=real.role_args,
             prompt_file_flag=real.prompt_file_flag,
+            prompt_arg_flag=real.prompt_arg_flag,
         )
         kwargs.update(overrides)
         ha.PROFILES[harness_id] = ha.HarnessProfile(**kwargs)

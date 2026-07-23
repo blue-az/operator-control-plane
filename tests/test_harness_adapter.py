@@ -238,6 +238,56 @@ class TestHarnessAdapter(unittest.TestCase):
         self.assertEqual(result.exit_state, ha.ExitState.SUCCESS)
         self.assertEqual(result.parsed_output["file_content"], prompt)
 
+    def test_inline_arg_transport_passes_prompt_as_flag_value_not_stdin(self) -> None:
+        # Pins the real bug found via an actual agy smoke call: agy's `-p`
+        # takes the prompt as its own argv value, not via stdin. Piping it
+        # over stdin instead silently "succeeds" with a real but unrelated
+        # answer -- exactly the kind of wrong-but-plausible response this
+        # adapter exists to prevent. This fake script asserts stdin is EMPTY
+        # and the prompt is only found as -p's argv value.
+        exe = write_fake_cli(
+            self.tmp,
+            "fake-inline-arg-echo",
+            """
+            import sys, json
+            stdin_content = sys.stdin.read()
+            prompt = None
+            for i, a in enumerate(sys.argv):
+                if a == "-p":
+                    prompt = sys.argv[i + 1]
+            print(json.dumps({"prompt_via_flag": prompt, "stdin_content": stdin_content}))
+            """,
+        )
+        profile = self.make_profile(
+            exe,
+            base_args=("--print-timeout", "30m"),
+            prompt_transport=ha.PromptTransport.INLINE_ARG,
+            prompt_arg_flag="-p",
+        )
+        ha.PROFILES["_test_agy"] = profile
+        prompt = "Reply with exactly the single word: pong"
+        try:
+            result = ha.invoke("_test_agy", ha.Role.SUPERVISOR, "m", prompt, self.workspace)
+        finally:
+            del ha.PROFILES["_test_agy"]
+        self.assertEqual(result.exit_state, ha.ExitState.SUCCESS)
+        self.assertEqual(result.parsed_output["prompt_via_flag"], prompt)
+        self.assertEqual(result.parsed_output["stdin_content"], "")
+
+    def test_build_argv_uses_placeholder_for_inline_arg_when_prompt_unknown(self) -> None:
+        # freeze() must record argv before the prompt is known (and must
+        # never embed prompt content in a frozen, plan-hashed argv anyway).
+        profile = ha.get_profile("agy")
+        argv = ha.build_argv(profile, ha.Role.SUPERVISOR, "some-model")
+        self.assertIn("-p", argv)
+        self.assertIn("<prompt>", argv)
+
+    def test_real_agy_profile_uses_inline_arg_transport(self) -> None:
+        profile = ha.get_profile("agy")
+        self.assertEqual(profile.prompt_transport, ha.PromptTransport.INLINE_ARG)
+        self.assertEqual(profile.prompt_arg_flag, "-p")
+        self.assertNotIn("-p", profile.base_args)
+
     def test_prompt_injection_shell_metacharacters_never_execute(self) -> None:
         # A prompt containing shell metacharacters must never be interpreted by
         # a shell -- it only ever reaches the child process as literal stdin

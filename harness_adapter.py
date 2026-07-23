@@ -38,6 +38,13 @@ class ExitState(Enum):
 class PromptTransport(Enum):
     STDIN = "stdin"
     PROMPT_FILE = "prompt_file"
+    # The prompt is the argv value of a specific flag (e.g. agy's `-p`),
+    # not piped via stdin. Confirmed necessary by a real smoke call: agy's
+    # `-p` takes the prompt as its own argument -- piping it over stdin
+    # instead produces a real, coherent, but completely unrelated response
+    # (agy answered a question about one of its own other flags), which is
+    # exactly the kind of silent-wrong-answer this adapter exists to avoid.
+    INLINE_ARG = "inline_arg"
 
 
 class Role(Enum):
@@ -61,6 +68,7 @@ class HarnessProfile:
     output_format: str
     role_args: dict[str, tuple[str, ...]]
     prompt_file_flag: Optional[str] = None
+    prompt_arg_flag: Optional[str] = None
     version_args: tuple[str, ...] = ("--version",)
     # Best-effort, case-insensitive substrings checked against combined
     # stdout+stderr to recognize quota/rate-limit exhaustion. This is
@@ -99,8 +107,9 @@ PROFILES: dict[str, HarnessProfile] = {
     "agy": HarnessProfile(
         harness_id="agy",
         executable="agy",
-        base_args=("-p", "--print-timeout", "30m"),
-        prompt_transport=PromptTransport.STDIN,
+        base_args=("--print-timeout", "30m"),
+        prompt_transport=PromptTransport.INLINE_ARG,
+        prompt_arg_flag="-p",
         output_format="text",
         role_args={
             Role.SUPERVISOR.value: ("--mode", "plan"),
@@ -252,9 +261,23 @@ def build_argv(
     profile: HarnessProfile,
     role: Role,
     model: str,
-    prompt_file_path: Optional[str],
+    prompt_file_path: Optional[str] = None,
+    inline_prompt: Optional[str] = None,
 ) -> list[str]:
-    argv = [profile.executable, *profile.base_args]
+    argv = [profile.executable]
+    if profile.prompt_transport == PromptTransport.INLINE_ARG:
+        if not profile.prompt_arg_flag:
+            raise AdapterError(
+                f"Harness {profile.harness_id!r} declares INLINE_ARG transport but has "
+                "no prompt_arg_flag configured."
+            )
+        # Placeholder ("<prompt>") when the real prompt isn't known yet
+        # (e.g. during freeze(), which must record argv before a study
+        # plan is hashed, without the prompt content itself in that argv).
+        argv.extend(
+            [profile.prompt_arg_flag, inline_prompt if inline_prompt is not None else "<prompt>"]
+        )
+    argv.extend(profile.base_args)
     argv.extend(profile.role_args.get(role.value, ()))
     if model:
         argv.extend(["--model", model])
@@ -349,7 +372,8 @@ def invoke(
                 handle.write(prompt)
             prompt_file_path = temp_prompt_file
 
-        argv = build_argv(profile, role, model, prompt_file_path)
+        inline_prompt = prompt if profile.prompt_transport == PromptTransport.INLINE_ARG else None
+        argv = build_argv(profile, role, model, prompt_file_path, inline_prompt)
         argv[0] = executable_path
 
         stdin_data = prompt if profile.prompt_transport == PromptTransport.STDIN else None
