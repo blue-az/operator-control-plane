@@ -583,9 +583,27 @@ class LedgerOps:
     claim_add: Callable[[argparse.Namespace], int]
 
 
-def _open_session(ledger_ops: LedgerOps, task_id: str, harness_id: str) -> Optional[str]:
+# session-start's real --lane choices are local/frontier_driver/frontier_author
+# (checked directly against the argparse definition) -- there is no "study"
+# lane, so a role must map onto one of those three rather than inventing a
+# fourth value that other lane-aware tooling (usage-summary, doctor) won't
+# recognize. Mirrors opr.get_frontier_lane()'s own review-vs-author split.
+LANE_FOR_ROLE = {
+    harness_adapter.Role.SUPERVISOR.value: "frontier_driver",
+    harness_adapter.Role.JUDGE.value: "frontier_driver",
+    harness_adapter.Role.IMPLEMENTER.value: "frontier_author",
+}
+
+
+def _open_session(
+    ledger_ops: LedgerOps, task_id: str, harness_id: str, role: harness_adapter.Role
+) -> Optional[str]:
     ns = argparse.Namespace(
-        task_id=task_id, harness_id=harness_id, force=True, lane="study", task_class=None
+        task_id=task_id,
+        harness_id=harness_id,
+        force=True,
+        lane=LANE_FOR_ROLE[role.value],
+        task_class=None,
     )
     with _captured_stdout() as buf:
         ledger_ops.session_start(ns)
@@ -730,7 +748,7 @@ def _run_harness_phase(ctx: PhaseContext, phase: dict, role: harness_adapter.Rol
     task_id = ctx.task_for(phase["row"])
     ledger_harness_id = LEDGER_HARNESS_ID.get(phase["harness_id"], phase["harness_id"])
 
-    usage_id = _open_session(ctx.ledger_ops, task_id, ledger_harness_id)
+    usage_id = _open_session(ctx.ledger_ops, task_id, ledger_harness_id, role)
     started_at = iso_now()
 
     result = harness_adapter.invoke(
