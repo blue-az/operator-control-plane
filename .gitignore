@@ -1,3 +1,6 @@
 .operator/
 __pycache__/
 *.pyc
+# Regenerable via fastfoodagent/fetch_substrate.py + build_substrate.py --
+# the raw CSV alone is ~22MB, too large and too easily stale to commit.
+fastfoodagent/data/
