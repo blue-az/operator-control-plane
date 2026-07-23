@@ -29,6 +29,7 @@ import yaml
 import authority_client
 import authority_projection
 import crystal_parse
+import study_runner
 
 LEDGER_DB_NAME = "ledger.sqlite3"
 LEDGER_HASH_FORMAT = "operator-ledger-event-v1"
@@ -6518,6 +6519,85 @@ def authority_reconcile_cmd(args) -> int:
         return 1
 
 
+def _study_ledger_ops() -> "study_runner.LedgerOps":
+    return study_runner.LedgerOps(
+        session_start=session_start_cmd,
+        session_end=session_end_cmd,
+        evidence_attach=evidence_attach_cmd,
+        usage_import=usage_import_cmd,
+        claim_add=claim_add_cmd,
+    )
+
+
+def study_plan_cmd(args) -> int:
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        return 1
+    try:
+        result = study_runner.study_plan_command(op_dir, args.plan)
+    except study_runner.StudyError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    print(f"Stored study plan '{result['study_id']}' with digest {result['plan_digest']}.")
+    print(f"Phases: {result['phase_count']}")
+    return 0
+
+
+def study_run_cmd(args) -> int:
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        return 1
+    try:
+        result = study_runner.study_run_command(
+            op_dir,
+            args.plan_digest,
+            args.run_id,
+            _study_ledger_ops(),
+            approve_phase=args.approve_phase,
+        )
+    except study_runner.StudyError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    print(f"run_id={result['run_id']} status={result['status']}")
+    return 0 if result["status"] == "completed" else 1
+
+
+def study_status_cmd(args) -> int:
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        return 1
+    try:
+        result = study_runner.study_status_command(op_dir, args.run_id)
+    except study_runner.StudyError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    print(json.dumps(result, indent=2))
+    return 0 if result["status"] == "completed" else 1
+
+
+def study_resume_cmd(args) -> int:
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        return 1
+    try:
+        result = study_runner.study_resume_command(
+            op_dir,
+            args.run_id,
+            _study_ledger_ops(),
+            approve_phase=args.approve_phase,
+            acknowledge_quota_reset=args.acknowledge_quota_reset,
+        )
+    except study_runner.StudyError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    print(f"run_id={result['run_id']} status={result['status']}")
+    return 0 if result["status"] == "completed" else 1
+
+
 # --- CLI Setup ---
 
 
@@ -7214,6 +7294,55 @@ def main() -> None:
         ),
     )
 
+    # operator study-plan
+    study_plan_parser = subparsers.add_parser(
+        "study-plan", help="Validate and store a digest-bound study plan beneath .operator/studies/."
+    )
+    study_plan_parser.add_argument("--plan", required=True, help="Path to a JSON study plan file.")
+
+    # operator study-run
+    study_run_parser = subparsers.add_parser(
+        "study-run", help="Create (or continue) a run from a stored study plan and execute phases."
+    )
+    study_run_parser.add_argument(
+        "--plan-digest", dest="plan_digest", required=True, help="SHA-256 digest of a stored study plan."
+    )
+    study_run_parser.add_argument(
+        "--run-id", dest="run_id", default=None, help="Existing run ID to continue (omit to start a new run)."
+    )
+    study_run_parser.add_argument(
+        "--approve-phase",
+        dest="approve_phase",
+        type=int,
+        default=None,
+        help="Approve exactly one mutating (implementation/repair) phase by phase_id.",
+    )
+
+    # operator study-status
+    study_status_parser = subparsers.add_parser(
+        "study-status", help="Report a study run's phase-by-phase checkpoint status."
+    )
+    study_status_parser.add_argument("--run-id", dest="run_id", required=True, help="Run ID.")
+
+    # operator study-resume
+    study_resume_parser = subparsers.add_parser(
+        "study-resume", help="Resume a study run after interruption, approval, or a quota pause."
+    )
+    study_resume_parser.add_argument("--run-id", dest="run_id", required=True, help="Run ID.")
+    study_resume_parser.add_argument(
+        "--approve-phase",
+        dest="approve_phase",
+        type=int,
+        default=None,
+        help="Approve exactly one mutating (implementation/repair) phase by phase_id.",
+    )
+    study_resume_parser.add_argument(
+        "--acknowledge-quota-reset",
+        dest="acknowledge_quota_reset",
+        action="store_true",
+        help="Retry a phase that previously stopped in waiting_quota (never a harness penalty).",
+    )
+
     args = parser.parse_args()
 
     if getattr(args, "command", None) == "task-show" and getattr(args, "task_id_flag", None):
@@ -7251,6 +7380,10 @@ def main() -> None:
         "verify": verify_cmd,
         "task-transition": task_transition_cmd,
         "authority-reconcile": authority_reconcile_cmd,
+        "study-plan": study_plan_cmd,
+        "study-run": study_run_cmd,
+        "study-status": study_status_cmd,
+        "study-resume": study_resume_cmd,
     }
 
     lock_handle = None
