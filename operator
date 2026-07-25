@@ -687,6 +687,8 @@ def audit_event_store(operator_dir: str) -> list[str]:
             )
 
     for key in sorted(set(latest_events) - set(visible_records)):
+        if key[0] == "brief_issued":
+            continue
         messages.append(f"[Error] Durable ledger latest {key[0]} {key[1]} has no YAML projection")
 
     tasks = {
@@ -3806,7 +3808,23 @@ def usage_annotate_cmd(args) -> int:
     return 0
 
 
-def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str | None:
+def record_brief_issued(op_dir: str, task_id: str, harness_id: str, role: str) -> None:
+    ensure_event_store(op_dir)
+    source_command = sys.argv[1] if len(sys.argv) > 1 else "internal"
+    brief_record = {
+        "task_id": task_id,
+        "harness_id": harness_id,
+        "role": role,
+        "executor_identity": get_executor_identity(),
+        "timestamp": get_current_utc_iso(),
+    }
+    items = [("brief_issued", f"{task_id}/{harness_id}", brief_record)]
+    append_record_events(op_dir, items, source_command)
+
+
+def generate_brief_markdown(
+    op_dir: str, task_id: str, harness_id: str, role: str | None = None
+) -> tuple[str, str] | None:
     resolved_task = resolve_task_record(op_dir, task_id)
     if not resolved_task:
         return None
@@ -3819,6 +3837,34 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     harness = load_yaml(harness_path)
     if not harness:
         return None
+
+    assigned = task.get("assigned_harness")
+    review = task.get("review_harness")
+
+    derived_role = None
+    if harness_id == review and harness_id == assigned:
+        print(
+            f"Warning: Harness '{harness_id}' is both assigned_harness and review_harness for task '{task_id}'. Emitting reviewer brief variant.",
+            file=sys.stderr,
+        )
+        derived_role = "reviewer"
+    elif harness_id == review:
+        derived_role = "reviewer"
+    elif harness_id == assigned:
+        derived_role = "builder"
+    else:
+        print(
+            f"Error: Harness '{harness_id}' is neither assigned_harness nor review_harness for task '{task_id}'.",
+            file=sys.stderr,
+        )
+        return None
+
+    if role is not None and role != derived_role:
+        print(
+            f"Warning: Specified role '{role}' differs from derived role '{derived_role}' for harness '{harness_id}'. Using derived role '{derived_role}'.",
+            file=sys.stderr,
+        )
+    role = derived_role
 
     claims = []
     claims_list = task.get("claims") or []
@@ -3863,57 +3909,109 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     for w in harness.get("known_failure_modes") or []:
         md.append(f"  - WARNING: {w}")
     md.append("")
-    md.append("## 3. Current Task State & Recommended Next Action")
-    md.append(f"- **Current Status:** `{task.get('status')}`")
-    md.append(f"- **Recommended Next Action:** `{task.get('next_action') or 'Not specified'}`")
-    md.append("- **Initial Assumptions:**")
-    assumptions = task.get("open_assumptions") or []
-    if assumptions:
-        for val in assumptions:
-            md.append(f"  - {val}")
-    else:
-        md.append("  - (None listed)")
-    md.append("")
-    md.append("## 4. Latest Harness Handoff Closeout")
-    if latest_handoff:
-        md.append(
-            f"*(Consumed from `{latest_handoff.get('handoff_id')}` by `{latest_handoff.get('by')}` at `{latest_handoff.get('created_at')}`)*"
-        )
+
+    if role == "builder":
+        md.append("## 3. Current Task State & Recommended Next Action")
+        md.append(f"- **Current Status:** `{task.get('status')}`")
+        md.append(f"- **Recommended Next Action:** `{task.get('next_action') or 'Not specified'}`")
+        md.append("- **Initial Assumptions:**")
+        assumptions = task.get("open_assumptions") or []
+        if assumptions:
+            for val in assumptions:
+                md.append(f"  - {val}")
+        else:
+            md.append("  - (None listed)")
         md.append("")
-        md.append(f"- **What Changed:** {latest_handoff.get('what_changed') or 'Not documented'}")
-        md.append(
-            f"- **What Was Verified:** {latest_handoff.get('what_verified') or 'Not documented'}"
-        )
-        md.append(
-            f"- **What Was Claimed (unverified):** {latest_handoff.get('what_claimed') or 'Not documented'}"
-        )
-        md.append(
-            f"- **What Remains Open:** {latest_handoff.get('what_remains_open') or 'Not documented'}"
-        )
-        md.append(
-            f"- **Unchecked Assumptions:** {latest_handoff.get('unchecked_assumptions') or 'Not documented'}"
-        )
-    else:
-        md.append("No previous handoff captured for this task yet. Starting from initial setup.")
-    md.append("")
-    md.append("## 5. Claims & Verification Gates")
-    if claims:
-        md.append(
-            "The following claims have been registered for this task. All load-bearing claims must have verification evidence."
-        )
-        md.append("")
-        md.append("| Claim ID | Made By | Status | Type | Text | Required Gate |")
-        md.append("| --- | --- | --- | --- | --- | --- |")
-        for c in claims:
-            outcome = c.get("verification_outcome")
-            if not outcome:
-                outcome = "verified" if c.get("verification_status") else "unverified"
-            status_str = str(outcome)
+        md.append("## 4. Latest Harness Handoff Closeout")
+        if latest_handoff:
             md.append(
-                f"| `{c.get('claim_id')}` | {c.get('made_by')} | {status_str} | `{c.get('type')}` | {c.get('text')} | {c.get('required_gate') or 'N/A'} |"
+                f"*(Consumed from `{latest_handoff.get('handoff_id')}` by `{latest_handoff.get('by')}` at `{latest_handoff.get('created_at')}`)*"
             )
-    else:
-        md.append("No claims have been registered yet for this task.")
+            md.append("")
+            md.append(
+                f"- **What Changed:** {latest_handoff.get('what_changed') or 'Not documented'}"
+            )
+            md.append(
+                f"- **What Was Verified:** {latest_handoff.get('what_verified') or 'Not documented'}"
+            )
+            md.append(
+                f"- **What Was Claimed (unverified):** {latest_handoff.get('what_claimed') or 'Not documented'}"
+            )
+            md.append(
+                f"- **What Remains Open:** {latest_handoff.get('what_remains_open') or 'Not documented'}"
+            )
+            md.append(
+                f"- **Unchecked Assumptions:** {latest_handoff.get('unchecked_assumptions') or 'Not documented'}"
+            )
+        else:
+            md.append(
+                "No previous handoff captured for this task yet. Starting from initial setup."
+            )
+        md.append("")
+        md.append("## 5. Claims & Verification Gates")
+        if claims:
+            md.append(
+                "The following claims have been registered for this task. All load-bearing claims must have verification evidence."
+            )
+            md.append("")
+            md.append("| Claim ID | Made By | Status | Type | Text | Required Gate |")
+            md.append("| --- | --- | --- | --- | --- | --- |")
+            for c in claims:
+                outcome = c.get("verification_outcome")
+                if not outcome:
+                    outcome = "verified" if c.get("verification_status") else "unverified"
+                status_str = str(outcome)
+                md.append(
+                    f"| `{c.get('claim_id')}` | {c.get('made_by')} | {status_str} | `{c.get('type')}` | {c.get('text')} | {c.get('required_gate') or 'N/A'} |"
+                )
+        else:
+            md.append("No claims have been registered yet for this task.")
+    else:  # role == "reviewer"
+        md.append("## 3. Current Task State")
+        md.append(f"- **Current Status:** `{task.get('status')}`")
+        md.append("- **Initial Assumptions:**")
+        assumptions = task.get("open_assumptions") or []
+        if assumptions:
+            builder_id = assigned or "builder"
+            for val in assumptions:
+                md.append(
+                    f'  - <unverified-assertion by="{builder_id}">{val}</unverified-assertion>'
+                )
+        else:
+            md.append("  - (None listed)")
+        md.append("")
+        md.append("## 5. Claims & Verification Gates")
+        if claims:
+            md.append(
+                "The following claims have been registered for this task. All load-bearing claims must have verification evidence."
+            )
+            md.append("")
+            md.append("| Claim ID | Type | Required Gate | Evidence |")
+            md.append("| --- | --- | --- | --- |")
+            for c in claims:
+                cid = c.get("claim_id")
+                ctype = c.get("type")
+                req_gate = c.get("required_gate") or "N/A"
+                ev_items = []
+                for ev_ref in c.get("evidence_refs") or []:
+                    ev_full_path = os.path.join(op_dir, ev_ref)
+                    if os.path.exists(ev_full_path):
+                        ev_data = load_yaml(ev_full_path) or {}
+                        ev_p = ev_data.get("path_or_url") or ev_ref
+                        ev_h = ev_data.get("hash")
+                        if not ev_h and isinstance(ev_data.get("fingerprint"), dict):
+                            ev_h = ev_data.get("fingerprint").get("value")
+                        if ev_h:
+                            ev_items.append(f"`{ev_p}` (hash: `{ev_h}`)")
+                        else:
+                            ev_items.append(f"`{ev_p}`")
+                    else:
+                        ev_items.append(f"`{ev_ref}`")
+                ev_str = "<br>".join(ev_items) if ev_items else "None"
+                md.append(f"| `{cid}` | `{ctype}` | {req_gate} | {ev_str} |")
+        else:
+            md.append("No claims have been registered yet for this task.")
+
     md.append("")
     md.append("## 6. Required Evidence")
     md.append(
@@ -3943,7 +4041,7 @@ def generate_brief_markdown(op_dir: str, task_id: str, harness_id: str) -> str |
     md.append("5. **Next action:** proposed next step for the subsequent harness.")
     md.append("")
 
-    return "\n".join(md)
+    return "\n".join(md), role
 
 
 def brief_cmd(args) -> int:
@@ -3960,20 +4058,21 @@ def brief_cmd(args) -> int:
         return 1
     task_id, _, _ = resolved_task
 
-    brief_content = generate_brief_markdown(op_dir, task_id, args.harness_id)
-    if not brief_content:
+    res = generate_brief_markdown(op_dir, task_id, args.harness_id)
+    if not res:
         print(
             f"Error: Could not generate brief for task '{task_id}' and harness '{args.harness_id}'. Check if they exist.",
             file=sys.stderr,
         )
         return 1
+    brief_content, role = res
 
     brief_filename = f"{task_id}.{args.harness_id}.md"
     brief_path = os.path.join(op_dir, "briefs", brief_filename)
 
     try:
-        with open(brief_path, "w") as f:
-            f.write(brief_content)
+        atomic_write_text(brief_path, brief_content)
+        record_brief_issued(op_dir, task_id, args.harness_id, role)
     except Exception as e:
         print(f"Error writing brief: {e}", file=sys.stderr)
         return 1
@@ -3997,13 +4096,14 @@ def export_brief_cmd(args) -> int:
         return 1
     task_id, _, _ = resolved_task
 
-    brief_content = generate_brief_markdown(op_dir, task_id, args.harness_id)
-    if not brief_content:
+    res = generate_brief_markdown(op_dir, task_id, args.harness_id)
+    if not res:
         print(
             f"Error: Could not generate brief for task '{task_id}' and harness '{args.harness_id}'. Check if they exist.",
             file=sys.stderr,
         )
         return 1
+    brief_content, role = res
 
     harness_path = os.path.join(op_dir, "harnesses", f"{args.harness_id}.yaml")
     harness = load_yaml(harness_path) or {}
@@ -4021,11 +4121,20 @@ def export_brief_cmd(args) -> int:
     full_export_content = export_header + brief_content
 
     try:
-        with open(export_path, "w") as f:
-            f.write(full_export_content)
+        atomic_write_text(export_path, full_export_content)
+        record_brief_issued(op_dir, task_id, args.harness_id, role)
     except Exception as e:
         print(f"Error writing export brief: {e}", file=sys.stderr)
         return 1
+
+    print("=" * 80)
+    print(f"PASTE THE CONTENT BELOW INTO THE {harness_display_name.upper()} SESSION:")
+    print("=" * 80)
+    print(full_export_content)
+    print("=" * 80)
+    print(f"Export brief written to: {export_path}")
+    print("=" * 80)
+    return 0
 
     print("=" * 80)
     print(f"PASTE THE CONTENT BELOW INTO THE {harness_display_name.upper()} SESSION:")
@@ -4572,6 +4681,30 @@ def doctor_cmd(args) -> int:
     infos = []
     issues.extend(audit_event_store(op_dir))
 
+    builder_briefs_issued = set()
+    db_path = ledger_db_path(op_dir)
+    if os.path.exists(db_path):
+        try:
+            conn = connect_event_store(op_dir, read_only=True)
+            try:
+                rows = conn.execute(
+                    "SELECT payload_json FROM ledger_events WHERE record_type = 'brief_issued'"
+                ).fetchall()
+                for row in rows:
+                    try:
+                        payload = json.loads(row["payload_json"])
+                        if payload.get("role") == "builder":
+                            t_id = payload.get("task_id")
+                            h_id = payload.get("harness_id")
+                            if t_id and h_id:
+                                builder_briefs_issued.add((t_id, h_id))
+                    except Exception:
+                        pass
+            finally:
+                conn.close()
+        except Exception:
+            pass
+
     try:
         identity_policy = load_identity_policy(op_dir)
     except IdentityPolicyError as exc:
@@ -4801,6 +4934,11 @@ def doctor_cmd(args) -> int:
             review = task.get("review_harness")
             authority = c_data.get("verification_authority")
             recorded_mode = c_data.get("verification_mode")
+
+            if vby and (task_id, vby) in builder_briefs_issued:
+                issues.append(
+                    f"[Error] claim {cid} verified by '{vby}' who was issued a builder brief for task '{task_id}'"
+                )
 
             if verified:
                 if authority != "uid_isolated" and vby == made:
@@ -6063,10 +6201,16 @@ def session_start_cmd(args) -> int:
         )
         return 1
 
-    brief_content = generate_brief_markdown(op_dir, task_id, harness_id)
-    if not brief_content:
+    if not task.get("assigned_harness"):
+        task["assigned_harness"] = harness_id
+        task["updated_at"] = get_current_utc_iso()
+        save_yaml(task, task_path)
+
+    res = generate_brief_markdown(op_dir, task_id, harness_id)
+    if not res:
         print("Error: Brief generation failed.", file=sys.stderr)
         return 1
+    brief_content, role = res
 
     harness_display_name = harness.get("display_name", harness_id)
     export_filename = f"{task_id}.{harness_id}.export.md"
@@ -6081,8 +6225,8 @@ def session_start_cmd(args) -> int:
     full_export_content = export_header + brief_content
 
     try:
-        with open(export_path, "w") as f:
-            f.write(full_export_content)
+        atomic_write_text(export_path, full_export_content)
+        record_brief_issued(op_dir, task_id, harness_id, role)
     except Exception as e:
         print(f"Error writing export brief: {e}", file=sys.stderr)
         return 1
@@ -7296,7 +7440,8 @@ def main() -> None:
 
     # operator study-plan
     study_plan_parser = subparsers.add_parser(
-        "study-plan", help="Validate and store a digest-bound study plan beneath .operator/studies/."
+        "study-plan",
+        help="Validate and store a digest-bound study plan beneath .operator/studies/.",
     )
     study_plan_parser.add_argument("--plan", required=True, help="Path to a JSON study plan file.")
 
@@ -7305,10 +7450,16 @@ def main() -> None:
         "study-run", help="Create (or continue) a run from a stored study plan and execute phases."
     )
     study_run_parser.add_argument(
-        "--plan-digest", dest="plan_digest", required=True, help="SHA-256 digest of a stored study plan."
+        "--plan-digest",
+        dest="plan_digest",
+        required=True,
+        help="SHA-256 digest of a stored study plan.",
     )
     study_run_parser.add_argument(
-        "--run-id", dest="run_id", default=None, help="Existing run ID to continue (omit to start a new run)."
+        "--run-id",
+        dest="run_id",
+        default=None,
+        help="Existing run ID to continue (omit to start a new run).",
     )
     study_run_parser.add_argument(
         "--approve-phase",
