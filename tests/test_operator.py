@@ -2186,6 +2186,79 @@ class TestOperatorCLI(unittest.TestCase):
         res = self.run_operator("doctor")
         self.assertIn("manual/auto divergence on quota_events", res.stdout)
 
+    def test_usage_import_since_until_accepts_naive_timestamps(self) -> None:
+        # Regression for #12: a --since/--until value with no UTC offset used to
+        # crash comparing it against tz-aware session start_time values parsed
+        # from harness logs.
+        self.run_operator("init")
+
+        fixtures_dir = Path(__file__).resolve().parent / "fixtures"
+
+        res = self.run_operator(
+            "task-create",
+            "--objective",
+            "Test naive since/until",
+            "--id",
+            "naive-since-task",
+            "--repo",
+            str(Path(self.temp_dir) / "project-phoenix"),
+            "--assign",
+            "claude",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        env_claude = {"OPERATOR_TEST_CLAUDE_DIR": str(fixtures_dir / "claude")}
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "claude",
+            "--task",
+            "naive-since-task",
+            "--since",
+            "2026-01-01T00:00:00",
+            "--dry-run",
+            env=env_claude,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertNotIn("Traceback", res.stderr)
+
+    def test_usage_import_claude_model_resolution_ignores_synthetic(self) -> None:
+        # Regression for #13: the importer used to take the first
+        # message.model value seen, which could be the "<synthetic>"
+        # zero-token sentinel rather than the session's real model.
+        self.run_operator("init")
+
+        fixtures_dir = Path(__file__).resolve().parent / "fixtures"
+
+        res = self.run_operator(
+            "task-create",
+            "--objective",
+            "Test synthetic model resolution",
+            "--id",
+            "synthetic-model-task",
+            "--repo",
+            str(Path(self.temp_dir) / "project-phoenix"),
+            "--assign",
+            "claude",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        env_claude = {"OPERATOR_TEST_CLAUDE_DIR": str(fixtures_dir / "claude_model_resolution")}
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "claude",
+            "--task",
+            "synthetic-model-task",
+            "--session-id",
+            "synth001",
+            "--dry-run",
+            env=env_claude,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("model: claude-fable-5", res.stdout)
+        self.assertNotIn("<synthetic>", res.stdout)
+
     def test_verified_by_guard_integrity(self) -> None:
         import yaml
 
