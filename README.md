@@ -1,17 +1,26 @@
 # Operator Control Plane
 
-A small, local **governance ledger for multi-agent software work.** It enforces a
-**narration-vs-execution partition**: an agent's *claim* ("I did X, it passes") is only as good as the
-*evidence* attached to it and the *verification* by a different identity. The `operator` CLI records
-tasks → claims → evidence → verifications as YAML projections under `.operator/`, preserves each
-trust-relevant write in an append-only SQLite event history, binds writes to the executing OS identity,
-guards against self-verification, and ships a `doctor` consistency checker.
+**Your AI coding agent just said "done, tests pass." Do you actually know that's true?**
+
+Multi-agent and autonomous coding workflows run on trust: an agent claims it finished a task, and
+that claim gets merged, handed off, or billed as if it were fact. `operator` is a small, local
+ledger that makes those claims checkable instead of assumed. It enforces a
+**narration-vs-execution partition**: an agent's *claim* ("I did X, it passes") only counts once it
+has *evidence* attached and is *verified by a different identity* — not the identity that made the
+claim.
+
+The `operator` CLI records tasks → claims → evidence → verifications as YAML projections under
+`.operator/`, preserves every trust-relevant write in an append-only SQLite event history, binds
+writes to the executing OS identity, blocks same-UID "trusted" verification in enforced mode, and
+ships a `doctor` consistency checker that fails closed.
 
 Only an enforced verification by a registered verifier OS UID distinct from the claim author's UID is
-recorded as `uid_isolated`. Same-UID and default `single_user` verification is explicitly advisory.
+recorded as `uid_isolated`. Same-UID and default `single_user` verification still work but are
+explicitly advisory — no self-grading.
 
-Built as the "engine room / logbook" enforcement substrate for [Bulkhead τ](https://bulkheadtau.com),
-but it stands alone. **Contributions welcome** — especially on the open problems below.
+**Contributions welcome** — especially on the open problems below. (Originally built as the
+"engine room / logbook" enforcement substrate for [Bulkhead τ](https://bulkheadtau.com); it stands
+alone here.)
 
 ![opr REPL example: confirmation-gated shell and file writes on the left; /model switching across local models on the right](docs/opr-example.png)
 
