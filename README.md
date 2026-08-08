@@ -209,11 +209,15 @@ Ollama models or a frontier pass-through, gates every model-initiated write or
 shell command behind an explicit `[y/N]` confirmation, and tags sessions into
 the same ledger `operator` reads.
 
-Local models fail on **degrees of freedom, not knowledge** — a task phrased as
-open-ended intent invites discovery loops and wandering; the same task phrased
-as a concrete plan (exact paths, a verbatim anchor, numbered steps, a
-machine-checkable success criterion) converts search into lookup. Three pieces
-formalize and measure this:
+Working hypothesis: local models may fail more on **degrees of freedom than on
+knowledge** — a task phrased as open-ended intent invites discovery loops and
+wandering; the same task phrased as a concrete plan (exact paths, a verbatim
+anchor, numbered steps, a machine-checkable success criterion) converts search
+into lookup. The benefit of plan-shaped phrasing is measured; the *cause* of
+goal-shaped failure is not yet established, because the supporting negative
+records were produced through a harness that ended the agent loop on the first
+state-changing command ([audit](.operator/evidence/opr-continuation-loop-audit/evidence-0008.md)).
+Three pieces formalize and measure this:
 
 - [`LOCAL_LANE_CONTRACT.md`](LOCAL_LANE_CONTRACT.md) — the contract itself, rules R1–R6, each
   tied to the failure mode it prevents.

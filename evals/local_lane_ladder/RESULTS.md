@@ -2,6 +2,25 @@
 
 Generated from 216 trial records.
 
+> **These measure model + pre-`890d595` harness, not model ability.**
+> Relabeled 2026-08-08 per the codex audit
+> (`.operator/evidence/opr-continuation-loop-audit/evidence-0008.md`).
+>
+> Every trial ran through `opr` when `run_command` was a *terminal* tool: the agent loop
+> returned on its first successful state-changing command. A model that spent a command on
+> discovery or verification before the required mutation was recorded as a failure whether or
+> not it was capable. Per-trial traces were not retained, so the two cannot be separated now.
+>
+> - The **128 passing trials remain valid.** A deterministic postcondition that was met was
+>   met; harness truncation cannot fabricate a real file or output state.
+> - The **88 failing trials are confounded** and must not be read as model-capability findings
+>   until rerun with traces preserved.
+> - The pass-rate arithmetic below is correctly computed from the records. What is affected is
+>   its *interpretation* as relative model ability, since removing false negatives moves cells.
+>
+> The 120s read timeout fixed in `d5eea34` is **not** implicated here: the slowest failing
+> trial finished in 72.1s, well inside that limit.
+
 ## Pass rate per model x level (all tasks combined)
 
 | Model | L0 | L1 | L2 |

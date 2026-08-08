@@ -118,7 +118,15 @@ def ensure_eval_harness_registered(op_dir: Path) -> None:
         "usage_source": "local",
         "transcript_source": "local",
         "strengths": ["deterministic local-model eval grid"],
-        "known_failure_modes": ["degrees-of-freedom failures at low specificity levels"],
+        # Phrased as an observed correlation, not a settled cause. The
+        # supporting negative records predate opr 890d595, when run_command
+        # was a terminal tool that ended the loop on first success, so they
+        # cannot distinguish model failure from harness truncation. See
+        # .operator/evidence/opr-continuation-loop-audit/evidence-0008.md
+        "known_failure_modes": [
+            "observed (pre-890d595 harness): lower pass rates at low specificity levels; "
+            "cause not established"
+        ],
     }
     harness_path.write_text(yaml.safe_dump(harness_data, sort_keys=False), encoding="utf-8")
 

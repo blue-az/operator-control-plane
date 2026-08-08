@@ -61,9 +61,17 @@ genuinely hard, and differently for each model.** `gemma4:26b` needs the
 *full* L2 structure to solve it at all (1/3 → 0/3 → 3/3 — L1 alone doesn't
 help, and even makes it slightly worse than L0). `qwen2.5-coder:32b` needs
 only L1 (0/3 → 3/3 → 3/3). `gemma4:31b` solves it at every level (3/3 across
-the board). `llama3.1:8b` never solves it at any level (0/3 → 0/3 → 0/3) —
-for this model, the task appears to be beyond a specificity-phrasing fix
-entirely, not a prompt-shaping problem.
+the board). `llama3.1:8b` never solves it at any level (0/3 → 0/3 → 0/3).
+
+> **Correction 2026-08-08.** This paragraph previously concluded that for
+> `llama3.1:8b` the task is "beyond a specificity-phrasing fix entirely, not a
+> prompt-shaping problem." That inference is withdrawn. It rests on 9 negative
+> trials with no retained traces, run under the pre-`890d595` harness where the
+> loop ended on the first successful `run_command` — so a discovery command
+> before the mutation reads as failure regardless of capability. The codex audit
+> also notes that despite its name the fixture requires only **one** edit (to
+> `src/utils.py`), so it is not intrinsically a multi-mutation task. The 0/9
+> record stands; the causal reading does not.
 
 **A few non-monotonic single-task dips exist even in the "confirmed"
 models** (e.g. `gemma4:31b` alias-add: 3/3 → 1/3 → 3/3; `gemma4:26b`
@@ -73,10 +81,19 @@ Worth more trials before reading anything into these specifically; they
 don't change the aggregate monotonic verdict for those two models.
 
 **`llama3.1:8b` and `qwen2.5-coder:32b` both score 0/18 at L0** — a floor
-effect at the goal-only level for both, consistent with the spec's founding
-principle (local models fail on degrees of freedom, not knowledge) holding
-even more sharply for a coder-tuned model and a small general model than
-for the two `gemma4` variants the original experiment used.
+effect at the goal-only level for both. This was previously read as the spec's
+founding principle (degrees of freedom, not knowledge) holding even more
+sharply for a coder-tuned model and a small general model than for the two
+`gemma4` variants.
+
+> **Qualified 2026-08-08.** The floor is a real property of the old
+> model+harness system, but it cannot support the causal reading: all 36
+> supporting records are negatives without traces, produced when the loop
+> terminated on the first state-changing command. A model that opened with a
+> discovery command at L0 — precisely what an under-specified prompt invites —
+> would be scored 0 whether or not it could finish. The confound and the
+> hypothesis predict the same observation, so this data cannot distinguish
+> them. See `.operator/evidence/opr-continuation-loop-audit/evidence-0008.md`.
 
 ## What this does not establish
 
