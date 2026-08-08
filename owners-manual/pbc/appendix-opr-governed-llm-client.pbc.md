@@ -87,6 +87,16 @@ usage records. This contract describes the verified open-source behavior impleme
   name: Identical Tool Calls Are Not Re-Executed
   rule: A tool call whose full JSON fingerprint has already been handled in this loop must halt the loop rather than execute again.
   trust: trusted
+- id: OPR-RUL-019
+  name: Request Timeouts Must Be Decode-Rate Neutral
+  rule: The local dispatch read timeout is configurable (local.request_timeout, default 600s) and must not be set so low that it truncates slow models; a fixed timeout is a token budget divided by decode rate and silently penalizes low-throughput models.
+  trust: trusted
+  note: >
+    Was hardcoded at 120s. At gemma4:26b's ~40 tok/s that allowed ~4800 output tokens; at
+    gemma4:31b's ~6.5 tok/s it allowed ~770, and 31b exceeded it on the final turn of multi-step
+    tasks. It surfaced as "Ollama API Error: Read timed out", reading as infrastructure flakiness
+    rather than a harness ceiling. Measured effect: 31b went from 0/5 to 2/2 explicit-completion
+    signals on an unchanged task once the timeout was raised.
 ```
 
 ## Behaviors

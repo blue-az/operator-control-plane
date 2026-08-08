@@ -26,7 +26,15 @@ def load_config(config_path_opt=None):
         "workspace_root": ".",
         "default_model": "gemma4:26b",
         "local": {
-            "ollama_url": "http://localhost:11434"
+            "ollama_url": "http://localhost:11434",
+            # A single HTTP read timeout is not model-neutral: it is a token
+            # budget divided by decode rate. At gemma4:26b's ~40 tok/s the old
+            # hardcoded 120s allowed ~4800 output tokens; at gemma4:31b's
+            # ~6.5 tok/s it allowed ~770, and a dense model on an iGPU hit that
+            # ceiling routinely on the final turn of a multi-step task. It
+            # surfaced as "Ollama API Error: Read timed out", i.e. as
+            # infrastructure flakiness rather than as a too-slow model.
+            "request_timeout": 600,
         },
         "frontier": {
             "enabled": False,
@@ -403,13 +411,15 @@ class Dispatcher:
             return base
         return f"{base}_local"
 
-    def _dispatch_ollama(self, model: str, task: str, ollama_url: str) -> str:
+    def _dispatch_ollama(
+        self, model: str, task: str, ollama_url: str, request_timeout: int = 600
+    ) -> str:
         url = f"{ollama_url.rstrip('/')}/api/generate"
         payload = {"model": model, "prompt": task, "stream": False}
         if "no_think" in model or "26b" in model:
             payload["system"] = "Respond with strict JSON only. No thinking preamble. No markdown."
         try:
-            response = requests.post(url, json=payload, timeout=120)
+            response = requests.post(url, json=payload, timeout=request_timeout)
             response.raise_for_status()
             return response.json().get("response", "")
         except Exception as e:
@@ -896,7 +906,12 @@ def run_agent_loop(
         if is_effective_frontier_model(current_model, config):
             response = dispatch_frontier(current_model, prompt, workspace_root, config)
         else:
-            response = dispatcher._dispatch_ollama(current_model, prompt, config["local"]["ollama_url"])
+            response = dispatcher._dispatch_ollama(
+                current_model,
+                prompt,
+                config["local"]["ollama_url"],
+                config["local"].get("request_timeout", 600),
+            )
 
         tool_call = extract_json_tool_call(response)
         if not tool_call:
