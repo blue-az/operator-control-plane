@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import datetime
+import getpass
 import json
 import os
 import re
@@ -296,6 +297,21 @@ If you want to invoke a tool, output the raw JSON block ONLY. Do not write any e
 If you do not want to invoke a tool, respond with normal conversation.
 """
 
+# Appended to SYSTEM_INSTRUCTIONS only when continuation is enabled
+# (--continue-steps N). Without it the loop exits on the first successful
+# state-changing tool (OPR-RUL-008), so advertising task_complete would be
+# describing behavior the harness does not have.
+CONTINUATION_INSTRUCTIONS = """
+Multi-step mode is ON. After a state-changing tool (write_file, patch_file,
+run_command) runs, you will be shown its output and may issue the next tool
+call. Work through the requested steps one tool call at a time.
+
+8. task_complete: {"tool": "task_complete", "summary": "what you did"}
+
+Emit task_complete ONLY when every requested step has actually run. Do not
+emit it as an acknowledgement, and do not emit it before running the steps.
+"""
+
 
 def extract_json_tool_call(text: str) -> dict | None:
     text = text.strip()
@@ -477,6 +493,20 @@ def confirm_model_action(prompt: str, config: dict) -> str:
     setup and the check right after workspace_root is resolved."""
     if config.get("eval_auto_confirm"):
         return "y"
+    # OPR-RUL-014: --dangerous waives the prompt for this invocation only.
+    # main() rejects it if it appears in a config file, so it cannot be left
+    # enabled and forgotten. It does not widen the workspace boundary
+    # (OPR-RUL-003) or lift the step budget (OPR-RUL-011).
+    if config.get("dangerous"):
+        print(f"{prompt}[auto-confirmed: --dangerous]")
+        return "y"
+    allow = config.get("yes_to") or []
+    if allow:
+        cmd = (config.get("_pending_command") or "").strip()
+        for prefix in allow:
+            if cmd.startswith(prefix):
+                print(f"{prompt}[auto-confirmed: --yes-to '{prefix}']")
+                return "y"
     return input(prompt).strip().lower()
 
 
@@ -574,9 +604,14 @@ def execute_model_tool(
                     "Shell execution is disabled. Run opr with --allow-run or configure tools.shell to enable."
                 )
 
-            confirm = confirm_model_action(
-                f"Confirm model-initiated execution of: {cmd}? [y/N]: ", config
-            )
+            # Surfaced so --yes-to can match on the command text itself.
+            config["_pending_command"] = cmd
+            try:
+                confirm = confirm_model_action(
+                    f"Confirm model-initiated execution of: {cmd}? [y/N]: ", config
+                )
+            finally:
+                config.pop("_pending_command", None)
             if confirm != "y":
                 raise ValueError("Command execution cancelled by user.")
 
@@ -682,8 +717,13 @@ def execute_model_tool(
     return output, allowed and not output.startswith("Error:")
 
 
-def prepare_prompt(task_input: str, accumulated_context: str, glossary: str = "") -> str:
-    parts = [SYSTEM_INSTRUCTIONS]
+def prepare_prompt(
+    task_input: str,
+    accumulated_context: str,
+    glossary: str = "",
+    continuation: bool = False,
+) -> str:
+    parts = [SYSTEM_INSTRUCTIONS + (CONTINUATION_INSTRUCTIONS if continuation else "")]
     if glossary:
         parts.append(
             "Project vocabulary (canonical definitions from the BN board header; "
@@ -822,6 +862,7 @@ def run_agent_loop(
     config: dict,
     initial_context: str = "",
     glossary: str = "",
+    continue_steps: int = 0,
 ) -> str:
     accumulated_context = initial_context
     task_input = initial_prompt
@@ -829,6 +870,11 @@ def run_agent_loop(
     turn = 0
     seen_tool_calls = set()
     terminal_tools = {"write_file", "patch_file", "run_command"}
+    # OPR-RUL-011: continuation is opt-in and budgeted. continue_steps == 0
+    # preserves OPR-RUL-008 exactly (exit on first successful state change).
+    continuation = continue_steps > 0
+    state_changes = 0
+    steps_log: list[str] = []
 
     # Vocabulary rides outside accumulated_context: local models get it every
     # turn, frontier models never see it and it never trips the context-sharing
@@ -836,7 +882,7 @@ def run_agent_loop(
     local_glossary = "" if is_effective_frontier_model(current_model, config) else glossary
 
     while turn < max_turns:
-        prompt = prepare_prompt(task_input, accumulated_context, local_glossary)
+        prompt = prepare_prompt(task_input, accumulated_context, local_glossary, continuation)
 
         # Context confirmation check for frontier models
         if is_effective_frontier_model(current_model, config) and accumulated_context:
@@ -857,9 +903,29 @@ def run_agent_loop(
             return response
 
         tool_name = tool_call.get("tool")
+
+        # OPR-RUL-012: completion is explicit. Only meaningful in continuation
+        # mode; outside it the model was never told this tool exists.
+        if tool_name == "task_complete":
+            if not continuation:
+                return response
+            summary = tool_call.get("summary", "")
+            ran = ", ".join(steps_log) if steps_log else "none"
+            return (
+                f"[Task complete after {state_changes} state-changing step(s): {ran}]\n"
+                f"{summary}"
+            )
+
         tool_fingerprint = json.dumps(tool_call, sort_keys=True)
         if tool_fingerprint in seen_tool_calls:
-            return f"[Stopped: model repeated identical tool call '{tool_name}' after it had already been handled.]"
+            # Name the repeated invocation: "it looped" is not actionable,
+            # "it re-issued step 1 after finishing step 2" is.
+            repeated = tool_call.get("command") or tool_call.get("path") or tool_name
+            ran = ", ".join(steps_log) if steps_log else "none"
+            return (
+                f"[Stopped: model repeated an already-handled tool call "
+                f"'{tool_name}: {repeated}'. State-changing steps that did run: {ran}.]"
+            )
         seen_tool_calls.add(tool_fingerprint)
 
         print(f"\n[Model requests tool call: {tool_name}]")
@@ -872,13 +938,54 @@ def run_agent_loop(
         print(f"\n[Tool Output]\n{tool_output}\n")
 
         if tool_name in terminal_tools:
-            if success:
-                return f"[Tool completed: {tool_name}]\n{tool_output}"
-            return f"[Tool failed or cancelled: {tool_name}]\n{tool_output}"
+            # A failed state change always stops the loop — that is exactly
+            # when a human should look. Unchanged by continuation.
+            if not success:
+                return f"[Tool failed or cancelled: {tool_name}]\n{tool_output}"
 
-        accumulated_context += f"\n--- Tool Output: {tool_name} ---\n{tool_output}\n---------------------------\n"
+            state_changes += 1
+            steps_log.append(tool_name)
+
+            # OPR-RUL-008 default path, preserved bit-for-bit when
+            # continuation is off.
+            if not continuation:
+                return f"[Tool completed: {tool_name}]\n{tool_output}"
+
+            # OPR-RUL-011: budget halts the loop rather than continuing.
+            if state_changes >= continue_steps:
+                return (
+                    f"[Halted: reached state-change budget of {continue_steps} "
+                    f"({', '.join(steps_log)}). Task may be incomplete — no "
+                    f"task_complete signal was received.]\n{tool_output}"
+                )
+
+        # In continuation mode the model must be able to tell that a silent
+        # command succeeded. `git add` emits nothing on success, and a bare
+        # empty Tool Output block reads as "nothing happened", so the model
+        # re-issues the same call and trips the OPR-RUL-009 fingerprint halt.
+        # Record the invocation and its outcome, not just stdout.
+        if continuation:
+            invocation = tool_call.get("command") or tool_call.get("path") or ""
+            status = "SUCCEEDED" if success else "FAILED"
+            body = tool_output.strip() or "(no output — this is normal for this command)"
+            accumulated_context += (
+                f"\n--- step {turn + 1}: {tool_name} {invocation} -> {status} ---\n"
+                f"{body}\n--- end step {turn + 1} ---\n"
+            )
+        else:
+            accumulated_context += (
+                f"\n--- Tool Output: {tool_name} ---\n{tool_output}\n"
+                "---------------------------\n"
+            )
         turn += 1
 
+    if continuation and state_changes:
+        # OPR-RUL-013: partial completion is reported, not masked as success.
+        return (
+            f"[Partial: {state_changes} state-changing step(s) ran "
+            f"({', '.join(steps_log)}) but no task_complete signal was "
+            f"received before the {max_turns}-turn limit.]"
+        )
     return "[Agent Loop terminated: reached max turn limit of 10]"
 
 
@@ -917,6 +1024,40 @@ def main():
         "--allow-frontier",
         action="store_true",
         help="Allow governed frontier model pass-through.",
+    )
+    parser.add_argument(
+        "--continue-steps",
+        type=int,
+        default=0,
+        metavar="N",
+        help=(
+            "Enable multi-step continuation: after a successful state-changing tool "
+            "(write_file/patch_file/run_command) the model is re-prompted with the "
+            "output instead of the loop exiting, up to N state changes. Default 0 "
+            "keeps the single-state-change behavior. Each step still requires its "
+            "own confirmation unless waived."
+        ),
+    )
+    parser.add_argument(
+        "--dangerous",
+        action="store_true",
+        help=(
+            "Waive the [y/N] confirmation gate for model-initiated state-changing "
+            "tools for THIS INVOCATION ONLY. Does not widen the workspace boundary "
+            "and does not lift --continue-steps. Cannot be set from a config file. "
+            "Prints the executing identity and whether the operator-builder "
+            "deny-read set holds before running."
+        ),
+    )
+    parser.add_argument(
+        "--yes-to",
+        default=None,
+        metavar="PREFIXES",
+        help=(
+            "Comma-separated command prefixes to auto-confirm (e.g. "
+            "'git add,git commit,git status'). Non-matching commands still prompt. "
+            "Safer middle ground than --dangerous: unmatched commands fail closed."
+        ),
     )
     parser.add_argument(
         "--frontier",
@@ -970,6 +1111,47 @@ def main():
                 file=sys.stderr,
             )
             sys.exit(1)
+
+    # OPR-RUL-014: the waiver is per-invocation only. A config file that tries
+    # to set it is a configuration error, not a silent grant -- otherwise it
+    # gets switched on once and left on.
+    if config.get("dangerous"):
+        print(
+            "Error: 'dangerous' cannot be set from a config file. It is a "
+            "per-invocation flag (--dangerous) by design.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    config["dangerous"] = args.dangerous
+    config["yes_to"] = (
+        [p.strip() for p in args.yes_to.split(",") if p.strip()] if args.yes_to else []
+    )
+
+    if args.continue_steps < 0:
+        print("Error: --continue-steps must be >= 0.", file=sys.stderr)
+        sys.exit(1)
+
+    # OPR-RUL-017: disclose blast radius at point of use. Waiving review as a
+    # user who can read every secret on the box is a different proposition
+    # from waiving it under the operator-builder deny-read set.
+    if config["dangerous"]:
+        deny_read = [
+            Path.home() / ".ssh/id_ed25519",
+            Path.home() / ".ssh/ionos_deploy",
+            Path.home() / ".operator-usage",
+        ]
+        readable = [str(p) for p in deny_read if os.access(p, os.R_OK)]
+        print("--- DANGEROUS MODE: confirmation gate waived for this run ---")
+        print(f"  identity : {getpass.getuser()} (uid={os.getuid()})")
+        print(f"  workspace: {workspace_root}")
+        if readable:
+            print(f"  NOT isolated: {len(readable)} sensitive path(s) readable by this process:")
+            for p in readable:
+                print(f"    - {p}")
+            print("  Consider .operator-run/run-external-agent (uid 971) for isolated runs.")
+        else:
+            print("  isolated : deny-read set holds (no sensitive paths readable)")
+        print("-------------------------------------------------------------")
 
     # Load context if specified
     context_str = ""
@@ -1056,6 +1238,7 @@ def main():
             config,
             initial_context=context_str,
             glossary=bn_glossary,
+            continue_steps=args.continue_steps,
         )
 
         outcome = "useful"
@@ -1468,6 +1651,7 @@ def main():
                 config,
                 initial_context=accumulated_context,
                 glossary=bn_glossary,
+                continue_steps=args.continue_steps,
             )
 
             print("\n--- Output ---")
