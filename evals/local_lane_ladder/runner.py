@@ -35,6 +35,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import platform
 import re
 import subprocess
 import sys
@@ -56,6 +58,22 @@ OPERATOR_BIN = REPO_ROOT / "operator"
 DEFAULT_LEVELS = ("L0", "L1", "L2")
 HARNESS_ID = "local-lane-eval"
 MAX_WALL_CLOCK_SECONDS = 600  # 10 minutes per trial, per spec
+
+
+def resolve_machine() -> str:
+    """Producer machine for a trial record, per MACHINE_PROVENANCE_SPEC.md:
+    OPERATOR_MACHINE override -> short hostname -> "unknown".
+
+    Trials are not comparable across machines. Pass/fail on a deterministic
+    postcondition mostly transfers, but wall_clock_s and any timeout-mediated
+    outcome are decode-rate dependent, and decode rate depends on how much of a
+    model fits in VRAM on that host. Records written before this field existed
+    read as "unknown" and must not be pooled with tagged ones.
+    """
+    return os.environ.get("OPERATOR_MACHINE") or platform.node().split(".")[0] or "unknown"
+
+
+MACHINE = resolve_machine()
 
 
 def load_tasks(task_ids: list[str] | None) -> list[dict]:
@@ -223,6 +241,7 @@ def run_trial(
             "level": level,
             "model": model,
             "trial": trial_idx,
+            "machine": MACHINE,
             "passed": grade_result.passed,
             "detail": grade_result.detail,
             "wall_clock_s": round(wall_clock, 1),
@@ -237,6 +256,7 @@ def run_trial(
             "level": level,
             "model": model,
             "trial": trial_idx,
+            "machine": MACHINE,
             "passed": False,
             "detail": f"timed out after {MAX_WALL_CLOCK_SECONDS}s",
             "wall_clock_s": round(wall_clock, 1),
@@ -251,6 +271,20 @@ def write_results_md(results: list[dict], output_path: Path) -> None:
     tasks = sorted({r["task_id"] for r in results})
     lines = ["# Local Lane Ladder — Results", ""]
     lines.append(f"Generated from {len(results)} trial records.")
+    machines = sorted({r.get("machine", "unknown") for r in results})
+    lines.append(f"Producer machine(s): {', '.join(machines)}.")
+    if len(machines) > 1:
+        counts = ", ".join(
+            f"{m}: {sum(1 for r in results if r.get('machine', 'unknown') == m)}"
+            for m in machines
+        )
+        lines.append("")
+        lines.append(
+            f"> **Mixed-machine dataset ({counts}).** Wall-clock and any timeout-mediated "
+            "outcome are decode-rate dependent and do not transfer between hosts; the "
+            "aggregates below pool them anyway. Split by machine before drawing timing "
+            "conclusions. See MACHINE_PROVENANCE_SPEC.md."
+        )
     lines.append("")
     lines.append("## Pass rate per model x level (all tasks combined)")
     lines.append("")
