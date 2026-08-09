@@ -4830,6 +4830,22 @@ def doctor_cmd(args) -> int:
                             f"verified by '{vby}', not the task's registered review harness "
                             f"'{review}' (--audit treats this mismatch as an error)"
                         )
+                    elif authority == "uid_isolated":
+                        # Harness identity and OS UID are separate axes, and only the
+                        # second carries authority (EXECUTOR_IDENTITY_SPEC.md: "Names,
+                        # harness assignments, environment variables, and role labels do
+                        # not create isolation"). Under mode: enforced the verifier UID
+                        # must differ from the author's, and review_harness is assigned
+                        # once at task-create and never mutated, so a CORRECT isolated
+                        # verification routinely names a different identity than the
+                        # task's routing field. Warning on it fires on correct behavior
+                        # and teaches readers to skip a line that is an Error for
+                        # supervision_credit under --audit. Report, do not warn.
+                        infos.append(
+                            f"[Info] claim {cid} verified by '{vby}' under uid_isolated "
+                            f"authority; task review harness is '{review}' (routing "
+                            f"metadata, not verification authority)"
+                        )
                     else:
                         issues.append(
                             f"[Warning] claim {cid} verified by '{vby}', not the task's review harness '{review}'"

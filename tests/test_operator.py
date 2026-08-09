@@ -553,6 +553,77 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("verification command was not executed", res.stdout)
         self.assertFalse(sentinel.exists())
 
+    def test_doctor_uid_isolated_reviewer_mismatch_is_info_not_warning(self) -> None:
+        """A correct uid_isolated verification names a verifier that differs from the
+        task's review_harness by construction: mode: enforced REQUIRES the verifier UID
+        to differ from the author's, and review_harness is written once at task-create
+        and never mutated. Warning on that fires on correct behavior, and the same line
+        is an Error for supervision_credit under --audit, so the noise trains readers to
+        skip a check that sometimes matters. It must report as Info."""
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Isolated verify", "--id", "iso-task",
+            "--review", "claude",
+        )
+        identity = Path(self.temp_dir) / ".operator" / "identity.yaml"
+        identity.write_text("mode: enforced\nuids:\n  1001: gemini-agy\n  1002: codex\n")
+
+        res = self.run_operator(
+            "claim-add", "--type", "test_passes", "--text", "Isolated claim",
+            "--gate", "iso-gate",
+            env={"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        (Path(self.temp_dir) / "iso-gate").write_text("gate")
+        evidence = Path(self.temp_dir) / "iso_ev.txt"
+        evidence.write_text("ev")
+
+        # Verifier uid 1002 is 'codex'; the task's review_harness is 'claude'.
+        res = self.run_operator(
+            "evidence-attach", "--claim", "claim-0001", "--type", "test_output",
+            "--status", "verified", "--verified-by", "codex", "--verify-cmd", "pytest",
+            str(evidence),
+            env={"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"},
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        out = self.run_operator("doctor").stdout
+        self.assertIn("uid_isolated authority", out)
+        self.assertIn("routing metadata, not verification authority", out)
+        self.assertNotIn(
+            "[Warning] claim claim-0001 verified by 'codex', not the task's review harness",
+            out,
+        )
+
+    def test_doctor_advisory_reviewer_mismatch_still_warns(self) -> None:
+        """The demotion above is scoped to uid_isolated. Without UID isolation the
+        harness name is the only reviewer signal there is, so a mismatch must still
+        warn -- otherwise the fix would silence the case it was never about."""
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Advisory verify", "--id", "adv-task",
+            "--review", "claude",
+        )
+        res = self.run_operator(
+            "claim-add", "--type", "test_passes", "--text", "Advisory claim",
+            "--by", "gemini-agy", "--gate", "adv-gate",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        (Path(self.temp_dir) / "adv-gate").write_text("gate")
+        evidence = Path(self.temp_dir) / "adv_ev.txt"
+        evidence.write_text("ev")
+        res = self.run_operator(
+            "evidence-attach", "--claim", "claim-0001", "--type", "test_output",
+            "--status", "verified", "--verified-by", "codex", "--verify-cmd", "pytest",
+            str(evidence),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        out = self.run_operator("doctor").stdout
+        self.assertIn("not the task's review harness", out)
+        self.assertNotIn("routing metadata, not verification authority", out)
+
+
     def test_doctor_accepts_legacy_raw_hash_evidence(self) -> None:
         self.run_operator("init")
         self.run_operator(
