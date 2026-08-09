@@ -122,3 +122,86 @@ explanation for most negatives.
 - `/home/blueaz/Documents/local/routing/pilot_confound/` — pass 1 results + every raw trace
 - `/home/blueaz/Documents/local/routing/pilot_confound_pass2/` — pass 2 results + traces
   and the generated `old_harness_timeout.yaml`
+
+---
+
+## Pass 3 — replicated arms (n=5), 2026-08-09
+
+Passes 1 and 2 were n=1 per arm and disagreed with each other. Pass 3 replicates
+each arm 5× on the same 17 cells and reports per-cell **pass rate** rather than a
+binary flip, so a single flip can no longer masquerade as signal.
+
+Two arms: `A1` (steps 0, timeout 120 — faithful old harness) and `B` (steps 4,
+timeout 600 — both fixes). `A2` was dropped: pass 2 attributed zero cells to the
+timeout and no read timeout fired at all under 120s, which is structural because
+`runner.py` never passed `--continue-steps`, making the historical ladder
+single-dispatch.
+
+### Result
+
+| | A1 (old harness) | B (both fixes) | effect |
+|---|---:|---:|---:|
+| mean pass rate over 17 cells | 0.071 | 0.294 | **+0.224** |
+
+| Model | cells | A1 | B | effect | cells with effect > 0 |
+|---|---:|---:|---:|---:|---:|
+| gemma4:26b | 5 | 0.12 | 0.68 | **+0.56** | 4/5 |
+| llama3.1:8b | 9 | 0.07 | 0.18 | +0.11 | 2/9 |
+| gemma4:31b | 3 | 0.00 | 0.00 | +0.00 | 0/3 |
+
+Cells with a non-zero effect:
+
+```
+gemma4:26b   alias-add                    L0   A1=0.0  B=1.0   +1.0
+llama3.1:8b  multi-file-rename-reference  L1   A1=0.0  B=0.8   +0.8
+gemma4:26b   multi-file-rename-reference  L0   A1=0.0  B=0.6   +0.6
+gemma4:26b   config-value-change          L0   A1=0.4  B=1.0   +0.6
+gemma4:26b   alias-add                    L1   A1=0.2  B=0.8   +0.6
+llama3.1:8b  doc-fix                      L0   A1=0.0  B=0.2   +0.2
+```
+
+### What replication settled
+
+**10 of 17 cells fail under both arms in all 5 reps.** These are genuine model
+failures; neither fix touches them. The majority of sampled historical negatives
+are real.
+
+**Pass 2's "did not reproduce" category was itself n=1 noise.** No cell passes the
+old harness in all 5 reps (0/17). Three cells pass it *sometimes* — llama3.1:8b
+config-value-change L1 at 0.4, gemma4:26b config-value-change L0 at 0.4,
+gemma4:26b alias-add L1 at 0.2 — so those historical records are partially
+unreliable, but none is wholly spurious. Pass 2 caught a real phenomenon and
+misestimated its size by sampling it once.
+
+**The per-model pattern from pass 1 was correct and pass 2's revision of it was
+the noisier reading.** Pass 1 (n=1) saw 26b 4/5 and llama 2/9; pass 2 (n=1) cut
+26b to 2/5; pass 3 (n=5) returns 26b 4/5 and llama 2/9 — pass 1's ratios exactly.
+This is a caution against treating any single n=1 pass as a correction of another.
+
+### Interpretation, bounded
+
+The effect is **concentrated, not diffuse**: six cells carry all of it and ten
+carry none. Reporting a single "X% of negatives were harness artifacts" averages
+those together and misleads in both directions.
+
+The concentration in `gemma4:26b` (+0.56) over `llama3.1:8b` (+0.11) is consistent
+with the mechanism captured in the pass-1 trace — a model that runs a discovery
+command such as `find` before editing gets truncated by a terminal `run_command`,
+while a model that never gets that far is unaffected. It is **not** monotonic in
+capability: `gemma4:31b`, the strongest model here, shows zero effect across 3
+cells. The earlier framing that the confound "penalizes competence" overstates a
+3-model, 17-cell sample and should be read as *penalizes discovery-first tool use*.
+
+### Remaining limits
+
+1. n=5 per arm gives per-cell rates but no formal confidence interval; the
+   gemma4:31b arm is 3 cells and its 0.00 should not be read as established zero.
+2. Still 63% coverage of reachable cells; 9 `qwen2.5-coder:32b` cells unreachable.
+3. One rep (gemma4:26b alias-add L0, arm B, r4) recorded `wall_s=5926.7` because
+   the run was `SIGSTOP`ped mid-flight for ~98 minutes during an operator pause.
+   Its `passed=True` is sound — grading reads the fixture filesystem, not the
+   model output or exit code, and the edit had already landed — but its duration
+   must be excluded from any timing analysis. That deterministic postcondition
+   grading survived a 98-minute harness disruption is incidental support for the
+   `trust-the-validator` position.
+4. One machine (z13); all results decode-rate dependent.
