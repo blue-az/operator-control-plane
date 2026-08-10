@@ -2330,6 +2330,150 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("model: claude-fable-5", res.stdout)
         self.assertNotIn("<synthetic>", res.stdout)
 
+    def test_usage_import_prime_agent(self) -> None:
+        # Gate 1 of the Prime Agent evidence PBC. The fixture is a real
+        # captured session (Gate 0) containing two RLM subagent spawns and a
+        # compaction; expected values were computed from its bytes, not from
+        # the upstream docs.
+        self.run_operator("init")
+
+        fixtures_dir = Path(__file__).resolve().parent / "fixtures"
+        op_path = Path(self.temp_dir) / ".operator"
+        shutil.copy(fixtures_dir / "pricing.yaml", op_path / "pricing.yaml")
+
+        res = self.run_operator(
+            "task-create",
+            "--objective",
+            "Test Prime Agent import",
+            "--id",
+            "prime-task",
+            "--repo",
+            str(Path(self.temp_dir) / "project-phoenix"),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        fixture_file = fixtures_dir / "prime_agent_session.jsonl"
+        usage_dir = op_path / "usage"
+
+        # 1. --dry-run prints the would-be record and writes nothing.
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "prime-agent",
+            "--task",
+            "prime-task",
+            "--source-dir",
+            str(fixture_file),
+            "--dry-run",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("Dry-run import for session", res.stdout)
+        self.assertIn("subtree_tokens_in", res.stdout)
+        self.assertEqual(list(usage_dir.glob("*.yaml")), [])
+
+        # 2. Import: own usage in the shared token columns; the subtree
+        # aggregate only in distinctly-named prime_agent fields.
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "prime-agent",
+            "--task",
+            "prime-task",
+            "--source-dir",
+            str(fixture_file),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("Successfully imported usage record", res.stdout)
+
+        usage_file = usage_dir / "2026-08-10.yaml"
+        records = yaml.safe_load(usage_file.read_text())
+        self.assertEqual(len(records), 1)
+        rec = records[0]
+        self.assertEqual(rec["harness_id"], "prime-agent")
+        self.assertEqual(rec["metering"], "tokens")
+        self.assertEqual(rec["model"], "openai/gpt-4o-mini")
+        self.assertEqual(rec["tokens_in"], 20849)
+        self.assertEqual(rec["tokens_out"], 809)
+        self.assertEqual(rec["tokens_cache_read"], 79872)
+        self.assertEqual(rec["tokens_cache_write"], 0)
+        # Model not in pricing.yaml: no guessed operator-side price. The
+        # provider-reported cost lives in prime_agent.*_cost_source_usd.
+        self.assertIsNone(rec["cost_estimate_usd"])
+        self.assertEqual(rec["activity"]["turns"], 10)
+        self.assertEqual(rec["activity"]["tool_calls"], 6)
+        self.assertEqual(rec["activity"]["wall_clock_s"], 2475)
+        self.assertEqual(rec["field_sources"]["tokens_in"], "auto")
+        self.assertEqual(rec["field_sources"]["subtree_tokens_in"], "auto")
+        pa = rec["prime_agent"]
+        self.assertEqual(pa["session_format_version"], 3)
+        self.assertEqual(pa["child_attributions"], 8)
+        self.assertEqual(pa["subtree_tokens_in"], 39190)
+        self.assertEqual(pa["subtree_tokens_out"], 1570)
+        self.assertEqual(pa["subtree_tokens_cache_read"], 130944)
+        self.assertEqual(pa["subtree_tokens_cache_write"], 0)
+        self.assertAlmostEqual(pa["own_cost_source_usd"], 0.00960315, places=8)
+        self.assertAlmostEqual(pa["subtree_cost_source_usd"], 0.0166413, places=8)
+        self.assertIn("single-ipython-tool", pa["tool_call_semantics"])
+
+        # 3. Idempotent re-import keyed on source_session_ref.
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "prime-agent",
+            "--task",
+            "prime-task",
+            "--source-dir",
+            str(fixture_file),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        records = yaml.safe_load(usage_file.read_text())
+        self.assertEqual(len(records), 1)
+
+        # 4. doctor flags the unpriced model rather than guessing.
+        res = self.run_operator("doctor")
+        self.assertIn("price table missing model openai/gpt-4o-mini", res.stdout)
+
+        # 5. An unrecognized session format version warns and refuses.
+        v4_dir = Path(self.temp_dir) / "prime-v4"
+        v4_dir.mkdir()
+        (v4_dir / "future.jsonl").write_text(
+            '{"type":"session","version":4,"id":"future-session",'
+            '"timestamp":"2026-08-10T00:00:00.000Z","cwd":"/tmp"}\n'
+        )
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "prime-agent",
+            "--task",
+            "prime-task",
+            "--source-dir",
+            str(v4_dir),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("unrecognized session format version 4", res.stderr)
+        self.assertIn("No matching session found", res.stdout)
+
+        # 6. RLM child transcripts are never imported as their own records;
+        # their usage is already in the parent's subtree layer.
+        child_dir = Path(self.temp_dir) / "prime-child"
+        child_dir.mkdir()
+        (child_dir / "child.jsonl").write_text(
+            '{"type":"session","version":3,"id":"child-session",'
+            '"timestamp":"2026-08-10T00:00:00.000Z","cwd":"/tmp",'
+            '"parentSession":"/tmp/root.jsonl","rlmDepth":1}\n'
+        )
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "prime-agent",
+            "--task",
+            "prime-task",
+            "--source-dir",
+            str(child_dir),
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("No matching session found", res.stdout)
+
     def test_verified_by_guard_integrity(self) -> None:
         import yaml
 

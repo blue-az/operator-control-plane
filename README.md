@@ -109,9 +109,13 @@ YAML-only ledger baselines those records into SQLite without changing their visi
 
 **Usage / quota accounting**
 - `usage-add --harness H [--model M] [--outcome …]` — capture a pasted usage snippet.
-- `usage-import --harness {claude,codex,gemini-agy} [--since …] [--dry-run]` — auto-ingest
+- `usage-import --harness {claude,codex,gemini-agy,prime-agent} [--since …] [--dry-run]` — auto-ingest
   token/usage from implemented harness session-log adapters. Other registered harnesses, including Grok,
   can use `session-start`, `usage-add`, and manual annotation until an adapter exists.
+  The prime-agent adapter reads root session transcripts under `~/.prime/agent/sessions/`
+  (read-only, format v3 only): own usage fills the shared token columns; the RLM subtree
+  aggregate is kept in distinctly-named `prime_agent.subtree_*` fields so unlike units are
+  never summed. Prime Agent is metered here without being a registered harness peer.
 - `usage-summary [--by-task] [--by-harness] [--by-model] [--by-lane] [--offload-audit] [--metering]` / `usage-annotate [--cost …] [--note …]`.
 
 **Briefs & handoff**
