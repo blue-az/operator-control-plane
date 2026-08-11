@@ -1,17 +1,26 @@
 # Operator Control Plane
 
-A small, local **governance ledger for multi-agent software work.** It enforces a
-**narration-vs-execution partition**: an agent's *claim* ("I did X, it passes") is only as good as the
-*evidence* attached to it and the *verification* by a different identity. The `operator` CLI records
-tasks → claims → evidence → verifications as YAML projections under `.operator/`, preserves each
-trust-relevant write in an append-only SQLite event history, binds writes to the executing OS identity,
-guards against self-verification, and ships a `doctor` consistency checker.
+**Your AI coding agent just said "done, tests pass." Do you actually know that's true?**
+
+Multi-agent and autonomous coding workflows run on trust: an agent claims it finished a task, and
+that claim gets merged, handed off, or billed as if it were fact. `operator` is a small, local
+ledger that makes those claims checkable instead of assumed. It enforces a
+**narration-vs-execution partition**: an agent's *claim* ("I did X, it passes") only counts once it
+has *evidence* attached and is *verified by a different identity* — not the identity that made the
+claim.
+
+The `operator` CLI records tasks → claims → evidence → verifications as YAML projections under
+`.operator/`, preserves every trust-relevant write in an append-only SQLite event history, binds
+writes to the executing OS identity, blocks same-UID "trusted" verification in enforced mode, and
+ships a `doctor` consistency checker that fails closed.
 
 Only an enforced verification by a registered verifier OS UID distinct from the claim author's UID is
-recorded as `uid_isolated`. Same-UID and default `single_user` verification is explicitly advisory.
+recorded as `uid_isolated`. Same-UID and default `single_user` verification still work but are
+explicitly advisory — no self-grading.
 
-Built as the "engine room / logbook" enforcement substrate for [Bulkhead τ](https://bulkheadtau.com),
-but it stands alone. **Contributions welcome** — especially on the open problems below.
+**Contributions welcome** — especially on the open problems below. (Originally built as the
+"engine room / logbook" enforcement substrate for [Bulkhead τ](https://bulkheadtau.com); it stands
+alone here.)
 
 ![opr REPL example: confirmation-gated shell and file writes on the left; /model switching across local models on the right](docs/opr-example.png)
 
@@ -100,9 +109,13 @@ YAML-only ledger baselines those records into SQLite without changing their visi
 
 **Usage / quota accounting**
 - `usage-add --harness H [--model M] [--outcome …]` — capture a pasted usage snippet.
-- `usage-import --harness {claude,codex,gemini-agy} [--since …] [--dry-run]` — auto-ingest
+- `usage-import --harness {claude,codex,gemini-agy,prime-agent} [--since …] [--dry-run]` — auto-ingest
   token/usage from implemented harness session-log adapters. Other registered harnesses, including Grok,
   can use `session-start`, `usage-add`, and manual annotation until an adapter exists.
+  The prime-agent adapter reads root session transcripts under `~/.prime/agent/sessions/`
+  (read-only, format v3 only): own usage fills the shared token columns; the RLM subtree
+  aggregate is kept in distinctly-named `prime_agent.subtree_*` fields so unlike units are
+  never summed. Prime Agent is metered here without being a registered harness peer.
 - `usage-summary [--by-task] [--by-harness] [--by-model] [--by-lane] [--offload-audit] [--metering]` / `usage-annotate [--cost …] [--note …]`.
 
 **Briefs & handoff**
@@ -200,11 +213,15 @@ Ollama models or a frontier pass-through, gates every model-initiated write or
 shell command behind an explicit `[y/N]` confirmation, and tags sessions into
 the same ledger `operator` reads.
 
-Local models fail on **degrees of freedom, not knowledge** — a task phrased as
-open-ended intent invites discovery loops and wandering; the same task phrased
-as a concrete plan (exact paths, a verbatim anchor, numbered steps, a
-machine-checkable success criterion) converts search into lookup. Three pieces
-formalize and measure this:
+Working hypothesis: local models may fail more on **degrees of freedom than on
+knowledge** — a task phrased as open-ended intent invites discovery loops and
+wandering; the same task phrased as a concrete plan (exact paths, a verbatim
+anchor, numbered steps, a machine-checkable success criterion) converts search
+into lookup. The benefit of plan-shaped phrasing is measured; the *cause* of
+goal-shaped failure is not yet established, because the supporting negative
+records were produced through a harness that ended the agent loop on the first
+state-changing command ([audit](.operator/evidence/opr-continuation-loop-audit/evidence-0008.md)).
+Three pieces formalize and measure this:
 
 - [`LOCAL_LANE_CONTRACT.md`](LOCAL_LANE_CONTRACT.md) — the contract itself, rules R1–R6, each
   tied to the failure mode it prevents.

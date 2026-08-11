@@ -250,5 +250,160 @@ class TestOprDispatchFrontier(unittest.TestCase):
         self.assertIn("internal harness failure", response)
 
 
+class _ScriptedDispatcher:
+    """Replays canned model responses in order so run_agent_loop can be driven
+    without a model server. Records how many dispatches it served, which is how
+    the tests distinguish "the loop stopped" from "the loop kept asking"."""
+
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.dispatch_count = 0
+
+    def _dispatch_ollama(self, model, prompt, url, timeout):
+        self.dispatch_count += 1
+        if not self.responses:
+            return "no more scripted responses"
+        return self.responses.pop(0)
+
+
+def _call(tool, **kw):
+    import json as _json
+
+    return _json.dumps({"tool": tool, **kw})
+
+
+class TestOprRepeatGuard(unittest.TestCase):
+    """OPR-RUL-009. The repeat guard is the loop's live halting constraint --
+    every multi-step run observed on 2026-08-07/08 ended on it rather than on
+    the budget or the turn cap -- and it had no coverage at all."""
+
+    def setUp(self) -> None:
+        self.workspace = Path(tempfile.mkdtemp()).resolve()
+        self.config = opr.load_config("/nonexistent/opr.yaml")
+        self.executed = []
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.workspace)
+
+    def _run(self, responses, continue_steps=4, tool_result=("ok", True)):
+        dispatcher = _ScriptedDispatcher(responses)
+        def fake_exec(tool_call, workspace_root, ledger_dir, usage_id, config):
+            self.executed.append(tool_call)
+            return tool_result
+        with mock.patch.object(opr, "execute_model_tool", side_effect=fake_exec):
+            out = opr.run_agent_loop(
+                "do the thing", "gemma4:26b", self.workspace, str(self.workspace),
+                "usage-0001", dispatcher, self.config, continue_steps=continue_steps,
+            )
+        return out, dispatcher
+
+    def test_identical_call_halts_the_loop(self):
+        out, _ = self._run([
+            _call("run_command", command="git add notes.py"),
+            _call("run_command", command="git add notes.py"),
+        ])
+        self.assertIn("Stopped: model repeated an already-handled tool call", out)
+
+    def test_repeat_is_not_executed_a_second_time(self):
+        """The guard fires before execute_model_tool, so a repeated state change
+        must not reach the workspace twice. This is the property that makes the
+        guard a safety mechanism and not just a loop breaker."""
+        self._run([
+            _call("run_command", command="rm -rf build"),
+            _call("run_command", command="rm -rf build"),
+        ])
+        self.assertEqual(len(self.executed), 1)
+
+    def test_halt_message_names_the_repeated_invocation(self):
+        """'it looped' is not actionable; the message must say which call."""
+        out, _ = self._run([
+            _call("run_command", command="git status --porcelain"),
+            _call("run_command", command="git status --porcelain"),
+        ])
+        self.assertIn("git status --porcelain", out)
+        self.assertIn("run_command", out)
+
+    def test_halt_message_reports_steps_that_did_run(self):
+        out, _ = self._run([
+            _call("run_command", command="git add a"),
+            _call("run_command", command="git commit -m x"),
+            _call("run_command", command="git add a"),
+        ])
+        self.assertIn("State-changing steps that did run: run_command, run_command", out)
+
+    def test_distinct_calls_do_not_trip_the_guard(self):
+        out, _ = self._run([
+            _call("run_command", command="git add a"),
+            _call("run_command", command="git add b"),
+            _call("task_complete", summary="done"),
+        ])
+        self.assertNotIn("Stopped: model repeated", out)
+        self.assertIn("Task complete", out)
+
+    def test_fingerprint_ignores_key_order(self):
+        """Fingerprints are json.dumps(..., sort_keys=True), so the same call
+        serialized with keys in a different order is the same call. Without
+        sort_keys a model reordering its own JSON would defeat the guard."""
+        out, _ = self._run([
+            '{"tool": "write_file", "path": "a.txt", "content": "x"}',
+            '{"content": "x", "path": "a.txt", "tool": "write_file"}',
+        ])
+        self.assertIn("Stopped: model repeated", out)
+
+    def test_differing_argument_is_a_different_call(self):
+        out, _ = self._run([
+            '{"tool": "write_file", "path": "a.txt", "content": "x"}',
+            '{"tool": "write_file", "path": "a.txt", "content": "y"}',
+            _call("task_complete", summary="done"),
+        ])
+        self.assertNotIn("Stopped: model repeated", out)
+
+    def test_task_complete_is_exempt_from_the_guard(self):
+        """task_complete returns before the fingerprint check, so emitting it
+        twice must report completion rather than a repeat halt."""
+        out, _ = self._run([
+            _call("task_complete", summary="done"),
+            _call("task_complete", summary="done"),
+        ])
+        self.assertIn("Task complete", out)
+        self.assertNotIn("Stopped: model repeated", out)
+
+    def test_guard_stops_dispatching(self):
+        """After halting, the loop must not ask the model again."""
+        _, dispatcher = self._run([
+            _call("run_command", command="make"),
+            _call("run_command", command="make"),
+            _call("run_command", command="never reached"),
+        ])
+        self.assertEqual(dispatcher.dispatch_count, 2)
+
+    def test_guard_also_applies_to_read_tools_without_continuation(self):
+        """continue_steps=0 exits on the first terminal tool, so the only way to
+        repeat outside continuation is a non-state-changing tool."""
+        out, _ = self._run(
+            [_call("read_file", path="README.md"), _call("read_file", path="README.md")],
+            continue_steps=0,
+        )
+        self.assertIn("Stopped: model repeated", out)
+
+    def test_legitimately_repeated_command_halts_KNOWN_LIMITATION(self):
+        """Documents a real defect rather than asserting desired behavior.
+
+        Running a test suite, fixing the failure, then running it again is a
+        normal multi-step shape, but both invocations fingerprint identically
+        and the second halts the loop. handoff-0001 on opr-continuation-loop-audit
+        flagged this as untested; it is now tested, and it FAILS the user's
+        intent while passing this assertion. If the guard is ever made
+        outcome-aware, this test should flip to the opposite assertion.
+        """
+        out, _ = self._run([
+            _call("run_command", command="pytest"),
+            _call("write_file", path="fix.py", content="patch"),
+            _call("run_command", command="pytest"),
+        ])
+        self.assertIn("Stopped: model repeated", out)
+        self.assertIn("pytest", out)
+
+
 if __name__ == "__main__":
     unittest.main()

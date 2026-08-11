@@ -14,10 +14,19 @@ linter that checks a task prompt against that contract, and (3) an eval ladder t
 per model, how much task specificity is required — so lane routing can be evidence-based
 instead of vibes-based.
 
-Operating principle the whole spec rests on: **local models fail on degrees of freedom, not
-knowledge.** Every hop where the model must decide what to do next (which file? which tool?
-am I done?) is an opportunity to loop or stall. Pre-making those decisions converts search
-into lookup. Frontier models supply their own search; local models need it supplied.
+Operating hypothesis the spec rests on: **local models may fail more on degrees of freedom
+than on knowledge.** Every hop where the model must decide what to do next (which file? which
+tool? am I done?) is an opportunity to loop or stall. Pre-making those decisions converts
+search into lookup. Frontier models supply their own search; local models may need it supplied.
+
+> **Downgraded 2026-08-08 from settled principle to open hypothesis.** The positive evidence
+> (plan-shaped phrasing helps) stands. The *failure* side is confounded: every supporting
+> negative record was produced through `opr` before commit `890d595`, when `run_command` was a
+> terminal tool that ended the agent loop on its first success. A model that spent a
+> state-changing command on discovery before the required mutation was recorded as a failure
+> regardless of capability, and the per-trial traces that would separate the two were
+> discarded. See `.operator/evidence/opr-continuation-loop-audit/evidence-0008.md`. Do not
+> cite this as an established cause until the affected cells are rerun with traces preserved.
 
 ## Evidence (2026-07-02, n=1 per cell — the eval ladder exists to firm this up)
 

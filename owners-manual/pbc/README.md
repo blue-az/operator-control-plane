@@ -10,6 +10,15 @@ Use these files as structured context for coding agents, QA review, drift checks
 - `NN-chapter-name.pbc.md` — chapter-level draft behavior-contract projections.
 - `appendix-opr-governed-llm-client.pbc.md` — draft target contract for extracting `opr`
   into this repository as a governed LLM client.
+- `appendix-prime-agent-evidence-ingestion.pbc.md` — draft target contract for ingesting Prime
+  Agent session records as usage and as claim evidence. Ledger task: `pa-evidence`. Gate 0 is
+  unmet: no Prime Agent session has been observed on this machine.
+- `appendix-local-routing-corpus.pbc.md` — draft target contract for harvesting real tasks from
+  this machine's harness logs and establishing by execution which could route locally. Ledger
+  task: `local-routing-corpus`. Gated on a fixturability probe that has not been run.
+- `appendix-multi-session-coordination.pbc.md` — draft working agreement for concurrent agent
+  sessions sharing one ledger. Ledger task: `session-coordination-protocol`. Both Claude sessions
+  have signed off; awaiting an operator ruling on the identity labels.
 
 ## Trust Model
 
