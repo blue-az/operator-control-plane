@@ -174,13 +174,31 @@ model; the 26b/31b gap shows mainly at L0/L1. The eval exists to confirm or kill
 
 ## Hardware constraints (will bite you if ignored)
 
-- The 3090 must be power-capped before any sweep: check
-  `nvidia-smi --query-gpu=power.limit --format=csv,noheader`; if it reads above 200 W, stop
-  and ask the user to run `sudo nvidia-smi -pl 200` (uncapped sustained load crashes the
-  machine — marginal PSU). The cap resets on reboot.
+> **Updated 2026-08-11 by operator ruling.** The previous version of this section required
+> capping the 3090 to 200 W before *any* sweep and told the agent to **stop and ask** above that,
+> on the stated grounds that "uncapped sustained load crashes the machine — marginal PSU." That
+> rationale was wrong and the gate is retired. It cost two operator overrides during the E0
+> desktop pack before anyone checked whether it was still true. See
+> `front-e0-desktop-pack-review` (F4) and `BOTTLENECKS.md`'s dated hardware entry.
+
+- **The cap is data-loss protection, not equipment protection.** Its only job is to stop a
+  mid-run reset from destroying a long run's work. It follows that **a resumable runner that
+  checkpoints its own state does not need the cap considered at all** — this suite's runner is
+  resumable, so sweeps here run uncapped by default.
+- **Standing cap is 320 W**, not 200 W: `sudo nvidia-smi -pl 320`. No AC-state check, no
+  attended/unattended distinction — both of those earlier rules are retired. The limit resets to
+  332 W stock on reboot or crash, so re-assert it before load if you want it.
+- **Do not stop and ask about the power limit.** Reading above 200 W is normal and expected. If a
+  sweep is genuinely non-resumable *and* long, say so and let the operator decide; otherwise
+  proceed.
+- Historical note, so the physics isn't lost: crashes on this rig trace to AC-unit mains noise
+  coupling through the PSU and tripping OCP alongside the GPU's own switching transients — a
+  glitch, not a sustained-wattage shortfall. The 750 W unit has since failed outright
+  (2026-07-27) and been replaced. Any doc attributing hardware damage on this machine to an
+  uncapped GPU is wrong.
 - `gemma4:31b` uses ~23.9/24 GB VRAM. Run one model at a time; `ollama ps` to check what is
-  resident. Sweeps are slow at 200 W (~minutes per trial for 30B models) — budget accordingly
-  and make the runner resumable (skip cells already recorded in the ledger).
+  resident. Budget wall-clock from a measured trial rather than the old 200 W figures, and keep
+  the runner resumable (skip cells already recorded in the ledger).
 
 ## Non-goals
 
