@@ -1,0 +1,22 @@
+task_id: config-value-change
+description: Edit a key in a small INI file.
+
+files:
+  config/settings.ini: |
+    [general]
+    debug = false
+    log_level = info
+
+prompts:
+  L0: "Please turn on debug mode in my settings."
+  L1: "Set debug to true in config/settings.ini."
+  L2: |
+    1. In config/settings.ini, replace the line "debug = false" with "debug = true".
+    2. Verify the file now contains "debug = true".
+    Only touch config/settings.ini.
+
+postcondition:
+  type: grep
+  file: config/settings.ini
+  pattern: "debug = true"
+  must_not_contain: "debug = false"
