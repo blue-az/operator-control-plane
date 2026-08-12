@@ -50,7 +50,7 @@ class TestOperatorCLI(unittest.TestCase):
         run_env = os.environ.copy()
         if env:
             run_env.update(env)
-        return subprocess.run(
+        result = subprocess.run(
             cmd,
             input=stdin_data,
             stdout=subprocess.PIPE,
@@ -59,6 +59,27 @@ class TestOperatorCLI(unittest.TestCase):
             env=run_env,
             timeout=timeout,
         )
+        # task-create no longer sets current_task as a side effect (MSC-RUL
+        # Q4 -- the field stays, the silent mutation goes; explicit
+        # task-use replaces it). The overwhelming majority of this suite's
+        # ~180 task-create calls rely on the old implicit activation rather
+        # than passing --task down the line, so this helper reproduces that
+        # activation transparently by chaining a real task-use call, parsed
+        # from the real success message rather than re-deriving the slug.
+        # This exercises task-use itself on every such call, not a stub.
+        if args and args[0] == "task-create" and result.returncode == 0:
+            first_line = (result.stdout or "").splitlines()[0] if result.stdout else ""
+            if first_line.startswith("Task '") and "' created successfully." in first_line:
+                created_id = first_line[len("Task '") : first_line.index("' created successfully.")]
+                subprocess.run(
+                    [OPERATOR_BIN, "task-use", created_id],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    env=run_env,
+                    timeout=timeout,
+                )
+        return result
 
     def rebaseline_ledger(self) -> None:
         db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
@@ -562,15 +583,25 @@ class TestOperatorCLI(unittest.TestCase):
         skip a check that sometimes matters. It must report as Info."""
         self.run_operator("init")
         self.run_operator(
-            "task-create", "--objective", "Isolated verify", "--id", "iso-task",
-            "--review", "claude",
+            "task-create",
+            "--objective",
+            "Isolated verify",
+            "--id",
+            "iso-task",
+            "--review",
+            "claude",
         )
         identity = Path(self.temp_dir) / ".operator" / "identity.yaml"
         identity.write_text("mode: enforced\nuids:\n  1001: gemini-agy\n  1002: codex\n")
 
         res = self.run_operator(
-            "claim-add", "--type", "test_passes", "--text", "Isolated claim",
-            "--gate", "iso-gate",
+            "claim-add",
+            "--type",
+            "test_passes",
+            "--text",
+            "Isolated claim",
+            "--gate",
+            "iso-gate",
             env={"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"},
         )
         self.assertEqual(res.returncode, 0, res.stderr)
@@ -580,8 +611,17 @@ class TestOperatorCLI(unittest.TestCase):
 
         # Verifier uid 1002 is 'codex'; the task's review_harness is 'claude'.
         res = self.run_operator(
-            "evidence-attach", "--claim", "claim-0001", "--type", "test_output",
-            "--status", "verified", "--verified-by", "codex", "--verify-cmd", "pytest",
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "codex",
+            "--verify-cmd",
+            "pytest",
             str(evidence),
             env={"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"},
         )
@@ -601,20 +641,41 @@ class TestOperatorCLI(unittest.TestCase):
         warn -- otherwise the fix would silence the case it was never about."""
         self.run_operator("init")
         self.run_operator(
-            "task-create", "--objective", "Advisory verify", "--id", "adv-task",
-            "--review", "claude",
+            "task-create",
+            "--objective",
+            "Advisory verify",
+            "--id",
+            "adv-task",
+            "--review",
+            "claude",
         )
         res = self.run_operator(
-            "claim-add", "--type", "test_passes", "--text", "Advisory claim",
-            "--by", "gemini-agy", "--gate", "adv-gate",
+            "claim-add",
+            "--type",
+            "test_passes",
+            "--text",
+            "Advisory claim",
+            "--by",
+            "gemini-agy",
+            "--gate",
+            "adv-gate",
         )
         self.assertEqual(res.returncode, 0, res.stderr)
         (Path(self.temp_dir) / "adv-gate").write_text("gate")
         evidence = Path(self.temp_dir) / "adv_ev.txt"
         evidence.write_text("ev")
         res = self.run_operator(
-            "evidence-attach", "--claim", "claim-0001", "--type", "test_output",
-            "--status", "verified", "--verified-by", "codex", "--verify-cmd", "pytest",
+            "evidence-attach",
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "codex",
+            "--verify-cmd",
+            "pytest",
             str(evidence),
         )
         self.assertEqual(res.returncode, 0, res.stderr)
@@ -622,7 +683,6 @@ class TestOperatorCLI(unittest.TestCase):
         out = self.run_operator("doctor").stdout
         self.assertIn("not the task's review harness", out)
         self.assertNotIn("routing metadata, not verification authority", out)
-
 
     def test_doctor_accepts_legacy_raw_hash_evidence(self) -> None:
         self.run_operator("init")

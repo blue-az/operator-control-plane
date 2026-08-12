@@ -1625,6 +1625,11 @@ def task_create_cmd(args) -> int:
                 file=sys.stderr,
             )
             return 1
+    # Write the resolved id back onto args so programmatic callers (e.g.
+    # crystal_import_cmd creating open-loop tasks) can read the id that was
+    # actually used -- including the auto-slugified case -- without relying
+    # on current_task, which task-create no longer mutates (MSC-RUL Q4).
+    args.task_id = task_id
 
     if not VALID_TASK_ID.fullmatch(task_id):
         print(
@@ -1661,15 +1666,34 @@ def task_create_cmd(args) -> int:
 
     save_yaml(task_data, task_path)
 
+    os.makedirs(os.path.join(op_dir, "evidence", task_id), exist_ok=True)
+    os.makedirs(os.path.join(op_dir, "handoffs", task_id), exist_ok=True)
+
+    print(f"Task '{task_id}' created successfully.")
+    print(f"Run 'operator task-use {task_id}' to make it the active task.")
+    return 0
+
+
+def task_use_cmd(args) -> int:
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
+        return 1
+
+    task_id = args.task_id
+    task_path = os.path.join(op_dir, "tasks", f"{task_id}.yaml")
+    if not os.path.exists(task_path) and not durable_record_exists(op_dir, "task", task_id):
+        print(f"Error: Task '{task_id}' does not exist.", file=sys.stderr)
+        return 1
+
     config_path = os.path.join(op_dir, "operator.yaml")
     config = load_yaml(config_path) or {}
     config["current_task"] = task_id
     save_yaml(config, config_path)
 
-    os.makedirs(os.path.join(op_dir, "evidence", task_id), exist_ok=True)
-    os.makedirs(os.path.join(op_dir, "handoffs", task_id), exist_ok=True)
-
-    print(f"Task '{task_id}' created successfully.")
     print(f"Active task set to '{task_id}'.")
     return 0
 
@@ -2641,15 +2665,10 @@ def crystal_import_cmd(args) -> int:
                     file=sys.stderr,
                 )
                 continue
-            # task-create sets current_task; recover id from operator.yaml
-            config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-            new_id = config.get("current_task")
-            if new_id:
-                created_tasks.append(new_id)
-        # Restore original current task after optional open-loop task creation.
-        config = load_yaml(os.path.join(op_dir, "operator.yaml")) or {}
-        config["current_task"] = task_id
-        save_yaml(config, os.path.join(op_dir, "operator.yaml"))
+            # task-create writes the resolved id (incl. auto-slugified) back
+            # onto create_args.task_id and no longer touches current_task.
+            if create_args.task_id:
+                created_tasks.append(create_args.task_id)
 
     print(
         f"Crystal import on task '{task_id}': evidence={evidence_id}, "
@@ -6861,6 +6880,14 @@ def main() -> None:
         help="Open assumptions to document.",
     )
 
+    # operator task use
+    use_parser = subparsers.add_parser(
+        "task-use",
+        help="Set the active task (current_task) explicitly. "
+        "task-create no longer does this as a side effect.",
+    )
+    use_parser.add_argument("task_id", help="Task ID to make active.")
+
     # operator task show
     show_parser = subparsers.add_parser(
         "task-show", help="Show details of the current or specified task."
@@ -7514,7 +7541,8 @@ def main() -> None:
 
     # operator study-plan
     study_plan_parser = subparsers.add_parser(
-        "study-plan", help="Validate and store a digest-bound study plan beneath .operator/studies/."
+        "study-plan",
+        help="Validate and store a digest-bound study plan beneath .operator/studies/.",
     )
     study_plan_parser.add_argument("--plan", required=True, help="Path to a JSON study plan file.")
 
@@ -7523,10 +7551,16 @@ def main() -> None:
         "study-run", help="Create (or continue) a run from a stored study plan and execute phases."
     )
     study_run_parser.add_argument(
-        "--plan-digest", dest="plan_digest", required=True, help="SHA-256 digest of a stored study plan."
+        "--plan-digest",
+        dest="plan_digest",
+        required=True,
+        help="SHA-256 digest of a stored study plan.",
     )
     study_run_parser.add_argument(
-        "--run-id", dest="run_id", default=None, help="Existing run ID to continue (omit to start a new run)."
+        "--run-id",
+        dest="run_id",
+        default=None,
+        help="Existing run ID to continue (omit to start a new run).",
     )
     study_run_parser.add_argument(
         "--approve-phase",
@@ -7575,6 +7609,7 @@ def main() -> None:
     cmd_map = {
         "init": init_cmd,
         "task-create": task_create_cmd,
+        "task-use": task_use_cmd,
         "task-show": task_show_cmd,
         "task-list": task_list_cmd,
         "claim-add": claim_add_cmd,

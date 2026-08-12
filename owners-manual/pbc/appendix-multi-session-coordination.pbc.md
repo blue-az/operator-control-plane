@@ -214,19 +214,40 @@ about adherence, and it cannot be evidenced until records accumulate under disti
 
 ## Open Questions Requiring An Operator Ruling
 
-1. **Should any of this be enforced rather than agreed?** Every rule is voluntary and nothing
-   detects a violation. A `--by` allowlist, or refusing a write when `current_task` was set by a
-   different label, would make MSC-RUL-101/102 real. That is a code change to a governance tool on
-   the strength of a two-day incident, and may be an overcorrection.
-2. **Are `claude-consultant` and `claude-supervisor` the right labels?** They encode the operator's
-   own words, but "supervisor" implies rank in an arrangement the operator asked to be peer.
-   Cheap to change now, expensive after many records.
-3. **Should the twelve mislabeled handoffs be annotated?** They cannot be rewritten — the durable
-   event store would flag it, correctly. A joint attribution handoff is the only available remedy
-   and depends on memory that is already degrading. It is proposed as the first joint action and
-   has not been written.
-4. **Does `current_task` deserve to exist?** It is a convenience that has caused one misdirected
-   write and three surprises. Removing it is a breaking change; MSC-RUL-102 works around it.
+1. **RULED 2026-08-11, NO.** Should any of this be enforced rather than agreed? Every rule is
+   voluntary and nothing detects a violation. A `--by` allowlist, or refusing a write when
+   `current_task` was set by a different label, would make MSC-RUL-101/102 real. **Ruling: do not
+   enforce.** An allowlist would have rejected `operator-builder` — unregistered at the time, and
+   the identity that produced this ledger's first uid-isolated claim verification
+   (`session-coordination-protocol` handoff-0005). Enforcement would have blocked the one thing
+   that made the ledger trustworthy that round. `--by` is provenance, not authority; gating it adds
+   friction without adding trust. (Note: this ruling covers `--by` specifically. `--assign` and
+   `--review` are already registry-validated at `task-create` — see Front H,
+   `docs/handoffs/NEXT_SESSION.md` in project-phoenix, for the gap that opened when
+   `claude-consultant`/`claude-supervisor` needed manual registration just to be assignable.)
+2. **Are `claude-consultant` and `claude-supervisor` the right labels?** Still open. They encode the
+   operator's own words, but "supervisor" implies rank in an arrangement the operator asked to be
+   peer, and role labels have since drifted at least twice in this ledger (the original two-actor
+   assumption, and one actor called `claude` then `claude-builder` then `claude-consultant` within
+   90 minutes). A fourth session (`claude-019KSo7K`, `front-e0-desktop-pack-review` handoff-0003,
+   2026-08-11) sidestepped the question by registering under a session-derived id per handoff-0005's
+   recommendation rather than picking a role label it couldn't verify applied to it. That is a
+   workaround, not a ruling — the label-vs-session-id choice is still the operator's to make.
+3. **Should the twelve mislabeled handoffs be annotated?** Settled — `opr-continuation-loop-audit`
+   handoff-0011 did this mechanically (see Provenance below), not from memory as originally
+   proposed here.
+4. **RULED 2026-08-11, KEEP THE FIELD, DROP THE SIDE EFFECT.** Does `current_task` deserve to
+   exist? It caused one misdirected write and three surprises, all traced to `task-create` silently
+   repointing it. **Ruling: keep `current_task`, remove the side effect.** `task-create` no longer
+   mutates it; a new explicit `task-use <id>` command does. Implemented in `operator`
+   (`task_create_cmd`, `task_use_cmd`); the internal `crystal-import` open-loop-task caller updated
+   to read the resolved id back off its own args instead of round-tripping through `current_task`.
+   Broke 20 of `tests/test_operator.py`'s ~180 implicit-activation `task-create` calls, fixed by
+   having the test harness's `run_operator` chain a real `task-use` call after every successful
+   `task-create` rather than editing each call site — this exercises `task-use` on every such test,
+   it does not stub around it. `tests/test_authority_integration.py` has its own `run_operator` and
+   was not touched; its 20 pre-existing failures (confirmed via `git stash`, identical with and
+   without this change) are unrelated to this ruling.
 
 ## Provenance
 
