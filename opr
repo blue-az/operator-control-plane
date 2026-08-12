@@ -322,16 +322,53 @@ emit it as an acknowledgement, and do not emit it before running the steps.
 
 
 def extract_json_tool_call(text: str) -> dict | None:
-    text = text.strip()
-    m = re.search(r"\{.*\}", text, re.DOTALL)
-    if m:
+    """Return the first parseable tool-call object in a model response.
+
+    Scans for the first *balanced* JSON object rather than regexing from the
+    first '{' to the last '}'. That greedy span was the bug: models routinely
+    emit two objects in one response -- an edit plus a self-verification read
+    -- and the span covered both plus the prose between them, which is not
+    valid JSON. Extraction then returned None and the caller handed the raw
+    text back as a final answer, so a correct tool call silently became prose
+    and nothing was dispatched.
+
+    Measured 2026-08-12 across 45 deterministic eval cells: every one of the
+    5 non-dispatched cells had emitted exactly 2 tool-shaped objects, and no
+    single-object response ever failed to dispatch. It hit two unrelated model
+    families (`qwen2.5-coder:14b`, `gemma3:27b`) in both fenced and bare form,
+    which is why it reads as a harness defect rather than a model quirk. See
+    evals/local_lane_ladder/fixtures/e1x-27b/FINDING.md.
+
+    Scanning also removes the need to strip markdown fences: a fence is not
+    valid JSON, so raw_decode simply skips past it to the object inside.
+    """
+    decoder = json.JSONDecoder()
+    idx = 0
+    while True:
+        start = text.find("{", idx)
+        if start == -1:
+            return None
         try:
-            obj = json.loads(m.group(0))
-            if isinstance(obj, dict) and "tool" in obj:
-                return obj
-        except Exception:
-            pass
-    return None
+            obj, end = decoder.raw_decode(text, start)
+        except ValueError:
+            # Not the start of a valid object (prose brace, fence, truncated
+            # payload). Step past it rather than abandoning the whole response.
+            idx = start + 1
+            continue
+        if isinstance(obj, dict) and "tool" in obj:
+            return obj
+        idx = max(end, start + 1)
+
+
+def looks_like_tool_call(text: str) -> bool:
+    """Did the model appear to be *trying* to call a tool?
+
+    Used only to make a non-dispatch visible. A response that carries a "tool"
+    key but yields no dispatchable call is a protocol failure, and it must not
+    be indistinguishable from the model simply answering in prose -- that
+    ambiguity is what made the original defect invisible in eval records.
+    """
+    return bool(re.search(r'"tool"\s*:', text))
 
 
 class Dispatcher:
@@ -915,6 +952,14 @@ def run_agent_loop(
 
         tool_call = extract_json_tool_call(response)
         if not tool_call:
+            if looks_like_tool_call(response):
+                # Say so out loud. Silently returning tool-shaped output as a
+                # final answer is what let a protocol failure read as a wrong
+                # answer in eval records for 5 of 45 cells.
+                print(
+                    "\n[No tool dispatched: response carried tool-shaped JSON "
+                    "that did not yield a dispatchable call]"
+                )
             return response
 
         tool_name = tool_call.get("tool")

@@ -75,6 +75,19 @@ Consequences:
 3. This does not reopen L0→L2 monotonicity or E0; it is a single-cell-class
    harness defect.
 
+## ROOT CAUSE FOUND AND FIXED — see e1x-27b/FINDING.md
+
+**Superseded mechanism.** The "fenced prose" framing above is wrong about
+*why*. The defect was `opr`'s greedy `re.search(r"\{.*\}", ..., DOTALL)` span,
+which covers two objects at once and fails to parse. Across all 45 traces, every
+non-dispatched cell had emitted exactly 2 tool-shaped objects and no
+single-object response ever failed. The observations above stand; the
+explanation was incomplete.
+
+Fixed the same day by scanning for the first balanced object, plus a
+`[No tool dispatched: ...]` marker. **These results are pre-fix** and are not
+comparable to post-fix runs.
+
 ## What would settle it
 
 Either a harness change that accepts fenced-JSON tool emissions (or explicitly

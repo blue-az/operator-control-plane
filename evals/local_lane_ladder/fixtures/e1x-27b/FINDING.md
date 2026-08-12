@@ -72,6 +72,40 @@ Excluding cells the harness never dispatched, on **gradeable** cells only:
 | `qwen2.5-coder:14b` | 7/7 | 2 |
 | `gemma3:27b` | **5/6** | 3 |
 
+## ROOT CAUSE FOUND AND FIXED (2026-08-12, later same day)
+
+The mechanism is **not** fenced-vs-bare JSON, as first written below. It is the
+number of objects in the response. `opr`'s `extract_json_tool_call` matched
+`re.search(r"\{.*\}", text, re.DOTALL)` — a **greedy** span from the first `{`
+to the last `}`. A response carrying two objects (an edit plus a
+self-verification read) produced a span covering both plus the text between
+them, which is not valid JSON. Extraction returned `None` and the caller
+returned the raw text as a final answer.
+
+Verified against all 45 retained traces: **all 5 non-dispatched cells emitted
+exactly 2 tool-shaped objects, and no single-object response ever failed to
+dispatch.** Fencing was incidental — both fenced and bare two-object responses
+failed, and both single-object forms succeeded.
+
+Fixed by scanning for the first *balanced* object with `JSONDecoder.raw_decode`
+instead of a greedy regex, plus an explicit `[No tool dispatched: ...]` marker
+so tool-shaped output that yields no call can never again be mistaken for a
+prose answer. Direct A/B on the verbatim failing payloads: old returns `None`,
+new returns the correct `patch_file` call. Covered by
+`tests/test_opr_tool_extraction.py` (10 tests) using the trace payloads verbatim.
+
+**This creates a harness epoch boundary.** Results in this pack and in
+`e1-gold-pack/` are **pre-fix** and are not comparable to anything run after it,
+exactly as the pre-`890d595` results are not comparable to these. Do not pool
+them.
+
+A post-fix re-run of the 12 affected cells passed 12/12, but that is
+*consistent with* the fix rather than proof of it — the models emitted single
+calls in that run, so the two-object path was not exercised. The A/B and the
+unit tests are the causal evidence. Note also that `gemma3:27b`'s genuine
+`function-add` t2 defect passed on re-run; that is run-to-run variance, **not**
+something the fix addressed.
+
 ## The confound is not model-family-specific
 
 This is the finding that matters beyond the scores. Across all 45 cells run
