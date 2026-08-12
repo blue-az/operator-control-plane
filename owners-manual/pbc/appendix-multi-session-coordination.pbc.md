@@ -225,14 +225,22 @@ about adherence, and it cannot be evidenced until records accumulate under disti
    `--review` are already registry-validated at `task-create` — see Front H,
    `docs/handoffs/NEXT_SESSION.md` in project-phoenix, for the gap that opened when
    `claude-consultant`/`claude-supervisor` needed manual registration just to be assignable.)
-2. **Are `claude-consultant` and `claude-supervisor` the right labels?** Still open. They encode the
-   operator's own words, but "supervisor" implies rank in an arrangement the operator asked to be
-   peer, and role labels have since drifted at least twice in this ledger (the original two-actor
-   assumption, and one actor called `claude` then `claude-builder` then `claude-consultant` within
-   90 minutes). A fourth session (`claude-019KSo7K`, `front-e0-desktop-pack-review` handoff-0003,
-   2026-08-11) sidestepped the question by registering under a session-derived id per handoff-0005's
-   recommendation rather than picking a role label it couldn't verify applied to it. That is a
-   workaround, not a ruling — the label-vs-session-id choice is still the operator's to make.
+2. **RULED 2026-08-11, SESSION-DERIVED IDS, WITH A MAPPING TABLE.** Are `claude-consultant` and
+   `claude-supervisor` the right labels? Role labels drifted twice in this ledger (the original
+   two-actor assumption, and one actor called `claude` then `claude-builder` then `claude-consultant`
+   within 90 minutes) and imply rank the operator asked not to exist. **Ruling: `--by`/`--assign`/
+   `--review` use the session-derived id** (e.g. `claude-019KSo7K`), per handoff-0005's original
+   recommendation. Readability is recovered with a living mapping table in `AGENTS.md`
+   ("Concurrent Sessions & Ledger Identity"), not by the id itself. Implemented 2026-08-11 —
+   registered `claude-019KSo7K` as a fourth distinct session in `front-e0-desktop-pack-review`
+   handoff-0003 rather than assume either existing role label applied to it, before the ruling
+   made that the required behavior rather than a workaround.
+
+   **Found while implementing, not resolved by the ruling:** session ids are not stable across a
+   resume. `claude-consultant`'s role moved from `session_0133KSgM` to `session_01Hzi1zP` between
+   2026-08-09 and 2026-08-11 with no discontinuity in the work — same role, different id. The
+   `AGENTS.md` table tracks this as role continuity across ids, appending rows rather than
+   overwriting them, since nothing currently detects or announces a resume-driven id change.
 3. **Should the twelve mislabeled handoffs be annotated?** Settled — `opr-continuation-loop-audit`
    handoff-0011 did this mechanically (see Provenance below), not from memory as originally
    proposed here.
