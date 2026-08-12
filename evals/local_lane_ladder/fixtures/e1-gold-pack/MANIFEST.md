@@ -61,19 +61,28 @@ The shared grader is [grading.py](../../grading.py). It reads fixture
 artifacts or executes the declared local assertion; model narration and
 self-reported success are not gold.
 
-## Trace-retention blocker
+## Trace-retention blocker — RESOLVED 2026-08-12
 
-The current [runner.py](../../runner.py) invokes `opr` with captured stdout
-and stderr but discards both after grading. `state.json` retains only summary
-fields such as pass/fail, detail, return code, and wall-clock time. It has no
-trace-output flag. This reproduces the raw-output gap identified in the E0
-consultant review and fails GOLD_STANDARD rule 4.
+**Was:** [runner.py](../../runner.py) invoked `opr` with captured stdout and
+stderr but discarded both after grading. `state.json` retained only summary
+fields such as pass/fail, detail, return code, and wall-clock time, with no
+trace-output flag. That reproduced the raw-output gap identified in the E0
+consultant review and failed GOLD_STANDARD rule 4.
 
-Therefore **do not execute or score the E1 matrix with the current runner**.
-The blocker is resolved only when the approved runner persists a per-cell
-stdout/stderr/tool trace, including failures, and RUN.md's trace preflight
-passes. Adding that harness feature is outside this brief. The dry-run is
-safe because it executes no model trials.
+**Now:** `runner.py` takes `--trace-dir DIR` and persists one JSON per cell —
+raw opr stdout/stderr (which carry the tool-call log), exact argv and prompt,
+git rev, machine, and grade outcome — for passes, graded fails, and timeouts
+alike. Default behaviour without the flag is unchanged, and the runner warns to
+stderr that such a run is not scoreable. Trace writes fail closed.
+
+Resolved on desktop at rev `77a31e2` under Claude supervision; the single-cell
+preflight and the failure/timeout retention tests are recorded in
+[RUN.md](RUN.md) §3. Any scoreable E1 cell must be produced by a command that
+includes `--trace-dir`.
+
+Still required before the matrix counts as evidence: operator authorisation of
+the phase, `ollama ps` 100%-GPU residency captured during each model's cells,
+27 retained traces, and a distinct-UID re-derive.
 
 ## Ledger and claim boundary
 
