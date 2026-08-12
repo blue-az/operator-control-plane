@@ -262,7 +262,7 @@ class TestOperatorCLI(unittest.TestCase):
         rows = self.read_ledger_events()
         self.assertEqual(
             {row["record_type"] for row in rows},
-            {"task", "claim", "evidence", "usage", "handoff"},
+            {"task", "claim", "evidence", "usage", "handoff", "brief_issued"},
         )
         by_record = {}
         for row in rows:
@@ -1345,7 +1345,7 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("Next Action:      Review stdin handoff", res.stdout)
 
         # 16. Generate and verify brief using handoff state
-        res = self.run_operator("brief", "--for", "claude")
+        res = self.run_operator("brief", "--for", "codex")
         self.assertEqual(res.returncode, 0, f"brief with handoffs failed: {res.stderr}")
         self.assertIn("Latest Harness Handoff Closeout", res.stdout)
         self.assertIn("Added stdin handoff", res.stdout)
@@ -4594,6 +4594,133 @@ class TestOperatorCLI(unittest.TestCase):
             "Task term-task assigned to codex with no claim/evidence/handoff activity",
             res.stdout,
         )
+
+    def test_role_scoped_brief_generation_and_doctor_audit(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+
+        res_task = self.run_operator(
+            "task-create",
+            "--objective",
+            "Role scoped brief test objective",
+            "--id",
+            "role-task",
+            "--assign",
+            "codex",
+            "--review",
+            "claude",
+            "--assumption",
+            "Assumption1: builder assumption text",
+        )
+        self.assertEqual(res_task.returncode, 0, res_task.stderr)
+
+        sentinel_claim_text = "SENTINEL_CLAIM_TEXT_12345"
+        res_claim = self.run_operator(
+            "claim-add",
+            "--type",
+            "test_passes",
+            "--text",
+            sentinel_claim_text,
+            "--gate",
+            "test-gate.py",
+        )
+        self.assertEqual(res_claim.returncode, 0, res_claim.stderr)
+
+        gate_path = Path(self.temp_dir) / "test-gate.py"
+        gate_path.write_text("print('test gate')")
+
+        ev_file = Path(self.temp_dir) / "ev_file.txt"
+        ev_file.write_text("evidence content 6789")
+        ev_hash = hashlib.sha256(b"evidence content 6789").hexdigest()
+
+        res_ev = self.run_operator(
+            "evidence-attach",
+            str(ev_file),
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--verify-cmd",
+            "python test-gate.py",
+            "--by",
+            "codex",
+        )
+        self.assertEqual(res_ev.returncode, 0, res_ev.stderr)
+
+        sentinel_narrative = "SENTINEL_BUILDER_NARRATIVE_WHAT_VERIFIED_999"
+        res_ho = self.run_operator(
+            "handoff-add",
+            "--task",
+            "role-task",
+            "--by",
+            "codex",
+            "--changed",
+            "modified operator file",
+            "--verified",
+            sentinel_narrative,
+            "--claimed",
+            "all tests pass",
+            "--open",
+            "none",
+            "--assumptions",
+            "no unchecked assumptions",
+            "--next-action",
+            "request review from claude",
+        )
+        self.assertEqual(res_ho.returncode, 0, res_ho.stderr)
+
+        # Builder brief (codex) -> builder variant
+        res_brief_builder = self.run_operator("brief", "--task", "role-task", "--for", "codex")
+        self.assertEqual(res_brief_builder.returncode, 0, res_brief_builder.stderr)
+        self.assertIn(sentinel_narrative, res_brief_builder.stdout)
+        self.assertIn(sentinel_claim_text, res_brief_builder.stdout)
+        self.assertIn("Recommended Next Action", res_brief_builder.stdout)
+        self.assertIn("Latest Harness Handoff Closeout", res_brief_builder.stdout)
+
+        # Reviewer brief (claude) -> reviewer variant
+        res_brief_reviewer = self.run_operator("brief", "--task", "role-task", "--for", "claude")
+        self.assertEqual(res_brief_reviewer.returncode, 0, res_brief_reviewer.stderr)
+        self.assertNotIn(sentinel_narrative, res_brief_reviewer.stdout)
+        self.assertNotIn(sentinel_claim_text, res_brief_reviewer.stdout)
+        self.assertNotIn("Recommended Next Action", res_brief_reviewer.stdout)
+        self.assertNotIn("Latest Harness Handoff Closeout", res_brief_reviewer.stdout)
+        self.assertIn("evidence-0001", res_brief_reviewer.stdout)
+        self.assertIn(ev_hash, res_brief_reviewer.stdout)
+        self.assertIn(
+            '<unverified-assertion by="codex">Assumption1: builder assumption text</unverified-assertion>',
+            res_brief_reviewer.stdout,
+        )
+
+        # Unauthorized harness brief (grok) -> fail closed
+        res_brief_unauthorized = self.run_operator("brief", "--task", "role-task", "--for", "grok")
+        self.assertNotEqual(res_brief_unauthorized.returncode, 0)
+        self.assertIn("neither assigned_harness nor review_harness", res_brief_unauthorized.stderr)
+
+        # Ledger events check
+        events = self.read_ledger_events()
+        brief_events = [e for e in events if e["record_type"] == "brief_issued"]
+        self.assertTrue(len(brief_events) >= 2)
+        roles = {e["record_id"]: json.loads(e["payload_json"])["role"] for e in brief_events}
+        self.assertEqual(roles.get("role-task/codex"), "builder")
+        self.assertEqual(roles.get("role-task/claude"), "reviewer")
+
+        # Doctor check when verifier was issued a builder brief
+        res_ev_verify_builder = self.run_operator(
+            "evidence-attach",
+            str(ev_file),
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "verified",
+            "--verified-by",
+            "codex",
+        )
+        self.assertEqual(res_ev_verify_builder.returncode, 0, res_ev_verify_builder.stderr)
+
+        res_doctor = self.run_operator("doctor")
+        self.assertNotEqual(res_doctor.returncode, 0)
+        self.assertIn("verified by 'codex' who was issued a builder brief", res_doctor.stdout)
 
 
 if __name__ == "__main__":
