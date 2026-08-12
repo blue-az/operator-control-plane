@@ -1,0 +1,45 @@
+--- 2026-08-12T21:55:33Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 2026-08-12T21:55:53Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:56:13Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 2026-08-12T21:56:33Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:56:54Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:57:14Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:57:34Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    12 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:57:54Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:58:14Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 2026-08-12T21:58:34Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:58:54Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    12 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:59:14Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:59:34Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T21:59:54Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T22:00:14Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     32768      4 minutes from now    
+--- 2026-08-12T22:00:34Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     32768      4 minutes from now    
