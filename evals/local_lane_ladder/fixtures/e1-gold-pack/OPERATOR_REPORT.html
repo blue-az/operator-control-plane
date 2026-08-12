@@ -376,9 +376,9 @@
     <p class="eyebrow">Operator report &middot; Front E &middot; prepared for external review</p>
     <h1>E1 Local-Lane Matrix</h1>
     <p class="standfirst">
-      Three local models, twenty-seven deterministically graded cells, full trace retention.
-      Two cells failed &mdash; and the traces show they are a harness defect, not a
-      capability difference.
+      Five local models, forty-five deterministically graded cells, full trace retention.
+      Seven cells failed &mdash; and the traces show six of them are a harness defect
+      spanning two model families, not a capability difference.
     </p>
   </header>
 
@@ -386,8 +386,8 @@
     <div class="prov-cell"><dt>Date</dt><dd>2026-08-12</dd></div>
     <div class="prov-cell"><dt>Machine</dt><dd>desktop</dd></div>
     <div class="prov-cell"><dt>Revision</dt><dd>90e91d7</dd></div>
-    <div class="prov-cell"><dt>Cells</dt><dd class="ok">27 / 27</dd></div>
-    <div class="prov-cell"><dt>Traces</dt><dd class="ok">27 / 27</dd></div>
+    <div class="prov-cell"><dt>Cells</dt><dd class="ok">45 / 45</dd></div>
+    <div class="prov-cell"><dt>Traces</dt><dd class="ok">45 / 45</dd></div>
     <div class="prov-cell"><dt>Residency</dt><dd class="ok">100% GPU</dd></div>
     <div class="prov-cell"><dt>Timeouts</dt><dd class="ok">0</dd></div>
     <div class="prov-cell"><dt>GPU</dt><dd>RTX 3090</dd></div>
@@ -403,9 +403,10 @@
 
     <p>
       On a single-RTX-3090 desktop host, for three plan-shaped (L2) local-lane fixtures,
-      how do deterministic postcondition pass rates compare across
-      <code>gemma4:26b</code>, <code>gemma4:31b</code>, and a fully GPU-resident
-      <code>qwen2.5-coder:14b</code>, at three trials per cell?
+      how do deterministic postcondition pass rates compare across five fully
+      GPU-resident local models &mdash; <code>gemma4:26b</code>, <code>gemma4:31b</code>,
+      <code>qwen2.5-coder:14b</code>, <code>gemma3:27b</code> and
+      <code>qwen3.6:27b</code> &mdash; at three trials per cell?
     </p>
     <p>
       Every cell is graded by a machine-checkable postcondition that inspects the
@@ -442,13 +443,13 @@
 
     <div class="scroll">
       <table>
-        <caption>L2 pass rate and wall-clock, all tasks combined</caption>
+        <caption>L2 pass rate and wall-clock, all tasks combined &mdash; nine cells per model</caption>
         <thead>
           <tr>
             <th>Model</th>
-            <th class="num">Pass</th>
+            <th class="num">Raw</th>
+            <th class="num">Gradeable</th>
             <th class="num">Median</th>
-            <th class="num">Mean</th>
             <th class="num">Max</th>
             <th>Status</th>
           </tr>
@@ -457,20 +458,37 @@
           <tr>
             <td class="model">gemma4:26b</td>
             <td class="num"><span class="score full">9/9</span></td>
-            <td class="num">6.4s</td><td class="num">10.2s</td><td class="num">27.5s</td>
+            <td class="num"><span class="score full">9/9</span></td>
+            <td class="num">6.4s</td><td class="num">27.5s</td>
             <td><span class="pill clean">unconfounded</span></td>
           </tr>
           <tr>
             <td class="model">gemma4:31b</td>
             <td class="num"><span class="score full">9/9</span></td>
-            <td class="num">19.0s</td><td class="num">18.5s</td><td class="num">31.3s</td>
+            <td class="num"><span class="score full">9/9</span></td>
+            <td class="num">19.0s</td><td class="num">31.3s</td>
+            <td><span class="pill clean">unconfounded</span></td>
+          </tr>
+          <tr>
+            <td class="model">qwen3.6:27b</td>
+            <td class="num"><span class="score full">9/9</span></td>
+            <td class="num"><span class="score full">9/9</span></td>
+            <td class="num">23.7s</td><td class="num">126.1s</td>
             <td><span class="pill clean">unconfounded</span></td>
           </tr>
           <tr>
             <td class="model">qwen2.5-coder:14b</td>
             <td class="num"><span class="score part">7/9</span></td>
-            <td class="num">2.1s</td><td class="num">4.5s</td><td class="num">9.9s</td>
-            <td><span class="pill conf">confounded</span></td>
+            <td class="num"><span class="score full">7/7</span></td>
+            <td class="num">2.1s</td><td class="num">9.9s</td>
+            <td><span class="pill conf">2 confounded</span></td>
+          </tr>
+          <tr>
+            <td class="model">gemma3:27b</td>
+            <td class="num"><span class="score part">5/9</span></td>
+            <td class="num"><span class="score part">5/6</span></td>
+            <td class="num">3.3s</td><td class="num">13.8s</td>
+            <td><span class="pill conf">3 confounded</span></td>
           </tr>
         </tbody>
       </table>
@@ -478,7 +496,7 @@
 
     <div class="scroll">
       <table>
-        <caption>Per-task breakdown</caption>
+        <caption>Per-task breakdown (raw)</caption>
         <thead>
           <tr>
             <th>Model</th>
@@ -490,15 +508,22 @@
         <tbody>
           <tr><td class="model">gemma4:26b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
           <tr><td class="model">gemma4:31b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
+          <tr><td class="model">qwen3.6:27b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
           <tr><td class="model">qwen2.5-coder:14b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score part">1/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
+          <tr><td class="model">gemma3:27b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score part">1/3</span></td><td class="num"><span class="score part">1/3</span></td></tr>
         </tbody>
       </table>
     </div>
 
     <p>
-      Both failures land in a single cell class: <code>config-value-change</code> &times;
-      <code>qwen2.5-coder:14b</code>, trials 1 and 2. Zero timeouts and zero non-zero
-      return codes across the matrix.
+      Zero timeouts and zero non-zero return codes across all forty-five cells. Of the
+      seven failures, <strong>six were never dispatched as tool calls at all</strong> and
+      one is a genuine defect. The next section separates them.
+    </p>
+    <p>
+      The two matrices were run as sibling packs. E1 fixed its matrix at three models;
+      the 27B-class pair was added afterwards on the same three fixtures with the same
+      grader and harness, rather than by re-running or re-labelling E1.
     </p>
   </section>
 
@@ -525,7 +550,7 @@
     <div class="traces">
       <div class="trace is-pass">
         <div class="trace-head">
-          <span class="who">trial 3</span>
+          <span class="who">qwen2.5-coder:14b <span class="who">trial 3</span>middot; trial 3</span>
           <span class="pill clean">passed &middot; 1.7s</span>
         </div>
 <pre><span class="marker">[Model requests tool call: patch_file]</span>
@@ -546,7 +571,7 @@ Successfully patched config/settings.ini.</pre>
 
       <div class="trace is-fail">
         <div class="trace-head">
-          <span class="who">trials 1 &amp; 2</span>
+          <span class="who">qwen2.5-coder:14b &middot; trials 1 &amp; 2</span>
           <span class="pill conf">failed &middot; 9.5s / 2.2s</span>
         </div>
 <pre><span class="missing">(no tool-call marker)</span>
@@ -599,12 +624,53 @@ Successfully patched config/settings.ini.</pre>
       as a catalogued harness failure rather than folded into a model ranking.
     </p>
 
-    <h3>Honest restatement of the third row</h3>
+    <h3>Honest restatement</h3>
     <p>
-      <strong>Do not cite &ldquo;<code>qwen2.5-coder:14b</code> scores 7/9 at L2&rdquo;
-      as a capability finding.</strong> The supportable statement is: its answers were
-      correct 3/3, and its tool-call emission parsed 1/3.
+      <strong>Do not cite &ldquo;<code>qwen2.5-coder:14b</code> scores 7/9&rdquo; or
+      &ldquo;<code>gemma3:27b</code> scores 5/9&rdquo; as capability findings.</strong>
+      Excluding cells the harness never dispatched, the gradeable records are 7/7 and
+      5/6 respectively. Only one failure in the entire forty-five-cell set is
+      attributable to a model.
     </p>
+
+    <h3>The one genuine failure</h3>
+    <p>
+      <code>gemma3:27b</code> on <code>function-add</code>, trial 2. Here the tool
+      <em>was</em> dispatched and reported success &mdash; the model simply wrote broken
+      code. It anchored on the line <code>return a + b</code> and emitted a replacement
+      that left a dangling copy of that line after the new function:
+    </p>
+<pre class="cmd">"replacement_content": "\n\ndef square(n):\n    return n * n\n\n    return a + b"</pre>
+    <p>
+      The result was an <code>IndentationError</code> on import. That is a real
+      anchored-edit failure and counts against the model.
+    </p>
+
+    <h3>The defect is not model-family-specific</h3>
+    <p>
+      This is the finding that outlives the scores. Across all forty-five cells the
+      emission defect appeared in <strong>two different model families</strong> &mdash;
+      <code>qwen2.5-coder:14b</code> and <code>gemma3:27b</code> &mdash; and never in
+      <code>gemma4:26b</code>, <code>gemma4:31b</code> or <code>qwen3.6:27b</code>. It
+      also appeared in two syntactic variants: fenced JSON in one family, bare JSON in
+      the other. The harness parses neither.
+    </p>
+    <p>
+      The three-model run alone could not separate &ldquo;a quirk of one model&rdquo;
+      from &ldquo;a defect in the harness&rdquo;. Two unrelated families failing the same
+      way &mdash; while the newer generation of <em>both</em> families passes cleanly
+      &mdash; is materially stronger evidence for the harness reading.
+    </p>
+    <div class="verdict">
+      <span class="label">Stated as a hypothesis, not a result</span>
+      <p>
+        The apparent pattern &mdash; older model generations emit unparseable JSON, newer
+        ones emit proper tool calls &mdash; rests on six confounded cells across two
+        models and was not what this matrix was designed to test. It does suggest the
+        parser is tuned to what current models happen to emit, which is a fragile
+        position for a grading harness.
+      </p>
+    </div>
   </section>
 
   <section>
@@ -636,8 +702,15 @@ Successfully patched config/settings.ini.</pre>
       <div class="ledger-row yes">
         <span class="mark">&#10003;</span>
         <div>
-          <p><code>gemma4:26b</code> and <code>gemma4:31b</code> each cleared every L2 cell, 9/9.</p>
-          <p class="sub">Unconfounded. Both named seats passed all three fixtures at three trials.</p>
+          <p><code>gemma4:26b</code>, <code>gemma4:31b</code> and <code>qwen3.6:27b</code> each cleared every L2 cell, 9/9.</p>
+          <p class="sub">Unconfounded &mdash; every cell dispatched a tool. Three models passed all three fixtures at three trials.</p>
+        </div>
+      </div>
+      <div class="ledger-row yes">
+        <span class="mark">&#10003;</span>
+        <div>
+          <p>Both 27B-class models run fully GPU-resident on one 24&nbsp;GB card.</p>
+          <p class="sub">17&nbsp;GB at 32768 context, 100% GPU, verified before the run and sampled throughout. No spill and no dual-GPU requirement &mdash; the precondition the gold standard sets for evaluating this seat at all.</p>
         </div>
       </div>
       <div class="ledger-row yes">
@@ -664,8 +737,22 @@ Successfully patched config/settings.ini.</pre>
       <div class="ledger-row no">
         <span class="mark">&times;</span>
         <div>
-          <p>The 14b floor-model row is not usable as a capability measurement.</p>
-          <p class="sub">Confounded by the emission-format defect described above.</p>
+          <p>The <code>qwen2.5-coder:14b</code> and <code>gemma3:27b</code> raw rows are not usable as capability measurements.</p>
+          <p class="sub">Confounded by the emission-format defect &mdash; 2 and 3 cells respectively. Cite the gradeable figures, 7/7 and 5/6, or nothing.</p>
+        </div>
+      </div>
+      <div class="ledger-row no">
+        <span class="mark">&times;</span>
+        <div>
+          <p>Accuracy here says nothing about judgment or prose quality.</p>
+          <p class="sub">These fixtures measure plan-shaped tool execution against deterministic postconditions. An informal probe the same day had <code>qwen3.6:27b</code> performing poorly as an evaluative judge; that probe was non-citable for lack of a postcondition, and neither result transfers to the other task class. Do not merge them into one ranking.</p>
+        </div>
+      </div>
+      <div class="ledger-row no">
+        <span class="mark">&times;</span>
+        <div>
+          <p>The generation-vs-emission-format pattern is not established.</p>
+          <p class="sub">Six confounded cells across two models, observed rather than designed for. Worth a dedicated test; not worth a claim.</p>
         </div>
       </div>
       <div class="ledger-row no">
@@ -733,9 +820,16 @@ Successfully patched config/settings.ini.</pre>
         defect; both alternatives are preferable.
       </li>
       <li>
-        <strong>Re-run the affected cell class at higher n</strong> to measure the
-        emission-format rate, if the 14b floor seat matters to a downstream decision.
-        Outside the present scope.
+        <strong>Re-run the affected cell classes at higher n</strong> to measure the
+        emission-format rate, and test the generation hypothesis deliberately rather
+        than incidentally. Outside the present scope.
+      </li>
+      <li>
+        <strong>Weigh <code>qwen3.6:27b</code>&rsquo;s accuracy against its latency
+        before seating it.</strong> It matched the two <code>gemma4</code> models at 9/9
+        while running fully GPU-resident, but its median cell took 23.7s against
+        <code>gemma4:26b</code>&rsquo;s 6.4s, with one cell at 126.1s. That trade is
+        acceptable for delegated work and poor for anything interactive.
       </li>
     </ol>
   </section>

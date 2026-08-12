@@ -1,0 +1,6 @@
+# E1X pre-run provenance (27B-class capacity extension)
+captured_utc: 2026-08-12T22:45:23Z
+hostname_s: desktop
+git_rev: 8041b19e039ac20dec1f301064844565db964f01
+gpu: NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
+residency_preflight: gemma3:27b 17GB 100% GPU @32768; qwen3.6:27b 17GB 100% GPU @32768
