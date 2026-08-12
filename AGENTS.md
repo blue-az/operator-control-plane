@@ -24,6 +24,44 @@ failure-mode catalogs when working across repos, and leave residue (commits,
 catalog entries, handoffs) under the human’s rules — see
 `project-phoenix/docs/AGENT_AUDIT_PROTOCOL.md` § “Frontier seat fitness”.
 
+## Concurrent Sessions & Ledger Identity
+
+**Ruled 2026-08-11** (`session-coordination-protocol` task, Q2): when multiple sessions
+write to this ledger at once, `--by`/`--assign`/`--review` use the **session-derived id**
+(short form of the real Claude Code session id, e.g. `claude-019KSo7K` for
+`session_019KSo7KhEUrNJGa1kSVeP8i`), not a role label. Role labels
+(`claude-supervisor`, `claude-consultant`, `claude-builder`) were tried first and
+drifted twice on this exact ledger — once when two sessions were assumed to be one
+(`session-coordination-protocol` handoff-0001), once when a single session's own label
+changed three times in 90 minutes. Session ids don't drift by construction; they're
+also what the git commit trailers (`Claude-Session: https://claude.ai/code/session_...`)
+already carry, which is how the original mixup got resolved in the end.
+
+**Known gap in this ruling, found while implementing it, not resolved by it:** a
+session-derived id is not guaranteed stable across a resume. `claude-consultant`'s role
+was held by `session_0133KSgM` through 2026-08-09, then by `session_01Hzi1zP` from
+2026-08-11 (`3b86ecb`) — same role, same continuity of work, different id. Treat the
+table below as tracking **role continuity**, not asserting that an id is permanent.
+When a session resumes under a new id and picks up a prior session's thread, add a row
+rather than overwrite one, and say so in the handoff that continues the work.
+
+**Recently active sessions** (populate/update as sessions come and go; this is not a
+full historical audit — plenty of one-off sessions touched this repo before
+2026-08-09 and aren't tracked here):
+
+| Session id | Root / working dir | Recent work | Last active |
+|---|---|---|---|
+| `claude-01QBpGoE` | `~/operator-control-plane` | Front A infra, `session-coordination-protocol` original proposal (as `claude-supervisor`) | 2026-08-09 |
+| `claude-0133KSgM` | `~/operator-control-plane` | Confound pilot passes 1-2, coordination-protocol counter-proposal (as `claude-consultant`) | 2026-08-09 |
+| `claude-01Hzi1zP` | `~/operator-control-plane` | `front-e0-desktop-pack-review`, `LOCAL_LANE_CONTRACT_SPEC.md` power-cap fix (continuing `claude-consultant`'s role) | 2026-08-11 |
+| `claude-01Q3rn3n` | `~/operator-control-plane` | Front G, pa-evidence Gate 1 adapter | 2026-08-10 |
+| `claude-019KSo7K` | `~/Alignerr` (cross-repo, via SSH to desktop) | Front D dashboard verification, Front E0 desktop pack, Q1/Q4 ruling implementation | 2026-08-11 |
+
+Registering a session-derived id as a harness (`.operator/harnesses/claude-<id>.yaml`)
+is required only if something needs to `--assign`/`--review` to it — `--by` needs no
+registration (Q1 ruling, same task). `.operator/` is gitignored and per-machine, so a
+harness registered on z13 does not exist on desktop until copied there.
+
 ## Project Structure & Module Organization
 
 This repository is a compact Python CLI project (requires Python ≥ 3.12).
