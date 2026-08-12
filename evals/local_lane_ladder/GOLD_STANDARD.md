@@ -102,6 +102,30 @@ local_ok + delegated      → any local fit (26b or 31b)
 Tool-call estimates: **0–1** → local band; **≥3** → supervised; **1–2** needs **data-locality**
 feature (local file vs network) — study §3.2.
 
+### Decode rates vs the ~20 tok/s conversational floor (residency-verified)
+
+Use these numbers, not the older power-sweep range. Measured at `num_ctx 8192`,
+220 W, **100% GPU residency confirmed via `ollama ps`**, low variance across 3 runs
+(`project-phoenix/docs/domain_runs/GEMMA4-CTX8192-3090-VS-Z13-001/findings.md`):
+
+| Model | desktop 3090 | z13 | vs ~20 t/s floor |
+|---|---:|---:|---|
+| `gemma4:26b` | **91.4** t/s | 18.8 t/s (38%/62% CPU/GPU) | clears on desktop; marginal on z13 |
+| `gemma4:31b` | **18.1** t/s | 4.86 t/s (45%/55% CPU/GPU) | **below on both** |
+
+**Recurring mis-citation — reject it.** `DEDICATED_VS_UNIFIED_MEMORY.md` §6 has an
+older 200–350 W sweep whose `gemma4:31b` column peaks at 30.8–31.7 tok/s. That sweep
+**did not confirm residency per row** and was probably partially CPU-spilling; its
+own §6 note says so. Citing "31B runs at ~31 tok/s" to argue 31b clears the
+conversational floor and should be the default interactive model is therefore
+unsupported — the residency-verified figure is 18.1 t/s, i.e. *below* the floor,
+and lower than the sweep's 300/350 W rows despite a higher cap.
+
+This is why §1 files "31b is best for conversational work" under **Not established**.
+The seat table above stands: **26b conversational / router, 31b delegated / executor.**
+A future change to these seats needs a residency-verified rate, not a throughput
+claim inherited from an unverified sweep.
+
 ---
 
 ## 4. Rules for any new Front E pack (after E0)
