@@ -70,21 +70,46 @@ chosen installed 14b-class tag and record that choice in MANIFEST.md.
 
 Before a model trial, inspect the approved runner interface and prove that a
 disposable single-cell run creates a retained per-cell trace containing model
-stdout/stderr and tool activity. The present runner has no such interface, so
-this gate currently fails:
+stdout/stderr and tool activity.
 
 ```bash
-python3 evals/local_lane_ladder/runner.py --help
+python3 evals/local_lane_ladder/runner.py --help   # must list --trace-dir
 ```
 
 Do not treat console output, `state.json` summaries, or model prose as a
-retained trace. Do not run the matrix until the runner's documented trace
-option and artifact layout can be inserted into the command below.
+retained trace.
 
-## 4. Deferred desktop matrix
+**Gate status: PASSED on desktop 2026-08-12** (rev `77a31e2`, Claude-supervised).
 
-After the trace gate is fixed, Grok or Claude supervision must update this
-command with the approved trace-retention option before execution:
+`runner.py` gained `--trace-dir DIR`, which writes one JSON per cell holding
+raw opr stdout/stderr, the exact argv and prompt, git rev, machine, and grade
+outcome. It is off by default, so omitting it reproduces the previous
+behaviour exactly; when omitted the runner now prints a "NOT scoreable" warning
+to stderr. Trace writes **fail closed** — an unwritable destination aborts the
+sweep instead of recording an untraced cell.
+
+Evidence retained for this gate:
+
+- Disposable single cell `alias-add | L2 | gemma4:26b | t1`, run with
+  `--no-ledger` and scratch paths, PASS in 18.1s. Its trace contains the full
+  tool sequence (`read_file` → args → tool output → `patch_file` → args → tool
+  output), not a summary. `ollama ps` reported **100% GPU** during the cell.
+- `tests/test_ladder_runner_trace.py` (5 tests, hermetic — no model required)
+  asserts traces are retained for graded **fails** and for **timeouts** with
+  partial output, that `--trace-dir` absent is a no-op, and that a failed trace
+  write raises. Retention on failure is the property that matters: the
+  pre-`890d595` confound was 88 negatives with no output kept.
+
+Re-verify before trusting this line:
+
+```bash
+python3 -m unittest tests.test_ladder_runner_trace -v
+```
+
+## 4. Desktop matrix
+
+The trace gate is passed and the option below is filled in. This command is
+**not** self-authorising: the operator still picks the phase before it runs.
 
 ```bash
 OPERATOR_MACHINE=desktop python3 evals/local_lane_ladder/runner.py \
@@ -94,7 +119,15 @@ OPERATOR_MACHINE=desktop python3 evals/local_lane_ladder/runner.py \
   --trials 3 \
   --output evals/local_lane_ladder/fixtures/e1-gold-pack/RESULTS.md \
   --state evals/local_lane_ladder/fixtures/e1-gold-pack/state.json \
-  <APPROVED-TRACE-RETENTION-OPTION>
+  --trace-dir evals/local_lane_ladder/fixtures/e1-gold-pack/traces
+```
+
+The run is resumable: `state.json` skips completed cells, so an interrupted
+sweep is restarted with the same command. Completeness check afterwards —
+27 cells means 27 traces, and a short count means the matrix is not scoreable:
+
+```bash
+ls evals/local_lane_ladder/fixtures/e1-gold-pack/traces/*.json | wc -l   # expect 27
 ```
 
 During each model's cells, retain the output of `ollama ps`. The Qwen floor
