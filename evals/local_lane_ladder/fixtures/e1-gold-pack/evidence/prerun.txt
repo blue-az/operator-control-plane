@@ -1,0 +1,23 @@
+# E1 pre-run provenance
+captured_utc: 2026-08-12T21:55:16Z
+hostname_s: desktop
+OPERATOR_MACHINE: desktop
+git_rev: 90e91d732403c525d6ecb9a6c639bd2685976f87
+git_status_clean: no
+890d595_ancestor: yes
+gpu: NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
+
+## ollama list
+NAME                     ID              SIZE      MODIFIED     
+qwen3.6:27b              a50eda8ed977    17 GB     17 hours ago    
+llama3.1:8b              46e0c10c039e    4.9 GB    3 weeks ago     
+gemma4:12b               4eb23ef187e2    7.6 GB    2 months ago    
+gemma4:31b               6316f0629137    19 GB     4 months ago    
+gemma4:e4b               c6eb396dbd59    9.6 GB    4 months ago    
+gemma4:26b               5571076f3d70    17 GB     4 months ago    
+gpt-oss:latest           17052f91a42e    13 GB     4 months ago    
+qwen2.5-coder:32b        b92d6a0bd47e    19 GB     5 months ago    
+qwen35-nothink:latest    c7f8c665a248    17 GB     5 months ago    
+qwen2.5-coder:14b        9ec8897f747e    9.0 GB    5 months ago    
+granite4:latest          4235724a127c    2.1 GB    7 months ago    
+gemma3:27b               a418f5838eaf    17 GB     7 months ago    
