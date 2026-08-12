@@ -87,3 +87,16 @@ re-derive of postcondition totals, trace completeness, model tags, residency and
 machine provenance first. The traces, `state.json`, `RESULTS.md`, `evidence/`
 (prerun provenance + 20s-interval `ollama ps` samples) are retained for exactly
 that.
+
+## External-review report
+
+`OPERATOR_REPORT.html` in this directory is the reviewer-facing writeup of this
+run — method, results, this finding, the claim boundary, and reproduction steps,
+written for someone with no prior knowledge of Front E. It is committed here so
+it syncs with the repo; a rendered copy is also published at
+<https://claude.ai/code/artifact/728a6afb-965e-406c-a152-c51152d84689>
+(private until shared).
+
+Filed on the **desktop** ledger under task `front-e1-gold-pack`. Per Front H that
+ledger does not sync — z13 gets this pack through `git pull`, not through
+`.operator/`, which is gitignored and per-machine.
