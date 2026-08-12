@@ -121,6 +121,15 @@ YAML-only ledger baselines those records into SQLite without changing their visi
 **Briefs & handoff**
 - `brief --for H [--task ID]` / `export-brief --for H [--task ID]` — generate a harness-specific
   brief (copy-paste for the next agent).
+
+**Headless delegation (all vendors with a CLI backend)**
+- `./delegate-brief --task ID --brief FILE --harness {claude,codex,grok,gemini-agy,fable,openrouter} [options]`
+  - Preserves the brief under `--deliver/.brief.md`, optional `--freeze` path hashes, full log + exit code.
+  - `--record` writes an Operator handoff (dispatch outcome only, not acceptance).
+  - Local model harness ids (`gemma4_local`, …) are not agent CLIs — use ollama runners separately.
+  - Example (Codex, no paste):  
+    `./delegate-brief --task front-e1-gold-pack --brief .operator/briefs/front-e1-gold-pack.codex.NOW.md --harness codex --cwd . --deliver evals/local_lane_ladder/fixtures/e1-gold-pack --freeze evals/local_lane_ladder/GOLD_STANDARD.md --record`
+
 - `handoff-add [--task ID] [--changed …] [--verified …] [--claimed …] [--open …]` — record a closeout.
 
 ## Worked example
