@@ -1,0 +1,752 @@
+<title>E1 Local-Lane Matrix</title>
+<style>
+  :root {
+    --ground:      #FBFBFD;
+    --surface:     #FFFFFF;
+    --surface-alt: #F2F3F7;
+    --rule:        #DDE0E8;
+    --rule-strong: #C3C8D4;
+    --ink:         #141821;
+    --ink-soft:    #3D4552;
+    --slate:       #5A6472;
+    --accent:      #22467F;
+    --accent-soft: #E7ECF5;
+    --pass:        #1B6B47;
+    --pass-soft:   #E3F0E9;
+    --flag:        #B4690E;
+    --flag-soft:   #FAEEDD;
+    --shadow:      0 1px 2px rgba(20, 24, 33, .05), 0 8px 24px -12px rgba(20, 24, 33, .12);
+
+    --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0F1217;
+      --surface:     #161A21;
+      --surface-alt: #1D222B;
+      --rule:        #2A303B;
+      --rule-strong: #3A414E;
+      --ink:         #E8EAEF;
+      --ink-soft:    #B9BFCB;
+      --slate:       #8A93A2;
+      --accent:      #8FB0E4;
+      --accent-soft: #1B2436;
+      --pass:        #6FC79B;
+      --pass-soft:   #14251D;
+      --flag:        #E0A356;
+      --flag-soft:   #2A2015;
+      --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0F1217;
+    --surface:     #161A21;
+    --surface-alt: #1D222B;
+    --rule:        #2A303B;
+    --rule-strong: #3A414E;
+    --ink:         #E8EAEF;
+    --ink-soft:    #B9BFCB;
+    --slate:       #8A93A2;
+    --accent:      #8FB0E4;
+    --accent-soft: #1B2436;
+    --pass:        #6FC79B;
+    --pass-soft:   #14251D;
+    --flag:        #E0A356;
+    --flag-soft:   #2A2015;
+    --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16.5px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 0 1.5rem 6rem;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 54rem; margin: 0 auto; }
+  .measure { max-width: 40rem; }
+
+  /* ---------- masthead ---------- */
+
+  header.masthead {
+    padding: 4rem 0 2rem;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 2rem;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin: 0 0 1.1rem;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(2.1rem, 5.5vw, 3.1rem);
+    line-height: 1.1;
+    letter-spacing: -.015em;
+    text-wrap: balance;
+    margin: 0 0 1rem;
+  }
+  .standfirst {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 38rem;
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  /* ---------- provenance strip ---------- */
+
+  .provenance {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 0;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--surface);
+    overflow: hidden;
+    margin: 0 0 3.5rem;
+    box-shadow: var(--shadow);
+  }
+  .prov-cell {
+    padding: .95rem 1.1rem;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .prov-cell dt {
+    font-family: var(--mono);
+    font-size: .66rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin: 0 0 .3rem;
+  }
+  .prov-cell dd {
+    font-family: var(--mono);
+    font-size: .92rem;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+    color: var(--ink);
+  }
+  .prov-cell dd.ok { color: var(--pass); }
+
+  /* ---------- sections ---------- */
+
+  section { margin: 0 0 3.5rem; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    line-height: 1.25;
+    text-wrap: balance;
+    margin: 0 0 .35rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid var(--rule-strong);
+  }
+  h2 + .section-note {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin: 0 0 1.5rem;
+  }
+  h3 {
+    font-family: var(--sans);
+    font-size: .95rem;
+    font-weight: 650;
+    letter-spacing: .01em;
+    margin: 2rem 0 .6rem;
+  }
+  p { margin: 0 0 1.1rem; max-width: 40rem; text-wrap: pretty; }
+  ul, ol { max-width: 40rem; padding-left: 1.2rem; margin: 0 0 1.1rem; }
+  li { margin-bottom: .5rem; }
+  strong { font-weight: 650; }
+  code {
+    font-family: var(--mono);
+    font-size: .87em;
+    background: var(--surface-alt);
+    padding: .12em .38em;
+    border-radius: 2px;
+  }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* ---------- verdict callout ---------- */
+
+  .verdict {
+    border-left: 3px solid var(--flag);
+    background: var(--flag-soft);
+    padding: 1.15rem 1.3rem;
+    border-radius: 0 3px 3px 0;
+    margin: 0 0 1.5rem;
+    max-width: 40rem;
+  }
+  .verdict p { margin: 0; max-width: none; }
+  .verdict .label {
+    display: block;
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--flag);
+    margin-bottom: .45rem;
+  }
+
+  /* ---------- tables ---------- */
+
+  .scroll { overflow-x: auto; margin: 0 0 1.2rem; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 30rem;
+    font-size: .93rem;
+  }
+  caption {
+    caption-side: top;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    padding-bottom: .6rem;
+  }
+  th, td {
+    text-align: left;
+    padding: .58rem .8rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  thead th {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--slate);
+    font-weight: 500;
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); }
+  td.model { font-family: var(--mono); font-size: .88rem; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .score { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .score.full { color: var(--pass); }
+  .score.part { color: var(--flag); }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .16em .5em;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .pill.clean { background: var(--pass-soft); color: var(--pass); }
+  .pill.conf  { background: var(--flag-soft); color: var(--flag); }
+
+  /* ---------- trace comparison ---------- */
+
+  .traces {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .trace {
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--surface);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .trace-head {
+    padding: .7rem .9rem;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .75rem;
+    flex-wrap: wrap;
+  }
+  .trace-head .who {
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--ink);
+  }
+  .trace.is-pass { border-top: 3px solid var(--pass); }
+  .trace.is-fail { border-top: 3px solid var(--flag); }
+  .trace pre {
+    font-family: var(--mono);
+    font-size: .755rem;
+    line-height: 1.6;
+    margin: 0;
+    padding: .9rem;
+    overflow-x: auto;
+    color: var(--ink-soft);
+    flex: 1;
+  }
+  .marker { color: var(--pass); font-weight: 600; }
+  .missing { color: var(--flag); font-weight: 600; }
+  .payload { background: var(--accent-soft); color: var(--ink); border-radius: 2px; }
+
+  .legend {
+    font-size: .85rem;
+    color: var(--slate);
+    max-width: 40rem;
+    margin: 0 0 1.1rem;
+  }
+
+  /* ---------- claim ledger ---------- */
+
+  .ledger { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--surface); }
+  .ledger-row {
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    gap: .8rem;
+    padding: .85rem 1rem;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+  .ledger-row:last-child { border-bottom: none; }
+  .ledger-row .mark { font-family: var(--mono); font-weight: 700; line-height: 1.5; }
+  .ledger-row.yes .mark { color: var(--pass); }
+  .ledger-row.no  .mark { color: var(--flag); }
+  .ledger-row p { margin: 0; max-width: none; font-size: .93rem; }
+  .ledger-row .sub { color: var(--slate); font-size: .85rem; margin-top: .2rem; }
+
+  /* ---------- repro ---------- */
+
+  pre.cmd {
+    font-family: var(--mono);
+    font-size: .78rem;
+    line-height: 1.7;
+    background: var(--surface-alt);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: .9rem 1rem;
+    overflow-x: auto;
+    margin: 0 0 1.1rem;
+    color: var(--ink-soft);
+  }
+
+  footer {
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 1.5rem;
+    margin-top: 3rem;
+    font-size: .85rem;
+    color: var(--slate);
+    max-width: 40rem;
+  }
+  footer p { max-width: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Operator report &middot; Front E &middot; prepared for external review</p>
+    <h1>E1 Local-Lane Matrix</h1>
+    <p class="standfirst">
+      Three local models, twenty-seven deterministically graded cells, full trace retention.
+      Two cells failed &mdash; and the traces show they are a harness defect, not a
+      capability difference.
+    </p>
+  </header>
+
+  <dl class="provenance">
+    <div class="prov-cell"><dt>Date</dt><dd>2026-08-12</dd></div>
+    <div class="prov-cell"><dt>Machine</dt><dd>desktop</dd></div>
+    <div class="prov-cell"><dt>Revision</dt><dd>90e91d7</dd></div>
+    <div class="prov-cell"><dt>Cells</dt><dd class="ok">27 / 27</dd></div>
+    <div class="prov-cell"><dt>Traces</dt><dd class="ok">27 / 27</dd></div>
+    <div class="prov-cell"><dt>Residency</dt><dd class="ok">100% GPU</dd></div>
+    <div class="prov-cell"><dt>Timeouts</dt><dd class="ok">0</dd></div>
+    <div class="prov-cell"><dt>GPU</dt><dd>RTX 3090</dd></div>
+    <div class="prov-cell"><dt>Power cap</dt><dd>320 W</dd></div>
+    <div class="prov-cell"><dt>Context</dt><dd>32768</dd></div>
+    <div class="prov-cell"><dt>Trials / cell</dt><dd>3</dd></div>
+    <div class="prov-cell"><dt>UID re-derive</dt><dd style="color:var(--flag)">pending</dd></div>
+  </dl>
+
+  <section>
+    <h2>What this run answers</h2>
+    <p class="section-note">Scope and method</p>
+
+    <p>
+      On a single-RTX-3090 desktop host, for three plan-shaped (L2) local-lane fixtures,
+      how do deterministic postcondition pass rates compare across
+      <code>gemma4:26b</code>, <code>gemma4:31b</code>, and a fully GPU-resident
+      <code>qwen2.5-coder:14b</code>, at three trials per cell?
+    </p>
+    <p>
+      Every cell is graded by a machine-checkable postcondition that inspects the
+      resulting files &mdash; never the model&rsquo;s own narration or a self-reported
+      success. Each task runs against a disposable temp fixture, so no real repository
+      is touched.
+    </p>
+
+    <div class="scroll">
+      <table>
+        <caption>Fixtures and their deterministic checks</caption>
+        <thead>
+          <tr><th>Task</th><th>Postcondition &mdash; the only thing scored</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="model">alias-add</td><td>Exact line present in <code>bash/.bash_aliases</code></td></tr>
+          <tr><td class="model">config-value-change</td><td>New value present <em>and</em> stale value absent</td></tr>
+          <tr><td class="model">function-add</td><td>Importing and calling <code>square(4)</code> returns <code>16</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      L2 means plan-shaped prompting: exact paths, anchored edits, one tool call per
+      step, an explicit success criterion, and bounded scope. This run does not
+      re-derive the L0&rarr;L2 complexity ladder; it holds specificity constant and
+      varies only the model.
+    </p>
+  </section>
+
+  <section>
+    <h2>Results</h2>
+    <p class="section-note">Raw, as graded</p>
+
+    <div class="scroll">
+      <table>
+        <caption>L2 pass rate and wall-clock, all tasks combined</caption>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th class="num">Pass</th>
+            <th class="num">Median</th>
+            <th class="num">Mean</th>
+            <th class="num">Max</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="model">gemma4:26b</td>
+            <td class="num"><span class="score full">9/9</span></td>
+            <td class="num">6.4s</td><td class="num">10.2s</td><td class="num">27.5s</td>
+            <td><span class="pill clean">unconfounded</span></td>
+          </tr>
+          <tr>
+            <td class="model">gemma4:31b</td>
+            <td class="num"><span class="score full">9/9</span></td>
+            <td class="num">19.0s</td><td class="num">18.5s</td><td class="num">31.3s</td>
+            <td><span class="pill clean">unconfounded</span></td>
+          </tr>
+          <tr>
+            <td class="model">qwen2.5-coder:14b</td>
+            <td class="num"><span class="score part">7/9</span></td>
+            <td class="num">2.1s</td><td class="num">4.5s</td><td class="num">9.9s</td>
+            <td><span class="pill conf">confounded</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <caption>Per-task breakdown</caption>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th class="num">alias-add</th>
+            <th class="num">config-value-change</th>
+            <th class="num">function-add</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="model">gemma4:26b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
+          <tr><td class="model">gemma4:31b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
+          <tr><td class="model">qwen2.5-coder:14b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score part">1/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      Both failures land in a single cell class: <code>config-value-change</code> &times;
+      <code>qwen2.5-coder:14b</code>, trials 1 and 2. Zero timeouts and zero non-zero
+      return codes across the matrix.
+    </p>
+  </section>
+
+  <section>
+    <h2>The finding</h2>
+    <p class="section-note">Why 7/9 is not a capability result</p>
+
+    <div class="verdict">
+      <span class="label">Reviewer&rsquo;s attention</span>
+      <p>
+        <code>qwen2.5-coder:14b</code> produced the <strong>correct edit in all three
+        trials</strong>. It received credit in one. The two failures are tool-call
+        emission format, not wrong answers.
+      </p>
+    </div>
+
+    <p class="legend">
+      Below are the retained traces for the passing and failing trials of the same cell.
+      The <span class="marker">green</span> lines are the harness dispatching a tool;
+      their <span class="missing">absence</span> is the defect. The
+      <span class="payload">highlighted</span> payload is identical across both.
+    </p>
+
+    <div class="traces">
+      <div class="trace is-pass">
+        <div class="trace-head">
+          <span class="who">trial 3</span>
+          <span class="pill clean">passed &middot; 1.7s</span>
+        </div>
+<pre><span class="marker">[Model requests tool call: patch_file]</span>
+Arguments: {
+  <span class="payload">"tool": "patch_file",
+  "path": "config/settings.ini",
+  "target_content": "debug = false",
+  "replacement_content": "debug = true"</span>
+}
+
+<span class="marker">[Tool Output]</span>
+Successfully patched config/settings.ini.
+
+--- Output ---
+[Tool completed: patch_file]
+Successfully patched config/settings.ini.</pre>
+      </div>
+
+      <div class="trace is-fail">
+        <div class="trace-head">
+          <span class="who">trials 1 &amp; 2</span>
+          <span class="pill conf">failed &middot; 9.5s / 2.2s</span>
+        </div>
+<pre><span class="missing">(no tool-call marker)</span>
+
+--- Output ---
+```json
+{
+  <span class="payload">"tool": "patch_file",
+  "path": "config/settings.ini",
+  "target_content": "debug = false",
+  "replacement_content": "debug = true"</span>
+}
+```
+```json
+{ "tool": "grep_search",
+  "pattern": "^debug = true$" }
+```
+
+<span class="missing">(no tool output &mdash; nothing executed)</span></pre>
+      </div>
+    </div>
+
+    <p>
+      The <code>tool</code>, <code>path</code>, <code>target_content</code> and
+      <code>replacement_content</code> are byte-identical between the passing and
+      failing trials. The difference is that trial 3&rsquo;s emission was parsed as a
+      tool call and dispatched, while trials 1 and 2 emitted the same JSON as fenced
+      prose, which the harness printed instead of executing. No edit occurred, so the
+      postcondition correctly reported the pattern missing.
+    </p>
+    <p>
+      The failing trials also emit <em>two</em> fenced blocks in one response &mdash; the
+      edit plus a self-verification <code>grep_search</code> &mdash; which is the shape
+      that fails to parse. The passing trial emitted a single call. The behaviour is
+      intermittent for this model on this fixture.
+    </p>
+
+    <h3>Grading is correct; the defect is upstream of it</h3>
+    <p>
+      The grader did exactly what it should: it read the artifact, found no change, and
+      failed the cell. Nothing about the scoring needs revision. What the raw number
+      cannot express is <em>why</em> the artifact was unchanged, and that distinction is
+      the whole point of retaining traces.
+    </p>
+    <p>
+      This belongs to the same family as a known historical confound in this project, in
+      which a large batch of negative results could not be distinguished from harness
+      truncation because no output had been kept. Those were pre-existing; this is a
+      <strong>new instance under the current harness</strong>, which is why it is filed
+      as a catalogued harness failure rather than folded into a model ranking.
+    </p>
+
+    <h3>Honest restatement of the third row</h3>
+    <p>
+      <strong>Do not cite &ldquo;<code>qwen2.5-coder:14b</code> scores 7/9 at L2&rdquo;
+      as a capability finding.</strong> The supportable statement is: its answers were
+      correct 3/3, and its tool-call emission parsed 1/3.
+    </p>
+  </section>
+
+  <section>
+    <h2>Instrumentation note</h2>
+    <p class="section-note">Why this finding was visible at all</p>
+    <p>
+      Until immediately before this run, the eval runner captured the model
+      subprocess&rsquo;s stdout and stderr and then discarded both after grading,
+      persisting only pass/fail, a detail string, a return code and wall-clock time. Under
+      that runner, this matrix would have produced a clean-looking
+      &ldquo;<code>qwen2.5-coder:14b</code>: 7/9&rdquo; and no reviewer could have
+      distinguished a wrong answer from an unparsed tool call.
+    </p>
+    <p>
+      Per-cell trace retention was added first, and gated before any scoring: traces are
+      written for passes, graded failures <em>and</em> timeouts, the write fails closed so
+      an untraced cell cannot be silently recorded, and the option is off by default so
+      unaltered runs behave exactly as before. This is the first run scored under it, and
+      it immediately caught a confound. That is the argument for the requirement,
+      demonstrated rather than asserted.
+    </p>
+  </section>
+
+  <section>
+    <h2>What is and is not established</h2>
+    <p class="section-note">Claim boundary</p>
+
+    <div class="ledger">
+      <div class="ledger-row yes">
+        <span class="mark">&#10003;</span>
+        <div>
+          <p><code>gemma4:26b</code> and <code>gemma4:31b</code> each cleared every L2 cell, 9/9.</p>
+          <p class="sub">Unconfounded. Both named seats passed all three fixtures at three trials.</p>
+        </div>
+      </div>
+      <div class="ledger-row yes">
+        <span class="mark">&#10003;</span>
+        <div>
+          <p>All three models held 100% GPU residency for the duration.</p>
+          <p class="sub">Sampled every 20 seconds throughout; no CPU spill in any sample.</p>
+        </div>
+      </div>
+      <div class="ledger-row yes">
+        <span class="mark">&#10003;</span>
+        <div>
+          <p>Every cell has a retained trace, including both failures.</p>
+          <p class="sub">27 cells, 27 traces, each carrying raw stdout/stderr, argv, prompt, revision and grade outcome.</p>
+        </div>
+      </div>
+      <div class="ledger-row no">
+        <span class="mark">&times;</span>
+        <div>
+          <p>No claim is registered from this run.</p>
+          <p class="sub">The governing manifest requires an independent re-derive by a distinct user identity &mdash; of postcondition totals, trace completeness, model tags, residency and machine provenance &mdash; before any result is registered. That has not happened. The author of a run should not be its verifier.</p>
+        </div>
+      </div>
+      <div class="ledger-row no">
+        <span class="mark">&times;</span>
+        <div>
+          <p>The 14b floor-model row is not usable as a capability measurement.</p>
+          <p class="sub">Confounded by the emission-format defect described above.</p>
+        </div>
+      </div>
+      <div class="ledger-row no">
+        <span class="mark">&times;</span>
+        <div>
+          <p>Wall-clock figures are not comparable to earlier throughput packets.</p>
+          <p class="sub">This run used a 320&nbsp;W power cap; the project&rsquo;s residency-verified decode rates were measured at 220&nbsp;W, and dense models scale strongly with power. Pass rates are unaffected &mdash; grading is on deterministic postconditions, not timing.</p>
+        </div>
+      </div>
+      <div class="ledger-row no">
+        <span class="mark">&times;</span>
+        <div>
+          <p>This does not reopen the complexity-ladder or harness-regression questions.</p>
+          <p class="sub">Specificity was held constant at L2 throughout. The finding is one cell-class defect, not a ladder result.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Reproduction</h2>
+    <p class="section-note">For the verifying reviewer</p>
+
+    <p>
+      Run from the repository root on the <code>desktop</code> host. The matrix is
+      resumable &mdash; completed cells are skipped, so an interrupted sweep restarts with
+      the same command.
+    </p>
+
+<pre class="cmd">OPERATOR_MACHINE=desktop python3 evals/local_lane_ladder/runner.py \
+  --models gemma4:26b gemma4:31b qwen2.5-coder:14b \
+  --tasks alias-add config-value-change function-add \
+  --levels L2 \
+  --trials 3 \
+  --output   .../e1-gold-pack/RESULTS.md \
+  --state    .../e1-gold-pack/state.json \
+  --trace-dir .../e1-gold-pack/traces</pre>
+
+    <p>Completeness check &mdash; a short count means the matrix is not scoreable:</p>
+<pre class="cmd">ls .../e1-gold-pack/traces/*.json | wc -l   # expect 27</pre>
+
+    <h3>Retained artifacts</h3>
+    <ul>
+      <li><code>traces/</code> &mdash; 27 per-cell JSON traces, one per graded cell</li>
+      <li><code>state.json</code> &mdash; per-cell records with trace paths</li>
+      <li><code>RESULTS.md</code> &mdash; generated pass-rate matrix</li>
+      <li><code>FINDING.md</code> &mdash; the catalogued harness failure described above</li>
+      <li><code>evidence/prerun.txt</code> &mdash; host, revision, GPU, model inventory</li>
+      <li><code>evidence/ollama_ps_samples.log</code> &mdash; residency sampled at 20s intervals</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Open items</h2>
+    <p class="section-note">Recommended next actions</p>
+    <ol>
+      <li>
+        <strong>Independent re-derive by a distinct identity.</strong> Required before any
+        result here is registered as a claim. Everything needed is retained.
+      </li>
+      <li>
+        <strong>Decide the harness&rsquo;s position on fenced-JSON tool emissions.</strong>
+        Either accept them, or reject them with a distinguishable error so a parse failure
+        can never again look like a wrong answer. The silent-print behaviour is the actual
+        defect; both alternatives are preferable.
+      </li>
+      <li>
+        <strong>Re-run the affected cell class at higher n</strong> to measure the
+        emission-format rate, if the 14b floor seat matters to a downstream decision.
+        Outside the present scope.
+      </li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>
+      Prepared by the operator&rsquo;s implementer seat on the desktop host. All figures
+      are drawn from the retained run artifacts rather than restated from narration.
+      Wall-clock values are exact; the pass/fail column is the only graded quantity.
+      This report is evidence for review, not a registered claim.
+    </p>
+  </footer>
+
+</div>

@@ -56,6 +56,7 @@ full historical audit — plenty of one-off sessions touched this repo before
 | `claude-01Hzi1zP` | `~/operator-control-plane` | `front-e0-desktop-pack-review`, `LOCAL_LANE_CONTRACT_SPEC.md` power-cap fix (continuing `claude-consultant`'s role) | 2026-08-11 |
 | `claude-01Q3rn3n` | `~/operator-control-plane` | Front G, pa-evidence Gate 1 adapter | 2026-08-10 |
 | `claude-019KSo7K` | `~/Alignerr` (cross-repo, via SSH to desktop) | Front D dashboard verification, Front E0 desktop pack, Q1/Q4 ruling implementation | 2026-08-11 |
+| `claude-01FSgUqu` | `~/.dotfiles` on **desktop** (cross-repo: this repo + `~/Python`) | Runner trace retention (`--trace-dir`), E1 27-cell desktop matrix + `FINDING.md`, gemma4:31b throughput correction across GOLD_STANDARD/Phoenix docs, SEAT-COST-001 cross-check | 2026-08-12 |
 
 Registering a session-derived id as a harness (`.operator/harnesses/claude-<id>.yaml`)
 is required only if something needs to `--assign`/`--review` to it — `--by` needs no
