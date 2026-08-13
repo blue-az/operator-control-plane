@@ -2,7 +2,7 @@
 
 **Run:** desktop, 2026-08-13, rev `8f6ccca`, 63/63 cells, 63/63 traces, zero
 CPU-spill samples, all seven models 100% GPU at `num_ctx 16384`.
-**Not UID-verified. No claim registered.**
+**UID-verified 2026-08-13** by uid 971 (`operator-builder`) on the z13 ledger (`uid_isolated`, enforced). Claims: `claim-0018` (six-pack integrity), `claim-0015` (62/63 totals). Re-derive artifacts: `REDERIVE.md` / `.operator/evidence/front-e1-gold-pack/rederive/e4-sampled.json`.
 
 First epoch with every known variable controlled: uniform context, uniform
 system prompt, realistic sampling, fixed extractor.

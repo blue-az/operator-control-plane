@@ -1,7 +1,7 @@
 # E1 finding — the two qwen failures are a harness confound, not capability
 
 **Run:** desktop, 2026-08-12, rev `90e91d7`, 27/27 cells, 27/27 traces retained,
-100% GPU residency for all three models. **Not yet UID-verified.**
+100% GPU residency for all three models. **UID-verified 2026-08-13** by uid 971 (`operator-builder`) on the z13 ledger (`uid_isolated`, enforced). Claims: `claim-0018` (six-pack integrity), `claim-0017` (raw 25/27 freeze — not a capability ranking; confounds in this FINDING stand).
 
 ## Headline table (raw, as graded)
 
@@ -95,11 +95,13 @@ rejects them with a distinguishable error, so a parse failure never looks like a
 wrong answer), or a re-run of the `config-value-change` × 14b cell at higher n to
 measure the emission-format rate. Neither is in E1's scope.
 
-**No claim is registered from this run.** MANIFEST requires a distinct-UID
-re-derive of postcondition totals, trace completeness, model tags, residency and
-machine provenance first. The traces, `state.json`, `RESULTS.md`, `evidence/`
-(prerun provenance + 20s-interval `ollama ps` samples) are retained for exactly
-that.
+**Claims registered and UID-verified (2026-08-13).** Distinct-UID re-derive of
+postcondition totals, trace completeness, model tags, residency and machine
+provenance: `claim-0018` + `claim-0017` on task `front-e1-gold-pack`, verified
+by uid 971 (`operator-builder`) under `uid_isolated` / enforced. Artifacts:
+`REDERIVE.md`, `.operator/evidence/front-e1-gold-pack/rederive/`.
+Capability ranking from the confounded 7/9 row remains disallowed; freeze
+integrity only.
 
 ## External-review report
 

@@ -1,0 +1,419 @@
+{
+  "checked_at_utc": "2026-08-13T16:54:22.646944+00:00",
+  "checker": {
+    "host": "z13",
+    "uid": 971,
+    "user": "operator-builder"
+  },
+  "ok": true,
+  "packs": {
+    "e1-gold-pack": {
+      "check_failures": [],
+      "git_revs": {
+        "90e91d732403c525d6ecb9a6c639bd2685976f87": 27
+      },
+      "machines": {
+        "desktop": 27
+      },
+      "model_totals": {
+        "gemma4:26b": {
+          "n": 9,
+          "pass": 9
+        },
+        "gemma4:31b": {
+          "n": 9,
+          "pass": 9
+        },
+        "qwen2.5-coder:14b": {
+          "n": 9,
+          "pass": 7
+        }
+      },
+      "n_results": 27,
+      "ok": true,
+      "ps_sha256": "243664dc804cffc128d852151291dcac42c0b3c3942cf7022bfb19149e758a21",
+      "results_md_sha256": "fb639946649990c169a11a570167beba95e95d197949e46fed30fdc949b4b015",
+      "state_sha256": "4e6f6bbfe85d100ccd9d03adef4a254d25059a49668c387049ba78f1090aac5a",
+      "total_pass": 25
+    },
+    "e1x-27b": {
+      "check_failures": [],
+      "git_revs": {
+        "8041b19e039ac20dec1f301064844565db964f01": 18
+      },
+      "machines": {
+        "desktop": 18
+      },
+      "model_totals": {
+        "gemma3:27b": {
+          "n": 9,
+          "pass": 5
+        },
+        "qwen3.6:27b": {
+          "n": 9,
+          "pass": 9
+        }
+      },
+      "n_results": 18,
+      "ok": true,
+      "ps_sha256": "b81cbe192c24e1e1cb88224cba292f41561b89576521bde7bf29ee82681bc2dd",
+      "results_md_sha256": "91f6e8d0fd4d13255fc53d5c353e4bb55415f5cd9a1eb3068bcead76d210ca5d",
+      "state_sha256": "e3c35c7154ca39d3ef79d2c4051afb790df5d8c3858d451a39fb5ae0c4cde857",
+      "total_pass": 14
+    },
+    "e2-postfix-vl": {
+      "check_failures": [],
+      "git_revs": {
+        "5be7db50d97de45b1a2860995a2d411d311fdb9c": 18
+      },
+      "machines": {
+        "desktop": 18
+      },
+      "model_totals": {
+        "gemma4:26b": {
+          "n": 9,
+          "pass": 8
+        },
+        "qwen3-vl:30b": {
+          "n": 9,
+          "pass": 9
+        }
+      },
+      "n_results": 18,
+      "ok": true,
+      "ps_sha256": "ee6aa5b5c2221fa02357051e3c20ca11c6027c00c865f37aa528781fd312a682",
+      "results_md_sha256": "797f23ef8b25850c94c049741e8b1013099d3ef411977324ae03e96a80c5753a",
+      "state_sha256": "8b5fbc50bcca8a9edbdbbbde4093a14501e489b9858b65155f547331a6d5406b",
+      "total_pass": 17
+    },
+    "e3-controlled": {
+      "check_failures": [],
+      "git_revs": {
+        "8f6ccca74945cc7907b924d40b6974e5de5582eb": 63
+      },
+      "machines": {
+        "desktop": 63
+      },
+      "model_totals": {
+        "gemma3:27b": {
+          "n": 9,
+          "pass": 9
+        },
+        "gemma4:26b": {
+          "n": 9,
+          "pass": 6
+        },
+        "gemma4:31b": {
+          "n": 9,
+          "pass": 9
+        },
+        "qwen2.5-coder:14b": {
+          "n": 9,
+          "pass": 9
+        },
+        "qwen3-vl:30b": {
+          "n": 9,
+          "pass": 9
+        },
+        "qwen3.6:27b": {
+          "n": 9,
+          "pass": 9
+        },
+        "qwen3:32b": {
+          "n": 9,
+          "pass": 9
+        }
+      },
+      "n_results": 63,
+      "ok": true,
+      "ps_sha256": "db33f4d3968d248fb5f0585eec5c0b1ff236d4df538c8d43e7ccb0b2a742d40a",
+      "results_md_sha256": "f23d3f3c912db686384677f4a91c8f0b2679979a703ae2a8dc9fae1e6909138c",
+      "state_sha256": "f2094f3e578f49a29d1b1822ed4319507f028a9e1bb0b5715ce9462b1735129c",
+      "total_pass": 60
+    },
+    "e4-sampled": {
+      "check_failures": [],
+      "git_revs": {
+        "8f6ccca74945cc7907b924d40b6974e5de5582eb": 63
+      },
+      "machines": {
+        "desktop": 63
+      },
+      "model_totals": {
+        "gemma3:27b": {
+          "n": 9,
+          "pass": 9
+        },
+        "gemma4:26b": {
+          "n": 9,
+          "pass": 8
+        },
+        "gemma4:31b": {
+          "n": 9,
+          "pass": 9
+        },
+        "qwen2.5-coder:14b": {
+          "n": 9,
+          "pass": 9
+        },
+        "qwen3-vl:30b": {
+          "n": 9,
+          "pass": 9
+        },
+        "qwen3.6:27b": {
+          "n": 9,
+          "pass": 9
+        },
+        "qwen3:32b": {
+          "n": 9,
+          "pass": 9
+        }
+      },
+      "n_results": 63,
+      "ok": true,
+      "ps_sha256": "49415f04fca148cfabdfb98960f29faff828fc25375f56129a697cdd9b1dca62",
+      "results_md_sha256": "b185a8e1188963ba3afc403c410a4dc1e44695bd45cac160b4e975b8fdddbcff",
+      "state_sha256": "61e62003c622a2a5ce6eade6aee6b7e55395f34e678417a4ae406b6565aa6f56",
+      "total_pass": 62
+    },
+    "e5-floor": {
+      "check_failures": [],
+      "git_revs": {
+        "1ef8364a459e0ab5ae409566eff6c49bbdc1a9ff": 90
+      },
+      "machines": {
+        "desktop": 90
+      },
+      "model_totals": {
+        "gemma4:12b": {
+          "n": 18,
+          "pass": 17
+        },
+        "gemma4:e4b": {
+          "n": 18,
+          "pass": 13
+        },
+        "granite4:latest": {
+          "n": 18,
+          "pass": 8
+        },
+        "llama3.1:8b": {
+          "n": 18,
+          "pass": 9
+        },
+        "qwen2.5-coder:14b": {
+          "n": 18,
+          "pass": 18
+        }
+      },
+      "n_results": 90,
+      "ok": true,
+      "ps_sha256": "421570d9e2bba5fd23f59336cd72eb94d82d7a4812451a2657f9ccd34b815981",
+      "results_md_sha256": "e222a6686193f040c5f7d64dc41547e811332817e4b24ccde878a143d56c8832",
+      "state_sha256": "b8b2e55a6aec16840fbaa8aed601c84edce4b52a6cf7341487921cb11607d4da",
+      "total_pass": 65
+    },
+    "e6-think-ab/off": {
+      "check_failures": [],
+      "git_revs": {
+        "31220d27b58389c9d6eb605551f11e172405dadb": 72
+      },
+      "machines": {
+        "desktop": 72
+      },
+      "model_totals": {
+        "gemma4:26b": {
+          "n": 18,
+          "pass": 18
+        },
+        "gemma4:31b": {
+          "n": 18,
+          "pass": 18
+        },
+        "qwen3.6:27b": {
+          "n": 18,
+          "pass": 18
+        },
+        "qwen3:32b": {
+          "n": 18,
+          "pass": 18
+        }
+      },
+      "n_results": 72,
+      "ok": true,
+      "ps_sha256": "d28a05754a4c0dffa75f87c961938efd69ec29b1c2647c8e418b6bbac750c9a5",
+      "results_md_sha256": "fa8be6b81164ceac5bd3f2a7d5541bb182afb99814e9e69c09b8b55fdafe0339",
+      "state_sha256": "691298292d45a1f0b53e4601053e442d2625818d13f83cf7ffc6b185f4d43e0e",
+      "total_pass": 72
+    },
+    "e6-think-ab/on": {
+      "check_failures": [],
+      "git_revs": {
+        "31220d27b58389c9d6eb605551f11e172405dadb": 72
+      },
+      "machines": {
+        "desktop": 72
+      },
+      "model_totals": {
+        "gemma4:26b": {
+          "n": 18,
+          "pass": 18
+        },
+        "gemma4:31b": {
+          "n": 18,
+          "pass": 18
+        },
+        "qwen3.6:27b": {
+          "n": 18,
+          "pass": 18
+        },
+        "qwen3:32b": {
+          "n": 18,
+          "pass": 18
+        }
+      },
+      "n_results": 72,
+      "ok": true,
+      "ps_sha256": "d28a05754a4c0dffa75f87c961938efd69ec29b1c2647c8e418b6bbac750c9a5",
+      "results_md_sha256": "fa8be6b81164ceac5bd3f2a7d5541bb182afb99814e9e69c09b8b55fdafe0339",
+      "state_sha256": "32ba40fc265eaea9d1554ab8327dc1357b620df8db197664501d788eb5e077ba",
+      "total_pass": 72
+    },
+    "e7-unused-fixtures": {
+      "check_failures": [],
+      "git_revs": {
+        "118fdca6373c4df166d3002da502e129ad299dba": 126
+      },
+      "machines": {
+        "desktop": 126
+      },
+      "model_totals": {
+        "gemma3:27b": {
+          "n": 18,
+          "pass": 18
+        },
+        "gemma4:26b": {
+          "n": 18,
+          "pass": 18
+        },
+        "gemma4:31b": {
+          "n": 18,
+          "pass": 18
+        },
+        "qwen2.5-coder:14b": {
+          "n": 18,
+          "pass": 18
+        },
+        "qwen3-vl:30b": {
+          "n": 18,
+          "pass": 18
+        },
+        "qwen3.6:27b": {
+          "n": 18,
+          "pass": 18
+        },
+        "qwen3:32b": {
+          "n": 18,
+          "pass": 18
+        }
+      },
+      "n_results": 126,
+      "ok": true,
+      "ps_sha256": "150bc2fd4c694532ab574960f01b9250462ef0f938d029e546898d8c5c1bf1b8",
+      "results_md_sha256": "e41a6d3f3f52cf4c8670f82ea3adc9c36558bca3967a9fa2753571662afbc220",
+      "state_sha256": "b4a2ac8cda1866645eef28db5a72d12d7015adb1dbf1ed6915066cb28f264eba",
+      "total_pass": 126
+    },
+    "e8-ceiling": {
+      "check_failures": [],
+      "git_revs": {
+        "abb8c7eadf8663a93cfb5fbf99fbcc7f99327357": 210
+      },
+      "machines": {
+        "desktop": 210
+      },
+      "model_totals": {
+        "gemma3:27b": {
+          "n": 30,
+          "pass": 0
+        },
+        "gemma4:26b": {
+          "n": 30,
+          "pass": 18
+        },
+        "gemma4:31b": {
+          "n": 30,
+          "pass": 7
+        },
+        "qwen2.5-coder:14b": {
+          "n": 30,
+          "pass": 4
+        },
+        "qwen3-vl:30b": {
+          "n": 30,
+          "pass": 10
+        },
+        "qwen3.6:27b": {
+          "n": 30,
+          "pass": 7
+        },
+        "qwen3:32b": {
+          "n": 30,
+          "pass": 9
+        }
+      },
+      "n_results": 210,
+      "ok": true,
+      "ps_sha256": "ab20d4b0cbf24e93c5f78e36d1f4f3f1c5b85621c4e1aabd5fa6d28ae804ec54",
+      "results_md_sha256": "3fbc2ffb5d6bbf0adad46d7c8da3574633c0d9478333e203f9c6304892749958",
+      "state_sha256": "a17ee4b32e9a87cf757d649a3113a5f536723951f71caec2b7c2c005c9304d98",
+      "total_pass": 55
+    },
+    "e9-ceiling-continued": {
+      "check_failures": [],
+      "git_revs": {
+        "422e8eec8aaedbf5955fce25d067a49303312228": 210
+      },
+      "machines": {
+        "desktop": 210
+      },
+      "model_totals": {
+        "gemma3:27b": {
+          "n": 30,
+          "pass": 12
+        },
+        "gemma4:26b": {
+          "n": 30,
+          "pass": 24
+        },
+        "gemma4:31b": {
+          "n": 30,
+          "pass": 24
+        },
+        "qwen2.5-coder:14b": {
+          "n": 30,
+          "pass": 14
+        },
+        "qwen3-vl:30b": {
+          "n": 30,
+          "pass": 16
+        },
+        "qwen3.6:27b": {
+          "n": 30,
+          "pass": 19
+        },
+        "qwen3:32b": {
+          "n": 30,
+          "pass": 13
+        }
+      },
+      "n_results": 210,
+      "ok": true,
+      "ps_sha256": "b9d59fb2b5c0d7d7f9ec8d5705ea7f1171cfca7c6696fd49453a2c13752e78e1",
+      "results_md_sha256": "5f7123328cf93688f1b344fd5ee91341669a20ecd78036ca2abe2f1863c88971",
+      "state_sha256": "710116134cbe5a5f52cb42b9e292222084fcb0e6db55801107383c14d1f87100",
+      "total_pass": 122
+    }
+  },
+  "span": "e1-e9 (+e1x; e6 as on/off)"
+}

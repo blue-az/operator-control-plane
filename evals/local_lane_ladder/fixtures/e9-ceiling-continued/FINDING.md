@@ -3,7 +3,7 @@
 **Run:** desktop, 2026-08-13, rev `422e8ee`, 210/210 cells, 210/210 traces, zero
 CPU spill, n=6, `num_ctx 16384 · temperature 0.8 · think off`, uniform system
 prompt, R6 scope enforced on every fixture.
-**Not UID-verified. No claim registered.**
+**UID-verified 2026-08-13** by uid 971 (`operator-builder`) on the z13 ledger (`uid_isolated`). Claims: `claim-0019` (e1–e9 span), `claim-0020` (122/210 ranking). Aggregate: `evals/local_lane_ladder/REDERIVE_E1_E9.md`.
 
 Corrects `e8-ceiling`, where `OPR-RUL-008` capped every cell at one state change.
 
