@@ -68,10 +68,22 @@ than incidental:
 assertion. `e1`–`e8` remain harness records — `e8`'s claim is scoped to freeze
 integrity precisely so it cannot be mistaken for a ranking.
 
-**Desktop ledger note:** these claims live on **z13's** ledger. The desktop
-ledger still shows `front-e1-gold-pack` with no claims, because Front H forbids
-merging the two. Anyone reading the desktop ledger alone will not see the
-verification — check z13, or this file.
+**Read the re-derive on disk, not in a ledger.** The verifier committed its own
+artifacts, so they sync by git and are the portable record:
+
+- `evals/local_lane_ladder/REDERIVE_E1_E9.md` — span aggregate, `Verdict: PASS`
+- `fixtures/<pack>/REDERIVE.md` — per-pack, all six `PASS`, `mismatches=0`
+- `rederive_pack.py` / `rederive_e1_e9.py` — the checker, re-runnable by anyone
+
+Independent totals match the authored ones on every pack: `e1` 25/27, `e1x`
+14/18, `e2` 17/18, `e3` 60/63, `e4` 62/63, `e5` 65/90, `e6` 72/72 + 72/72, `e7`
+126/126, `e8` 55/210, `e9` 122/210.
+
+**Desktop ledger note:** the *claims* live on **z13's** ledger, so the desktop
+ledger still shows `front-e1-gold-pack` with no claims — Front H forbids merging
+the two, and that is working as intended rather than a gap. Anyone reading the
+desktop ledger alone will not see the verification; the committed artifacts above
+are the cross-machine record.
 
 ---
 
