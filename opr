@@ -372,10 +372,15 @@ def looks_like_tool_call(text: str) -> bool:
 
 
 class Dispatcher:
-    def __init__(self, govern: bool, govern_cli: str, govern_dir: str):
+    def __init__(
+        self, govern: bool, govern_cli: str, govern_dir: str, json_system_prompt: bool = True
+    ):
         self.govern = govern
         self.govern_cli = govern_cli
         self.govern_dir = govern_dir
+        # Applied to every local model, or to none. Never per-model -- that
+        # asymmetry is what confounded the pre-2026-08-12 comparisons.
+        self.json_system_prompt = json_system_prompt
 
     def _slugify(self, text: str) -> str:
         text = text.lower()
@@ -476,15 +481,21 @@ class Dispatcher:
         payload = {"model": model, "prompt": task, "stream": False}
         if options:
             payload["options"] = dict(options)
-        # NOTE (uncontrolled variable, deliberately left alone): this system
-        # prompt is gated on a substring of the model NAME, so `gemma4:26b`
-        # receives a strict-JSON instruction that `gemma4:31b`, `gemma3:27b`,
-        # `qwen2.5-coder:14b` and others do not. Any cross-model comparison
-        # run through this path is confounded by it, and the confound points
-        # at exactly the emission-format behaviour the eval fixtures grade.
-        # Changing it would move every number already on record, so it is a
-        # policy decision for the operator, not a drive-by edit.
-        if "no_think" in model or "26b" in model:
+        # Every local model gets the same JSON-discipline instruction.
+        #
+        # This used to be gated on a substring of the model NAME
+        # (`"no_think" in model or "26b" in model`), so `gemma4:26b` received
+        # an instruction that `gemma4:31b`, `gemma3:27b`, `qwen2.5-coder:14b`
+        # and every other comparator did not -- and it speaks directly to the
+        # emission-format behaviour the eval fixtures grade. Any cross-model
+        # comparison run before 2026-08-12 is confounded by it.
+        #
+        # Applied uniformly rather than removed: production use wants every
+        # model given its best chance at parseable output, so equal-and-on is
+        # both fair and closer to real use than equal-and-off. Set
+        # `local.json_system_prompt: false` in config to measure raw protocol
+        # adherence without it.
+        if self.json_system_prompt:
             payload["system"] = "Respond with strict JSON only. No thinking preamble. No markdown."
         try:
             response = requests.post(url, json=payload, timeout=request_timeout)
@@ -1312,6 +1323,7 @@ def main():
         govern=govern_enabled,
         govern_cli=operator_bin,
         govern_dir=ledger_dir,
+        json_system_prompt=config.get("local", {}).get("json_system_prompt", True),
     )
 
     # Establish model choice

@@ -317,7 +317,19 @@ def run_trial(
     ]
     # Recorded in the trace's argv, so a reader can see exactly which sampling
     # and context settings produced a cell rather than inferring them.
-    argv.extend(sampling or [])
+    #
+    # --seed is offset by the trial index. At temperature 0 a fixed seed makes
+    # every trial in a cell byte-identical, which turns n=3 into n=1 reported
+    # three times -- reproducible but blind to reliability. Offsetting keeps
+    # each trial independently reproducible while still sampling the model's
+    # behaviour across three draws.
+    for i, token in enumerate(sampling or []):
+        if token == "--seed":
+            argv.extend(["--seed", str(int(sampling[i + 1]) + trial_idx)])
+        elif i and (sampling or [])[i - 1] == "--seed":
+            continue
+        else:
+            argv.append(token)
     start = time.monotonic()
     try:
         if use_ledger:
