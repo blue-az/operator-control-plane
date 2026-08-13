@@ -977,12 +977,18 @@ def run_agent_loop(
     initial_context: str = "",
     glossary: str = "",
     continue_steps: int = 0,
+    on_repeat: str = "stop",
+    max_repeat_feedback: int = 3,
 ) -> str:
     accumulated_context = initial_context
     task_input = initial_prompt
     max_turns = 10
     turn = 0
     seen_tool_calls = set()
+    # EXPERIMENTAL: --on-repeat feedback needs the prior result to hand back,
+    # so retain each call's output rather than only its fingerprint.
+    prior_tool_output: dict[str, str] = {}
+    repeat_count = 0
     terminal_tools = {"write_file", "patch_file", "run_command"}
     # OPR-RUL-011: continuation is opt-in and budgeted. continue_steps == 0
     # preserves OPR-RUL-008 exactly (exit on first successful state change).
@@ -1051,6 +1057,45 @@ def run_agent_loop(
             # "it re-issued step 1 after finishing step 2" is.
             repeated = tool_call.get("command") or tool_call.get("path") or tool_name
             ran = ", ".join(steps_log) if steps_log else "none"
+
+            if on_repeat == "feedback":
+                # EXPERIMENTAL (OPR-RUL-008 unchanged; opt-in via --on-repeat).
+                #
+                # Repetition is the single largest failure mode measured on this
+                # harness: 32 of 88 failures in e9-ceiling-continued were
+                # repeat-guard stops, and `no_blind_repeat` was the most-violated
+                # trajectory rule at 61 of 210 cells. The open question is whether
+                # those models are genuinely stuck or merely lost the tool result
+                # from context -- a hard stop cannot tell the two apart.
+                #
+                # So instead of ending the run, hand the model back what it
+                # already learned and let it continue. If repetition is a context
+                # problem this recovers; if the model is truly stuck it will
+                # repeat again and the budget below still ends the run, which is
+                # itself the answer.
+                repeat_count += 1
+                if repeat_count > max_repeat_feedback:
+                    return (
+                        f"[Stopped: model repeated tool calls {repeat_count} times "
+                        f"despite being given the prior result each time "
+                        f"(--on-repeat feedback, budget {max_repeat_feedback}). "
+                        f"Last repeat '{tool_name}: {repeated}'. "
+                        f"State-changing steps that did run: {ran}.]"
+                    )
+                prior = prior_tool_output.get(tool_fingerprint, "(output not retained)")
+                print(
+                    f"\n[Repeat fed back: '{tool_name}: {repeated}' was already run "
+                    f"({repeat_count}/{max_repeat_feedback}); returning its prior result]"
+                )
+                accumulated_context += (
+                    f"\n--- Already ran: {tool_name} ---\n"
+                    f"You have already run this exact call. Its result was:\n{prior}\n"
+                    f"Do not run it again. Continue with the next step of the task.\n"
+                    f"---------------------------\n"
+                )
+                turn += 1
+                continue
+
             return (
                 f"[Stopped: model repeated an already-handled tool call "
                 f"'{tool_name}: {repeated}'. State-changing steps that did run: {ran}.]"
@@ -1065,6 +1110,7 @@ def run_agent_loop(
         )
 
         print(f"\n[Tool Output]\n{tool_output}\n")
+        prior_tool_output[tool_fingerprint] = tool_output
 
         if tool_name in terminal_tools:
             # A failed state change always stops the loop — that is exactly
@@ -1224,6 +1270,30 @@ def main():
         type=int,
         default=None,
         help="Sampling seed for local models. Pair with --temperature 0 for repeatable runs.",
+    )
+    parser.add_argument(
+        "--on-repeat",
+        choices=["stop", "feedback"],
+        default="stop",
+        help=(
+            "EXPERIMENTAL. What to do when the model re-issues an identical tool "
+            "call. 'stop' (default) ends the run, preserving OPR-RUL-008 behaviour "
+            "and every measurement taken to date. 'feedback' hands the prior "
+            "result back and lets the loop continue, which tests whether "
+            "repetition is a model being stuck or merely losing the tool output "
+            "from context -- the largest single failure mode measured on this "
+            "harness (32 of 88 failures in e9-ceiling-continued)."
+        ),
+    )
+    parser.add_argument(
+        "--max-repeat-feedback",
+        type=int,
+        default=3,
+        help=(
+            "With --on-repeat feedback, how many repeats to absorb before "
+            "stopping anyway. Bounds the experiment so a genuinely stuck model "
+            "still terminates."
+        ),
     )
     parser.add_argument(
         "--think",
@@ -1431,6 +1501,8 @@ def main():
             initial_context=context_str,
             glossary=bn_glossary,
             continue_steps=args.continue_steps,
+            on_repeat=args.on_repeat,
+            max_repeat_feedback=args.max_repeat_feedback,
         )
 
         outcome = "useful"
@@ -1844,6 +1916,8 @@ def main():
                 initial_context=accumulated_context,
                 glossary=bn_glossary,
                 continue_steps=args.continue_steps,
+            on_repeat=args.on_repeat,
+            max_repeat_feedback=args.max_repeat_feedback,
             )
 
             print("\n--- Output ---")
