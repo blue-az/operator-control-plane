@@ -15,6 +15,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 import unittest
+import unittest.mock
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -100,6 +101,50 @@ class ToolExtractionTest(unittest.TestCase):
         self.assertIsNone(extract(truncated))
         self.assertTrue(opr.looks_like_tool_call(truncated))
         self.assertFalse(opr.looks_like_tool_call("Just an ordinary answer."))
+
+
+class DispatchOptionsTest(unittest.TestCase):
+    """Sampling/context options must reach the Ollama request.
+
+    They were absent entirely before: no temperature (so every cell was a
+    fresh stochastic draw) and no num_ctx (so context came from each model's
+    Modelfile, which differs per model and pushed qwen3:32b into CPU spill at
+    its 32768 default). Both silently confound any comparison, so the wiring
+    is worth asserting rather than assuming.
+    """
+
+    def _payload(self, options):
+        captured = {}
+
+        class _Resp:
+            @staticmethod
+            def raise_for_status():
+                return None
+
+            @staticmethod
+            def json():
+                return {"response": "ok"}
+
+        def fake_post(url, json=None, timeout=None):
+            captured.update(json)
+            return _Resp()
+
+        d = opr.Dispatcher(govern=False, govern_cli="operator", govern_dir=".")
+        with unittest.mock.patch.object(opr.requests, "post", side_effect=fake_post):
+            d._dispatch_ollama("test-model", "prompt", "http://x", 60, options)
+        return captured
+
+    def test_options_are_forwarded(self) -> None:
+        payload = self._payload({"num_ctx": 24576, "temperature": 0, "seed": 42})
+        self.assertEqual(
+            payload["options"], {"num_ctx": 24576, "temperature": 0, "seed": 42}
+        )
+
+    def test_absent_options_key_when_unset(self) -> None:
+        """Omitting the key entirely preserves the previous behaviour exactly,
+        so existing runs are not silently changed by this feature landing."""
+        self.assertNotIn("options", self._payload(None))
+        self.assertNotIn("options", self._payload({}))
 
 
 if __name__ == "__main__":
