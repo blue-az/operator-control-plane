@@ -1,0 +1,13 @@
+# E10 pre-run provenance — repeat-guard A/B, full matrix, both arms fresh
+captured_utc: 2026-08-13T17:59:34Z
+git_rev: fe4211b09bc164c3dc0b7b48bad929e39ab68356
+question: does opr's repeat-guard under-measure local models?
+design: 5 fixtures x 7 models x n=6 = 210 cells PER ARM, 420 total.
+        Both arms run fresh and back to back rather than reusing e9 as the
+        stop arm, because cross-invocation drift already produced one false
+        regression in this programme (see e3/e4 notes).
+ordering: feedback arm first, then stop arm. Ordering is not randomised;
+          if the two arms disagree only marginally, ordering is a live
+          alternative explanation and should be stated as such.
+controls: num_ctx 16384, temperature 0.8, think off, uniform system prompt
+variable: --on-repeat feedback vs stop (max-repeat-feedback default 3)

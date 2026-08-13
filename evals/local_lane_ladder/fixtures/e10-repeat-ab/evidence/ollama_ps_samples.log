@@ -1,0 +1,625 @@
+--- 17:59:34Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 18:00:04Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:00:34Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:01:04Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:01:34Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:02:04Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 18:02:34Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:03:04Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:03:35Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 18:04:05Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 18:04:35Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:05:05Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:05:35Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 18:06:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:06:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:07:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:07:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:08:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:08:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:09:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:09:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:10:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:10:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:11:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:11:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:12:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:12:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:13:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:13:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:14:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:14:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      3 minutes from now    
+--- 18:15:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      3 minutes from now    
+--- 18:15:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:16:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:16:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:17:05Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 18:17:35Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 18:18:05Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:18:35Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:19:05Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:19:35Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:20:05Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:20:35Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:21:05Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:21:35Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 18:22:05Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:22:35Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:23:05Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:23:35Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 18:24:05Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 18:24:35Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 18:25:05Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:25:35Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:26:05Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:26:35Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:27:05Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:27:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:28:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:28:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:29:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:29:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:30:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:30:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:31:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:31:35Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:32:05Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:32:36Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:33:06Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:33:36Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:34:06Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:34:36Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:35:06Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:35:36Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:36:06Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:36:36Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:37:06Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:37:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 18:38:06Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 18:38:36Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 18:39:06Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 18:39:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:40:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:40:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:41:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:41:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:42:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:42:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:43:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:43:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:44:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:44:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:45:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:45:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:46:06Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 18:46:36Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 18:47:06Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 18:47:36Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:48:06Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:48:36Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:49:06Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 18:49:36Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:50:06Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:50:36Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:51:06Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:51:36Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:52:06Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 18:52:36Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 18:53:06Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 18:53:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:54:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:54:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:55:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:55:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 18:56:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:56:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:57:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:57:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:58:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:58:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:59:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 18:59:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:00:06Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:00:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:01:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:01:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:02:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:02:36Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:03:06Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:03:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:04:07Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 19:04:37Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 19:05:07Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 19:05:37Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:06:07Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:06:37Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:07:07Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:07:37Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:08:07Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:08:37Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:09:07Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:09:37Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:10:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:10:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:11:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:11:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      3 minutes from now    
+--- 19:12:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:12:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:13:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:13:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:14:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:14:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      3 minutes from now    
+--- 19:15:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:15:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:16:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:16:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:17:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:17:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:18:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:18:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:19:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:19:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:20:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:20:37Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:21:07Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:21:37Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:22:07Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:22:37Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:23:07Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:23:37Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:24:07Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:24:37Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:25:07Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:25:37Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:26:07Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:26:37Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:27:07Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4:31b    6316f0629137    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:27:37Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:28:07Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:28:37Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:29:07Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:29:37Z
+NAME          ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma3:27b    a418f5838eaf    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:30:07Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 19:30:37Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 19:31:07Z
+NAME                 ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB    100% GPU     16384      4 minutes from now    
+--- 19:31:37Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:32:07Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:32:37Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:33:07Z
+NAME           ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6:27b    a50eda8ed977    16 GB    100% GPU     16384      4 minutes from now    
+--- 19:33:37Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:34:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:34:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:35:07Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:35:37Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:36:08Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:36:38Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:37:08Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      3 minutes from now    
+--- 19:37:38Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      3 minutes from now    
+--- 19:38:08Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:38:38Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:39:08Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:39:38Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:40:08Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:40:38Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:41:08Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:41:38Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:42:08Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:42:38Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      4 minutes from now    
+--- 19:43:08Z
+NAME            ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3-vl:30b    eda0be100877    19 GB    100% GPU     16384      3 minutes from now    
+--- 19:43:38Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:44:08Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:44:38Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:45:08Z
+NAME         ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3:32b    030ee887880f    22 GB    100% GPU     16384      4 minutes from now    
