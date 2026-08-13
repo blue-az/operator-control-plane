@@ -567,6 +567,14 @@ def main() -> int:
         help="Pin the sampling seed for every cell. Pair with --temperature 0.",
     )
     parser.add_argument(
+        "--on-repeat", choices=["stop", "feedback"], default=None,
+        help=(
+            "EXPERIMENTAL. Pass through to opr: what to do when a model re-issues "
+            "an identical tool call. Unset keeps opr's default ('stop'), under "
+            "which every pack to date was measured."
+        ),
+    )
+    parser.add_argument(
         "--think", choices=["on", "off", "low", "medium", "high"], default=None,
         help=(
             "Pin reasoning mode for every cell. Unset leaves each model at its own "
@@ -623,6 +631,7 @@ def main() -> int:
         ("--temperature", args.temperature),
         ("--seed", args.seed),
         ("--think", args.think),
+        ("--on-repeat", args.on_repeat),
     ):
         if value is not None:
             sampling.extend([flag, str(value)])

@@ -293,7 +293,7 @@ class TestOprRepeatGuard(unittest.TestCase):
     def tearDown(self) -> None:
         shutil.rmtree(self.workspace)
 
-    def _run(self, responses, continue_steps=4, tool_result=("ok", True)):
+    def _run(self, responses, continue_steps=4, tool_result=("ok", True), **kw):
         dispatcher = _ScriptedDispatcher(responses)
         def fake_exec(tool_call, workspace_root, ledger_dir, usage_id, config):
             self.executed.append(tool_call)
@@ -301,7 +301,7 @@ class TestOprRepeatGuard(unittest.TestCase):
         with mock.patch.object(opr, "execute_model_tool", side_effect=fake_exec):
             out = opr.run_agent_loop(
                 "do the thing", "gemma4:26b", self.workspace, str(self.workspace),
-                "usage-0001", dispatcher, self.config, continue_steps=continue_steps,
+                "usage-0001", dispatcher, self.config, continue_steps=continue_steps, **kw,
             )
         return out, dispatcher
 
@@ -415,3 +415,75 @@ class TestOprRepeatGuard(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestOprRepeatFeedback(unittest.TestCase):
+    """EXPERIMENTAL --on-repeat feedback.
+
+    Repetition is the largest failure mode measured on this harness (32 of 88
+    failures in e9-ceiling-continued, and the most-violated trajectory rule at
+    61 of 210 cells). A hard stop cannot distinguish a model that is genuinely
+    stuck from one that merely lost the tool result from context. This mode
+    hands the result back so the two can be told apart.
+    """
+
+    def setUp(self) -> None:
+        self.workspace = Path(tempfile.mkdtemp()).resolve()
+        self.config = opr.load_config("/nonexistent/opr.yaml")
+        self.config["tools"]["write"] = True
+        self.executed = []
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.workspace)
+
+    def _run(self, responses, **kw):
+        dispatcher = _ScriptedDispatcher(responses)
+        def fake_exec(tool_call, workspace_root, ledger_dir, usage_id, config):
+            self.executed.append(tool_call)
+            return ("file contents here", True)
+        with mock.patch.object(opr, "execute_model_tool", side_effect=fake_exec):
+            out = opr.run_agent_loop(
+                "do the thing", "gemma4:26b", self.workspace, str(self.workspace),
+                "usage-0001", dispatcher, self.config, continue_steps=4, **kw,
+            )
+        return out, dispatcher
+
+    def test_repeat_recovers_when_the_model_moves_on(self):
+        """The case the mode exists for: a model repeats once, is handed the
+        prior result, and then advances. Under 'stop' this run is lost."""
+        out, _ = self._run([
+            _call("read_file", path="a.txt"),
+            _call("read_file", path="a.txt"),      # repeat
+            _call("write_file", path="a.txt", content="x"),
+            _call("task_complete", summary="done"),
+        ], on_repeat="feedback")
+        self.assertIn("Task complete", out)
+        self.assertIn("write_file", [c["tool"] for c in self.executed])
+
+    def test_repeat_is_not_executed_again(self):
+        """Feeding the result back must not re-run the tool -- that would make
+        a repeated run_command run twice."""
+        self._run([
+            _call("read_file", path="a.txt"),
+            _call("read_file", path="a.txt"),
+            _call("task_complete", summary="done"),
+        ], on_repeat="feedback")
+        self.assertEqual(sum(1 for c in self.executed if c["tool"] == "read_file"), 1)
+
+    def test_budget_stops_a_genuinely_stuck_model(self):
+        """If repetition is not a context problem, the run must still end."""
+        out, _ = self._run(
+            [_call("read_file", path="a.txt")] * 8,
+            on_repeat="feedback", max_repeat_feedback=2,
+        )
+        self.assertIn("repeated tool calls", out)
+        self.assertIn("despite being given the prior result", out)
+
+    def test_default_is_unchanged(self):
+        """Every measurement to date was taken under 'stop'; it must stay the
+        default so those packs remain comparable."""
+        out, _ = self._run([
+            _call("read_file", path="a.txt"),
+            _call("read_file", path="a.txt"),
+        ])
+        self.assertIn("Stopped: model repeated", out)
