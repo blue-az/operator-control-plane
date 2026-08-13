@@ -2,7 +2,7 @@
 
 **Run:** desktop, 2026-08-13, rev `118fdca`, 126/126 cells, 126/126 traces, zero
 CPU spill, n=6, `num_ctx 16384 · temperature 0.8 · think off`.
-**Not UID-verified. No claim registered.**
+**UID-verified 2026-08-13** by uid 971 (`operator-builder`) on the z13 ledger (`uid_isolated`). Claims: `claim-0019` (e1–e9 span), `claim-0023` (126/126). Aggregate: `evals/local_lane_ladder/REDERIVE_E1_E9.md`.
 
 Phase 0 of the ceiling-battery plan: run the three fixtures that were written but
 never executed in any pack, before building anything new.

@@ -1,7 +1,7 @@
 # E1X finding — 27B-class capacity extension
 
 **Run:** desktop, 2026-08-12, rev `8041b19`, 18/18 cells, 18/18 traces,
-100% GPU residency for both models, zero CPU-spill samples. **Not UID-verified.**
+100% GPU residency for both models, zero CPU-spill samples. **UID-verified 2026-08-13** (pack integrity) by uid 971 on z13 ledger via `claim-0018`. Raw totals in `REDERIVE.md`; confounds in this FINDING stand.
 
 Sibling pack to `e1-gold-pack/`. Same three L2 fixtures, same grader, same
 harness — only the model list differs. E1's 27-cell matrix is **not** modified;
@@ -140,7 +140,7 @@ the two into one ranking.
 
 ## Claim boundary
 
-**No claim registered.** Same bar as E1: a distinct-UID re-derive of postcondition
+**Pack integrity claimed via `claim-0018` (UID-verified).** Historical bar was a distinct-UID re-derive of postcondition
 totals, trace completeness, model tags, residency and machine provenance comes
 first. Wall-clock was taken at a 320 W cap and is not comparable to the 220 W
 throughput packets.
