@@ -1,0 +1,7 @@
+# E5 pre-run provenance — floor-finding sweep
+captured_utc: 2026-08-13T01:41:51Z
+git_rev: 1ef8364a459e0ab5ae409566eff6c49bbdc1a9ff
+question: where do the L2 fixtures start to discriminate, going DOWN in model size?
+controls: identical to e4-sampled (num_ctx 16384, temperature 0.8, uniform strict-JSON system prompt)
+trials: 6 (raised from 3 — near a floor, n=3 cannot resolve a ~50% model)
+ladder: granite4 3.4B | llama3.1:8b 8.0B | gemma4:e4b 8.0B | gemma4:12b 11.9B | qwen2.5-coder:14b 14.8B (anchor, 9/9 in e4)
