@@ -1,0 +1,10 @@
+# E8 pre-run provenance — the ceiling battery
+captured_utc: 2026-08-13T06:47:51Z
+git_rev: abb8c7eadf8663a93cfb5fbf99fbcc7f99327357
+question: do the five hard fixtures separate strong local models (14B-32B)?
+context: all six prior fixtures saturate above 14B (e4 62/63, e7 126/126)
+controls: num_ctx 16384, temperature 0.8, think off, n=6, uniform system prompt
+grading: deterministic postconditions only; scope (R6) enforced on all five
+fixtures: csv-summarize-repair booking-off-by-one constant-and-callers ambiguous-anchor strict-log-format
+validated: each rejects its initial state, accepts a reference solution, and blocks test-editing
+trajectory: captured per cell (tool calls, failures, ctok, think chars)

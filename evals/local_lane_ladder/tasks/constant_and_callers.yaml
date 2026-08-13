@@ -48,6 +48,9 @@ files:
 
     print("LIMITS_OK")
 
+# OPR-RUL-008 exits after the first state change; this L2 needs more.
+state_changes: 5
+
 prompts:
   L0: "We decided to allow more retries. Bump it and make sure nothing still mentions the old number."
   L1: >

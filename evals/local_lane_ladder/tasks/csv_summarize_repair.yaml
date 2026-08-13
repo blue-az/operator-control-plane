@@ -54,6 +54,9 @@ files:
 
     print("EXPENSES_OK")
 
+# OPR-RUL-008 exits after the first state change; this L2 needs more.
+state_changes: 3
+
 prompts:
   L0: "My expense totals come out wrong when amounts have dollar signs or brackets. Please sort it out."
   L1: >
