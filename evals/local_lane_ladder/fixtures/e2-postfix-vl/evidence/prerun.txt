@@ -1,0 +1,9 @@
+# E2 pre-run provenance (first POST-FIX pack)
+captured_utc: 2026-08-12T23:47:46Z
+hostname_s: desktop
+git_rev: 5be7db50d97de45b1a2860995a2d411d311fdb9c
+harness_epoch: POST-fix (extract_json_tool_call balanced-scan, 5be7db5)
+not_comparable_to: e1-gold-pack, e1x-27b (both pre-fix)
+gpu: NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
+residency_preflight: qwen3-vl:30b 20GB 100% GPU @32768, 138.7 tok/s bare decode
+note: qwen3-vl is a vision-language model; these fixtures are text-only, so only its text/tool path is exercised.
