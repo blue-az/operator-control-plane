@@ -3,7 +3,7 @@
 **Run:** desktop, 2026-08-13, rev `1ef8364`, 90/90 cells, 90/90 traces, zero CPU
 spill. Controls identical to `e4-sampled` (`num_ctx 16384`, `temperature 0.8`,
 uniform strict-JSON system prompt), n=6.
-**Not UID-verified. No claim registered.**
+**UID-verified 2026-08-13** by uid 971 (`operator-builder`) on the z13 ledger (`uid_isolated`, enforced). Claims: `claim-0018` (six-pack integrity), `claim-0016` (these totals). Re-derive artifacts: `REDERIVE.md` / `.operator/evidence/front-e1-gold-pack/rederive/e5-floor.json`.
 
 `e4-sampled` showed the fixtures saturated at 14B and above — 62 of 63 cells
 passing. This walks the ladder down instead of building harder fixtures.

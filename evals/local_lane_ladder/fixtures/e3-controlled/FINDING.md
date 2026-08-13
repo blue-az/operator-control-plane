@@ -1,7 +1,7 @@
 # E3 finding — temperature 0 is not a neutral control
 
 **Run:** desktop, 2026-08-13, rev `8f6ccca`, 63/63 cells, 63/63 traces,
-zero CPU spill. **Retained as an artifact record, NOT as a model comparison.**
+zero CPU spill. **Retained as an artifact record, NOT as a model comparison.** **UID-verified 2026-08-13** (pack integrity, 60/63) by uid 971 via `claim-0018`.
 
 Raw result: six models 9/9; `gemma4:26b` 6/9, with all three failures on
 `alias-add` and all three via the repeat-guard.

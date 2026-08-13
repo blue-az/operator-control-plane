@@ -2,7 +2,7 @@
 
 **Run:** desktop, 2026-08-13, rev pending, 144/144 cells (72 on + 72 off),
 144/144 traces, zero CPU spill, n=6.
-**Not UID-verified. No claim registered.**
+**UID-verified 2026-08-13** by uid 971 (`operator-builder`) on the z13 ledger (`uid_isolated`). Claims: `claim-0019` (e1–e9 span), `claim-0022` (on/off both 72/72). Aggregate: `evals/local_lane_ladder/REDERIVE_E1_E9.md`.
 
 Thinking mode was the only variable. Everything else identical to `e4-sampled`:
 `num_ctx 16384`, `temperature 0.8`, uniform strict-JSON system prompt.
