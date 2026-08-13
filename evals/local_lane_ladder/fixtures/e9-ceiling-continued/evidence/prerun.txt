@@ -1,0 +1,10 @@
+# E9 pre-run provenance — corrected ceiling battery
+captured_utc: 2026-08-13T08:05:05Z
+git_rev: 422e8eec8aaedbf5955fce25d067a49303312228
+corrects: e8-ceiling, where OPR-RUL-008 capped every cell at one state change
+          so constant-and-callers (needs 3 edits) scored 0/42 structurally and
+          the 'verify by running' step of four L2 prompts was unreachable.
+change: tasks declare state_changes; runner passes --continue-steps
+budgets: csv 3, booking 3, constant-and-callers 5, strict-log-format 3, ambiguous-anchor none (single edit)
+controls: num_ctx 16384, temperature 0.8, think off, n=6, uniform system prompt
+not comparable to: e8-ceiling (different continuation regime) or e1-e7
