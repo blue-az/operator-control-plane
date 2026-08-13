@@ -63,6 +63,10 @@ def build_fixture(
     return root
 
 
+_IGNORED_DIRS = {"__pycache__", ".pytest_cache", ".mypy_cache"}
+_IGNORED_SUFFIXES = {".pyc", ".pyo"}
+
+
 def hash_tree(root: Path) -> dict[str, str]:
     """Map every file under `root` to a SHA-256 of its bytes.
 
@@ -75,8 +79,16 @@ def hash_tree(root: Path) -> dict[str, str]:
     """
     manifest: dict[str, str] = {}
     for path in sorted(root.rglob("*")):
-        if path.is_file() and not path.is_symlink():
-            manifest[str(path.relative_to(root))] = hashlib.sha256(path.read_bytes()).hexdigest()
+        if not path.is_file() or path.is_symlink():
+            continue
+        rel = path.relative_to(root)
+        # Interpreter build output is not the model's doing and must never count
+        # as an out-of-scope write. A postcondition that runs the fixture's test
+        # battery creates __pycache__ as a side effect, which would otherwise
+        # fail the scope check on every exec-graded task for every model.
+        if any(part in _IGNORED_DIRS for part in rel.parts) or rel.suffix in _IGNORED_SUFFIXES:
+            continue
+        manifest[str(rel)] = hashlib.sha256(path.read_bytes()).hexdigest()
     return manifest
 
 

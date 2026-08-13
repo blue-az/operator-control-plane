@@ -1,0 +1,69 @@
+task_id: ambiguous-anchor
+description: >
+  The anchor text appears three times, once under each environment heading. Only
+  the occurrence under one named section may change; the other two must survive
+  byte-identical. Directly extends the floor finding from e5-floor, where the
+  first capability to fail was carrying an exact literal target -- here the target
+  is unambiguous only if the model reads its surrounding context first.
+
+files:
+  runbook.md: |
+    # Service runbook
+
+    ## Production
+    1. Drain connections.
+    2. Run: restart the service
+    3. Confirm health checks pass.
+
+    ## Staging
+    1. Drain connections.
+    2. Run: restart the service
+    3. Confirm health checks pass.
+
+    ## Development
+    1. Drain connections.
+    2. Run: restart the service
+    3. Confirm health checks pass.
+
+prompts:
+  L0: "Staging needs the force flag when we bounce it. The other environments must stay as they are."
+  L1: >
+    In runbook.md, the step "Run: restart the service" appears under Production,
+    Staging and Development. Change only the Staging one to
+    "Run: restart the service --force". Leave the other two exactly as they are.
+  L2: |
+    1. Read runbook.md and note that "Run: restart the service" appears three times.
+    2. In runbook.md, under the heading "## Staging" only, replace the single line
+       "2. Run: restart the service" with "2. Run: restart the service --force".
+       Do not change the identical line under "## Production" or under "## Development".
+    3. Verify the file now contains exactly one line reading
+       "2. Run: restart the service --force".
+    Only touch runbook.md.
+
+trajectory_hint:
+  - Read runbook.md and locate the Staging heading.
+  - Patch only the step line that follows the Staging heading.
+  - Read runbook.md again and confirm two unchanged occurrences remain.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: staging line changed
+      type: regex
+      file: runbook.md
+      pattern: "## Staging\\n1\\. Drain connections\\.\\n2\\. Run: restart the service --force\\n"
+      dotall: false
+    - name: exactly one forced occurrence
+      type: grep
+      file: runbook.md
+      pattern: "restart the service --force"
+      count: 1
+    - name: other two occurrences untouched
+      type: regex
+      file: runbook.md
+      pattern: "## Production\\n1\\. Drain connections\\.\\n2\\. Run: restart the service\\n[\\s\\S]*## Development\\n1\\. Drain connections\\.\\n2\\. Run: restart the service\\n"
+      dotall: true
+    - name: scope respected
+      type: files_unchanged
+      allowed:
+        - runbook.md

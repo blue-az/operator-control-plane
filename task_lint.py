@@ -160,9 +160,19 @@ def check_r4_success_criterion(text: str) -> RuleResult:
 
 
 def check_r5_closed_vocabulary(text: str) -> RuleResult:
-    """R5 -- Imperative, closed vocabulary. FAIL if any ban-list token is present."""
+    """R5 -- Imperative, closed vocabulary. FAIL if any ban-list token is present.
+
+    Matching is word-bounded. A plain substring test produced false failures on
+    ordinary filenames -- "src/fetcher.py" contains "etc", so a perfectly
+    plan-shaped prompt naming that file linted semi-shaped and the runner
+    refused to start. Any prompt mentioning fetcher/sketch/etcd hit it.
+    """
     lowered = text.lower()
-    hits = [tok for tok in _BAN_LIST if tok in lowered]
+    hits = [
+        tok
+        for tok in _BAN_LIST
+        if re.search(rf"(?<![a-z]){re.escape(tok)}(?![a-z])", lowered)
+    ]
     if hits:
         return RuleResult("R5", "FAIL", f"ban-list token(s) present: {hits}")
     return RuleResult("R5", "PASS", "no ban-list tokens found")

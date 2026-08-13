@@ -1,0 +1,84 @@
+task_id: booking-off-by-one
+description: >
+  A boundary bug in a booking overlap check. The end date is the checkout day and
+  is exclusive, so a stay ending on the day another begins does not conflict. The
+  fix is two comparison operators. The edge battery swaps argument order, which
+  catches a one-sided fix that happens to satisfy the reported case.
+
+files:
+  src/bookings.py: |
+    def bookings_conflict(start1, end1, start2, end2):
+        """Return True if two bookings overlap.
+
+        Dates are ISO strings, e.g. "2026-03-05", and compare correctly as
+        strings. The end date is the CHECKOUT day and is EXCLUSIVE: the room is
+        free again on that day, so a booking ending 2026-03-10 does not conflict
+        with one starting 2026-03-10.
+        """
+        return start1 <= end2 and start2 <= end1
+
+  tests/check_bookings.py: |
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    sys.path.insert(0, ".")
+    from src.bookings import bookings_conflict
+
+    # The reported bug: A checks out the morning B checks in.
+    assert not bookings_conflict("2026-03-05", "2026-03-10", "2026-03-10", "2026-03-12"), \
+        "checkout day is exclusive; these must not conflict"
+    # Same boundary with the arguments swapped -- catches a one-sided fix.
+    assert not bookings_conflict("2026-03-10", "2026-03-12", "2026-03-05", "2026-03-10"), \
+        "boundary must hold with arguments swapped"
+
+    # Genuine overlaps must still be detected.
+    assert bookings_conflict("2026-03-05", "2026-03-10", "2026-03-08", "2026-03-12")
+    assert bookings_conflict("2026-03-08", "2026-03-12", "2026-03-05", "2026-03-10")
+    assert bookings_conflict("2026-03-05", "2026-03-10", "2026-03-05", "2026-03-10"), \
+        "identical ranges overlap"
+    assert bookings_conflict("2026-03-01", "2026-03-31", "2026-03-10", "2026-03-12"), \
+        "fully contained range overlaps"
+
+    # Disjoint ranges must not conflict.
+    assert not bookings_conflict("2026-03-01", "2026-03-05", "2026-03-20", "2026-03-25")
+
+    print("BOOKINGS_OK")
+
+prompts:
+  L0: "Guests are told the room is taken when the last guest checks out that morning. Fix my booking checker."
+  L1: >
+    In src/bookings.py, fix bookings_conflict so the end date is treated as an
+    exclusive checkout day. Keep the same name and signature. Do not change the
+    tests.
+  L2: |
+    1. Read src/bookings.py and read tests/check_bookings.py.
+    2. In src/bookings.py, replace the line "    return start1 <= end2 and start2 <= end1"
+       so the checkout day is exclusive, keeping the name and signature of
+       "def bookings_conflict(start1, end1, start2, end2):" unchanged.
+    3. Verify by running "python3 tests/check_bookings.py" from the fixture root;
+       it should exit 0 and print "BOOKINGS_OK".
+    Only touch src/bookings.py.
+
+trajectory_hint:
+  - Read src/bookings.py.
+  - Read tests/check_bookings.py to see the boundary cases.
+  - Patch the return expression in src/bookings.py.
+  - Run python3 tests/check_bookings.py and confirm it exits 0.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: battery passes
+      type: exec
+      command: python3 tests/check_bookings.py
+      timeout: 60
+    - name: signature preserved
+      type: python_symbol
+      file: src/bookings.py
+      symbol: bookings_conflict
+      args: [start1, end1, start2, end2]
+    - name: tests not edited
+      type: files_unchanged
+      allowed:
+        - src/bookings.py

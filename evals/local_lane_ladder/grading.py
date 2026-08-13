@@ -22,6 +22,7 @@ source domain -- "find all matching files: no omissions and no extras".
 from __future__ import annotations
 
 import ast
+import os
 import re
 import subprocess
 from dataclasses import dataclass, field
@@ -213,6 +214,13 @@ def _grade_files_unchanged(
 
 def _grade_exec(postcondition: dict, fixture_root: Path) -> GradeResult:
     timeout = postcondition.get("timeout", DEFAULT_EXEC_TIMEOUT)
+    # Never write bytecode. The model is told to run the fixture's own test
+    # battery to verify its work, and the grader then runs it again -- so a
+    # same-size edit landing in the same filesystem second (e.g. "MAX_RETRIES =
+    # 3" -> "MAX_RETRIES = 5") can be masked by a stale .pyc, failing a correct
+    # answer at random. Suppressing bytecode removes the hazard entirely and
+    # also keeps __pycache__ out of the scope check.
+    env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
     try:
         completed = subprocess.run(
             postcondition["command"],
@@ -221,6 +229,7 @@ def _grade_exec(postcondition: dict, fixture_root: Path) -> GradeResult:
             capture_output=True,
             text=True,
             timeout=timeout,
+            env=env,
         )
     except subprocess.TimeoutExpired:
         return GradeResult(False, f"postcondition command timed out after {timeout}s")

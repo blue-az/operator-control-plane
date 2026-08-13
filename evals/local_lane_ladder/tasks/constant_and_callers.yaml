@@ -1,0 +1,96 @@
+task_id: constant-and-callers
+description: >
+  Change a constant and every caller that hard-codes its old value. Three files
+  must end up consistent, and the stale value must survive nowhere. Probes
+  carrying state across dependent edits -- the boundary the router study called
+  local vs supervised -- rather than a single anchored patch.
+
+files:
+  src/limits.py: |
+    # Shared operational limits.
+    MAX_RETRIES = 3
+    BACKOFF_SECONDS = 2
+
+  src/fetcher.py: |
+    from src.limits import MAX_RETRIES
+
+
+    def describe_policy():
+        # Keep this message in sync with MAX_RETRIES.
+        return "retrying up to 3 times before giving up"
+
+
+    def attempts_allowed():
+        return MAX_RETRIES
+
+  docs/retry_policy.md: |
+    # Retry policy
+
+    The fetcher retries up to 3 times before giving up.
+    Backoff starts at 2 seconds.
+
+  tests/check_limits.py: |
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    sys.path.insert(0, ".")
+    from src.limits import MAX_RETRIES
+    from src.fetcher import describe_policy, attempts_allowed
+
+    assert MAX_RETRIES == 5, f"MAX_RETRIES={MAX_RETRIES}, expected 5"
+    assert attempts_allowed() == 5, f"attempts_allowed()={attempts_allowed()}"
+    assert "up to 5 times" in describe_policy(), f"stale message: {describe_policy()!r}"
+
+    doc = open("docs/retry_policy.md", encoding="utf-8").read()
+    assert "up to 5 times" in doc, "docs/retry_policy.md not updated"
+    assert "up to 3 times" not in doc, "docs/retry_policy.md still says 3"
+
+    print("LIMITS_OK")
+
+prompts:
+  L0: "We decided to allow more retries. Bump it and make sure nothing still mentions the old number."
+  L1: >
+    Raise the retry limit from 3 to 5 in src/limits.py, and update src/fetcher.py
+    and docs/retry_policy.md so no file still states the old value. Do not change
+    the tests.
+  L2: |
+    1. In src/limits.py, replace the line "MAX_RETRIES = 3" with "MAX_RETRIES = 5".
+    2. In src/fetcher.py, replace the text "retrying up to 3 times before giving up"
+       with "retrying up to 5 times before giving up".
+    3. In docs/retry_policy.md, replace the text "retries up to 3 times before giving up"
+       with "retries up to 5 times before giving up".
+    4. Verify by running "python3 tests/check_limits.py" from the fixture root;
+       it should exit 0 and print "LIMITS_OK".
+    Only touch src/limits.py, src/fetcher.py and docs/retry_policy.md.
+
+trajectory_hint:
+  - Read src/limits.py.
+  - Patch MAX_RETRIES in src/limits.py.
+  - Read src/fetcher.py and patch the policy message.
+  - Read docs/retry_policy.md and patch the retry count.
+  - Run python3 tests/check_limits.py and confirm it exits 0.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: all three files consistent
+      type: exec
+      command: python3 tests/check_limits.py
+      timeout: 60
+    - name: constant updated
+      type: regex
+      file: src/limits.py
+      pattern: "^MAX_RETRIES\\s*=\\s*5\\s*$"
+      must_not_match: "^MAX_RETRIES\\s*=\\s*3\\s*$"
+    - name: no stale value in code
+      type: grep
+      file: src/fetcher.py
+      pattern: "up to 5 times"
+      must_not_contain: "up to 3 times"
+    - name: scope respected
+      type: files_unchanged
+      allowed:
+        - src/limits.py
+        - src/fetcher.py
+        - docs/retry_policy.md

@@ -1,0 +1,87 @@
+task_id: csv-summarize-repair
+description: >
+  Repair an expense summariser that looks correct and silently produces wrong
+  totals. The naive split(",") breaks on quoted amounts, float() rejects
+  currency formatting, accounting-style parentheses are not read as negative,
+  and category keys are not normalised. The characteristic failure is a total
+  that is wrong but plausible -- which is why this discriminates where a
+  one-line edit does not.
+
+files:
+  src/expenses.py: |
+    def summarize_expenses(csv_text):
+        """Total the amount column per category.
+
+        Returns {category: total} with each total rounded to 2 decimals.
+        Category keys are lowercase with surrounding whitespace stripped.
+        Amounts may be quoted and may use $ and thousands separators.
+        An amount wrapped in parentheses is negative, accounting style.
+        Rows with a missing or empty amount are skipped, as are blank lines.
+        """
+        totals = {}
+        for line in csv_text.strip().splitlines()[1:]:
+            parts = line.split(",")
+            cat = parts[1]
+            amount = float(parts[2])
+            totals[cat] = totals.get(cat, 0) + amount
+        return totals
+
+  tests/check_expenses.py: |
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    sys.path.insert(0, ".")
+    from src.expenses import summarize_expenses
+
+    BASIC = (
+        'date,category,amount\n'
+        '2026-01-02,Food,"$1,234.56"\n'
+        '2026-01-03,food ,45.44\n'
+        '2026-01-04,Travel,(45.00)\n'
+        '\n'
+        '2026-01-05,Office,\n'
+    )
+    r = summarize_expenses(BASIC)
+    assert abs(r.get("food", 0) - 1280.00) < 0.005, f"food={r.get('food')!r} expected 1280.00"
+    assert abs(r.get("travel", 0) + 45.00) < 0.005, f"travel={r.get('travel')!r} expected -45.00"
+    assert "office" not in r, f"office should be skipped (empty amount), got {r!r}"
+
+    assert summarize_expenses("date,category,amount\n") == {}, "header-only must give {}"
+
+    only_fee = summarize_expenses('date,category,amount\n2026-02-01,Fees,(12.50)\n')
+    assert abs(only_fee.get("fees", 0) + 12.50) < 0.005, f"fees={only_fee!r} expected -12.50"
+
+    print("EXPENSES_OK")
+
+prompts:
+  L0: "My expense totals come out wrong when amounts have dollar signs or brackets. Please sort it out."
+  L1: >
+    Fix summarize_expenses in src/expenses.py so it handles quoted amounts,
+    currency symbols, thousands separators, parenthesised negatives, blank
+    lines, empty amounts, and category case/whitespace. Do not change the tests.
+  L2: |
+    1. Read src/expenses.py and read tests/check_expenses.py.
+    2. In src/expenses.py, rewrite the body of "def summarize_expenses(csv_text):"
+       so that it satisfies the docstring already in that function.
+    3. Verify by running "python3 tests/check_expenses.py" from the fixture root;
+       it should exit 0 and print "EXPENSES_OK".
+    Only touch src/expenses.py.
+
+trajectory_hint:
+  - Read src/expenses.py.
+  - Read tests/check_expenses.py to see the required behaviour.
+  - Patch the body of summarize_expenses in src/expenses.py.
+  - Run python3 tests/check_expenses.py and confirm it exits 0.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: battery passes
+      type: exec
+      command: python3 tests/check_expenses.py
+      timeout: 60
+    - name: tests not edited
+      type: files_unchanged
+      allowed:
+        - src/expenses.py
