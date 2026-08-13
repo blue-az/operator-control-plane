@@ -231,3 +231,26 @@ substantially artifact.
 **Working rule for the next session:** when a model difference appears, assume
 the harness until the trace proves otherwise. The trajectory parse now makes that
 check mechanical rather than a manual read — use it before writing anything down.
+
+### Standing hazard: patterns matching text that contains the pattern
+
+This bit **four separate times in one session**, in four different tools, and
+each time it produced a confident wrong answer rather than an obvious error:
+
+| Where | The match | Consequence |
+|---|---|---|
+| `task_lint` R5 ban-list | `etc` inside `src/fetcher.py` | plan-shaped prompt linted semi-shaped; would have aborted the runner |
+| failure taxonomy | `connection` inside a fixture's *"Drain connections."* | 19 model failures misfiled as INFRA |
+| `pkill -f` / `pgrep -f` | the pattern appears in the watcher's **own** command line | killed my own chain launcher; a wait-loop that could never exit; a duplicate run launched |
+| monitor filter | `Traceback` inside a *fixture's* test output | fired on every expected exec failure, drowning real signal |
+
+The unifying cause: **grader detail, fixture content, and process command lines
+all quote the thing being searched for.** Substring matching against them is a
+false-positive generator, not a bug to be fixed with a better pattern.
+
+Structural fixes, in preference order:
+1. Read the signal from a source that *cannot* contain it — infra status from the
+   harness's own stdout, never from grader text.
+2. Identify processes by PID or `/proc/<pid>/cmdline` inspection, never `pgrep -f`
+   on a string your own process also carries.
+3. Word-bound the match (`(?<![a-z])etc(?![a-z])`) only when 1 and 2 are unavailable.
