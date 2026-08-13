@@ -1,0 +1,23 @@
+# E3 pre-run provenance — first CONTROLLED epoch
+captured_utc: 2026-08-13T00:28:12Z
+hostname_s: desktop
+git_rev: 8f6ccca74945cc7907b924d40b6974e5de5582eb
+gpu: NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
+ollama_env: OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0
+
+## Controls (none of which existed in e1/e1x/e2)
+num_ctx:      16384 for ALL models (largest value every model holds 100% GPU)
+temperature:  0 for ALL models
+seed:         42 + trial index -> 43/44/45 (reproducible yet 3 distinct draws)
+system_prompt: strict-JSON instruction applied to ALL models (was gated on '26b')
+
+## Residency verified at ctx 16384 before the run
+qwen2.5-coder:14b 10GB | gemma4:26b 17GB | gemma3:27b 17GB | qwen3.6:27b 17GB
+gemma4:31b 19GB | qwen3-vl:30b 19GB | qwen3:32b 22GB — all 100% GPU
+
+supersedes_as_comparison: e1-gold-pack, e1x-27b, e2-postfix-vl
+
+## ollama list
+NAME                     ID              SIZE      MODIFIED       
+qwen3:32b                030ee887880f    20 GB     32 minutes ago    
+qwen3-vl:30b             eda0be100877    19 GB     43 minutes ago    
