@@ -460,6 +460,7 @@ class Dispatcher:
         ollama_url: str,
         request_timeout: int = 600,
         options: dict | None = None,
+        think: bool | str | None = None,
     ) -> str:
         """Dispatch to Ollama.
 
@@ -481,6 +482,16 @@ class Dispatcher:
         payload = {"model": model, "prompt": task, "stream": False}
         if options:
             payload["options"] = dict(options)
+        # Reasoning mode. Omitted entirely when None, which leaves each model at
+        # its own default -- for thinking-capable models that means reasoning ON.
+        # Measured on gemma4:26b against a one-tool-call fixture: think=true cost
+        # 995 completion tokens / 10.5s against 104 / 1.7s for think=false, so
+        # leaving this uncontrolled is worth roughly 10x tokens and 6x wall.
+        # Value is per-model and cannot be reasoned about: suppressing it can
+        # raise a score (some models' instability lives entirely in reasoning) or
+        # lower it (for others reasoning is load-bearing). A/B it per model.
+        if think is not None:
+            payload["think"] = think
         # Every local model gets the same JSON-discipline instruction.
         #
         # This used to be gated on a substring of the model NAME
@@ -500,7 +511,21 @@ class Dispatcher:
         try:
             response = requests.post(url, json=payload, timeout=request_timeout)
             response.raise_for_status()
-            return response.json().get("response", "")
+            body = response.json()
+            # Token accounting on stdout so it lands in retained eval traces.
+            # Completion tokens are the hardware-independent cost metric: tok/s
+            # is a property of the serving stack and does not transfer between
+            # hosts or power caps, whereas token count does.
+            # `think_chars` is reported separately because a model asked to
+            # suppress reasoning may still emit some -- a silently leaky
+            # suppression would otherwise look like a clean measurement.
+            print(
+                f"[tokens] prompt={body.get('prompt_eval_count') or 0} "
+                f"completion={body.get('eval_count') or 0} "
+                f"think_chars={len(body.get('thinking') or '')} "
+                f"done_reason={body.get('done_reason')}"
+            )
+            return body.get("response", "")
         except Exception as e:
             return f"Ollama API Error: {str(e)}"
 
@@ -991,6 +1016,7 @@ def run_agent_loop(
                 config["local"]["ollama_url"],
                 config["local"].get("request_timeout", 600),
                 config["local"].get("options") or None,
+                config["local"].get("think"),
             )
 
         tool_call = extract_json_tool_call(response)
@@ -1200,6 +1226,18 @@ def main():
         help="Sampling seed for local models. Pair with --temperature 0 for repeatable runs.",
     )
     parser.add_argument(
+        "--think",
+        choices=["on", "off", "low", "medium", "high"],
+        default=None,
+        help=(
+            "Reasoning mode for local models. Unset leaves each model at its own "
+            "default, which for thinking-capable models is ON -- measured at ~10x "
+            "the completion tokens and ~6x the wall clock on a one-tool-call task. "
+            "Whether suppression helps or hurts is per-model; A/B it. Effort levels "
+            "(low/medium/high) are for models that expose a dial rather than a switch."
+        ),
+    )
+    parser.add_argument(
         "--eval-auto-confirm",
         action="store_true",
         help=(
@@ -1229,6 +1267,10 @@ def main():
         )
         if v is not None
     }
+    if args.think is not None:
+        config.setdefault("local", {})
+        config["local"]["think"] = {"on": True, "off": False}.get(args.think, args.think)
+
     if _cli_options:
         config.setdefault("local", {})
         merged = dict(config["local"].get("options") or {})

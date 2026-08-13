@@ -485,6 +485,14 @@ def main() -> int:
         help="Pin the sampling seed for every cell. Pair with --temperature 0.",
     )
     parser.add_argument(
+        "--think", choices=["on", "off", "low", "medium", "high"], default=None,
+        help=(
+            "Pin reasoning mode for every cell. Unset leaves each model at its own "
+            "default (ON for thinking-capable models), which is both a large cost "
+            "difference and an uncontrolled variable across a comparison."
+        ),
+    )
+    parser.add_argument(
         "--trace-dir", default=None,
         help=(
             "Retain one JSON trace per cell (raw opr stdout/stderr, argv, prompt, "
@@ -532,6 +540,7 @@ def main() -> int:
         ("--num-ctx", args.num_ctx),
         ("--temperature", args.temperature),
         ("--seed", args.seed),
+        ("--think", args.think),
     ):
         if value is not None:
             sampling.extend([flag, str(value)])
