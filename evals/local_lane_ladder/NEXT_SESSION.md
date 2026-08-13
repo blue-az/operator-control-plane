@@ -4,8 +4,12 @@
 **Read order:** this file → `GOLD_STANDARD.md` → the `FINDING.md` of whichever
 pack you touch.
 
-Nine packs, **825 graded cells**, all traced. The instrument works now. This file
-says what is settled, what is blocked, and what to do next.
+Nine packs, **825 graded cells**, all traced, **independently re-derived by a
+distinct UID**. The instrument works and its numbers are verified. This file says
+what is settled and what to do next.
+
+**Top of the queue is now item 3 — the repetition finding** — since the re-derive
+that used to block everything is closed.
 
 ---
 
@@ -30,19 +34,44 @@ not honoured by this Ollama build, so cells are independent draws.
 
 ---
 
-## 1. BLOCKING — the distinct-UID re-derive
+## 1. ~~BLOCKING~~ — the distinct-UID re-derive is DONE (2026-08-13)
 
-**Nothing here is a registered claim, and nothing should be until this happens.**
-It now spans `e1`–`e9`. `MSC-RUL-104`: no session verifies a claim it authored,
-and every pack in this programme was authored by one session.
+**Closed.** Verified by **uid 971 (`operator-builder`)**, `verification_authority:
+uid_isolated`, `verification_mode: enforced`, via `rederive_pack.py`.
 
-Everything needed is retained: 825 traces, per-cell `state.json`, residency logs,
-pre-run provenance, and `FINDING.md` per pack. A verifier should re-derive
-postcondition totals, trace completeness, model tags, residency and machine
-provenance — then register the E9 result, and only that one.
+**The E9 ranking re-derived exactly** — `claim-0020`:
 
-**Do not register `e1`–`e8`.** They are harness records, not comparisons; each
-`FINDING.md` says why.
+> gemma4:31b 24/30, gemma4:26b 24/30, qwen3.6:27b 19/30, qwen3-vl:30b 16/30,
+> qwen2.5-coder:14b 14/30, qwen3:32b 13/30, gemma3:27b 12/30 (overall 122/210)
+
+Independent totals match the authored ones cell for cell. Coverage across
+`claim-0015`…`claim-0023`: `e1` 25/27, `e4` 62/63, `e5` floor totals, `e6` on
+72/72 and off 72/72, `e7` 126/126, `e8` 55/210 (freeze integrity only — its
+`FINDING` records the `OPR-RUL-008` confound and E9 supersedes it as the
+ranking), `e9` 122/210.
+
+Two things worth carrying forward, because both are the process working rather
+than incidental:
+
+- **`claim-0014` came back `false`** and was superseded by `claim-0018`: its
+  `required_gate` was free text rather than a filesystem path, so the gate was
+  not machine-checkable. The first filing was rejected on form, not on substance,
+  and redone correctly. That is the ledger refusing an unverifiable claim.
+- **The verification ran on z13 against desktop-produced artifacts.** That is
+  stronger than same-machine verification, not weaker — a different UID *and* a
+  different host, made possible because the traces sync by git while `.operator/`
+  deliberately does not (Front H). The claims record `machine: z13` for the
+  executor and "Producer desktop" in the text, so the split is explicit rather
+  than blurred.
+
+**Consequence:** the E9 ranking is now registered evidence, not an authored
+assertion. `e1`–`e8` remain harness records — `e8`'s claim is scoped to freeze
+integrity precisely so it cannot be mistaken for a ranking.
+
+**Desktop ledger note:** these claims live on **z13's** ledger. The desktop
+ledger still shows `front-e1-gold-pack` with no claims, because Front H forbids
+merging the two. Anyone reading the desktop ledger alone will not see the
+verification — check z13, or this file.
 
 ---
 
