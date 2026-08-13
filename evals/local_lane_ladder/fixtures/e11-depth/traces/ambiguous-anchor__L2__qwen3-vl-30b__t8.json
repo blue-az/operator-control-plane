@@ -1,0 +1,72 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n",
+    "--model",
+    "qwen3-vl:30b",
+    "--workspace",
+    "/tmp/opr-eval-ambiguous-anchor-L2-78wm7d9b",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off"
+  ],
+  "cell_key": "ambiguous-anchor|L2|qwen3-vl:30b|8",
+  "git_rev": "e1bdeb0ae90244d1c3038549a743c2d9446ae504",
+  "grade_detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+  "harness": "local-lane-eval",
+  "level": "L2",
+  "machine": "desktop",
+  "model": "qwen3-vl:30b",
+  "passed": false,
+  "prompt": "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n",
+  "recorded_utc": "2026-08-13T20:13:38.730692+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: qwen3-vl:30b (lane_1_local_repair)\nDispatching governed query...\nThinking...\n[tokens] prompt=369 completion=8355 think_chars=35930 done_reason=stop\n\n[Model requests tool call: grep_search]\nArguments: {\n  \"tool\": \"grep_search\",\n  \"pattern\": \"Run: restart the service\",\n  \"path\": \"runbook.md\"\n}\n\n[Tool Output]\nNo matches found.\n\nThinking...\n[tokens] prompt=385 completion=830 think_chars=3605 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"runbook.md\"\n}\n\n[Tool Output]\n# Service runbook\n\n## Production\n1. Drain connections.\n2. Run: restart the service\n3. Confirm health checks pass.\n\n## Staging\n1. Drain connections.\n2. Run: restart the service\n3. Confirm health checks pass.\n\n## Development\n1. Drain connections.\n2. Run: restart the service\n3. Confirm health checks pass.\n\n\nThinking...\n[tokens] prompt=469 completion=6674 think_chars=29700 done_reason=stop\n\n[Model requests tool call: run_command]\nArguments: {\n  \"tool\": \"run_command\",\n  \"command\": \"sed -i 's/2\\\\. Run: restart the service/2\\\\. Run: restart the service --force/2' runbook.md\"\n}\n\n[Tool Output]\n\n\n\n--- Output ---\n[Tool completed: run_command]\n\n--------------\n",
+  "task_id": "ambiguous-anchor",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 15859,
+    "distinct_tools": [
+      "grep_search",
+      "read_file",
+      "run_command"
+    ],
+    "n_calls": 3,
+    "n_failed_calls": 0,
+    "no_dispatch": false,
+    "stopped_repeat": false,
+    "think_chars": 69235,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": "runbook.md",
+        "tool": "grep_search"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "runbook.md",
+        "tool": "read_file"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": null,
+        "tool": "run_command"
+      }
+    ]
+  },
+  "trial": 8,
+  "wall_clock_s": 133.4
+}
