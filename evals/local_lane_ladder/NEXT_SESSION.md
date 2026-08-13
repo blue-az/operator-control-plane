@@ -146,7 +146,53 @@ Three deterministic instruments already exist and were scoped but not executed:
 
 ---
 
-## 5. Housekeeping
+## 5. Adding a new model (e.g. `qwen3.8:27b`, expected 2026-08-14)
+
+**One command:** `./evals/local_lane_ladder/new_model_gate.sh <tag>`
+
+It runs five gates in order and refuses to continue on a failure rather than
+producing a number that looks fine. Every gate exists because skipping it already
+cost this programme a run:
+
+| Gate | Why |
+|---|---|
+| 0 — no sweep running | GPU contention silently distorts every timing |
+| 1 — weights fit | `nemotron-3.5-lightning` is 25 GB of *weights* on a 24 GB card; no context tuning fixes that. Distinct from `qwen3:32b`, whose spill was KV cache and which fits at `num_ctx ≤ 24576` |
+| 2 — 100% GPU at ctx 16384 | spill is a measurement confound, not a result |
+| 3 — think support **and obedience** | `qwen3-vl:30b` ignores `think=false`, emitting 11,407 chars of reasoning at 52x the tokens. A leaky "off" row measures nothing |
+| 4 — one graded cell | proves the harness can drive it, and that a trace is retained |
+
+On success it prints the battery command with **`qwen3.6:27b` included as a
+same-run control**. That matters: 3.6 is the direct predecessor at the same size
+class, and running it fresh alongside avoids comparing across invocations —
+cross-invocation drift already produced one false regression here.
+
+**Compare against `e9-ceiling-continued`, not `e10-repeat-ab`** (e10 varies
+`--on-repeat`; the gate command uses the default).
+
+### What to actually look for in `qwen3.8:27b`
+
+`qwen3.6:27b` scored **19/30** in E9 — third place, and interesting in two
+specific ways that give 3.8 a sharp test rather than a vague one:
+
+1. **It was the only model to solve any `csv-summarize-repair` cell** (3/6 of the
+   fixture's 3/42 total). That fixture brackets the top of the current ladder, so
+   if 3.8 improves anywhere, that is where headroom exists.
+2. **It bought its rank with instability** — 3 of 5 fixtures were coin-flips,
+   against zero for both `gemma4` models. If 3.8 keeps the capability and fixes
+   the variance, it is a genuine seat contender. If it is merely a little better
+   on average and still flip-prone, it is not: `gemma4:26b` wins the seat on
+   determinism, not on peak score.
+
+Also worth checking, cheaply, because both have bitten: whether it obeys
+`think=false` (Gate 3 answers this), and whether it emits one tool call per
+response or several — the two-object emission pattern is what the extractor fix
+in `5be7db5` had to handle.
+
+**No claim from a first run.** One model, n=6, one epoch is a smoke test, not
+evidence — and per `MSC-RUL-107` it cannot revise a seat decision on its own.
+
+## 6. Housekeeping
 
 - **The published report is stale.** `fixtures/e1-gold-pack/OPERATOR_REPORT.html`
   (artifact `728a6afb-965e-406c-a152-c51152d84689`) reflects the `e5` floor
