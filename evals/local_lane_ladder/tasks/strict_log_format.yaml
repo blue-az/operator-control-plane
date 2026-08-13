@@ -53,6 +53,9 @@ files:
 
     print("LOGSUM_OK")
 
+# OPR-RUL-008 exits after the first state change; this L2 needs more.
+state_changes: 3
+
 prompts:
   L0: "I need a summary of how many errors happened each hour from my logs."
   L1: >

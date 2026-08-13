@@ -1,0 +1,58 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n",
+    "--model",
+    "gemma4:26b",
+    "--workspace",
+    "/tmp/opr-eval-constant-and-callers-L2-lu_4l2yj",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off"
+  ],
+  "cell_key": "constant-and-callers|L2|gemma4:26b|3",
+  "git_rev": "abb8c7eadf8663a93cfb5fbf99fbcc7f99327357",
+  "grade_detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-lu_4l2yj/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+  "harness": "local-lane-eval",
+  "level": "L2",
+  "machine": "desktop",
+  "model": "gemma4:26b",
+  "passed": false,
+  "prompt": "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n",
+  "recorded_utc": "2026-08-13T07:18:27.221450+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: gemma4:26b (lane_1_local_repair)\nDispatching governed query...\nThinking...\n[tokens] prompt=470 completion=47 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"src/limits.py\",\n  \"target_content\": \"MAX_RETRIES = 3\",\n  \"replacement_content\": \"MAX_RETRIES = 5\"\n}\n\n[Tool Output]\nSuccessfully patched src/limits.py.\n\n\n--- Output ---\n[Tool completed: patch_file]\nSuccessfully patched src/limits.py.\n--------------\n",
+  "task_id": "constant-and-callers",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 47,
+    "distinct_tools": [
+      "patch_file"
+    ],
+    "n_calls": 1,
+    "n_failed_calls": 0,
+    "no_dispatch": false,
+    "stopped_repeat": false,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": "src/limits.py",
+        "tool": "patch_file"
+      }
+    ]
+  },
+  "trial": 3,
+  "wall_clock_s": 3.3
+}

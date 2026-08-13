@@ -379,6 +379,17 @@ def run_trial(
         "--no-govern",  # runner does its own explicit ledger tagging above
         "--no-bn",
     ]
+    # OPR-RUL-008 exits opr after the FIRST successful state-changing tool
+    # (write_file / patch_file / run_command). A task needing more than one --
+    # a multi-file edit, or any L2 that ends "verify by running ..." -- is
+    # structurally unpassable without a continuation budget, regardless of the
+    # model. Measured: constant-and-callers scored 0/42 across seven models at
+    # the default, and the same model passes it with a budget. Tasks declare
+    # what they need; omitting the key preserves the single-state-change
+    # default exactly.
+    budget = task.get("state_changes")
+    if budget:
+        argv += ["--continue-steps", str(budget)]
     # Recorded in the trace's argv, so a reader can see exactly which sampling
     # and context settings produced a cell rather than inferring them.
     #
