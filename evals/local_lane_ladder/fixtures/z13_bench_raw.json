@@ -1,0 +1,1 @@
+[["granite4:latest", "88.2", "2s", "3s", "GB 100% GPU"], ["gemma4:12b", "25.7", "6s", "11s", "GB 100% GPU"], ["qwen2.5-14b-24k:latest", "24.5", "11s", "16s", "GB 100% GPU"], ["gpt-oss-16k:latest", "51.5", "12s", "15s", "GB 100% GPU"], ["gemma4-26b-24k:latest", "46.8", "20s", "23s", "GB 16%/84% CPU/GPU"], ["gemma4-31b-24k:latest", "7.1", "22s", "41s", "GB 31%/69% CPU/GPU"]]
