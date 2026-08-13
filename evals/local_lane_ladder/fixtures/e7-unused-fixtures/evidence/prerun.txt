@@ -1,0 +1,9 @@
+# E7 pre-run provenance — the three never-run fixtures
+captured_utc: 2026-08-13T05:07:09Z
+git_rev: 118fdca6373c4df166d3002da502e129ad299dba
+question: do doc-fix / grep-and-report / multi-file-rename-reference discriminate ABOVE 14B?
+why: E1-E6 all ran only alias-add, config-value-change, function-add. These three were
+     written but never run in any pack. multi-file-rename-reference is historically the
+     only fixture that produced per-model SHAPE differences on the original 216-cell grid.
+controls: num_ctx 16384, temperature 0.8, think off, n=6
+config-value-change: RETIRED from all future packs (E5: 6/6 at 3.4B, zero information)

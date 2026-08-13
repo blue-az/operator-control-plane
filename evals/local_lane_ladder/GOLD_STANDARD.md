@@ -168,6 +168,118 @@ under this gold standard.
 | `docs/LOCAL_LANE_ROUTER_STUDY.md` | 26b router measurement |
 | `ANALYSIS.md` / `RESULTS.md` | 216-cell ladder |
 | `fixtures/e0-desktop-pack-consultant-review/FINDING.md` | Why E0 ≠ Front E evidence |
-| `~/Alignerr/batch4_authoritative_guidelines.md` | DocAI process gold |
-| `~/Alignerr/batch4_failure_catalog.md` | Harness failure culture |
+| `~/Alignerr/batch4_authoritative_guidelines.md` | DocAI process gold — **z13 only** (see below) |
+| `~/Alignerr/batch4_failure_catalog.md` | Harness failure culture — **z13 only** (see below) |
+| `~/Alignerr/Labeling_Instructions.pdf` | **Code-editing eval rubric** — present on desktop; see §7 |
+
+### Host availability of the Alignerr corpus (checked 2026-08-13)
+
+`batch4_authoritative_guidelines.md`, `batch4_failure_catalog.md` and the Batch 5
+Phase 2 PDF **do not exist on desktop** — verified by name across `/` and by
+content signature. They live on **z13**, per the bridge handoff's asset table
+(*"Alignerr corpus | `~/Alignerr/` | only if that tree exists on desktop"*). The
+desktop `~/Alignerr/` tree is a different, code-eval engagement.
+
+A desktop agent following the two rows above hits missing paths with no
+explanation, which is the cold-start failure the bridge doc warns about. Two
+things follow:
+
+- **Do not invent a parallel gold** from the absence. §2's mapping table below is
+  the distilled transfer and is self-contained — use it.
+- **Resolved 2026-08-13** by retrieving the methodology files from z13 into
+  desktop `~/Alignerr/` (methodology only — the 260 MB Batch 5 PDF pools were
+  deliberately left behind, per "methodology transfers; corpus does not"):
+
+**The 15-vs-≥3 conflict was form-slots vs a validity floor, exactly as suspected.**
+Verbatim: *"Use `step_1` through `step_15` as separate fields. Use at least three
+steps; leave unused fields empty."* So **≥3 is the rule**; 15 is the platform form.
+
+**Full trajectory step vocabulary** (and it is explicitly *not* closed —
+*"These are descriptive categories, not mandatory wording"*):
+
+| Step form | Definition |
+|---|---|
+| **Scan** | Visually scan the whole pool for an exact condition; state count and exact filenames |
+| **Reference lookup** | Open one exact filename, locate one field, state its value |
+| **Extract** | Open one exact filename, extract the requested value(s) from a stated location |
+| **Calculate** | Show one arithmetic operation as a full expression with its result |
+| **Derive/final** | Apply the final derivation; round to exactly two decimals |
+
+Three source rules that sharpen the local mapping in §2:
+
+- *"Each step describes exactly **one action**. Do not combine scanning/searching
+  and extraction in one step."* — the compound-call prohibition, stated directly.
+- *"Whenever a step produces multiple candidates but later steps retain only some,
+  explicitly name the rejected candidates and explain why each was dropped."* —
+  drop-reasons are mandatory, not optional colour.
+- *"Do not use PDF text search as the source of truth; some PDFs have broken text
+  layers."* — the original form of "grader reads artifacts, not narration."
+
+**Acceptance rule that is really R6:** *"Find all matching files: no omissions and
+no extras."* The local equivalent is scope enforcement — an answer that edits the
+right file plus three others is the "no extras" failure.
+
+**Instruction-conflict rule (transferable as a fixture design).** Batch 4 carried a
+genuine internal contradiction between two skipping rules. The ruling was: *"Do not
+improvise if that situation occurs. Preserve the exhaustive scan evidence, open an
+issue, and request an operator ruling before skipping or submitting."* A fixture
+whose spec is deliberately self-contradictory, where correct behaviour is to
+**escalate rather than guess**, is a strong candidate discriminator for capable
+models.
+
+### The failure catalog: what it actually catalogues
+
+`batch4_failure_catalog.md` opens by scoping itself, and the scoping is the point:
+
+> **this catalog documents our own harnesses' mistakes, not external reviewers'
+> claims.** A reviewer disputing an answer is an input to be independently
+> verified, not a party whose competence gets graded here.
+
+All four entries are **one root pattern — reviewer-dispute capitulation** — and the
+generalisation is sharper than "dispute ≠ verdict":
+
+1. *"A dispute is a claim, not a verdict, regardless of who raises it or how
+   confident it sounds."*
+2. **Evaluate each sub-claim independently.** A dispute can be right about the file
+   set and wrong about the arithmetic. Entry 1's diagnosis: *"The correct parts of
+   the dispute made the incorrect parts look credible by association — that's the
+   actual failure mode."*
+3. **Capitulation runs in both directions.** Entry 4 is over-*exclusion* under
+   reviewer pressure: *"abandon a previously-sound judgment call without
+   re-verifying whether the reviewer's objection is actually correct."*
+4. **Not every blocked dispute is a mistake.** Entry 3 is recorded as *closed, not
+   a confirmed harness failure* — the reviewer turned out to be right and the
+   ambiguity was real. *"'Hold for clarification' is a valid outcome distinct from
+   'harness was wrong'."*
+
+Direct consequence for this eval programme: the **harness-defect catalogue**
+(extractor bug, name-gated system prompt, uncontrolled sampling/context/thinking)
+is a *different artifact* from the model scoreboard and the two must never be
+pooled — which is exactly why `e1`–`e3` are retained as harness records rather
+than deleted or re-scored.
+
+### §7 — `Labeling_Instructions.pdf`: an Alignerr rubric already aimed at code
+
+A separate Alignerr engagement (Model Response Evaluation, repo-based) that ships
+a **code-editing evaluation rubric** — closer to Front E's target format than the
+DocAI corpus, and present on this host. Load-bearing parts:
+
+- **Forced-direction preference scale, 0–7, with no tie.** 3/4 is the
+  "reasonable people could disagree" band. *"Correctness and final code quality
+  matter most. A model that took a messy path but produced better final code
+  should be rated higher than a model that was efficient but produced weaker
+  code."*
+- **12 behavioural weakness codes**, each requiring evidence-backed justification:
+  `INST · OVERENG · TOOL · LAZY · VERIFY · FALSE · ROOT · DESTRUCT · FILE ·
+  HALLUC · DOCS · VERBOSE/FORMAT`.
+- **Disambiguation pairs** — the part most rubrics omit and the reason inter-rater
+  agreement holds: *VERIFY* = did not check vs *FALSE* = claimed it worked when it
+  did not; *TOOL* = used a real tool wrong vs *HALLUC* = invented one; *LAZY* =
+  gave up early vs *ROOT* = finished but fixed symptoms.
+- **Flagging rules that map directly onto harness guards:** evaluate final output,
+  not chain-of-thought; do not penalise pre-existing codebase issues; do not
+  penalise for not running tests when execution is disabled; **apply weaknesses
+  symmetrically** across compared models.
+- **Three-line summary:** `Correctness > Efficiency` · `Evidence > Assumptions` ·
+  `Final Code > Process`.
 | `project-phoenix/docs/handoffs/NEXT_SESSION.md` §E | Front E status |
