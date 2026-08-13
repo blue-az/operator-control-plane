@@ -36,11 +36,16 @@ failure with no retained output is precisely the confound that invalidated
 the 88 pre-890d595 negatives, so the write fails closed -- if it raises, the
 caller must not mark the cell done.
 
-Known gap: tool-call count is not parsed into a structured field (opr's own
-stdout format was not validated against a real run while writing this).
-Wall-clock and pass/fail are exact; with --trace-dir the raw output needed to
-derive tool-call counts is now retained, so that parse can be added later
-without re-running the matrix.
+Trajectory: every trace now carries a parsed `trajectory` object -- the ordered
+tool calls with their paths and errors, call counts, the two harness-visible
+terminations (repeat-guard, non-dispatch), and token/thinking accounting. This
+closes the previous "tool-call count is not parsed" gap. It is descriptive only:
+the deterministic postcondition remains the sole gate, and the parse is
+deliberately tolerant so it can never fail a cell the grader already decided.
+
+Scope: run_trial hashes the fixture before opr runs and passes that manifest to
+the grader, which is what makes a `files_unchanged` postcondition able to enforce
+LOCAL_LANE_CONTRACT R6. Tasks without such a postcondition are unaffected.
 """
 
 from __future__ import annotations
@@ -62,7 +67,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 import task_lint  # noqa: E402
 
-from fixtures import build_fixture, cleanup_fixture  # noqa: E402
+from fixtures import build_fixture, cleanup_fixture, hash_tree  # noqa: E402
 from grading import grade  # noqa: E402
 
 TASKS_DIR = Path(__file__).resolve().parent / "tasks"
@@ -167,6 +172,61 @@ def _as_text(blob: str | bytes | None) -> str:
     return blob
 
 
+_TOOL_CALL_MARKER = "[Model requests tool call: "
+_TOOL_OUTPUT_MARKER = "[Tool Output]"
+
+
+def parse_trajectory(stdout: str) -> dict:
+    """Turn opr's stdout into a structured trajectory.
+
+    The runner previously recorded only pass/fail and wall clock, so the one
+    thing an eval most wants to know about an agentic failure -- what the model
+    actually did -- had to be read by eye out of a trace. This parses it.
+
+    Fields mirror the Alignerr trajectory rules the gold standard composes in:
+    each dispatched call is one action (their "do not combine scanning and
+    extraction in one step"), and failed calls are retained rather than dropped
+    (their mandatory drop-reasons for discarded candidates). `stopped_repeat`
+    and `no_dispatch` capture the two harness-visible terminations.
+
+    Parsing is deliberately tolerant: an unrecognised line is skipped rather
+    than raising, because a trajectory parse must never be able to fail a cell
+    that the deterministic postcondition already graded.
+    """
+    calls: list[dict] = []
+    for chunk in stdout.split(_TOOL_CALL_MARKER)[1:]:
+        tool = chunk.split("]", 1)[0].strip()
+        args = None
+        start = chunk.find("{")
+        if start != -1:
+            try:
+                args, _ = json.JSONDecoder().raw_decode(chunk, start)
+            except ValueError:
+                args = None
+        output = ""
+        if _TOOL_OUTPUT_MARKER in chunk:
+            output = chunk.split(_TOOL_OUTPUT_MARKER, 1)[1].strip()
+        ok = not output.startswith("Error:")
+        calls.append(
+            {
+                "tool": tool,
+                "path": (args or {}).get("path"),
+                "ok": ok,
+                "error": output.splitlines()[0][:200] if not ok else None,
+            }
+        )
+    return {
+        "tool_calls": calls,
+        "n_calls": len(calls),
+        "n_failed_calls": sum(1 for c in calls if not c["ok"]),
+        "distinct_tools": sorted({c["tool"] for c in calls}),
+        "stopped_repeat": "[Stopped: model repeated" in stdout,
+        "no_dispatch": "[No tool dispatched" in stdout,
+        "completion_tokens": sum(int(m) for m in re.findall(r"completion=(\d+)", stdout)),
+        "think_chars": sum(int(m) for m in re.findall(r"think_chars=(\d+)", stdout)),
+    }
+
+
 def trace_path_for(trace_dir: Path, task_id: str, level: str, model: str, trial: int) -> Path:
     safe_model = re.sub(r"[^A-Za-z0-9._-]", "-", model)
     return trace_dir / f"{task_id}__{level}__{safe_model}__t{trial}.json"
@@ -203,6 +263,7 @@ def write_trace(
         "grade_detail": record.get("detail"),
         "prompt": prompt,
         "argv": argv,
+        "trajectory": parse_trajectory(stdout),
         "stdout": stdout,
         "stderr": stderr,
     }
@@ -304,6 +365,9 @@ def run_trial(
     fixture_root = build_fixture(
         task.get("files", {}), prefix=f"{task['task_id']}-{level}", remove=task.get("remove")
     )
+    # Pre-run state, so a scope postcondition can tell "edited the declared file"
+    # from "edited the declared file and three others". Taken before opr runs.
+    manifest = hash_tree(fixture_root)
     task_slug = f"eval-{task['task_id']}-{level}-{model.replace(':', '-')}-t{trial_idx}"
     usage_id = None
     argv = [
@@ -362,7 +426,9 @@ def run_trial(
                 ))
             return record
         wall_clock = time.monotonic() - start
-        grade_result = grade(task["postcondition"], fixture_root, completed.stdout)
+        grade_result = grade(
+            task["postcondition"], fixture_root, completed.stdout, manifest
+        )
         outcome = "pass" if grade_result.passed else "fail"
         if use_ledger and usage_id:
             _ledger_session_end(ledger_dir, usage_id, outcome)
@@ -374,6 +440,11 @@ def run_trial(
             "machine": MACHINE,
             "passed": grade_result.passed,
             "detail": grade_result.detail,
+            "check_score": round(grade_result.score, 3),
+            "checks": [
+                {"name": c.name, "passed": c.passed, "detail": c.detail}
+                for c in grade_result.checks
+            ],
             "wall_clock_s": round(wall_clock, 1),
             "returncode": completed.returncode,
         }
