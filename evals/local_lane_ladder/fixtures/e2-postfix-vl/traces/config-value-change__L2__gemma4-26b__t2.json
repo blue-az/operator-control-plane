@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "1. In config/settings.ini, replace the line \"debug = false\" with \"debug = true\".\n2. Verify the file now contains \"debug = true\".\nOnly touch config/settings.ini.\n",
+    "--model",
+    "gemma4:26b",
+    "--workspace",
+    "/tmp/opr-eval-config-value-change-L2-vz11x94x",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn"
+  ],
+  "cell_key": "config-value-change|L2|gemma4:26b|2",
+  "git_rev": "5be7db50d97de45b1a2860995a2d411d311fdb9c",
+  "grade_detail": "pattern found: 'debug = true'",
+  "harness": "local-lane-eval",
+  "level": "L2",
+  "machine": "desktop",
+  "model": "gemma4:26b",
+  "passed": true,
+  "prompt": "1. In config/settings.ini, replace the line \"debug = false\" with \"debug = true\".\n2. Verify the file now contains \"debug = true\".\nOnly touch config/settings.ini.\n",
+  "recorded_utc": "2026-08-12T23:52:27.466183+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: gemma4:26b (lane_1_local_repair)\nDispatching governed query...\nThinking...\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"config/settings.ini\",\n  \"target_content\": \"debug = false\",\n  \"replacement_content\": \"debug = true\"\n}\n\n[Tool Output]\nSuccessfully patched config/settings.ini.\n\n\n--- Output ---\n[Tool completed: patch_file]\nSuccessfully patched config/settings.ini.\n--------------\n",
+  "task_id": "config-value-change",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trial": 2,
+  "wall_clock_s": 3.4
+}
