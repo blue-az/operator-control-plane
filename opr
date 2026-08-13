@@ -449,10 +449,41 @@ class Dispatcher:
         return f"{base}_local"
 
     def _dispatch_ollama(
-        self, model: str, task: str, ollama_url: str, request_timeout: int = 600
+        self,
+        model: str,
+        task: str,
+        ollama_url: str,
+        request_timeout: int = 600,
+        options: dict | None = None,
     ) -> str:
+        """Dispatch to Ollama.
+
+        `options` goes through verbatim as the request's `options` object.
+        Omitted entirely when empty, which reproduces the previous
+        uncontrolled behaviour exactly: Ollama then applies each model's own
+        Modelfile defaults for temperature, seed and num_ctx.
+
+        Leaving those uncontrolled has bitten twice, so prefer setting them
+        for any measured run:
+          - no temperature/seed makes every cell a fresh stochastic draw, so
+            a 3-trial cell cannot separate a 1.0 model from a 0.85 one;
+          - no num_ctx means context comes from whatever each model ships,
+            which both varies across models and can push a large model into
+            CPU spill (qwen3:32b defaults to 32768 and spills at 25 GB on a
+            24 GB card; it is fully resident at 24576 and below).
+        """
         url = f"{ollama_url.rstrip('/')}/api/generate"
         payload = {"model": model, "prompt": task, "stream": False}
+        if options:
+            payload["options"] = dict(options)
+        # NOTE (uncontrolled variable, deliberately left alone): this system
+        # prompt is gated on a substring of the model NAME, so `gemma4:26b`
+        # receives a strict-JSON instruction that `gemma4:31b`, `gemma3:27b`,
+        # `qwen2.5-coder:14b` and others do not. Any cross-model comparison
+        # run through this path is confounded by it, and the confound points
+        # at exactly the emission-format behaviour the eval fixtures grade.
+        # Changing it would move every number already on record, so it is a
+        # policy decision for the operator, not a drive-by edit.
         if "no_think" in model or "26b" in model:
             payload["system"] = "Respond with strict JSON only. No thinking preamble. No markdown."
         try:
@@ -948,6 +979,7 @@ def run_agent_loop(
                 prompt,
                 config["local"]["ollama_url"],
                 config["local"].get("request_timeout", 600),
+                config["local"].get("options") or None,
             )
 
         tool_call = extract_json_tool_call(response)
@@ -1130,6 +1162,33 @@ def main():
         help="Skip injecting the BN header vocabulary into local-model prompts.",
     )
     parser.add_argument(
+        "--num-ctx",
+        type=int,
+        default=None,
+        help=(
+            "Context window for local models. Unset uses each model's own default, "
+            "which varies per model and can force CPU spill (qwen3:32b defaults to "
+            "32768 and spills at 25 GB on a 24 GB card; 24576 is fully resident). "
+            "Set it explicitly for any measured run."
+        ),
+    )
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=None,
+        help=(
+            "Sampling temperature for local models. Unset uses the model default "
+            "(non-zero), making every run a fresh stochastic draw. Use 0 for "
+            "reproducible measurement."
+        ),
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Sampling seed for local models. Pair with --temperature 0 for repeatable runs.",
+    )
+    parser.add_argument(
         "--eval-auto-confirm",
         action="store_true",
         help=(
@@ -1146,6 +1205,25 @@ def main():
     config = load_config(args.config)
 
     # Command line overrides
+    # Sampling/context options are merged over anything in the config file, so
+    # a measured run can pin them from the command line without editing config.
+    # Only keys actually supplied are set; unset keys stay absent so Ollama
+    # applies the model default exactly as before.
+    _cli_options = {
+        k: v
+        for k, v in (
+            ("num_ctx", args.num_ctx),
+            ("temperature", args.temperature),
+            ("seed", args.seed),
+        )
+        if v is not None
+    }
+    if _cli_options:
+        config.setdefault("local", {})
+        merged = dict(config["local"].get("options") or {})
+        merged.update(_cli_options)
+        config["local"]["options"] = merged
+
     if args.workspace:
         config["workspace_root"] = os.path.abspath(os.path.expanduser(args.workspace))
     if args.allow_run:

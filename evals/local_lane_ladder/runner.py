@@ -298,7 +298,7 @@ def _ledger_session_end(ledger_dir: Path, usage_id: str, outcome: str) -> None:
 
 def run_trial(
     task: dict, level: str, model: str, trial_idx: int, ledger_dir: Path, use_ledger: bool,
-    trace_dir: Path | None = None,
+    trace_dir: Path | None = None, sampling: list[str] | None = None,
 ) -> dict:
     prompt = task["prompts"][level]
     fixture_root = build_fixture(
@@ -315,6 +315,9 @@ def run_trial(
         "--no-govern",  # runner does its own explicit ledger tagging above
         "--no-bn",
     ]
+    # Recorded in the trace's argv, so a reader can see exactly which sampling
+    # and context settings produced a cell rather than inferring them.
+    argv.extend(sampling or [])
     start = time.monotonic()
     try:
         if use_ledger:
@@ -450,6 +453,26 @@ def main() -> int:
         help="Validate task prompts and print the planned grid; run no trials.",
     )
     parser.add_argument(
+        "--num-ctx", type=int, default=None,
+        help=(
+            "Pin the local-model context window for every cell. Unset means each "
+            "model uses its own default, which differs across models and can force "
+            "CPU spill on large ones -- both of which confound a comparison."
+        ),
+    )
+    parser.add_argument(
+        "--temperature", type=float, default=None,
+        help=(
+            "Pin sampling temperature for every cell. Unset means model defaults "
+            "(non-zero), so each cell is a fresh stochastic draw and n=3 cannot "
+            "separate a reliable model from a mostly-reliable one. Use 0 to measure."
+        ),
+    )
+    parser.add_argument(
+        "--seed", type=int, default=None,
+        help="Pin the sampling seed for every cell. Pair with --temperature 0.",
+    )
+    parser.add_argument(
         "--trace-dir", default=None,
         help=(
             "Retain one JSON trace per cell (raw opr stdout/stderr, argv, prompt, "
@@ -492,6 +515,24 @@ def main() -> int:
     if use_ledger:
         ensure_eval_harness_registered(ledger_dir / ".operator")
 
+    sampling: list[str] = []
+    for flag, value in (
+        ("--num-ctx", args.num_ctx),
+        ("--temperature", args.temperature),
+        ("--seed", args.seed),
+    ):
+        if value is not None:
+            sampling.extend([flag, str(value)])
+    if sampling:
+        print(f"Sampling pinned: {' '.join(sampling)}")
+    else:
+        print(
+            "Sampling NOT pinned -- model defaults for temperature/context. Cells are "
+            "stochastic draws and context varies by model; fine for a smoke, not for "
+            "a comparison.",
+            file=sys.stderr,
+        )
+
     trace_dir = Path(args.trace_dir).resolve() if args.trace_dir else None
     if trace_dir is not None:
         print(f"Trace retention: ON -> {trace_dir}")
@@ -513,7 +554,9 @@ def main() -> int:
             continue
         print(f"[{key}] running...")
         try:
-            result = run_trial(task, level, model, trial, ledger_dir, use_ledger, trace_dir)
+            result = run_trial(
+                task, level, model, trial, ledger_dir, use_ledger, trace_dir, sampling
+            )
         except OSError as exc:
             # Trace write failed. Abort rather than record an untraced cell --
             # state.json cannot distinguish the two after the fact.
