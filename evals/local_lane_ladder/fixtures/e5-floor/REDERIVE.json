@@ -1,0 +1,282 @@
+{
+  "checked_at_utc": "2026-08-13T02:46:48.612029+00:00",
+  "checker": {
+    "argv": [
+      "rederive_pack.py",
+      "fixtures/e5-floor",
+      "--expected-machine",
+      "desktop",
+      "--json-out",
+      "/home/blueaz/operator-control-plane/.operator/evidence/front-e1-gold-pack/rederive/e5-floor.json",
+      "--md-out",
+      "/home/blueaz/operator-control-plane/.operator/evidence/front-e1-gold-pack/rederive/e5-floor.md"
+    ],
+    "hostname": "z13",
+    "uid": 971,
+    "user": "operator-builder"
+  },
+  "checks": [
+    {
+      "detail": "n=90",
+      "name": "state.results non-empty",
+      "ok": true
+    },
+    {
+      "detail": "65/90 overall; models={'gemma4:12b': '17/18', 'gemma4:e4b': '13/18', 'granite4:latest': '8/18', 'llama3.1:8b': '9/18', 'qwen2.5-coder:14b': '18/18'}",
+      "model_totals": {
+        "gemma4:12b": {
+          "n": 18,
+          "pass": 17
+        },
+        "gemma4:e4b": {
+          "n": 18,
+          "pass": 13
+        },
+        "granite4:latest": {
+          "n": 18,
+          "pass": 8
+        },
+        "llama3.1:8b": {
+          "n": 18,
+          "pass": 9
+        },
+        "qwen2.5-coder:14b": {
+          "n": 18,
+          "pass": 18
+        }
+      },
+      "name": "postcondition totals",
+      "ok": true,
+      "task_totals": {
+        "alias-add|gemma4:12b": {
+          "n": 6,
+          "pass": 6
+        },
+        "alias-add|gemma4:e4b": {
+          "n": 6,
+          "pass": 1
+        },
+        "alias-add|granite4:latest": {
+          "n": 6,
+          "pass": 0
+        },
+        "alias-add|llama3.1:8b": {
+          "n": 6,
+          "pass": 0
+        },
+        "alias-add|qwen2.5-coder:14b": {
+          "n": 6,
+          "pass": 6
+        },
+        "config-value-change|gemma4:12b": {
+          "n": 6,
+          "pass": 6
+        },
+        "config-value-change|gemma4:e4b": {
+          "n": 6,
+          "pass": 6
+        },
+        "config-value-change|granite4:latest": {
+          "n": 6,
+          "pass": 6
+        },
+        "config-value-change|llama3.1:8b": {
+          "n": 6,
+          "pass": 5
+        },
+        "config-value-change|qwen2.5-coder:14b": {
+          "n": 6,
+          "pass": 6
+        },
+        "function-add|gemma4:12b": {
+          "n": 6,
+          "pass": 5
+        },
+        "function-add|gemma4:e4b": {
+          "n": 6,
+          "pass": 6
+        },
+        "function-add|granite4:latest": {
+          "n": 6,
+          "pass": 2
+        },
+        "function-add|llama3.1:8b": {
+          "n": 6,
+          "pass": 4
+        },
+        "function-add|qwen2.5-coder:14b": {
+          "n": 6,
+          "pass": 6
+        }
+      }
+    },
+    {
+      "detail": "sha256=e222a6686193f040\u2026",
+      "name": "RESULTS.md matches re-sum",
+      "ok": true
+    },
+    {
+      "detail": "expected=90 on_disk=90 missing=0 orphans=0",
+      "name": "trace completeness",
+      "ok": true
+    },
+    {
+      "detail": "mismatches=0",
+      "name": "state\u2194trace field consistency",
+      "ok": true
+    },
+    {
+      "detail": "all basenames match naming convention (or absent)",
+      "name": "state.trace basename",
+      "ok": true
+    },
+    {
+      "detail": "observed=['gemma4:12b', 'gemma4:e4b', 'granite4:latest', 'llama3.1:8b', 'qwen2.5-coder:14b'] (no --expected-models)",
+      "name": "model tags",
+      "ok": true
+    },
+    {
+      "detail": "counts={'desktop': 90} expected='desktop'",
+      "name": "machine provenance",
+      "ok": true
+    },
+    {
+      "detail": "samples=41 all matrix models 100% GPU in every observation; by_model={'qwen2.5-coder:14b': {'gpu': 10}, 'gemma4:12b': {'gpu': 18}, 'gemma4:e4b': {'gpu': 22}, 'llama3.1:8b': {'gpu': 19}, 'granite4:latest': {'gpu': 21}}",
+      "name": "GPU residency (no CPU spill)",
+      "ok": true,
+      "residency": {
+        "by_model": {
+          "gemma4:12b": {
+            "gpu": 18
+          },
+          "gemma4:e4b": {
+            "gpu": 22
+          },
+          "granite4:latest": {
+            "gpu": 21
+          },
+          "llama3.1:8b": {
+            "gpu": 19
+          },
+          "qwen2.5-coder:14b": {
+            "gpu": 10
+          }
+        },
+        "non_gpu_rows": [],
+        "row_count": 90,
+        "samples": 41
+      }
+    },
+    {
+      "detail": "revs={'1ef8364a459e0ab5ae409566eff6c49bbdc1a9ff': 90}",
+      "name": "trace git_rev coherence",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "git_revs": {
+    "1ef8364a459e0ab5ae409566eff6c49bbdc1a9ff": 90
+  },
+  "machines": {
+    "desktop": 90
+  },
+  "model_totals": {
+    "gemma4:12b": {
+      "n": 18,
+      "pass": 17
+    },
+    "gemma4:e4b": {
+      "n": 18,
+      "pass": 13
+    },
+    "granite4:latest": {
+      "n": 18,
+      "pass": 8
+    },
+    "llama3.1:8b": {
+      "n": 18,
+      "pass": 9
+    },
+    "qwen2.5-coder:14b": {
+      "n": 18,
+      "pass": 18
+    }
+  },
+  "models": [
+    "gemma4:12b",
+    "gemma4:e4b",
+    "granite4:latest",
+    "llama3.1:8b",
+    "qwen2.5-coder:14b"
+  ],
+  "n_results": 90,
+  "ok": true,
+  "pack": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e5-floor",
+  "pack_name": "e5-floor",
+  "ps_sha256": "421570d9e2bba5fd23f59336cd72eb94d82d7a4812451a2657f9ccd34b815981",
+  "results_md_sha256": "e222a6686193f040c5f7d64dc41547e811332817e4b24ccde878a143d56c8832",
+  "state_sha256": "b8b2e55a6aec16840fbaa8aed601c84edce4b52a6cf7341487921cb11607d4da",
+  "task_totals": {
+    "alias-add|gemma4:12b": {
+      "n": 6,
+      "pass": 6
+    },
+    "alias-add|gemma4:e4b": {
+      "n": 6,
+      "pass": 1
+    },
+    "alias-add|granite4:latest": {
+      "n": 6,
+      "pass": 0
+    },
+    "alias-add|llama3.1:8b": {
+      "n": 6,
+      "pass": 0
+    },
+    "alias-add|qwen2.5-coder:14b": {
+      "n": 6,
+      "pass": 6
+    },
+    "config-value-change|gemma4:12b": {
+      "n": 6,
+      "pass": 6
+    },
+    "config-value-change|gemma4:e4b": {
+      "n": 6,
+      "pass": 6
+    },
+    "config-value-change|granite4:latest": {
+      "n": 6,
+      "pass": 6
+    },
+    "config-value-change|llama3.1:8b": {
+      "n": 6,
+      "pass": 5
+    },
+    "config-value-change|qwen2.5-coder:14b": {
+      "n": 6,
+      "pass": 6
+    },
+    "function-add|gemma4:12b": {
+      "n": 6,
+      "pass": 5
+    },
+    "function-add|gemma4:e4b": {
+      "n": 6,
+      "pass": 6
+    },
+    "function-add|granite4:latest": {
+      "n": 6,
+      "pass": 2
+    },
+    "function-add|llama3.1:8b": {
+      "n": 6,
+      "pass": 4
+    },
+    "function-add|qwen2.5-coder:14b": {
+      "n": 6,
+      "pass": 6
+    }
+  },
+  "total_pass": 65
+}

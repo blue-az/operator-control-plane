@@ -1,0 +1,174 @@
+{
+  "checked_at_utc": "2026-08-13T02:46:48.464305+00:00",
+  "checker": {
+    "argv": [
+      "rederive_pack.py",
+      "fixtures/e2-postfix-vl",
+      "--expected-machine",
+      "desktop",
+      "--json-out",
+      "/home/blueaz/operator-control-plane/.operator/evidence/front-e1-gold-pack/rederive/e2-postfix-vl.json",
+      "--md-out",
+      "/home/blueaz/operator-control-plane/.operator/evidence/front-e1-gold-pack/rederive/e2-postfix-vl.md"
+    ],
+    "hostname": "z13",
+    "uid": 971,
+    "user": "operator-builder"
+  },
+  "checks": [
+    {
+      "detail": "n=18",
+      "name": "state.results non-empty",
+      "ok": true
+    },
+    {
+      "detail": "17/18 overall; models={'gemma4:26b': '8/9', 'qwen3-vl:30b': '9/9'}",
+      "model_totals": {
+        "gemma4:26b": {
+          "n": 9,
+          "pass": 8
+        },
+        "qwen3-vl:30b": {
+          "n": 9,
+          "pass": 9
+        }
+      },
+      "name": "postcondition totals",
+      "ok": true,
+      "task_totals": {
+        "alias-add|gemma4:26b": {
+          "n": 3,
+          "pass": 2
+        },
+        "alias-add|qwen3-vl:30b": {
+          "n": 3,
+          "pass": 3
+        },
+        "config-value-change|gemma4:26b": {
+          "n": 3,
+          "pass": 3
+        },
+        "config-value-change|qwen3-vl:30b": {
+          "n": 3,
+          "pass": 3
+        },
+        "function-add|gemma4:26b": {
+          "n": 3,
+          "pass": 3
+        },
+        "function-add|qwen3-vl:30b": {
+          "n": 3,
+          "pass": 3
+        }
+      }
+    },
+    {
+      "detail": "sha256=797f23ef8b25850c\u2026",
+      "name": "RESULTS.md matches re-sum",
+      "ok": true
+    },
+    {
+      "detail": "expected=18 on_disk=18 missing=0 orphans=0",
+      "name": "trace completeness",
+      "ok": true
+    },
+    {
+      "detail": "mismatches=0",
+      "name": "state\u2194trace field consistency",
+      "ok": true
+    },
+    {
+      "detail": "all basenames match naming convention (or absent)",
+      "name": "state.trace basename",
+      "ok": true
+    },
+    {
+      "detail": "observed=['gemma4:26b', 'qwen3-vl:30b'] (no --expected-models)",
+      "name": "model tags",
+      "ok": true
+    },
+    {
+      "detail": "counts={'desktop': 18} expected='desktop'",
+      "name": "machine provenance",
+      "ok": true
+    },
+    {
+      "detail": "samples=26 all matrix models 100% GPU in every observation; by_model={'qwen3-vl:30b': {'gpu': 21}, 'gemma4:26b': {'gpu': 2}}",
+      "name": "GPU residency (no CPU spill)",
+      "ok": true,
+      "residency": {
+        "by_model": {
+          "gemma4:26b": {
+            "gpu": 2
+          },
+          "qwen3-vl:30b": {
+            "gpu": 21
+          }
+        },
+        "non_gpu_rows": [],
+        "row_count": 23,
+        "samples": 26
+      }
+    },
+    {
+      "detail": "revs={'5be7db50d97de45b1a2860995a2d411d311fdb9c': 18}",
+      "name": "trace git_rev coherence",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "git_revs": {
+    "5be7db50d97de45b1a2860995a2d411d311fdb9c": 18
+  },
+  "machines": {
+    "desktop": 18
+  },
+  "model_totals": {
+    "gemma4:26b": {
+      "n": 9,
+      "pass": 8
+    },
+    "qwen3-vl:30b": {
+      "n": 9,
+      "pass": 9
+    }
+  },
+  "models": [
+    "gemma4:26b",
+    "qwen3-vl:30b"
+  ],
+  "n_results": 18,
+  "ok": true,
+  "pack": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e2-postfix-vl",
+  "pack_name": "e2-postfix-vl",
+  "ps_sha256": "ee6aa5b5c2221fa02357051e3c20ca11c6027c00c865f37aa528781fd312a682",
+  "results_md_sha256": "797f23ef8b25850c94c049741e8b1013099d3ef411977324ae03e96a80c5753a",
+  "state_sha256": "8b5fbc50bcca8a9edbdbbbde4093a14501e489b9858b65155f547331a6d5406b",
+  "task_totals": {
+    "alias-add|gemma4:26b": {
+      "n": 3,
+      "pass": 2
+    },
+    "alias-add|qwen3-vl:30b": {
+      "n": 3,
+      "pass": 3
+    },
+    "config-value-change|gemma4:26b": {
+      "n": 3,
+      "pass": 3
+    },
+    "config-value-change|qwen3-vl:30b": {
+      "n": 3,
+      "pass": 3
+    },
+    "function-add|gemma4:26b": {
+      "n": 3,
+      "pass": 3
+    },
+    "function-add|qwen3-vl:30b": {
+      "n": 3,
+      "pass": 3
+    }
+  },
+  "total_pass": 17
+}

@@ -1,7 +1,7 @@
 # E2 finding — qwen3-vl:30b as a local coding seat (superseded as a comparison)
 
 **Run:** desktop, 2026-08-12, rev `5be7db5`, 18/18 cells, 18/18 traces, both
-models 100% GPU at 32768 ctx. **Not UID-verified. No claim registered.**
+models 100% GPU at 32768 ctx. **UID-verified 2026-08-13** (pack integrity) by uid 971 on z13 ledger via `claim-0018`. Numbers re-derived in `REDERIVE.md`; pack remains superseded as a cross-model comparison by `e4-sampled/`.
 
 First post-fix pack (balanced-scan extractor). Ran before the remaining two
 harness confounds were found, so it is **superseded as a comparison** by
