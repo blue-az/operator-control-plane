@@ -1,0 +1,92 @@
+task_id: strict-log-format
+description: >
+  Build a log summariser against an exact output contract. The traps are all in
+  the format rather than the logic: a zero-padded hour, a deliberately
+  ungrammatical fixed plural, ascending order, hours with no errors omitted, and
+  an empty list rather than a message when there are none. A model that solves
+  the counting and ships its own nicer format fails, which is the point.
+
+files:
+  src/logsum.py: |
+    def error_report(log_text):
+        """Summarise ERROR lines per UTC hour.
+
+        Each log line looks like:
+            2026-08-11T14:23:05Z LEVEL message
+
+        LEVEL is one of INFO, WARN, ERROR and is matched case-sensitively.
+        Return a list of strings, one per hour that has at least one ERROR,
+        formatted exactly as "HH: N errors" -- two-digit hour, then a colon and
+        a single space, then the count, then a single space and the literal word
+        "errors" even when the count is 1. Sort ascending by hour. Ignore lines
+        that do not match the shape above. Return [] when there are no errors.
+        """
+        raise NotImplementedError
+
+  tests/check_logsum.py: |
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    sys.path.insert(0, ".")
+    from src.logsum import error_report
+
+    BASIC = (
+        "2026-08-11T09:15:00Z ERROR disk full\n"
+        "2026-08-11T14:23:05Z INFO started\n"
+        "not a log line at all\n"
+        "2026-08-11T14:41:00Z ERROR timeout\n"
+        "2026-08-11T14:52:00Z ERROR timeout again\n"
+        "2026-08-11T15:00:00Z WARN slow\n"
+    )
+    got = error_report(BASIC)
+    assert got == ["09: 1 errors", "14: 2 errors"], f"got {got!r}"
+
+    assert error_report("2026-08-11T10:00:00Z INFO fine\n") == [], "no errors must give []"
+    assert error_report("") == [], "empty input must give []"
+
+    midnight = error_report("2026-08-12T00:04:00Z ERROR boom\n")
+    assert midnight == ["00: 1 errors"], f"midnight hour must zero-pad, got {midnight!r}"
+
+    # Lowercase level must not count as an error.
+    assert error_report("2026-08-11T11:00:00Z error lowercase\n") == [], "LEVEL is case-sensitive"
+
+    print("LOGSUM_OK")
+
+prompts:
+  L0: "I need a summary of how many errors happened each hour from my logs."
+  L1: >
+    Implement error_report in src/logsum.py per its docstring: one entry per hour
+    containing at least one ERROR, formatted "HH: N errors", sorted ascending,
+    [] when there are none. Do not change the tests.
+  L2: |
+    1. Read src/logsum.py and read tests/check_logsum.py.
+    2. In src/logsum.py, replace the line "        raise NotImplementedError" with an
+       implementation of "def error_report(log_text):" that satisfies the docstring
+       already in that function.
+    3. Verify by running "python3 tests/check_logsum.py" from the fixture root;
+       it should exit 0 and print "LOGSUM_OK".
+    Only touch src/logsum.py.
+
+trajectory_hint:
+  - Read src/logsum.py for the output contract.
+  - Read tests/check_logsum.py for the exact expected strings.
+  - Patch the body of error_report in src/logsum.py.
+  - Run python3 tests/check_logsum.py and confirm it exits 0.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: battery passes
+      type: exec
+      command: python3 tests/check_logsum.py
+      timeout: 60
+    - name: function still defined
+      type: python_symbol
+      file: src/logsum.py
+      symbol: error_report
+      args: [log_text]
+    - name: tests not edited
+      type: files_unchanged
+      allowed:
+        - src/logsum.py
