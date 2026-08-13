@@ -9,6 +9,7 @@ to clean up.
 
 from __future__ import annotations
 
+import hashlib
 import shutil
 import tempfile
 from pathlib import Path
@@ -43,15 +44,40 @@ def build_fixture(
     away). Caller owns cleanup.
     """
     root = Path(tempfile.mkdtemp(prefix=f"opr-eval-{prefix}-")).resolve()
-    for rel_path, content in {**DISTRACTOR_FILES, **task_files}.items():
+    for rel_path, spec in {**DISTRACTOR_FILES, **task_files}.items():
         target = root / rel_path
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(content, encoding="utf-8")
+        # A task file may be a plain string, or {content: ..., mode: 0o755} when
+        # it has to be executable -- a "fix the failing script" fixture cannot be
+        # written any other way, since write_text always produces mode 644.
+        if isinstance(spec, dict):
+            target.write_text(spec["content"], encoding="utf-8")
+            if "mode" in spec:
+                target.chmod(spec["mode"])
+        else:
+            target.write_text(spec, encoding="utf-8")
     for rel_path in remove or []:
         target = root / rel_path
         if target.exists():
             target.unlink()
     return root
+
+
+def hash_tree(root: Path) -> dict[str, str]:
+    """Map every file under `root` to a SHA-256 of its bytes.
+
+    Taken once before the model runs and once after, this is what makes
+    LOCAL_LANE_CONTRACT R6 gradeable: the contract enumerates every file that may
+    be touched, but nothing ever checked that the model obeyed. Hashing bytes
+    rather than comparing mtimes means a rewrite with identical content counts as
+    unchanged, which is the behaviour we want -- R6 is about the resulting tree,
+    not about write syscalls.
+    """
+    manifest: dict[str, str] = {}
+    for path in sorted(root.rglob("*")):
+        if path.is_file() and not path.is_symlink():
+            manifest[str(path.relative_to(root))] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return manifest
 
 
 def cleanup_fixture(root: Path) -> None:
