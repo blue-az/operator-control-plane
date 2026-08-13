@@ -1,0 +1,12 @@
+# E6 pre-run provenance — thinking A/B
+captured_utc: 2026-08-13T03:00:03Z
+git_rev: 31220d27b58389c9d6eb605551f11e172405dadb
+controls: num_ctx 16384, temperature 0.8, uniform strict-JSON system prompt, n=6
+variable: --think on vs --think off (the ONLY difference between the two sub-packs)
+
+## think-support probe (run first; determines eligibility)
+clean A/B:            gemma4:26b, gemma4:31b, qwen3.6:27b, qwen3:32b
+no thinking mode:     gemma3:27b, qwen2.5-coder:14b (API errors on think=true)
+LEAKY suppression:    qwen3-vl:30b — think=false still emitted 2373 chars of
+                      reasoning and MORE tokens (578) than think=true (271).
+                      Excluded: its 'off' row would not measure suppression.

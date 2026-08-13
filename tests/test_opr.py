@@ -259,13 +259,16 @@ class _ScriptedDispatcher:
         self.responses = list(responses)
         self.dispatch_count = 0
         self.seen_options = []
+        self.seen_think = []
 
-    def _dispatch_ollama(self, model, prompt, url, timeout, options=None):
-        # Mirrors the real signature, including the sampling/context options
-        # the loop now forwards. Recording them lets a test assert that pinned
-        # settings actually reach the dispatch rather than being dropped.
+    def _dispatch_ollama(self, model, prompt, url, timeout, options=None, think=None):
+        # Mirrors the real signature, including the sampling/context options and
+        # reasoning mode the loop now forwards. Recording them lets a test assert
+        # that pinned settings actually reach the dispatch rather than being
+        # dropped -- which is exactly how the think parameter went unnoticed.
         self.dispatch_count += 1
         self.seen_options.append(options)
+        self.seen_think.append(think)
         if not self.responses:
             return "no more scripted responses"
         return self.responses.pop(0)
