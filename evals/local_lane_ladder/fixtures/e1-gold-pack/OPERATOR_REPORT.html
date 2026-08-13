@@ -1,4 +1,4 @@
-<title>E1 Local-Lane Matrix</title>
+<title>Local-Lane Model Floor</title>
 <style>
   :root {
     --ground:      #FBFBFD;
@@ -74,9 +74,6 @@
   }
 
   .wrap { max-width: 54rem; margin: 0 auto; }
-  .measure { max-width: 40rem; }
-
-  /* ---------- masthead ---------- */
 
   header.masthead {
     padding: 4rem 0 2rem;
@@ -110,12 +107,9 @@
     text-wrap: pretty;
   }
 
-  /* ---------- provenance strip ---------- */
-
   .provenance {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
-    gap: 0;
     border: 1px solid var(--rule);
     border-radius: 3px;
     background: var(--surface);
@@ -144,8 +138,7 @@
     color: var(--ink);
   }
   .prov-cell dd.ok { color: var(--pass); }
-
-  /* ---------- sections ---------- */
+  .prov-cell dd.warn { color: var(--flag); }
 
   section { margin: 0 0 3.5rem; }
 
@@ -172,7 +165,6 @@
     font-family: var(--sans);
     font-size: .95rem;
     font-weight: 650;
-    letter-spacing: .01em;
     margin: 2rem 0 .6rem;
   }
   p { margin: 0 0 1.1rem; max-width: 40rem; text-wrap: pretty; }
@@ -187,13 +179,7 @@
     border-radius: 2px;
   }
   a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
-  a:focus-visible, summary:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: 2px;
-  }
-
-  /* ---------- verdict callout ---------- */
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
   .verdict {
     border-left: 3px solid var(--flag);
@@ -214,15 +200,8 @@
     margin-bottom: .45rem;
   }
 
-  /* ---------- tables ---------- */
-
   .scroll { overflow-x: auto; margin: 0 0 1.2rem; }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    min-width: 30rem;
-    font-size: .93rem;
-  }
+  table { border-collapse: collapse; width: 100%; min-width: 32rem; font-size: .93rem; }
   caption {
     caption-side: top;
     text-align: left;
@@ -233,11 +212,7 @@
     color: var(--slate);
     padding-bottom: .6rem;
   }
-  th, td {
-    text-align: left;
-    padding: .58rem .8rem;
-    border-bottom: 1px solid var(--rule);
-  }
+  th, td { text-align: left; padding: .58rem .8rem; border-bottom: 1px solid var(--rule); }
   thead th {
     font-family: var(--mono);
     font-size: .7rem;
@@ -251,10 +226,12 @@
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); }
   td.model { font-family: var(--mono); font-size: .88rem; white-space: nowrap; }
   tbody tr:last-child td { border-bottom: none; }
+  tr.knee td { background: var(--accent-soft); }
 
   .score { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; }
   .score.full { color: var(--pass); }
   .score.part { color: var(--flag); }
+  .score.zero { color: var(--flag); font-weight: 700; }
 
   .pill {
     display: inline-block;
@@ -269,14 +246,7 @@
   .pill.clean { background: var(--pass-soft); color: var(--pass); }
   .pill.conf  { background: var(--flag-soft); color: var(--flag); }
 
-  /* ---------- trace comparison ---------- */
-
-  .traces {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
-    gap: 1rem;
-    margin: 1.5rem 0;
-  }
+  .traces { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1rem; margin: 1.5rem 0; }
   .trace {
     border: 1px solid var(--rule);
     border-radius: 3px;
@@ -294,11 +264,7 @@
     gap: .75rem;
     flex-wrap: wrap;
   }
-  .trace-head .who {
-    font-family: var(--mono);
-    font-size: .78rem;
-    color: var(--ink);
-  }
+  .trace-head .who { font-family: var(--mono); font-size: .78rem; color: var(--ink); }
   .trace.is-pass { border-top: 3px solid var(--pass); }
   .trace.is-fail { border-top: 3px solid var(--flag); }
   .trace pre {
@@ -311,18 +277,8 @@
     color: var(--ink-soft);
     flex: 1;
   }
-  .marker { color: var(--pass); font-weight: 600; }
-  .missing { color: var(--flag); font-weight: 600; }
-  .payload { background: var(--accent-soft); color: var(--ink); border-radius: 2px; }
-
-  .legend {
-    font-size: .85rem;
-    color: var(--slate);
-    max-width: 40rem;
-    margin: 0 0 1.1rem;
-  }
-
-  /* ---------- claim ledger ---------- */
+  .good { color: var(--pass); font-weight: 600; }
+  .bad  { color: var(--flag); font-weight: 700; }
 
   .ledger { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--surface); }
   .ledger-row {
@@ -339,8 +295,6 @@
   .ledger-row.no  .mark { color: var(--flag); }
   .ledger-row p { margin: 0; max-width: none; font-size: .93rem; }
   .ledger-row .sub { color: var(--slate); font-size: .85rem; margin-top: .2rem; }
-
-  /* ---------- repro ---------- */
 
   pre.cmd {
     font-family: var(--mono);
@@ -365,62 +319,72 @@
   }
   footer p { max-width: none; }
 
-  @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
-  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 
 <div class="wrap">
 
   <header class="masthead">
     <p class="eyebrow">Operator report &middot; Front E &middot; prepared for external review</p>
-    <h1>E1 Local-Lane Matrix</h1>
+    <h1>Local-Lane Model Floor</h1>
     <p class="standfirst">
-      Five local models, forty-five deterministically graded cells, full trace retention.
-      Seven cells failed &mdash; and the traces show six of them are a harness defect
-      spanning two model families, not a capability difference.
+      Twelve local models, 279 deterministically graded cells. The fixtures cannot
+      tell a 14B model from a 32B one &mdash; but going down, they break sharply, and
+      what breaks first is not code generation. It is carrying an exact file path.
     </p>
   </header>
 
   <dl class="provenance">
-    <div class="prov-cell"><dt>Date</dt><dd>2026-08-12</dd></div>
+    <div class="prov-cell"><dt>Date</dt><dd>2026-08-13</dd></div>
     <div class="prov-cell"><dt>Machine</dt><dd>desktop</dd></div>
-    <div class="prov-cell"><dt>Revision</dt><dd>90e91d7</dd></div>
-    <div class="prov-cell"><dt>Cells</dt><dd class="ok">45 / 45</dd></div>
-    <div class="prov-cell"><dt>Traces</dt><dd class="ok">45 / 45</dd></div>
-    <div class="prov-cell"><dt>Residency</dt><dd class="ok">100% GPU</dd></div>
-    <div class="prov-cell"><dt>Timeouts</dt><dd class="ok">0</dd></div>
     <div class="prov-cell"><dt>GPU</dt><dd>RTX 3090</dd></div>
-    <div class="prov-cell"><dt>Power cap</dt><dd>320 W</dd></div>
-    <div class="prov-cell"><dt>Context</dt><dd>32768</dd></div>
-    <div class="prov-cell"><dt>Trials / cell</dt><dd>3</dd></div>
-    <div class="prov-cell"><dt>UID re-derive</dt><dd style="color:var(--flag)">pending</dd></div>
+    <div class="prov-cell"><dt>Cells</dt><dd class="ok">279</dd></div>
+    <div class="prov-cell"><dt>Traces</dt><dd class="ok">279 / 279</dd></div>
+    <div class="prov-cell"><dt>Residency</dt><dd class="ok">100% GPU</dd></div>
+    <div class="prov-cell"><dt>Models</dt><dd>12</dd></div>
+    <div class="prov-cell"><dt>Size range</dt><dd>3.4B&ndash;32B</dd></div>
+    <div class="prov-cell"><dt>Claims filed</dt><dd class="warn">0</dd></div>
+    <div class="prov-cell"><dt>UID re-derive</dt><dd class="warn">pending</dd></div>
   </dl>
 
   <section>
-    <h2>What this run answers</h2>
-    <p class="section-note">Scope and method</p>
+    <h2>The two results</h2>
+    <p class="section-note">Summary</p>
 
     <p>
-      On a single-RTX-3090 desktop host, for three plan-shaped (L2) local-lane fixtures,
-      how do deterministic postcondition pass rates compare across five fully
-      GPU-resident local models &mdash; <code>gemma4:26b</code>, <code>gemma4:31b</code>,
-      <code>qwen2.5-coder:14b</code>, <code>gemma3:27b</code> and
-      <code>qwen3.6:27b</code> &mdash; at three trials per cell?
+      <strong>Above ~14B the fixtures are saturated.</strong> Seven models from 14B to
+      32B were run under identical controls; 62 of 63 cells passed. Every model clears
+      them, so the set cannot rank seats and must not be cited as if it can.
     </p>
     <p>
-      Every cell is graded by a machine-checkable postcondition that inspects the
-      resulting files &mdash; never the model&rsquo;s own narration or a self-reported
-      success. Each task runs against a disposable temp fixture, so no real repository
-      is touched.
+      <strong>Below ~12B they discriminate sharply, and monotonically.</strong> Five
+      models from 3.4B to 14.8B score 8/18, 9/18, 13/18, 17/18, 18/18 &mdash; ordered
+      by parameter count without exception. The failures are genuine: 19 of 25 are
+      &ldquo;the tool ran and did the wrong thing&rdquo;, not harness artifacts.
+    </p>
+    <p>
+      Reaching a state where those numbers mean anything required fixing three defects
+      in the harness itself, each of which had been silently biasing results. That work
+      is documented below, because it bears on how much weight the tables deserve.
+    </p>
+  </section>
+
+  <section>
+    <h2>Method</h2>
+    <p class="section-note">What is measured, and how</p>
+
+    <p>
+      Three plan-shaped (L2) fixtures, each graded by a machine-checkable postcondition
+      that inspects the resulting files &mdash; never the model&rsquo;s narration or a
+      self-reported success. Every trial runs against a disposable temp fixture, so no
+      real repository is touched. Every cell retains a full trace: raw stdout and
+      stderr, exact argv, prompt, revision, and grade outcome.
     </p>
 
     <div class="scroll">
       <table>
         <caption>Fixtures and their deterministic checks</caption>
-        <thead>
-          <tr><th>Task</th><th>Postcondition &mdash; the only thing scored</th></tr>
-        </thead>
+        <thead><tr><th>Task</th><th>Postcondition &mdash; the only thing scored</th></tr></thead>
         <tbody>
           <tr><td class="model">alias-add</td><td>Exact line present in <code>bash/.bash_aliases</code></td></tr>
           <tr><td class="model">config-value-change</td><td>New value present <em>and</em> stale value absent</td></tr>
@@ -431,266 +395,275 @@
 
     <p>
       L2 means plan-shaped prompting: exact paths, anchored edits, one tool call per
-      step, an explicit success criterion, and bounded scope. This run does not
-      re-derive the L0&rarr;L2 complexity ladder; it holds specificity constant and
-      varies only the model.
+      step, an explicit success criterion, bounded scope. All models ran fully
+      GPU-resident at <code>num_ctx 16384</code> with a uniform system prompt and
+      identical sampling.
     </p>
   </section>
 
   <section>
-    <h2>Results</h2>
-    <p class="section-note">Raw, as graded</p>
+    <h2>The instrument had to be repaired first</h2>
+    <p class="section-note">Three defects, each silently biasing results</p>
+
+    <p>
+      These were found in sequence, each exposed by fixing the one before it. They are
+      listed because a reader should know the earlier numbers were not merely noisy but
+      systematically wrong, and why the current ones are not.
+    </p>
 
     <div class="scroll">
       <table>
-        <caption>L2 pass rate and wall-clock, all tasks combined &mdash; nine cells per model</caption>
+        <caption>Harness defects found and fixed</caption>
+        <thead><tr><th>Defect</th><th>Effect on measurement</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Tool-call extraction used a <strong>greedy brace span</strong> from the first <code>{</code> to the last <code>}</code></td>
+            <td>A response carrying two objects produced an unparseable span, so a correct tool call was returned as prose and nothing dispatched. Confounded 5 of 45 cells across two model families.</td>
+          </tr>
+          <tr>
+            <td>The strict-JSON system prompt was gated on a <strong>substring of the model name</strong> (<code>"26b" in model</code>)</td>
+            <td>One model received an instruction its comparators did not &mdash; and it speaks directly to the emission behaviour being graded. Every cross-model comparison before this was confounded.</td>
+          </tr>
+          <tr>
+            <td><strong>No sampling or context control at all</strong> was sent to the model server</td>
+            <td>Context came from each model&rsquo;s own defaults, so it differed per model <em>and</em> pushed a 32B model into CPU spill. Temperature was unpinned, making every cell a fresh draw.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      All three are fixed, with tests, and the fix for each is covered by regression
+      cases built from the verbatim payloads that failed.
+    </p>
+  </section>
+
+  <section>
+    <h2>Above 14B: saturated</h2>
+    <p class="section-note">Seven models &middot; 63 cells &middot; identical controls</p>
+
+    <div class="scroll">
+      <table>
+        <caption>Controlled epoch &mdash; nine cells per model</caption>
+        <thead>
+          <tr><th>Model</th><th class="num">Pass</th><th class="num">Median</th><th class="num">Max</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="model">qwen2.5-coder:14b</td><td class="num"><span class="score full">9/9</span></td><td class="num">2.2s</td><td class="num">9.9s</td></tr>
+          <tr><td class="model">gemma3:27b</td><td class="num"><span class="score full">9/9</span></td><td class="num">3.4s</td><td class="num">17.8s</td></tr>
+          <tr><td class="model">gemma4:26b</td><td class="num"><span class="score part">8/9</span></td><td class="num">9.1s</td><td class="num">21.9s</td></tr>
+          <tr><td class="model">gemma4:31b</td><td class="num"><span class="score full">9/9</span></td><td class="num">20.3s</td><td class="num">36.6s</td></tr>
+          <tr><td class="model">qwen3:32b</td><td class="num"><span class="score full">9/9</span></td><td class="num">27.3s</td><td class="num">100.5s</td></tr>
+          <tr><td class="model">qwen3-vl:30b</td><td class="num"><span class="score full">9/9</span></td><td class="num">37.1s</td><td class="num">70.1s</td></tr>
+          <tr><td class="model">qwen3.6:27b</td><td class="num"><span class="score full">9/9</span></td><td class="num">41.4s</td><td class="num">154.2s</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      62 of 63. The single failure is genuine and worth keeping as a specimen: a model
+      read <code>bash/.bash_aliases</code> correctly, then issued its patch against
+      <code>.bash_aliases</code>. It is the same error that defines the floor below.
+    </p>
+    <p>
+      Correctness being a tie, the only thing these numbers decide is <strong>latency</strong>,
+      and it points away from the large models: a 19&times; median spread for no
+      measurable accuracy gain. <code>qwen3-vl:30b</code> is a vision-language model and
+      works as a coding seat, but costs 17&times; the median of the fastest.
+    </p>
+  </section>
+
+  <section>
+    <h2>Below 12B: the floor</h2>
+    <p class="section-note">Five models &middot; 90 cells &middot; n=6</p>
+
+    <div class="scroll">
+      <table>
+        <caption>Floor sweep &mdash; eighteen cells per model, by fixture</caption>
         <thead>
           <tr>
-            <th>Model</th>
-            <th class="num">Raw</th>
-            <th class="num">Gradeable</th>
-            <th class="num">Median</th>
-            <th class="num">Max</th>
-            <th>Status</th>
+            <th>Model</th><th class="num">Params</th><th class="num">Total</th>
+            <th class="num">alias-add</th><th class="num">config</th><th class="num">function-add</th><th class="num">Median</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="model">gemma4:26b</td>
-            <td class="num"><span class="score full">9/9</span></td>
-            <td class="num"><span class="score full">9/9</span></td>
-            <td class="num">6.4s</td><td class="num">27.5s</td>
-            <td><span class="pill clean">unconfounded</span></td>
+            <td class="model">granite4</td><td class="num">3.4B</td>
+            <td class="num"><span class="score part">8/18</span></td>
+            <td class="num"><span class="score zero">0/6</span></td>
+            <td class="num"><span class="score full">6/6</span></td>
+            <td class="num"><span class="score part">2/6</span></td><td class="num">1.8s</td>
           </tr>
           <tr>
-            <td class="model">gemma4:31b</td>
-            <td class="num"><span class="score full">9/9</span></td>
-            <td class="num"><span class="score full">9/9</span></td>
-            <td class="num">19.0s</td><td class="num">31.3s</td>
-            <td><span class="pill clean">unconfounded</span></td>
-          </tr>
-          <tr>
-            <td class="model">qwen3.6:27b</td>
-            <td class="num"><span class="score full">9/9</span></td>
-            <td class="num"><span class="score full">9/9</span></td>
-            <td class="num">23.7s</td><td class="num">126.1s</td>
-            <td><span class="pill clean">unconfounded</span></td>
-          </tr>
-          <tr>
-            <td class="model">qwen2.5-coder:14b</td>
-            <td class="num"><span class="score part">7/9</span></td>
-            <td class="num"><span class="score full">7/7</span></td>
-            <td class="num">2.1s</td><td class="num">9.9s</td>
-            <td><span class="pill conf">2 confounded</span></td>
-          </tr>
-          <tr>
-            <td class="model">gemma3:27b</td>
-            <td class="num"><span class="score part">5/9</span></td>
+            <td class="model">llama3.1:8b</td><td class="num">8.0B</td>
+            <td class="num"><span class="score part">9/18</span></td>
+            <td class="num"><span class="score zero">0/6</span></td>
             <td class="num"><span class="score part">5/6</span></td>
-            <td class="num">3.3s</td><td class="num">13.8s</td>
-            <td><span class="pill conf">3 confounded</span></td>
+            <td class="num"><span class="score part">4/6</span></td><td class="num">2.0s</td>
           </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="scroll">
-      <table>
-        <caption>Per-task breakdown (raw)</caption>
-        <thead>
           <tr>
-            <th>Model</th>
-            <th class="num">alias-add</th>
-            <th class="num">config-value-change</th>
-            <th class="num">function-add</th>
+            <td class="model">gemma4:e4b</td><td class="num">8.0B</td>
+            <td class="num"><span class="score part">13/18</span></td>
+            <td class="num"><span class="score zero">1/6</span></td>
+            <td class="num"><span class="score full">6/6</span></td>
+            <td class="num"><span class="score full">6/6</span></td><td class="num">2.5s</td>
           </tr>
-        </thead>
-        <tbody>
-          <tr><td class="model">gemma4:26b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
-          <tr><td class="model">gemma4:31b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
-          <tr><td class="model">qwen3.6:27b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
-          <tr><td class="model">qwen2.5-coder:14b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score part">1/3</span></td><td class="num"><span class="score full">3/3</span></td></tr>
-          <tr><td class="model">gemma3:27b</td><td class="num"><span class="score full">3/3</span></td><td class="num"><span class="score part">1/3</span></td><td class="num"><span class="score part">1/3</span></td></tr>
+          <tr class="knee">
+            <td class="model">gemma4:12b</td><td class="num">11.9B</td>
+            <td class="num"><span class="score part">17/18</span></td>
+            <td class="num"><span class="score full">6/6</span></td>
+            <td class="num"><span class="score full">6/6</span></td>
+            <td class="num"><span class="score part">5/6</span></td><td class="num">13.6s</td>
+          </tr>
+          <tr>
+            <td class="model">qwen2.5-coder:14b</td><td class="num">14.8B</td>
+            <td class="num"><span class="score full">18/18</span></td>
+            <td class="num"><span class="score full">6/6</span></td>
+            <td class="num"><span class="score full">6/6</span></td>
+            <td class="num"><span class="score full">6/6</span></td><td class="num">2.5s</td>
+          </tr>
         </tbody>
       </table>
     </div>
 
     <p>
-      Zero timeouts and zero non-zero return codes across all forty-five cells. Of the
-      seven failures, <strong>six were never dispatched as tool calls at all</strong> and
-      one is a genuine defect. The next section separates them.
-    </p>
-    <p>
-      The two matrices were run as sibling packs. E1 fixed its matrix at three models;
-      the 27B-class pair was added afterwards on the same three fixtures with the same
-      grader and harness, rather than by re-running or re-labelling E1.
+      Monotonic in parameter count, with the knee between <strong>8B and 12B</strong>.
     </p>
   </section>
 
   <section>
-    <h2>The finding</h2>
-    <p class="section-note">Why 7/9 is not a capability result</p>
+    <h2>What actually fails</h2>
+    <p class="section-note">The finding</p>
 
     <div class="verdict">
       <span class="label">Reviewer&rsquo;s attention</span>
       <p>
-        <code>qwen2.5-coder:14b</code> produced the <strong>correct edit in all three
-        trials</strong>. It received credit in one. The two failures are tool-call
-        emission format, not wrong answers.
+        The first capability to break is <strong>not tool-calling and not code
+        generation</strong> &mdash; small models manage both. It is carrying an exact
+        literal path from the prompt into the tool call.
       </p>
     </div>
 
-    <p class="legend">
-      Below are the retained traces for the passing and failing trials of the same cell.
-      The <span class="marker">green</span> lines are the harness dispatching a tool;
-      their <span class="missing">absence</span> is the defect. The
-      <span class="payload">highlighted</span> payload is identical across both.
+    <p>
+      The prompt names the file explicitly as <code>bash/.bash_aliases</code>. The
+      models below the knee drop the directory prefix and write to a path that does not
+      exist:
     </p>
 
     <div class="traces">
-      <div class="trace is-pass">
-        <div class="trace-head">
-          <span class="who">qwen2.5-coder:14b <span class="who">trial 3</span>middot; trial 3</span>
-          <span class="pill clean">passed &middot; 1.7s</span>
-        </div>
-<pre><span class="marker">[Model requests tool call: patch_file]</span>
-Arguments: {
-  <span class="payload">"tool": "patch_file",
-  "path": "config/settings.ini",
-  "target_content": "debug = false",
-  "replacement_content": "debug = true"</span>
-}
-
-<span class="marker">[Tool Output]</span>
-Successfully patched config/settings.ini.
-
---- Output ---
-[Tool completed: patch_file]
-Successfully patched config/settings.ini.</pre>
-      </div>
-
       <div class="trace is-fail">
         <div class="trace-head">
-          <span class="who">qwen2.5-coder:14b &middot; trials 1 &amp; 2</span>
-          <span class="pill conf">failed &middot; 9.5s / 2.2s</span>
+          <span class="who">granite4 &middot; 3.4B</span>
+          <span class="pill conf">0/6</span>
         </div>
-<pre><span class="missing">(no tool-call marker)</span>
-
---- Output ---
-```json
+<pre>[Model requests tool call: patch_file]
 {
-  <span class="payload">"tool": "patch_file",
-  "path": "config/settings.ini",
-  "target_content": "debug = false",
-  "replacement_content": "debug = true"</span>
+  "tool": "patch_file",
+  "path": <span class="bad">".bash_aliases"</span>,
+  "target_content": "alias nv='nvidia-smi'",
+  ...
 }
-```
-```json
-{ "tool": "grep_search",
-  "pattern": "^debug = true$" }
-```
 
-<span class="missing">(no tool output &mdash; nothing executed)</span></pre>
+[Tool Output]
+<span class="bad">Error: File not found: .bash_aliases</span></pre>
+      </div>
+
+      <div class="trace is-pass">
+        <div class="trace-head">
+          <span class="who">qwen2.5-coder &middot; 14.8B</span>
+          <span class="pill clean">6/6</span>
+        </div>
+<pre>[Model requests tool call: patch_file]
+{
+  "tool": "patch_file",
+  "path": <span class="good">"bash/.bash_aliases"</span>,
+  "target_content": "alias nv='nvidia-smi'",
+  ...
+}
+
+[Tool Output]
+<span class="good">Successfully patched bash/.bash_aliases.</span></pre>
       </div>
     </div>
 
     <p>
-      The <code>tool</code>, <code>path</code>, <code>target_content</code> and
-      <code>replacement_content</code> are byte-identical between the passing and
-      failing trials. The difference is that trial 3&rsquo;s emission was parsed as a
-      tool call and dispatched, while trials 1 and 2 emitted the same JSON as fenced
-      prose, which the harness printed instead of executing. No edit occurred, so the
-      postcondition correctly reported the pattern missing.
-    </p>
-    <p>
-      The failing trials also emit <em>two</em> fenced blocks in one response &mdash; the
-      edit plus a self-verification <code>grep_search</code> &mdash; which is the shape
-      that fails to parse. The passing trial emitted a single call. The behaviour is
-      intermittent for this model on this fixture.
+      <code>llama3.1:8b</code> compounds it by also truncating the anchor
+      <code>alias nv='nvidia-smi'</code> to <code>alias nv=</code>. In every case the
+      tool <strong>errored loudly</strong> rather than silently succeeding &mdash; the
+      harness behaved correctly and the models were simply wrong.
     </p>
 
-    <h3>Grading is correct; the defect is upstream of it</h3>
+    <h3>It decays with scale rather than switching on</h3>
     <p>
-      The grader did exactly what it should: it read the artifact, found no change, and
-      failed the cell. Nothing about the scoring needs revision. What the raw number
-      cannot express is <em>why</em> the artifact was unchanged, and that distinction is
-      the whole point of retaining traces.
+      Path-fidelity failures on this fixture run roughly 6/6, 5/6, 4/6, 0/6, 0/6 from
+      3.4B to 14.8B &mdash; and the same error still appears once at 26B. This is a
+      probability that falls with model size, not a threshold that is crossed. A larger
+      model does not make the failure impossible; it makes it rare.
     </p>
     <p>
-      This belongs to the same family as a known historical confound in this project, in
-      which a large batch of negative results could not be distinguished from harness
-      truncation because no output had been kept. Those were pre-existing; this is a
-      <strong>new instance under the current harness</strong>, which is why it is filed
-      as a catalogued harness failure rather than folded into a model ranking.
+      This matters for anyone relying on exact-path instructions: the failure is silent
+      in intent and loud only because the file happened not to exist. An edit to a path
+      that <em>does</em> exist would have succeeded against the wrong file.
     </p>
-
-    <h3>Honest restatement</h3>
-    <p>
-      <strong>Do not cite &ldquo;<code>qwen2.5-coder:14b</code> scores 7/9&rdquo; or
-      &ldquo;<code>gemma3:27b</code> scores 5/9&rdquo; as capability findings.</strong>
-      Excluding cells the harness never dispatched, the gradeable records are 7/7 and
-      5/6 respectively. Only one failure in the entire forty-five-cell set is
-      attributable to a model.
-    </p>
-
-    <h3>The one genuine failure</h3>
-    <p>
-      <code>gemma3:27b</code> on <code>function-add</code>, trial 2. Here the tool
-      <em>was</em> dispatched and reported success &mdash; the model simply wrote broken
-      code. It anchored on the line <code>return a + b</code> and emitted a replacement
-      that left a dangling copy of that line after the new function:
-    </p>
-<pre class="cmd">"replacement_content": "\n\ndef square(n):\n    return n * n\n\n    return a + b"</pre>
-    <p>
-      The result was an <code>IndentationError</code> on import. That is a real
-      anchored-edit failure and counts against the model.
-    </p>
-
-    <h3>The defect is not model-family-specific</h3>
-    <p>
-      This is the finding that outlives the scores. Across all forty-five cells the
-      emission defect appeared in <strong>two different model families</strong> &mdash;
-      <code>qwen2.5-coder:14b</code> and <code>gemma3:27b</code> &mdash; and never in
-      <code>gemma4:26b</code>, <code>gemma4:31b</code> or <code>qwen3.6:27b</code>. It
-      also appeared in two syntactic variants: fenced JSON in one family, bare JSON in
-      the other. The harness parses neither.
-    </p>
-    <p>
-      The three-model run alone could not separate &ldquo;a quirk of one model&rdquo;
-      from &ldquo;a defect in the harness&rdquo;. Two unrelated families failing the same
-      way &mdash; while the newer generation of <em>both</em> families passes cleanly
-      &mdash; is materially stronger evidence for the harness reading.
-    </p>
-    <div class="verdict">
-      <span class="label">Stated as a hypothesis, not a result</span>
-      <p>
-        The apparent pattern &mdash; older model generations emit unparseable JSON, newer
-        ones emit proper tool calls &mdash; rests on six confounded cells across two
-        models and was not what this matrix was designed to test. It does suggest the
-        parser is tuned to what current models happen to emit, which is a fragile
-        position for a grading harness.
-      </p>
-    </div>
   </section>
 
   <section>
-    <h2>Instrumentation note</h2>
-    <p class="section-note">Why this finding was visible at all</p>
+    <h2>The fixtures themselves are now graded</h2>
+    <p class="section-note">Instrument quality</p>
+
+    <div class="scroll">
+      <table>
+        <caption>Discriminating power across 3.4B&ndash;32B</caption>
+        <thead><tr><th>Fixture</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="model">alias-add</td>
+            <td><strong>The discriminator.</strong> Sharp cliff between 8B and 12B; carries essentially all the signal.</td>
+          </tr>
+          <tr>
+            <td class="model">config-value-change</td>
+            <td><strong>Saturated even at 3.4B</strong> (6/6). Carries no information at any size tested. Retire or harden.</td>
+          </tr>
+          <tr>
+            <td class="model">function-add</td>
+            <td>Weak and <strong>non-monotonic</strong> &mdash; an 8B model (6/6) outscores an 11.9B one (5/6).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
     <p>
-      Until immediately before this run, the eval runner captured the model
-      subprocess&rsquo;s stdout and stderr and then discarded both after grading,
-      persisting only pass/fail, a detail string, a return code and wall-clock time. Under
-      that runner, this matrix would have produced a clean-looking
-      &ldquo;<code>qwen2.5-coder:14b</code>: 7/9&rdquo; and no reviewer could have
-      distinguished a wrong answer from an unparsed tool call.
+      That <code>config-value-change</code> passes 6/6 on a 3.4B model while
+      <code>alias-add</code> scores 0/6 is itself informative. Both are single anchored
+      string edits and look equivalent in the manifest. The difference is the path
+      shape: <code>config/settings.ini</code> is conventional, while
+      <code>bash/.bash_aliases</code> is a dotfile inside a directory &mdash; a form
+      small models normalise away.
     </p>
+  </section>
+
+  <section>
+    <h2>Two methodology results worth carrying elsewhere</h2>
+    <p class="section-note">Applies to any local-model benchmark</p>
+
+    <h3>Temperature 0 is not a neutral control</h3>
     <p>
-      Per-cell trace retention was added first, and gated before any scoring: traces are
-      written for passes, graded failures <em>and</em> timeouts, the write fails closed so
-      an untraced cell cannot be silently recorded, and the option is off by default so
-      unaltered runs behave exactly as before. This is the first run scored under it, and
-      it immediately caught a confound. That is the argument for the requirement,
-      demonstrated rather than asserted.
+      Pinned for reproducibility, it produced a 6/9 for one model with every failure
+      being the repeat-guard. Greedy decoding locks an agentic loop into re-issuing an
+      identical tool call. Measured directly on the affected cell:
+      <strong>1/6 at temperature 0 against 6/6 at 0.8.</strong> Temperature 0 buys
+      reproducibility by introducing a failure mode absent from real use, and it
+      penalises loop-prone models specifically.
+    </p>
+
+    <h3>The seed is not honoured, and n=3 is weaker than it looks</h3>
+    <p>
+      The same seed on a high-entropy prompt produced different outputs on consecutive
+      calls, so seed-based reproducibility is unavailable on this stack. Apparent
+      determinism within a cell comes from the fixtures being low-entropy, not from
+      seeding working. One model measured 3/3, 3/8, 8/8, 8/8, 6/6 on the same cell
+      across separate windows &mdash; real variance lives <em>across</em> invocations,
+      where a three-trial cell cannot see it.
     </p>
   </section>
 
@@ -702,142 +675,104 @@ Successfully patched config/settings.ini.</pre>
       <div class="ledger-row yes">
         <span class="mark">&#10003;</span>
         <div>
-          <p><code>gemma4:26b</code>, <code>gemma4:31b</code> and <code>qwen3.6:27b</code> each cleared every L2 cell, 9/9.</p>
-          <p class="sub">Unconfounded &mdash; every cell dispatched a tool. Three models passed all three fixtures at three trials.</p>
+          <p>All 279 cells ran fully GPU-resident with a retained trace.</p>
+          <p class="sub">Residency sampled throughout every run; zero CPU-spill samples across every pack.</p>
         </div>
       </div>
       <div class="ledger-row yes">
         <span class="mark">&#10003;</span>
         <div>
-          <p>Both 27B-class models run fully GPU-resident on one 24&nbsp;GB card.</p>
-          <p class="sub">17&nbsp;GB at 32768 context, 100% GPU, verified before the run and sampled throughout. No spill and no dual-GPU requirement &mdash; the precondition the gold standard sets for evaluating this seat at all.</p>
+          <p>The floor sweep is monotonic in parameter count, and its failures are genuine.</p>
+          <p class="sub">19 of 25 are &ldquo;tool ran, wrong result&rdquo;. Only interpretable because the harness defects were fixed first.</p>
         </div>
       </div>
       <div class="ledger-row yes">
         <span class="mark">&#10003;</span>
         <div>
-          <p>All three models held 100% GPU residency for the duration.</p>
-          <p class="sub">Sampled every 20 seconds throughout; no CPU spill in any sample.</p>
-        </div>
-      </div>
-      <div class="ledger-row yes">
-        <span class="mark">&#10003;</span>
-        <div>
-          <p>Every cell has a retained trace, including both failures.</p>
-          <p class="sub">27 cells, 27 traces, each carrying raw stdout/stderr, argv, prompt, revision and grade outcome.</p>
+          <p>Three harness defects were found, fixed, and covered by regression tests.</p>
+          <p class="sub">Each built from the verbatim payloads that failed.</p>
         </div>
       </div>
       <div class="ledger-row no">
         <span class="mark">&times;</span>
         <div>
-          <p>No claim is registered from this run.</p>
-          <p class="sub">The governing manifest requires an independent re-derive by a distinct user identity &mdash; of postcondition totals, trace completeness, model tags, residency and machine provenance &mdash; before any result is registered. That has not happened. The author of a run should not be its verifier.</p>
+          <p>No claim is registered from any of this.</p>
+          <p class="sub">An independent re-derive by a distinct user identity is required first, and now spans five packs. The author of a run should not be its verifier.</p>
         </div>
       </div>
       <div class="ledger-row no">
         <span class="mark">&times;</span>
         <div>
-          <p>The <code>qwen2.5-coder:14b</code> and <code>gemma3:27b</code> raw rows are not usable as capability measurements.</p>
-          <p class="sub">Confounded by the emission-format defect &mdash; 2 and 3 cells respectively. Cite the gradeable figures, 7/7 and 5/6, or nothing.</p>
+          <p>Nothing here ranks models above ~14B.</p>
+          <p class="sub">The fixtures are saturated there. Latency separates them; correctness does not.</p>
         </div>
       </div>
       <div class="ledger-row no">
         <span class="mark">&times;</span>
         <div>
-          <p>Accuracy here says nothing about judgment or prose quality.</p>
-          <p class="sub">These fixtures measure plan-shaped tool execution against deterministic postconditions. An informal probe the same day had <code>qwen3.6:27b</code> performing poorly as an evaluative judge; that probe was non-citable for lack of a postcondition, and neither result transfers to the other task class. Do not merge them into one ranking.</p>
+          <p>&ldquo;A 3B model cannot do agentic coding&rdquo; does not follow.</p>
+          <p class="sub">What follows is that a 3.4B model fails <em>these three fixtures</em> at <em>this prompt shape</em>, on path fidelity. A different prompt shape or a runtime that re-injects exact paths could plausibly change it.</p>
         </div>
       </div>
       <div class="ledger-row no">
         <span class="mark">&times;</span>
         <div>
-          <p>The generation-vs-emission-format pattern is not established.</p>
-          <p class="sub">Six confounded cells across two models, observed rather than designed for. Worth a dedicated test; not worth a claim.</p>
-        </div>
-      </div>
-      <div class="ledger-row no">
-        <span class="mark">&times;</span>
-        <div>
-          <p>Wall-clock figures are not comparable to earlier throughput packets.</p>
-          <p class="sub">This run used a 320&nbsp;W power cap; the project&rsquo;s residency-verified decode rates were measured at 220&nbsp;W, and dense models scale strongly with power. Pass rates are unaffected &mdash; grading is on deterministic postconditions, not timing.</p>
-        </div>
-      </div>
-      <div class="ledger-row no">
-        <span class="mark">&times;</span>
-        <div>
-          <p>This does not reopen the complexity-ladder or harness-regression questions.</p>
-          <p class="sub">Specificity was held constant at L2 throughout. The finding is one cell-class defect, not a ladder result.</p>
+          <p>Cross-invocation variance is unexplained.</p>
+          <p class="sub">Something varies at the server or model-load level that none of these controls reach. Not addressed here.</p>
         </div>
       </div>
     </div>
   </section>
 
   <section>
+    <h2>Practical reading</h2>
+    <p class="section-note">If you have to choose a local seat today</p>
+    <ul>
+      <li><strong>Nothing below ~12B</strong> for plan-shaped edit work, and note it fails by writing to a path that does not exist rather than by refusing.</li>
+      <li><strong>12B is the knee, not the answer.</strong> 17/18, but at a 13.6s median &mdash; over 5&times; a 14.8B model&rsquo;s 2.5s, for a worse score. Small does not mean fast.</li>
+      <li><strong><code>qwen2.5-coder:14b</code> is the value pick:</strong> 18/18 at 2.5s median in 9&nbsp;GB.</li>
+      <li>Large models buy latency, not accuracy, on work of this size. Spend the VRAM only when the task exceeds what these fixtures represent.</li>
+    </ul>
+  </section>
+
+  <section>
     <h2>Reproduction</h2>
     <p class="section-note">For the verifying reviewer</p>
 
-    <p>
-      Run from the repository root on the <code>desktop</code> host. The matrix is
-      resumable &mdash; completed cells are skipped, so an interrupted sweep restarts with
-      the same command.
-    </p>
-
 <pre class="cmd">OPERATOR_MACHINE=desktop python3 evals/local_lane_ladder/runner.py \
-  --models gemma4:26b gemma4:31b qwen2.5-coder:14b \
+  --models &lt;models&gt; \
   --tasks alias-add config-value-change function-add \
-  --levels L2 \
-  --trials 3 \
-  --output   .../e1-gold-pack/RESULTS.md \
-  --state    .../e1-gold-pack/state.json \
-  --trace-dir .../e1-gold-pack/traces</pre>
+  --levels L2 --trials 6 \
+  --num-ctx 16384 --temperature 0.8 \
+  --output &lt;pack&gt;/RESULTS.md \
+  --state  &lt;pack&gt;/state.json \
+  --trace-dir &lt;pack&gt;/traces</pre>
 
-    <p>Completeness check &mdash; a short count means the matrix is not scoreable:</p>
-<pre class="cmd">ls .../e1-gold-pack/traces/*.json | wc -l   # expect 27</pre>
+    <p>Completeness check &mdash; a short count means the pack is not scoreable:</p>
+<pre class="cmd">ls &lt;pack&gt;/traces/*.json | wc -l</pre>
 
-    <h3>Retained artifacts</h3>
-    <ul>
-      <li><code>traces/</code> &mdash; 27 per-cell JSON traces, one per graded cell</li>
-      <li><code>state.json</code> &mdash; per-cell records with trace paths</li>
-      <li><code>RESULTS.md</code> &mdash; generated pass-rate matrix</li>
-      <li><code>FINDING.md</code> &mdash; the catalogued harness failure described above</li>
-      <li><code>evidence/prerun.txt</code> &mdash; host, revision, GPU, model inventory</li>
-      <li><code>evidence/ollama_ps_samples.log</code> &mdash; residency sampled at 20s intervals</li>
-    </ul>
+    <p>
+      Each pack retains <code>traces/</code> (one JSON per cell), <code>state.json</code>,
+      <code>RESULTS.md</code>, <code>FINDING.md</code>, and <code>evidence/</code> holding
+      pre-run provenance and interval residency samples.
+    </p>
   </section>
 
   <section>
     <h2>Open items</h2>
     <p class="section-note">Recommended next actions</p>
     <ol>
-      <li>
-        <strong>Independent re-derive by a distinct identity.</strong> Required before any
-        result here is registered as a claim. Everything needed is retained.
-      </li>
-      <li>
-        <strong>Decide the harness&rsquo;s position on fenced-JSON tool emissions.</strong>
-        Either accept them, or reject them with a distinguishable error so a parse failure
-        can never again look like a wrong answer. The silent-print behaviour is the actual
-        defect; both alternatives are preferable.
-      </li>
-      <li>
-        <strong>Re-run the affected cell classes at higher n</strong> to measure the
-        emission-format rate, and test the generation hypothesis deliberately rather
-        than incidentally. Outside the present scope.
-      </li>
-      <li>
-        <strong>Weigh <code>qwen3.6:27b</code>&rsquo;s accuracy against its latency
-        before seating it.</strong> It matched the two <code>gemma4</code> models at 9/9
-        while running fully GPU-resident, but its median cell took 23.7s against
-        <code>gemma4:26b</code>&rsquo;s 6.4s, with one cell at 126.1s. That trade is
-        acceptable for delegated work and poor for anything interactive.
-      </li>
+      <li><strong>Independent re-derive by a distinct identity</strong>, now spanning five packs. Required before any of this is registered as a claim.</li>
+      <li><strong>Retire or harden <code>config-value-change</code>.</strong> It has carried no information at any model size tested.</li>
+      <li><strong>Build one fixture above the ceiling</strong> &mdash; a multi-file edit, an anchor appearing more than once, four-plus dependent steps, or a repair loop after a failing test. Adding models to the current set produces more 9/9 rows and no information.</li>
+      <li><strong>Investigate cross-invocation variance</strong> directly, with many repetitions spread over time rather than more trials inside one window.</li>
     </ol>
   </section>
 
   <footer>
     <p>
       Prepared by the operator&rsquo;s implementer seat on the desktop host. All figures
-      are drawn from the retained run artifacts rather than restated from narration.
+      are drawn from retained run artifacts rather than restated from narration.
       Wall-clock values are exact; the pass/fail column is the only graded quantity.
       This report is evidence for review, not a registered claim.
     </p>
