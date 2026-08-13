@@ -1,0 +1,172 @@
+--- 01:41:51Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 01:42:06Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now    
+--- 01:42:21Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      4 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now    
+--- 01:42:36Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      4 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now    
+--- 01:42:51Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:e4b         c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      4 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now    
+--- 01:43:06Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:e4b         c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      4 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now    
+--- 01:43:21Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:e4b         c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      4 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      3 minutes from now    
+--- 01:43:36Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b         4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      3 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      3 minutes from now    
+--- 01:43:51Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b         4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      3 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      3 minutes from now    
+--- 01:44:06Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b         4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      3 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      3 minutes from now    
+--- 01:44:21Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b         4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      3 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      2 minutes from now    
+--- 01:44:36Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b         4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      2 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      2 minutes from now    
+--- 01:44:51Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b         4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      2 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      2 minutes from now    
+--- 01:45:06Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b         4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      2 minutes from now    
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      2 minutes from now    
+--- 01:45:21Z
+NAME               ID              SIZE      PROCESSOR    CONTEXT    UNTIL                   
+llama3.1:8b        46e0c10c039e    6.0 GB    100% GPU     16384      2 minutes from now         
+granite4:latest    4235724a127c    3.0 GB    100% GPU     16384      About a minute from now    
+--- 01:45:36Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL                   
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now         
+llama3.1:8b          46e0c10c039e    6.0 GB    100% GPU     16384      About a minute from now    
+granite4:latest      4235724a127c    3.0 GB    100% GPU     16384      About a minute from now    
+--- 01:45:51Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL                   
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now         
+llama3.1:8b          46e0c10c039e    6.0 GB    100% GPU     16384      About a minute from now    
+granite4:latest      4235724a127c    3.0 GB    100% GPU     16384      About a minute from now    
+--- 01:46:06Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL                   
+granite4:latest      4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now         
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now         
+llama3.1:8b          46e0c10c039e    6.0 GB    100% GPU     16384      About a minute from now    
+--- 01:46:21Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+llama3.1:8b          46e0c10c039e    6.0 GB    100% GPU     16384      4 minutes from now    
+granite4:latest      4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now    
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now    
+--- 01:46:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 01:46:51Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:47:06Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:47:21Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:47:36Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:47:51Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:48:06Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now    
+gemma4:e4b           c6eb396dbd59    3.4 GB    100% GPU     16384      3 minutes from now    
+--- 01:48:21Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now    
+gemma4:e4b           c6eb396dbd59    3.4 GB    100% GPU     16384      3 minutes from now    
+--- 01:48:36Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+granite4:latest      4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now    
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now    
+gemma4:e4b           c6eb396dbd59    3.4 GB    100% GPU     16384      3 minutes from now    
+--- 01:48:51Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+llama3.1:8b          46e0c10c039e    5.9 GB    100% GPU     16384      4 minutes from now    
+granite4:latest      4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now    
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now    
+--- 01:49:07Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+llama3.1:8b          46e0c10c039e    5.9 GB    100% GPU     16384      4 minutes from now    
+granite4:latest      4235724a127c    3.0 GB    100% GPU     16384      4 minutes from now    
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now    
+--- 01:49:22Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:49:37Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:49:52Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:50:07Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:50:22Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:50:37Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:50:52Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      4 minutes from now    
+--- 01:51:07Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      3 minutes from now    
+--- 01:51:22Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      3 minutes from now    
+--- 01:51:37Z
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:12b    4eb23ef187e2    8.1 GB    100% GPU     16384      4 minutes from now    
+gemma4:e4b    c6eb396dbd59    3.4 GB    100% GPU     16384      3 minutes from now    
+--- 01:51:52Z
+NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+qwen2.5-coder:14b    9ec8897f747e    10 GB     100% GPU     16384      4 minutes from now    
+gemma4:e4b           c6eb396dbd59    3.4 GB    100% GPU     16384      3 minutes from now    
