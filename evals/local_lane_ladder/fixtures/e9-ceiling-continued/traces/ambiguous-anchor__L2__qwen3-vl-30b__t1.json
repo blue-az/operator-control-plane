@@ -1,0 +1,58 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n",
+    "--model",
+    "qwen3-vl:30b",
+    "--workspace",
+    "/tmp/opr-eval-ambiguous-anchor-L2-53s0e1q8",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off"
+  ],
+  "cell_key": "ambiguous-anchor|L2|qwen3-vl:30b|1",
+  "git_rev": "422e8eec8aaedbf5955fce25d067a49303312228",
+  "grade_detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+  "harness": "local-lane-eval",
+  "level": "L2",
+  "machine": "desktop",
+  "model": "qwen3-vl:30b",
+  "passed": false,
+  "prompt": "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n",
+  "recorded_utc": "2026-08-13T08:12:28.332276+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: qwen3-vl:30b (lane_1_local_repair)\nDispatching governed query...\nThinking...\n[tokens] prompt=369 completion=2508 think_chars=11101 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"runbook.md\"\n}\n\n[Tool Output]\n# Service runbook\n\n## Production\n1. Drain connections.\n2. Run: restart the service\n3. Confirm health checks pass.\n\n## Staging\n1. Drain connections.\n2. Run: restart the service\n3. Confirm health checks pass.\n\n## Development\n1. Drain connections.\n2. Run: restart the service\n3. Confirm health checks pass.\n\n\nThinking...\n[tokens] prompt=456 completion=8958 think_chars=39582 done_reason=stop\n\n[No tool dispatched: response carried tool-shaped JSON that did not yield a dispatchable call]\n\n--- Output ---\n{\n  \"tool\": \"run_command\",\n  \"command\": \"sed -i '/^## Staging/,/^\\S/s|2\\\\. Run: restart the service|2. Run: restart the service --force|' runbook.md\"\n}\n--------------\n",
+  "task_id": "ambiguous-anchor",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 11466,
+    "distinct_tools": [
+      "read_file"
+    ],
+    "n_calls": 1,
+    "n_failed_calls": 0,
+    "no_dispatch": true,
+    "stopped_repeat": false,
+    "think_chars": 50683,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": "runbook.md",
+        "tool": "read_file"
+      }
+    ]
+  },
+  "trial": 1,
+  "wall_clock_s": 110.1
+}
