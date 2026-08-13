@@ -1,0 +1,12 @@
+# E4 pre-run provenance — sampled epoch (corrects E3's temperature-0 artifact)
+captured_utc: 2026-08-13T01:01:54Z
+git_rev: 8f6ccca74945cc7907b924d40b6974e5de5582eb
+num_ctx: 16384 (all models, all 100% GPU — verified)
+temperature: 0.8 (NOT 0 — see below)
+seed: not passed; ollama does not reliably honour it (same seed -> different output)
+system_prompt: strict-JSON, applied to ALL models
+
+Why not temperature 0: greedy decoding locks agentic loops into re-issuing
+an identical tool call, which the repeat-guard then stops. Measured on
+gemma4:26b x alias-add: temp 0 -> 1/6 pass, temp 0.8 -> 6/6 pass. Temperature 0
+buys reproducibility by introducing a failure mode absent from real use.
