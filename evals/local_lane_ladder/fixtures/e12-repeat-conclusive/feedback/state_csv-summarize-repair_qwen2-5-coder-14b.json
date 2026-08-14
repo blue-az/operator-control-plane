@@ -1,0 +1,630 @@
+{
+  "done": {
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|1": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|10": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|11": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|12": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|13": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|14": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|15": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|16": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|17": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|18": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|19": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|2": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|20": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|21": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|22": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|23": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|24": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|3": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|4": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|5": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|6": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|7": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|8": true,
+    "csv-summarize-repair|L2|qwen2.5-coder:14b|9": true
+  },
+  "results": [
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-moer_0pd/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-moer_0pd/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 15.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-2_ltve41/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-2_ltve41/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-2_ltve41/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-2_ltve41/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 4.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n9tg8id3/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n9tg8id3/src/expenses.py\", line 24, in summarize_expenses\n    amount = parse_amount(parts[2])\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n9tg8id3/src/expenses.py\", line 16, in pars",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n9tg8id3/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n9tg8id3/src/expenses.py\", line 24, in summarize_expenses\n    amount = parse_amount(parts[2])\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n9tg8id3/src/expenses.py\", line 16, in pars",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 14.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-x6paccqu/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-x6paccqu/src/expenses.py\", line 19, in summarize_expenses\n    amount = float(amount_str)\nValueError: could not convert string to float: '\"1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-x6paccqu/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-x6paccqu/src/expenses.py\", line 19, in summarize_expenses\n    amount = float(amount_str)\nValueError: could not convert string to float: '\"1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 11.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-lt4aeshp/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-lt4aeshp/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 17.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-rixetwe0/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-rixetwe0/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-rixetwe0/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-rixetwe0/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 4.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-7o85ppr5/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-7o85ppr5/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-7o85ppr5/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-7o85ppr5/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t7.json",
+      "trial": 7,
+      "wall_clock_s": 4.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-x2d54iwd/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-x2d54iwd/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-x2d54iwd/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-x2d54iwd/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t8.json",
+      "trial": 8,
+      "wall_clock_s": 6.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-59t1zi2o/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-59t1zi2o/src/expenses.py\", line 22, in summarize_expenses\n    amount = float(re.sub(r'[\\$\\,]+', '', amount_str))\nValueError: could not convert string to float: '\"1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-59t1zi2o/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-59t1zi2o/src/expenses.py\", line 22, in summarize_expenses\n    amount = float(re.sub(r'[\\$\\,]+', '', amount_str))\nValueError: could not convert string to float: '\"1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t9.json",
+      "trial": 9,
+      "wall_clock_s": 11.5
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-l720hw0n/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-l720hw0n/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-l720hw0n/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-l720hw0n/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t10.json",
+      "trial": 10,
+      "wall_clock_s": 4.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-79n5hhzt/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-79n5hhzt/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-79n5hhzt/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-79n5hhzt/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t11.json",
+      "trial": 11,
+      "wall_clock_s": 4.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jytapjtf/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jytapjtf/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jytapjtf/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jytapjtf/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t12.json",
+      "trial": 12,
+      "wall_clock_s": 8.8
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-o2cbcdvf/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-o2cbcdvf/src/expenses.py\", line 21, in summarize_expenses\n    amount = float(amount_str)\nValueError: could not convert string to float: '\"1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-o2cbcdvf/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-o2cbcdvf/src/expenses.py\", line 21, in summarize_expenses\n    amount = float(amount_str)\nValueError: could not convert string to float: '\"1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t13.json",
+      "trial": 13,
+      "wall_clock_s": 13.7
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-vw0rg8_h/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-vw0rg8_h/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-vw0rg8_h/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-vw0rg8_h/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t14.json",
+      "trial": 14,
+      "wall_clock_s": 4.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-s9yrzx2v/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-s9yrzx2v/src/expenses.py\", line 27, in summarize_expenses\n    amount = parse_amount(parts[2])\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-s9yrzx2v/src/expenses.py\", line 18, in pars",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-s9yrzx2v/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-s9yrzx2v/src/expenses.py\", line 27, in summarize_expenses\n    amount = parse_amount(parts[2])\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-s9yrzx2v/src/expenses.py\", line 18, in pars",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t15.json",
+      "trial": 15,
+      "wall_clock_s": 14.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-y55_g4pw/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-y55_g4pw/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-y55_g4pw/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-y55_g4pw/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t16.json",
+      "trial": 16,
+      "wall_clock_s": 8.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jp3fvaee/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jp3fvaee/src/expenses.py\", line 22, in summarize_expenses\n    amount = float(amount_str.replace(\",\", \"\"))\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jp3fvaee/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jp3fvaee/src/expenses.py\", line 22, in summarize_expenses\n    amount = float(amount_str.replace(\",\", \"\"))\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t17.json",
+      "trial": 17,
+      "wall_clock_s": 13.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-kyzxt9n5/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-kyzxt9n5/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-kyzxt9n5/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-kyzxt9n5/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t18.json",
+      "trial": 18,
+      "wall_clock_s": 4.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-ojrkpxmo/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-ojrkpxmo/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-ojrkpxmo/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-ojrkpxmo/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t19.json",
+      "trial": 19,
+      "wall_clock_s": 8.8
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-2z_3q82n/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-2z_3q82n/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-2z_3q82n/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-2z_3q82n/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t20.json",
+      "trial": 20,
+      "wall_clock_s": 7.1
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-rjqxccc_/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=4545.0 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-rjqxccc_/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=4545.0 expected 1280.00",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t21.json",
+      "trial": 21,
+      "wall_clock_s": 12.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-xez03yak/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-xez03yak/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-xez03yak/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-xez03yak/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t22.json",
+      "trial": 22,
+      "wall_clock_s": 4.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n0e2ee01/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n0e2ee01/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n0e2ee01/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n0e2ee01/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t23.json",
+      "trial": 23,
+      "wall_clock_s": 4.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-7jhy8xmg/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-7jhy8xmg/src/expenses.py\", line 21, in summarize_expenses\n    amount = float(amount_str)\nValueError: could not convert string to float: '\"1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-7jhy8xmg/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-7jhy8xmg/src/expenses.py\", line 21, in summarize_expenses\n    amount = float(amount_str)\nValueError: could not convert string to float: '\"1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/csv-summarize-repair__L2__qwen2.5-coder-14b__t24.json",
+      "trial": 24,
+      "wall_clock_s": 11.2
+    }
+  ]
+}
