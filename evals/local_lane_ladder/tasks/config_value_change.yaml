@@ -1,3 +1,5 @@
+# MEASURED: RETIRED — 6/6 on a 3.4B model (e5). Carries no information at any
+# size tested, floor to ceiling. Excluded from packs since e5.
 task_id: config-value-change
 description: Edit a key in a small INI file.
 

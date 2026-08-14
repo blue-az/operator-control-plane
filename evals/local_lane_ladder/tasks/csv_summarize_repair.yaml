@@ -1,3 +1,6 @@
+# MEASURED: CEILING MARKER — 5/126 at n=18 (e9+e11). Difficulty ~1994 Elo,
+# roughly 180 points above the strongest model tested. Only qwen3.6:27b has
+# ever solved it. Read as 'brackets the top', not as a ranking.
 task_id: csv-summarize-repair
 description: >
   Repair an expense summariser that looks correct and silently produces wrong

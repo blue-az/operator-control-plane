@@ -1,3 +1,8 @@
+# MEASURED: SATURATED at the ceiling — 42/42 across seven models 14B-32B (e9).
+# Difficulty ~615 Elo, far below the entire field. Do NOT use as a ceiling
+# discriminator. Its apparent spread in e8 was the OPR-RUL-008 one-state-change
+# cap, not capability. Retained as a sanity band: a strong model failing this
+# means suspect the harness, not the model.
 task_id: booking-off-by-one
 description: >
   A boundary bug in a booking overlap check. The end date is the checkout day and
