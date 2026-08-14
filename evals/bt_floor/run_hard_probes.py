@@ -65,7 +65,7 @@ def preflight(funnel):
     return True
 
 
-def ask(model, funnel, question):
+def ask(model, funnel, question, temperature, seed=None):
     r = requests.post(
         "http://localhost:11434/api/generate",
         json={
@@ -73,7 +73,8 @@ def ask(model, funnel, question):
             "prompt": funnel + "\n\n" + INSTRUCTION + question,
             "stream": False,
             "think": False,
-            "options": {"num_ctx": NUM_CTX, "temperature": 0},
+            "options": ({"num_ctx": NUM_CTX, "temperature": temperature}
+                        | ({"seed": seed} if seed is not None else {})),
             "keep_alive": "10m",
         },
         timeout=TIMEOUT,
@@ -87,31 +88,53 @@ def main():
         print(__doc__)
         return 2
 
-    funnel = Path(sys.argv[1]).read_text()
-    models = sys.argv[2:]
+    args = sys.argv[1:]
+    # Repetition only measures anything above temperature 0: at 0 the sampler is
+    # near-deterministic, so n>1 reproduces the same cell instead of sampling it.
+    # The E10 drift probe put the flag-inert flip rate at 11.3%, which is the
+    # band any single-run difference has to clear.
+    reps, temperature = 1, 0.0
+    if "--reps" in args:
+        i = args.index("--reps"); reps = int(args[i + 1]); del args[i:i + 2]
+    if "--temp" in args:
+        i = args.index("--temp"); temperature = float(args[i + 1]); del args[i:i + 2]
+    if reps > 1 and temperature == 0.0:
+        print("refusing: --reps > 1 at temperature 0 measures nothing. "
+              "Pass --temp 0.8.")
+        return 2
+
+    funnel = Path(args[0]).read_text()
+    models = args[1:]
 
     if not preflight(funnel):
         return 1
-    print(f"funnel ok: {len(funnel)} chars, num_ctx={NUM_CTX}\n")
+    print(f"funnel ok: {len(funnel)} chars, num_ctx={NUM_CTX}, "
+          f"temp={temperature}, reps={reps}\n")
 
     out = {}
     for model in models:
         rec = {"model": model, "num_ctx": NUM_CTX, "funnel_chars": len(funnel),
-               "epoch": "current", "probes": {}}
+               "epoch": "current", "temperature": temperature, "reps": reps,
+               "probes": {}}
         for p in HARD_PROBES:
+          for rep in range(reps):
+            cell = p["id"] if reps == 1 else f"{p['id']}#{rep}"
             t0 = time.time()
             try:
-                resp = ask(model, funnel, p["question"])
+                resp = ask(model, funnel, p["question"], temperature,
+                           seed=(rep if reps > 1 else None))
             except Exception as e:
-                print(f"[{model}|{p['id']}] ERROR {type(e).__name__}: {e}", flush=True)
-                rec["probes"][p["id"]] = {"output": "", "error": str(e)}
+                print(f"[{model}|{cell}] ERROR {type(e).__name__}: {e}", flush=True)
+                rec["probes"][cell] = {"output": "", "error": str(e)}
                 continue
             dt = time.time() - t0
             pec = resp.get("prompt_eval_count", -1)
             done_reason = resp.get("done_reason", "")
             ans = resp.get("response", "")
-            rec["probes"][p["id"]] = {
+            rec["probes"][cell] = {
                 "question": p["question"],
+                "probe_id": p["id"],
+                "rep": rep,
                 "prompt_eval_count": pec,
                 "eval_count": resp.get("eval_count"),
                 "seconds": round(dt, 1),
@@ -131,7 +154,7 @@ def main():
                 flag += f"  !! ungrounded: {','.join(g['citations']['ungrounded'])}"
             if g["empty_output"]:
                 flag += "  !! EMPTY OUTPUT"
-            print(f"[{model}|{p['id']}] {g['verdict']:16s} "
+            print(f"[{model}|{cell}] {g['verdict']:16s} "
                   f"{dt:6.1f}s  ptok={pec}  bonus={len(g['bonus_hit'])}"
                   f"  missing={g['required_missing'] or '-'}{flag}", flush=True)
         out[model] = rec
