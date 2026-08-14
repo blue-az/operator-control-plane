@@ -80,8 +80,9 @@ in `tests/test_opr.py`. `GOVERNED_DISPATCH_SPEC.md` and `OPR_GENERALIZATION_SPEC
 
 **Ledger layout** (created by `init_cmd`):
 `.operator/{tasks,claims,evidence,handoffs,usage,briefs}/` plus `harnesses/<id>.yaml` (the
-known AI harnesses — claude, codex, gemini-agy, grok, copilot, gemma3_local, gemma4_local,
-gpt-oss_local; their default definitions are hardcoded in `init_cmd`'s `harnesses_data`). `opr` derives
+known AI harnesses — claude, codex, gemini-agy, grok, copilot, opencode, openrouter, fable,
+gemma3_local, gemma4_local, gpt-oss_local; their default definitions are hardcoded in
+`init_cmd`'s `harnesses_data`). `opr` derives
 local harness labels from the serving model (`<model-base>_local`, e.g. gpt-oss:20b → gpt-oss_local —
 defaults differ per machine), so a new local default model needs a matching `harnesses/<id>.yaml` in
 existing ledgers. `operator.yaml` holds top-level state like

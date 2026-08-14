@@ -1560,6 +1560,30 @@ def init_cmd(args) -> int:
                 "context window variance across providers",
             ],
         },
+        "opencode": {
+            "harness_id": "opencode",
+            "display_name": "OpenCode",
+            "kind": "opencode",
+            "command": None,
+            "working_directory": None,
+            "model": "configured-opencode-model",
+            "permission_profile": "default",
+            "usage_source": "local",
+            "transcript_source": "local",
+            "strengths": [
+                "provider-agnostic seat (frontier or local ollama behind one harness)",
+                "headless `opencode run` for non-interactive delegation",
+                "local session export as JSON evidence (`opencode export`)",
+            ],
+            "known_failure_modes": [
+                "seat identity does not imply capability; the configured model decides",
+                "small local models flail on goal-shaped (L0) work: repeated identical "
+                "searches, truncated commands, planning without executing. The same "
+                "models execute plan-shaped (L2) work reliably -- gemma4:26b completed "
+                "a 3-file edit plus verification via `opencode run` (2026-08-13). Give "
+                "this seat exact paths, anchors and a success criterion.",
+            ],
+        },
         "fable": {
             "harness_id": "fable",
             "display_name": "Claude Fable (API)",
