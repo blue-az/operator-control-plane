@@ -1,0 +1,12 @@
+# qwen3.8:27b ladder — E11-matched config
+captured_utc: 2026-08-14T21:05:56Z
+git_rev: 69fda86a7d0eab0fc90a45e42f337fc90a9a3d78
+question: where does qwen3.8:27b sit against the E11 field, and vs qwen3.6:27b
+design: 3 fixtures x 1 model x n=18 = 54 cells (matches E11 pooled per-model count)
+fixtures: csv-summarize-repair strict-log-format ambiguous-anchor
+controls: num_ctx 16384, temperature 0.8, think off, --on-repeat default (stop)
+comparability: E11 warned its baseline holds only until a 2nd card lands 2026-08-14.
+  Checked at launch: 1x RTX 3090, 320W -- second card NOT installed. Baseline intact.
+preflight: ambiguous-anchor L2 n=1 PASS 11.5s, trajectory read_file->patch_file,
+  0 failed calls, no_dispatch False -- harness parses this model correctly.
+NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
