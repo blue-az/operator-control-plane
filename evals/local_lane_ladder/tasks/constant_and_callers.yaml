@@ -1,3 +1,5 @@
+# MEASURED: MILD — 36/42 (e9). Separates qwen3.6:27b from the field, little
+# else. Needs state_changes:5; it scored 0/42 before continuation existed.
 task_id: constant-and-callers
 description: >
   Change a constant and every caller that hard-codes its old value. Three files
