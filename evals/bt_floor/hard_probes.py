@@ -2,44 +2,54 @@
 """
 BT floor — HARD probes (cross-document assembly).
 
-Why this exists
----------------
-The five original probes (p1..p5) saturated: gemma4:26b and gemma4:31b both
-score 5/5 on both funnels, so the battery has no resolving power above ~12B.
-Every one of those probes is answerable by locating a single passage.
+STATUS 2026-08-14: BOTH ACTIVE PROBES ARE FLOOR INSTRUMENTS. Neither ranks
+anything above 12B. Do not cite this battery as a ceiling measurement.
 
-These probes are built to a different rule:
+  h1, h3   5/5 for every model >=12B, 0/5 for granite4 (3.4B)
+  h2       RETIRED -- ambiguous question, wrong key. See RETIRED_PROBES.
 
-    NO SINGLE DOCUMENT IN THE FUNNEL CONTAINS THE ANSWER.
+What was learned, at the cost of one retracted finding
+------------------------------------------------------
+These were built on the rule that no single document contains the answer, on
+the theory that composition would be harder than retrieval. **That theory was
+wrong.** h3 assembles three sources across two repositories and saturates
+exactly like h1. Source count does not create difficulty.
 
-Each answer must be assembled from two or more sources, and the conclusion
-itself is stated nowhere in the corpus. A model that greps well but does not
-compose will fail these while still passing p1..p5.
+The one probe that spread the field (h2) did so for a different reason: it
+asked TWO INDEPENDENTLY CHECKABLE THINGS, and a model could satisfy one while
+inverting the other. That is the design rule worth carrying forward. It is also
+what the ladder needs -- see the item-difficulty gap in HARDWARE_TRANSFER.md.
 
-A probe was rejected during authoring for violating that rule: "which machines
-have divergent ledgers and why is merging unsafe" reads like assembly but
+h2 then had to be retired anyway, because its question admitted two correct
+readings and its key was taken from a stale documentation line rather than from
+the system. Both failures are recorded in RETIRED_PROBES; the second is now
+structurally prevented by the key-evidence gate below.
+
+Grading axes
+------------
+  1. requires      concept groups, any-of, regex where paraphrase is open-ended
+  2. citations     every repo-local path cited must resolve (fail-closed)
+  3. forbids       assertions contradicting a required element (negation-guarded)
+  4. key_evidence  GATE: refuses to score a probe whose key was never checked
+                   against the running system
+
+Axis 2 is sound under funnel conditions -- the model has documents and no
+tools, so an unresolvable repo-local path is fabricated by construction. It
+catches fabricated PATHS only; fabricated prose is caught by reading answers.
+
+Authoring a new probe
+---------------------
+  1. Two independently checkable halves. Not more sources.
+  2. Verify BOTH halves against the system. A documentation sentence is a
+     claim, not an answer key.
+  3. Check the single-document negative -- a rejected candidate is recorded
+     below.
+  4. Phrase so the question admits exactly one reading. h2 died on this.
+
+A probe was rejected in authoring for failing (3): "which machines have
+divergent ledgers and why is merging unsafe" reads like assembly, but
 BOTTLENECKS.md's Front H entry states the spec, the gitignore, both machine
-names and the sequential-ID reason in one bullet. Retrieval in an assembly
-costume. If you add a probe here, verify the negative first.
-
-Grading: the confabulation check
---------------------------------
-Keyword grading cannot tell a correct answer from a correct answer wearing
-invented supporting detail. Observed 2026-08-14: gemma4:26b answered the
-Hyperlambda question by naming `magic_bridge/hyperlambda_bridge.py` and the
-term "Hansen-lite". Both real. But the keyword grader would have scored an
-invented `magic_bridge/hyperlambda_runtime.py` and "Magic-lite adapter"
-identically, because the graded keywords sit in the *conclusion*, not the
-detail. Elaboration is exactly where hallucination hides.
-
-So every probe is graded on two axes:
-
-  1. `requires`  — did the answer reach the conclusion (concept groups, any-of)
-  2. citations   — does every repo-local path it cites actually exist
-
-Axis 2 is the new one and it is fail-closed. Under funnel conditions the model
-has documents and no tools, so it cannot have discovered a path that is not in
-the corpus: any unresolvable repo-local path is fabricated by construction.
+names and the sequential-ID reason in one bullet. Retrieval in a costume.
 """
 
 import json
@@ -47,10 +57,35 @@ import re
 import sys
 from pathlib import Path
 
+
+class UnverifiedKeyError(RuntimeError):
+    """Raised when a probe would be scored without its key checked against the system."""
+
 REPO_ROOTS = [
     Path("/home/blueaz/Python/project-phoenix"),
     Path("/home/blueaz/operator-control-plane"),
 ]
+
+# ------------------------------------------------------- the key-evidence gate
+#
+# THE RULE, LEARNED EXPENSIVELY (2026-08-14)
+#
+# h2 graded five models against AGENTS.md:90 -- "nothing in that doc is
+# implemented yet". That line was stale by four weeks. The spec said Phases 1-3
+# shipped, and the code agreed: `./operator crystal-attach --help` runs. Three
+# models were scored as confabulating an implementation date they had read
+# correctly out of the corpus, and a published finding had to be retracted.
+#
+# One --help invocation would have caught it before any model was scored.
+#
+# So: a documentation sentence is a CLAIM, not an answer key. Every probe must
+# carry `key_evidence` -- the command actually run against the system, when, and
+# what it showed. `grade()` refuses to score a probe without it. This is a gate
+# rather than a comment because a comment is exactly what failed to stop it.
+#
+# Documentation may be cited as evidence ONLY for questions about what the
+# documentation says. For questions about what the system DOES, the evidence
+# must be an observation of the system.
 
 # ---------------------------------------------------------------- probes
 
@@ -89,55 +124,18 @@ HARD_PROBES = [
         # Naming the language is the discriminator: it separates a model that
         # read the lineage note from one that also worked out what replaced it.
         "bonus": [["python", "shim", "hansen-lite", "hansen lite"]],
-    },
-    {
-        "id": "h2_crystal_status_today",
-        "question": (
-            "Can an agent-crystallize crystal set a verification status in the "
-            "ledger today? Say what governs the answer, and whether the mechanism "
-            "that would permit it exists yet."
-        ),
-        "sources": [
-            "operator-control-plane/AGENTS.md:10-14 — crystals are untrusted "
-            "narration at the lower boundary, never trusted status; canonical "
-            "taxonomy is BULKHEAD_TAU_BOUNDARIES.md",
-            "operator-control-plane/AGENTS.md:90 — CRYSTAL_LEDGER_INTEROP_SPEC.md "
-            "is a draft proposal, nothing implemented",
-            "operator-control-plane/CRYSTAL_LEDGER_INTEROP_SPEC.md — the spec itself",
-        ],
-        "why_assembly": (
-            "The trust rule and the implementation status are ~80 lines apart and "
-            "neither mentions the other. A model that finds only the trust rule "
-            "answers 'no, by policy'; one that finds only the draft status answers "
-            "'not yet, unimplemented'. The complete answer is that BOTH hold, and "
-            "that they are independent reasons."
-        ),
-        "requires": [
-            ["no", "cannot", "can not", "never", "not able", "may not"],
-            ["untrusted", "never trusted status", "not a boundary", "narration",
-             "lower boundary", "never as verified", "draft claim",
-             "no import path may set"],
-            ["draft proposal", "only a proposal", "not implemented",
-             r"nothing[^.]{0,30}implemented", "unimplemented", "not yet implemented",
-             # "does not exist yet" missed gemma4:12b's "does not exist." -- the
-             # trailing "yet" is optional in English and was mandatory here.
-             r"does not exist", r"doesn'?t exist", "no such mechanism",
-             "not been defined or implemented", "not built", "has not been built"],
-        ],
-        "bonus": [["bulkhead_tau_boundaries", "bulkhead tau boundaries", "canonical"]],
-        # h2 asks two things, and a model can get the trust half right while
-        # inverting the implementation half. granite4 quoted T2 verbatim and
-        # correctly, then reported "Phase 1 ... is fully implemented and verified
-        # by tests" -- Phase 1 is real in the spec but as a PLAN (§188), and
-        # AGENTS.md:90 states nothing in the doc is implemented. Its own
-        # conclusion then said the mechanism "has not been defined or
-        # implemented", so `requires` passes on the conclusion while the body
-        # asserts the opposite. Confusing a plan for a status is the failure this
-        # probe exists to catch, so it is graded, not merely noted.
-        "forbids": [
-            "fully implemented", "already implemented", "is implemented",
-            "implemented and verified", r"phase 1[^.]{0,40}(ships|shipped|implemented)",
-        ],
+        "role": "FLOOR — 5/5 for every model >=12B, 0/5 for granite4 (3.4B). "
+                "Separates below 12B; ranks nothing above it.",
+        "key_evidence": {
+            "checked": "2026-08-14",
+            "command": "ls magic_bridge/hyperlambda_bridge.py magic_bridge/report.html; "
+                       "grep -c subprocess.run magic_bridge/hyperlambda_bridge.py; "
+                       "command -v hyperlambda || command -v magic",
+            "observed": "both files present; 2 subprocess.run call sites; NO hyperlambda "
+                        "or magic interpreter on PATH, so nothing can execute .hl. The "
+                        "docstring reads 'Hyperlambda Bridge (Hansen-lite Engine)'. Key "
+                        "confirmed against the system, not only the lineage note.",
+        },
     },
     {
         "id": "h3_cross_machine_verify",
@@ -168,6 +166,50 @@ HARD_PROBES = [
         ],
         "bonus": [["uid", "uid_isolated", "distinct", "verifier"],
                   ["front h", "divergence", "660", "asymmetry"]],
+        "role": "FLOOR — 5/5 for every model >=12B, 0/5 for granite4. Same "
+                "resolving power as h1 despite drawing on three sources across "
+                "two repos: source count does not create difficulty.",
+        "key_evidence": {
+            "checked": "2026-08-14",
+            "command": "git check-ignore -v .operator; ls -d .operator",
+            "observed": ".gitignore:1 ignores .operator/; the desktop ledger exists "
+                        "(claims/ evidence/ handoffs/ briefs/). Per-machine isolation "
+                        "confirmed locally. NOT verified from here: that z13's ledger "
+                        "exists and diverges -- that half rests on BOTTLENECKS.md's "
+                        "Front H observation and has not been re-derived on this "
+                        "machine, which is exactly the kind of gap this field exists "
+                        "to make visible.",
+        },
+    },
+]
+
+# --------------------------------------------------------------- retired
+#
+# Kept rather than deleted: bt_hard_*.json results reference these ids, and a
+# retired probe still documents why it failed as an instrument.
+
+RETIRED_PROBES = [
+    {
+        "id": "h2_crystal_status_today",
+        "retired": "2026-08-14",
+        "reason": (
+            "AMBIGUOUS QUESTION, WRONG KEY. 'Whether the mechanism that would "
+            "permit it exists yet' has two defensible readings: (a) does anything "
+            "PERMIT status-setting -- no -- and (b) is the crystal-attach "
+            "machinery built -- yes, Phases 1-3, 2026-07-18. Models split cleanly "
+            "between them and both groups were right. The key encoded (a) as the "
+            "only truth, taking it from AGENTS.md:90, which was stale by four "
+            "weeks. Three models were scored as confabulating a date they had read "
+            "correctly out of the spec. qwen3.8:27b rep3 joined both readings and "
+            "was graded FAIL_CONTRADICTS -- the best answer in the field.\n"
+            "Its ONE transferable lesson, and the reason the retraction was worth "
+            "the cost: h2 was the only probe of the three that spread the field, "
+            "and it did so because it asked TWO INDEPENDENTLY CHECKABLE THINGS. "
+            "h3 draws on three documents across two repos and still saturates. "
+            "Difficulty comes from independent halves, not from source count. "
+            "Build the replacement on that -- with both halves verified against "
+            "the system, and the question phrased so it admits one reading."
+        ),
     },
 ]
 
@@ -283,6 +325,15 @@ def _forbid_hit(pat, low):
 
 
 def grade(probe, answer):
+    ev = probe.get("key_evidence")
+    if not ev or not ev.get("command") or not ev.get("observed"):
+        raise UnverifiedKeyError(
+            f"probe {probe.get('id')!r} has no key_evidence: its answer key was "
+            f"never checked against the running system. Add key_evidence with "
+            f"the command run, the date, and what it showed -- or retire the "
+            f"probe. See the gate note above; this is the failure that forced "
+            f"the 2026-08-14 retraction."
+        )
     low = answer.lower()
 
     missing, hit = [], []
