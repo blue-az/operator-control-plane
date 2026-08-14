@@ -133,10 +133,35 @@ common, and it is exactly what Batch 5's anti-anchoring rule exists to prevent.
 
 Three deterministic instruments already exist and were scoped but not executed:
 
-1. **ShowcaseAgent seam sets** — `hard_cases_extended` + `borderline_cases` +
-   `tie_breaker_cases` + `showcase_seam_routing_mini`, 33 queries, exact-match
-   graded. Sits at **5/10** and has only ever been run against `llama3.1:8b`.
-   Highest information-per-minute available anywhere in this programme.
+1. ~~**ShowcaseAgent seam sets**~~ — **BLOCKED, and the recorded result is
+   suspect. Do not run this until the harness is fixed.**
+
+   Attempted 2026-08-13. `--routing-only --llm-routing` **never calls the
+   model**: 10/10 queries returned in 0.0s recorded as `method: rule`. The
+   benchmark's own warning caught it (*"10/10 rows fell back to non-LLM routing
+   methods"*), which is good design — but it means the run measures the rule
+   router, not the model.
+
+   Not a threshold problem: rule confidence on these queries is **0.10–0.20**,
+   far below the 0.5 default, so the LLM path should fire on every one. Raising
+   `--routing-threshold` to 1.0 changed nothing, and `llm_router` imports
+   cleanly, so it is not the `ImportError` fallback either. The gate is
+   somewhere between `benchmark.py --routing-only` and
+   `HybridDomainRouter.route()`.
+
+   **Consequence for the prior result:** the recorded "5/10 for both rule-routing
+   and forced-LLM" was probably never a model measurement. Two identical scores
+   across supposedly different methods is exactly what a silent fallback
+   produces. Treat that 5/10 as unverified.
+
+   Also note `HybridDomainRouter` hands the LLM a fixed confidence of 0.8 and
+   returns whichever result scores higher — so even when the model *is* consulted,
+   a rule hit above 0.8 discards its answer and records `method: rule`. A pure
+   LLM-routing mode does not currently exist.
+
+   Fixing this needs work in `project-phoenix/domains/ShowcaseAgent/router/`,
+   which is another component's code — raise it by handoff rather than patching
+   it from here.
 2. **PTS-001** (`project-phoenix/scripts/pts_001_runner.py`) — the strongest
    single deterministic discriminator on disk (`gemma3:27b` 6/6, `gemma4:31b` 5/6,
    `gemma4:26b` parse_fail). Runner already iterates a fixtures directory; add
