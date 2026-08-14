@@ -74,8 +74,15 @@ HARD_PROBES = [
             "imitating Hyperlambda' — that is the composed conclusion."
         ),
         "requires": [
-            ["no runtime", "not a runtime", "does not execute", "no hyperlambda runtime",
-             "never executed", "no functional", "not functional", "illustrative"],
+            # Regex, not a word list: gemma4:31b and gemma4:12b both wrote
+            # "a Hyperlambda runtime does not exist" and were scored FAIL by an
+            # accept list that happened not to contain that phrasing. Grading a
+            # concept means covering the concept, not the wordings I thought of.
+            [r"(runtime|hyperlambda)[^.]{0,40}(does not|doesn'?t|do not|never)"
+             r"[^.]{0,25}(exist|execute|run)",
+             r"(no|not an?|never an?)[^.]{0,25}(functional |actual |real )?runtime",
+             r"not integrated as a runtime", "illustrative", "design sketch",
+             "prototype exploration"],
             ["magic_bridge", "magic bridge"],
             ["report.html", "dashboard", "command center"],
         ],
@@ -108,11 +115,29 @@ HARD_PROBES = [
         "requires": [
             ["no", "cannot", "can not", "never", "not able", "may not"],
             ["untrusted", "never trusted status", "not a boundary", "narration",
-             "lower boundary"],
-            ["draft", "proposal", "not implemented", "nothing.*implemented",
-             "unimplemented", "does not exist yet"],
+             "lower boundary", "never as verified", "draft claim",
+             "no import path may set"],
+            ["draft proposal", "only a proposal", "not implemented",
+             r"nothing[^.]{0,30}implemented", "unimplemented", "not yet implemented",
+             # "does not exist yet" missed gemma4:12b's "does not exist." -- the
+             # trailing "yet" is optional in English and was mandatory here.
+             r"does not exist", r"doesn'?t exist", "no such mechanism",
+             "not been defined or implemented", "not built", "has not been built"],
         ],
         "bonus": [["bulkhead_tau_boundaries", "bulkhead tau boundaries", "canonical"]],
+        # h2 asks two things, and a model can get the trust half right while
+        # inverting the implementation half. granite4 quoted T2 verbatim and
+        # correctly, then reported "Phase 1 ... is fully implemented and verified
+        # by tests" -- Phase 1 is real in the spec but as a PLAN (§188), and
+        # AGENTS.md:90 states nothing in the doc is implemented. Its own
+        # conclusion then said the mechanism "has not been defined or
+        # implemented", so `requires` passes on the conclusion while the body
+        # asserts the opposite. Confusing a plan for a status is the failure this
+        # probe exists to catch, so it is graded, not merely noted.
+        "forbids": [
+            "fully implemented", "already implemented", "is implemented",
+            "implemented and verified", r"phase 1[^.]{0,40}(ships|shipped|implemented)",
+        ],
     },
     {
         "id": "h3_cross_machine_verify",
@@ -150,7 +175,7 @@ HARD_PROBES = [
 
 # Repo-local path: has a directory separator or a known source extension.
 PATH_RE = re.compile(
-    r"\b((?:[\w.-]+/)*[\w.-]+\.(?:py|md|sh|yaml|yml|json|html|hl))\b"
+    r"\b((?:[\w.-]+/)*[\w.-]+\.(?:py|md|sh|yaml|yml|json|html|hl|db|sql|toml|ini|cfg|ts|js|rs|go))\b"
 )
 
 # Cited bare filenames that legitimately exist in several places, plus corpus
@@ -235,6 +260,28 @@ def _group_hit(group, low):
     return None
 
 
+# Words that invert the sentence a forbidden phrase sits in. "nothing in it is
+# implemented yet" contains "is implemented" and means the opposite; a naive
+# substring forbid scored a known-correct answer FAIL_CONTRADICTS on exactly
+# that. Negation is checked in the run-up to the match, not the whole answer,
+# so a contradiction elsewhere in a long reply is still caught.
+_NEG_RE = re.compile(r"\b(not|nothing|never|no|none|isn't|aren't|without|yet to be)\b")
+
+# Deliberately biased toward suppression. A missed contradiction costs one
+# false PASS; a false contradiction fails a correct answer, which is the more
+# expensive error and the one already made once here.
+_NEG_WINDOW = 30
+
+
+def _forbid_hit(pat, low):
+    """True if `pat` appears asserted rather than negated."""
+    for m in re.finditer(pat, low):
+        lookback = low[max(0, m.start() - _NEG_WINDOW):m.start()]
+        if not _NEG_RE.search(lookback):
+            return True
+    return False
+
+
 def grade(probe, answer):
     low = answer.lower()
 
@@ -242,6 +289,13 @@ def grade(probe, answer):
     for group in probe["requires"]:
         m = _group_hit(group, low)
         (hit if m else missing).append(m or group[0])
+
+    # An answer that asserts the negation of a required element is wrong even
+    # when some other sentence in it satisfies the keyword.
+    contradictions = []
+    for pat in probe.get("forbids", []):
+        if _forbid_hit(pat, low):
+            contradictions.append(pat)
 
     bonus_hit = []
     for group in probe.get("bonus", []):
@@ -254,6 +308,8 @@ def grade(probe, answer):
     # Fail-closed on fabricated citations even when the conclusion is right.
     if not cites["ok"]:
         verdict = "FAIL_UNGROUNDED"
+    elif contradictions:
+        verdict = "FAIL_CONTRADICTS"
     elif missing:
         verdict = "FAIL"
     else:
@@ -264,6 +320,7 @@ def grade(probe, answer):
         "verdict": verdict,
         "required_hit": hit,
         "required_missing": missing,
+        "contradictions": contradictions,
         "bonus_hit": bonus_hit,
         "citations": cites,
         "empty_output": len(answer.strip()) == 0,
