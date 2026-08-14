@@ -87,8 +87,12 @@ This repository is a compact Python CLI project (requires Python ≥ 3.12).
 
 The P3a broker must remain independent of the repo-local `operator` CLI and
 `.operator` state. P3b owns only root-managed installation and policy lifecycle.
-`CRYSTAL_LEDGER_INTEROP_SPEC.md` is a draft proposal — nothing in that doc is
-implemented yet.
+`CRYSTAL_LEDGER_INTEROP_SPEC.md` is **implemented, Phases 1–3 (2026-07-18)**:
+`crystal-attach`, `crystal-import` and `crystal-bridge` are all registered and
+live. Its trust rules are enforced in code, not aspirational — `crystal-attach`
+fails closed if a caller smuggles a status onto the namespace (T2; verification
+goes through `evidence-attach --status` as a distinct verifier). Read the spec's
+own Status line for phase state rather than trusting a summary here.
 
 ## Build, Test, and Development Commands
 
