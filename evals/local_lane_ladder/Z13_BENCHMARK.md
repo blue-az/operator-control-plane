@@ -16,14 +16,21 @@ interfered with the other.
 | **GPU-addressable** | **17.5 GiB** = 4.0 GiB VRAM carve-out + 13.5 GiB GTT |
 | Backend | Vulkan (RADV GFX1151) — not ROCm |
 
-**17.5 GiB is the number that governs everything here.** It is not the 27 GB on
-the box and not the 4 GiB the carve-out advertises: the driver reaches the rest
-through GTT. Models whose weights plus KV cache stay under it run fully resident;
-17 GB and 19 GB models do not.
+**Read tok/s, not the CPU/GPU percentage.** z13 is a *unified-memory* machine:
+there is one LPDDR5X pool at ~256 GB/s, and the iGPU and CPU cores read the same
+memory. So the split `ollama ps` prints is **not** the discrete-GPU story of data
+falling off a fast bus onto a slow one — nothing moves to slower memory, because
+there is no slower memory. It reports which compute unit executes which layers.
+
+17.5 GiB is therefore a **compute-placement boundary**, not a bandwidth cliff:
+past it, layers execute on CPU cores rather than the iGPU. That still costs
+throughput, but by a different mechanism and with a much gentler slope than a
+PCIe spill on a discrete card. Everything below is stated in tok/s for that
+reason; the percentages are context, not the measurement.
 
 ## Measured
 
-| Model | Size | tok/s | Residency | Load |
+| Model | Size | **tok/s** | Layer placement | Load |
 |---|---:|---:|---|---:|
 | `granite4` | 2.1 GB | **88.2** | 100% GPU | 2s |
 | `gpt-oss-16k` | 13 GB | **51.5** | 100% GPU | 12s |
@@ -42,7 +49,7 @@ through GTT. Models whose weights plus KV cache stay under it run fully resident
 Verified like-for-like before believing it: `gemma4-26b-24k` on z13 and
 `gemma4:26b` on desktop report the same architecture, the same 25.8B parameters
 and the same Q4_K_M quantisation — the `-24k` suffix is a Modelfile with a baked
-context, not different weights. Spill percentages improved alongside throughput,
+context, not different weights. CPU-placed share fell alongside the throughput rise,
 which points at the serving stack (Vulkan/RADV, ollama) rather than at
 measurement error.
 
@@ -55,33 +62,41 @@ current gap is roughly 2x.
 
 Same host, similar parameter counts, **6.6x apart**:
 
-| | Params | Spill | tok/s |
+| | Params | CPU-placed | tok/s |
 |---|---:|---:|---:|
 | `gemma4:26b` **MoE** | 25.8B | 16% CPU | **46.8** |
 | `gemma4:31b` **dense** | 31B | 31% CPU | **7.1** |
 
-An MoE model activates a fraction of its weights per token, so spilling part of
-it to system memory costs proportionally little. A dense model touches every
-weight every token, so the spilled fraction is paid on every single one. This is
-the single most useful rule for the machine: **on unified memory, prefer MoE, and
-treat a dense model that does not fit as unusable rather than slow.**
+An MoE activates a fraction of its weights per token, so the share of layers
+placed on CPU is touched only occasionally. A dense model touches every weight on
+every token, so CPU-placed layers are paid on all of them — and dense compute at
+256 GB/s is slow even before placement enters into it. The rule for the machine:
+**on unified memory, prefer MoE, and treat a large dense model as unusable rather
+than slow.**
 
-`gemma4:26b` at 46.8 tok/s clears the ~20 tok/s conversational floor **while
-spilling**. `gemma4:31b` at 7.1 does not come close.
+Note this is a *compute* explanation, not a memory-bandwidth one. On a discrete
+card the same table would be read as a spill cliff; here both models are reading
+the same pool at the same speed, and the 6.6x gap is architecture plus where the
+layers run.
+
+`gemma4:26b` reaches 46.8 tok/s with 16% of its layers on CPU — which on a
+discrete card would read as a badly degraded model, and here does not. That gap
+between the percentage and the throughput is exactly why tok/s is the metric.
+`gemma4:31b` at 7.1 does not come close to the floor.
 
 ## Finding 3 — z13 is an interactive machine, not merely a slow one
 
 Four of six models measured clear the conversational floor, two of them by a wide
 margin. Notably `gemma4:12b` — which the Rasch fit over the ladder placed at
 **1707 Elo, statistically tied with the top of the desktop field** — runs at
-25.7 tok/s fully resident on a laptop.
+25.7 tok/s with every layer on the iGPU.
 
 The practical seat guidance for z13:
 
 | Use | Model | Why |
 |---|---|---|
 | Interactive / agentic | `gemma4-26b-24k` | 46.8 tok/s, strongest model that stays usable |
-| Fully-resident, no spill | `gpt-oss-16k` (51.5) or `gemma4:12b` (25.7) | predictable, no CPU fallback |
+| All layers on iGPU | `gpt-oss-16k` (51.5) or `gemma4:12b` (25.7) | no CPU-placed layers; most predictable |
 | Throwaway / fast | `granite4` | 88.2 tok/s, but 3.4B scored 8/18 on the floor ladder |
 | **Avoid** | `gemma4-31b-24k` | 7.1 tok/s dense; correctness does not pay for 6.6x the wait |
 
@@ -94,10 +109,11 @@ z13 is missing both tunings the desktop has:
 | `OLLAMA_FLASH_ATTENTION` | `1` | unset |
 | `OLLAMA_KV_CACHE_TYPE` | `q8_0` | unset (fp16) |
 
-On a machine whose binding constraint is a 17.5 GiB ceiling, an fp16 KV cache is
-twice the footprint it needs to be — and footprint is exactly what pushes the
-17 GB and 19 GB models over. Enabling `q8_0` plausibly moves `gemma4-26b-24k`
-from 16% spill toward fully resident.
+An fp16 KV cache is twice the footprint it needs to be, and footprint is what
+determines how many layers fit on the iGPU. Enabling `q8_0` would place more of
+`gemma4-26b-24k` on the iGPU — **but the prediction to test is tok/s, not the
+percentage.** Given 46.8 tok/s already at 16% CPU placement, the headroom may be
+smaller than the percentage suggests.
 
 **Not changed.** It is a systemd service edit on the operator's laptop, and the
 right form is a measured before/after rather than a silent flip. The experiment
@@ -105,8 +121,8 @@ is cheap: set both, restart ollama, re-run this same sweep, compare.
 
 ## Limits
 
-n=1 per model, one prompt, one context length; these are throughput and residency
-figures, not capability. Load times include cold page-in from disk and vary with
+n=1 per model, one prompt, one context length; these are throughput figures, not
+capability. Load times include cold page-in from disk and vary with
 cache state. No fixture pass rates were measured here — whether the ladder's
 *rankings* transfer across machines is a separate question, and the deterministic
 postconditions should transfer while any timeout-mediated outcome will not
