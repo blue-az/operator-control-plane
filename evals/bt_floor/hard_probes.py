@@ -160,13 +160,48 @@ CITATION_ALLOWLIST = {
 }
 
 
+_BASENAME_INDEX = None
+_SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv"}
+
+
+def _basename_index():
+    """Every filename present under the repo roots, built once.
+
+    A bare filename is grounded if some file by that name exists anywhere in
+    the corpus. Without this, a model citing "report.html" -- correct, and the
+    exact form BOTTLENECKS.md uses in prose -- was scored as fabricated
+    because only <root>/report.html was tried, never magic_bridge/report.html.
+    That false positive fired on a fully correct gemma4:31b answer.
+    """
+    global _BASENAME_INDEX
+    if _BASENAME_INDEX is None:
+        idx = set()
+        for root in REPO_ROOTS:
+            if not root.exists():
+                continue
+            for p in root.rglob("*"):
+                if any(part in _SKIP_DIRS for part in p.parts):
+                    continue
+                if p.is_file():
+                    idx.add(p.name)
+        _BASENAME_INDEX = idx
+    return _BASENAME_INDEX
+
+
 def resolve_citation(path_str):
-    """True if the cited path exists under any repo root (or bare/allowlisted)."""
+    """True if the cited path is grounded in the corpus.
+
+    Grounding is corpus-relative, not strictly filesystem-relative: a model
+    reading documents may legitimately name anything those documents name.
+    Three ways to resolve, cheapest first.
+    """
     if path_str in CITATION_ALLOWLIST:
         return True
+
     p = Path(path_str)
     if p.is_absolute():
         return p.exists()
+
     for root in REPO_ROOTS:
         if (root / p).exists():
             return True
@@ -174,6 +209,11 @@ def resolve_citation(path_str):
         parts = p.parts
         if len(parts) > 1 and (root / Path(*parts[1:])).exists():
             return True
+
+    # Bare filename cited without its directory.
+    if "/" not in path_str and path_str in _basename_index():
+        return True
+
     return False
 
 
