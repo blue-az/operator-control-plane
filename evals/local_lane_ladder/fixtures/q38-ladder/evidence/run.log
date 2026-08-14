@@ -1,0 +1,200 @@
+Grid: 3 tasks x 1 levels x 1 models x 18 trials = 54 cells
+Sampling pinned: --num-ctx 16384 --temperature 0.8 --think off
+Trace retention: ON -> /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q38-ladder/traces
+[ambiguous-anchor|L2|qwen3.8:27b|1] running...
+[ambiguous-anchor|L2|qwen3.8:27b|1] PASS (4.9s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|2] running...
+[ambiguous-anchor|L2|qwen3.8:27b|2] PASS (6.3s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|3] running...
+[ambiguous-anchor|L2|qwen3.8:27b|3] FAIL (5.2s) -- 2/4 checks failed: staging line changed: regex did not match: '## Staging\\n1\\. Drain connections\\.\\n2\\. Run: restart the service --force\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'
+[ambiguous-anchor|L2|qwen3.8:27b|4] running...
+[ambiguous-anchor|L2|qwen3.8:27b|4] PASS (5.1s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|5] running...
+[ambiguous-anchor|L2|qwen3.8:27b|5] PASS (4.8s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|6] running...
+[ambiguous-anchor|L2|qwen3.8:27b|6] PASS (6.2s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|7] running...
+[ambiguous-anchor|L2|qwen3.8:27b|7] PASS (4.9s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|8] running...
+[ambiguous-anchor|L2|qwen3.8:27b|8] PASS (5.0s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|9] running...
+[ambiguous-anchor|L2|qwen3.8:27b|9] PASS (5.1s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|10] running...
+[ambiguous-anchor|L2|qwen3.8:27b|10] PASS (5.0s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|11] running...
+[ambiguous-anchor|L2|qwen3.8:27b|11] PASS (6.2s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|12] running...
+[ambiguous-anchor|L2|qwen3.8:27b|12] FAIL (4.2s) -- 2/4 checks failed: staging line changed: regex did not match: '## Staging\\n1\\. Drain connections\\.\\n2\\. Run: restart the service --force\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'
+[ambiguous-anchor|L2|qwen3.8:27b|13] running...
+[ambiguous-anchor|L2|qwen3.8:27b|13] PASS (4.9s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|14] running...
+[ambiguous-anchor|L2|qwen3.8:27b|14] PASS (4.9s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|15] running...
+[ambiguous-anchor|L2|qwen3.8:27b|15] PASS (5.0s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|16] running...
+[ambiguous-anchor|L2|qwen3.8:27b|16] PASS (4.9s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|17] running...
+[ambiguous-anchor|L2|qwen3.8:27b|17] PASS (4.8s) -- all 4 checks passed
+[ambiguous-anchor|L2|qwen3.8:27b|18] running...
+[ambiguous-anchor|L2|qwen3.8:27b|18] PASS (4.9s) -- all 4 checks passed
+[csv-summarize-repair|L2|qwen3.8:27b|1] running...
+[csv-summarize-repair|L2|qwen3.8:27b|1] PASS (15.3s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.8:27b|2] running...
+[csv-summarize-repair|L2|qwen3.8:27b|2] FAIL (17.5s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-dm2trg9d/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-dm2trg9d/src/expenses.py", line 24, in summarize_expenses
+    amount = float(raw)
+ValueError: could not convert string to float: '"1'
+[csv-summarize-repair|L2|qwen3.8:27b|3] running...
+[csv-summarize-repair|L2|qwen3.8:27b|3] FAIL (15.9s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-vb6iyqmf/tests/check_expenses.py", line 17, in <module>
+    assert abs(r.get("food", 0) - 1280.00) < 0.005, f"food={r.get('food')!r} expected 1280.00"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: food=46.44 expected 1280.00
+[csv-summarize-repair|L2|qwen3.8:27b|4] running...
+[csv-summarize-repair|L2|qwen3.8:27b|4] FAIL (15.5s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-_kzmh6i5/tests/check_expenses.py", line 17, in <module>
+    assert abs(r.get("food", 0) - 1280.00) < 0.005, f"food={r.get('food')!r} expected 1280.00"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: food=45.44 expected 1280.00
+[csv-summarize-repair|L2|qwen3.8:27b|5] running...
+[csv-summarize-repair|L2|qwen3.8:27b|5] FAIL (15.2s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-avzw937g/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-avzw937g/src/expenses.py", line 33, in summarize_expenses
+    amount = _parse_amount(parts[2])
+  File "/tmp/opr-eval-csv-summarize-repair-L2-avzw937g/src/expenses.py", line 21, in _pa
+[csv-summarize-repair|L2|qwen3.8:27b|6] running...
+[csv-summarize-repair|L2|qwen3.8:27b|6] PASS (18.3s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.8:27b|7] running...
+[csv-summarize-repair|L2|qwen3.8:27b|7] FAIL (16.2s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-ugyydoov/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-ugyydoov/src/expenses.py", line 31, in summarize_expenses
+    amount = float(raw)
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L2|qwen3.8:27b|8] running...
+[csv-summarize-repair|L2|qwen3.8:27b|8] FAIL (17.0s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-8a3vhenn/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-8a3vhenn/src/expenses.py", line 26, in summarize_expenses
+    amount = float(raw)
+ValueError: could not convert string to float: '"1'
+[csv-summarize-repair|L2|qwen3.8:27b|9] running...
+[csv-summarize-repair|L2|qwen3.8:27b|9] FAIL (3.7s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-cc3bcf_6/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-cc3bcf_6/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L2|qwen3.8:27b|10] running...
+[csv-summarize-repair|L2|qwen3.8:27b|10] FAIL (17.4s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-2_6dz51q/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-2_6dz51q/src/expenses.py", line 34, in summarize_expenses
+    amount = parse_amount(parts[2])
+  File "/tmp/opr-eval-csv-summarize-repair-L2-2_6dz51q/src/expenses.py", line 21, in pars
+[csv-summarize-repair|L2|qwen3.8:27b|11] running...
+[csv-summarize-repair|L2|qwen3.8:27b|11] PASS (21.2s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.8:27b|12] running...
+[csv-summarize-repair|L2|qwen3.8:27b|12] FAIL (3.8s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-am721af_/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-am721af_/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L2|qwen3.8:27b|13] running...
+[csv-summarize-repair|L2|qwen3.8:27b|13] FAIL (19.8s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-jh76sarr/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-jh76sarr/src/expenses.py", line 32, in summarize_expenses
+    amount = float(raw_amount)
+ValueError: could not convert string to float: '"1'
+[csv-summarize-repair|L2|qwen3.8:27b|14] running...
+[csv-summarize-repair|L2|qwen3.8:27b|14] FAIL (15.8s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-ajlfty7l/tests/check_expenses.py", line 17, in <module>
+    assert abs(r.get("food", 0) - 1280.00) < 0.005, f"food={r.get('food')!r} expected 1280.00"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: food=46.44 expected 1280.00
+[csv-summarize-repair|L2|qwen3.8:27b|15] running...
+[csv-summarize-repair|L2|qwen3.8:27b|15] FAIL (14.9s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-qiyfn1k6/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-qiyfn1k6/src/expenses.py", line 28, in summarize_expenses
+    amount = float(raw)
+ValueError: could not convert string to float: '"1'
+[csv-summarize-repair|L2|qwen3.8:27b|16] running...
+[csv-summarize-repair|L2|qwen3.8:27b|16] FAIL (6.3s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-hjqrucwx/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-hjqrucwx/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L2|qwen3.8:27b|17] running...
+[csv-summarize-repair|L2|qwen3.8:27b|17] FAIL (3.7s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-wlvegki_/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-wlvegki_/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L2|qwen3.8:27b|18] running...
+[csv-summarize-repair|L2|qwen3.8:27b|18] FAIL (3.3s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-csv-summarize-repair-L2-2drvoaeh/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/opr-eval-csv-summarize-repair-L2-2drvoaeh/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[strict-log-format|L2|qwen3.8:27b|1] running...
+[strict-log-format|L2|qwen3.8:27b|1] PASS (10.4s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|2] running...
+[strict-log-format|L2|qwen3.8:27b|2] PASS (10.9s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|3] running...
+[strict-log-format|L2|qwen3.8:27b|3] PASS (9.2s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|4] running...
+[strict-log-format|L2|qwen3.8:27b|4] PASS (10.6s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|5] running...
+[strict-log-format|L2|qwen3.8:27b|5] PASS (9.2s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|6] running...
+[strict-log-format|L2|qwen3.8:27b|6] PASS (9.3s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|7] running...
+[strict-log-format|L2|qwen3.8:27b|7] FAIL (7.5s) -- 1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-strict-log-format-L2-73vo6qz3/tests/check_logsum.py", line 16, in <module>
+    got = error_report(BASIC)
+  File "/tmp/opr-eval-strict-log-format-L2-73vo6qz3/src/logsum.py", line 14, in error_report
+    raise NotImplementedError
+NotImplementedError
+[strict-log-format|L2|qwen3.8:27b|8] running...
+[strict-log-format|L2|qwen3.8:27b|8] PASS (12.3s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|9] running...
+[strict-log-format|L2|qwen3.8:27b|9] PASS (9.2s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|10] running...
+[strict-log-format|L2|qwen3.8:27b|10] PASS (9.2s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|11] running...
+[strict-log-format|L2|qwen3.8:27b|11] PASS (10.5s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|12] running...
+[strict-log-format|L2|qwen3.8:27b|12] FAIL (3.7s) -- 1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-strict-log-format-L2-9ri0dpba/tests/check_logsum.py", line 16, in <module>
+    got = error_report(BASIC)
+  File "/tmp/opr-eval-strict-log-format-L2-9ri0dpba/src/logsum.py", line 14, in error_report
+    raise NotImplementedError
+NotImplementedError
+[strict-log-format|L2|qwen3.8:27b|13] running...
+[strict-log-format|L2|qwen3.8:27b|13] FAIL (3.2s) -- 1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-strict-log-format-L2-htgo0nzc/tests/check_logsum.py", line 16, in <module>
+    got = error_report(BASIC)
+  File "/tmp/opr-eval-strict-log-format-L2-htgo0nzc/src/logsum.py", line 14, in error_report
+    raise NotImplementedError
+NotImplementedError
+[strict-log-format|L2|qwen3.8:27b|14] running...
+[strict-log-format|L2|qwen3.8:27b|14] PASS (8.6s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|15] running...
+[strict-log-format|L2|qwen3.8:27b|15] PASS (10.9s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|16] running...
+[strict-log-format|L2|qwen3.8:27b|16] PASS (9.4s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|17] running...
+[strict-log-format|L2|qwen3.8:27b|17] PASS (11.5s) -- all 3 checks passed
+[strict-log-format|L2|qwen3.8:27b|18] running...
+[strict-log-format|L2|qwen3.8:27b|18] PASS (11.7s) -- all 3 checks passed
+
+Wrote evals/local_lane_ladder/fixtures/q38-ladder/RESULTS.md
