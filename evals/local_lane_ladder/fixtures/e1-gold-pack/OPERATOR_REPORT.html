@@ -1,336 +1,133 @@
-<title>Local-Lane Model Floor</title>
+<title>Local-Lane Model Ranking</title>
 <style>
   :root {
-    --ground:      #FBFBFD;
-    --surface:     #FFFFFF;
-    --surface-alt: #F2F3F7;
-    --rule:        #DDE0E8;
-    --rule-strong: #C3C8D4;
-    --ink:         #141821;
-    --ink-soft:    #3D4552;
-    --slate:       #5A6472;
-    --accent:      #22467F;
-    --accent-soft: #E7ECF5;
-    --pass:        #1B6B47;
-    --pass-soft:   #E3F0E9;
-    --flag:        #B4690E;
-    --flag-soft:   #FAEEDD;
-    --shadow:      0 1px 2px rgba(20, 24, 33, .05), 0 8px 24px -12px rgba(20, 24, 33, .12);
-
-    --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --mono:  ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --ground:#FBFBFD; --surface:#FFFFFF; --surface-alt:#F2F3F7;
+    --rule:#DDE0E8; --rule-strong:#C3C8D4;
+    --ink:#141821; --ink-soft:#3D4552; --slate:#5A6472;
+    --accent:#22467F; --accent-soft:#E7ECF5;
+    --pass:#1B6B47; --pass-soft:#E3F0E9;
+    --flag:#B4690E; --flag-soft:#FAEEDD;
+    --shadow:0 1px 2px rgba(20,24,33,.05), 0 8px 24px -12px rgba(20,24,33,.12);
+    --serif: ui-serif,"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono: ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   }
-
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --ground:      #0F1217;
-      --surface:     #161A21;
-      --surface-alt: #1D222B;
-      --rule:        #2A303B;
-      --rule-strong: #3A414E;
-      --ink:         #E8EAEF;
-      --ink-soft:    #B9BFCB;
-      --slate:       #8A93A2;
-      --accent:      #8FB0E4;
-      --accent-soft: #1B2436;
-      --pass:        #6FC79B;
-      --pass-soft:   #14251D;
-      --flag:        #E0A356;
-      --flag-soft:   #2A2015;
-      --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+      --ground:#0F1217; --surface:#161A21; --surface-alt:#1D222B;
+      --rule:#2A303B; --rule-strong:#3A414E;
+      --ink:#E8EAEF; --ink-soft:#B9BFCB; --slate:#8A93A2;
+      --accent:#8FB0E4; --accent-soft:#1B2436;
+      --pass:#6FC79B; --pass-soft:#14251D;
+      --flag:#E0A356; --flag-soft:#2A2015;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
     }
   }
-
   :root[data-theme="dark"] {
-    --ground:      #0F1217;
-    --surface:     #161A21;
-    --surface-alt: #1D222B;
-    --rule:        #2A303B;
-    --rule-strong: #3A414E;
-    --ink:         #E8EAEF;
-    --ink-soft:    #B9BFCB;
-    --slate:       #8A93A2;
-    --accent:      #8FB0E4;
-    --accent-soft: #1B2436;
-    --pass:        #6FC79B;
-    --pass-soft:   #14251D;
-    --flag:        #E0A356;
-    --flag-soft:   #2A2015;
-    --shadow:      0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+    --ground:#0F1217; --surface:#161A21; --surface-alt:#1D222B;
+    --rule:#2A303B; --rule-strong:#3A414E;
+    --ink:#E8EAEF; --ink-soft:#B9BFCB; --slate:#8A93A2;
+    --accent:#8FB0E4; --accent-soft:#1B2436;
+    --pass:#6FC79B; --pass-soft:#14251D;
+    --flag:#E0A356; --flag-soft:#2A2015;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
   }
+  * { box-sizing:border-box; }
+  body { background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:16.5px; line-height:1.62; margin:0; padding:0 1.5rem 6rem;
+         -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:54rem; margin:0 auto; }
 
-  * { box-sizing: border-box; }
+  header.masthead { padding:4rem 0 2rem; border-bottom:2px solid var(--ink); margin-bottom:2rem; }
+  .eyebrow { font-family:var(--mono); font-size:.72rem; letter-spacing:.13em;
+             text-transform:uppercase; color:var(--slate); margin:0 0 1.1rem; }
+  h1 { font-family:var(--serif); font-weight:600; font-size:clamp(2.1rem,5.5vw,3.1rem);
+       line-height:1.1; letter-spacing:-.015em; text-wrap:balance; margin:0 0 1rem; }
+  .standfirst { font-family:var(--serif); font-size:1.2rem; line-height:1.5;
+                color:var(--ink-soft); max-width:38rem; margin:0; text-wrap:pretty; }
 
-  body {
-    background: var(--ground);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 16.5px;
-    line-height: 1.62;
-    margin: 0;
-    padding: 0 1.5rem 6rem;
-    -webkit-font-smoothing: antialiased;
-  }
+  .provenance { display:grid; grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));
+                border:1px solid var(--rule); border-radius:3px; background:var(--surface);
+                overflow:hidden; margin:0 0 3.5rem; box-shadow:var(--shadow); }
+  .prov-cell { padding:.95rem 1.1rem; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); }
+  .prov-cell dt { font-family:var(--mono); font-size:.66rem; letter-spacing:.1em;
+                  text-transform:uppercase; color:var(--slate); margin:0 0 .3rem; }
+  .prov-cell dd { font-family:var(--mono); font-size:.92rem; font-variant-numeric:tabular-nums;
+                  margin:0; color:var(--ink); }
+  .prov-cell dd.ok { color:var(--pass); }
+  .prov-cell dd.warn { color:var(--flag); }
 
-  .wrap { max-width: 54rem; margin: 0 auto; }
+  section { margin:0 0 3.5rem; }
+  h2 { font-family:var(--serif); font-size:1.6rem; font-weight:600; letter-spacing:-.01em;
+       line-height:1.25; text-wrap:balance; margin:0 0 .35rem; padding-top:1.3rem;
+       border-top:1px solid var(--rule-strong); }
+  h2 + .section-note { font-family:var(--mono); font-size:.72rem; letter-spacing:.08em;
+                       text-transform:uppercase; color:var(--slate); margin:0 0 1.5rem; }
+  h3 { font-family:var(--sans); font-size:.95rem; font-weight:650; margin:2rem 0 .6rem; }
+  p { margin:0 0 1.1rem; max-width:40rem; text-wrap:pretty; }
+  ul,ol { max-width:40rem; padding-left:1.2rem; margin:0 0 1.1rem; }
+  li { margin-bottom:.5rem; }
+  strong { font-weight:650; }
+  code { font-family:var(--mono); font-size:.87em; background:var(--surface-alt);
+         padding:.12em .38em; border-radius:2px; }
+  a { color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px; }
+  a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:2px; }
 
-  header.masthead {
-    padding: 4rem 0 2rem;
-    border-bottom: 2px solid var(--ink);
-    margin-bottom: 2rem;
-  }
-  .eyebrow {
-    font-family: var(--mono);
-    font-size: .72rem;
-    letter-spacing: .13em;
-    text-transform: uppercase;
-    color: var(--slate);
-    margin: 0 0 1.1rem;
-  }
-  h1 {
-    font-family: var(--serif);
-    font-weight: 600;
-    font-size: clamp(2.1rem, 5.5vw, 3.1rem);
-    line-height: 1.1;
-    letter-spacing: -.015em;
-    text-wrap: balance;
-    margin: 0 0 1rem;
-  }
-  .standfirst {
-    font-family: var(--serif);
-    font-size: 1.2rem;
-    line-height: 1.5;
-    color: var(--ink-soft);
-    max-width: 38rem;
-    margin: 0;
-    text-wrap: pretty;
-  }
+  .verdict { border-left:3px solid var(--flag); background:var(--flag-soft);
+             padding:1.15rem 1.3rem; border-radius:0 3px 3px 0; margin:0 0 1.5rem; max-width:40rem; }
+  .verdict p { margin:0; max-width:none; }
+  .verdict .label { display:block; font-family:var(--mono); font-size:.68rem;
+                    letter-spacing:.12em; text-transform:uppercase; color:var(--flag); margin-bottom:.45rem; }
 
-  .provenance {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    background: var(--surface);
-    overflow: hidden;
-    margin: 0 0 3.5rem;
-    box-shadow: var(--shadow);
-  }
-  .prov-cell {
-    padding: .95rem 1.1rem;
-    border-right: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-  }
-  .prov-cell dt {
-    font-family: var(--mono);
-    font-size: .66rem;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--slate);
-    margin: 0 0 .3rem;
-  }
-  .prov-cell dd {
-    font-family: var(--mono);
-    font-size: .92rem;
-    font-variant-numeric: tabular-nums;
-    margin: 0;
-    color: var(--ink);
-  }
-  .prov-cell dd.ok { color: var(--pass); }
-  .prov-cell dd.warn { color: var(--flag); }
+  .scroll { overflow-x:auto; margin:0 0 1.2rem; }
+  table { border-collapse:collapse; width:100%; min-width:32rem; font-size:.93rem; }
+  caption { caption-side:top; text-align:left; font-family:var(--mono); font-size:.7rem;
+            letter-spacing:.1em; text-transform:uppercase; color:var(--slate); padding-bottom:.6rem; }
+  th,td { text-align:left; padding:.58rem .8rem; border-bottom:1px solid var(--rule); }
+  thead th { font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase;
+             color:var(--slate); font-weight:500; border-bottom:1px solid var(--rule-strong); white-space:nowrap; }
+  td.num,th.num { text-align:right; font-variant-numeric:tabular-nums; font-family:var(--mono); }
+  td.model { font-family:var(--mono); font-size:.88rem; white-space:nowrap; }
+  tbody tr:last-child td { border-bottom:none; }
+  tr.seat td { background:var(--accent-soft); }
 
-  section { margin: 0 0 3.5rem; }
+  .pill { display:inline-block; font-family:var(--mono); font-size:.68rem; letter-spacing:.06em;
+          text-transform:uppercase; padding:.16em .5em; border-radius:2px; white-space:nowrap; }
+  .pill.clean { background:var(--pass-soft); color:var(--pass); }
+  .pill.conf { background:var(--flag-soft); color:var(--flag); }
 
-  h2 {
-    font-family: var(--serif);
-    font-size: 1.6rem;
-    font-weight: 600;
-    letter-spacing: -.01em;
-    line-height: 1.25;
-    text-wrap: balance;
-    margin: 0 0 .35rem;
-    padding-top: 1.3rem;
-    border-top: 1px solid var(--rule-strong);
-  }
-  h2 + .section-note {
-    font-family: var(--mono);
-    font-size: .72rem;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--slate);
-    margin: 0 0 1.5rem;
-  }
-  h3 {
-    font-family: var(--sans);
-    font-size: .95rem;
-    font-weight: 650;
-    margin: 2rem 0 .6rem;
-  }
-  p { margin: 0 0 1.1rem; max-width: 40rem; text-wrap: pretty; }
-  ul, ol { max-width: 40rem; padding-left: 1.2rem; margin: 0 0 1.1rem; }
-  li { margin-bottom: .5rem; }
-  strong { font-weight: 650; }
-  code {
-    font-family: var(--mono);
-    font-size: .87em;
-    background: var(--surface-alt);
-    padding: .12em .38em;
-    border-radius: 2px;
-  }
-  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
-  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .tierbar { font-family:var(--mono); font-size:.72rem; color:var(--slate);
+             border-left:2px dashed var(--rule-strong); padding:.15rem 0 .15rem .7rem; margin:.2rem 0 .2rem 1rem; }
 
-  .verdict {
-    border-left: 3px solid var(--flag);
-    background: var(--flag-soft);
-    padding: 1.15rem 1.3rem;
-    border-radius: 0 3px 3px 0;
-    margin: 0 0 1.5rem;
-    max-width: 40rem;
-  }
-  .verdict p { margin: 0; max-width: none; }
-  .verdict .label {
-    display: block;
-    font-family: var(--mono);
-    font-size: .68rem;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--flag);
-    margin-bottom: .45rem;
-  }
+  .ledger { border:1px solid var(--rule); border-radius:3px; overflow:hidden; background:var(--surface); }
+  .ledger-row { display:grid; grid-template-columns:1.6rem 1fr; gap:.8rem; padding:.85rem 1rem;
+                border-bottom:1px solid var(--rule); align-items:start; }
+  .ledger-row:last-child { border-bottom:none; }
+  .ledger-row .mark { font-family:var(--mono); font-weight:700; line-height:1.5; }
+  .ledger-row.yes .mark { color:var(--pass); }
+  .ledger-row.no .mark { color:var(--flag); }
+  .ledger-row p { margin:0; max-width:none; font-size:.93rem; }
+  .ledger-row .sub { color:var(--slate); font-size:.85rem; margin-top:.2rem; }
 
-  .scroll { overflow-x: auto; margin: 0 0 1.2rem; }
-  table { border-collapse: collapse; width: 100%; min-width: 32rem; font-size: .93rem; }
-  caption {
-    caption-side: top;
-    text-align: left;
-    font-family: var(--mono);
-    font-size: .7rem;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--slate);
-    padding-bottom: .6rem;
-  }
-  th, td { text-align: left; padding: .58rem .8rem; border-bottom: 1px solid var(--rule); }
-  thead th {
-    font-family: var(--mono);
-    font-size: .7rem;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--slate);
-    font-weight: 500;
-    border-bottom: 1px solid var(--rule-strong);
-    white-space: nowrap;
-  }
-  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); }
-  td.model { font-family: var(--mono); font-size: .88rem; white-space: nowrap; }
-  tbody tr:last-child td { border-bottom: none; }
-  tr.knee td { background: var(--accent-soft); }
-
-  .score { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; }
-  .score.full { color: var(--pass); }
-  .score.part { color: var(--flag); }
-  .score.zero { color: var(--flag); font-weight: 700; }
-
-  .pill {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: .68rem;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    padding: .16em .5em;
-    border-radius: 2px;
-    white-space: nowrap;
-  }
-  .pill.clean { background: var(--pass-soft); color: var(--pass); }
-  .pill.conf  { background: var(--flag-soft); color: var(--flag); }
-
-  .traces { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1rem; margin: 1.5rem 0; }
-  .trace {
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    background: var(--surface);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  .trace-head {
-    padding: .7rem .9rem;
-    border-bottom: 1px solid var(--rule);
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: .75rem;
-    flex-wrap: wrap;
-  }
-  .trace-head .who { font-family: var(--mono); font-size: .78rem; color: var(--ink); }
-  .trace.is-pass { border-top: 3px solid var(--pass); }
-  .trace.is-fail { border-top: 3px solid var(--flag); }
-  .trace pre {
-    font-family: var(--mono);
-    font-size: .755rem;
-    line-height: 1.6;
-    margin: 0;
-    padding: .9rem;
-    overflow-x: auto;
-    color: var(--ink-soft);
-    flex: 1;
-  }
-  .good { color: var(--pass); font-weight: 600; }
-  .bad  { color: var(--flag); font-weight: 700; }
-
-  .ledger { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--surface); }
-  .ledger-row {
-    display: grid;
-    grid-template-columns: 1.6rem 1fr;
-    gap: .8rem;
-    padding: .85rem 1rem;
-    border-bottom: 1px solid var(--rule);
-    align-items: start;
-  }
-  .ledger-row:last-child { border-bottom: none; }
-  .ledger-row .mark { font-family: var(--mono); font-weight: 700; line-height: 1.5; }
-  .ledger-row.yes .mark { color: var(--pass); }
-  .ledger-row.no  .mark { color: var(--flag); }
-  .ledger-row p { margin: 0; max-width: none; font-size: .93rem; }
-  .ledger-row .sub { color: var(--slate); font-size: .85rem; margin-top: .2rem; }
-
-  pre.cmd {
-    font-family: var(--mono);
-    font-size: .78rem;
-    line-height: 1.7;
-    background: var(--surface-alt);
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    padding: .9rem 1rem;
-    overflow-x: auto;
-    margin: 0 0 1.1rem;
-    color: var(--ink-soft);
-  }
-
-  footer {
-    border-top: 1px solid var(--rule-strong);
-    padding-top: 1.5rem;
-    margin-top: 3rem;
-    font-size: .85rem;
-    color: var(--slate);
-    max-width: 40rem;
-  }
-  footer p { max-width: none; }
-
-  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  pre.cmd { font-family:var(--mono); font-size:.78rem; line-height:1.7; background:var(--surface-alt);
+            border:1px solid var(--rule); border-radius:3px; padding:.9rem 1rem; overflow-x:auto;
+            margin:0 0 1.1rem; color:var(--ink-soft); }
+  footer { border-top:1px solid var(--rule-strong); padding-top:1.5rem; margin-top:3rem;
+           font-size:.85rem; color:var(--slate); max-width:40rem; }
+  footer p { max-width:none; }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
 </style>
 
 <div class="wrap">
 
   <header class="masthead">
     <p class="eyebrow">Operator report &middot; Front E &middot; prepared for external review</p>
-    <h1>Local-Lane Model Floor</h1>
+    <h1>Local-Lane Model Ranking</h1>
     <p class="standfirst">
-      Twelve local models, 279 deterministically graded cells. The fixtures cannot
-      tell a 14B model from a 32B one &mdash; but going down, they break sharply, and
-      what breaks first is not code generation. It is carrying an exact file path.
+      Twelve local models, 1,317 deterministically graded cells, every one traced.
+      The ranking took eleven epochs to produce &mdash; because six separate harness
+      defects had to be found first, and every one of them first appeared as a
+      difference between models.
     </p>
   </header>
 
@@ -338,332 +135,181 @@
     <div class="prov-cell"><dt>Date</dt><dd>2026-08-13</dd></div>
     <div class="prov-cell"><dt>Machine</dt><dd>desktop</dd></div>
     <div class="prov-cell"><dt>GPU</dt><dd>RTX 3090</dd></div>
-    <div class="prov-cell"><dt>Cells</dt><dd class="ok">279</dd></div>
-    <div class="prov-cell"><dt>Traces</dt><dd class="ok">279 / 279</dd></div>
-    <div class="prov-cell"><dt>Residency</dt><dd class="ok">100% GPU</dd></div>
+    <div class="prov-cell"><dt>Cells</dt><dd class="ok">1,317</dd></div>
+    <div class="prov-cell"><dt>Traces</dt><dd class="ok">100%</dd></div>
     <div class="prov-cell"><dt>Models</dt><dd>12</dd></div>
-    <div class="prov-cell"><dt>Size range</dt><dd>3.4B&ndash;32B</dd></div>
-    <div class="prov-cell"><dt>Claims filed</dt><dd class="warn">0</dd></div>
-    <div class="prov-cell"><dt>UID re-derive</dt><dd class="warn">pending</dd></div>
+    <div class="prov-cell"><dt>Ranking n</dt><dd>18</dd></div>
+    <div class="prov-cell"><dt>UID re-derive</dt><dd class="ok">verified</dd></div>
+    <div class="prov-cell"><dt>Noise floor</dt><dd class="warn">11.3%</dd></div>
+    <div class="prov-cell"><dt>Claims filed</dt><dd class="ok">1</dd></div>
   </dl>
 
   <section>
-    <h2>The two results</h2>
-    <p class="section-note">Summary</p>
-
-    <p>
-      <strong>Above ~14B the fixtures are saturated.</strong> Seven models from 14B to
-      32B were run under identical controls; 62 of 63 cells passed. Every model clears
-      them, so the set cannot rank seats and must not be cited as if it can.
-    </p>
-    <p>
-      <strong>Below ~12B they discriminate sharply, and monotonically.</strong> Five
-      models from 3.4B to 14.8B score 8/18, 9/18, 13/18, 17/18, 18/18 &mdash; ordered
-      by parameter count without exception. The failures are genuine: 19 of 25 are
-      &ldquo;the tool ran and did the wrong thing&rdquo;, not harness artifacts.
-    </p>
-    <p>
-      Reaching a state where those numbers mean anything required fixing three defects
-      in the harness itself, each of which had been silently biasing results. That work
-      is documented below, because it bears on how much weight the tables deserve.
-    </p>
-  </section>
-
-  <section>
-    <h2>Method</h2>
-    <p class="section-note">What is measured, and how</p>
-
-    <p>
-      Three plan-shaped (L2) fixtures, each graded by a machine-checkable postcondition
-      that inspects the resulting files &mdash; never the model&rsquo;s narration or a
-      self-reported success. Every trial runs against a disposable temp fixture, so no
-      real repository is touched. Every cell retains a full trace: raw stdout and
-      stderr, exact argv, prompt, revision, and grade outcome.
-    </p>
+    <h2>The ranking</h2>
+    <p class="section-note">n=18 &middot; 378 cells &middot; three discriminating fixtures</p>
 
     <div class="scroll">
       <table>
-        <caption>Fixtures and their deterministic checks</caption>
-        <thead><tr><th>Task</th><th>Postcondition &mdash; the only thing scored</th></tr></thead>
-        <tbody>
-          <tr><td class="model">alias-add</td><td>Exact line present in <code>bash/.bash_aliases</code></td></tr>
-          <tr><td class="model">config-value-change</td><td>New value present <em>and</em> stale value absent</td></tr>
-          <tr><td class="model">function-add</td><td>Importing and calling <code>square(4)</code> returns <code>16</code></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>
-      L2 means plan-shaped prompting: exact paths, anchored edits, one tool call per
-      step, an explicit success criterion, bounded scope. All models ran fully
-      GPU-resident at <code>num_ctx 16384</code> with a uniform system prompt and
-      identical sampling.
-    </p>
-  </section>
-
-  <section>
-    <h2>The instrument had to be repaired first</h2>
-    <p class="section-note">Three defects, each silently biasing results</p>
-
-    <p>
-      These were found in sequence, each exposed by fixing the one before it. They are
-      listed because a reader should know the earlier numbers were not merely noisy but
-      systematically wrong, and why the current ones are not.
-    </p>
-
-    <div class="scroll">
-      <table>
-        <caption>Harness defects found and fixed</caption>
-        <thead><tr><th>Defect</th><th>Effect on measurement</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>Tool-call extraction used a <strong>greedy brace span</strong> from the first <code>{</code> to the last <code>}</code></td>
-            <td>A response carrying two objects produced an unparseable span, so a correct tool call was returned as prose and nothing dispatched. Confounded 5 of 45 cells across two model families.</td>
-          </tr>
-          <tr>
-            <td>The strict-JSON system prompt was gated on a <strong>substring of the model name</strong> (<code>"26b" in model</code>)</td>
-            <td>One model received an instruction its comparators did not &mdash; and it speaks directly to the emission behaviour being graded. Every cross-model comparison before this was confounded.</td>
-          </tr>
-          <tr>
-            <td><strong>No sampling or context control at all</strong> was sent to the model server</td>
-            <td>Context came from each model&rsquo;s own defaults, so it differed per model <em>and</em> pushed a 32B model into CPU spill. Temperature was unpinned, making every cell a fresh draw.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>
-      All three are fixed, with tests, and the fix for each is covered by regression
-      cases built from the verbatim payloads that failed.
-    </p>
-  </section>
-
-  <section>
-    <h2>Above 14B: saturated</h2>
-    <p class="section-note">Seven models &middot; 63 cells &middot; identical controls</p>
-
-    <div class="scroll">
-      <table>
-        <caption>Controlled epoch &mdash; nine cells per model</caption>
+        <caption>Rasch fit &mdash; ability and item difficulty on one scale, Elo-scaled</caption>
         <thead>
-          <tr><th>Model</th><th class="num">Pass</th><th class="num">Median</th><th class="num">Max</th></tr>
+          <tr><th>Model</th><th class="num">Raw</th><th class="num">Elo</th><th>95% CI</th><th class="num">Median</th><th>Stability</th></tr>
         </thead>
         <tbody>
-          <tr><td class="model">qwen2.5-coder:14b</td><td class="num"><span class="score full">9/9</span></td><td class="num">2.2s</td><td class="num">9.9s</td></tr>
-          <tr><td class="model">gemma3:27b</td><td class="num"><span class="score full">9/9</span></td><td class="num">3.4s</td><td class="num">17.8s</td></tr>
-          <tr><td class="model">gemma4:26b</td><td class="num"><span class="score part">8/9</span></td><td class="num">9.1s</td><td class="num">21.9s</td></tr>
-          <tr><td class="model">gemma4:31b</td><td class="num"><span class="score full">9/9</span></td><td class="num">20.3s</td><td class="num">36.6s</td></tr>
-          <tr><td class="model">qwen3:32b</td><td class="num"><span class="score full">9/9</span></td><td class="num">27.3s</td><td class="num">100.5s</td></tr>
-          <tr><td class="model">qwen3-vl:30b</td><td class="num"><span class="score full">9/9</span></td><td class="num">37.1s</td><td class="num">70.1s</td></tr>
-          <tr><td class="model">qwen3.6:27b</td><td class="num"><span class="score full">9/9</span></td><td class="num">41.4s</td><td class="num">154.2s</td></tr>
+          <tr class="seat">
+            <td class="model">gemma4:26b</td><td class="num">36/54</td><td class="num"><strong>1814</strong></td>
+            <td>[1757, 1866]</td><td class="num"><strong>13.2s</strong></td><td><span class="pill clean">0 unstable</span></td>
+          </tr>
+          <tr>
+            <td class="model">gemma4:31b</td><td class="num">36/54</td><td class="num"><strong>1814</strong></td>
+            <td>[1767, 1869]</td><td class="num">17.9s</td><td><span class="pill clean">0 unstable</span></td>
+          </tr>
+          <tr>
+            <td class="model">qwen3.6:27b</td><td class="num">28/54</td><td class="num">1689</td>
+            <td>[1603, 1784]</td><td class="num">14.5s</td><td><span class="pill conf">3 of 5 unstable</span></td>
+          </tr>
+          <tr>
+            <td class="model">qwen3-vl:30b</td><td class="num">12/54</td><td class="num">1447</td>
+            <td>[1367, 1531]</td><td class="num">119.8s</td><td><span class="pill conf">2 of 5 unstable</span></td>
+          </tr>
+          <tr>
+            <td class="model">qwen3:32b</td><td class="num">4/54</td><td class="num">1291</td>
+            <td>[1200, 1381]</td><td class="num">12.8s</td><td><span class="pill conf">1 of 5 unstable</span></td>
+          </tr>
+          <tr>
+            <td class="model">qwen2.5-coder:14b</td><td class="num">3/54</td><td class="num">1266</td>
+            <td>[1189, 1363]</td><td class="num">6.3s</td><td><span class="pill conf">3 of 5 unstable</span></td>
+          </tr>
+          <tr>
+            <td class="model">gemma3:27b</td><td class="num">0/54</td><td class="num">1178</td>
+            <td>[1147, 1215]</td><td class="num">20.9s</td><td><span class="pill clean">0 unstable</span></td>
+          </tr>
         </tbody>
       </table>
     </div>
 
+    <p>Five tiers separate at <strong>&ge;95% confidence</strong>. Two adjacent pairs do not, and those are genuine ties rather than missing data:</p>
+
+    <div class="tierbar">gemma4:26b &nbsp;&asymp;&nbsp; gemma4:31b &nbsp;&nbsp; P=0.49 &mdash; dead heat</div>
+    <div class="tierbar">&mdash;&mdash; break, P=0.98 &mdash;&mdash;</div>
+    <div class="tierbar">qwen3.6:27b</div>
+    <div class="tierbar">&mdash;&mdash; break, P=1.00 &mdash;&mdash;</div>
+    <div class="tierbar">qwen3-vl:30b</div>
+    <div class="tierbar">&mdash;&mdash; break, P=0.98 &mdash;&mdash;</div>
+    <div class="tierbar">qwen3:32b &nbsp;&asymp;&nbsp; qwen2.5-coder:14b &nbsp;&nbsp; P=0.63 &mdash; a 33B does not separate from a 15B</div>
+    <div class="tierbar">&mdash;&mdash; break, P=0.97 &mdash;&mdash;</div>
+    <div class="tierbar">gemma3:27b</div>
+
+    <h3>The seat: gemma4:26b</h3>
     <p>
-      62 of 63. The single failure is genuine and worth keeping as a specimen: a model
-      read <code>bash/.bash_aliases</code> correctly, then issued its patch against
-      <code>.bash_aliases</code>. It is the same error that defines the floor below.
-    </p>
-    <p>
-      Correctness being a tie, the only thing these numbers decide is <strong>latency</strong>,
-      and it points away from the large models: a 19&times; median spread for no
-      measurable accuracy gain. <code>qwen3-vl:30b</code> is a vision-language model and
-      works as a coding seat, but costs 17&times; the median of the fastest.
+      Tied with <code>gemma4:31b</code> on correctness and statistically inseparable from
+      it, so the decision falls to the two axes that <em>can</em> separate them.
+      It is <strong>1.4&times; faster</strong> (13.2s vs 17.9s median) and reaches
+      <strong>17 of its 24 passes with a clean trajectory</strong> against 31b's 12 &mdash;
+      half of 31b's successes arrive via a blind patch, a skipped source, or a repeat.
+      Both are perfectly deterministic across 18 trials. Nothing in 1,317 cells
+      justifies the larger model for this work.
     </p>
   </section>
 
   <section>
-    <h2>Below 12B: the floor</h2>
-    <p class="section-note">Five models &middot; 90 cells &middot; n=6</p>
+    <h2>Parameter count predicts almost nothing</h2>
+    <p class="section-note">The most portable result here</p>
+    <p>
+      A <strong>12B model outranks a 33B one</strong> by roughly 300 Elo. The spread
+      <em>within</em> the gemma4 family is comparable to the spread across the entire
+      field. On a separate 90-cell floor sweep the ordering was monotonic in size from
+      3.4B to 14.8B &mdash; but that monotonicity vanishes above ~14B, where family and
+      tuning dominate.
+    </p>
+    <p>
+      The corollary for hardware: <code>qwen3:32b</code> occupies 20&nbsp;GB of VRAM to
+      finish sixth of seven. Spending capacity on parameter count is not a strategy on
+      this workload class.
+    </p>
+  </section>
+
+  <section>
+    <h2>The instrument had to be repaired six times</h2>
+    <p class="section-note">Every defect first appeared as a model difference</p>
 
     <div class="scroll">
       <table>
-        <caption>Floor sweep &mdash; eighteen cells per model, by fixture</caption>
-        <thead>
-          <tr>
-            <th>Model</th><th class="num">Params</th><th class="num">Total</th>
-            <th class="num">alias-add</th><th class="num">config</th><th class="num">function-add</th><th class="num">Median</th>
-          </tr>
-        </thead>
+        <caption>Harness defects found, and what each one faked</caption>
+        <thead><tr><th>Defect</th><th>What it looked like</th></tr></thead>
         <tbody>
-          <tr>
-            <td class="model">granite4</td><td class="num">3.4B</td>
-            <td class="num"><span class="score part">8/18</span></td>
-            <td class="num"><span class="score zero">0/6</span></td>
-            <td class="num"><span class="score full">6/6</span></td>
-            <td class="num"><span class="score part">2/6</span></td><td class="num">1.8s</td>
-          </tr>
-          <tr>
-            <td class="model">llama3.1:8b</td><td class="num">8.0B</td>
-            <td class="num"><span class="score part">9/18</span></td>
-            <td class="num"><span class="score zero">0/6</span></td>
-            <td class="num"><span class="score part">5/6</span></td>
-            <td class="num"><span class="score part">4/6</span></td><td class="num">2.0s</td>
-          </tr>
-          <tr>
-            <td class="model">gemma4:e4b</td><td class="num">8.0B</td>
-            <td class="num"><span class="score part">13/18</span></td>
-            <td class="num"><span class="score zero">1/6</span></td>
-            <td class="num"><span class="score full">6/6</span></td>
-            <td class="num"><span class="score full">6/6</span></td><td class="num">2.5s</td>
-          </tr>
-          <tr class="knee">
-            <td class="model">gemma4:12b</td><td class="num">11.9B</td>
-            <td class="num"><span class="score part">17/18</span></td>
-            <td class="num"><span class="score full">6/6</span></td>
-            <td class="num"><span class="score full">6/6</span></td>
-            <td class="num"><span class="score part">5/6</span></td><td class="num">13.6s</td>
-          </tr>
-          <tr>
-            <td class="model">qwen2.5-coder:14b</td><td class="num">14.8B</td>
-            <td class="num"><span class="score full">18/18</span></td>
-            <td class="num"><span class="score full">6/6</span></td>
-            <td class="num"><span class="score full">6/6</span></td>
-            <td class="num"><span class="score full">6/6</span></td><td class="num">2.5s</td>
-          </tr>
+          <tr><td>Tool-call extraction used a <strong>greedy brace span</strong></td>
+              <td>A correct call emitted as two JSON objects failed to parse and was returned as prose. Read as two model families having an &ldquo;emission quirk&rdquo;.</td></tr>
+          <tr><td>System prompt gated on a <strong>substring of the model name</strong></td>
+              <td>One model silently received a strict-JSON instruction its comparators did not &mdash; speaking directly to the behaviour being graded.</td></tr>
+          <tr><td><strong>No sampling or context control</strong> was sent at all</td>
+              <td>Context came from each model&rsquo;s own defaults, so it differed per model <em>and</em> pushed a 32B model into CPU spill.</td></tr>
+          <tr><td><strong>Reasoning mode uncontrolled</strong></td>
+              <td>Thinking-capable models ran with reasoning on by default, costing 5&ndash;32&times; the tokens. A 19&times; apparent latency spread collapsed to 1.2&times; once controlled.</td></tr>
+          <tr><td>The loop <strong>exited after the first file edit</strong></td>
+              <td>A multi-file task scored <strong>0 of 42</strong> across seven models. It was structurally unpassable; the same model passes it with a continuation budget.</td></tr>
+          <tr><td>Scope rule <strong>stated but never graded</strong></td>
+              <td>A model could make the required edit and also rewrite unrelated files with no penalty.</td></tr>
         </tbody>
       </table>
     </div>
-
-    <p>
-      Monotonic in parameter count, with the knee between <strong>8B and 12B</strong>.
-    </p>
-  </section>
-
-  <section>
-    <h2>What actually fails</h2>
-    <p class="section-note">The finding</p>
 
     <div class="verdict">
-      <span class="label">Reviewer&rsquo;s attention</span>
+      <span class="label">The reusable lesson</span>
       <p>
-        The first capability to break is <strong>not tool-calling and not code
-        generation</strong> &mdash; small models manage both. It is carrying an exact
-        literal path from the prompt into the tool call.
+        One fixture was on record as the only one ever producing per-model
+        <em>shape</em> differences. Under a repaired harness it scores 6/6 for all
+        seven models. <strong>The apparent capability ladder was substantially
+        artifact.</strong> The working rule that came out of this: when a model
+        difference appears, assume the harness until a retained trace proves
+        otherwise.
       </p>
     </div>
+  </section>
 
+  <section>
+    <h2>How much of any result is noise</h2>
+    <p class="section-note">Measured, not assumed</p>
     <p>
-      The prompt names the file explicitly as <code>bash/.bash_aliases</code>. The
-      models below the knee drop the directory prefix and write to a path that does not
-      exist:
-    </p>
-
-    <div class="traces">
-      <div class="trace is-fail">
-        <div class="trace-head">
-          <span class="who">granite4 &middot; 3.4B</span>
-          <span class="pill conf">0/6</span>
-        </div>
-<pre>[Model requests tool call: patch_file]
-{
-  "tool": "patch_file",
-  "path": <span class="bad">".bash_aliases"</span>,
-  "target_content": "alias nv='nvidia-smi'",
-  ...
-}
-
-[Tool Output]
-<span class="bad">Error: File not found: .bash_aliases</span></pre>
-      </div>
-
-      <div class="trace is-pass">
-        <div class="trace-head">
-          <span class="who">qwen2.5-coder &middot; 14.8B</span>
-          <span class="pill clean">6/6</span>
-        </div>
-<pre>[Model requests tool call: patch_file]
-{
-  "tool": "patch_file",
-  "path": <span class="good">"bash/.bash_aliases"</span>,
-  "target_content": "alias nv='nvidia-smi'",
-  ...
-}
-
-[Tool Output]
-<span class="good">Successfully patched bash/.bash_aliases.</span></pre>
-      </div>
-    </div>
-
-    <p>
-      <code>llama3.1:8b</code> compounds it by also truncating the anchor
-      <code>alias nv='nvidia-smi'</code> to <code>alias nv=</code>. In every case the
-      tool <strong>errored loudly</strong> rather than silently succeeding &mdash; the
-      harness behaved correctly and the models were simply wrong.
-    </p>
-
-    <h3>It decays with scale rather than switching on</h3>
-    <p>
-      Path-fidelity failures on this fixture run roughly 6/6, 5/6, 4/6, 0/6, 0/6 from
-      3.4B to 14.8B &mdash; and the same error still appears once at 26B. This is a
-      probability that falls with model size, not a threshold that is crossed. A larger
-      model does not make the failure impossible; it makes it rare.
+      A dedicated probe ran 142 cells that were provably unaffected by the variable
+      under test, in two separate invocations at identical settings. Aggregate rates
+      differed by 4.2 points &mdash; but <strong>16 of 142 individual cells (11.3%)
+      flipped</strong>.
     </p>
     <p>
-      This matters for anyone relying on exact-path instructions: the failure is silent
-      in intent and loud only because the file happened not to exist. An edit to a path
-      that <em>does</em> exist would have succeeded against the wrong file.
+      That figure bounds everything else here. It explains why single-trial results are
+      untrustworthy, why confidence intervals stayed wide at n=6, and why two adjacent
+      pairs in the ranking cannot be separated by adding trials.
+    </p>
+    <p>
+      It is also <strong>not uniform</strong>. Four models reproduced to the decimal
+      across separate invocations; the only two that drifted beyond the floor were
+      precisely the two an independent stability metric had already flagged.
+      <strong>Instability is a property of specific models, not a smear across the
+      field</strong> &mdash; and it is predictable in advance.
     </p>
   </section>
 
   <section>
-    <h2>The fixtures themselves are now graded</h2>
-    <p class="section-note">Instrument quality</p>
-
-    <div class="scroll">
-      <table>
-        <caption>Discriminating power across 3.4B&ndash;32B</caption>
-        <thead><tr><th>Fixture</th><th>Verdict</th></tr></thead>
-        <tbody>
-          <tr>
-            <td class="model">alias-add</td>
-            <td><strong>The discriminator.</strong> Sharp cliff between 8B and 12B; carries essentially all the signal.</td>
-          </tr>
-          <tr>
-            <td class="model">config-value-change</td>
-            <td><strong>Saturated even at 3.4B</strong> (6/6). Carries no information at any size tested. Retire or harden.</td>
-          </tr>
-          <tr>
-            <td class="model">function-add</td>
-            <td>Weak and <strong>non-monotonic</strong> &mdash; an 8B model (6/6) outscores an 11.9B one (5/6).</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
+    <h2>Process quality does not predict correctness</h2>
+    <p class="section-note">Trajectory scoring</p>
     <p>
-      That <code>config-value-change</code> passes 6/6 on a 3.4B model while
-      <code>alias-add</code> scores 0/6 is itself informative. Both are single anchored
-      string edits and look equivalent in the manifest. The difference is the path
-      shape: <code>config/settings.ini</code> is conventional, while
-      <code>bash/.bash_aliases</code> is a dotfile inside a directory &mdash; a form
-      small models normalise away.
+      Each cell was additionally scored against a rubric transferred from a
+      document-AI verification standard: read the source before editing it, consult
+      every declared source, do not silently repeat a discarded step. The
+      deterministic postcondition remained the only gate &mdash; the process score
+      never decides a cell.
     </p>
-  </section>
-
-  <section>
-    <h2>Two methodology results worth carrying elsewhere</h2>
-    <p class="section-note">Applies to any local-model benchmark</p>
-
-    <h3>Temperature 0 is not a neutral control</h3>
     <p>
-      Pinned for reproducibility, it produced a 6/9 for one model with every failure
-      being the repeat-guard. Greedy decoding locks an agentic loop into re-issuing an
-      identical tool call. Measured directly on the affected cell:
-      <strong>1/6 at temperature 0 against 6/6 at 0.8.</strong> Temperature 0 buys
-      reproducibility by introducing a failure mode absent from real use, and it
-      penalises loop-prone models specifically.
+      <strong>A clean trajectory barely predicts passing:</strong> 60% against 56%.
+      That is noise, and it is the correct outcome. The source rubric explicitly names
+      &ldquo;confusing process with outcome&rdquo; as an error and rules that process
+      is a tiebreaker, not a criterion. A process score that predicted outcome would
+      have collapsed two axes that are deliberately separate.
     </p>
-
-    <h3>The seed is not honoured, and n=3 is weaker than it looks</h3>
     <p>
-      The same seed on a high-entropy prompt produced different outputs on consecutive
-      calls, so seed-based reproducibility is unavailable on this stack. Apparent
-      determinism within a cell comes from the fixtures being low-entropy, not from
-      seeding working. One model measured 3/3, 3/8, 8/8, 8/8, 6/6 on the same cell
-      across separate windows &mdash; real variance lives <em>across</em> invocations,
-      where a three-trial cell cannot see it.
+      Where it earns its place is exactly the tie above. On correctness the two leaders
+      are indistinguishable; on process they are not, and the seat decision rests on
+      evidence rather than preference.
     </p>
   </section>
 
@@ -672,55 +318,34 @@
     <p class="section-note">Claim boundary</p>
 
     <div class="ledger">
-      <div class="ledger-row yes">
-        <span class="mark">&#10003;</span>
-        <div>
-          <p>All 279 cells ran fully GPU-resident with a retained trace.</p>
-          <p class="sub">Residency sampled throughout every run; zero CPU-spill samples across every pack.</p>
-        </div>
-      </div>
-      <div class="ledger-row yes">
-        <span class="mark">&#10003;</span>
-        <div>
-          <p>The floor sweep is monotonic in parameter count, and its failures are genuine.</p>
-          <p class="sub">19 of 25 are &ldquo;tool ran, wrong result&rdquo;. Only interpretable because the harness defects were fixed first.</p>
-        </div>
-      </div>
-      <div class="ledger-row yes">
-        <span class="mark">&#10003;</span>
-        <div>
-          <p>Three harness defects were found, fixed, and covered by regression tests.</p>
-          <p class="sub">Each built from the verbatim payloads that failed.</p>
-        </div>
-      </div>
-      <div class="ledger-row no">
-        <span class="mark">&times;</span>
-        <div>
-          <p>No claim is registered from any of this.</p>
-          <p class="sub">An independent re-derive by a distinct user identity is required first, and now spans five packs. The author of a run should not be its verifier.</p>
-        </div>
-      </div>
-      <div class="ledger-row no">
-        <span class="mark">&times;</span>
-        <div>
-          <p>Nothing here ranks models above ~14B.</p>
-          <p class="sub">The fixtures are saturated there. Latency separates them; correctness does not.</p>
-        </div>
-      </div>
-      <div class="ledger-row no">
-        <span class="mark">&times;</span>
-        <div>
-          <p>&ldquo;A 3B model cannot do agentic coding&rdquo; does not follow.</p>
-          <p class="sub">What follows is that a 3.4B model fails <em>these three fixtures</em> at <em>this prompt shape</em>, on path fidelity. A different prompt shape or a runtime that re-injects exact paths could plausibly change it.</p>
-        </div>
-      </div>
-      <div class="ledger-row no">
-        <span class="mark">&times;</span>
-        <div>
-          <p>Cross-invocation variance is unexplained.</p>
-          <p class="sub">Something varies at the server or model-load level that none of these controls reach. Not addressed here.</p>
-        </div>
-      </div>
+      <div class="ledger-row yes"><span class="mark">&#10003;</span><div>
+        <p>The ranking is independently verified.</p>
+        <p class="sub">Re-derived cell-for-cell by a separate user identity on a different machine, under enforced UID isolation. The verifier committed its own re-runnable checker; every pack passed with zero mismatches.</p>
+      </div></div>
+      <div class="ledger-row yes"><span class="mark">&#10003;</span><div>
+        <p>Every cell ran fully GPU-resident with a retained trace.</p>
+        <p class="sub">Residency sampled throughout every epoch; zero CPU-spill samples across all packs.</p>
+      </div></div>
+      <div class="ledger-row yes"><span class="mark">&#10003;</span><div>
+        <p>Scope compliance is total.</p>
+        <p class="sub">Zero out-of-scope writes in 210 enforced cells. A negative result worth recording: this is not where these models fail.</p>
+      </div></div>
+      <div class="ledger-row no"><span class="mark">&times;</span><div>
+        <p>The two remaining ties may be permanent.</p>
+        <p class="sub">An 11.3% per-cell noise floor bounds what any sample size can resolve. More trials cannot distinguish a genuine tie from insufficient data here.</p>
+      </div></div>
+      <div class="ledger-row no"><span class="mark">&times;</span><div>
+        <p>This does not rank models above ~14B on easy work.</p>
+        <p class="sub">Six earlier fixtures are saturated &mdash; every model from 14B to 32B clears them. Those results say &ldquo;nobody fails&rdquo;, not &ldquo;these are equal&rdquo;.</p>
+      </div></div>
+      <div class="ledger-row no"><span class="mark">&times;</span><div>
+        <p>Nothing here transfers to comprehension or judgment.</p>
+        <p class="sub">A separate 30-cell battery on long-document comprehension puts the capability floor at <strong>3.4B</strong> &mdash; a model that scores 8/18 on this execution ladder. Execution and comprehension floors are different capabilities at different sizes.</p>
+      </div></div>
+      <div class="ledger-row no"><span class="mark">&times;</span><div>
+        <p>Timings do not survive a hardware change.</p>
+        <p class="sub">Single RTX 3090 at a 320&nbsp;W cap. A second card lands the day after this run; pass rates should transfer, wall-clock will not.</p>
+      </div></div>
     </div>
   </section>
 
@@ -728,53 +353,40 @@
     <h2>Practical reading</h2>
     <p class="section-note">If you have to choose a local seat today</p>
     <ul>
-      <li><strong>Nothing below ~12B</strong> for plan-shaped edit work, and note it fails by writing to a path that does not exist rather than by refusing.</li>
-      <li><strong>12B is the knee, not the answer.</strong> 17/18, but at a 13.6s median &mdash; over 5&times; a 14.8B model&rsquo;s 2.5s, for a worse score. Small does not mean fast.</li>
-      <li><strong><code>qwen2.5-coder:14b</code> is the value pick:</strong> 18/18 at 2.5s median in 9&nbsp;GB.</li>
-      <li>Large models buy latency, not accuracy, on work of this size. Spend the VRAM only when the task exceeds what these fixtures represent.</li>
+      <li><strong><code>gemma4:26b</code> is the executor seat</strong> &mdash; tied at the top, fastest of the leaders, perfectly stable, cleanest process.</li>
+      <li><strong>Turn reasoning off for plan-shaped work.</strong> It costs nothing measurable in quality on tasks these models already solve and returns 5&ndash;32&times; in tokens.</li>
+      <li><strong>Gate the unstable models rather than trusting a run.</strong> Stability is bimodal and predictable; treat a coin-flip model as a coin flip.</li>
+      <li><strong>Do not buy parameters.</strong> A 12B beats a 33B here, and the 33B costs 20&nbsp;GB to place sixth.</li>
+      <li><strong>Nothing below ~12B</strong> for plan-shaped edit work &mdash; and note it fails by writing to a path that does not exist, not by refusing.</li>
     </ul>
   </section>
 
   <section>
     <h2>Reproduction</h2>
     <p class="section-note">For the verifying reviewer</p>
-
-<pre class="cmd">OPERATOR_MACHINE=desktop python3 evals/local_lane_ladder/runner.py \
+<pre class="cmd">python3 evals/local_lane_ladder/runner.py \
   --models &lt;models&gt; \
-  --tasks alias-add config-value-change function-add \
-  --levels L2 --trials 6 \
-  --num-ctx 16384 --temperature 0.8 \
-  --output &lt;pack&gt;/RESULTS.md \
-  --state  &lt;pack&gt;/state.json \
-  --trace-dir &lt;pack&gt;/traces</pre>
-
-    <p>Completeness check &mdash; a short count means the pack is not scoreable:</p>
-<pre class="cmd">ls &lt;pack&gt;/traces/*.json | wc -l</pre>
-
+  --tasks csv-summarize-repair strict-log-format ambiguous-anchor \
+  --levels L2 --trials 12 \
+  --num-ctx 16384 --temperature 0.8 --think off \
+  --trace-dir &lt;pack&gt;/traces --state &lt;pack&gt;/state.json</pre>
     <p>
-      Each pack retains <code>traces/</code> (one JSON per cell), <code>state.json</code>,
-      <code>RESULTS.md</code>, <code>FINDING.md</code>, and <code>evidence/</code> holding
-      pre-run provenance and interval residency samples.
+      Completeness gate &mdash; a short trace count means the pack is not scoreable:
     </p>
-  </section>
-
-  <section>
-    <h2>Open items</h2>
-    <p class="section-note">Recommended next actions</p>
-    <ol>
-      <li><strong>Independent re-derive by a distinct identity</strong>, now spanning five packs. Required before any of this is registered as a claim.</li>
-      <li><strong>Retire or harden <code>config-value-change</code>.</strong> It has carried no information at any model size tested.</li>
-      <li><strong>Build one fixture above the ceiling</strong> &mdash; a multi-file edit, an anchor appearing more than once, four-plus dependent steps, or a repair loop after a failing test. Adding models to the current set produces more 9/9 rows and no information.</li>
-      <li><strong>Investigate cross-invocation variance</strong> directly, with many repetitions spread over time rather than more trials inside one window.</li>
-    </ol>
+<pre class="cmd">ls &lt;pack&gt;/traces/*.json | wc -l</pre>
+    <p>
+      Each pack retains per-cell JSON traces (raw stdout/stderr, argv, prompt, revision,
+      parsed trajectory), <code>state.json</code>, a generated results matrix, a written
+      finding, and evidence holding pre-run provenance and interval residency samples.
+    </p>
   </section>
 
   <footer>
     <p>
-      Prepared by the operator&rsquo;s implementer seat on the desktop host. All figures
-      are drawn from retained run artifacts rather than restated from narration.
-      Wall-clock values are exact; the pass/fail column is the only graded quantity.
-      This report is evidence for review, not a registered claim.
+      Prepared by the operator&rsquo;s implementer seat. All figures are drawn from
+      retained run artifacts rather than restated from narration. Wall-clock values are
+      exact; the pass/fail column is the only graded quantity, and the trajectory score
+      never overrides it. Independently re-derived under enforced UID isolation.
     </p>
   </footer>
 
