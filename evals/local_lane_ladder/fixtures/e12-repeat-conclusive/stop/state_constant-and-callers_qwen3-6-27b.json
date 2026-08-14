@@ -1,0 +1,870 @@
+{
+  "done": {
+    "constant-and-callers|L2|qwen3.6:27b|1": true,
+    "constant-and-callers|L2|qwen3.6:27b|10": true,
+    "constant-and-callers|L2|qwen3.6:27b|11": true,
+    "constant-and-callers|L2|qwen3.6:27b|12": true,
+    "constant-and-callers|L2|qwen3.6:27b|13": true,
+    "constant-and-callers|L2|qwen3.6:27b|14": true,
+    "constant-and-callers|L2|qwen3.6:27b|15": true,
+    "constant-and-callers|L2|qwen3.6:27b|16": true,
+    "constant-and-callers|L2|qwen3.6:27b|17": true,
+    "constant-and-callers|L2|qwen3.6:27b|18": true,
+    "constant-and-callers|L2|qwen3.6:27b|19": true,
+    "constant-and-callers|L2|qwen3.6:27b|2": true,
+    "constant-and-callers|L2|qwen3.6:27b|20": true,
+    "constant-and-callers|L2|qwen3.6:27b|21": true,
+    "constant-and-callers|L2|qwen3.6:27b|22": true,
+    "constant-and-callers|L2|qwen3.6:27b|23": true,
+    "constant-and-callers|L2|qwen3.6:27b|24": true,
+    "constant-and-callers|L2|qwen3.6:27b|3": true,
+    "constant-and-callers|L2|qwen3.6:27b|4": true,
+    "constant-and-callers|L2|qwen3.6:27b|5": true,
+    "constant-and-callers|L2|qwen3.6:27b|6": true,
+    "constant-and-callers|L2|qwen3.6:27b|7": true,
+    "constant-and-callers|L2|qwen3.6:27b|8": true,
+    "constant-and-callers|L2|qwen3.6:27b|9": true
+  },
+  "results": [
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-w5h2emkn/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-w5h2emkn/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 19.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 11.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-hmo419z7/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-hmo419z7/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 4.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 10.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 10.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 10.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-ubivl9yu/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-ubivl9yu/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t7.json",
+      "trial": 7,
+      "wall_clock_s": 5.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t8.json",
+      "trial": 8,
+      "wall_clock_s": 10.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-un_sizwp/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-un_sizwp/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t9.json",
+      "trial": 9,
+      "wall_clock_s": 4.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t10.json",
+      "trial": 10,
+      "wall_clock_s": 11.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t11.json",
+      "trial": 11,
+      "wall_clock_s": 10.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-w2eb0tp6/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-w2eb0tp6/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t12.json",
+      "trial": 12,
+      "wall_clock_s": 6.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t13.json",
+      "trial": 13,
+      "wall_clock_s": 10.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t14.json",
+      "trial": 14,
+      "wall_clock_s": 10.7
+    },
+    {
+      "check_score": 0.75,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-8926j032/tests/check_limits.py\", line 14, in <module>\n    assert \"up to 5 times\" in doc, \"docs/retry_policy.md not updated\"\n           ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: docs/retry_policy.md not updated",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "1/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-8926j032/tests/check_limits.py\", line 14, in <module>\n    assert \"up to 5 times\" in doc, \"docs/retry_policy.md not updated\"\n           ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: docs/retry_policy.md not updated",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t15.json",
+      "trial": 15,
+      "wall_clock_s": 6.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-69imaivo/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-69imaivo/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t16.json",
+      "trial": 16,
+      "wall_clock_s": 5.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t17.json",
+      "trial": 17,
+      "wall_clock_s": 10.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t18.json",
+      "trial": 18,
+      "wall_clock_s": 10.5
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-qvhkhn53/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-qvhkhn53/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t19.json",
+      "trial": 19,
+      "wall_clock_s": 6.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-n7e49ptc/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-n7e49ptc/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t20.json",
+      "trial": 20,
+      "wall_clock_s": 4.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t21.json",
+      "trial": 21,
+      "wall_clock_s": 10.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-lhiku1ig/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-lhiku1ig/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t22.json",
+      "trial": 22,
+      "wall_clock_s": 4.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t23.json",
+      "trial": 23,
+      "wall_clock_s": 10.7
+    },
+    {
+      "check_score": 0.75,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-3fbok3ym/tests/check_limits.py\", line 14, in <module>\n    assert \"up to 5 times\" in doc, \"docs/retry_policy.md not updated\"\n           ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: docs/retry_policy.md not updated",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "1/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-3fbok3ym/tests/check_limits.py\", line 14, in <module>\n    assert \"up to 5 times\" in doc, \"docs/retry_policy.md not updated\"\n           ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: docs/retry_policy.md not updated",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/stop/traces/constant-and-callers__L2__qwen3.6-27b__t24.json",
+      "trial": 24,
+      "wall_clock_s": 6.6
+    }
+  ]
+}

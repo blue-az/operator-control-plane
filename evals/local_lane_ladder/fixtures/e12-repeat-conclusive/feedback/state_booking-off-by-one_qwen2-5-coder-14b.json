@@ -1,0 +1,750 @@
+{
+  "done": {
+    "booking-off-by-one|L2|qwen2.5-coder:14b|1": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|10": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|11": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|12": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|13": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|14": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|15": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|16": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|17": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|18": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|19": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|2": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|20": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|21": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|22": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|23": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|24": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|3": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|4": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|5": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|6": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|7": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|8": true,
+    "booking-off-by-one|L2|qwen2.5-coder:14b|9": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 5.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 4.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 4.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 4.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 7.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 5.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t7.json",
+      "trial": 7,
+      "wall_clock_s": 3.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t8.json",
+      "trial": 8,
+      "wall_clock_s": 5.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t9.json",
+      "trial": 9,
+      "wall_clock_s": 6.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t10.json",
+      "trial": 10,
+      "wall_clock_s": 6.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t11.json",
+      "trial": 11,
+      "wall_clock_s": 7.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t12.json",
+      "trial": 12,
+      "wall_clock_s": 3.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t13.json",
+      "trial": 13,
+      "wall_clock_s": 7.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t14.json",
+      "trial": 14,
+      "wall_clock_s": 8.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t15.json",
+      "trial": 15,
+      "wall_clock_s": 7.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t16.json",
+      "trial": 16,
+      "wall_clock_s": 7.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t17.json",
+      "trial": 17,
+      "wall_clock_s": 4.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t18.json",
+      "trial": 18,
+      "wall_clock_s": 5.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t19.json",
+      "trial": 19,
+      "wall_clock_s": 6.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t20.json",
+      "trial": 20,
+      "wall_clock_s": 5.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t21.json",
+      "trial": 21,
+      "wall_clock_s": 4.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t22.json",
+      "trial": 22,
+      "wall_clock_s": 5.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t23.json",
+      "trial": 23,
+      "wall_clock_s": 8.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen2.5-coder:14b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e12-repeat-conclusive/feedback/traces/booking-off-by-one__L2__qwen2.5-coder-14b__t24.json",
+      "trial": 24,
+      "wall_clock_s": 4.5
+    }
+  ]
+}

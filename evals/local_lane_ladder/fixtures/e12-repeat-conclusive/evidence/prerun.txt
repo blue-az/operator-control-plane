@@ -1,0 +1,7 @@
+# E12 pre-run provenance — conclusive repeat-guard test
+captured_utc: 2026-08-14T01:06:38Z
+git_rev: 7ad2305febaefca92fa691de47cdaa5b67798bce
+design: 9 engaged cell classes x n=24 x 2 arms = 432 cells (216/arm)
+powered for: ~14 pt effect at 80% power against an 11.3% noise floor
+arms interleaved per class, not blocked -- removes E10's drift exposure
+controls: num_ctx 16384, temperature 0.8, think off

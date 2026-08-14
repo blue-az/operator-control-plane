@@ -1,0 +1,75 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n",
+    "--model",
+    "qwen3.6:27b",
+    "--workspace",
+    "/tmp/opr-eval-booking-off-by-one-L2-1zee4s9f",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "3",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off",
+    "--on-repeat",
+    "stop"
+  ],
+  "cell_key": "booking-off-by-one|L2|qwen3.6:27b|13",
+  "git_rev": "87f72c15dc06cb67b873090206c0613a1dcdafd2",
+  "grade_detail": "all 3 checks passed",
+  "harness": "local-lane-eval",
+  "level": "L2",
+  "machine": "desktop",
+  "model": "qwen3.6:27b",
+  "passed": true,
+  "prompt": "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n",
+  "recorded_utc": "2026-08-14T01:12:52.468771+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: qwen3.6:27b (lane_1_local_repair)\nDispatching governed query...\nThinking...\n[tokens] prompt=500 completion=17 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"src/bookings.py\"\n}\n\n[Tool Output]\ndef bookings_conflict(start1, end1, start2, end2):\n    \"\"\"Return True if two bookings overlap.\n\n    Dates are ISO strings, e.g. \"2026-03-05\", and compare correctly as\n    strings. The end date is the CHECKOUT day and is EXCLUSIVE: the room is\n    free again on that day, so a booking ending 2026-03-10 does not conflict\n    with one starting 2026-03-10.\n    \"\"\"\n    return start1 <= end2 and start2 <= end1\n\n\nThinking...\n[tokens] prompt=659 completion=18 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"tests/check_bookings.py\"\n}\n\n[Tool Output]\nimport sys\n\nsys.dont_write_bytecode = True\n\nsys.path.insert(0, \".\")\nfrom src.bookings import bookings_conflict\n\n# The reported bug: A checks out the morning B checks in.\nassert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n    \"checkout day is exclusive; these must not conflict\"\n# Same boundary with the arguments swapped -- catches a one-sided fix.\nassert not bookings_conflict(\"2026-03-10\", \"2026-03-12\", \"2026-03-05\", \"2026-03-10\"), \\\n    \"boundary must hold with arguments swapped\"\n\n# Genuine overlaps must still be detected.\nassert bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-08\", \"2026-03-12\")\nassert bookings_conflict(\"2026-03-08\", \"2026-03-12\", \"2026-03-05\", \"2026-03-10\")\nassert bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-05\", \"2026-03-10\"), \\\n    \"identical ranges overlap\"\nassert bookings_conflict(\"2026-03-01\", \"2026-03-31\", \"2026-03-10\", \"2026-03-12\"), \\\n    \"fully contained range overlaps\"\n\n# Disjoint ranges must not conflict.\nassert not bookings_conflict(\"2026-03-01\", \"2026-03-05\", \"2026-03-20\", \"2026-03-25\")\n\nprint(\"BOOKINGS_OK\")\n\n\nThinking...\n[tokens] prompt=1185 completion=66 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"src/bookings.py\",\n  \"target_content\": \"    return start1 <= end2 and start2 <= end1\",\n  \"replacement_content\": \"    return start1 < end2 and start2 < end1\"\n}\n\n[Tool Output]\nSuccessfully patched src/bookings.py.\n\nThinking...\n[tokens] prompt=1216 completion=66 think_chars=0 done_reason=stop\n\n--- Output ---\n[Stopped: model repeated an already-handled tool call 'patch_file: src/bookings.py'. State-changing steps that did run: patch_file.]\n--------------\n",
+  "task_id": "booking-off-by-one",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 167,
+    "distinct_tools": [
+      "patch_file",
+      "read_file"
+    ],
+    "n_calls": 3,
+    "n_failed_calls": 0,
+    "no_dispatch": false,
+    "stopped_repeat": true,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": "src/bookings.py",
+        "tool": "read_file"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "tests/check_bookings.py",
+        "tool": "read_file"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "src/bookings.py",
+        "tool": "patch_file"
+      }
+    ]
+  },
+  "trial": 13,
+  "wall_clock_s": 8.8
+}
