@@ -100,24 +100,46 @@ The practical seat guidance for z13:
 | Throwaway / fast | `granite4` | 88.2 tok/s, but 3.4B scored 8/18 on the floor ladder |
 | **Avoid** | `gemma4-31b-24k` | 7.1 tok/s dense; correctness does not pay for 6.6x the wait |
 
-## Finding 4 — an unclaimed config gap
+## Finding 4 — KV quantisation moves placement and nothing else (TESTED)
 
-z13 is missing both tunings the desktop has:
+z13 was missing both tunings the desktop has. **Both were enabled and the sweep
+re-run identically** (2026-08-13, ollama restarted 18:51):
 
-| | desktop | z13 |
-|---|---|---|
-| `OLLAMA_FLASH_ATTENTION` | `1` | unset |
-| `OLLAMA_KV_CACHE_TYPE` | `q8_0` | unset (fp16) |
+| | desktop | z13 before | z13 after |
+|---|---|---|---|
+| `OLLAMA_FLASH_ATTENTION` | `1` | unset | `1` |
+| `OLLAMA_KV_CACHE_TYPE` | `q8_0` | unset (fp16) | `q8_0` |
 
-An fp16 KV cache is twice the footprint it needs to be, and footprint is what
-determines how many layers fit on the iGPU. Enabling `q8_0` would place more of
-`gemma4-26b-24k` on the iGPU — **but the prediction to test is tok/s, not the
-percentage.** Given 46.8 tok/s already at 16% CPU placement, the headroom may be
-smaller than the percentage suggests.
+| Model | tok/s before → after | Δ | CPU-placed |
+|---|---|---:|---|
+| `granite4` | 88.2 → 85.4 | −3.2% | 0 → 0 |
+| `gemma4:12b` | 25.7 → 25.7 | 0.0% | 0 → 0 |
+| `qwen2.5-14b-24k` | 24.5 → 24.4 | −0.4% | 0 → 0 |
+| `gpt-oss-16k` | 51.5 → 51.4 | −0.2% | 0 → 0 |
+| `gemma4-26b-24k` | 46.8 → 46.2 | −1.3% | **16 → 13** |
+| `gemma4-31b-24k` | 7.1 → 7.2 | +1.4% | **31 → 27** |
 
-**Not changed.** It is a systemd service edit on the operator's laptop, and the
-right form is a measured before/after rather than a silent flip. The experiment
-is cheap: set both, restart ollama, re-run this same sweep, compare.
+**The mechanism executed and bought nothing.** CPU-placed share fell on both
+affected models, which proves the KV cache is preallocated at `num_ctx` and that
+`q8_0` really halved its footprint — this is not a change that failed to apply.
+Throughput still moved by less than the ±3.2% n=1 noise band on every model.
+
+This is the clearest evidence in this document for the framing at the top: **the
+placement percentage is not a throughput signal on unified memory.** Improving it
+by 3–4 points returned nothing, because there is no bandwidth cliff to climb back
+up. On a discrete card the same shift would have shown in tok/s.
+
+**Caveat on scope.** This sweep generates 128 tokens from a short prompt. KV
+*allocation* scales with `num_ctx` — hence the placement change — but the
+attention *work over* that cache stays trivial at ~150 real tokens, and flash
+attention in particular has almost nothing to act on. A long-context workload
+(the BT funnel at 22–37k tokens, already on this machine) could differ, and no
+pre-tuning long-context baseline exists to compare against.
+
+**Disposition:** left **on**. It costs no measurable throughput here, is lossy in
+principle, and matches the desktop configuration. If it is kept permanently the
+open question is quality rather than speed — `q8_0` is a lossy cache, and the BT
+floor probes are the calibrated instrument on this machine for checking that.
 
 ## Limits
 
