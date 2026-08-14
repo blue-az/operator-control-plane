@@ -182,6 +182,7 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertTrue((op_path / "harnesses" / "grok.yaml").exists())
         self.assertTrue((op_path / "harnesses" / "openrouter.yaml").exists())
         self.assertTrue((op_path / "harnesses" / "fable.yaml").exists())
+        self.assertTrue((op_path / "harnesses" / "opencode.yaml").exists())
 
     def test_durable_event_ledger_tracks_record_history(self) -> None:
         self.assertEqual(self.run_operator("init").returncode, 0)
