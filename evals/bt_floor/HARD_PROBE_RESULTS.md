@@ -1,115 +1,142 @@
-# Hard probes — first field result
+# Hard probes — first field result (WITH RETRACTION)
 
 **Measured:** 2026-08-14, `current` funnel (40,510 tokens), `num_ctx 49152`,
 `temperature 0.8`, `think off`, n=5 per cell with `seed=rep`.
 **Not UID-verified. No claim registered.**
 
-Raw: `handoffs/bt_hard_20260814_130202.json` (n=5) and
-`bt_hard_20260814_121228.json` (the n=1 pass).
+Raw: `handoffs/bt_hard_20260814_130202.json` (five-model field),
+`bt_hard_20260814_135742.json` (`qwen3.8:27b`), `bt_hard_20260814_121228.json` (n=1).
 
-## Result
+> ## RETRACTION (2026-08-14, same day)
+>
+> **The h2 answer key was wrong, and two findings built on it are withdrawn.**
+>
+> h2 graded models against `operator-control-plane/AGENTS.md:90` — *"nothing in
+> that doc is implemented yet"*. That line is **stale**. The spec's own line 3
+> reads **"Status: Phases 1–3 implemented (2026-07-18)"**, with `DONE 2026-07-18`
+> on all three phases, and the code agrees: `crystal-attach` is registered at
+> `operator:52`, handled at `:2447`, and fails closed on status at `:2453`
+> quoting T2. `crystal_parse.py` exists. `./operator crystal-attach --help` runs.
+>
+> The stale line was written 2026-07-18 in `2b46544` — the same day the phases
+> were marked DONE — and never updated. AGENTS.md has been edited since
+> (2026-08-12, `8041b19`) with that line surviving.
+>
+> **What this means:** models penalised for "confabulating an implementation
+> date" were quoting the corpus accurately. `qwen3.6:27b` and `qwen3.8:27b` both
+> independently produced "2026-07-18" because it is written in the spec. Two
+> models agreeing on a specific date was the tell, and it should have prompted a
+> corpus check before the finding was written, not after.
+>
+> **Withdrawn:**
+> - *Finding 2, "the failure mode is reading a plan as a status"* — there was no
+>   such failure. The plan says implemented because it is implemented.
+> - *Finding 3, "the gemma4 tie breaks at p=0.048"* — re-graded, 26b vs 31b is
+>   5/5 vs 2/5, **p=0.167**. The tie stands. E11's P=0.49 is unchallenged.
+>
+> **Not withdrawn:** `gemma4:26b`'s answers were never wrong. It said the
+> mechanism that would permit status-setting "does not exist yet and is
+> explicitly prohibited" — true independently of whether the spec shipped.
 
-| Model | h1 hyperlambda | h2 crystal status | h3 cross-machine | total | flips |
-|---|---|---|---|---:|---:|
-| `gemma4:26b` | 5/5 | **5/5** | 5/5 | **15/15** | 0 |
-| `gemma4:12b` | 5/5 | 3/5 | 5/5 | 13/15 | 1 |
-| `gemma4:31b` | 5/5 | 1/5 | 5/5 | 11/15 | 1 |
-| `qwen3.6:27b` | 5/5 | 1/5 | 5/5 | 11/15 | 1 |
-| `granite4` (3.4B) | 0/5 | 2/5 | 0/5 | 2/15 | 1 |
+## Corrected result
 
-## Finding 1 — h1 and h3 are floor instruments, h2 is the ceiling instrument
+h2 re-graded accepting both readings of "does the mechanism exist yet" (see
+below). h1 and h3 unaffected.
 
-h1 and h3 are 5/5 for every model from 12B up and 0/5 for granite4. They
-discriminate hard *downward* and not at all above 12B, which is the same
-saturation that made p1..p5 useless for ranking strong seats. Cross-document
-assembly alone did not produce ceiling resolution.
+| Model | h1 | h2 (corrected) | h3 | total |
+|---|---|---|---|---:|
+| `gemma4:26b` | 5/5 | 5/5 | 5/5 | 15/15 |
+| `qwen3.6:27b` | 5/5 | 5/5 *(was 1/5)* | 5/5 | 15/15 |
+| `qwen3.8:27b` | 5/5 | 5/5 *(was 2/5)* | 5/5 | 15/15 |
+| `gemma4:12b` | 5/5 | 4/5 | 5/5 | 14/15 |
+| `gemma4:31b` | 5/5 | 2/5 | 5/5 | 12/15 |
+| `granite4` (3.4B) | 0/5 | 3/5 | 0/5 | 3/15 |
 
-h2 is the only probe with a spread: 5/5, 3/5, 1/5, 1/5, 2/5.
+## Finding 1 — the probes saturate (h1, h3 unchanged; h2 now too)
 
-What separates it is not that it needs more documents — h3 needs three across
-two repos and still saturates. It is that h2 asks **two independent questions**
-and a model can answer one while inverting the other. Trust rule *and*
-implementation status. Every model finds the trust rule. Only `gemma4:26b`
-reliably also reports that the mechanism does not exist yet.
+h1 and h3 are 5/5 for every model from 12B up and 0/5 for granite4: hard
+downward discrimination, none above 12B. Once h2 is graded correctly it
+saturates as well, with three models at 5/5.
 
-**Design rule this yields:** a discriminating probe needs two independently
-checkable halves, not more sources.
+**Cross-document assembly did not produce ceiling resolution.** The apparent
+h2 spread in the first write-up was an artefact of grading one reading of an
+ambiguous question as correct. `gemma4:31b` at 2/5 is the only genuine
+separation left, and it comes from the model not addressing the existence
+question at all rather than from getting it wrong.
 
-## Finding 2 — the failure mode is reading a plan as a status
+## Finding 2 — the question was ambiguous, and the grader picked a side
 
-Every h2 failure is the same half of the question, and the corpus makes the
-error easy: `CRYSTAL_LEDGER_INTEROP_SPEC.md` is written as a phased build plan
-(§188, "Phase 1 (smallest reviewable unit)"), while the fact that none of it
-exists lives 80 lines away in `operator-control-plane/AGENTS.md:90` — "nothing
-in that doc is implemented yet."
+"Whether the mechanism that would permit it exists yet" has two defensible
+readings, and the models split cleanly between them:
 
-Confabulating models convert the plan into a status:
+- **(a)** does a mechanism that *permits* status-setting exist? **No** — and
+  `gemma4:26b` / `gemma4:12b` answered this, correctly.
+- **(b)** is the crystal-attach machinery built? **Yes, 2026-07-18** — and
+  `qwen3.6` / `qwen3.8` / `granite4` answered this, also correctly.
 
-- `qwen3.6:27b` — "Phases 1–3 ... were **implemented on 2026-07-18**." An
-  invented date for work that does not exist.
-- `granite4` — quotes T2 verbatim and correctly, then "**Phase 1** ... is fully
-  implemented and verified by tests", then concludes the mechanism "has not been
-  defined or implemented." Self-contradictory inside one answer.
-- `gemma4:31b` — milder and more consistent (4/5): answers the trust half
-  thoroughly, never addresses existence, and describes `crystal-attach` /
-  `crystal-import` as existing commands "designed to exclude" the capability.
-  rep2: "no mechanism in the current **implementation**" — the unbuilt spec
-  treated as shipped behaviour.
+The `forbids` axis marked (b) a contradiction. It was written after reading
+granite4's answer and encoded the assumption that any claim of implementation
+was false — an assumption inherited from a stale line rather than checked
+against the code. **`qwen3.8:27b` rep3 gave the most complete answer of any
+model in the field** — "the mechanism that would permit it does not exist. The
+spec for `crystal-attach` (Phase 1, implemented 2026-07-18) explicitly notes
+that no `--status` [is] accepted" — joining both readings correctly. It was
+graded FAIL_CONTRADICTS.
 
-This generalises past the probe. BOTTLENECKS.md and the specs are largely
-planned work, so a model that reports plans as shipped is actively dangerous
-for BN/operator triage, independently of how well it retrieves.
+A probe whose question admits two correct answers cannot rank anything.
 
-## Finding 3 — the gemma4 tie breaks, narrowly
+## Finding 3 — `qwen3.8:27b` is indistinguishable from `qwen3.6:27b` here
 
-E11 (n=18, 378 cells) left `gemma4:26b` and `gemma4:31b` tied at 1814 Elo,
-P=0.49. On h2 they separate 5/5 vs 1/5, Fisher exact two-tailed **p=0.048**.
+15/15 vs 15/15, identical per-probe. Preflight: `think=False` honored, 100% GPU
+at `num_ctx 49152`, no CPU placement, 12.8s cold load. Architecturally it is a
+point release — same `qwen35` arch, Q4_K_M, 262144 context, vision+tools+
+thinking, 27.3B vs 27.8B.
 
-Read this narrowly:
+The only visible difference is on h3, where 3.8 hit both bonus groups on all
+five reps (`uid_isolated` *and* the Front H divergence) against 3.6's one. That
+is a bonus-column signal on a saturated probe — suggestive, not a result.
 
-- 5/5 vs 1/5 is the *minimum* configuration reaching p<0.05 at n=5. One flipped
-  cell erases it.
-- Nine pairwise tests were computed. Under Bonferroni (α=0.0056) this does not
-  survive. The 26b-vs-31b comparison was the pre-specified question this probe
-  was built to answer, so it stands as a single planned test; every other pair
-  in the matrix is exploratory and none reach significance.
-- It is one probe on one axis — document comprehension, not the agentic ladder.
+**This instrument cannot rank 3.8 against 3.6.** The agentic ladder at E11's
+config is the instrument that would, and it has not been run.
 
-The defensible statement: **on cross-document assembly requiring plan-vs-status
-discrimination, `gemma4:26b` beats `gemma4:31b`.** Combined with 26b already
-being 1.4x faster and perfectly stable, nothing here argues for 31b as the seat.
+## What survives
 
-`gemma4:12b` at 3/5 is not separable from either (p=0.44 vs 26b, p=0.52 vs 31b).
-Its 13/15 total on a 12B model remains the standing surprise from the z13 work.
+- `granite4` (3.4B) is below the floor on h1 and h3 (0/5 each): the dashboard is
+  "produced by the **Claude Code** agent"; h3 answered "**Yes**, the desktop can
+  verify" with an invented `session_end --attach-crystal`. Those are real
+  confabulations, unaffected by the retraction.
+- `gemma4:31b` does not address the existence half of h2 in 4 of 5 samples under
+  either reading.
+- `gemma4:26b` remains the only model at 15/15 with zero flips across the
+  original five-model field.
 
-## Finding 4 — `gemma4:26b` is the only zero-flip model
+## The instrument's real defect
 
-15/15 with no cell changing verdict across five samples at temperature 0.8.
-Every other model including granite4 flipped exactly one probe. Stability was
-uninformative on the saturated batteries; here it separates.
+Across two grading passes this instrument produced **four paraphrase false
+negatives**, **one negation false positive**, and **one wrong answer key** —
+the last being the expensive one, because it inverted a finding rather than
+suppressing a cell.
 
-## Grading caveat — this instrument was wrong before it was right
+The lesson is not "widen the accept lists". It is that **the answer key must be
+verified against the system, not against the documentation**. `AGENTS.md:90` was
+treated as ground truth because it was declarative and recent-looking. One
+`--help` invocation falsified it. Every future probe key needs that check before
+any model is scored against it.
 
-The n=1 pass misgraded 4 of 15 cells, all false negatives from paraphrase
-("does not exist" vs "does not execute"; "does not exist" vs "does not exist
-*yet*"). The contradiction check added to catch confabulation produced its own
-false positive on a known-correct answer, matching "is implemented" inside
-"nothing in it is implemented yet".
+The citation check remains the sounder axis and still only covers fabricated
+paths; prose claims are caught only by reading them.
 
-All fixes were applied to the grader and re-scored from retained outputs; no
-model was re-run to produce this table. That is the whole reason outputs are
-retained verbatim.
+## Action item for the repo (not an eval finding)
 
-Keyword grading of free prose leaks in both directions and every table above
-should be read as provisional on the accept lists. The citation check is the
-sounder axis and it only covers fabricated *paths* — `granite4`'s invented
-"Claude Code agent produces the dashboard" (h1) and `qwen3.6`'s invented
-implementation date are both prose, and neither is caught structurally.
+`operator-control-plane/AGENTS.md:90` states that
+`CRYSTAL_LEDGER_INTEROP_SPEC.md` is an unimplemented draft. It is implemented.
+Any agent cold-starting from AGENTS.md will conclude `crystal-attach` does not
+exist. This misled a whole eval pass and will mislead the next reader.
 
 ## Limits
 
-n=5, one machine, one funnel epoch, one prompt per probe. Five models; the
-wider E11 field (`qwen3-vl:30b`, `qwen3:32b`, `gemma3:27b`, `qwen2.5-coder:14b`)
-has not been run here. Results are not comparable to p1..p5, which ran on
-different epochs at temperature 0. `capped` cannot host these probes at all —
-it truncates BOTTLENECKS.md above both h1's and h3's sources.
+n=5, one machine, one funnel epoch, one prompt per probe. Six models; the wider
+E11 field (`qwen3-vl:30b`, `qwen3:32b`, `qwen2.5-coder:14b`, `gemma3:27b`) has
+not been run here. Not comparable to p1..p5 (different epochs, temperature 0).
+`capped` cannot host these probes — it truncates BOTTLENECKS.md above both h1's
+and h3's sources.
