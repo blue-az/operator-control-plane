@@ -19,9 +19,26 @@ Script: `desktop_sweep.py`.
 
 | | |
 |---|---|
-| GPU | 1× NVIDIA RTX 3090, 24 GB, 320 W power limit |
+| GPU | 1× NVIDIA RTX 3090, 24 GB — **350 W stock TDP, deliberately capped at 320 W** |
 | Second card | installed, **unpowered** (wrong cord; replacement due 2026-08-18) |
 | KV cache | `q8_0`, flash attention on |
+| PSU | upgraded, +100 W headroom; no crash since |
+
+**The 320 W is a setting, not the hardware.** The card's stock TDP is 350 W; it
+is capped from performance analysis — the last few percent of throughput cost
+materially more crash risk, so the cap buys stability rather than losing speed
+worth having. **Every figure in this document is therefore conservative**,
+measured at 91% of stock TDP rather than at the card's ceiling.
+
+History worth keeping, because it explains older numbers: the card was
+previously capped at **200 W while the AC was running**, which is no longer a
+factor after the PSU upgrade. Any recorded desktop rate that looks
+unaccountably low may have been measured under that constraint.
+
+Record the cap with the number. A bare "320 W" gives a later reader no way to
+tell a deliberate setting from a hardware limit — the same omission that cost a
+full z13 sweep on 2026-08-15, where an unrecorded power state produced an
+anchor reading 3.4x low and entirely plausible.
 
 ## Measured
 
