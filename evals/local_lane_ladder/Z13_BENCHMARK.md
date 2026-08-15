@@ -262,3 +262,41 @@ So the useful bands on this machine are roughly:
 
 Extrapolating one model's ratio to another architecture is how the 7.9 estimate
 went wrong.
+
+
+### Addendum B — `gemma4:26b` characterised on z13, and the tag split resolved
+
+The seat model was previously measured on z13 only through the `gemma4-26b-24k`
+tag, n=1. Repeated on the standard tag, AC / `performance` / `num_ctx 16384`,
+cold load each:
+
+| run | tok/s |
+|---|---:|
+| 1 | 51.1 |
+| 2 | 51.3 |
+| 3 | 51.5 |
+| **mean** | **51.3** (sd **0.20**) |
+| `gemma4-26b-24k`, same conditions | 51.6 |
+
+**sd 0.20 — 0.4% variation.** This is now the best-characterised number on
+either machine, and it confirms the two tags are the same model: 51.3 vs 51.6
+is inside the noise.
+
+Desktop / z13 = 133.0 / 51.3 = **2.59x**, against a 350 W card run at a 320 W
+cap. Placement is a stable 12%/88% CPU/GPU across all three runs.
+
+**The tag split is resolved.** z13 carried `gemma4-26b-24k:latest` where desktop
+carried `gemma4:26b`, so the shared opencode model list showed both names and
+half the list was dead on whichever machine you were using. They were never
+different models — identical blob `sha256-7121486771cb..`, identical ollama id
+`5571076f3d70`, identical `temperature 1`. The sole difference was a baked
+`PARAMETER num_ctx 24576`.
+
+`ollama pull gemma4:26b` on z13 completed in under a second by reusing the
+existing blob, and the duplicate entry was removed from
+`~/.config/opencode/opencode.jsonc` (not dotfiles-tracked; backup in
+`handoffs/`). Set `num_ctx` per request rather than relying on a baked tag.
+
+Two z13-only tags remain unmatched — `gemma4-31b-24k` and `qwen2.5-14b-24k` —
+because no standard-tag equivalent is installed on z13. `gemma4:31b` is not
+worth unifying: it is no longer a seat and runs at 7.2 tok/s here.
