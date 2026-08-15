@@ -159,3 +159,85 @@ cache state. No fixture pass rates were measured here — whether the ladder's
 postconditions should transfer while any timeout-mediated outcome will not
 (`MACHINE_PROVENANCE_SPEC.md`). z13's ollama also predates the desktop's tuning,
 so machine and configuration are confounded in every cross-machine ratio above.
+
+
+---
+
+## Addendum 2026-08-15 — qwen3.6/3.8 on z13, and the power-state confound
+
+**Every figure above was measured on an unrecorded power state.** That omission
+nearly cost a whole run: a sweep taken on battery in `power-saver` measured
+`gemma4-26b-24k` at **13.7 tok/s** against the 46.2 recorded here — 3.4x low,
+and entirely plausible-looking. It was caught only because the sweep included
+`gemma4-26b-24k` as an **anchor** against a known value. Without that anchor the
+qwen numbers would have been published as clean measurements.
+
+**Always anchor a re-run on a model with a recorded value, and always record
+power state.** On a laptop a benchmark without its power state is not a
+measurement.
+
+### Power state costs 3.8x
+
+| | AC + `performance` | battery + `power-saver` |
+|---|---:|---:|
+| `gemma4-26b-24k` | **51.6** | 13.7 |
+
+The AC figure also exceeds this document's own 46.2 by 12%, consistent with
+`performance` versus whatever profile produced the original — which is exactly
+the ambiguity the missing power-state note creates.
+
+### Measured (AC, `performance` governor, `num_ctx` as marked)
+
+| Model | z13 | desktop | desktop / z13 |
+|---|---:|---:|---:|
+| `gemma4-26b-24k` (MoE, 16384) | 51.6 | 133.0 | 2.58x |
+| `qwen3.6:27b` (dense, 16384) | 12.0 | 37.8 | 3.15x |
+| `qwen3.6:27b` (dense, 8192) | 13.0 | — | — |
+| `qwen3.8:27b` (dense, 8192) | **16.3** | 43.7 | — |
+| `qwen3.8:27b` (dense, 16384) | **does not fit** | 43.7 | — |
+
+### Finding A — `qwen3.8:27b` does not fit z13 at 16384
+
+```
+llama-server startup failed after projector CPU offload retry:
+llama-server reported out-of-memory during startup:
+radv/amdgpu: Not enough memory for command submission.
+```
+
+It carries a CLIP vision projector (~460M params) on top of 17 GB of weights;
+with a 16384 KV cache that exceeds the 17.5 GiB GPU-addressable pool. ollama
+attempts a projector CPU offload and still fails.
+
+It is **marginal rather than impossible**: it succeeded once six minutes after a
+reboot and failed on every attempt afterwards, which fits a Vulkan contiguous
+allocation failing as memory fragments. At `num_ctx 8192` it fits reliably.
+
+**Do not treat "it ran once" as "it fits."**
+
+### Finding B — 3.8 is faster than 3.6 here too, at matched context
+
+At `num_ctx 8192`, AC: **16.3 vs 13.0 tok/s, +25%**. Desktop measured +15.6% at
+16384. The direction is consistent across both machines.
+
+Neither clears the ~20 tok/s interactive floor on z13. Per the corrected framing
+above, that rules them out for **interactive** use and not for delegated work,
+which has no floor.
+
+### Finding C — the dense penalty is not a single number
+
+A prediction made before this run put `qwen3.6` at ~7.9 tok/s by applying
+`gemma4:31b`'s 4.8x dense penalty. Measured: **12.0**, a 3.15x penalty. The
+prediction was 34% low.
+
+`gemma4:31b`'s 4.8x is not "the dense penalty" — it is that model, which also
+carries the field's largest CPU-placed share (27%). `qwen3.6` sits at 9%/91%.
+So the useful bands on this machine are roughly:
+
+| | penalty vs desktop |
+|---|---|
+| MoE | ~2.6x |
+| dense, lightly CPU-placed | ~3.2x |
+| dense, heavily CPU-placed | ~4.8x |
+
+Extrapolating one model's ratio to another architecture is how the 7.9 estimate
+went wrong.
