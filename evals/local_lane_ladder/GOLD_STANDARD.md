@@ -88,7 +88,7 @@ Do not mix them with z13 rates; see `DESKTOP_BENCHMARK.md` and `Z13_BENCHMARK.md
 | Seat | Model | Role |
 |------|--------|------|
 | **Router + local executor** | `gemma4:26b` | Lane + mode (+ tool-call band), and plan-shaped tool work. **133.0 t/s** desktop / 46.2 z13 |
-| **Not a seat** | `gemma4:31b` | Ties 26b on correctness (36/54 each, P=0.49) and is **3.8x slower** (34.8 t/s). Nothing measured argues for it |
+| **Dominated, not unusable** | `gemma4:31b` | Ties 26b on correctness (36/54 each, P=0.49) and is **3.8x slower** (34.8 t/s). 26b dominates it, so nothing argues for choosing it — but 34.8 t/s clears the ~20 t/s interactive floor comfortably, and delegated work has no floor at all |
 | **Floor local** | `qwen2.5*:14b` class when 100% GPU | Encoding / smaller tasks |
 | **Capacity unlock (dual later)** | Qwen ~27–32B “fits well” | Same fixtures only — then claim “tests better” |
 | **Frontier** | Claude / Codex / … | `frontier` / `needs_supervision` lanes |
@@ -143,8 +143,12 @@ t/s at 100% GPU across 16k and 32k context; that pack and the seat table
 disagreed by 3x for weeks without anyone reconciling them.
 
 On correctness the two are tied — 36/54 each, P=0.49 in E11 (n=18, 378 cells) —
-so the 3.8x decode gap decides it, and it decides for 26b. **`gemma4:31b` is no
-longer a seat.**
+so the 3.8x decode gap decides it, and it decides for 26b. **`gemma4:31b` is
+dominated — not unusable.** It runs at 34.8 t/s, well above the ~20 t/s floor,
+and that floor is a perceived-latency threshold for interactive use only
+(informal `opr` bench sessions), not a capability gate. The argument against 31b
+is that 26b matches it on correctness and is 3.8x faster, so there is no task it
+is the right answer for — not that it is too slow to run.
 
 The rule stands for the next change: a seat move needs a residency-verified rate
 on the machine it applies to. The "~40 t/s" figure was itself the inherited
