@@ -193,10 +193,26 @@ the ambiguity the missing power-state note creates.
 | `gemma4-26b-24k` (MoE, 16384) | 51.6 | 133.0 | 2.58x |
 | `qwen3.6:27b` (dense, 16384) | 12.0 | 37.8 | 3.15x |
 | `qwen3.6:27b` (dense, 8192) | 13.0 | — | — |
+| `qwen3.8:27b` (dense, 4096) | 15.5 | — | — |
 | `qwen3.8:27b` (dense, 8192) | **16.3** | 43.7 | — |
-| `qwen3.8:27b` (dense, 16384) | **does not fit** | 43.7 | — |
+| `qwen3.8:27b` (dense, 12288) | OOM | — | — |
+| `qwen3.8:27b` (dense, 16384) | OOM | 43.7 | — |
 
-### Finding A — `qwen3.8:27b` does not fit z13 at 16384
+### Finding A — `qwen3.8:27b` fits z13 up to 8192 context, not beyond
+
+**Read the context column before quoting this.** "Does not fit z13" is wrong
+without it — the model runs fine in normal use, where ollama's default context
+is far below the 16384 this battery pins. Measured boundary, AC/`performance`:
+
+| `num_ctx` | result |
+|---:|---|
+| 4096 | **15.5 tok/s** (this is what normal interactive use loads) |
+| 8192 | **16.3 tok/s** |
+| 12288 | OOM |
+| 16384 | OOM |
+
+The limit bites at the ladder's pinned 16384, not at everyday context lengths.
+Anyone running this model interactively on z13 will never see it.
 
 ```
 llama-server startup failed after projector CPU offload retry:
@@ -208,11 +224,16 @@ It carries a CLIP vision projector (~460M params) on top of 17 GB of weights;
 with a 16384 KV cache that exceeds the 17.5 GiB GPU-addressable pool. ollama
 attempts a projector CPU offload and still fails.
 
-It is **marginal rather than impossible**: it succeeded once six minutes after a
-reboot and failed on every attempt afterwards, which fits a Vulkan contiguous
-allocation failing as memory fragments. At `num_ctx 8192` it fits reliably.
+The 16384 failure reproduced four times across battery and AC, and 12288 fails
+too, so the ceiling sits between 8192 and 12288. One 16384 run did succeed six
+minutes after a reboot and never again, which fits a Vulkan contiguous
+allocation failing as memory fragments — so 16384 is not merely tight, it is
+unreliable even when it occasionally succeeds.
 
-**Do not treat "it ran once" as "it fits."**
+**Two symmetric errors to avoid, both made during this run:** treating "it ran
+once at 16384" as "it fits", and treating "it OOMs at 16384" as "it does not fit
+z13". The first overstates capacity, the second understates it, and the fix for
+both is to state the context.
 
 ### Finding B — 3.8 is faster than 3.6 here too, at matched context
 
