@@ -50,15 +50,35 @@ Each model is asked, one task per call, for strict JSON:
 `{"lane", "interaction_mode", "expected_tool_calls", "reason"}`.
 
 A hardware-aware policy then converts classification into a concrete
-assignment, using measured decode rates on this box (26b ≈ 40 tok/s,
-31b ≈ 7 tok/s) against the operator's 20 tok/s conversational floor:
+assignment, against the operator's 20 tok/s conversational floor.
+
+> **CORRECTED 2026-08-15 — the rates below were the wrong machine's.** This
+> study said "measured decode rates on this box (26b ≈ 40 tok/s, 31b ≈ 7
+> tok/s)". Those are **z13** rates (46.2 / 7.2). The desktop measures **133.0
+> and 34.8**, residency-verified at 100% GPU (`evals/local_lane_ladder/
+> DESKTOP_BENCHMARK.md`). Rates are not portable between these machines: the
+> penalty is ~2.9x for MoE and ~4.8x for a large dense model, so a single
+> conversion factor does not exist.
 
 ```
 frontier lane                     -> frontier
 needs_supervision lane            -> supervised
-local_ok + conversational         -> models clearing 20 tok/s  (here: 26b only)
-local_ok + delegated              -> any local model            (26b or 31b)
+local_ok + conversational         -> models clearing 20 tok/s
+local_ok + delegated              -> any local model
 ```
+
+Which models clear the 20 t/s floor is therefore **machine-dependent**:
+
+| | desktop (1x 3090 320W) | z13 (unified) |
+|---|---|---|
+| clears 20 t/s | `gemma4:26b` (133.0) **and** `gemma4:31b` (34.8) | `gemma4:26b` (46.2) only |
+
+The original parenthetical "(here: 26b only)" held for z13 and was applied to
+the desktop, where it excludes `gemma4:31b` on a rate that is 5x too low.
+
+Seat choice does not turn on this: 26b and 31b tie on correctness (36/54 each,
+P=0.49, E11 n=18) and 26b is 3.8x faster on decode, so 26b takes both seats.
+See `GOLD_STANDARD.md` §3. The floor rule still matters for any future model.
 
 Harness choices carry the day's measured lessons rather than re-deriving
 them: HTTP API not `ollama run` (the CLI emits ANSI spinner bytes and can

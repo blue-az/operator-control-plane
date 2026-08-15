@@ -97,6 +97,12 @@ usage records. This contract describes the verified open-source behavior impleme
     tasks. It surfaced as "Ollama API Error: Read timed out", reading as infrastructure flakiness
     rather than a harness ceiling. Measured effect: 31b went from 0/5 to 2/2 explicit-completion
     signals on an unchanged task once the timeout was raised.
+    Machine note (added 2026-08-15): the ~40 / ~6.5 tok/s figures above are z13-class
+    rates, retained because they are what the original incident measured. The desktop
+    (1x RTX 3090 320W) runs the same models at 133.0 and 34.8 tok/s, so the same 120s
+    ceiling would have bitten ~3x later there. This does not weaken the rule -- it is
+    the rule: a fixed timeout is a token budget divided by a decode rate that varies
+    by machine as well as by model. Always state which machine a rate came from.
 ```
 
 ## Behaviors

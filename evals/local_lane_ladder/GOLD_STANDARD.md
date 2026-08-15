@@ -82,10 +82,13 @@ Use for **hardware / tok/s / residency** claims. Same spirit: no unsourced “te
 
 ## 3. Model seats (from measured work, not preference)
 
+**Rates below are DESKTOP (1x RTX 3090 320W), residency-verified 100% GPU.**
+Do not mix them with z13 rates; see `DESKTOP_BENCHMARK.md` and `Z13_BENCHMARK.md`.
+
 | Seat | Model | Role |
 |------|--------|------|
-| **Router** | `gemma4:26b` | Lane + mode (+ tool-call band); ~40 t/s; **LOCAL_LANE_ROUTER_STUDY** conclusion |
-| **Local executor / high tester** | `gemma4:31b` | Plan-shaped tool work when fit/speed OK; dense-slow for chat |
+| **Router + local executor** | `gemma4:26b` | Lane + mode (+ tool-call band), and plan-shaped tool work. **133.0 t/s** desktop / 46.2 z13 |
+| **Not a seat** | `gemma4:31b` | Ties 26b on correctness (36/54 each, P=0.49) and is **3.8x slower** (34.8 t/s). Nothing measured argues for it |
 | **Floor local** | `qwen2.5*:14b` class when 100% GPU | Encoding / smaller tasks |
 | **Capacity unlock (dual later)** | Qwen ~27–32B “fits well” | Same fixtures only — then claim “tests better” |
 | **Frontier** | Claude / Codex / … | `frontier` / `needs_supervision` lanes |
@@ -122,9 +125,42 @@ unsupported — the residency-verified figure is 18.1 t/s, i.e. *below* the floo
 and lower than the sweep's 300/350 W rows despite a higher cap.
 
 This is why §1 files "31b is best for conversational work" under **Not established**.
-The seat table above stands: **26b conversational / router, 31b delegated / executor.**
-A future change to these seats needs a residency-verified rate, not a throughput
-claim inherited from an unverified sweep.
+
+**UPDATED 2026-08-15 — the seat table changed, and the bar this paragraph set is
+what changed it.** The old table read *"26b conversational / router, 31b
+delegated / executor"* and listed 26b at "~40 t/s". That 40 was a **z13** rate
+applied to the desktop. Desktop, residency-verified at 100% GPU with every model
+in the field (`DESKTOP_BENCHMARK.md`, corroborated by 279 `ollama ps` samples in
+`HARDWARE_TRANSFER.md`):
+
+| | desktop | z13 |
+|---|---:|---:|
+| `gemma4:26b` | **133.0 t/s** | 46.2 |
+| `gemma4:31b` | 34.8 t/s | 7.2 |
+
+`fixtures/q36-35b-spill-tps/RESULTS.md` had already measured 26b at 125.7-128.0
+t/s at 100% GPU across 16k and 32k context; that pack and the seat table
+disagreed by 3x for weeks without anyone reconciling them.
+
+On correctness the two are tied — 36/54 each, P=0.49 in E11 (n=18, 378 cells) —
+so the 3.8x decode gap decides it, and it decides for 26b. **`gemma4:31b` is no
+longer a seat.**
+
+The rule stands for the next change: a seat move needs a residency-verified rate
+on the machine it applies to. The "~40 t/s" figure was itself the inherited
+unverified claim this sentence was written to guard against, which is how it
+survived so long.
+
+### Out of field — vision grader
+
+`qwen3-vl:30b` is **not a seat and not a ranking row.** It is a vision-language
+grader (pixels in, text out). One job: score stills the text field cannot see
+(paper 1.37 ATS cartoon, Comfy vs frontier). Packs: `fixtures/vl-smoke`,
+`fixtures/vl-casestudy`.
+
+Do not add it to Elo, L0–L2, tok/s-vs-ladder, or seat tables. Historical packs
+that already ran it (E2, E9, desktop sweep) stay as records; new field tables
+and new ladder batteries omit it. `new_model_gate.sh` refuses the tag.
 
 ---
 
