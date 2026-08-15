@@ -300,16 +300,49 @@ def ensure_eval_harness_registered(op_dir: Path) -> None:
     harness_path.write_text(yaml.safe_dump(harness_data, sort_keys=False), encoding="utf-8")
 
 
-def _ledger_session_start(ledger_dir: Path, task_slug: str, objective: str) -> str | None:
+# ONE LEDGER TASK PER PACK, NOT PER CELL.
+#
+# Every cell used to create its own `eval-<task>-<level>-<model>-t<n>` task,
+# purely so `session-start` had something to attach to. Nothing ever read those
+# tasks -- the real record of a cell is its retained trace plus the pack's
+# RESULTS.md -- but they accumulated: 939 of 951 tasks on the desktop ledger
+# (98.7%) were this scaffolding, and the 12 tasks representing actual work were
+# unfindable inside them.
+#
+# They cannot be deleted after the fact. The YAML files are projections of a
+# durable append-only ledger, and removing them orphans the durable records
+# (verified 2026-08-15: moving them aside took `doctor` from 19 issues to 2774).
+# So the fix is to stop minting them. Cell identity is NOT lost: it already
+# lives in each retained trace (`cell_key`) and in the pack's RESULTS.md, which
+# are the artifacts anything actually reads. It does not survive into the ledger
+# -- `session-start` takes only --task/--harness/--lane/--class, with no field
+# for a per-cell label -- and that is the same as before, since nothing ever
+# read the per-cell task either.
+LEDGER_PACK_TASK = (
+    os.environ.get("EVAL_LEDGER_TASK")
+    or f"eval-pack-{time.strftime('%Y%m%d')}"
+)
+_pack_task_created = False
+
+
+def _ledger_session_start(ledger_dir: Path, objective: str) -> str | None:
+    global _pack_task_created
     try:
-        subprocess.run(
-            [str(OPERATOR_BIN), "task-create", "--id", task_slug, "--objective", objective[:200]],
-            cwd=ledger_dir, capture_output=True, text=True, timeout=15, check=False,
-        )
+        if not _pack_task_created:
+            subprocess.run(
+                [
+                    str(OPERATOR_BIN), "task-create", "--id", LEDGER_PACK_TASK,
+                    "--objective",
+                    f"Local lane ladder eval pack {LEDGER_PACK_TASK}; "
+                    f"per-cell detail in session records and pack RESULTS.md",
+                ],
+                cwd=ledger_dir, capture_output=True, text=True, timeout=15, check=False,
+            )
+            _pack_task_created = True
         result = subprocess.run(
             [
                 str(OPERATOR_BIN), "session-start",
-                "--task", task_slug,
+                "--task", LEDGER_PACK_TASK,
                 "--harness", HARNESS_ID,
                 "--lane", "local",
                 "--class", "bounded",
@@ -368,7 +401,6 @@ def run_trial(
     # Pre-run state, so a scope postcondition can tell "edited the declared file"
     # from "edited the declared file and three others". Taken before opr runs.
     manifest = hash_tree(fixture_root)
-    task_slug = f"eval-{task['task_id']}-{level}-{model.replace(':', '-')}-t{trial_idx}"
     usage_id = None
     argv = [
         str(OPR_BIN), prompt,
@@ -408,7 +440,7 @@ def run_trial(
     start = time.monotonic()
     try:
         if use_ledger:
-            usage_id = _ledger_session_start(ledger_dir, task_slug, prompt)
+            usage_id = _ledger_session_start(ledger_dir, prompt)
         try:
             completed = subprocess.run(
                 argv, capture_output=True, text=True, timeout=MAX_WALL_CLOCK_SECONDS,
