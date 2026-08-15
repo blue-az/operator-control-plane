@@ -28,7 +28,6 @@ Script: `desktop_sweep.py`.
 | Model | **tok/s** | Load | Placement |
 |---|---:|---:|---|
 | `granite4` (3.4B) | **197.9** | 2.9s | 100% GPU |
-| `qwen3-vl:30b` | **177.2** | 12.7s | 100% GPU |
 | `gemma4:26b` (MoE) | **133.0** | 11.9s | 100% GPU |
 | `gemma4:12b` | 75.2 | 7.2s | 100% GPU |
 | `qwen2.5-coder:14b` | 72.9 | 6.5s | 100% GPU |
@@ -42,6 +41,9 @@ Script: `desktop_sweep.py`.
 check in `HARDWARE_TRANSFER.md`: nothing in the ladder field was spilling while
 it was scored, so the rankings measure capability rather than VRAM pressure.
 
+`qwen3-vl:30b` was on this sweep (177.2 tok/s, 12.7s load, 100% GPU). It is a
+vision grader, not a field model — see `GOLD_STANDARD.md`. Do not rank it here.
+
 ## Finding 1 — speed and correctness are close to uncorrelated
 
 The two fastest models on this machine are the two *worst* on the ladder:
@@ -49,11 +51,9 @@ The two fastest models on this machine are the two *worst* on the ladder:
 | Model | tok/s | ladder (n=18) |
 |---|---:|---:|
 | `granite4` | 197.9 | 8/18 floor; 3/15 on probes |
-| `qwen3-vl:30b` | 177.2 | 12/54 |
 | `gemma4:26b` | 133.0 | **36/54** |
 | `gemma4:31b` | 34.8 | 36/54 |
 
-`qwen3-vl:30b` generates 5× faster than `gemma4:31b` and solves a third as much.
 Throughput tables cannot be read as capability tables, in either direction.
 
 ## Finding 2 — the seat pick is far wider than the ladder implied
@@ -71,10 +71,37 @@ four times faster. Nothing in this table argues for `gemma4:31b`.
 
 ## Finding 3 — `qwen3.8:27b` is faster than `qwen3.6:27b` as well as more compliant
 
-43.7 vs 37.8 tok/s, **+15.6%**, same architecture and quantisation. Combined with
-the `strict-log-format` contract gain (16.7% → 83.3%, p=0.0005), the point
-release is better on both axes measured so far. It remains unrankable against
-`gemma4:26b` on correctness — and is 3× slower on this machine.
+Repeated 2026-08-15, cold load each, `num_ctx 16384` (3 reps plus the 08-14
+baseline):
+
+| | mean | sd | range | n |
+|---|---:|---:|---|---:|
+| `qwen3.8:27b` | **44.6** | 1.19 | 43.5–45.7 | 4 |
+| `qwen3.6:27b` | **37.3** | 0.98 | 36.4–38.4 | 4 |
+
+**+19.7%, with no overlap between the samples** — 3.8's slowest run beats 3.6's
+fastest. Welch t=9.53. The original n=1 figure (+15.6%) understated it.
+
+Same architecture (`qwen35`), same quantisation, so this is close to a
+controlled A/B. It reproduces on z13 at matched 8192 context (16.3 vs 13.0,
++25%), on a completely different backend — Vulkan/unified rather than
+CUDA/discrete.
+
+**This is the only axis on which the two revisions separate.** An earlier
+version of this section paired it with the `strict-log-format` contract gain
+(16.7% → 83.3%, p=0.0005) and concluded the release was "better on both axes".
+That contract result did not replicate — a second contract fixture reversed the
+direction (p=0.104) and produced zero contract violations from either model, and
+the `run_command` finding died too (p=0.0455 → p=0.733). Pooled correctness
+across 210 head-to-head cells is 76/105 vs 73/105, **p=0.761**. See
+`fixtures/q36-q38-multistep/FINDING.md`.
+
+So: **faster, not measurably better.** It remains unrankable against
+`gemma4:26b` on correctness, and is 3× slower than it on this machine.
+
+Cost of the speed: `qwen3.8` carries a CLIP vision projector, and on
+constrained hardware that buys throughput with memory — it OOMs above 8192
+context on z13 where `qwen3.6` runs at 16384.
 
 ## Finding 4 — the z13 penalty is architecture-dependent
 
