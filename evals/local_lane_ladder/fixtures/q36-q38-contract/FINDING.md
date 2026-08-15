@@ -101,3 +101,32 @@ n=18 per model, one fixture, one level, one machine. Nothing here reaches
 significance. The fixture is new and has no measured difficulty; `gemma4:26b`
 went 3/3 on it in preflight, so it sits well below `csv-summarize-repair` and
 is not a ceiling instrument.
+
+## Finding 4 — the one defensible tooling difference: 3.8 verifies, 3.6 never does
+
+Tool-call census across all 36 cells:
+
+| | read_file | patch_file | run_command | patch success |
+|---|---:|---:|---:|---:|
+| `qwen3.6:27b` | 36 | 31 | **0** | 18/31 (58%) |
+| `qwen3.8:27b` | 31 | 21 | **6** | 14/21 (67%) |
+
+**`qwen3.8` runs the test to verify; `qwen3.6` never once does.** Cells using
+`run_command`: 5/18 vs 0/18, Fisher **p=0.0455**. The L2 prompt explicitly says
+*"Verify by running python3 tests/check_render.py"*, so this is conformance to a
+stated plan step, and 3.6 skipped it in all eighteen attempts.
+
+Patch success rate is **not** separable: 67% vs 58%, p=0.575.
+
+**The verification did not pay off.** 3.6 went 18/18 without ever verifying;
+3.8 went 14/18 while verifying in 5 cells. Trajectory conformance and outcome
+diverge here, which is exactly why the deterministic postcondition stays the
+gate and the trajectory score is reported beside it rather than folded in.
+
+Contamination check: only 2 `qwen35.go` parse-failure events occurred during the
+run window against 20 failed `patch_file` calls, so the failure counts are
+overwhelmingly genuine model-side patch failures, not the server bug in
+`SILENT_TURN_DIAGNOSIS.md`.
+
+Caveats: one fixture, p=0.0455 is marginal, and 5/18 means 3.8 does not verify
+reliably either — only more often than never.
