@@ -5804,8 +5804,25 @@ def task_list_cmd(args) -> int:
     tasks_dir = os.path.join(op_dir, "tasks")
     task_files = glob.glob(os.path.join(tasks_dir, "*.yaml"))
 
+    total_found = len(task_files)
+    hidden_eval = 0
+    if not getattr(args, "all", False):
+        kept = [tf for tf in task_files
+                if not os.path.basename(tf).startswith("eval-")]
+        hidden_eval = len(task_files) - len(kept)
+        task_files = kept
+    name_filter = getattr(args, "filter", None)
+    if name_filter:
+        task_files = [tf for tf in task_files if name_filter in os.path.basename(tf)]
+
     if not task_files:
-        print("No tasks found in ledger.")
+        if total_found and hidden_eval == total_found:
+            print(f"No tasks to show ({hidden_eval} eval-* cell tasks hidden; "
+                  f"use --all).")
+        elif name_filter:
+            print(f"No tasks matching {name_filter!r}.")
+        else:
+            print("No tasks found in ledger.")
         return 0
 
     tasks_data = []
@@ -5869,6 +5886,11 @@ def task_list_cmd(args) -> int:
             f"{td['task_id']:<25} | {td['status']:<12} | {td['assign']:<10} | {td['review']:<10} | {td['claims']:<10} | {na}"
         )
     print("=" * 100)
+    # Disclose what was withheld -- a filtered list that looks complete is
+    # worse than a long one.
+    if hidden_eval:
+        print(f"({hidden_eval} machine-generated eval-* cell tasks hidden. "
+              f"Use --all to include them, or --filter to search.)")
     return 0
 
 
@@ -7525,7 +7547,21 @@ def main() -> None:
     )
 
     # operator task-list
-    subparsers.add_parser("task-list", help="List all tasks in the ledger with outcome summaries.")
+    task_list_parser = subparsers.add_parser(
+        "task-list", help="List all tasks in the ledger with outcome summaries."
+    )
+    # The local-lane ladder registers one task per eval CELL, so eval-* outnumbers
+    # real work ~78:1 (939 of 951 on desktop, 2026-08-15) and buries it. They are
+    # projections of durable ledger records and cannot simply be removed, so they
+    # are hidden from the default view instead.
+    task_list_parser.add_argument(
+        "--all", action="store_true",
+        help="Include machine-generated eval-* cell tasks (hidden by default).",
+    )
+    task_list_parser.add_argument(
+        "--filter", "-f", default=None,
+        help="Only show tasks whose id contains this substring.",
+    )
 
     # operator claim-list
     claim_list_parser = subparsers.add_parser(
