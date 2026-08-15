@@ -1,0 +1,12 @@
+# 3.6 vs 3.8 on a multi-step fixture
+captured_utc: 2026-08-15T19:27:16Z
+git_rev: 6ede9ef97461bb3ed0f4af15956449768b51644b
+question: Qwen reports large LONG-HORIZON agentic gains 3.6->3.8
+  (DeepSWE 13.3->42.2, Terminal-Bench 63.4->73.0, OSWorld 63.9->84.3).
+  Prior fixtures resolve in 3-4 tool calls and showed no separation.
+  constant-and-callers needs state_changes:5 across 3 files.
+hypothesis-under-test: the null result is a fixture-horizon artifact
+ruled out first: ollama qwen35 parse bug fires on 0.12% of requests
+  (10/8122 since Aug 1) -- too rare to explain a null across 144 cells
+design: constant-and-callers x 2 models x n=18 = 36 cells, L2
+controls: num_ctx 16384, temperature 0.8, think off (E11-matched)
