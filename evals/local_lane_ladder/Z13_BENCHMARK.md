@@ -297,6 +297,28 @@ existing blob, and the duplicate entry was removed from
 `~/.config/opencode/opencode.jsonc` (not dotfiles-tracked; backup in
 `handoffs/`). Set `num_ctx` per request rather than relying on a baked tag.
 
-Two z13-only tags remain unmatched — `gemma4-31b-24k` and `qwen2.5-14b-24k` —
-because no standard-tag equivalent is installed on z13. `gemma4:31b` is not
-worth unifying: it is no longer a seat and runs at 7.2 tok/s here.
+**All of them were resolved the same way.** Every `-24k`/`-16k` tag on z13 was
+a Modelfile over a blob byte-identical to the desktop tag's, so each standard
+tag pulled in under a second:
+
+| z13 tag | shared blob | standard tag |
+|---|---|---|
+| `gemma4-26b-24k` | `7121486771cb..` | `gemma4:26b` |
+| `gemma4-31b-24k` | `280af6832eca..` | `gemma4:31b` |
+| `gpt-oss-16k` | `e7b273f96360..` | `gpt-oss:latest` |
+
+The opencode list now has **zero dead entries**: all 15 names resolve on
+desktop, the 7 installed on z13 resolve there, and nothing is machine-specific
+by name. Models absent from z13 are a capacity fact, not a naming one.
+
+`gemma4:31b` was unified rather than dropped. It is not a seat — `gemma4:26b`
+ties it on correctness and is 3.8x faster — but at 7.2 tok/s on z13 it is
+usable for delegated work, which has no interactive floor. "Dominated" is not
+"unusable"; see the correction above.
+
+`qwen2.5-14b-24k` was **delisted from opencode but deliberately NOT deleted**
+from z13. It silently clamps context and is invalid for current runs, so it
+should not be selectable — but `evals/bt_floor/README.md` records it as the
+model that *established* the July BT floor (5/5 on the july funnel), and
+deleting it would make that baseline unreproducible. Disk is not the
+constraint; the model list was.
