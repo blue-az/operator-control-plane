@@ -444,6 +444,16 @@ def run_trial(
         try:
             completed = subprocess.run(
                 argv, capture_output=True, text=True, timeout=MAX_WALL_CLOCK_SECONDS,
+                # PYTHONUNBUFFERED is load-bearing for diagnosis, not a tidy-up.
+                # opr has no flush=True anywhere, so with stdout on a pipe its
+                # prints sit in a block buffer. On timeout the runner SIGKILLs
+                # the process and the buffer dies with it -- which is why two
+                # 600s hangs on 2026-08-15 recorded 0 bytes of stdout despite
+                # opr printing "Routing task to:" before it ever contacts the
+                # model. The trace was empty for exactly the cells that needed
+                # it. Unbuffered, partial output survives the kill and shows how
+                # far the turn got.
+                env={**os.environ, "PYTHONUNBUFFERED": "1"},
             )
         except subprocess.TimeoutExpired as exc:
             wall_clock = time.monotonic() - start
