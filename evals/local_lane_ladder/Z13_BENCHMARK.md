@@ -322,3 +322,55 @@ should not be selectable — but `evals/bt_floor/README.md` records it as the
 model that *established* the July BT floor (5/5 on the july funnel), and
 deleting it would make that baseline unreproducible. Disk is not the
 constraint; the model list was.
+
+
+### Addendum C — the gemma4 z13 set, completed (and `gemma4:31b` has regressed)
+
+n=3 each, AC / `performance` / `num_ctx 16384`, cold load, standard tags:
+
+| Model | z13 mean | sd | 08-13 figure | desktop | desktop/z13 |
+|---|---:|---:|---:|---:|---:|
+| `gemma4:26b` (MoE) | **51.3** | 0.20 | 46.8 | 133.0 | 2.59x |
+| `gemma4:12b` | **26.8** | 0.06 | 25.7 | 75.2 | 2.81x |
+| `gemma4:31b` (dense) | **will not load** | — | 7.1 | 34.8 | — |
+
+**The 08-13 figures are ~4-10% low and their power state was never recorded.**
+`gemma4:26b` bridges the two runs (46.8 then, 51.3 now) at only 9.6% apart —
+nowhere near the 3.8x battery penalty — so 08-13 was on AC, most likely
+`balanced` rather than `performance`. That is an inference from a shared model,
+not a recorded fact, and it is the best that can be recovered.
+
+#### `gemma4:31b` no longer loads on z13
+
+It ran at 7.1 tok/s on 2026-08-13 with a 31%/69% CPU/GPU split. It now fails
+every attempt:
+
+```
+Vulkan0 (AMD Radeon 8050S, RADV GFX1151) - 17698 MiB free
+load_tensors:      Vulkan0 model buffer size = 14657.31 MiB
+load_tensors:  Vulkan_Host model buffer size =  4235.47 MiB
+radv/amdgpu: Not enough memory for command submission.
+ggml_vulkan: device lost on Vulkan0
+llama_model_load: error loading model: vk::Queue::submit: ErrorDeviceLost
+```
+
+The tensors fit — 14.7 of 17.7 GiB — and the driver then has nothing left for
+command buffers and loses the device.
+
+**It is not a context or placement problem.** Failure reproduces at `num_ctx`
+16384, 8192, 4096 and **2048**, where the KV cache is negligible, and at
+`num_gpu` 40, 32 and **24** (~40% of 60 layers), where only ~7.6 GiB would sit
+on the GPU. Both `gemma4-31b-24k` and the standard tag fail identically, which
+also confirms the two tags are the same model.
+
+**Cause not isolated.** z13 runs ollama **0.32.13**, desktop **0.32.12**, and
+desktop runs this model fine at 34.8 tok/s — but on CUDA, so the version and the
+backend are confounded. Whether a mesa/RADV update also landed on z13 since
+08-13 is unknown. What is certain is that the 08-13 split put more of the model
+on CPU (31%) than the current attempt does (~23%), so something changed in
+placement estimation.
+
+**Consequence:** "`gemma4:31b` is slow but usable on z13" is **false today** — it
+does not run at all there. The seat argument is unaffected (`gemma4:26b` ties it
+on correctness and is 3.8x faster on desktop), but any plan that treats 31b as a
+z13 fallback needs to know it is currently unavailable on that machine.
