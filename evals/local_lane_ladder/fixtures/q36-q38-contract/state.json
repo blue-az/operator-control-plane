@@ -1,0 +1,1086 @@
+{
+  "done": {
+    "strict-table-render|L2|qwen3.6:27b|1": true,
+    "strict-table-render|L2|qwen3.6:27b|10": true,
+    "strict-table-render|L2|qwen3.6:27b|11": true,
+    "strict-table-render|L2|qwen3.6:27b|12": true,
+    "strict-table-render|L2|qwen3.6:27b|13": true,
+    "strict-table-render|L2|qwen3.6:27b|14": true,
+    "strict-table-render|L2|qwen3.6:27b|15": true,
+    "strict-table-render|L2|qwen3.6:27b|16": true,
+    "strict-table-render|L2|qwen3.6:27b|17": true,
+    "strict-table-render|L2|qwen3.6:27b|18": true,
+    "strict-table-render|L2|qwen3.6:27b|2": true,
+    "strict-table-render|L2|qwen3.6:27b|3": true,
+    "strict-table-render|L2|qwen3.6:27b|4": true,
+    "strict-table-render|L2|qwen3.6:27b|5": true,
+    "strict-table-render|L2|qwen3.6:27b|6": true,
+    "strict-table-render|L2|qwen3.6:27b|7": true,
+    "strict-table-render|L2|qwen3.6:27b|8": true,
+    "strict-table-render|L2|qwen3.6:27b|9": true,
+    "strict-table-render|L2|qwen3.8:27b|1": true,
+    "strict-table-render|L2|qwen3.8:27b|10": true,
+    "strict-table-render|L2|qwen3.8:27b|11": true,
+    "strict-table-render|L2|qwen3.8:27b|12": true,
+    "strict-table-render|L2|qwen3.8:27b|13": true,
+    "strict-table-render|L2|qwen3.8:27b|14": true,
+    "strict-table-render|L2|qwen3.8:27b|15": true,
+    "strict-table-render|L2|qwen3.8:27b|16": true,
+    "strict-table-render|L2|qwen3.8:27b|17": true,
+    "strict-table-render|L2|qwen3.8:27b|18": true,
+    "strict-table-render|L2|qwen3.8:27b|2": true,
+    "strict-table-render|L2|qwen3.8:27b|3": true,
+    "strict-table-render|L2|qwen3.8:27b|4": true,
+    "strict-table-render|L2|qwen3.8:27b|5": true,
+    "strict-table-render|L2|qwen3.8:27b|6": true,
+    "strict-table-render|L2|qwen3.8:27b|7": true,
+    "strict-table-render|L2|qwen3.8:27b|8": true,
+    "strict-table-render|L2|qwen3.8:27b|9": true
+  },
+  "results": [
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-table-render-L2-c61oq9gq/tests/check_render.py\", line 9, in <module>\n    got = render_rows([\n        {\"name\": \"alpha\", \"score\": 1.5},\n        {\"name\": \"beta\", \"score\": 3.0},\n    ])\n  File \"/tmp/opr-eval-strict-table-render-L2-c61oq9gq/src/render.py\", line 27, in render_rows\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-table-render-L2-c61oq9gq/tests/check_render.py\", line 9, in <module>\n    got = render_rows([\n        {\"name\": \"alpha\", \"score\": 1.5},\n        {\"name\": \"beta\", \"score\": 3.0},\n    ])\n  File \"/tmp/opr-eval-strict-table-render-L2-c61oq9gq/src/render.py\", line 27, in render_rows\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 21.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 13.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 12.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 12.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 13.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 11.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t7.json",
+      "trial": 7,
+      "wall_clock_s": 12.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t8.json",
+      "trial": 8,
+      "wall_clock_s": 13.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t9.json",
+      "trial": 9,
+      "wall_clock_s": 12.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t10.json",
+      "trial": 10,
+      "wall_clock_s": 12.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t11.json",
+      "trial": 11,
+      "wall_clock_s": 13.1
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-table-render-L2-2bc4c82v/tests/check_render.py\", line 9, in <module>\n    got = render_rows([\n        {\"name\": \"alpha\", \"score\": 1.5},\n        {\"name\": \"beta\", \"score\": 3.0},\n    ])\n  File \"/tmp/opr-eval-strict-table-render-L2-2bc4c82v/src/render.py\", line 27, in render_rows\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-table-render-L2-2bc4c82v/tests/check_render.py\", line 9, in <module>\n    got = render_rows([\n        {\"name\": \"alpha\", \"score\": 1.5},\n        {\"name\": \"beta\", \"score\": 3.0},\n    ])\n  File \"/tmp/opr-eval-strict-table-render-L2-2bc4c82v/src/render.py\", line 27, in render_rows\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t12.json",
+      "trial": 12,
+      "wall_clock_s": 8.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t13.json",
+      "trial": 13,
+      "wall_clock_s": 13.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t14.json",
+      "trial": 14,
+      "wall_clock_s": 10.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t15.json",
+      "trial": 15,
+      "wall_clock_s": 10.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t16.json",
+      "trial": 16,
+      "wall_clock_s": 12.3
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": null,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t17.json",
+      "trial": 17,
+      "wall_clock_s": 601.7
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": null,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.8-27b__t18.json",
+      "trial": 18,
+      "wall_clock_s": 601.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 37.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 21.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 19.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 21.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 15.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 19.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t7.json",
+      "trial": 7,
+      "wall_clock_s": 21.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t8.json",
+      "trial": 8,
+      "wall_clock_s": 14.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t9.json",
+      "trial": 9,
+      "wall_clock_s": 14.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t10.json",
+      "trial": 10,
+      "wall_clock_s": 21.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t11.json",
+      "trial": 11,
+      "wall_clock_s": 23.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t12.json",
+      "trial": 12,
+      "wall_clock_s": 20.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t13.json",
+      "trial": 13,
+      "wall_clock_s": 15.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t14.json",
+      "trial": 14,
+      "wall_clock_s": 15.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t15.json",
+      "trial": 15,
+      "wall_clock_s": 19.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t16.json",
+      "trial": 16,
+      "wall_clock_s": 20.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t17.json",
+      "trial": 17,
+      "wall_clock_s": 20.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'render_rows' defined with args ['rows']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/render.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-table-render",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-contract/traces/strict-table-render__L2__qwen3.6-27b__t18.json",
+      "trial": 18,
+      "wall_clock_s": 23.0
+    }
+  ]
+}

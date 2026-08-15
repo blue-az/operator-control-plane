@@ -1,0 +1,144 @@
+# NEW 2026-08-15 — untested, no measured difficulty yet.
+#
+# Purpose: independently test the hypothesis that qwen3.8:27b beats qwen3.6:27b
+# on exact output contracts (strict-log-format moved 16.7% -> 83.3%, p=0.0005).
+# One fixture is one axis, so this deliberately uses DIFFERENT contract traps --
+# rounding mode, ellipsis-inclusive truncation, a missing-value sentinel and an
+# exact joiner -- rather than replicating zero-padding and fixed plurals. If it
+# replicated those traps it would re-measure the same item, not test the claim.
+#
+# Every rule below is stated explicitly in the docstring. The trap is failing to
+# IMPLEMENT a stated contract, never failing to guess an unstated one: h2 in the
+# BT probe battery had to be retired for asking a question that admitted two
+# correct answers, and a fixture can die the same way.
+task_id: strict-table-render
+description: >
+  Render rows into an exact one-line-per-row text contract. The logic is trivial
+  -- no filtering, no sorting, no aggregation, rows come out in the order given.
+  Everything hard is in the format: half-up rounding where Python's round() does
+  banker's rounding, truncation where the ellipsis counts toward the width, a
+  literal sentinel for missing values, an exact joiner, and an empty string
+  rather than a newline for empty input.
+
+files:
+  src/render.py: |
+    def render_rows(rows):
+        """Render rows as text, one line per row, joined by newlines.
+
+        Each row is a dict with keys "name" (str), "score" (float or None).
+
+        Each line is exactly:   NAME | SCORE
+
+        with a single space, a pipe, and a single space between the two fields.
+
+        NAME rules:
+          - If the name is 8 characters or fewer, use it unchanged.
+          - If it is longer, truncate so the result is EXACTLY 8 characters
+            total, where the 8th character is the single-character ellipsis
+            "…". So "abcdefghij" becomes "abcdefg…" (7 kept + ellipsis).
+
+        SCORE rules:
+          - None renders as the single character "-".
+          - Otherwise render with exactly two decimal places, always keeping
+            trailing zeros, e.g. 3.0 -> "3.00".
+          - Round HALF-UP, not banker's rounding. 0.125 -> "0.13" and
+            0.625 -> "0.63". Python's built-in round() gives 0.12 and 0.62 here,
+            which is wrong for this contract.
+
+        Return "" (an empty string) when rows is empty -- not a newline.
+        There is no trailing newline and no trailing whitespace on any line.
+        """
+        raise NotImplementedError
+
+  tests/check_render.py: |
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    sys.path.insert(0, ".")
+    from src.render import render_rows
+
+    # Basic shape, order preserved, exact joiner.
+    got = render_rows([
+        {"name": "alpha", "score": 1.5},
+        {"name": "beta", "score": 3.0},
+    ])
+    assert got == "alpha | 1.50\nbeta | 3.00", repr(got)
+
+    # Empty input is an empty string, not a newline.
+    assert render_rows([]) == "", repr(render_rows([]))
+
+    # Missing score is a literal hyphen.
+    got = render_rows([{"name": "gamma", "score": None}])
+    assert got == "gamma | -", repr(got)
+
+    # Truncation: ellipsis counts toward the 8-character width.
+    got = render_rows([{"name": "abcdefghij", "score": 2.0}])
+    assert got == "abcdefg… | 2.00", repr(got)
+
+    # Exactly 8 characters is untouched.
+    got = render_rows([{"name": "abcdefgh", "score": 2.0}])
+    assert got == "abcdefgh | 2.00", repr(got)
+
+    # Nine characters truncates.
+    got = render_rows([{"name": "abcdefghi", "score": 2.0}])
+    assert got == "abcdefg… | 2.00", repr(got)
+
+    # Half-up rounding, where round() would round to even.
+    got = render_rows([{"name": "h", "score": 0.125}])
+    assert got == "h | 0.13", repr(got) + "  (banker's rounding gives 0.12)"
+    got = render_rows([{"name": "h", "score": 0.625}])
+    assert got == "h | 0.63", repr(got) + "  (banker's rounding gives 0.62)"
+
+    # Trailing zeros are kept.
+    assert render_rows([{"name": "z", "score": 0.0}]) == "z | 0.00"
+
+    # No trailing newline on multi-row output.
+    got = render_rows([{"name": "a", "score": 1.0}, {"name": "b", "score": 2.0}])
+    assert not got.endswith("\n"), "no trailing newline"
+    assert got.count("\n") == 1, repr(got)
+
+    print("RENDER_OK")
+
+# OPR-RUL-008 exits after the first state change; this L2 needs more.
+state_changes: 3
+
+prompts:
+  L0: "I want my rows printed out as a neat table of names and scores."
+  L1: >
+    Implement render_rows in src/render.py per its docstring: one line per row as
+    "NAME | SCORE", names truncated to 8 characters including the ellipsis,
+    scores at two decimals rounded half-up, None as "-", and "" for empty input.
+    Do not change the tests.
+  L2: |
+    1. Read src/render.py and read tests/check_render.py.
+    2. In src/render.py, replace the line "        raise NotImplementedError" with an
+       implementation of "def render_rows(rows):" that satisfies the docstring
+       already in that function. Note the docstring requires half-up rounding,
+       which Python's built-in round() does not do.
+    3. Verify by running "python3 tests/check_render.py" from the fixture root;
+       it should exit 0 and print "RENDER_OK".
+    Only touch src/render.py.
+
+trajectory_hint:
+  - Read src/render.py for the output contract.
+  - Read tests/check_render.py for the exact expected strings.
+  - Patch the body of render_rows in src/render.py.
+  - Run python3 tests/check_render.py and confirm it exits 0.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: battery passes
+      type: exec
+      command: python3 tests/check_render.py
+      timeout: 60
+    - name: function still defined
+      type: python_symbol
+      file: src/render.py
+      symbol: render_rows
+      args: [rows]
+    - name: tests not edited
+      type: files_unchanged
+      allowed:
+        - src/render.py

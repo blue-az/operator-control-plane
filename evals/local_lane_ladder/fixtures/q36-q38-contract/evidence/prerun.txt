@@ -1,0 +1,12 @@
+# 3.6 vs 3.8 — second exact-contract fixture
+captured_utc: 2026-08-15T10:38:11Z
+git_rev: 49fd6c5f9b2a86fd883502ffd44074412c82581c
+question: is qwen3.8's strict-log-format win (p=0.0005) a contract-fidelity
+  pattern, or was that one lucky axis?
+design: strict-table-render x 2 models x n=18 = 36 cells, L2
+independence: DIFFERENT traps from strict-log-format -- half-up rounding,
+  ellipsis-inclusive truncation, missing-value sentinel, exact joiner, no
+  trailing newline. All four verified to bite independently before running.
+controls: num_ctx 16384, temperature 0.8, think off (E11-matched)
+preflight: reference impl solves it; naive impl fails; gemma4:26b 3/3
+hardware: 1x RTX 3090 320W (second card still unpowered)
