@@ -71,8 +71,17 @@ An MoE activates a fraction of its weights per token, so the share of layers
 placed on CPU is touched only occasionally. A dense model touches every weight on
 every token, so CPU-placed layers are paid on all of them — and dense compute at
 256 GB/s is slow even before placement enters into it. The rule for the machine:
-**on unified memory, prefer MoE, and treat a large dense model as unusable rather
-than slow.**
+**on unified memory, prefer MoE, and treat a large dense model as unusable for
+INTERACTIVE work rather than merely slow.**
+
+That qualifier is load-bearing and was missing until 2026-08-15. The ~20 tok/s
+floor is a *perceived* lower limit for a human watching output arrive, taken from
+informal `opr` bench sessions -- it is a human-attention threshold, not a
+technical gate. Delegated and batch work has no such floor: a model at 5-9 tok/s
+finishing an offloaded task in the background is doing its job. The router policy
+already encodes exactly this split (`local_ok + conversational` requires clearing
+the floor; `local_ok + delegated` accepts any local model), so "unusable" without
+"for interactive" contradicts the policy this repo already runs.
 
 Note this is a *compute* explanation, not a memory-bandwidth one. On a discrete
 card the same table would be read as a spill cliff; here both models are reading
@@ -98,7 +107,7 @@ The practical seat guidance for z13:
 | Interactive / agentic | `gemma4-26b-24k` | 46.8 tok/s, strongest model that stays usable |
 | All layers on iGPU | `gpt-oss-16k` (51.5) or `gemma4:12b` (25.7) | no CPU-placed layers; most predictable |
 | Throwaway / fast | `granite4` | 88.2 tok/s, but 3.4B scored 8/18 on the floor ladder |
-| **Avoid** | `gemma4-31b-24k` | 7.1 tok/s dense; correctness does not pay for 6.6x the wait |
+| **Not interactive** | `gemma4-31b-24k` | 7.1 tok/s dense — below the ~20 t/s perceived floor. Still valid for delegated/offloaded work, where no floor applies |
 
 ## Finding 4 — KV quantisation moves placement and nothing else (TESTED)
 
