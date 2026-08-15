@@ -38,9 +38,11 @@ TEMPERATURE = 0.8
 GEN_TOKENS = 128
 PROMPT = "Write a short paragraph explaining what a hash table is."
 
+# Text field only. qwen3-vl:30b is a vision grader — GOLD_STANDARD.md
+# "Out of field". Pass it on the CLI if you really want a decode number.
 MODELS = [
     "gemma4:26b", "gemma4:31b", "gemma4:12b",
-    "qwen3.8:27b", "qwen3.6:27b", "qwen3-vl:30b", "qwen3:32b",
+    "qwen3.8:27b", "qwen3.6:27b", "qwen3:32b",
     "gemma3:27b", "qwen2.5-coder:14b", "granite4:latest",
 ]
 
@@ -77,6 +79,15 @@ def bench(model):
         "options": {"num_ctx": NUM_CTX, "temperature": TEMPERATURE,
                     "num_predict": GEN_TOKENS},
         "keep_alive": "2m"}, timeout=1800).json()
+    # An ollama error comes back as HTTP 200 with an {"error": ...} body, so it
+    # is NOT caught by the exception handler in main(). Without this the record
+    # reads eval_count 0 / tok_s None / placement "?" and looks like a model
+    # that generated nothing -- which is what a real OOM looked like on z13
+    # (qwen3.8:27b, "radv/amdgpu: Not enough memory for command submission").
+    # A capacity failure must never be reported as a throughput measurement.
+    if isinstance(r, dict) and r.get("error"):
+        return {"model": model, "tok_s": None, "error": r["error"],
+                "failed": "api_error"}
     place = placement()
     ev, ed = r.get("eval_count") or 0, r.get("eval_duration") or 0
     rec = {
@@ -104,6 +115,9 @@ def main():
             rows.append({"model": m, "error": str(e)})
             continue
         rows.append(rec)
+        if rec.get("failed"):
+            print(f"[{rec['model']:20s}] FAILED -- {rec['error'][:96]}", flush=True)
+            continue
         print(f"[{rec['model']:20s}] {str(rec['tok_s']):>6s} tok/s  "
               f"load {rec['load_s']:5.1f}s  {rec['placement']:18s} "
               f"gen={rec['eval_count']}", flush=True)
