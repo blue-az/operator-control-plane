@@ -62,10 +62,46 @@ machine's own session in any way the seat recognises. It arrives as evidence and
 is verified at the seat by a distinct UID, like any other outside input.
 
 **Current state (2026-08-15).** Desktop is the seat: 948 of 953 task records
-stamp `executor.machine = desktop` (5 legacy records read `unknown`). z13 holds
-a second `.operator/` in violation of this spec; it should be retired rather
-than merged. `~/.claude/projects-z13` exists with 68 synced log files that have
-**never been imported** — no `z13` row appears in `usage-summary --by-machine`.
+stamp `executor.machine = desktop` (5 legacy records read `unknown`).
+
+**z13's second ledger CANNOT simply be retired — it holds unique work.**
+BOTTLENECKS Front H describes it via its *eval* event count ("z13's holds
+zero"), which is true and badly misleading. Inventoried over SSH 2026-08-15:
+
+| | z13 |
+|---|---:|
+| tasks | 9 (**8 exist nowhere else**) |
+| claims | **23** |
+| evidence | **110** |
+| handoffs | **40** |
+
+z13-only tasks: `agentic-cli-tps-metrics`, `evidence-snapshot-hardening`,
+`kernelcad-forehand-incident-handoff`, `local-routing-corpus`,
+`opr-continuation-loop-audit`, `pa-evidence`, `proposal-lifecycle`,
+`session-coordination-protocol`.
+
+Worse, `front-e1-gold-pack` exists on **both** machines with **different
+content** (md5 `196603…` vs `05c17c…`). That is the divergence this spec's
+"never `operator init` a second ledger" rule exists to prevent, and it has
+already happened: one task id, two histories, two sequential-id spaces.
+
+So the path is **migration, not deletion**, and it is not mechanical:
+
+1. z13-only tasks can move as *evidence* into seat-side tasks — they cannot be
+   copied as tasks, because their record ids collide with the seat's sequence.
+2. `front-e1-gold-pack` needs a human ruling on which history is authoritative,
+   or both preserved under distinct ids.
+3. Only after both are resolved does z13 stop writing and become Background.
+
+Full ledger backup taken before any of this:
+`handoffs/z13_ledger_backup_20260815_142616.tar.gz` (283 entries, 356K).
+**Nothing on z13 has been deleted or modified.**
+
+`~/.claude/projects-z13` holds 68 synced log files; the usage half of the
+backfill (67 records, `--machine z13`) was imported 2026-08-15 under task
+`z13-historical-usage-import`. That path is safe precisely because usage
+records are producer-labelled and written by the seat, so no second ledger is
+involved.
 
 ## Non-goals
 
