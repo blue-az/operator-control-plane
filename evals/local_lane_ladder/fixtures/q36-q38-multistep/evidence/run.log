@@ -1,0 +1,121 @@
+Grid: 1 tasks x 1 levels x 2 models x 18 trials = 36 cells
+Sampling pinned: --num-ctx 16384 --temperature 0.8 --think off
+Trace retention: ON -> /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/q36-q38-multistep/traces
+[constant-and-callers|L2|qwen3.8:27b|1] running...
+[constant-and-callers|L2|qwen3.8:27b|1] FAIL (20.3s) -- 2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-rr3oun5x/tests/check_limits.py", line 11, in <module>
+    assert "up to 5 times" in describe_policy(), f"stale message: {describe_policy()!r}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'
+[constant-and-callers|L2|qwen3.8:27b|2] running...
+[constant-and-callers|L2|qwen3.8:27b|2] PASS (11.6s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|3] running...
+[constant-and-callers|L2|qwen3.8:27b|3] FAIL (6.2s) -- 2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-o8vjcpbv/tests/check_limits.py", line 11, in <module>
+    assert "up to 5 times" in describe_policy(), f"stale message: {describe_policy()!r}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'
+[constant-and-callers|L2|qwen3.8:27b|4] running...
+[constant-and-callers|L2|qwen3.8:27b|4] FAIL (5.4s) -- 2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-iwni41un/tests/check_limits.py", line 11, in <module>
+    assert "up to 5 times" in describe_policy(), f"stale message: {describe_policy()!r}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'
+[constant-and-callers|L2|qwen3.8:27b|5] running...
+[constant-and-callers|L2|qwen3.8:27b|5] PASS (8.5s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|6] running...
+[constant-and-callers|L2|qwen3.8:27b|6] PASS (11.2s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|7] running...
+[constant-and-callers|L2|qwen3.8:27b|7] FAIL (5.6s) -- 2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-a5jgo1yn/tests/check_limits.py", line 11, in <module>
+    assert "up to 5 times" in describe_policy(), f"stale message: {describe_policy()!r}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'
+[constant-and-callers|L2|qwen3.8:27b|8] running...
+[constant-and-callers|L2|qwen3.8:27b|8] PASS (11.9s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|9] running...
+[constant-and-callers|L2|qwen3.8:27b|9] FAIL (10.9s) -- 1/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-8simoodz/tests/check_limits.py", line 14, in <module>
+    assert "up to 5 times" in doc, "docs/retry_policy.md not updated"
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: docs/retry_policy.md not updated
+[constant-and-callers|L2|qwen3.8:27b|10] running...
+[constant-and-callers|L2|qwen3.8:27b|10] PASS (10.2s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|11] running...
+[constant-and-callers|L2|qwen3.8:27b|11] PASS (11.8s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|12] running...
+[constant-and-callers|L2|qwen3.8:27b|12] PASS (11.9s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|13] running...
+[constant-and-callers|L2|qwen3.8:27b|13] PASS (11.0s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|14] running...
+[constant-and-callers|L2|qwen3.8:27b|14] PASS (10.9s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|15] running...
+[constant-and-callers|L2|qwen3.8:27b|15] PASS (11.5s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|16] running...
+[constant-and-callers|L2|qwen3.8:27b|16] PASS (10.9s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|17] running...
+[constant-and-callers|L2|qwen3.8:27b|17] PASS (12.1s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|18] running...
+[constant-and-callers|L2|qwen3.8:27b|18] PASS (13.7s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|1] running...
+[constant-and-callers|L2|qwen3.6:27b|1] FAIL (27.5s) -- 1/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-468wic1g/tests/check_limits.py", line 14, in <module>
+    assert "up to 5 times" in doc, "docs/retry_policy.md not updated"
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: docs/retry_policy.md not updated
+[constant-and-callers|L2|qwen3.6:27b|2] running...
+[constant-and-callers|L2|qwen3.6:27b|2] PASS (12.4s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|3] running...
+[constant-and-callers|L2|qwen3.6:27b|3] PASS (12.2s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|4] running...
+[constant-and-callers|L2|qwen3.6:27b|4] PASS (12.1s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|5] running...
+[constant-and-callers|L2|qwen3.6:27b|5] PASS (12.9s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|6] running...
+[constant-and-callers|L2|qwen3.6:27b|6] PASS (12.3s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|7] running...
+[constant-and-callers|L2|qwen3.6:27b|7] PASS (12.8s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|8] running...
+[constant-and-callers|L2|qwen3.6:27b|8] PASS (13.1s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|9] running...
+[constant-and-callers|L2|qwen3.6:27b|9] PASS (15.4s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|10] running...
+[constant-and-callers|L2|qwen3.6:27b|10] FAIL (6.0s) -- 2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-qm4tuume/tests/check_limits.py", line 11, in <module>
+    assert "up to 5 times" in describe_policy(), f"stale message: {describe_policy()!r}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'
+[constant-and-callers|L2|qwen3.6:27b|11] running...
+[constant-and-callers|L2|qwen3.6:27b|11] FAIL (11.0s) -- 1/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-nkzl3n9a/tests/check_limits.py", line 14, in <module>
+    assert "up to 5 times" in doc, "docs/retry_policy.md not updated"
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: docs/retry_policy.md not updated
+[constant-and-callers|L2|qwen3.6:27b|12] running...
+[constant-and-callers|L2|qwen3.6:27b|12] PASS (12.3s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|13] running...
+[constant-and-callers|L2|qwen3.6:27b|13] FAIL (5.9s) -- 2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-_ut8j_80/tests/check_limits.py", line 11, in <module>
+    assert "up to 5 times" in describe_policy(), f"stale message: {describe_policy()!r}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'
+[constant-and-callers|L2|qwen3.6:27b|14] running...
+[constant-and-callers|L2|qwen3.6:27b|14] FAIL (9.5s) -- 1/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-en48it_0/tests/check_limits.py", line 14, in <module>
+    assert "up to 5 times" in doc, "docs/retry_policy.md not updated"
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: docs/retry_policy.md not updated
+[constant-and-callers|L2|qwen3.6:27b|15] running...
+[constant-and-callers|L2|qwen3.6:27b|15] FAIL (6.6s) -- 2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/opr-eval-constant-and-callers-L2-w1w8kdo9/tests/check_limits.py", line 11, in <module>
+    assert "up to 5 times" in describe_policy(), f"stale message: {describe_policy()!r}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'
+[constant-and-callers|L2|qwen3.6:27b|16] running...
+[constant-and-callers|L2|qwen3.6:27b|16] PASS (12.7s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|17] running...
+[constant-and-callers|L2|qwen3.6:27b|17] PASS (12.8s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:27b|18] running...
+[constant-and-callers|L2|qwen3.6:27b|18] PASS (14.9s) -- all 4 checks passed
+
+Wrote evals/local_lane_ladder/fixtures/q36-q38-multistep/RESULTS.md
