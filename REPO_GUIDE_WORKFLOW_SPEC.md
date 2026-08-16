@@ -207,8 +207,8 @@ sudo -n -u operator-builder \
 
 `operator-builder` is a non-login account. Passwordless sudo permits only that wrapper, not a
 direct `sudo -u operator-builder <script>`. The earlier closeout failure was that wrong invocation,
-not a missing password. The z13 100% GPU clause is not independently present in the required_gate
-files; 32K completion is.
+not a missing password. Full GPU placement is a goal, not a verification absolute; the load-bearing
+z13 result is that both models completed at 32K.
 
 ### z13 native-provider replica
 
