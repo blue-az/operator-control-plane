@@ -170,3 +170,68 @@ identity; it does not demonstrate `uid_isolated` review. The run also exposed a 
 detail: `test_passes --gate` is an artifact path, not a prose success condition. The original prose
 gate was superseded by a claim naming `tests/test_widget.py`; `doctor` then reported only non-fatal
 advisory/superseded-record warnings.
+
+## Qwen 27B continuation (2026-08-15)
+
+Operator task `qwen27-repo-guide-characterization` first repeated the current desktop throughput
+measurement, then ran the same nested-worktree repository-guide fixture once each with
+`qwen3.6:27b` and `qwen3.8:27b`. The matched cold-load sweep used 16,384 context and produced three
+100%-GPU observations per revision:
+
+| Model | Runs (tok/s) | Mean |
+|---|---|---:|
+| `qwen3.6:27b` | 38.3, 38.1, 38.3 | 38.23 |
+| `qwen3.8:27b` | 45.4, 42.9, 43.9 | 44.07 |
+
+Both `/init` cells passed the path boundary and the semantic checklist. Each wrote exactly one child
+`component/AGENTS.md`, preserved the parent hash, left no other Git-visible change, and captured the
+setup, lint, full-test, exact focused-test, entrypoint, package boundary, Python requirement, Ruff
+setting, and pure-core/thin-CLI architecture. Both generated test commands passed independently.
+
+Qwen 3.8 finished in 45.38 seconds versus 117.09 for Qwen 3.6. The raw decode difference was only
+15.3%; the larger task-time difference coincided with four versus seven assistant generations,
+36,195 versus 62,223 cumulative input tokens, and 1,110 versus 1,553 output tokens. Treat this as a
+task-trajectory observation, not a decode benchmark or stable latency ratio.
+
+This continuation establishes two successful examples, not comparative reliability. Each model ran
+only once, and prior ladder evidence found Qwen 3.6 variable across fixtures. UID-isolated
+verification of claims 0027–0033 completed on 2026-08-16 as uid 971 through the existing
+`run-external-agent` wrapper:
+
+```
+sudo -n -u operator-builder \
+  /home/blueaz/Python/project-phoenix/.operator-run/run-external-agent \
+  /home/blueaz/operator-control-plane \
+  <command>
+```
+
+`operator-builder` is a non-login account. Passwordless sudo permits only that wrapper, not a
+direct `sudo -u operator-builder <script>`. The earlier closeout failure was that wrong invocation,
+not a missing password. The z13 100% GPU clause is not independently present in the required_gate
+files; 32K completion is.
+
+### z13 native-provider replica
+
+The same two cells were then run locally on z13 with AC power and the performance profile active.
+OpenCode 1.18.18's native Ollama provider selected 32,768 context. Under Ollama 0.32.13, both current
+model artifacts loaded at 100% GPU and completed successfully:
+
+| Model | Wall time | Generations | Tool calls | Input | Output |
+|---|---:|---:|---:|---:|---:|
+| `qwen3.6:27b` | 335.26 s | 6 | 14 | 63,257 | 1,452 |
+| `qwen3.8:27b` | 177.83 s | 4 | 9 | 41,070 | 1,045 |
+
+Both guides again passed the exact-path, parent-hash, Git-status, fixture-test, and full semantic
+checks. Qwen 3.8 finished 1.89x faster, but the task trajectories also differed; do not interpret
+that ratio as raw decode speed.
+
+This run corrects a stale operational limit. An earlier z13 measurement found Qwen 3.8 OOM at
+12,288 and 16,384 context. The current model/runtime combination completed at 32,768, so 8K is no
+longer the current ceiling. The older result remains historically valid for its environment rather
+than being erased.
+
+An initial attempt to force matched 8K context through a custom OpenAI-compatible provider was
+excluded: Ollama returned `no user query found in messages` across tool turns, and one Qwen 3.8
+attempt combined a `qwen35` parser error with a server-side stall. The reportable reruns used the
+native provider, matching the desktop protocol. Temporary model aliases were removed and z13's
+power profile was restored to `balanced` after the run.

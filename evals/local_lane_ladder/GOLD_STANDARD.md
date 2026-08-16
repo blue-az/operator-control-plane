@@ -1,6 +1,6 @@
 # Gold standard for local / Front E evaluation
 
-**Status:** active reference (2026-08-11)  
+**Status:** active reference (2026-08-11; Qwen 27B / z13 32K correction 2026-08-15)  
 **Owner:** Erik  
 **Applies to:** Front E routability work, local-lane ladder packs, model comparisons
 (gemma4 26b/31b, qwen class), dual-3090 capacity claims when they rest on “tests better.”
@@ -90,8 +90,50 @@ Do not mix them with z13 rates; see `DESKTOP_BENCHMARK.md` and `Z13_BENCHMARK.md
 | **Router + local executor** | `gemma4:26b` | Lane + mode (+ tool-call band), and plan-shaped tool work. **133.0 t/s** desktop / 46.2 z13 |
 | **Dominated, not unusable** | `gemma4:31b` | Ties 26b on correctness (36/54 each, P=0.49) and is **3.8x slower** (34.8 t/s). 26b dominates it, so nothing argues for choosing it — but 34.8 t/s clears the ~20 t/s interactive floor comfortably, and delegated work has no floor at all |
 | **Floor local** | `qwen2.5*:14b` class when 100% GPU | Encoding / smaller tasks |
-| **Capacity unlock (dual later)** | Qwen ~27–32B “fits well” | Same fixtures only — then claim “tests better” |
+| **Measured dense-Qwen candidates; no seat assigned** | `qwen3.6:27b`, `qwen3.8:27b` | 3.8 is faster; correctness is tied. Both now complete a native 32K / 100% GPU repository-guide cell on z13. See below. |
+| **Capacity unlock (dual later)** | Qwen ~32B class | Same fixtures only — then claim “tests better” |
 | **Frontier** | Claude / Codex / … | `frontier` / `needs_supervision` lanes |
+
+### Dense Qwen 27B characterization
+
+These models are measured local candidates, not an undifferentiated future capacity class:
+
+- **Correctness:** `qwen3.8:27b` and `qwen3.6:27b` scored 76/105 and 73/105 in the
+  pooled head-to-head (`p=0.761`), so the current agentic fixtures do not establish a
+  correctness difference. Both scored 15/15 on the corrected BT hard probes, which
+  saturated and therefore cannot rank them. `qwen3.8:27b` produced the field's most
+  complete answer on one ambiguous cross-document probe, but that is a qualitative
+  strength signal rather than a ranking result.
+- **Capability shape:** in E9, `qwen3.6:27b` scored 19/30 and was the only model to solve
+  any `csv-summarize-repair` cells, but three of five fixtures were coin-flips. Its
+  profile is higher peak reach with lower determinism than the selected `gemma4:26b`
+  seat. No equivalent evidence yet shows that 3.8 removes that variance.
+- **Throughput:** on the desktop RTX 3090 at matched 16,384 context, 3.8 averaged
+  44.6 tok/s against 37.3 for 3.6 (`+19.7%`, four samples each, non-overlapping
+  ranges). The direction reproduced on z13 at matched 8,192 context: 16.3 versus
+  13.0 tok/s.
+- **Memory:** the earlier z13 run placed 3.8's ceiling at 8,192 context, with 12,288
+  and 16,384 OOM. That limit is historical, not current: with Ollama 0.32.13 and the
+  current model artifact, native OpenCode loaded both 3.6 and 3.8 at 32,768 context,
+  reported 100% GPU placement, and completed the repository-guide task. Preserve the
+  older result as a versioned runtime observation rather than a model-intrinsic limit.
+- **Runtime confounds:** two recorded 3.8 timeouts were Ollama server stalls in which
+  the model was never invoked. Both revisions also traverse Ollama's `qwen35` tool-call
+  parser, whose observed EOF failures are backend failures rather than model-quality
+  measurements.
+- **Repository-guide `/init`:** in one matched cell each, both revisions wrote only the
+  declared nested `AGENTS.md`, preserved the parent guide, passed the fixture tests, and
+  captured every semantic acceptance item. Qwen 3.8 produced the more explicit guide
+  and finished in 45.38 seconds against 117.09 for 3.6. That 2.58x task-time gap came
+  mostly from fewer generations and tokens, not its 15.3% decode-rate advantage. These
+  are successful examples, not reliability estimates; repeated seeds are still needed.
+  The same native-provider task also passed on z13 at 32K/100% GPU: 177.83 seconds for
+  3.8 and 335.26 seconds for 3.6.
+
+Evidence: [desktop throughput](DESKTOP_BENCHMARK.md), [z13 fit](Z13_BENCHMARK.md),
+[hard probes](../bt_floor/HARD_PROBE_RESULTS.md), [E9 profile](NEXT_SESSION.md), and
+[runtime diagnosis](SILENT_TURN_DIAGNOSIS.md). The repository-guide continuation is
+recorded under Operator task `qwen27-repo-guide-characterization`.
 
 Policy sketch (router study):
 

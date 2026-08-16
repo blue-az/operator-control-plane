@@ -198,11 +198,22 @@ the ambiguity the missing power-state note creates.
 | `qwen3.8:27b` (dense, 12288) | OOM | — | — |
 | `qwen3.8:27b` (dense, 16384) | OOM | 43.7 | — |
 
-### Finding A — `qwen3.8:27b` fits z13 up to 8192 context, not beyond
+The two `qwen3.8:27b` OOM rows are the 2026-08-13 environment. They are not the
+current operational ceiling; see Finding A.
 
-**Read the context column before quoting this.** "Does not fit z13" is wrong
-without it — the model runs fine in normal use, where ollama's default context
-is far below the 16384 this battery pins. Measured boundary, AC/`performance`:
+### Finding A — `qwen3.8:27b` z13 context ceiling (historical 8K; current 32K)
+
+> **Current-environment correction, 2026-08-15:** the 8192/12288 OOM boundary
+> below was measured under an earlier model/runtime state. It is no longer the
+> operational ceiling. OpenCode 1.18.18 with Ollama 0.32.13 loaded
+> `qwen3.8:27b` at 32,768 context, reported 100% GPU placement, and completed a
+> four-generation repository-guide task in 177.83 seconds. `qwen3.6:27b` also
+> completed at 32,768. Preserve the table as historical evidence; do not use it
+> to configure the current installation without a fresh preflight.
+
+**Historical measurement (2026-08-13, earlier model/runtime).** "Does not fit
+z13" was already the wrong quote of this run — the model ran at everyday
+context. The battery pinned 16384. Measured boundary then, AC/`performance`:
 
 | `num_ctx` | result |
 |---:|---|
@@ -211,8 +222,9 @@ is far below the 16384 this battery pins. Measured boundary, AC/`performance`:
 | 12288 | OOM |
 | 16384 | OOM |
 
-The limit bites at the ladder's pinned 16384, not at everyday context lengths.
-Anyone running this model interactively on z13 will never see it.
+In that environment the limit bit at the ladder's pinned 16384, not at everyday
+context lengths. Anyone running this model interactively on z13 would not have
+seen it.
 
 ```
 llama-server startup failed after projector CPU offload retry:
@@ -220,20 +232,21 @@ llama-server reported out-of-memory during startup:
 radv/amdgpu: Not enough memory for command submission.
 ```
 
-It carries a CLIP vision projector (~460M params) on top of 17 GB of weights;
-with a 16384 KV cache that exceeds the 17.5 GiB GPU-addressable pool. ollama
-attempts a projector CPU offload and still fails.
+It carried a CLIP vision projector (~460M params) on top of 17 GB of weights;
+with a 16384 KV cache that exceeded the 17.5 GiB GPU-addressable pool. ollama
+attempted a projector CPU offload and still failed.
 
-The 16384 failure reproduced four times across battery and AC, and 12288 fails
-too, so the ceiling sits between 8192 and 12288. One 16384 run did succeed six
-minutes after a reboot and never again, which fits a Vulkan contiguous
-allocation failing as memory fragments — so 16384 is not merely tight, it is
-unreliable even when it occasionally succeeds.
+The 16384 failure reproduced four times across battery and AC, and 12288 failed
+too, so that environment's ceiling sat between 8192 and 12288. One 16384 run
+did succeed six minutes after a reboot and never again, which fits a Vulkan
+contiguous allocation failing as memory fragments — so 16384 was not merely
+tight, it was unreliable even when it occasionally succeeded.
 
 **Two symmetric errors to avoid, both made during this run:** treating "it ran
 once at 16384" as "it fits", and treating "it OOMs at 16384" as "it does not fit
 z13". The first overstates capacity, the second understates it, and the fix for
-both is to state the context.
+both is to state the context **and the runtime**. The 2026-08-15 native-provider
+cell is a new environment, not a rewrite of this table.
 
 ### Finding B — 3.8 is faster than 3.6 here too, at matched context
 
