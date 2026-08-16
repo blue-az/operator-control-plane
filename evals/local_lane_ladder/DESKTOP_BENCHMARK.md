@@ -116,9 +116,11 @@ across 210 head-to-head cells is 76/105 vs 73/105, **p=0.761**. See
 So: **faster, not measurably better.** It remains unrankable against
 `gemma4:26b` on correctness, and is 3× slower than it on this machine.
 
-Cost of the speed: `qwen3.8` carries a CLIP vision projector, and on
-constrained hardware that buys throughput with memory — it OOMs above 8192
-context on z13 where `qwen3.6` runs at 16384.
+At the time of this comparison, `qwen3.8`'s CLIP vision projector carried a
+measured z13 memory cost: it OOMed above 8192 context where `qwen3.6` ran at
+16384. That is now a historical environment result. A later native OpenCode run
+under Ollama 0.32.13 loaded both current artifacts at 32768 and 100% GPU on z13;
+see `Z13_BENCHMARK.md`'s dated correction.
 
 ## Finding 4 — the z13 penalty is architecture-dependent
 
