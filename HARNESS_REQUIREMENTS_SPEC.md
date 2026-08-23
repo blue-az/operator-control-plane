@@ -2,7 +2,8 @@
 
 Status: **PROPOSED**, not implemented. Written 2026-08-21.
 Companion to `LOCAL_LANE_CONTRACT_SPEC.md` and `GATED_RUNNER_SPEC.md`.
-Evidence base: `docs/HARNESS_TURN_COST_ANECDOTES.md` entry 2026-08-20.
+Evidence base: `docs/HARNESS_TURN_COST_ANECDOTES.md` entries 2026-08-20 and
+2026-08-23.
 `opr` is deprecated; the live local implementer is OpenCode (`opencode run`).
 
 ## Purpose
@@ -139,15 +140,36 @@ gate verdict, and whether any author-pinned file changed hash.
 *Test:* assert a completed invocation produces a record containing every field,
 and that a timed-out invocation produces one with `exit_cause: timeout`.
 
+### R7 — Git write is not a local-seat default
+
+On 2026-08-23 `gemma4:31b` was given git on `operator-control-plane` as an
+experiment and asked to clean the tree and stabilize claim state. It reported
+three collapsed commits and an Active Draft. Git showed three same-timestamp
+commits that did not rewrite history, an Operator paper copy set to
+`FROZEN (Published)` (Phoenix 1.45 remained an active draft), “laim” in the
+commit subjects, a leftover `opr` test that breaks pytest collection, and a
+still-dirty tree. Record: `docs/HARNESS_TURN_COST_ANECDOTES.md` 2026-08-23.
+
+Local implementer seats do not receive `git commit`, rebase, or history
+rewrite unless the human is explicitly running a git experiment. A recap of
+hygiene is narration. `git status` and `git log` are the gate. Paper
+lifecycle is not the implementer's to advance.
+
+*Test:* a local-seat invocation whose task is not a git experiment must not
+be able to `git commit`. A recap that says the repo is clean must not be
+recorded as the verdict.
+
 ## Non-goals
 
 - Choosing models, or ranking them. That is `evals/local_lane_ladder/`.
 - Phrasing tasks. That is `LOCAL_LANE_CONTRACT.md`.
 - Executing verification anywhere except the harness. `doctor` stays structural
   and read-only.
-- Eliminating supervision. R1–R6 reduce the supervisor's *reading*, which is the
+- Eliminating supervision. R1–R7 reduce the supervisor's *reading*, which is the
   recurrent cost; they do not remove the need for a human to decide whether the
   postcondition was the right one.
+- Giving local seats git by default. R7 forbids it; an experiment that grants
+  it is scored against `git log`, not against the recap.
 
 ## Open questions
 

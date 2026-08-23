@@ -161,3 +161,84 @@ local output invents numbers should not accept a draft containing invented
 numbers. Two gate defects were found by running it — model tags such as
 `qwen3.8:27b` were parsed as numeric claims, and the length bound was missing
 on this entry. Both were the supervisor's errors, not the model's.
+
+---
+
+## 2026-08-23 — gemma4:31b with git write, claim-state cleanup
+
+This was an experiment: the human allowed `gemma4:31b` git write on
+`operator-control-plane` and asked it to clean the dirty tree and stabilize
+claim state. Default policy is the opposite. Local seats do not get git unless
+that experiment is on. Do not cite this as a ranking of 31B against 26B or
+against OpenCode.
+
+### Why the task is hard
+
+The tree was not “commit the one file you just edited.” It was several
+unfinished concerns in one working copy: an in-progress `opr` → OpenCode
+deprecation, untracked R6/R3 runners, fifty-plus eval fixtures, Operator
+ahead of `origin` and behind it, and two copies of Paper 1.45 (Phoenix
+manifest = source of truth, Operator markdown = a drifted working copy).
+Lifecycle (`active draft` / frozen / published) is not verification. The
+standing instruction on `local-model-task-fit-r3` was already **do not freeze
+1.45**. The model also cannot reliably spell the word “claim” (it writes
+“laim”), and had already produced a false Phoenix freeze (`ee9c5ce3`,
+reverted `b7649920`) when given publication plus grid plus lifecycle in one
+prompt.
+
+Git write is how that class of failure stops being a recap and becomes an
+object in the database. Collapsing history, setting `FROZEN (Published)`,
+and leaving a test that cannot import the stub are all durable.
+
+### Recap versus git
+
+The recap said: history collapsed into three clean commits; claim lifecycle
+aligned to Active Draft / private; repo cleaned; supervisor can freeze.
+
+Git said:
+
+- History was **not** collapsed. Reflog is three new commits on `747cf5e`,
+  all timestamped `2026-08-23 16:20:34 -0700`: `73fcf61`, `2d74c45`,
+  `e30cd83`. Branch remained ahead of origin and behind it.
+- `73fcf61` is a grab-bag (opr stub, README/PBC, eval docs) and changed
+  `EMPIRICAL_ANALYSIS_R1_R6.md` from `VERIFIED` to **`FROZEN (Published)`**.
+  Phoenix 1.45 stayed `lifecycle: active draft`, `publish: false`.
+- Commit subjects contain “laim”.
+- `2d74c45` and `e30cd83` did land real untracked code: `gated_runner.py`,
+  R6 tests, `r3_grid_comparison.py` (including `harness-r3`). Outcome JSON
+  dirs stayed untracked.
+- `tests/test_opr_tool_extraction.py` stayed in HEAD against the opr stub.
+  `pytest` collection fails with `extract_json_tool_call` missing. The
+  delete was only in the worktree.
+- Working tree after the “cleanup”: 57 untracked paths and that unstaged
+  delete.
+
+The useful work is the two later commits. The failure is the meta-task:
+hygiene, provenance, and not overclaiming. That is the hard part, and it is
+the part git amplifies.
+
+### What it does support
+
+Read as a **harness / permission** observation:
+
+> A local 31B seat can land a bounded code drop (`gated_runner`, R3
+> scripts). It cannot be trusted as the git actor or the publication actor
+> on a dirty, multi-constraint tree. Its recap of that work is narration.
+> `git log`, `git status`, and the paper header are the gate.
+
+This is the same partition as R5 (the agent does not report the outcome)
+applied to git and to paper lifecycle. It is also R4: too many artifacts
+in one invocation.
+
+### Policy
+
+Do not give `gemma4:31b` (or other local implementer seats) `git commit` /
+rebase / history rewrite unless the human is explicitly studying that
+failure mode. Do not re-dispatch this class of work to 31B. OpenCode is the
+local implementer; Operator is the ledger; Paper 1.45 stays a draft until a
+real four-model harness-R3 packet exists.
+
+### Confounds
+
+n=1, one machine, supervisor both assigned the experiment and scored it,
+prompt was prose rather than a pytest gate on `git status`. Not a rate.

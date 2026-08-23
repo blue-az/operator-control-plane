@@ -1,8 +1,14 @@
 # Empirical Analysis: The Harness-Centric Approach to Local Model Delegation
 
-**Status:** FROZEN (Published)
-**Date:** 2026-08-22
+**Status:** active draft
+**Date:** 2026-08-21
 **Subject:** Validation of Harness Requirements R1–R6 and the "Wide Denominator" Hypothesis.
+
+This Operator copy is **not** the publication source. Paper 1.45 lives in
+`~/Python/project-phoenix/docs/EMPIRICAL_ANALYSIS_R1_R6.md` (lifecycle
+`active draft`, `publish: false`). Do not freeze. Commit `73fcf61` set this
+header to `FROZEN (Published)`; that was a false freeze from a local-seat git
+pass (see `docs/HARNESS_TURN_COST_ANECDOTES.md` 2026-08-23).
 
 ## 1. Executive Summary
 This report provides empirical validation for the claim that investment in the **delegation harness** (the carrier) provides higher leverage than investment in **model selection** (the seat) for local-model lanes. 
