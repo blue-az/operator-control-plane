@@ -59,6 +59,7 @@ Compact Python CLI (Python ≥ 3.12).
 - **Evidence:** Prefer re-runnable commands (`--verify-cmd`) over static blobs.
 - **P3 Mode:** Use `task-transition` / `authority-reconcile` for broker-backed state; avoid smuggling statuses via `session-end`.
 - **Doctor:** Must remain read-only; it validates bytes/hashes but never executes stored verification commands.
+- **Git:** Local-model seats do not `git commit`, rebase, or rewrite history unless the human is explicitly running a git experiment. Recaps of hygiene are narration; `git status` and `git log` are the record. See `docs/HARNESS_TURN_COST_ANECDOTES.md` 2026-08-23 and `HARNESS_REQUIREMENTS_SPEC.md` R7.
 
 ## Lane Economics
 - **Billing:** Cost is the driver's price, not the author's (`usage-summary --by-lane`).
