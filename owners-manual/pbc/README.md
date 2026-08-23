@@ -8,8 +8,9 @@ Use these files as structured context for coding agents, QA review, drift checks
 
 - `product-overview.pbc.md` — package-level draft contract context.
 - `NN-chapter-name.pbc.md` — chapter-level draft behavior-contract projections.
-- `appendix-opr-governed-llm-client.pbc.md` — draft target contract for extracting `opr`
-  into this repository as a governed LLM client.
+- `appendix-opr-governed-llm-client.pbc.md` — **deprecated.** Historical contract for
+  the old `opr` governed REPL. Do not implement continuation. Restore from git
+  (`fe4211b`) if needed.
 - `appendix-prime-agent-evidence-ingestion.pbc.md` — draft target contract for ingesting Prime
   Agent session records as usage and as claim evidence. Ledger task: `pa-evidence`. Gate 0 is
   unmet: no Prime Agent session has been observed on this machine.
@@ -19,9 +20,9 @@ Use these files as structured context for coding agents, QA review, drift checks
 - `appendix-multi-session-coordination.pbc.md` — draft working agreement for concurrent agent
   sessions sharing one ledger. Ledger task: `session-coordination-protocol`. Both Claude sessions
   have signed off; awaiting an operator ruling on the identity labels.
-- `appendix-local-implementer-dispatch.pbc.md` — draft contract for dispatching a local-model
-  seat from a ledger brief via `opencode run` (not `opr`). Ledger task:
-  `proposal-lifecycle`. Proposed only; not implemented.
+- `appendix-local-implementer-dispatch.pbc.md` — live contract for dispatching a local-model
+  seat from a ledger brief via `opencode run`. Ledger task: `proposal-lifecycle`.
+  LID-RUL-101–105 are provisional; LID-BHV-001 remains proposed.
 
 ## Trust Model
 

@@ -15,8 +15,10 @@ updated: 2026-08-23
 # Local Implementer Dispatch — Behavior Contract
 
 > PBC for sending a local-model seat at a ledger task without a human
-> copy-pasting supervisor recaps. **Nothing in the Proposed sections is
-> implemented.** Fenced as `pbc:proposed-*`. Ledger task: `proposal-lifecycle`.
+> copy-pasting supervisor recaps. Ledger task: `proposal-lifecycle`.
+> LID-RUL-101–105 ratified 2026-08-23 (`trust: provisional`, claim-0077).
+> LID-BHV-001 and its outcomes remain proposed until `opencode run` + brief
+> dispatch is implemented. No opr continuation.
 >
 > **Carrier: OpenCode, not opr.** `opencode run` already completes multi-step
 > local jobs (gemma4:26b, 3-file edit plus verification, 2026-08-13, recorded
@@ -51,9 +53,8 @@ a result.
 ## Non-Goals
 
 - A new `progress` or `proposal` record type.
-- Making `opr` the implementer runner. opr stays the bounded governed REPL.
-  OPR continuation (010–018) is a separate product question, not a gate on
-  this contract.
+- Making `opr` the implementer runner. `opr` is deprecated; OpenCode is the
+  carrier. OPR continuation (010–018) is rejected, not deferred.
 - Automatic routing of arbitrary work to local models.
 - Changing verification UID isolation.
 - Freezing Paper 1.45 from this contract.
@@ -109,47 +110,44 @@ a result.
     verification via opencode run (2026-08-13). audio_ports.py was written by
     qwen3.8:27b via opencode. That is existing behavior, not a proposal.
   trust: verified
-```
-
-## Proposed Rules
-
-```pbc:proposed-rules
 - id: LID-RUL-101
   name: Brief Is The Dispatch
   rule: >
     The implementer is started with opencode run, given the exported builder
     brief for the task (operator export-brief --for opencode --task <id>),
     not a pasted supervisor recap.
-  trust: proposed
+  trust: provisional
 - id: LID-RUL-102
   name: Harness Id Is Not The Model
   rule: >
     Assign opencode as the implementer harness. The seat is the OpenCode
     model string (e.g. gemma4:31b). gemma4_local may remain a provenance
     label for the model family; it is not the runner.
-  trust: proposed
+  trust: provisional
 - id: LID-RUL-103
   name: Slice Progress Is A Claim Plus Evidence
   rule: >
     After each measurement slice the implementer claim-add's and
     evidence-attach's the outcome JSON, and may attach opencode export
     output. Chat recap is not an acceptable substitute.
-  trust: proposed
+  trust: provisional
 - id: LID-RUL-104
   name: Implementer Does Not Write Lifecycle
   rule: >
     The local implementer does not edit PAPERS_MANIFEST.json lifecycle or
     publication_status, does not delete a numbered inventory draft card, and
     does not pass --status on evidence-attach.
-  trust: proposed
+  trust: provisional
 - id: LID-RUL-105
   name: Partial Runs Are Named Partial
   rule: >
     A run that covers a subset of cells must be claimed as that subset.
     Aggregating unrelated outcome directories into a freeze number is a
     narration failure, not a result.
-  trust: proposed
+  trust: provisional
 ```
+
+## Proposed behavior (not yet implemented)
 
 ```pbc:proposed-behavior
 id: LID-BHV-001
@@ -174,6 +172,6 @@ trust: proposed
 
 ## Proof Boundary
 
-Shows: opr is the wrong implementer carrier; OpenCode already runs multi-step local jobs; five proposed rules keep Operator as a trust ledger.
+Shows: opr is the wrong implementer carrier; OpenCode already runs multi-step local jobs; five provisional rules keep Operator as a trust ledger.
 
 Does not show: an Operator wrapper around `opencode run`; that Gemma 4 31B will claim-add without a supervisor prompt; or that harness-R3 cells have been run.

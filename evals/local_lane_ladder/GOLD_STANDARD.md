@@ -82,15 +82,20 @@ Use for **hardware / tok/s / residency** claims. Same spirit: no unsourced “te
 
 ## 3. Model seats (from measured work, not preference)
 
-**Rates below are DESKTOP (1x RTX 3090 320W), residency-verified 100% GPU.**
-Do not mix them with z13 rates; see `DESKTOP_BENCHMARK.md` and `Z13_BENCHMARK.md`.
+**Rates below are chip-to-chip: RTX 3090 (320 W) vs Ryzen AI MAX 390
+(Radeon 8050S).** Cite placement next to the rate. 100% GPU is the clean
+case, not a veto. A few-percent **weight lip** on the 3090 (`qwen3.6:35b`
+at 4%/96%, 86.4 t/s) is a host-conditioned row. The same blob is 100%
+iGPU on the MAX 390. Hide neither the model nor the spill. Do not mix
+3090 rates with MAX 390; see `DESKTOP_BENCHMARK.md` and `Z13_BENCHMARK.md`.
 
 | Seat | Model | Role |
 |------|--------|------|
-| **Router + local executor** | `gemma4:26b` | Lane + mode (+ tool-call band), and plan-shaped tool work. **133.0 t/s** desktop / 46.2 z13 |
+| **Router + local executor** | `gemma4:26b` | Seat on **both chips**. Lane + mode + plan-shaped tool work. **133.0 t/s** on the 3090 / **55.2 t/s** on the MAX 390, 100% GPU. E9 24/30 on both. |
+| **Fast Qwen** | `qwen3.6:35b` | 35B-A3B MoE. 3090: **86.4 t/s**, 4%/96%, E9 **14/30**. MAX 390: **59.2 t/s**, **100% GPU**, E9 **18/30**. Faster than 26b on the MAX 390, slower on the 3090. Not the seat. |
 | **Dominated, not unusable** | `gemma4:31b` | Ties 26b on correctness (36/54 each, P=0.49) and is **3.8x slower** (34.8 t/s). 26b dominates it, so nothing argues for choosing it — but 34.8 t/s clears the ~20 t/s interactive floor comfortably, and delegated work has no floor at all |
 | **Floor local** | `qwen2.5*:14b` class when 100% GPU | Encoding / smaller tasks |
-| **Capacity unlock (dual later)** | Qwen ~27–32B “fits well” | Same fixtures only — then claim “tests better” |
+| **Capacity unlock (dual later)** | models that do not load on one 24 GB card at all | Same fixtures only — then claim “tests better”. 35b is not this case. |
 | **Frontier** | Claude / Codex / … | `frontier` / `needs_supervision` lanes |
 
 Policy sketch (router study):
@@ -150,10 +155,18 @@ and that floor is a perceived-latency threshold for interactive use only
 is that 26b matches it on correctness and is 3.8x faster, so there is no task it
 is the right answer for — not that it is too slow to run.
 
-The rule stands for the next change: a seat move needs a residency-verified rate
-on the machine it applies to. The "~40 t/s" figure was itself the inherited
-unverified claim this sentence was written to guard against, which is how it
-survived so long.
+The rule stands for the next change: a seat move needs a **placement-logged**
+rate on the machine it applies to. Unverified rates stay out. A logged 4%
+MoE weight lip does not. G2 in `new_model_gate.sh` warns on spill and only
+refuses CPU-only / failed load — it does not keep 86 t/s models off the
+speed table. The "~40 t/s" figure was itself the inherited unverified claim
+this sentence was written to guard against, which is how it survived so long.
+
+**UPDATED 2026-08-17 — 35b belongs on the speed ranking, and now has an E9 row.**
+`fixtures/q36-35b-spill-tps` measured `qwen3.6:35b` at **86.4 / 84.0 t/s**
+(16k / 32k) with a stable 4% weight spill. `fixtures/q36-35b-e9` ran the
+five-fixture ceiling battery: **14/30** vs same-run 26b **24/30** (p=0.015).
+26b matched its E9 score exactly. 35b is on both tables. It is not the seat.
 
 ### Out of field — vision grader
 
@@ -179,7 +192,10 @@ A pack that **may** count toward Front E must:
 2. Use **L0/L1/L2** (or a documented subset) as the complexity axis.
 3. Define **Alignerr-style postconditions** per cell (R4 + golden).
 4. Grade with **deterministic checks**; retain traces (no terminal-tool false fails).
-5. Report **100% GPU / spill** when making capacity claims (`ollama ps` or equivalent).
+5. Report **placement** (`ollama ps`) on every ranking row. 100% GPU is
+   preferred. A few-percent weight lip is a host-conditioned row, not a
+   reason to omit the model. KV-default overflow is still a confound —
+   pin `num_ctx`, do not hide the score.
 6. Keep **desktop vs z13 ledger** identity honest (Front **H** — two `.operator/` trees).
 7. Register claims only for what was measured; UID-isolated verify preferred.
 

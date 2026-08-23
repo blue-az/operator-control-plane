@@ -332,24 +332,27 @@ def rederive_pack(
         # Empty ps for a model can happen if sampling gap between loads — warn but
         # do not auto-fail if the log has *some* 100% GPU rows for every model that
         # was sampled. Missing entirely is a soft fail.
-        if spill:
+        if missing_ps:
             record(
-                "GPU residency (no CPU spill)",
-                False,
-                f"spill observations: {spill}",
-                residency=residency,
-            )
-        elif missing_ps:
-            record(
-                "GPU residency (no CPU spill)",
+                "GPU residency logged",
                 False,
                 f"models never seen in ollama_ps samples: {missing_ps}; "
                 f"seen={ {m: relevant[m] for m in observed_models if relevant[m]} }",
                 residency=residency,
             )
+        elif spill:
+            # Host-conditioned row (e.g. qwen3.6:35b 4% weight lip). Record,
+            # do not fail the pack — G2 is no longer a 100% veto.
+            record(
+                "GPU residency logged",
+                True,
+                f"host-conditioned spill (not a veto): {spill}; "
+                f"samples={residency['samples']} by_model={relevant}",
+                residency=residency,
+            )
         else:
             record(
-                "GPU residency (no CPU spill)",
+                "GPU residency logged",
                 True,
                 f"samples={residency['samples']} all matrix models 100% GPU in every observation; "
                 f"by_model={relevant}",

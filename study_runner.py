@@ -587,7 +587,7 @@ class LedgerOps:
 # (checked directly against the argparse definition) -- there is no "study"
 # lane, so a role must map onto one of those three rather than inventing a
 # fourth value that other lane-aware tooling (usage-summary, doctor) won't
-# recognize. Mirrors opr.get_frontier_lane()'s own review-vs-author split.
+# recognize. Mirrors the old opr.get_frontier_lane() review-vs-author split.
 LANE_FOR_ROLE = {
     harness_adapter.Role.SUPERVISOR.value: "frontier_driver",
     harness_adapter.Role.JUDGE.value: "frontier_driver",

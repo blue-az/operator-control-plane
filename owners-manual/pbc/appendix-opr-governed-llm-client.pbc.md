@@ -2,17 +2,24 @@
 id: pbc_opr_governed_llm_client
 title: "opr Governed LLM Client — Behavior Contract"
 context: opr-generalization
-status: active
+status: deprecated
 tags:
   - pbc
   - owner-manual
   - opr
   - governed-client
+  - deprecated
+updated: 2026-08-23
 ---
 
 # opr Governed LLM Client — Behavior Contract
 
-> PBC for `opr` client integration inside `operator-control-plane`.
+> **Deprecated (2026-08-23).** `opr` is a stub that points at OpenCode
+> (`opencode run`). Do not implement OPR continuation (010–018). Restore the
+> old client from git commit `fe4211b09bc164c3dc0b7b48bad929e39ab68356`. Live
+> contract: `appendix-local-implementer-dispatch.pbc.md`.
+>
+> Historical PBC for `opr` client integration inside `operator-control-plane`.
 
 ## Scope
 

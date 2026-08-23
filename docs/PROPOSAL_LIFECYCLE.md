@@ -44,9 +44,12 @@ Both already exist in the repo. The lifecycle must cover both without inventing
 a third.
 
 **Shape A — amendment to a live contract.**
-`appendix-opr-governed-llm-client.pbc.md` is `status: active`. Proposed rules
-OPR-RUL-010..018 sit inline in `pbc:proposed-rules` fences alongside ratified
-OPR-RUL-001..009. The unit of approval is *a set of rule IDs*.
+`appendix-opr-governed-llm-client.pbc.md` was `status: active` when this
+lifecycle was written; it is now `status: deprecated` (`opr` retired in favor
+of OpenCode). Proposed rules OPR-RUL-010..018 sat inline in
+`pbc:proposed-rules` fences alongside ratified OPR-RUL-001..009. The unit of
+approval is *a set of rule IDs*. The live Shape A example is now
+`appendix-local-implementer-dispatch.pbc.md`.
 
 **Shape B — a whole draft contract.**
 `appendix-prime-agent-evidence-ingestion.pbc.md` is `status: draft` with Gate 0
@@ -154,8 +157,10 @@ Net new surface: **one CLI verb and one linter.**
 
 ## 7. Applying it to the two live examples
 
-**`appendix-opr-governed-llm-client.pbc.md` (Shape A).** OPR-RUL-010..018 are
-DRAFTED and unfrozen. Freeze as one claim on `opr-continuation-loop-audit`.
+**`appendix-opr-governed-llm-client.pbc.md` (Shape A, now deprecated).**
+OPR-RUL-010..018 were DRAFTED and unfrozen. Continuation is rejected;
+OpenCode is the carrier. Do not freeze those rules on
+`opr-continuation-loop-audit`. Historical note:
 Note OPR-RUL-012 should be withdrawn rather than approved — its own measurement
 (5/5 functional, 1/5 signalled) contradicts it, and OPR-RUL-018 supersedes it.
 A lifecycle that cannot retire a proposal its evidence killed is not worth

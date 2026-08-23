@@ -1,4 +1,4 @@
-# Desktop benchmark — single RTX 3090, the last clean baseline
+# RTX 3090 benchmark — single card, the last clean discrete baseline
 
 **Measured:** 2026-08-14, `ctx 16384`, `temperature 0.8`, 128-token generations,
 each model loaded cold and unloaded after. Decode rate is
@@ -61,6 +61,25 @@ it was scored, so the rankings measure capability rather than VRAM pressure.
 `qwen3-vl:30b` was on this sweep (177.2 tok/s, 12.7s load, 100% GPU). It is a
 vision grader, not a field model — see `GOLD_STANDARD.md`. Do not rank it here.
 
+### Addendum 2026-08-17 — `qwen3.6:35b` is on this table
+
+The 08-14 sweep omitted `qwen3.6:35b` because G2 refused any CPU token.
+That was the wrong spill (`qwen3:32b` KV-default, not a 23 GB MoE weight
+lip). Same meter, `fixtures/q36-35b-spill-tps`, warm mean, 320 W:
+
+| Model | **tok/s** | ctx | Placement |
+|---|---:|---:|---|
+| `gemma4:26b` | **128.0** | 16384 | 100% GPU |
+| **`qwen3.6:35b`** | **86.4** | 16384 | **4%/96% CPU/GPU** |
+| `qwen3.6:35b` | 84.0 | 32768 | 4%/96% CPU/GPU |
+| `qwen3.6:27b` | 37.8 | 16384 | 100% GPU |
+
+35b is **second on this desk**, ~2.3× the dense 27B, ~2.5× `gemma4:31b`.
+Spill fraction did not grow 16k→32k. Cite placement with the rate. This
+does not move the seat — 26b is still faster and won the E9 battery
+**24/30 vs 14/30** (`q36-35b-e9`, p=0.015). It does mean a 90 t/s Qwen
+no longer sits off the ranking because four percent of it is on the host.
+
 ## Finding 1 — speed and correctness are close to uncorrelated
 
 The two fastest models on this machine are the two *worst* on the ladder:
@@ -85,6 +104,10 @@ turnaround rather than decode. On decode rate specifically the gap is 3.8×.
 
 Two models with statistically indistinguishable correctness, one of them nearly
 four times faster. Nothing in this table argues for `gemma4:31b`.
+
+`qwen3.6:35b` at 86.4 t/s is the first Qwen that is in the same speed
+conversation as 26b. It is still slower than 26b, and it has not run the
+E9 30-cell battery. Speed ranking ≠ seat.
 
 ## Finding 3 — `qwen3.8:27b` is faster than `qwen3.6:27b` as well as more compliant
 
@@ -140,6 +163,17 @@ This also settles a stale note: `Z13_BENCHMARK.md` estimated the current gap at
 "roughly 2×" after finding the old 4.9× ratio outdated. Measured like-for-like,
 **both were right about different things** — MoE is ~2.9×, dense is still ~4.8×.
 The single-ratio framing was the error.
+
+## Finding 5 — a few-percent MoE weight lip is a host row, not a veto
+
+G2 existed because `qwen3:32b` at default 32768 spilled KV and two
+"same-ctx" models were not the same machine. `qwen3.6:35b` is the other
+case: 23 GB of weights, 4% CPU at every window tried, 86 t/s. Dedicated
+vs unified already said MoE spill can degrade gracefully. This pack
+measured that it does. Omitting the row was the hole.
+
+`new_model_gate.sh` G2 now warns on mixed placement and only fails
+CPU-only / failed load. See `GOLD_STANDARD.md` §3 (2026-08-17).
 
 ## Limits
 

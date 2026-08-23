@@ -1,5 +1,11 @@
 # OPR Generalization Spec
 
+> **Deprecated (2026-08-23).** `opr` is no longer the local implementer. Use
+> OpenCode (`opencode run`). Operator remains the ledger. This spec describes
+> the old governed REPL; restore it from git commit
+> `fe4211b09bc164c3dc0b7b48bad929e39ab68356`. Live dispatch contract:
+> `owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md`.
+
 ## Purpose
 
 `opr` is currently implemented inside `project-phoenix` as a governed LLM client for local

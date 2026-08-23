@@ -20,8 +20,9 @@ Source: blue-az/operator-control-plane:main@9b9e3e63a7f0f54ccde541c6c10570c8fdbe
 
 ## Appendices
 
-- [opr Governed LLM Client](chapters/appendix-opr-governed-llm-client.md) — draft migration
-  target for the planned `opr` extraction.
+- [opr Governed LLM Client](chapters/appendix-opr-governed-llm-client.md) — **deprecated.**
+  Historical appendix for the old `opr` REPL. Live local implementer is OpenCode
+  (`opencode run`); see [Local Implementer Dispatch](pbc/appendix-local-implementer-dispatch.pbc.md).
 
 ## Attention Index
 

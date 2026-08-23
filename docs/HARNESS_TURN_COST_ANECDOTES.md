@@ -72,3 +72,92 @@ Only worth doing if the harness ever exposes the control:
    and use `usage-import`.
 
 Until then it stays here.
+
+---
+
+## 2026-08-16 — Claude Code, accidental `/claude-api` in the logsum fixture
+
+Operator meant to paste a Fable control task into a fresh session at
+`/home/blueaz/Public/LinkedIn/fable-control/logsum`. Typed `/claude-api`
+instead. Session `1b6c0f9e-b075-40aa-9c68-1a9288c3c820`. Interrupted at
+`2026-08-16T19:33:27.648Z`. No files were edited. The fixture is still
+`raise NotImplementedError`.
+
+What the command actually did:
+
+1. Loaded the bundled skill “Building LLM-Powered Applications with Claude.”
+2. Wrote **372,998** tokens into a 1-hour cache on `claude-opus-5`.
+3. Wrote **373,607** tokens again on `claude-fable-5`.
+4. `ls`, `find`, then `Read` of `src/logsum.py` and `tests/check_logsum.py`.
+5. Operator cancel.
+
+The bill was about **$7**. Remaining usage limit showed **$0.75**. Extra
+usage overflowed onto credit. Cancel stopped the turn, not the bill: cache
+writes are charged when the request is accepted, not when the assistant
+finishes. The $7 was the skill ingest, not any implementation work.
+
+### Sonnet’s later read of the same session
+
+Asked how close the cancelled turn was to “the end,” Sonnet scored the
+28-line transcript as:
+
+- “harmless — just skill context loaded and two files read”
+- “under 10% in, still at the look-around phase”
+- next step would have been asking what to build, not writing code
+- “nothing consequential was skipped by cancelling”
+
+That is true of **edits** and false of **spend**. There was no cheap “ask
+what you wanted” left. The skill was already in context; every later turn
+would have kept that cache hot. Left running, Fable would have drained the
+account.
+
+### Why this is not a model comparison
+
+The intended logsum task never ran. This is not evidence that Fable cannot
+implement `error_report`. It is not a Fable-vs-Sonnet quality result. It is
+not a measurement of slash-command pricing in general — n=1, one skill, one
+harness version (`2.1.233`), extra usage already enabled.
+
+### What it does support
+
+Read as a **harness** observation, it is the complement of the 2026-08-15
+`hello` row:
+
+> A one-token slash command can front-load hundreds of thousands of cache
+> tokens onto the expensive seat. A remaining-limit readout of $0.75 is not
+> a hard stop. Progress scored on file edits will call that “harmless”
+> after the money is already gone.
+
+Same routing hole as `ROUTING_COST_GAP_PLAN.md`: once the turn is on a
+frontier seat, there is no cost gate, and cancel does not unwind ingest.
+
+### What would make it an experiment
+
+Only worth doing if the question is “how does slash-command ingest bill,”
+not “can Fable write logsum”:
+
+1. Same cwd, extra usage **off**, so leftover limit is a hard stop.
+2. Same `/claude-api` vs a one-line paste that does not load a skill.
+3. Record billed dollars and `cache_creation_input_tokens` from the
+   session JSONL, not from the TUI remaining-limit line.
+4. Do not leave the session running. The 2026-08-16 cancel is the stop
+   condition.
+
+Until then it stays here.
+
+---
+
+## 2026-08-20 — task shape, not task difficulty
+
+One session delegated coding work to local models through the opencode harness. Each task was gated by a pytest suite written before the code. The work was split by task shape. Writing a new self-contained module passed 6 of 8. Editing an existing file across several sites passed 0 of 3. gemma4:26b, gemma4:31b and qwen3.8:27b each independently passed the same 14-test gate on a new-file task. The models agreed on the result. The two new-file failures were qwen3.8:27b hitting a timeout. The models did not produce wrong answers. Verification overhead was held constant across both shapes. The same gate was used. The same tests were used. Only the shape changed. Confounds: one session, no per-turn token accounting, and the supervisor was also the person reporting the result. This is an anecdote. It is not citable as a rate.
+
+### Provenance of this entry
+
+Drafted by `gemma4:26b` through opencode against a pytest gate written first,
+which checked structural anchors, the voice-signature blocklist from
+`AGENT_AUDIT_PROTOCOL.md`, and an allowlist of the only figures measured that
+day. The number check is the load-bearing one: a paper arguing that unaudited
+local output invents numbers should not accept a draft containing invented
+numbers. Two gate defects were found by running it — model tags such as
+`qwen3.8:27b` were parsed as numeric claims, and the length bound was missing
+on this entry. Both were the supervisor's errors, not the model's.
