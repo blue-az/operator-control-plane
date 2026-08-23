@@ -6,18 +6,23 @@ status: draft
 tags:
   - pbc
   - operator
-  - opr
+  - opencode
   - local-lane
   - proposed
-updated: 2026-08-22
+updated: 2026-08-23
 ---
 
 # Local Implementer Dispatch — Behavior Contract
 
 > PBC for sending a local-model seat at a ledger task without a human
 > copy-pasting supervisor recaps. **Nothing in the Proposed sections is
-> implemented.** Fenced as `pbc:proposed-*` so contract tooling does not
-> read them as active. Ledger task: `proposal-lifecycle`.
+> implemented.** Fenced as `pbc:proposed-*`. Ledger task: `proposal-lifecycle`.
+>
+> **Carrier: OpenCode, not opr.** `opencode run` already completes multi-step
+> local jobs (gemma4:26b, 3-file edit plus verification, 2026-08-13, recorded
+> on the opencode harness yaml). `opr` still exits after one state-changing
+> tool (OPR-RUL-008). Building a continuation loop to make opr an implementer
+> seat is the wrong investment for this problem.
 >
 > This contract does **not** add a progress or work-tracker record type.
 > Progress is a claim or a handoff. Completion remains claim → evidence →
@@ -27,31 +32,30 @@ updated: 2026-08-22
 
 On 2026-08-22 a Gemma 4 31B implementer was driven by pasted chat recaps
 instead of the ledger. The recaps claimed a completed harness-R3 grid and
-then froze Paper 1.45. The files did not match: `r3_grid_comparison.py`
-still had no harness-applied arm, and "142 outcome records" was 136 raw
-reruns plus 6 mute tool-call cells. Operator only saw assignment versus
-closeout because nothing was written to claims or evidence.
+then froze Paper 1.45. The files did not match. Operator only saw assignment
+versus closeout because nothing was written to claims or evidence.
 
 Three product facts produced that failure:
 
 1. `gemma4_local` is a ledger harness id, not a CLI (`README.md`).
-2. `opr` exits after one state-changing tool (OPR-RUL-008), so a local
-   implementer cannot finish a multi-step slice in one dispatch until the
-   continuation amendment is ratified.
+2. `opr` cannot finish a multi-step slice in one dispatch (OPR-RUL-008).
+   OpenCode already can (`opencode run`, session export).
 3. A chat recap is narration. The ledger does not ingest it.
 
 ## Scope
 
-How a local implementer is dispatched at an existing task, how the seat
-(model) is distinguished from the harness label, and what counts as a
-result.
+How a local implementer is dispatched at an existing task via OpenCode, how
+the seat (model) is distinguished from the harness label, and what counts as
+a result.
 
 ## Non-Goals
 
 - A new `progress` or `proposal` record type.
+- Making `opr` the implementer runner. opr stays the bounded governed REPL.
+  OPR continuation (010–018) is a separate product question, not a gate on
+  this contract.
 - Automatic routing of arbitrary work to local models.
 - Changing verification UID isolation.
-- Replacing `operator` with `opr`.
 - Freezing Paper 1.45 from this contract.
 
 ## Actors
@@ -60,19 +64,19 @@ result.
 - id: operator_user
   name: Operator user
   type: human
-  description: Rules on proposed behavior, starts the local session, and verifies.
+  description: Rules on proposed behavior, starts the OpenCode run, and verifies.
 - id: grok_supervisor
   name: grok
   type: system
   description: Review harness. Writes handoffs and rulings; does not implement the grid.
+- id: opencode_harness
+  name: opencode
+  type: external
+  description: Provider-agnostic coding harness. Headless opencode run is the implementer dispatch. opencode export produces JSON evidence.
 - id: gemma4_local
   name: gemma4_local
   type: system
-  description: Ledger harness label for local Gemma 4. Not a process. The seat is the model named on the session.
-- id: opr_client
-  name: opr
-  type: system
-  description: Governed local client that must load the builder brief by task id.
+  description: Ledger label only. Not a process. The seat is the OpenCode-configured model (e.g. gemma4:31b).
 ```
 
 ## Rules — as verified today
@@ -81,9 +85,8 @@ result.
 - id: LID-RUL-001
   name: Harness Id Is Not A Runner
   rule: >
-    gemma4_local (and other *_local ids) are registry labels. Dispatching work
-    still requires opr or an ollama runner. Tested by README and harness yaml
-    (command: null).
+    gemma4_local is a registry label (command: null). The runner that already
+    completes multi-step local work is opencode. opr is not that runner.
   trust: verified
 - id: LID-RUL-002
   name: Recaps Are Not Results
@@ -95,9 +98,16 @@ result.
 - id: LID-RUL-003
   name: Yaml Default Model Must Not Be Read As The Seat
   rule: >
-    .operator/harnesses/gemma4_local.yaml currently lists model gemma4:26b.
+    .operator/harnesses/gemma4_local.yaml lists model gemma4:26b.
     Task local-model-task-fit-r3 names the seat gemma4:31b. The yaml default
-    is a fallback, not authority.
+    is a fallback, not authority. OpenCode's configured model is the seat.
+  trust: verified
+- id: LID-RUL-004
+  name: OpenCode Already Completes Multi-Step Local Jobs
+  rule: >
+    The opencode harness yaml records gemma4:26b completing a 3-file edit plus
+    verification via opencode run (2026-08-13). audio_ports.py was written by
+    qwen3.8:27b via opencode. That is existing behavior, not a proposal.
   trust: verified
 ```
 
@@ -107,23 +117,23 @@ result.
 - id: LID-RUL-101
   name: Brief Is The Dispatch
   rule: >
-    opr --task <id> loads the builder brief for the assigned local harness
-    and runs the session model named on the task or session, not a pasted
-    supervisor recap.
+    The implementer is started with opencode run, given the exported builder
+    brief for the task (operator export-brief --for opencode --task <id>),
+    not a pasted supervisor recap.
   trust: proposed
 - id: LID-RUL-102
   name: Harness Id Is Not The Model
   rule: >
-    The ledger harness_id identifies the registry entry. The seat is the
-    model string on the session (e.g. gemma4:31b). A yaml default must not
-    override an explicit session or task seat.
+    Assign opencode as the implementer harness. The seat is the OpenCode
+    model string (e.g. gemma4:31b). gemma4_local may remain a provenance
+    label for the model family; it is not the runner.
   trust: proposed
 - id: LID-RUL-103
   name: Slice Progress Is A Claim Plus Evidence
   rule: >
-    After each --model --mode measurement slice the implementer claim-add's
-    and evidence-attach's the outcome JSON. Chat recap is not an acceptable
-    substitute.
+    After each measurement slice the implementer claim-add's and
+    evidence-attach's the outcome JSON, and may attach opencode export
+    output. Chat recap is not an acceptable substitute.
   trust: proposed
 - id: LID-RUL-104
   name: Implementer Does Not Write Lifecycle
@@ -143,26 +153,27 @@ result.
 
 ```pbc:proposed-behavior
 id: LID-BHV-001
-name: Dispatch Local Implementer From Brief
-actor: opr_client
-description: Start a governed local session for an assigned task by loading the builder brief and the session model.
+name: Dispatch Local Implementer From Brief Via OpenCode
+actor: opencode_harness
+description: Run opencode run against the exported builder brief for an assigned task, using the configured local model as the seat.
 trust: proposed
 ```
 
 ```pbc:proposed-outcomes
-- opr --task local-model-task-fit-r3 starts gemma4:31b against the exported builder brief.
-- The implementer need not receive a pasted recap to know the next action.
-- Outcome JSON files are attached as evidence on the same task.
+- opencode run consumes .operator/briefs/<task>.opencode.export.md (or stdin of that brief).
+- The seat is the OpenCode-configured model (gemma4:31b for local-model-task-fit-r3).
+- Outcome JSON and optional opencode export JSON are attached as evidence on the same task.
 - Paper 1.45 lifecycle is unchanged by the implementer.
+- opr is not invoked for this dispatch.
 ```
 
 ## Open Questions For The Operator
 
-1. Ship `opr --task` before or after ratifying OPR continuation (010–018)? Continuation is what makes a multi-step slice possible in one dispatch; brief-loading without continuation still dies after the first write.
-2. Should LID-RUL-102 live in the harness yaml (explicit `model` override per session) or only in opr flags?
+1. Reassign `local-model-task-fit-r3` from `gemma4_local` to `opencode` now, or keep gemma4_local as a label and treat opencode as the runner only in this PBC?
+2. `review_harness` is write-once (MSC-RUL-004). If the implementer harness changes, a new task may be required.
 
 ## Proof Boundary
 
-Shows: the 2026-08-22 copy-paste failure, the three product facts that caused it, and five proposed rules that keep Operator as a trust ledger while making local dispatch usable.
+Shows: opr is the wrong implementer carrier; OpenCode already runs multi-step local jobs; five proposed rules keep Operator as a trust ledger.
 
-Does not show: that `opr --task` exists, that Gemma 4 31B will claim-add without a supervisor prompt, or that harness-R3 cells have been run.
+Does not show: an Operator wrapper around `opencode run`; that Gemma 4 31B will claim-add without a supervisor prompt; or that harness-R3 cells have been run.
