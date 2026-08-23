@@ -22,10 +22,8 @@ explicitly advisory — no self-grading.
 [Bulkhead τ](https://bulkheadtau.com), but it is a standalone, domain-neutral control plane. Bulkhead
 Tau may use Operator; Operator does not import, invoke, or require Bulkhead Tau.
 
-![opr REPL example: confirmation-gated shell and file writes on the left; /model switching across local models on the right](docs/opr-example.png)
-
-*The `opr` governed REPL: every shell command and model-initiated file write requires explicit
-confirmation, each session is a tracked usage record, and `/model` swaps local models mid-conversation.*
+Local-model implementer work runs through **OpenCode** (`opencode run`). Operator stays the
+ledger. The old `opr` governed REPL is deprecated; `./opr` prints that pointer and exits.
 
 ## Quickstart
 
@@ -216,12 +214,16 @@ the external authority yet. The service is installed but not started or enabled,
 proof remains issue #7. Initial installation must execute a root-owned staged copy of
 `operator-admin`; its privileged wrapper intentionally refuses a user-writable checkout.
 
-## Local-lane task contract (`opr`)
+## Local-lane task contract
 
-`opr` is a governed, local-first LLM CLI alongside `operator`: it routes tasks to
-Ollama models or a frontier pass-through, gates every model-initiated write or
-shell command behind an explicit `[y/N]` confirmation, and tags sessions into
-the same ledger `operator` reads.
+OpenCode (`opencode run`) is the local-model implementer. `operator` is the ledger.
+The old `opr` governed REPL is a deprecation stub; restore the last full
+implementation from git if you need it:
+
+```bash
+git checkout fe4211b09bc164c3dc0b7b48bad929e39ab68356 -- \
+    opr tests/test_opr.py tests/test_opr_tool_extraction.py
+```
 
 Working hypothesis: local models may fail more on **degrees of freedom than on
 knowledge** — a task phrased as open-ended intent invites discovery loops and
@@ -237,19 +239,18 @@ Three pieces formalize and measure this:
   tied to the failure mode it prevents.
 - [`task_lint.py`](task_lint.py) — a deterministic (no LLM calls) checker against those rules.
   CLI: `task_lint.py <file|-> [--json]`, exit 0/1/2 = plan-shaped/semi-shaped/goal-shaped.
-  `opr` prints the verdict as a one-line advisory warning whenever it dispatches
-  a non-plan-shaped prompt to a local model — it never changes routing, the
-  model chosen, or whether dispatch proceeds.
 - [`evals/local_lane_ladder/`](evals/local_lane_ladder/) — the measurement instrument: a task ×
   specificity-level (L0 goal-shaped / L1 file-named / L2 plan-shaped) × model ×
   trial grid, graded deterministically against a postcondition (grep/exec/output-match,
   no LLM judging), run against disposable fixtures only, resumable, and
-  ledger-tagged (`lane=local`, `task_class=bounded`).
+  ledger-tagged (`lane=local`, `task_class=bounded`). Historical sweeps drove
+  `opr`; re-running that instrument requires restoring `opr` from git.
   [`ANALYSIS.md`](evals/local_lane_ladder/ANALYSIS.md) has the first real sweep's results (6 tasks
   × 3 levels × 4 models × 3 trials = 216 cells): the monotonic pass-rate claim
   holds for 3 of 4 models tested and is honestly reported as refuted for the
   fourth, plus a per-task breakdown of exactly where each model needs how much
   specificity. Full design: [`LOCAL_LANE_CONTRACT_SPEC.md`](LOCAL_LANE_CONTRACT_SPEC.md).
+  Live dispatch contract: [`owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md`](owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md).
 
 ## Design specs
 

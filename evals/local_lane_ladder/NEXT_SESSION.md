@@ -15,17 +15,26 @@ that used to block everything is closed.
 
 ## Where it stands
 
-**The seat pick is `gemma4:26b`** — 24/30 on the ceiling battery, tied with
+**The seat pick is `gemma4:26b` on both chips (RTX 3090 and Ryzen AI MAX 390).** — 24/30 on the ceiling battery, tied with
 `gemma4:31b` on the postcondition but 1.5x faster, perfectly stable (every cell
 0/6 or 6/6 across five fixtures), and reaching 17 of its 24 passes with a clean
 trajectory against 31b's 12. Nothing in 825 cells justifies the larger model on
 this workload.
 
+**`qwen3.6:35b` is on both machines** (2026-08-17). Desktop: 86.4 t/s,
+4% lip, E9 **14/30**. z13: **59.2 t/s, 100% GPU at 32k**, E9 **18/30**
+vs same-run 26b **24/30** (`q36-35b-e9-z13`). Inversion: 35b is faster
+than 26b on z13 and slower on the 3090. Seat unchanged. Power on z13
+was AC/`balanced`/`powersave` (no sudo for `performance`).
+
 Supporting: `qwen3.6:27b` is the only model that solved any `csv-summarize-repair`
 cell, so keep it for genuinely messy repair — but gate it, 3 of its 5 fixtures
-are coin-flips. `qwen3-vl:30b` is accurate but unsteerable (ignores `--think off`,
-~9x the seat pick's latency). Below ~12B is not viable: the floor capability is
-carrying an exact literal path.
+are coin-flips. Below ~12B is not viable: the floor capability is carrying an
+exact literal path.
+
+`qwen3-vl:30b` is the image grader (paper 1.37 / Comfy stills), not a seat.
+Do not put it on Elo or L0–L2 tables. Packs: `fixtures/vl-smoke`,
+`fixtures/vl-casestudy`. Rule: `GOLD_STANDARD.md` “Out of field.”
 
 **Standing run config.** `--num-ctx 16384 --temperature 0.8 --think off`,
 `--trace-dir` always, residency sampled. Never `temperature 0` — it is not a
@@ -183,7 +192,7 @@ cost this programme a run:
 |---|---|
 | 0 — no sweep running | GPU contention silently distorts every timing |
 | 1 — weights fit | `nemotron-3.5-lightning` is 25 GB of *weights* on a 24 GB card; no context tuning fixes that. Distinct from `qwen3:32b`, whose spill was KV cache and which fits at `num_ctx ≤ 24576` |
-| 2 — 100% GPU at ctx 16384 | spill is a measurement confound, not a result |
+| 2 — lands on GPU at ctx 16384 | refuse CPU-only / failed load. A few-percent weight lip is a host row (`qwen3.6:35b` 86.4 t/s at 4%/96%). KV-default spill is still a confound — pin ctx, do not veto the model |
 | 3 — think support **and obedience** | `qwen3-vl:30b` ignores `think=false`, emitting 11,407 chars of reasoning at 52x the tokens. A leaky "off" row measures nothing |
 | 4 — one graded cell | proves the harness can drive it, and that a trace is retained |
 

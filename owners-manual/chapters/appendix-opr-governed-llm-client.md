@@ -1,6 +1,11 @@
 # Appendix: opr Governed LLM Client
 
-This appendix describes the open-source governed model client `opr` implemented in this repository.
+> **Deprecated (2026-08-23).** `opr` is no longer the local implementer. Use
+> OpenCode (`opencode run`). This appendix describes the old governed REPL;
+> restore it from git commit `fe4211b09bc164c3dc0b7b48bad929e39ab68356`.
+> Live dispatch: `owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md`.
+
+This appendix describes the historical open-source governed model client `opr`.
 
 ## One-Minute Snapshot
 

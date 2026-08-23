@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Local-lane eval ladder runner. LOCAL_LANE_CONTRACT_SPEC.md Deliverable 3.
 
+Historical instrument: drives the old `opr` tool loop (via --eval-auto-confirm
+against a disposable fixture). `opr` is now a deprecation stub that points at
+OpenCode. Re-running this sweep requires restoring the old binary:
+
+    git checkout fe4211b09bc164c3dc0b7b48bad929e39ab68356 -- opr
+
 Drives opr's own tool loop (via --eval-auto-confirm against a disposable
 fixture) across a grid of task x specificity-level x model x trial, grades
 deterministically (grading.py, no LLM judging), records each trial into the

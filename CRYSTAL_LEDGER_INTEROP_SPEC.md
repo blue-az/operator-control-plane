@@ -13,16 +13,14 @@ repo. Match existing conventions (`EXECUTOR_IDENTITY_SPEC.md` remains the identi
 
 ---
 
-## 0. Why (the stack, and the trust gap)
+## 0. Why (the Operator trust gap)
 
-PBC already bounds this system **from above**: `owners-manual/pbc/` carries draft behavior
-contracts — what the product *should* do — with a draft-until-human-accepted trust model that
-matches the ledger's. The **lower** boundary is the GT-KB-derived evidence layer (the Logbook:
-"do not trust the narration — verify against the evidence"; see
-`project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md`). `agent-crystallize` is **not** a boundary —
-it is the standard *narration format* arriving AT that boundary: Markdown "checkpoint"
-and "crystal" artifacts narrating an agent session's in-flight state (focus, decisions, findings,
-open loops, test claims, resume prompt). Untrusted content in a parseable envelope.
+Operator is standalone; this interop does not place it inside Bulkhead Tau or any
+other product's boundary stack. PBC drafts under `owners-manual/pbc/` may provide
+optional intent for Operator-owned work, while `agent-crystallize` produces
+external Markdown "checkpoint" and "crystal" artifacts narrating an agent
+session's in-flight state (focus, decisions, findings, open loops, test claims,
+resume prompt). Those artifacts are untrusted content in a parseable envelope.
 
 The gap: a crystal is **self-narrated and unverified** — mutable Markdown, no hash, no identity
 binding, no append-only history. Its `Tests And Verification` section is free text like
@@ -35,8 +33,9 @@ verified status.** Operator supplies the integrity layer crystals lack; crystall
 session-continuity layer the ledger deliberately lacks (session outcome/cost is tracked here, but
 nothing helps the *next* session resume).
 
-Composition target: PBC = intent (upper), crystal = session narration (lower), operator = the
-enforcement middle that ties both to evidence.
+Composition target inside Operator: optional PBC intent plus external crystal
+narration can become Operator claims and evidence under Operator's own trust
+rules. This is an interop pipeline, not the Bulkhead Tau boundary map.
 
 ---
 

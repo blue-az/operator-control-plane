@@ -5,10 +5,15 @@
 #   G0  another sweep is live        -> GPU contention silently distorts timings
 #   G1  weights fit                  -> nemotron-3.5-lightning is 25GB of weights
 #                                       on a 24GB card; no context tuning fixes it
-#   G2  100% GPU at ctx 16384        -> qwen3:32b spilled at its 32768 default;
-#                                       spill is a measurement confound, not a result
-#   G3  think support + obedience    -> qwen3-vl:30b IGNORES think=false, emitting
-#                                       11,407 chars of reasoning and 52x the tokens
+#   G2  lands on GPU at ctx 16384    -> refuse CPU-only / failed load. A few-percent
+#                                       weight lip (qwen3.6:35b 4%/96%) is a host
+#                                       row: record it, do not veto the battery.
+#                                       KV-default spill (qwen3:32b @ 32768) is the
+#                                       confound this gate used to treat as a hard
+#                                       fail — pin num_ctx, do not hide the model.
+#   G3  think support + obedience    -> qwen3-vl:30b IGNORES think=false (that
+#                                       tag is now refused above; keep the gate
+#                                       for the next leaky thinker)
 #   G4  one graded cell              -> proves the harness can actually drive it
 #
 # Refuses to proceed on a failed gate rather than producing a number that looks
@@ -21,6 +26,13 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SCRATCH="$(mktemp -d -t newmodel-gate-XXXX)"
 trap 'rm -rf "$SCRATCH"' EXIT
 fail() { echo "  GATE FAILED: $*"; echo; echo "STOP. Do not run the battery."; exit 1; }
+
+# Vision tags are a grader, not a ladder seat. GOLD_STANDARD.md "Out of field".
+case "$MODEL" in
+  *vl*|*-vision*|llava*|moondream*|minicpm-v*)
+    fail "$MODEL is a vision grader, not a field model. Use fixtures/vl-smoke or fixtures/vl-casestudy. Do not add it to Elo / L0-L2 tables."
+    ;;
+esac
 
 echo "== Gate 0: no other sweep running =="
 if pgrep -f "local_lane_ladder/runner.py" >/dev/null; then
@@ -35,12 +47,22 @@ echo "  on disk: $SIZE"
 VRAM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -1)
 echo "  card: ${VRAM} MiB"
 
-echo "== Gate 2: 100% GPU residency at num_ctx $CTX =="
+echo "== Gate 2: residency at num_ctx $CTX (recorded, not a 100% veto) =="
 curl -s http://127.0.0.1:11434/api/generate \
   -d "{\"model\":\"$MODEL\",\"prompt\":\"ok\",\"stream\":false,\"options\":{\"num_ctx\":$CTX}}" >/dev/null
 PS=$(ollama ps | awk -v m="$MODEL" '$1==m{print}')
 echo "  $PS"
-echo "$PS" | grep -q "100% GPU" || fail "not fully GPU-resident at ctx $CTX (spill is a confound, not a result)"
+if echo "$PS" | grep -q "100% GPU"; then
+  echo "  ok — 100% GPU"
+elif echo "$PS" | grep -Eq '[0-9]+%[[:space:]]*/[[:space:]]*[0-9]+%[[:space:]]*CPU/GPU|[0-9]+%[[:space:]]*GPU'; then
+  echo "  WARN: host-conditioned spill. Log ollama ps on every ranking row."
+  echo "  A few-percent weight lip is not a disqualification (see qwen3.6:35b)."
+  echo "  If this is KV-default overflow, pin num_ctx; do not skip the battery."
+elif [ -z "$PS" ]; then
+  fail "model did not appear in ollama ps after generate (load failed?)"
+else
+  fail "no GPU placement at ctx $CTX — CPU-only or unreadable ps line"
+fi
 
 echo "== Gate 3: think support and obedience =="
 python3 - "$MODEL" <<'PY'
@@ -114,6 +136,10 @@ Run the ceiling battery against the E9 reference epoch:
 qwen3.6:27b is included as a same-run control: it is the direct predecessor and
 scored 19/30 in E9, so a fresh side-by-side avoids comparing across invocations
 (cross-invocation drift already produced one false regression in this programme).
+
+If Gate 2 warned, the pack is a host-conditioned row: print placement next to
+every score. Do not omit the model from the desktop speed table. Do NOT pool a
+short L2 subset into e9/e11 — run this full battery for an Elo row.
 
 Do NOT pool with e10-repeat-ab -- that pack varies --on-repeat and this uses the
 default. Compare against e9-ceiling-continued.

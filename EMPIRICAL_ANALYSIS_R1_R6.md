@@ -1,6 +1,6 @@
 # Empirical Analysis: The Harness-Centric Approach to Local Model Delegation
 
-**Status:** VERIFIED (Post-Grid Measurement + R3 Validation)
+**Status:** FROZEN (Published)
 **Date:** 2026-08-22
 **Subject:** Validation of Harness Requirements R1–R6 and the "Wide Denominator" Hypothesis.
 

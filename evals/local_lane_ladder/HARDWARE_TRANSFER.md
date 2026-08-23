@@ -41,11 +41,20 @@ compounds rather than being thrown away.
 and the power-limited throughput figures. Anything in a results table with a
 seconds or a percent-GPU column is single-3090 only.
 
+## Addendum 2026-08-17 — 35b is in the field, on the lip
+
+E11's seven models were 100% GPU. That transfer claim stands. It does not
+mean a later model with a 4% weight lip is off the ranking. `qwen3.6:35b`
+runs at 86.4 t/s with 4%/96% placement (`q36-35b-spill-tps`). G2 no longer
+treats that as a veto. Cite placement; do not omit the row.
+
 ## What the second card actually unlocks
 
-Not a re-ranking of the current field — that field already ran clean at full
-residency. What it unlocks is **models that do not fit in 24 GB at all**, which
-is a different question from ranking the ones that do.
+Not a re-ranking of the E11 field — that field already ran clean at full
+residency. For **35b** the second card is a residency experiment (kill the
+4%), not a 2× decode claim. What it also unlocks is **models that do not
+load on one 24 GB card at all**, which is a different question from ranking
+the ones that do (including 35b on the lip).
 
 It does **not** address the binding constraint on ranking the current top band.
 That constraint is fixture difficulty: the three fixtures sit at ~1511, ~1598 and

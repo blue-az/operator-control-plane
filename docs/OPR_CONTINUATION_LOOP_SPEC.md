@@ -1,6 +1,12 @@
 # opr Continuation Loop — Implementation Spec
 
-**Status:** proposed, not implemented
+> **Deprecated (2026-08-23).** Do not implement this. OpenCode already runs
+> multi-step local jobs. `opr` is a deprecation stub; restore the old REPL from
+> git commit `fe4211b09bc164c3dc0b7b48bad929e39ab68356` if you need the
+> historical client. See
+> `owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md`.
+
+**Status:** rejected — not implementing. OpenCode is the carrier.
 **Date:** 2026-08-07
 **PBC:** `owners-manual/pbc/appendix-opr-governed-llm-client.pbc.md` (OPR-RUL-010..013, OPR-BHV-005)
 **Target:** `opr` `run_agent_loop`, currently lines ~818–884

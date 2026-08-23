@@ -2,9 +2,11 @@
 
 Status: IMPLEMENTED. Written 2026-07-02; all four deliverables shipped 2026-07-20/21.
 `LOCAL_LANE_CONTRACT.md` (contract), `task_lint.py` (linter, `tests/test_task_lint.py`),
-`evals/local_lane_ladder/` (eval ladder — see `ANALYSIS.md` for the first real sweep's
-results), and `opr`'s one-line lint-verdict wiring are all in place. README section:
-"Local-lane task contract (`opr`)".
+and `evals/local_lane_ladder/` (eval ladder — see `ANALYSIS.md` for the first real sweep's
+results) remain in place. The `opr` lint-verdict wiring shipped with that work; `opr`
+itself is now a deprecation stub. Live local implementer: OpenCode (`opencode run`).
+README section: "Local-lane task contract". Historical sweeps that drove `opr` need
+`opr` restored from git (`fe4211b`).
 
 ## Purpose
 

@@ -1,4 +1,7 @@
-# z13 benchmark — unified-memory laptop as a local-model host
+# Ryzen AI MAX 390 (Radeon 8050S) — unified-memory local host
+
+Machine hostname in the logs is `z13` (Flow Z13). The comparison is the
+**MAX 390**, not the chassis.
 
 **Measured:** 2026-08-13, `ctx 16384`, `temperature 0.8`, 128-token generations,
 each model loaded cold and unloaded after. Decode rate excludes load time.
@@ -160,6 +163,28 @@ postconditions should transfer while any timeout-mediated outcome will not
 (`MACHINE_PROVENANCE_SPEC.md`). z13's ollama also predates the desktop's tuning,
 so machine and configuration are confounded in every cross-machine ratio above.
 
+
+---
+
+## Addendum 2026-08-17 — `qwen3.6:35b` is 100% GPU on this machine
+
+Same blob as desktop (`07d35212591f`, 23 GB Q4_K_M). On the 3090 it is a
+4% weight lip at 86 t/s. Here it is **22 GB / 100% GPU / 32k**.
+
+Warm decode, AC, `balanced`/`powersave` (`q36-35b-z13-tps`):
+
+| Model | 16k | 32k | place |
+|---|---:|---:|---|
+| `qwen3.6:35b` | **59.2** | 58.6 | 100% GPU |
+| `gemma4:26b` | 55.2 | 55.3 | 100% GPU |
+
+35b is slightly *faster* than 26b on z13 and *slower* on the 3090
+(86 vs 128). That inversion is the row this table was missing.
+
+26b at 100% GPU / 55 t/s also supersedes this document's own 16%/84% /
+46.8 row (2026-08-13). Serving moved; do not quote the old split as
+current. E9 battery: `fixtures/q36-35b-e9-z13` — 35b 18/30, 26b 24/30,
+both 100% GPU.
 
 ---
 

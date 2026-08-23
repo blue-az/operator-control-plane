@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Typed headless harness adapters shared by `opr` and `study_runner.py`.
+"""Typed headless harness adapters used by `study_runner.py`.
 
-Replaces ad hoc per-harness subprocess string templates (previously duplicated
-inside `opr`'s `dispatch_frontier`) with typed profiles: an argv **list**
+Originally shared with the deprecated `opr` client. Replaces ad hoc per-harness
+subprocess string templates (previously duplicated inside `opr`'s
+`dispatch_frontier`) with typed profiles: an argv **list**
 (never a shell string), an explicit prompt-transport mode, and a closed
 exit-state vocabulary that distinguishes success from every way a headless CLI
 call can fail short of that.
