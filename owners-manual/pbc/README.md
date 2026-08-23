@@ -20,7 +20,7 @@ Use these files as structured context for coding agents, QA review, drift checks
   sessions sharing one ledger. Ledger task: `session-coordination-protocol`. Both Claude sessions
   have signed off; awaiting an operator ruling on the identity labels.
 - `appendix-local-implementer-dispatch.pbc.md` — draft contract for dispatching a local-model
-  seat from a ledger brief (`opr --task`) instead of pasted recaps. Ledger task:
+  seat from a ledger brief via `opencode run` (not `opr`). Ledger task:
   `proposal-lifecycle`. Proposed only; not implemented.
 
 ## Trust Model
