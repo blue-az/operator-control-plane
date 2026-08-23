@@ -18,9 +18,9 @@ Only an enforced verification by a registered verifier OS UID distinct from the 
 recorded as `uid_isolated`. Same-UID and default `single_user` verification still work but are
 explicitly advisory — no self-grading.
 
-**Contributions welcome** — especially on the open problems below. (Originally built as the
-"engine room / logbook" enforcement substrate for [Bulkhead τ](https://bulkheadtau.com); it stands
-alone here.)
+**Contributions welcome** — especially on the open problems below. Operator was developed alongside
+[Bulkhead τ](https://bulkheadtau.com), but it is a standalone, domain-neutral control plane. Bulkhead
+Tau may use Operator; Operator does not import, invoke, or require Bulkhead Tau.
 
 ![opr REPL example: confirmation-gated shell and file writes on the left; /model switching across local models on the right](docs/opr-example.png)
 
@@ -61,7 +61,7 @@ and issue-boundary contracts.
 
 ## Commands
 
-The `operator` CLI exposes 22 subcommands across the task → claim → evidence → verification →
+The `operator` CLI exposes 23 subcommands across the task → claim → evidence → verification →
 session → usage lifecycle. Run `./operator <command> --help` for full flags.
 
 **Setup** — `init` creates the `.operator/` ledger in the current repo. Re-running it on an existing
@@ -71,6 +71,7 @@ YAML-only ledger baselines those records into SQLite without changing their visi
 - `task-create --objective "…" [--id ID] [--repo R] [--assign A] [--review R]` — open a task.
 - `task-show [ID]` — show a task's claims, evidence, and status.
 - `task-list` — list all tasks with outcome summaries.
+- `decide --claim ID --decision approve|reject|defer --rationale "…"` — operator ruling on a frozen proposal claim. Records UID; does not require a distinct verifier UID.
 
 **Claims** (a claim is a typed, checkable assertion bound to a gate)
 - `claim-add --type TYPE --text "…" [--task ID] [--gate GATE] [--by WHO]` — register a claim.
