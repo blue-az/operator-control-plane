@@ -1,6 +1,6 @@
 # Proposal Lifecycle — freezing agent proposals so an operator can rule on them
 
-**Status:** proposal (this document is subject to the lifecycle it describes)
+**Status:** machinery shipped 2026-08-22 (`operator decide`, `pbc_lint.py`); operator ruling on open questions still required. This document remains subject to the lifecycle it describes.
 **Date:** 2026-08-09
 **Author:** claude-supervisor
 **Applies to:** `operator-control-plane`, and any repo using PBCs + the operator ledger
@@ -119,6 +119,9 @@ exits non-zero:
 
 Wire it into the same place the existing gates run. It is a parser over
 fenced blocks, not a semantic checker; it should stay under ~150 lines.
+Invariant 2 requires `--ledger .operator` because claims live in the
+gitignored ledger; `pytest tests/test_pbc_lint.py` checks 1/3/4 plus
+invariant 2 against fixtures.
 
 ## 5. Why this is the minimum
 

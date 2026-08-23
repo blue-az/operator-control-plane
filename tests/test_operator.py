@@ -4723,6 +4723,87 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertNotEqual(res_doctor.returncode, 0)
         self.assertIn("verified by 'codex' who was issued a builder brief", res_doctor.stdout)
 
+    def test_decide_records_ruling_on_task_and_event_log(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        created = self.run_operator(
+            "task-create",
+            "--id",
+            "proposal-task",
+            "--objective",
+            "Rule on a frozen proposal",
+            "--assign",
+            "grok",
+        )
+        self.assertEqual(created.returncode, 0, created.stderr)
+        claim = self.run_operator(
+            "claim-add",
+            "--type",
+            "paper_or_report_claim",
+            "--layer",
+            "design",
+            "--text",
+            "Proposes OPR-RUL-010..018",
+            "--gate",
+            "Operator ruling.",
+            "--by",
+            "grok",
+        )
+        self.assertEqual(claim.returncode, 0, claim.stderr)
+        decided = self.run_operator(
+            "decide",
+            "--task",
+            "proposal-task",
+            "--claim",
+            "claim-0001",
+            "--decision",
+            "defer",
+            "--rationale",
+            "Need the UID question answered first.",
+        )
+        self.assertEqual(decided.returncode, 0, decided.stderr)
+        self.assertIn("defer", decided.stdout)
+        task = yaml.safe_load(
+            (Path(self.temp_dir) / ".operator" / "tasks" / "proposal-task.yaml").read_text()
+        )
+        entry = task["operator_decision"]["claim-0001"]
+        self.assertEqual(entry["decision"], "defer")
+        self.assertEqual(entry["rationale"], "Need the UID question answered first.")
+        self.assertIn("uid", entry["executor"])
+        events = [e for e in self.read_ledger_events() if e["source_command"] == "decide"]
+        self.assertTrue(events)
+        missing = self.run_operator(
+            "decide",
+            "--claim",
+            "claim-9999",
+            "--decision",
+            "approve",
+            "--rationale",
+            "nope",
+        )
+        self.assertNotEqual(missing.returncode, 0)
+        cross = self.run_operator(
+            "task-create",
+            "--id",
+            "other-task",
+            "--objective",
+            "Unrelated",
+            "--assign",
+            "grok",
+        )
+        self.assertEqual(cross.returncode, 0, cross.stderr)
+        wrong_task = self.run_operator(
+            "decide",
+            "--task",
+            "other-task",
+            "--claim",
+            "claim-0001",
+            "--decision",
+            "approve",
+            "--rationale",
+            "wrong task",
+        )
+        self.assertNotEqual(wrong_task.returncode, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

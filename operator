@@ -1748,7 +1748,22 @@ def task_show_cmd(args) -> int:
     print(f"Created At:       {task.get('created_at')}")
     print(f"Updated At:       {task.get('updated_at')}")
     if task.get("operator_decision"):
-        print(f"Operator Dec:     {task.get('operator_decision')}")
+        decision = task.get("operator_decision")
+        if isinstance(decision, dict) and decision and not {
+            "decision",
+            "claim_id",
+        }.issubset(decision.keys()):
+            print("Operator Dec:")
+            for claim_id, entry in decision.items():
+                if isinstance(entry, dict):
+                    print(
+                        f"  - {claim_id}: {entry.get('decision')} "
+                        f"({entry.get('rationale')})"
+                    )
+                else:
+                    print(f"  - {claim_id}: {entry}")
+        else:
+            print(f"Operator Dec:     {decision}")
     if task.get("next_action"):
         print(f"Next Action:      {task.get('next_action')}")
     print("-" * 80)
@@ -1798,6 +1813,83 @@ def task_show_cmd(args) -> int:
     else:
         print("  (None captured)")
     print("=" * 80)
+    return 0
+
+
+def decide_cmd(args) -> int:
+    """Record an operator ruling on a frozen proposal claim.
+
+    Approval is a human-gated act. It records the executing UID; it does not
+    require a distinct verifier UID (unlike trusted verification).
+    """
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print(
+            "Error: No .operator directory found. Run 'operator init' first.",
+            file=sys.stderr,
+        )
+        return 1
+
+    decision = (args.decision or "").strip().lower()
+    if decision not in {"approve", "reject", "defer"}:
+        print(
+            "Error: --decision must be approve, reject, or defer.",
+            file=sys.stderr,
+        )
+        return 1
+    rationale = (args.rationale or "").strip()
+    if not rationale:
+        print("Error: --rationale is required.", file=sys.stderr)
+        return 1
+
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
+        return 1
+    task_id, task_path, task = resolved_task
+
+    resolved_claim = resolve_claim_record(op_dir, args.claim)
+    if not resolved_claim:
+        return 1
+    _, claim = resolved_claim
+    if claim.get("task_id") != task_id:
+        print(
+            f"Error: Claim '{args.claim}' belongs to task '{claim.get('task_id')}', "
+            f"not '{task_id}'.",
+            file=sys.stderr,
+        )
+        return 1
+
+    exec_identity = get_executor_identity()
+    utc_now = get_current_utc_iso()
+    entry = {
+        "decision": decision,
+        "claim_id": args.claim,
+        "rationale": rationale,
+        "decided_at": utc_now,
+        "executor": dict(exec_identity),
+    }
+
+    preflight_projection(op_dir, task_path, task)
+    existing = task.get("operator_decision")
+    if existing is None or existing == {}:
+        decisions: dict = {}
+    elif isinstance(existing, dict) and "decision" in existing:
+        prior_id = existing.get("claim_id") or "_prior"
+        decisions = {prior_id: existing}
+    elif isinstance(existing, dict):
+        decisions = dict(existing)
+    else:
+        decisions = {"_prior": existing}
+    decisions[args.claim] = entry
+    task["operator_decision"] = decisions
+    task["updated_at"] = utc_now
+    task["executor"] = dict(exec_identity)
+    save_yaml(task, task_path)
+
+    print(
+        f"Recorded operator decision '{decision}' on {args.claim} "
+        f"for task '{task_id}' (uid {exec_identity.get('uid')})."
+    )
     return 0
 
 
@@ -7139,6 +7231,34 @@ def main() -> None:
         help="Supervision layer (required for supervision_credit claims per FR-12).",
     )
 
+    # operator decide
+    decide_parser = subparsers.add_parser(
+        "decide",
+        help="Record an operator ruling (approve|reject|defer) on a proposal claim.",
+    )
+    decide_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to current active task).",
+    )
+    decide_parser.add_argument(
+        "--claim",
+        required=True,
+        help="Claim ID the ruling applies to (e.g. claim-0001).",
+    )
+    decide_parser.add_argument(
+        "--decision",
+        required=True,
+        choices=["approve", "reject", "defer"],
+        help="Ruling. Reject and defer are first-class; they do not delete the proposal.",
+    )
+    decide_parser.add_argument(
+        "--rationale",
+        required=True,
+        help="Why this ruling. Stored on the task and in the event ledger.",
+    )
+
     # operator claim show
     claim_show_parser = subparsers.add_parser(
         "claim-show", help="Show details of a registered claim."
@@ -7816,6 +7936,7 @@ def main() -> None:
         "task-use": task_use_cmd,
         "task-show": task_show_cmd,
         "task-list": task_list_cmd,
+        "decide": decide_cmd,
         "claim-add": claim_add_cmd,
         "claim-show": claim_show_cmd,
         "claim-list": claim_list_cmd,

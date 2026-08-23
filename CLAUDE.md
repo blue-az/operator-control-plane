@@ -22,10 +22,12 @@ limitations").
 
 ```bash
 pip install -r requirements.txt          # only runtime dep is PyYAML
-./operator --help                        # 22 subcommands; ./operator <cmd> --help for flags
+./operator --help                        # 23 subcommands; ./operator <cmd> --help for flags
 ./operator doctor                        # consistency check over local .operator/ ledger
 pytest tests/                            # full subprocess-driven integration suite
 pytest tests/test_operator.py -q         # fastest focused repo-CLI run
+pytest tests/test_pbc_lint.py -q         # PBC fence linter
+python3 pbc_lint.py owners-manual/pbc    # fail-closed PBC invariants 1/3/4
 pytest tests/test_operator.py -q -k doctor   # run a single test by name pattern
 pytest tests/test_authority_broker.py -q     # standalone P3a broker/store tests
 pytest tests/test_dogfood_runner.py -q   # dogfood runner unit suite
@@ -49,8 +51,8 @@ Python 3 stdlib + PyYAML). `main()` builds an argparse subparser per command and
 To add or change a command, edit both the `add_parser(...)` block in `main()` and the corresponding
 `*_cmd(args)` function. Supports `--type diff` evidence attachments (generating git diffs relative to `--diff-base` or `task.created_at`) and `doctor --stale-days N` (flagging inactive assigned tasks).
 
-**Subcommands (22):** `init`, `task-create`, `task-show`, `task-list`, `task-transition`,
-`claim-add`, `claim-show`, `claim-list`, `evidence-attach`, `handoff-add`, `verify`, `doctor`,
+**Subcommands (23):** `init`, `task-create`, `task-show`, `task-list`, `task-transition`,
+`claim-add`, `claim-show`, `claim-list`, `evidence-attach`, `handoff-add`, `decide`, `verify`, `doctor`,
 `session-start`, `session-end`, `session-list`, `usage-add`, `usage-import`, `usage-summary`,
 `usage-annotate`, `brief`, `export-brief`, `authority-reconcile`.
 
