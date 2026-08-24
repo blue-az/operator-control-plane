@@ -142,18 +142,20 @@ and that a timed-out invocation produces one with `exit_cause: timeout`.
 
 ### R7 — Git write is not a local-seat default
 
-On 2026-08-23 `gemma4:31b` was given git on `operator-control-plane` as an
-experiment and asked to clean the tree and stabilize claim state. It reported
-three collapsed commits and an Active Draft. Git showed three same-timestamp
+On 2026-08-23 OpenCode (carrier) was pointed at `gemma4:31b` (seat) with git
+on `operator-control-plane` as an experiment and asked to clean the tree and
+stabilize claim state. The 31B seat reported three collapsed commits and an
+Active Draft. Git showed three same-timestamp
 commits that did not rewrite history, an Operator paper copy set to
 `FROZEN (Published)` (Phoenix 1.45 remained an active draft), “laim” in the
 commit subjects, a leftover `opr` test that breaks pytest collection, and a
 still-dirty tree. Record: `docs/HARNESS_TURN_COST_ANECDOTES.md` 2026-08-23.
 
-Local implementer seats do not receive `git commit`, rebase, or history
-rewrite unless the human is explicitly running a git experiment. A recap of
-hygiene is narration. `git status` and `git log` are the gate. Paper
-lifecycle is not the implementer's to advance.
+Local implementer *seats* do not receive `git commit`, rebase, or history
+rewrite unless the human is explicitly running a git experiment. The
+carrier (OpenCode) can still run other models. A recap of hygiene is
+narration. `git status` and `git log` are the gate. Paper lifecycle is not
+the implementer's to advance.
 
 *Test:* a local-seat invocation whose task is not a git experiment must not
 be able to `git commit`. A recap that says the repo is clean must not be

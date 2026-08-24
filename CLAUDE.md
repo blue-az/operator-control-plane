@@ -94,9 +94,10 @@ local default model needs a matching `harnesses/<id>.yaml` in existing ledgers. 
 full-snapshot versions for trust-relevant writes. Session commands version their `usage-XXXX` record.
 `find_operator_dir()` walks upward from cwd to locate the active ledger.
 
-**Git is not a local-seat default.** `gemma4_local` and other local implementer
-seats do not run `git commit` / rebase / history rewrite unless the human is
-explicitly running a git experiment. Recaps of git hygiene are narration. See
+**Git is not a local-seat default.** OpenCode is the carrier and can run many
+models. Local *seats* (e.g. `gemma4:31b`) do not run `git commit` / rebase /
+history rewrite unless the human is explicitly running a git experiment.
+Recaps of git hygiene are narration. See
 `docs/HARNESS_TURN_COST_ANECDOTES.md` 2026-08-23 and `HARNESS_REQUIREMENTS_SPEC.md` R7.
 
 **Harness roles are not ranks.** Any agent can participate if its work is recorded under the ledger's
