@@ -1,4 +1,9 @@
-"""Race two local OpenCode implementers, with a gated Codex fallback."""
+"""Race two *local* OpenCode implementers.
+
+Winner is arm A or arm B only. Frontier (Luna, Claude, …) is not a racer
+and must not be recorded as winner. A later optional frontier race is out
+of scope for this command.
+"""
 
 from __future__ import annotations
 
@@ -32,9 +37,8 @@ class RoundResult:
 
 @dataclass
 class RaceResult:
-    winner: str | None
+    winner: str | None  # "A", "B", or None — never a frontier harness
     rounds: list[list[RoundResult]]
-    fallback_used: bool
 
 
 def _default_invoke(**kwargs):
@@ -128,11 +132,11 @@ def run_race(
     arm_b: Arm,
     round_timeout_s: int = 600,
     max_rounds: int = 2,
-    fallback_harness: str = "codex",
-    fallback_model: str = "gpt-5.6-luna",
     invoke_fn=None,
     run_gate_fn=None,
 ) -> RaceResult:
+    if arm_a.model == arm_b.model:
+        raise ValueError(f"ab-local requires two different models; got {arm_a.model!r} twice")
     invoke = invoke_fn or _default_invoke
     gate = run_gate_fn or _default_gate
     arms = (arm_a, arm_b)
@@ -155,23 +159,7 @@ def run_race(
         winners = [result for result in results if result.passed]
         if winners:
             winner = min(winners, key=lambda result: result.duration_s).arm
-            return RaceResult(winner, all_rounds, False)
+            return RaceResult(winner, all_rounds)
         previous = {result.arm: result for result in results}
 
-    last = {result.arm: result for result in all_rounds[-1]} if all_rounds else {}
-    fallback_prompt = (
-        f"{prompt}\n\nContinuation after both local arms failed their gate:\n"
-        f"Arm A gate stderr:\n{last.get('A').gate_stderr if last.get('A') else ''}\n"
-        f"Arm B gate stderr:\n{last.get('B').gate_stderr if last.get('B') else ''}\n"
-    )
-    invoke(
-        harness_id=fallback_harness,
-        role=harness_adapter.Role.IMPLEMENTER,
-        model=fallback_model,
-        prompt=fallback_prompt,
-        workspace=arm_a.workspace,
-        timeout_seconds=round_timeout_s,
-        extra_env=None,
-    )
-    returncode, _, _ = gate(arm_a.workspace, gate_cmd)
-    return RaceResult("fallback" if returncode == 0 else None, all_rounds, True)
+    return RaceResult(None, all_rounds)
