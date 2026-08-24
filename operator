@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import dataclasses
 import fcntl
 import glob
 import hashlib
@@ -16,6 +17,7 @@ import os
 import pwd
 import re
 import shutil
+import shlex
 import socket
 import sqlite3
 import stat
@@ -29,6 +31,7 @@ import yaml
 import authority_client
 import authority_projection
 import crystal_parse
+import ab_local
 import study_runner
 
 LEDGER_DB_NAME = "ledger.sqlite3"
@@ -7063,6 +7066,32 @@ def study_plan_cmd(args) -> int:
     return 0
 
 
+def ab_local_cmd(args) -> int:
+    prompt = Path(args.prompt_file).read_text()
+    result = ab_local.run_race(
+        prompt=prompt,
+        gate_cmd=shlex.split(args.gate),
+        arm_a=ab_local.Arm(
+            name="A",
+            model=args.model_a,
+            device=args.device_a,
+            workspace=Path(args.workspace_a),
+        ),
+        arm_b=ab_local.Arm(
+            name="B",
+            model=args.model_b,
+            device=args.device_b,
+            workspace=Path(args.workspace_b),
+        ),
+        round_timeout_s=args.round_timeout,
+        max_rounds=args.max_rounds,
+        fallback_harness=args.fallback_harness,
+        fallback_model=args.fallback_model,
+    )
+    print(json.dumps(dataclasses.asdict(result), default=str))
+    return 0 if result.winner else 1
+
+
 def study_run_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
@@ -7919,6 +7948,23 @@ def main() -> None:
         help="Retry a phase that previously stopped in waiting_quota (never a harness penalty).",
     )
 
+    # operator ab-local
+    ab_local_parser = subparsers.add_parser(
+        "ab-local", help="Race two local OpenCode implementers with a gated fallback."
+    )
+    ab_local_parser.add_argument("--model-a", required=True)
+    ab_local_parser.add_argument("--model-b", required=True)
+    ab_local_parser.add_argument("--workspace-a", required=True)
+    ab_local_parser.add_argument("--workspace-b", required=True)
+    ab_local_parser.add_argument("--prompt-file", required=True)
+    ab_local_parser.add_argument("--gate", required=True)
+    ab_local_parser.add_argument("--device-a", default="0")
+    ab_local_parser.add_argument("--device-b", default="1")
+    ab_local_parser.add_argument("--round-timeout", type=int, default=600)
+    ab_local_parser.add_argument("--max-rounds", type=int, default=2)
+    ab_local_parser.add_argument("--fallback-harness", default="codex")
+    ab_local_parser.add_argument("--fallback-model", default="gpt-5.6-luna")
+
     args = parser.parse_args()
 
     if getattr(args, "command", None) == "task-show" and getattr(args, "task_id_flag", None):
@@ -7962,6 +8008,7 @@ def main() -> None:
         "study-run": study_run_cmd,
         "study-status": study_status_cmd,
         "study-resume": study_resume_cmd,
+        "ab-local": ab_local_cmd,
     }
 
     lock_handle = None
