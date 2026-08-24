@@ -1,19 +1,38 @@
 # Operator Orchestration Repair and FastFoodAgent Crossed-Seat Study
 
+> **Current (2026-08-23).** The Claude-supervises / Agy-implements hierarchy
+> below is **obsolete**. Frontier harnesses are peers. `assigned_harness` and
+> role (supervisor, implementer, judge) are routing fields, not rank. The
+> only live constraint is **remaining tokens / quota**. Claude is
+> `waiting_quota` as of this date — pause, not a model failure. Agy is on a
+> **free plan**: activity-metered, no token files on disk, quota effects are
+> minor and must not be read as quality. Do not report “Claude beats Agy”
+> (or the reverse) from this study.
+>
+> Fill each phase with whoever still has budget. Do not wait on Claude to
+> start a row. Erik still owns final V&V.
+>
+> Machinery in §§1–2 (adapter, `operator study-*`, MenuStat freeze) still
+> stands. §§3–5 role lists are historical; follow this banner.
+
 ## Summary
 
-Create a reusable, no-copy/paste Operator study runner, then use it for two blinded crossed runs:
+Create a reusable, no-copy/paste Operator study runner, then use it for two
+blinded rows whose **roles are assigned by remaining quota**, not by brand.
+
+Historical Codex draft (kept for provenance; do not execute as written):
 
 - Row A: Claude Code supervises; Agy implements.
 - Row B: Agy supervises; Claude Code implements.
-- Codex performs the end-to-end meta-review after its tokens reset.
-- Grok independently cross-checks Codex after its tokens reset.
-- Erik retains final V&V authority.
+- Codex meta-review after token reset; Grok cross-check; Erik V&V.
 
-This compares complete model + harness + role seats, not models in isolation.
+That compared complete model + harness + role seats. It assumed a frontier
+hierarchy that is not true.
 
-First execution action: save this plan verbatim as docs/FASTFOOD_CROSSED_SEAT_STUDY_PLAN.md. If another agent commits this Codex-authored plan, its commit message must disclose the committing agent and
-any compression.
+First execution action (historical): save this plan verbatim as
+docs/FASTFOOD_CROSSED_SEAT_STUDY_PLAN.md. If another agent commits this
+Codex-authored plan, its commit message must disclose the committing agent
+and any compression.
 
 ## 1. Repair Operator First
 
@@ -109,22 +128,34 @@ requirements (https://www.fda.gov/food/nutrition-food-labeling-and-critical-food
 
 ## 3. Run the Two-Row Crossed Experiment
 
-Create detached disposable worktrees from one pinned Project Phoenix commit:
+Create detached disposable worktrees from one pinned commit of the
+`~/Python` git root (Paper/Phoenix tree lives in that repo, not a nested
+`.git`):
 
 /tmp/operator-study-FFSI-001/row-a
 /tmp/operator-study-FFSI-001/row-b
 
-Interleave phases symmetrically:
+Worktrees at `b7649920` already exist from the 2026-08-23 probe. Preflight
+run `2cf837a0…` completed. Tasks `ffsi-001-row-a/b` still name the old
+Claude/Agy roles; those assignments are stale until rewritten for whoever
+has quota.
 
-1. Claude produces Row A's supervisor design.
-2. Agy produces Row B's supervisor design.
-3. Agy implements Row A from Claude's design.
-4. Claude implements Row B from Agy's design.
+Interleave phases symmetrically. **Do not bind the numbered steps to brand
+names.** Each step is a role; the harness is whoever has tokens that day:
+
+1. Row A supervisor design.
+2. Row B supervisor design.
+3. Row A implementer from A's design.
+4. Row B implementer from B's design.
 5. Run identical deterministic validators on both.
 6. Each original supervisor reviews its assigned implementation.
 7. Permit at most two supervisor-requested repair loops per row, each separately approved.
 8. Run final validators and obtain structured supervisor verdicts.
 9. Seal both evidence bundles before any judge sees them.
+
+Historical binding (obsolete): Claude designed A and implemented B; Agy
+designed B and implemented A. Claude cannot take a step while out of
+tokens. Skip or reassign that step; do not treat it as a row failure.
 
 Use fresh headless sessions with complete phase packets rather than conversational continuation. Neither row may see the other row's artifacts.
 
@@ -161,11 +192,14 @@ Generate an identity-scrubbed A/B package after both rows are sealed.
 - Withhold timing and token totals until quality scoring is complete.
 - Verify blinding using automated forbidden-string searches.
 
-Judging order:
+Judging order (roles, not brands):
 
-1. Codex scores both blinded rows and creates an end_to_end supervision claim.
-2. Grok independently scores the same packet and verifies or challenges Codex's claim.
+1. First judge with remaining quota scores both blinded rows and creates an `end_to_end` supervision claim.
+2. A second, distinct harness with remaining quota scores the same packet and verifies or challenges that claim.
 3. Erik performs final V&V and authorizes unblinding.
+
+Historical names were Codex then Grok. Use whoever has tokens. Two judges
+must still be distinct identities. Claude is ineligible while `waiting_quota`.
 
 Judge rubric:
 
@@ -184,7 +218,10 @@ After unblinding, report:
 - Wall time by role.
 - Imported token/usage measurements by role, with missing values explicit.
 - Quality judgments before efficiency data.
-- No generalized "Claude beats Agy" conclusion from two rows; report only the observed seat-by-role result.
+- No generalized brand ranking from two rows. Report only the observed
+  seat-by-role result, and only after quality scores, with quota pauses
+  labeled as pauses. Agy free-plan activity is not comparable to Claude/Codex
+  token dollars.
 
 Store the completed packet under docs/domain_runs/FFSI-001/.
 
@@ -204,7 +241,10 @@ After deterministic tests pass, run one explicitly approved trivial read-only sm
 
 Token scheduling:
 
-- Preserve Claude/Agy capacity until deterministic infrastructure tests pass.
-- Complete the crossed rows before the Agy subscription expires.
-- Seal the rows if Codex or Grok remains quota-blocked.
-- Resume only the blinded judge phases after their token resets.
+- Do not spend a harness that is `waiting_quota`. Resume it only after
+  explicit acknowledgement (`study-resume --acknowledge-quota-reset`).
+- Assign the next phase to a peer that still has budget. Agy's free plan
+  is usable; treat quota nicks as metering, not as rank.
+- Seal a row if the remaining judges are quota-blocked; judge later.
+- Claude is `waiting_quota` as of 2026-08-23. That does not stall the
+  study if another harness can take the step.
