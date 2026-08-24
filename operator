@@ -7077,15 +7077,20 @@ def ab_local_cmd(args) -> int:
                 model=args.model_a,
                 device=args.device_a,
                 workspace=Path(args.workspace_a),
+                ollama_host=args.ollama_host_a,
             ),
             arm_b=ab_local.Arm(
                 name="B",
                 model=args.model_b,
                 device=args.device_b,
                 workspace=Path(args.workspace_b),
+                ollama_host=args.ollama_host_b,
             ),
             round_timeout_s=args.round_timeout,
             max_rounds=args.max_rounds,
+            spawn_listeners=args.spawn_listeners,
+            num_ctx=args.num_ctx,
+            models_dir=args.models_dir,
         )
     except ValueError as exc:
         print(f"Error: {exc}", file=sys.stderr)
@@ -7953,7 +7958,8 @@ def main() -> None:
     # operator ab-local
     ab_local_parser = subparsers.add_parser(
         "ab-local",
-        help="Race two different local OpenCode models. Winner is A or B only.",
+        help=("Race two local models with two listeners; winner is A or B only. "
+              "Does not use or stop 11434."),
     )
     ab_local_parser.add_argument("--model-a", required=True)
     ab_local_parser.add_argument("--model-b", required=True)
@@ -7965,6 +7971,11 @@ def main() -> None:
     ab_local_parser.add_argument("--device-b", default="1")
     ab_local_parser.add_argument("--round-timeout", type=int, default=600)
     ab_local_parser.add_argument("--max-rounds", type=int, default=2)
+    ab_local_parser.add_argument("--ollama-host-a", default="127.0.0.1:11435")
+    ab_local_parser.add_argument("--ollama-host-b", default="127.0.0.1:11436")
+    ab_local_parser.add_argument("--num-ctx", type=int, default=8192)
+    ab_local_parser.add_argument("--spawn-listeners", action="store_true")
+    ab_local_parser.add_argument("--models-dir")
 
     args = parser.parse_args()
 
