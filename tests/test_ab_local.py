@@ -1,3 +1,4 @@
+import json
 import threading
 import time
 import unittest
@@ -124,8 +125,55 @@ class AbLocalTests(unittest.TestCase):
             prompt="do it", gate_cmd=["gate"], arm_a=self.arms[0], arm_b=self.arms[1],
             max_rounds=1, invoke_fn=invoke, run_gate_fn=gate,
         )
-        self.assertEqual(local_envs[self.arms[0].workspace], {"CUDA_VISIBLE_DEVICES": "0"})
-        self.assertEqual(local_envs[self.arms[1].workspace], {"CUDA_VISIBLE_DEVICES": "1"})
+        self.assertEqual(local_envs[self.arms[0].workspace]["CUDA_VISIBLE_DEVICES"], "0")
+        self.assertEqual(local_envs[self.arms[1].workspace]["CUDA_VISIBLE_DEVICES"], "1")
+        self.assertEqual(local_envs[self.arms[0].workspace]["OLLAMA_HOST"], "127.0.0.1:11435")
+        self.assertEqual(local_envs[self.arms[1].workspace]["OLLAMA_HOST"], "127.0.0.1:11436")
+
+    def test_invoke_sets_ollama_host_and_opencode_config(self):
+        arm = ab_local.Arm("A", "ollama/gemma4:31b", "0", Path("/tmp/a"), "127.0.0.1:19001")
+        captured = {}
+
+        def invoke(**kwargs):
+            if kwargs["workspace"] == arm.workspace:
+                captured.update(kwargs)
+                captured["config"] = json.loads(
+                    Path(kwargs["extra_env"]["OPENCODE_CONFIG"]).read_text()
+                )
+            return SimpleNamespace(exit_state="success")
+
+        ab_local.run_race(
+            prompt="do it", gate_cmd=["gate"], arm_a=arm, arm_b=self.arms[1],
+            max_rounds=1, invoke_fn=invoke, run_gate_fn=lambda *a: (1, "", ""),
+        )
+        self.assertEqual(captured["extra_env"]["OLLAMA_HOST"], "127.0.0.1:19001")
+        self.assertEqual(
+            captured["config"]["provider"]["ollama"]["options"]["baseURL"],
+            "http://127.0.0.1:19001/v1",
+        )
+
+    def test_spawn_not_called_when_disabled(self):
+        def fail_spawn(*args):
+            raise AssertionError("spawn must be skipped")
+
+        ab_local.run_race(
+            prompt="do it", gate_cmd=["gate"], arm_a=self.arms[0], arm_b=self.arms[1],
+            max_rounds=1, spawn_fn=fail_spawn,
+            invoke_fn=lambda **k: SimpleNamespace(exit_state="success"),
+            run_gate_fn=lambda *a: (1, "", ""),
+        )
+
+    def test_spawn_fails_closed_if_models_dir_unreadable(self):
+        invoked = []
+        with self.assertRaisesRegex(ValueError, "systemd store is not readable"):
+            ab_local.run_race(
+                prompt="do it", gate_cmd=["gate"], arm_a=self.arms[0], arm_b=self.arms[1],
+                spawn_listeners=True, models_dir="/no/such",
+                spawn_fn=lambda *args: invoked.append(args),
+                invoke_fn=lambda **k: invoked.append(k),
+                run_gate_fn=lambda *a: (1, "", ""),
+            )
+        self.assertEqual(invoked, [])
 
 
 if __name__ == "__main__":
