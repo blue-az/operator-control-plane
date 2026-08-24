@@ -276,6 +276,31 @@ class TestHarnessAdapter(unittest.TestCase):
         self.assertEqual(argv[argv.index("--dir") + 1], str(self.workspace.resolve()))
         self.assertEqual(argv[argv.index("--model") + 1], "ollama/gemma4:31b")
 
+    def test_extra_env_is_visible_to_the_child(self) -> None:
+        exe = write_fake_cli(
+            self.tmp,
+            "fake-env",
+            """
+            import os, json
+            print(json.dumps({"cuda": os.environ.get("CUDA_VISIBLE_DEVICES")}))
+            """,
+        )
+        profile = self.make_profile(exe)
+        ha.PROFILES["_test_env"] = profile
+        try:
+            result = ha.invoke(
+                "_test_env",
+                ha.Role.IMPLEMENTER,
+                "m",
+                "hi",
+                self.workspace,
+                extra_env={"CUDA_VISIBLE_DEVICES": "1"},
+            )
+        finally:
+            del ha.PROFILES["_test_env"]
+        self.assertEqual(result.exit_state, ha.ExitState.SUCCESS)
+        self.assertEqual(result.parsed_output["cuda"], "1")
+
     def test_inline_arg_transport_passes_prompt_as_flag_value_not_stdin(self) -> None:
         # Pins the real bug found via an actual agy smoke call: agy's `-p`
         # takes the prompt as its own argv value, not via stdin. Piping it

@@ -401,6 +401,7 @@ def invoke(
     prompt: str,
     workspace: Path,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    extra_env: Optional[dict[str, str]] = None,
 ) -> AdapterResult:
     """Run one headless harness call. Never raises for a failed call -- every
     outcome short of a well-formed success is returned as a typed
@@ -450,6 +451,11 @@ def invoke(
 
         stdin_data = prompt if profile.prompt_transport == PromptTransport.STDIN else None
 
+        env = None
+        if extra_env:
+            env = os.environ.copy()
+            env.update(extra_env)
+
         start = time.monotonic()
         try:
             res = subprocess.run(
@@ -459,6 +465,7 @@ def invoke(
                 text=True,
                 cwd=str(workspace),
                 timeout=timeout_seconds,
+                env=env,
             )
         except subprocess.TimeoutExpired as exc:
             duration = time.monotonic() - start
