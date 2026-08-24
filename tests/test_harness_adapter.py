@@ -240,6 +240,42 @@ class TestHarnessAdapter(unittest.TestCase):
         self.assertEqual(result.exit_state, ha.ExitState.SUCCESS)
         self.assertEqual(result.parsed_output["file_content"], prompt)
 
+    def test_trailing_transport_puts_prompt_last_and_dir_before_it(self) -> None:
+        exe = write_fake_cli(
+            self.tmp,
+            "fake-trailing",
+            """
+            import sys, json
+            print(json.dumps({"argv": sys.argv[1:], "stdin": sys.stdin.read()}))
+            """,
+        )
+        profile = self.make_profile(
+            exe,
+            prompt_transport=ha.PromptTransport.TRAILING,
+            output_format="json",
+            base_args=("run", "--format", "json"),
+            workspace_flag="--dir",
+            role_args={
+                ha.Role.SUPERVISOR.value: (),
+                ha.Role.JUDGE.value: (),
+                ha.Role.IMPLEMENTER.value: ("--auto",),
+            },
+        )
+        ha.PROFILES["_test_opencode"] = profile
+        try:
+            result = ha.invoke(
+                "_test_opencode", ha.Role.IMPLEMENTER, "ollama/gemma4:31b", "do the slice", self.workspace
+            )
+        finally:
+            del ha.PROFILES["_test_opencode"]
+        self.assertEqual(result.exit_state, ha.ExitState.SUCCESS)
+        argv = result.parsed_output["argv"]
+        self.assertEqual(argv[-1], "do the slice")
+        self.assertEqual(result.parsed_output["stdin"], "")
+        self.assertIn("--auto", argv)
+        self.assertEqual(argv[argv.index("--dir") + 1], str(self.workspace.resolve()))
+        self.assertEqual(argv[argv.index("--model") + 1], "ollama/gemma4:31b")
+
     def test_inline_arg_transport_passes_prompt_as_flag_value_not_stdin(self) -> None:
         # Pins the real bug found via an actual agy smoke call: agy's `-p`
         # takes the prompt as its own argv value, not via stdin. Piping it

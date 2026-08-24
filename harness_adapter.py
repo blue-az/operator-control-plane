@@ -47,6 +47,8 @@ class PromptTransport(Enum):
     # (agy answered a question about one of its own other flags), which is
     # exactly the kind of silent-wrong-answer this adapter exists to avoid.
     INLINE_ARG = "inline_arg"
+    # Last argv token is the prompt (`opencode run [message..]`).
+    TRAILING = "trailing"
 
 
 class Role(Enum):
@@ -71,6 +73,7 @@ class HarnessProfile:
     role_args: dict[str, tuple[str, ...]]
     prompt_file_flag: Optional[str] = None
     prompt_arg_flag: Optional[str] = None
+    workspace_flag: Optional[str] = None
     version_args: tuple[str, ...] = ("--version",)
     # Best-effort, case-insensitive substrings checked against combined
     # stdout+stderr to recognize quota/rate-limit exhaustion. This is
@@ -93,6 +96,7 @@ class HarnessProfile:
 #   agy    --mode {accept-edits, plan}
 #   codex exec -s/--sandbox {read-only, workspace-write, danger-full-access}
 #   grok   --permission-mode {..., plan, acceptEdits, ...}
+#   opencode run --auto (implementer); no plan-mode flag on `run`
 PROFILES: dict[str, HarnessProfile] = {
     "claude": HarnessProfile(
         harness_id="claude",
@@ -149,6 +153,22 @@ PROFILES: dict[str, HarnessProfile] = {
             Role.JUDGE.value: ("--permission-mode", "plan"),
             Role.IMPLEMENTER.value: ("--permission-mode", "acceptEdits"),
         },
+    ),
+    "opencode": HarnessProfile(
+        harness_id="opencode",
+        executable="opencode",
+        base_args=("run", "--format", "json"),
+        prompt_transport=PromptTransport.TRAILING,
+        output_format="text",
+        role_args={
+            Role.SUPERVISOR.value: (),
+            Role.JUDGE.value: (),
+            Role.IMPLEMENTER.value: ("--auto",),
+        },
+        workspace_flag="--dir",
+        # Do not use bare "quota" or "429": Codex was misclassified on a
+        # *QUOTA* filename, and OpenCode json event ids contain the digits 429.
+        quota_markers=("rate limit exceeded", "usage limit"),
     ),
 }
 
@@ -276,7 +296,9 @@ def freeze(
             "not found on PATH."
         )
     cli_version = _run_version_check(profile)
-    argv = build_argv(profile, role, model, prompt_file_path=None)
+    argv = build_argv(
+        profile, role, model, prompt_file_path=None, workspace=str(Path(workspace).resolve())
+    )
     return FrozenAdapter(
         harness_id=harness_id,
         role=role.value,
@@ -294,6 +316,7 @@ def build_argv(
     model: str,
     prompt_file_path: Optional[str] = None,
     inline_prompt: Optional[str] = None,
+    workspace: Optional[str] = None,
 ) -> list[str]:
     argv = [profile.executable]
     if profile.prompt_transport == PromptTransport.INLINE_ARG:
@@ -312,6 +335,8 @@ def build_argv(
     argv.extend(profile.role_args.get(role.value, ()))
     if model:
         argv.extend(["--model", model])
+    if profile.workspace_flag:
+        argv.extend([profile.workspace_flag, workspace or "<workspace>"])
     if profile.prompt_transport == PromptTransport.PROMPT_FILE:
         if not profile.prompt_file_flag:
             raise AdapterError(
@@ -319,6 +344,8 @@ def build_argv(
                 "no prompt_file_flag configured."
             )
         argv.extend([profile.prompt_file_flag, prompt_file_path or "<prompt-file>"])
+    if profile.prompt_transport == PromptTransport.TRAILING:
+        argv.append(inline_prompt if inline_prompt is not None else "<prompt>")
     return argv
 
 
@@ -405,8 +432,20 @@ def invoke(
                 handle.write(prompt)
             prompt_file_path = temp_prompt_file
 
-        inline_prompt = prompt if profile.prompt_transport == PromptTransport.INLINE_ARG else None
-        argv = build_argv(profile, role, model, prompt_file_path, inline_prompt)
+        inline_prompt = (
+            prompt
+            if profile.prompt_transport
+            in (PromptTransport.INLINE_ARG, PromptTransport.TRAILING)
+            else None
+        )
+        argv = build_argv(
+            profile,
+            role,
+            model,
+            prompt_file_path,
+            inline_prompt,
+            workspace=str(Path(workspace).resolve()),
+        )
         argv[0] = executable_path
 
         stdin_data = prompt if profile.prompt_transport == PromptTransport.STDIN else None

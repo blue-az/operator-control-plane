@@ -59,7 +59,13 @@ RUN_ID_RE = re.compile(r"^[0-9a-f]{32}$")
 # (`.operator/harnesses/<id>.yaml`) differ for one harness: the adapter calls
 # it "agy" (matching the plan's exact CLI profile name); the ledger registry
 # entry is "gemini-agy". claude/codex/grok are the same in both.
-LEDGER_HARNESS_ID = {"claude": "claude", "codex": "codex", "agy": "gemini-agy", "grok": "grok"}
+LEDGER_HARNESS_ID = {
+    "claude": "claude",
+    "codex": "codex",
+    "agy": "gemini-agy",
+    "grok": "grok",
+    "opencode": "opencode",
+}
 
 # usage_import_cmd only has log parsers for these harnesses today (no grok
 # parser exists yet) -- study_runner does not add one; grok usage stays at
