@@ -96,18 +96,43 @@ def _http_request(method: str, url: str, payload=None, timeout: int = 15):
     return json.loads(body) if body else None
 
 
-def _config_for_arm(arm: Arm) -> tempfile.NamedTemporaryFile:
-    config = {
-        "provider": {
-            "ollama": {
-                "npm": "@ai-sdk/openai-compatible",
-                "name": "Ollama race",
-                "options": {"baseURL": _ollama_url(arm.ollama_host, "/v1")},
+_DEFAULT_OPENCODE_CONFIG = Path.home() / ".config/opencode/opencode.jsonc"
+
+
+def _rewrite_opencode_baseurl(text: str, host: str) -> str:
+    """Point the ollama OpenAI-compatible URL at this arm's listener.
+
+    A stub config that only contains baseURL made OpenCode omit a user
+    message on some turns; qwen3.8 then 500s ('no user query found').
+    Copy the real jsonc and rewrite the stock 11434 URL instead.
+    """
+    target = _ollama_url(host, "/v1")
+    rewritten = text.replace("http://localhost:11434/v1", target)
+    rewritten = rewritten.replace("http://127.0.0.1:11434/v1", target)
+    return rewritten
+
+
+def _config_for_arm(arm: Arm, source: Path | None = None) -> tempfile.NamedTemporaryFile:
+    host = _arm_host(arm)
+    src = source or _DEFAULT_OPENCODE_CONFIG
+    if src.is_file():
+        text = _rewrite_opencode_baseurl(src.read_text(encoding="utf-8"), host)
+        suffix = src.suffix or ".jsonc"
+    else:
+        text = json.dumps(
+            {
+                "provider": {
+                    "ollama": {
+                        "npm": "@ai-sdk/openai-compatible",
+                        "name": "Ollama race",
+                        "options": {"baseURL": _ollama_url(host, "/v1")},
+                    }
+                }
             }
-        }
-    }
-    file = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-    json.dump(config, file)
+        )
+        suffix = ".json"
+    file = tempfile.NamedTemporaryFile(mode="w", suffix=suffix, delete=False)
+    file.write(text)
     file.close()
     return file
 

@@ -137,9 +137,7 @@ class AbLocalTests(unittest.TestCase):
         def invoke(**kwargs):
             if kwargs["workspace"] == arm.workspace:
                 captured.update(kwargs)
-                captured["config"] = json.loads(
-                    Path(kwargs["extra_env"]["OPENCODE_CONFIG"]).read_text()
-                )
+                captured["config_text"] = Path(kwargs["extra_env"]["OPENCODE_CONFIG"]).read_text()
             return SimpleNamespace(exit_state="success")
 
         ab_local.run_race(
@@ -147,10 +145,14 @@ class AbLocalTests(unittest.TestCase):
             max_rounds=1, invoke_fn=invoke, run_gate_fn=lambda *a: (1, "", ""),
         )
         self.assertEqual(captured["extra_env"]["OLLAMA_HOST"], "127.0.0.1:19001")
-        self.assertEqual(
-            captured["config"]["provider"]["ollama"]["options"]["baseURL"],
-            "http://127.0.0.1:19001/v1",
-        )
+        self.assertIn("http://127.0.0.1:19001/v1", captured["config_text"])
+        self.assertNotIn("http://localhost:11434/v1", captured["config_text"])
+
+    def test_rewrite_keeps_jsonc_and_retargets_baseurl(self):
+        src = '{"provider":{"ollama":{"options":{"baseURL":"http://localhost:11434/v1"}}}}'
+        out = ab_local._rewrite_opencode_baseurl(src, "127.0.0.1:11436")
+        self.assertIn("http://127.0.0.1:11436/v1", out)
+        self.assertNotIn("11434", out)
 
     def test_spawn_not_called_when_disabled(self):
         def fail_spawn(*args):
