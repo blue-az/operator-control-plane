@@ -7068,26 +7068,28 @@ def study_plan_cmd(args) -> int:
 
 def ab_local_cmd(args) -> int:
     prompt = Path(args.prompt_file).read_text()
-    result = ab_local.run_race(
-        prompt=prompt,
-        gate_cmd=shlex.split(args.gate),
-        arm_a=ab_local.Arm(
-            name="A",
-            model=args.model_a,
-            device=args.device_a,
-            workspace=Path(args.workspace_a),
-        ),
-        arm_b=ab_local.Arm(
-            name="B",
-            model=args.model_b,
-            device=args.device_b,
-            workspace=Path(args.workspace_b),
-        ),
-        round_timeout_s=args.round_timeout,
-        max_rounds=args.max_rounds,
-        fallback_harness=args.fallback_harness,
-        fallback_model=args.fallback_model,
-    )
+    try:
+        result = ab_local.run_race(
+            prompt=prompt,
+            gate_cmd=shlex.split(args.gate),
+            arm_a=ab_local.Arm(
+                name="A",
+                model=args.model_a,
+                device=args.device_a,
+                workspace=Path(args.workspace_a),
+            ),
+            arm_b=ab_local.Arm(
+                name="B",
+                model=args.model_b,
+                device=args.device_b,
+                workspace=Path(args.workspace_b),
+            ),
+            round_timeout_s=args.round_timeout,
+            max_rounds=args.max_rounds,
+        )
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
     print(json.dumps(dataclasses.asdict(result), default=str))
     return 0 if result.winner else 1
 
@@ -7950,7 +7952,8 @@ def main() -> None:
 
     # operator ab-local
     ab_local_parser = subparsers.add_parser(
-        "ab-local", help="Race two local OpenCode implementers with a gated fallback."
+        "ab-local",
+        help="Race two different local OpenCode models. Winner is A or B only.",
     )
     ab_local_parser.add_argument("--model-a", required=True)
     ab_local_parser.add_argument("--model-b", required=True)
@@ -7962,8 +7965,6 @@ def main() -> None:
     ab_local_parser.add_argument("--device-b", default="1")
     ab_local_parser.add_argument("--round-timeout", type=int, default=600)
     ab_local_parser.add_argument("--max-rounds", type=int, default=2)
-    ab_local_parser.add_argument("--fallback-harness", default="codex")
-    ab_local_parser.add_argument("--fallback-model", default="gpt-5.6-luna")
 
     args = parser.parse_args()
 

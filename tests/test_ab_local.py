@@ -30,7 +30,7 @@ class AbLocalTests(unittest.TestCase):
         )
         self.assertEqual(result.winner, "A")
         self.assertEqual(len(calls), 2)
-        self.assertFalse(result.fallback_used)
+        self.assertTrue(all(c["harness_id"] == "opencode" for c in calls))
 
     def test_second_round_uses_own_stderr(self):
         calls = []
@@ -54,7 +54,7 @@ class AbLocalTests(unittest.TestCase):
         self.assertIn("A unique marker", a_prompt)
         self.assertNotIn("B unique marker", a_prompt)
 
-    def test_fallback_after_max_rounds(self):
+    def test_no_winner_when_neither_local_passes(self):
         calls = []
 
         def invoke(**kwargs):
@@ -62,18 +62,27 @@ class AbLocalTests(unittest.TestCase):
             return SimpleNamespace(exit_state="success")
 
         def gate(workspace, command):
-            if calls and calls[-1]["harness_id"] == "codex":
-                return (0, "", "")
             return (1, "", "failed")
 
         result = ab_local.run_race(
             prompt="do it", gate_cmd=["gate"], arm_a=self.arms[0], arm_b=self.arms[1],
             max_rounds=2, invoke_fn=invoke, run_gate_fn=gate,
         )
-        self.assertEqual(result.winner, "fallback")
-        self.assertTrue(result.fallback_used)
-        self.assertEqual(calls[-1]["harness_id"], "codex")
-        self.assertEqual(calls[-1]["model"], "gpt-5.6-luna")
+        self.assertIsNone(result.winner)
+        self.assertEqual(len(calls), 4)
+        self.assertTrue(all(c["harness_id"] == "opencode" for c in calls))
+
+    def test_rejects_identical_models(self):
+        same = ab_local.Arm("B", "model-a", "1", Path("/tmp/b"))
+        with self.assertRaises(ValueError):
+            ab_local.run_race(
+                prompt="do it",
+                gate_cmd=["gate"],
+                arm_a=self.arms[0],
+                arm_b=same,
+                invoke_fn=lambda **k: SimpleNamespace(exit_state="success"),
+                run_gate_fn=lambda *a: (1, "", ""),
+            )
 
     def test_concurrent_start(self):
         starts = []
