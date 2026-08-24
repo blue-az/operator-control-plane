@@ -164,13 +164,14 @@ on this entry. Both were the supervisor's errors, not the model's.
 
 ---
 
-## 2026-08-23 — gemma4:31b with git write, claim-state cleanup
+## 2026-08-23 — OpenCode running gemma4:31b, git write, claim-state cleanup
 
-This was an experiment: the human allowed `gemma4:31b` git write on
-`operator-control-plane` and asked it to clean the dirty tree and stabilize
-claim state. Default policy is the opposite. Local seats do not get git unless
-that experiment is on. Do not cite this as a ranking of 31B against 26B or
-against OpenCode.
+This was an experiment: **OpenCode** (the carrier; it can run many models) was
+pointed at **`gemma4:31b`** (the seat) with git write on
+`operator-control-plane`, and asked to clean the dirty tree and stabilize
+claim state. Default policy is the opposite. Local *seats* do not get git
+unless that experiment is on. This is not a ranking of 31B against 26B, and
+it is not a ranking of 31B against OpenCode — OpenCode is the harness.
 
 ### Why the task is hard
 
@@ -221,22 +222,25 @@ the part git amplifies.
 
 Read as a **harness / permission** observation:
 
-> A local 31B seat can land a bounded code drop (`gated_runner`, R3
-> scripts). It cannot be trusted as the git actor or the publication actor
-> on a dirty, multi-constraint tree. Its recap of that work is narration.
-> `git log`, `git status`, and the paper header are the gate.
+> OpenCode running `gemma4:31b` can land a bounded code drop
+> (`gated_runner`, R3 scripts). That seat cannot be trusted as the git
+> actor or the publication actor on a dirty, multi-constraint tree. Its
+> recap of that work is narration. `git log`, `git status`, and the paper
+> header are the gate.
 
 This is the same partition as R5 (the agent does not report the outcome)
 applied to git and to paper lifecycle. It is also R4: too many artifacts
-in one invocation.
+in one invocation. The carrier is not the failure: OpenCode would run a
+different model the same way.
 
 ### Policy
 
-Do not give `gemma4:31b` (or other local implementer seats) `git commit` /
-rebase / history rewrite unless the human is explicitly studying that
-failure mode. Do not re-dispatch this class of work to 31B. OpenCode is the
-local implementer; Operator is the ledger; Paper 1.45 stays a draft until a
-real four-model harness-R3 packet exists.
+Do not give the `gemma4:31b` seat `git commit` / rebase / history rewrite
+unless the human is explicitly studying that failure mode. Do not point
+OpenCode at 31B for git hygiene or paper lifecycle. OpenCode stays the
+local implementer carrier; pick another seat, or keep git with the human.
+Operator is the ledger. Paper 1.45 stays a draft until a real four-model
+harness-R3 packet exists.
 
 ### Confounds
 
