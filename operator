@@ -59,6 +59,7 @@ MUTATING_COMMANDS = {
     "usage-import",
     "usage-annotate",
     "handoff-add",
+    "review-delegate",
     "session-start",
     "session-end",
 }
@@ -2536,6 +2537,149 @@ def _evidence_attach_cmd_impl(
         print(
             f"Associated with claim '{claim_id}' (Verification status: {claim.get('verification_status')})."
         )
+    return 0
+
+
+def review_delegate_cmd(args) -> int:
+    """Create a fail-closed review delegation bundle for advisory or UID-isolated review.
+
+    The command does not mark claims verified.  It writes a small bundle and a
+    reviewer script under .operator/review_delegations/ so the human can run the
+    review under a separate OS account when UID isolation is required.
+    """
+    enrollment, op_dir = resolve_operator_context()
+    if enrollment:
+        print(
+            "Error: review-delegate is only implemented for local file-backed ledgers.",
+            file=sys.stderr,
+        )
+        return 1
+    if not op_dir:
+        print("Error: .operator directory not found.", file=sys.stderr)
+        return 1
+
+    resolved_claim = resolve_claim_record(op_dir, args.claim)
+    if not resolved_claim:
+        return 1
+    _claim_path, claim = resolved_claim
+    task_id = args.task_id or claim.get("task_id")
+    resolved_task = resolve_task_record(op_dir, task_id)
+    if not resolved_task:
+        return 1
+    task_id, _task_path, task = resolved_task
+    if claim.get("task_id") != task_id:
+        print(
+            f"Error: Claim '{args.claim}' belongs to task '{claim.get('task_id')}', not '{task_id}'.",
+            file=sys.stderr,
+        )
+        return 1
+
+    reviewer = args.reviewer or task.get("review_harness")
+    if not reviewer:
+        print("Error: --reviewer is required when the task has no review_harness.", file=sys.stderr)
+        return 1
+
+    repo_root = os.path.abspath(os.path.join(op_dir, os.pardir))
+    author_uid = None
+    author_executor = claim.get("author_executor")
+    if isinstance(author_executor, dict):
+        author_uid = author_executor.get("uid")
+    current_uid = get_executor_identity()["uid"]
+
+    warnings: list[str] = []
+    identity_policy = identity_policy_for_write(op_dir)
+    if identity_policy is None:
+        return 1
+    if args.mode == "uid-isolated" and identity_policy["mode"] != "enforced":
+        warnings.append(
+            "ledger identity policy is not enforced; create .operator/identity.yaml with distinct builder/verifier UIDs before expecting uid_isolated verification"
+        )
+    if args.mode == "uid-isolated":
+        if args.review_user:
+            try:
+                review_uid = pwd.getpwnam(args.review_user).pw_uid
+            except KeyError:
+                review_uid = None
+                warnings.append(f"review Unix user '{args.review_user}' does not exist yet")
+            if isinstance(author_uid, int) and review_uid == author_uid:
+                warnings.append(
+                    f"review Unix user '{args.review_user}' has same UID as claim author ({author_uid}); verification would not be uid_isolated"
+                )
+        else:
+            warnings.append("uid-isolated mode requested without --review-user; script will include a placeholder")
+    elif isinstance(author_uid, int) and current_uid == author_uid:
+        warnings.append(
+            "advisory-agent mode: current UID matches claim author; resulting verification is single_user/advisory"
+        )
+
+    evidence_refs = claim.get("evidence_refs") or []
+    evidence_paths = [os.path.join(op_dir, ref) for ref in evidence_refs]
+    verify_cmd = args.verify_cmd or claim.get("required_gate") or "# TODO: provide verification command"
+
+    delegation_id = f"review-{args.claim}-{get_current_utc_iso().replace(':', '').replace('+', 'Z')}"
+    delegation_dir = os.path.join(op_dir, "review_delegations")
+    os.makedirs(delegation_dir, exist_ok=True)
+    bundle_path = os.path.join(delegation_dir, f"{delegation_id}.yaml")
+    script_path = os.path.join(delegation_dir, f"{delegation_id}.sh")
+
+    prompt = (
+        f"You are an independent verifier for Operator task {task_id}. "
+        f"Review claim {args.claim} and its evidence only. Read the bundle at {bundle_path}. "
+        f"Rerun the verification command exactly where possible. If supported, attach a concise review evidence note "
+        f"with ./operator evidence-attach --task {task_id} --claim {args.claim} --status verified "
+        f"--verified-by {reviewer} --by {reviewer} --verdict '<verdict>'. "
+        "If unsupported, do not verify; explain why. Do not modify product code or tests."
+    )
+
+    model = args.model or "openai-codex/gpt-5.6-luna"
+    if "/" in model:
+        provider, model_id = model.split("/", 1)
+    else:
+        provider, model_id = "openai-codex", model
+    pi_cmd = (
+        f"pi --provider {shlex.quote(provider)} --model {shlex.quote(model_id)} "
+        f"--thinking medium --session-id {shlex.quote(reviewer + '-' + args.claim)} "
+        f"--name {shlex.quote(reviewer)} --approve --print -- {shlex.quote(prompt)}"
+    )
+
+    if args.mode == "uid-isolated":
+        run_line = f"sudo -u {shlex.quote(args.review_user or '<review-unix-user>')} bash -lc {shlex.quote('cd ' + shlex.quote(repo_root) + ' && ' + pi_cmd)}"
+    else:
+        run_line = f"cd {shlex.quote(repo_root)} && {pi_cmd}"
+
+    bundle = {
+        "delegation_id": delegation_id,
+        "created_at": get_current_utc_iso(),
+        "mode": args.mode,
+        "task_id": task_id,
+        "claim_id": args.claim,
+        "reviewer": reviewer,
+        "review_user": args.review_user,
+        "model": model,
+        "repo_root": repo_root,
+        "claim_text": claim.get("text"),
+        "author_executor": author_executor,
+        "evidence_refs": evidence_refs,
+        "evidence_paths": evidence_paths,
+        "verify_cmd": verify_cmd,
+        "warnings": warnings,
+        "expected_verification_authority": "uid_isolated" if args.mode == "uid-isolated" else "advisory",
+        "run_command": run_line,
+    }
+    save_yaml(bundle, bundle_path)
+
+    script = "#!/usr/bin/env bash\nset -euo pipefail\n" + run_line + "\n"
+    atomic_write_text(script_path, script)
+    os.chmod(script_path, 0o750)
+
+    print(f"Created review delegation bundle: {bundle_path}")
+    print(f"Created reviewer launch script: {script_path}")
+    if warnings:
+        for warning in warnings:
+            print(f"[Warning] {warning}")
+    print("Run command:")
+    print(run_line)
+    print("Note: this command never verifies by itself; evidence-attach enforces the final trust mode.")
     return 0
 
 
@@ -7499,6 +7643,45 @@ def main() -> None:
         "--verified-by", default=None, help="Actor who verified the claim."
     )
 
+    # operator review delegate
+    review_delegate_parser = subparsers.add_parser(
+        "review-delegate",
+        help="Create a fail-closed review bundle for advisory-agent or UID-isolated verification.",
+    )
+    review_delegate_parser.add_argument("claim", help="Claim ID to delegate for review.")
+    review_delegate_parser.add_argument(
+        "--task",
+        dest="task_id",
+        default=None,
+        help="Task ID (defaults to the claim's task).",
+    )
+    review_delegate_parser.add_argument(
+        "--reviewer",
+        default=None,
+        help="Reviewer harness ID (defaults to task review_harness).",
+    )
+    review_delegate_parser.add_argument(
+        "--mode",
+        choices=["advisory-agent", "uid-isolated"],
+        default="uid-isolated",
+        help="Desired review isolation mode. uid-isolated prints a sudo -u launch command.",
+    )
+    review_delegate_parser.add_argument(
+        "--review-user",
+        default=None,
+        help="Unix user to run the verifier as for uid-isolated mode.",
+    )
+    review_delegate_parser.add_argument(
+        "--model",
+        default="openai-codex/gpt-5.6-luna",
+        help="Pi model as provider/model or model id (default: openai-codex/gpt-5.6-luna).",
+    )
+    review_delegate_parser.add_argument(
+        "--verify-cmd",
+        default=None,
+        help="Exact command the reviewer should rerun (defaults to claim required gate).",
+    )
+
     # operator usage add
     usage_parser = subparsers.add_parser(
         "usage-add", help="Capture a pasted usage snippet / quota log."
@@ -7999,6 +8182,7 @@ def main() -> None:
         "claim-show": claim_show_cmd,
         "claim-list": claim_list_cmd,
         "evidence-attach": evidence_attach_cmd,
+        "review-delegate": review_delegate_cmd,
         "crystal-attach": crystal_attach_cmd,
         "crystal-import": crystal_import_cmd,
         "crystal-bridge": crystal_bridge_cmd,
