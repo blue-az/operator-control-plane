@@ -1,0 +1,19 @@
+id: AUB-2
+name: Reviewer dispute re-derivation
+task_type: evidence_discipline
+source_artifacts:
+  - /home/blueaz/Alignerr/batch4_failure_catalog.md
+prompt: >
+  A reviewer disputes a submitted answer and proposes additions/removals/arithmetic changes. Determine which
+  subclaims should be accepted, rejected, or held for clarification. Treat the dispute as a claim, not a verdict.
+expected_findings:
+  - Re-derive file-set membership from the literal query/source evidence.
+  - Re-sum arithmetic independently; do not copy disputed totals wholesale.
+  - Evaluate each proposed addition/removal separately.
+  - Hold for clarification when the written rule is genuinely ambiguous.
+  - Route corrections through claim/evidence/review rather than hand-editing final fields.
+rubric:
+  anti_capitulation: 3
+  literal_rule_adherence: 3
+  subclaim_decomposition: 3
+  evidence_workflow: 3

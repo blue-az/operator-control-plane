@@ -1,0 +1,20 @@
+id: AUB-1
+name: Code transcript preference judgment
+source_artifacts:
+  - /home/blueaz/Documents/Career/Applications/Alignerr/ALIGNERR_EVAL_RESULT_2026-04-24.md
+  - /home/blueaz/Alignerr/Test_Instructions.md
+task_type: reviewer_judgment
+prompt: >
+  Given two coding-task responses for a repo issue, choose the better response and justify the preference.
+  Penalize overbroad/invasive patches, TODOs in final code, and unverified success claims. Reward narrower,
+  semantically aligned fixes and explicit uncertainty about unrun tests.
+expected_findings:
+  - Prefer the narrower/localized fix when both responses have verification gaps.
+  - Identify reset-index/rebuild-index workaround patterns as semantic-risk signals.
+  - Note TODOs in final code as a serious mergeability concern.
+  - Do not overclaim correctness without runnable verification.
+rubric:
+  correct_preference: 3
+  semantic_risk_detection: 3
+  verification_gap_honesty: 3
+  rationale_quality: 3

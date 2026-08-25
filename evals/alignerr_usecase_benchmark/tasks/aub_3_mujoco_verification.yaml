@@ -1,0 +1,23 @@
+id: AUB-3
+name: MuJoCo / robotics verification methodology
+task_type: technical_benchmark_design
+source_artifacts:
+  - /home/blueaz/Alignerr/mujoco-prep/PREP_BRIEF.md
+  - /home/blueaz/Alignerr/mujoco-prep/GPU_CPU_BENCH_SECTION.md
+  - /home/blueaz/Alignerr/mujoco-prep/INTERVIEW_CRIB.md
+  - /home/blueaz/Alignerr/mujoco_spike/MUJOCO_LESSONS_LEARNED.md
+prompt: >
+  Given saved MuJoCo/RL notes, extract the benchmarkable claims and propose rerunnable verification gates.
+  Separate throughput from convergence, single-env Gym-MuJoCo from MJX/GPU physics, and contact/model
+  invariants from subjective visual assessment.
+expected_findings:
+  - Use closed-form geometry checks for kinematic site distances.
+  - Use mj_forward, not mj_step, for set-pose/read-sensor tests.
+  - Treat support force equals weight as a contact invariant after filtering self-contacts.
+  - Preserve the CPU/GPU crossover finding: default PPO/SAC do not benefit from GPU; scaled SAC does.
+  - State scope limits: throughput not convergence where applicable, single env, power-capped GPU.
+rubric:
+  measurable_claim_extraction: 3
+  rerunnable_gate_design: 3
+  physics_api_accuracy: 3
+  scope_honesty: 3
