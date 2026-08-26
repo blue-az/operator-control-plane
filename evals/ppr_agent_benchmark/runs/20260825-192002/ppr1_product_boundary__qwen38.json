@@ -1,0 +1,23 @@
+{
+  "returncode": 0,
+  "elapsed_s": 54.613,
+  "stdout": "All required facts are confirmed present in `/home/blueaz/operator-control-plane/ppr-agent-briefing.md`:\n\n- \u2705 **4 surfaces** \u2014 SURFACES table\n- \u2705 **15 tools** \u2014 SURFACES + NUMBERS\n- \u2705 **Full vs published subset** \u2014 DATA_BOUNDARY + NUMBERS\n- \u2705 **3,576** \u2014 DATA_BOUNDARY + NUMBERS\n- \u2705 **1,483** \u2014 DATA_BOUNDARY + NUMBERS\n- \u2705 **41.5%** \u2014 DATA_BOUNDARY + NUMBERS + RISK_NOTES\n- \u2705 **Not clinical monitoring** \u2014 NON_GOALS + RISK_NOTES #5\n- \u2705 **Offline PDF ingestion** \u2014 DATA_BOUNDARY + NON_GOALS + RISK_NOTES #6\n- \u2705 **Deterministic, not a chatbot** \u2014 SURFACES + NON_GOALS\n",
+  "stderr": "",
+  "cmd": [
+    "pi",
+    "--provider",
+    "ollama",
+    "--model",
+    "qwen3.8:27b",
+    "--thinking",
+    "off",
+    "--no-context-files",
+    "--no-session",
+    "--print",
+    "--",
+    "Task: Write a concise product-boundary briefing for PPR Agent. Preserve exact facts and avoid overclaiming.\nReturn sections: SURFACES, DATA_BOUNDARY, NON_GOALS, NUMBERS, RISK_NOTES.\nMust mention 4 surfaces, 15 tools, full vs published subset, 3576, 1483, 41.5%, not clinical monitoring, offline PDF ingestion, deterministic-not-chatbot.\n\nUse only this local ground truth snapshot:\n# PPR Agent local ground truth snapshot\n\nRepo: `/home/blueaz/Python/ppr-agent`\nCurrent HEAD observed: `04ed8ed Implement Reflect attention cards from the ppr-agent-53e91a5 first-pass eval`.\n\n## Core repo facts\n\n- Standalone source-legible extract of PPR_Agent CRM domain, not the full Phoenix system.\n- Four surfaces: Registry tools, CLI `./ppr`, Charter/PBC, Analyst Desk.\n- Analytical historical registry only; not clinical monitoring or device programming.\n- PDF extraction is offline ingestion; not part of live query path.\n- Natural-language query is deterministic plan-building/tool dispatch; not a chatbot/free-text LLM assistant.\n- Tool catalog: 15 statically registered tools.\n- Full registry: 3,576 device models, 92,071,191 registered US implants, 2008-2025, 18 years, 3 companies.\n- Company totals: MDT 1,892 devices / 48,343,280 implants; ABT 1,271 / 29,111,911; BSX 413 / 14,616,000.\n- Device-category totals: Pacemaker 1,302 / 60,207,040; ICD 1,329 / 17,416,439; CRT-D 733 / 11,482,107; CRT-P 203 / 2,632,729; TPS 8 / 330,111; S-ICD 1 / 2,765.\n- Desk published subset: 1,483 devices; full devices.json: 3,576 devices; published is 41.5% of full.\n\n## Charter/gate facts\n\n- PPR-RUL-001: pattern precedence; comparative queries before generic top-device plans.\n- PPR-RUL-002: company code normalization to ABT / BSX / MDT.\n- PPR-RUL-003: years outside 2008-2025 warn or cap; year alone does not hard-deny.\n- `./ppr gate \"mdt 2030\"`: allowed true, company MDT, year 2030, year_capped 2025, rule hits RUL-002 and RUL-003.\n- `./ppr gate \"st jude 2007\"`: allowed true, company null, year 2007, year_capped 2008, rule hit RUL-003.\n- Missing charter fails closed. Partial charter parse remains fail-open by policy but exposes partial_charter_parse/fallback lines.\n- `./ppr query` executes deterministic tool plans and does not surface a charter policy verdict; `./ppr gate` inspects policy and does not execute data queries.\n\n## Real query/data facts\n\n`./ppr query \"compare Abbott and Medtronic ICDs 2023\"` chooses `compare_companies`, not generic top devices. Result:\n\n- Period 2023-2023, category ICD.\n- MDT: 23 device families, 60 total device models, 918,205 implants.\n- ABT: 10 device families, 32 total device models, 423,440 implants.\n- Insight: market leader MDT with 918,205 implants.\n\n`./ppr run get_top_devices --year 2023 --limit 5` result:\n\n1. MDT Pacemaker Azure XT DR W1DR01 \u2014 623,926 implants.\n2. MDT Pacemaker Adapta DR ADDR01 \u2014 454,869 implants.\n3. ABT Pacemaker Unknown PM2272 US R \u2014 383,089 implants.\n4. MDT Pacemaker Advisa DR MRI A2DR01 \u2014 344,410 implants.\n5. BSX Pacemaker ACCOLADE/PROPONENT/ESSENTIO DR L101/L111/L201/L211/L301/L311 \u2014 278,000 implants.\n\n`./ppr run get_market_concentration --year 2023 --device-category ICD` result:\n\n- HHI 3912.31, concentration level High.\n- Market shares: MDT 52.96%, ABT 24.42%, BSX 22.61%.\n"
+  ],
+  "task": "ppr1_product_boundary",
+  "label": "qwen38",
+  "model": "qwen3.8:27b"
+}
