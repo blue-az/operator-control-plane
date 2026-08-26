@@ -1,0 +1,5 @@
+run_id,label,model,image_path,seed,elephant_present_recognizable,tiny_tricycle_present_recognizable,proportions_elephant_overloads_tricycle,ats_hiring_satire_legible_from_image,total_score,scorer,notes
+20260825-200350-prompts,qwen38,qwen3.8:27b,qwen38.render.png,1191900,1,0,1,0,2,pi-01a03792,"Recognizable elephant and a red wheeled object under/behind it, but not a clearly recognizable tiny child's tricycle; no ATS/hiring satire is legible."
+20260825-200350-prompts,qwen36-35b,qwen3.6:35b,qwen36-35b.render.png,1191901,0,1,0,0,1,pi-01a03792,"Tricycle/bicycle form is present, but the animal is not a recognizable elephant and the ATS/hiring metaphor is absent."
+20260825-200350-prompts,gemma31,gemma4:31b,gemma31.render.png,1191902,1,0,0,0,1,pi-01a03792,"Recognizable elephant riding a wheeled contraption, but not a tiny child's tricycle, not visibly overloaded in the intended way, and no ATS/hiring satire is legible."
+20260825-200350-prompts,gemma26,gemma4:26b,gemma26.render.png,1191903,1,0,0,0,1,pi-01a03792,"Recognizable elephant/elephant head motif, but no recognizable tricycle/riding proposition and no ATS/hiring satire."

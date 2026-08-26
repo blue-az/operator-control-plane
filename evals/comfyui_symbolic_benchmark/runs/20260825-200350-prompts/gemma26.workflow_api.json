@@ -1,0 +1,86 @@
+{
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 1191903,
+      "steps": 8,
+      "cfg": 7.0,
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": [
+        "4",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    }
+  },
+  "4": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "Editorial political cartoon, sharp satirical caricature, a gargantuan, heavy corporate elephant wearing a professional business suit, crushing and overloading a tiny, flimsy child's tricycle, the tricycle's wheels are buckling and the metal frame is bending under the immense weight, massive scale imbalance, scattered paper resumes and CVs flying in the air, digital scanning lines and barcode patterns superimposed on the scene, 'REJECTED' stamps and 'ATS' text integrated into the chaos, high contrast, ink and watercolor newspaper illustration style, dramatic lighting.",
+      "clip": [
+        "4",
+        1
+      ]
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "blurry, unreadable, malformed text, extra limbs, distorted wheels, photorealistic, caption-only joke",
+      "clip": [
+        "4",
+        1
+      ]
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "comfy_symbolic_ats_elephant",
+      "images": [
+        "8",
+        0
+      ]
+    }
+  }
+}

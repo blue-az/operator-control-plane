@@ -1,0 +1,46 @@
+[
+  {
+    "label": "qwen38",
+    "model": "qwen3.8:27b",
+    "seed": 1191900,
+    "workflow": "qwen38.workflow_api.json",
+    "receipt": {
+      "prompt_id": "841d9c0e-f02f-4c12-83fa-a748a7efd5dd",
+      "number": 0,
+      "node_errors": {}
+    }
+  },
+  {
+    "label": "qwen36-35b",
+    "model": "qwen3.6:35b",
+    "seed": 1191901,
+    "workflow": "qwen36-35b.workflow_api.json",
+    "receipt": {
+      "prompt_id": "15c720e6-a05e-4bab-8a60-647def979621",
+      "number": 1,
+      "node_errors": {}
+    }
+  },
+  {
+    "label": "gemma31",
+    "model": "gemma4:31b",
+    "seed": 1191902,
+    "workflow": "gemma31.workflow_api.json",
+    "receipt": {
+      "prompt_id": "96228dee-d7a3-4f8b-b7ee-064675566544",
+      "number": 2,
+      "node_errors": {}
+    }
+  },
+  {
+    "label": "gemma26",
+    "model": "gemma4:26b",
+    "seed": 1191903,
+    "workflow": "gemma26.workflow_api.json",
+    "receipt": {
+      "prompt_id": "ea2bfc5d-0b33-455e-adec-f1e9b7905b46",
+      "number": 3,
+      "node_errors": {}
+    }
+  }
+]
