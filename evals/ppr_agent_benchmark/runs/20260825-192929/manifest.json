@@ -1,0 +1,103 @@
+{
+  "out_dir": "/home/blueaz/operator-control-plane/evals/ppr_agent_benchmark/runs/20260825-192929",
+  "provider": "ollama",
+  "ollama_host": "127.0.0.1:11435",
+  "results": [
+    {
+      "task": "ppr1_product_boundary",
+      "label": "qwen38",
+      "model": "qwen3.8:27b",
+      "returncode": 0,
+      "elapsed_s": 53.112,
+      "stdout_path": "ppr1_product_boundary__qwen38.out.md"
+    },
+    {
+      "task": "ppr1_product_boundary",
+      "label": "qwen36-35b",
+      "model": "qwen3.6:35b",
+      "returncode": 0,
+      "elapsed_s": 37.662,
+      "stdout_path": "ppr1_product_boundary__qwen36-35b.out.md"
+    },
+    {
+      "task": "ppr1_product_boundary",
+      "label": "gemma31",
+      "model": "gemma4:31b",
+      "returncode": 0,
+      "elapsed_s": 52.344,
+      "stdout_path": "ppr1_product_boundary__gemma31.out.md"
+    },
+    {
+      "task": "ppr1_product_boundary",
+      "label": "gemma26",
+      "model": "gemma4:26b",
+      "returncode": 0,
+      "elapsed_s": 29.028,
+      "stdout_path": "ppr1_product_boundary__gemma26.out.md"
+    },
+    {
+      "task": "ppr2_gate_query_semantics",
+      "label": "qwen38",
+      "model": "qwen3.8:27b",
+      "returncode": 0,
+      "elapsed_s": 49.661,
+      "stdout_path": "ppr2_gate_query_semantics__qwen38.out.md"
+    },
+    {
+      "task": "ppr2_gate_query_semantics",
+      "label": "qwen36-35b",
+      "model": "qwen3.6:35b",
+      "returncode": 0,
+      "elapsed_s": 41.5,
+      "stdout_path": "ppr2_gate_query_semantics__qwen36-35b.out.md"
+    },
+    {
+      "task": "ppr2_gate_query_semantics",
+      "label": "gemma31",
+      "model": "gemma4:31b",
+      "returncode": 0,
+      "elapsed_s": 54.011,
+      "stdout_path": "ppr2_gate_query_semantics__gemma31.out.md"
+    },
+    {
+      "task": "ppr2_gate_query_semantics",
+      "label": "gemma26",
+      "model": "gemma4:26b",
+      "returncode": 0,
+      "elapsed_s": 29.147,
+      "stdout_path": "ppr2_gate_query_semantics__gemma26.out.md"
+    },
+    {
+      "task": "ppr3_real_data_report",
+      "label": "qwen38",
+      "model": "qwen3.8:27b",
+      "returncode": 0,
+      "elapsed_s": 52.8,
+      "stdout_path": "ppr3_real_data_report__qwen38.out.md"
+    },
+    {
+      "task": "ppr3_real_data_report",
+      "label": "qwen36-35b",
+      "model": "qwen3.6:35b",
+      "returncode": 0,
+      "elapsed_s": 37.894,
+      "stdout_path": "ppr3_real_data_report__qwen36-35b.out.md"
+    },
+    {
+      "task": "ppr3_real_data_report",
+      "label": "gemma31",
+      "model": "gemma4:31b",
+      "returncode": 0,
+      "elapsed_s": 58.855,
+      "stdout_path": "ppr3_real_data_report__gemma31.out.md"
+    },
+    {
+      "task": "ppr3_real_data_report",
+      "label": "gemma26",
+      "model": "gemma4:26b",
+      "returncode": 0,
+      "elapsed_s": 29.603,
+      "stdout_path": "ppr3_real_data_report__gemma26.out.md"
+    }
+  ]
+}
