@@ -1,0 +1,89 @@
+{
+  "benchmark": "comfyui_symbolic_constraint_existing_artifacts",
+  "source_white_paper": "/home/blueaz/Documents/obsidian-vault/LinkedIn/primary_papers/WHITE_PAPER_THE_CAPABILITY_CEILING.md",
+  "source_output_dir": "/home/blueaz/Python/Evaluation/ComfyUI/output",
+  "task": "ATS elephant political cartoon: elephant riding/overloading tiny tricycle, ATS/hiring satire legible",
+  "constraints": [
+    "elephant_present_recognizable",
+    "tiny_tricycle_present_recognizable",
+    "proportions_elephant_overloads_tricycle",
+    "ats_hiring_satire_legible_from_image"
+  ],
+  "scores": [
+    {
+      "artifact": "assets/frontier_vs_local_elephants_corrected.png",
+      "region": "frontier_left",
+      "label": "frontier_reference",
+      "score": 4,
+      "max_score": 4,
+      "constraints": {
+        "elephant_present_recognizable": true,
+        "tiny_tricycle_present_recognizable": true,
+        "proportions_elephant_overloads_tricycle": true,
+        "ats_hiring_satire_legible_from_image": true
+      },
+      "notes": "Elephant in business suit rides a tiny tricycle labeled ATS; company HQ, speech bubble, rejected resumes, and creaking tricycle make satire legible."
+    },
+    {
+      "artifact": "assets/frontier_vs_local_elephants_corrected.png",
+      "region": "local_right",
+      "label": "local_reference_composite_region",
+      "score": 1,
+      "max_score": 4,
+      "constraints": {
+        "elephant_present_recognizable": true,
+        "tiny_tricycle_present_recognizable": false,
+        "proportions_elephant_overloads_tricycle": false,
+        "ats_hiring_satire_legible_from_image": false
+      },
+      "notes": "Recognizable elephant, but it is not riding a tiny tricycle; small human bicycle/rider elements and sign do not carry the ATS hiring metaphor."
+    },
+    {
+      "artifact": "assets/ats_cartoon_12b_00001_.png",
+      "label": "gemma4_12b_raw_local",
+      "score": 3,
+      "max_score": 4,
+      "constraints": {
+        "elephant_present_recognizable": true,
+        "tiny_tricycle_present_recognizable": true,
+        "proportions_elephant_overloads_tricycle": true,
+        "ats_hiring_satire_legible_from_image": false
+      },
+      "notes": "Large suited elephant on a small wheeled cycle, but no clear ATS/hiring/company/rejected-resume semantic marker."
+    },
+    {
+      "artifact": "assets/ats_cartoon_26b_00001_.png",
+      "label": "gemma4_26b_raw_local",
+      "score": 3,
+      "max_score": 4,
+      "constraints": {
+        "elephant_present_recognizable": true,
+        "tiny_tricycle_present_recognizable": true,
+        "proportions_elephant_overloads_tricycle": true,
+        "ats_hiring_satire_legible_from_image": false
+      },
+      "notes": "Large suited elephant on a small tricycle-like vehicle; metaphor is not legible as ATS/hiring without external prompt context."
+    },
+    {
+      "artifact": "assets/ats_cartoon_hybrid_clean_00004.png",
+      "label": "harness_assisted_hybrid",
+      "score": 3,
+      "max_score": 4,
+      "constraints": {
+        "elephant_present_recognizable": true,
+        "tiny_tricycle_present_recognizable": true,
+        "proportions_elephant_overloads_tricycle": true,
+        "ats_hiring_satire_legible_from_image": false
+      },
+      "notes": "Harness/compositing adds ATS/caption cues, but the image itself still reads as an elephant next to/overlaid with a bicycle-like diagram rather than a clean political cartoon. Caption rescue is not counted as raw image-legible satire."
+    }
+  ],
+  "status": "artifact_scored_not_fully_rerunnable",
+  "open_items": [
+    "recover full ComfyUI session log",
+    "recover workflow JSON",
+    "confirm exact frontier prompt/model",
+    "document all harness steps",
+    "run second-hardware reproduction if still desired"
+  ]
+}
