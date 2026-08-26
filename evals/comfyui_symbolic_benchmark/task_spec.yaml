@@ -1,0 +1,43 @@
+id: comfyui-ats-elephant-symbolic-v1
+name: ATS Elephant Tiny Tricycle Symbolic Constraint Benchmark
+status: repeatable_scaffold
+source_paper: /home/blueaz/Documents/obsidian-vault/LinkedIn/primary_papers/WHITE_PAPER_THE_CAPABILITY_CEILING.md
+local_only: true
+base_image_model:
+  engine: ComfyUI
+  checkpoint: sd_xl_base_1.0.safetensors
+  checkpoint_path: /home/blueaz/Python/Evaluation/ComfyUI/models/checkpoints/sd_xl_base_1.0.safetensors
+fixed_task: >
+  Generate an editorial political cartoon: companies relying on ATS applicant tracking systems
+  are represented as a huge corporate elephant riding and overloading a tiny child's tricycle.
+  The metaphor should be legible from the image itself.
+constraints:
+  - id: elephant_present_recognizable
+    score: 1
+    pass_condition: A viewer can recognize an elephant as the main subject.
+  - id: tiny_tricycle_present_recognizable
+    score: 1
+    pass_condition: A viewer can recognize a small child's tricycle, not merely any bicycle/wheel/cart.
+  - id: proportions_elephant_overloads_tricycle
+    score: 1
+    pass_condition: The elephant is much larger than the tricycle and is visibly riding/overloading it.
+  - id: ats_hiring_satire_legible_from_image
+    score: 1
+    pass_condition: ATS/hiring/company screening satire is legible from visual/text cues in the image itself, not only from the prompt or external caption.
+score_interpretation:
+  4: full symbolic success
+  3: visually plausible but misses one symbolic constraint
+  2: partial object binding
+  1: mostly missed proposition
+  0: unusable/off-task
+repeatability_plan:
+  - Freeze prompt-author instruction.
+  - Ask four local text models to write one ComfyUI prompt each with tools disabled.
+  - Render each prompt through the same SDXL checkpoint/workflow with fixed seeds.
+  - Score each output manually against the four binary constraints.
+  - Keep raw prompt, workflow JSON, image, score row, and hashes.
+models_to_test:
+  - qwen3.8:27b
+  - qwen3.6:35b
+  - gemma4:31b
+  - gemma4:26b

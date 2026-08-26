@@ -1,0 +1,23 @@
+{
+  "label": "qwen36-35b",
+  "model": "qwen3.6:35b",
+  "elapsed_s": 29.731,
+  "returncode": 0,
+  "prompt": "editorial political cartoon style, heavy black outlines, flat bold colors, a massive corporate elephant wearing a business suit sitting precariously on top of a tiny fragile child's red tricycle, the miniature tricycle violently buckling under immense weight with wheels completely flattened against the asphalt and metal frame groaning and bending at sharp angles, crushed piles of job applications and shredded resumes ground beneath the straining back tire, looming giant overhead paper-shredder gears casting shadows over the scene, visual satire of applicant tracking systems filtering candidates through severe scale disproportion and physical strain",
+  "stderr": "Warning: Model \"qwen3.6:35b\" not found for provider \"ollama\". Using custom model id.\n",
+  "cmd": [
+    "pi",
+    "--provider",
+    "ollama",
+    "--model",
+    "qwen3.6:35b",
+    "--thinking",
+    "off",
+    "--no-context-files",
+    "--no-session",
+    "--no-tools",
+    "--print",
+    "--",
+    "Write one SDXL/ComfyUI positive prompt for this fixed benchmark task.\nDo not explain. Output only the prompt text.\n\nTask: editorial political cartoon where companies relying on ATS applicant tracking systems are represented as a huge corporate elephant riding and overloading a tiny child's tricycle. The metaphor must be legible from the image itself.\n\nMust include visual cues for: elephant, tiny child's tricycle, severe scale/overload, ATS/hiring/company screening satire. Avoid relying on an external caption only.\n"
+  ]
+}
