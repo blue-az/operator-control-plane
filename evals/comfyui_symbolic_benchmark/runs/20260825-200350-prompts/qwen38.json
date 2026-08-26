@@ -1,0 +1,23 @@
+{
+  "label": "qwen38",
+  "model": "qwen3.8:27b",
+  "elapsed_s": 32.638,
+  "returncode": 0,
+  "prompt": "editorial political cartoon, satirical illustration, a massive bloated corporate elephant wearing a thin cheap business tie and a stiff name badge reading \"HIRING\", its enormous body straddling and crushing a comically tiny child's red plastic tricycle, the tricycle frame visibly bent and buckling under the absurd overload, wheels flat and cracked, severe exaggerated scale contrast between the enormous elephant and the small tricycle, a rubber stamp reading \"ATS \u2014 AUTO-REJECT\" smashing down onto a pile of scattered r\u00e9sum\u00e9 papers labelled \"RESUME\" and \"APPLY NOW\", a small wooden sign \"ENTRY-LEVEL\" crushed flat under the elephant's front foot, a backdrop of identical grey office towers each glowing with a large \"ATS\" sign, bold flat cartoon colors, thick clean ink outlines, exaggerated comic proportions, immediately legible visual metaphor, satirical political illustration style, no photographic realism, white background",
+  "stderr": "",
+  "cmd": [
+    "pi",
+    "--provider",
+    "ollama",
+    "--model",
+    "qwen3.8:27b",
+    "--thinking",
+    "off",
+    "--no-context-files",
+    "--no-session",
+    "--no-tools",
+    "--print",
+    "--",
+    "Write one SDXL/ComfyUI positive prompt for this fixed benchmark task.\nDo not explain. Output only the prompt text.\n\nTask: editorial political cartoon where companies relying on ATS applicant tracking systems are represented as a huge corporate elephant riding and overloading a tiny child's tricycle. The metaphor must be legible from the image itself.\n\nMust include visual cues for: elephant, tiny child's tricycle, severe scale/overload, ATS/hiring/company screening satire. Avoid relying on an external caption only.\n"
+  ]
+}

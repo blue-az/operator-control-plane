@@ -1,0 +1,23 @@
+{
+  "label": "gemma26",
+  "model": "gemma4:26b",
+  "elapsed_s": 22.444,
+  "returncode": 0,
+  "prompt": "Editorial political cartoon, sharp satirical caricature, a gargantuan, heavy corporate elephant wearing a professional business suit, crushing and overloading a tiny, flimsy child's tricycle, the tricycle's wheels are buckling and the metal frame is bending under the immense weight, massive scale imbalance, scattered paper resumes and CVs flying in the air, digital scanning lines and barcode patterns superimposed on the scene, 'REJECTED' stamps and 'ATS' text integrated into the chaos, high contrast, ink and watercolor newspaper illustration style, dramatic lighting.",
+  "stderr": "",
+  "cmd": [
+    "pi",
+    "--provider",
+    "ollama",
+    "--model",
+    "gemma4:26b",
+    "--thinking",
+    "off",
+    "--no-context-files",
+    "--no-session",
+    "--no-tools",
+    "--print",
+    "--",
+    "Write one SDXL/ComfyUI positive prompt for this fixed benchmark task.\nDo not explain. Output only the prompt text.\n\nTask: editorial political cartoon where companies relying on ATS applicant tracking systems are represented as a huge corporate elephant riding and overloading a tiny child's tricycle. The metaphor must be legible from the image itself.\n\nMust include visual cues for: elephant, tiny child's tricycle, severe scale/overload, ATS/hiring/company screening satire. Avoid relying on an external caption only.\n"
+  ]
+}
