@@ -47,7 +47,7 @@ The repeatable scaffold is now present:
    python main.py --listen 127.0.0.1 --port 8188
    ```
 
-3. Submit fixed SDXL workflow jobs:
+3. Submit fixed SDXL workflow jobs. The scaffold uses a CPU-safe smoke render by default (512×512, 8 steps) so repeatability can be proven even when CUDA is unavailable:
 
    ```bash
    python evals/comfyui_symbolic_benchmark/render_comfyui_sdxl.py <run_dir>/prompt_manifest.json
