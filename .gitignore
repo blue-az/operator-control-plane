@@ -4,3 +4,17 @@ __pycache__/
 # Regenerable via fastfoodagent/fetch_substrate.py + build_substrate.py --
 # the raw CSV alone is ~22MB, too large and too easily stale to commit.
 fastfoodagent/data/
+
+# Raw benchmark/measurement output -- regenerate via analyze_results.py /
+# measurement_session.py / r3_grid_comparison.py, don't commit.
+measurement_results/
+measurement_results_anchored/
+measurement_results_harness-r3/
+measurement_results_raw/
+
+# Generated report (graph.html/manifest.json/cache) -- regenerate, don't commit.
+graphify-out/
+
+# Timestamped run dirs: 20260825-192002 was added then reverted same day as
+# side-effect-prone (a90626d). Don't repeat that churn for future runs.
+evals/ppr_agent_benchmark/runs/
