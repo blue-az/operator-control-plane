@@ -3664,6 +3664,270 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 0)
         self.assertIn("is an offload candidate", res.stdout)
 
+    def test_usage_role_tagging(self) -> None:
+        # USAGE_ROLE_TAGGING_SPEC.md: role is derived from the task's
+        # assigned_harness / review_harness, reusing the same lookup brief
+        # generation uses (derive_role_for_task) -- but unlike brief
+        # generation, "both" is reported plainly here rather than degraded
+        # to "reviewer", since a usage record isn't a disclosure boundary.
+        import datetime
+
+        import yaml
+
+        self.run_operator("init")
+        fixtures_dir = Path(__file__).resolve().parent / "fixtures"
+        op_path = Path(self.temp_dir) / ".operator"
+        today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        usage_file = op_path / "usage" / f"{today}.yaml"
+        payload_file = Path(self.temp_dir) / "payload.txt"
+        payload_file.write_text("dummy usage payload")
+
+        res = self.run_operator(
+            "task-create",
+            "--objective",
+            "role tagging",
+            "--id",
+            "t-role",
+            "--assign",
+            "codex",
+            "--review",
+            "claude",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        # 1. usage-add derives role from the task for each harness identity.
+        for harness, expected_role in (
+            ("codex", "builder"),
+            ("claude", "reviewer"),
+            ("gemini-agy", "unassigned"),
+        ):
+            res = self.run_operator(
+                "usage-add",
+                "--harness",
+                harness,
+                "--task",
+                "t-role",
+                "--cost",
+                "0.0",
+                "--file",
+                str(payload_file),
+            )
+            self.assertEqual(res.returncode, 0, res.stderr)
+
+        data = yaml.safe_load(usage_file.read_text())
+        by_harness = {r["harness_id"]: r for r in data}
+        self.assertEqual(by_harness["codex"]["role"], "builder")
+        self.assertEqual(by_harness["claude"]["role"], "reviewer")
+        self.assertEqual(by_harness["gemini-agy"]["role"], "unassigned")
+
+        # 2. Self-review (assigned == review) reports "both" plainly via
+        # session-start's usage record, diverging from brief generation's
+        # degrade-to-reviewer rule for the same case.
+        res = self.run_operator(
+            "task-create",
+            "--objective",
+            "self review",
+            "--id",
+            "t-both",
+            "--assign",
+            "claude",
+            "--review",
+            "claude",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        res = self.run_operator(
+            "session-start", "--task", "t-both", "--harness", "claude"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        data = yaml.safe_load(usage_file.read_text())
+        both_rec = next(r for r in data if r["task_id"] == "t-both")
+        self.assertEqual(both_rec["role"], "both")
+
+        # 3. usage-annotate --role manually overrides the gemini-agy
+        # ("unassigned") record from step 1, tagging field_sources as manual.
+        gemini_rec = by_harness["gemini-agy"]
+        res = self.run_operator(
+            "usage-annotate", gemini_rec["usage_id"], "--role", "reviewer"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        data = yaml.safe_load(usage_file.read_text())
+        gemini_rec = next(r for r in data if r["usage_id"] == gemini_rec["usage_id"])
+        self.assertEqual(gemini_rec["role"], "reviewer")
+        self.assertEqual(gemini_rec.get("field_sources", {}).get("role"), "manual")
+
+        # 4. usage-import auto-derives role (field_sources: auto) on its own,
+        # separate task -- this record is left untouched for the staleness
+        # check below.
+        res = self.run_operator(
+            "task-create",
+            "--objective",
+            "claude import role",
+            "--id",
+            "t-role-import",
+            "--assign",
+            "claude",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        # session-start first creates today's open placeholder record, so
+        # the subsequent import updates it in place (matching by
+        # task_id+harness_id+time-window overlap) instead of filing a new
+        # record under the fixture's own (2026-05-29) session date. The
+        # placeholder's started_at must be rewritten to overlap the
+        # fixture's embedded timestamps first (same technique
+        # test_usage_lane_tagging uses for its claude-task case).
+        res = self.run_operator(
+            "session-start", "--task", "t-role-import", "--harness", "claude"
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        data = yaml.safe_load(usage_file.read_text())
+        for r in data:
+            if r["task_id"] == "t-role-import":
+                r["started_at"] = "2026-05-29T06:00:00Z"
+        usage_file.write_text(yaml.safe_dump(data))
+        self.rebaseline_ledger()
+
+        env_claude = {"OPERATOR_TEST_CLAUDE_DIR": str(fixtures_dir / "claude")}
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "claude",
+            "--task",
+            "t-role-import",
+            "--session-id",
+            "f49ed474",
+            env=env_claude,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        data = yaml.safe_load(usage_file.read_text())
+        imported_rec = next(
+            r
+            for r in data
+            if r["task_id"] == "t-role-import" and r.get("source_session_ref")
+        )
+        self.assertEqual(imported_rec["role"], "builder")
+        self.assertEqual(imported_rec.get("field_sources", {}).get("role"), "auto")
+
+        # 5. usage-summary --by-role groups by the tagged role.
+        res = self.run_operator("usage-summary", "--by-role")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("SUMMARY BY ROLE", res.stdout)
+        self.assertIn("Role:         builder", res.stdout)
+        self.assertIn("Role:         reviewer", res.stdout)
+        self.assertIn("Role:         both", res.stdout)
+
+        # 6. doctor flags a stale auto role tag when the task's role wiring
+        # changes after import (t-role-import: assigned_harness claude ->
+        # codex, so harness_id "claude" now derives "unassigned"), but never
+        # flags the manually-annotated gemini-agy record even though ITS
+        # task ("t-role") also changes underneath it the same way.
+        task_file = op_path / "tasks" / "t-role-import.yaml"
+        task_data = yaml.safe_load(task_file.read_text())
+        task_data["assigned_harness"] = "codex"
+        task_file.write_text(yaml.safe_dump(task_data))
+
+        role_task_file = op_path / "tasks" / "t-role.yaml"
+        role_task_data = yaml.safe_load(role_task_file.read_text())
+        role_task_data["assigned_harness"] = "gemini-agy"
+        role_task_data["review_harness"] = None
+        role_task_file.write_text(yaml.safe_dump(role_task_data))
+        self.rebaseline_ledger()
+
+        res = self.run_operator("doctor")
+        self.assertIn(
+            f"Usage record {imported_rec['usage_id']} has stale role tag "
+            "'builder' (task 't-role-import' now derives 'unassigned' "
+            "for harness 'claude')",
+            res.stdout,
+        )
+        self.assertNotIn(f"Usage record {gemini_rec['usage_id']} has stale role tag", res.stdout)
+
+    def test_usage_cache_waste(self) -> None:
+        # USAGE_CACHE_WASTE_SPEC.md: a Claude cache write only counts as
+        # wasted once a LATER write supersedes it with no intervening read.
+        # Fixture cw001: msg1 writes 1000 (never read before msg2 writes
+        # again) -> wasted; msg2 writes 500, later redeemed by msg3's read
+        # -> not wasted. Expect wasted=1000/1500 (66.7%).
+        import glob
+
+        import yaml
+
+        self.run_operator("init")
+        fixtures_dir = Path(__file__).resolve().parent / "fixtures"
+        op_path = Path(self.temp_dir) / ".operator"
+        shutil.copy(fixtures_dir / "pricing.yaml", op_path / "pricing.yaml")
+
+        def load_all_usage_records():
+            recs = []
+            for p in glob.glob(str(op_path / "usage" / "*.yaml")):
+                recs.extend(yaml.safe_load(Path(p).read_text()) or [])
+            return recs
+
+        res = self.run_operator(
+            "task-create",
+            "--objective",
+            "cache waste",
+            "--id",
+            "t-cache-waste",
+            "--assign",
+            "claude",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        # cw001's own timestamps (2026-08-01) land in a usage file dated by
+        # session start, not "today" -- an unrelated fixture-date quirk of
+        # usage-import (see USAGE_AUTOIMPORT_SPEC.md); read across all usage
+        # files instead of assuming which date file holds the record.
+        env_claude = {"OPERATOR_TEST_CLAUDE_DIR": str(fixtures_dir / "claude_cache_waste")}
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "claude",
+            "--task",
+            "t-cache-waste",
+            "--session-id",
+            "cw001",
+            env=env_claude,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        data = load_all_usage_records()
+        rec = next(r for r in data if r["task_id"] == "t-cache-waste")
+        self.assertEqual(rec["tokens_cache_write"], 1500)
+        cache_waste = rec["cache_waste"]
+        self.assertEqual(cache_waste["wasted_cache_write_tokens"], 1000)
+        self.assertAlmostEqual(cache_waste["wasted_cache_write_pct"], 1000 / 1500)
+        self.assertEqual(cache_waste["method"], "v1-superseded-no-reuse")
+        self.assertEqual(rec.get("field_sources", {}).get("cache_waste"), "auto")
+
+        # Re-import is idempotent -- no double counting.
+        res = self.run_operator(
+            "usage-import",
+            "--harness",
+            "claude",
+            "--task",
+            "t-cache-waste",
+            "--session-id",
+            "cw001",
+            env=env_claude,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        data = load_all_usage_records()
+        matching = [r for r in data if r["task_id"] == "t-cache-waste"]
+        self.assertEqual(len(matching), 1)
+        self.assertEqual(matching[0]["cache_waste"]["wasted_cache_write_tokens"], 1000)
+
+        res = self.run_operator("usage-summary", "--cache-waste-audit")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("66.7% of Claude cache-write spend", res.stdout)
+        self.assertIn("v1-superseded-no-reuse method, Claude only", res.stdout)
+
+        # doctor: advisory-only high-cache-waste warning above the 0.5 threshold.
+        res = self.run_operator("doctor")
+        self.assertIn(
+            f"Usage record {rec['usage_id']} has high cache waste: 67% of cache-write spend",
+            res.stdout,
+        )
+
     def test_doctor_new_warnings(self) -> None:
         import yaml
 
