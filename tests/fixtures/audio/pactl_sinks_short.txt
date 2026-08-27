@@ -1,0 +1,5 @@
+54	alsa_output.pci-0000_01_00.1.pro-output-3	PipeWire	s32le 8ch 48000Hz	SUSPENDED
+55	alsa_output.pci-0000_01_00.1.pro-output-7	PipeWire	s32le 8ch 48000Hz	SUSPENDED
+56	alsa_output.pci-0000_01_00.1.pro-output-8	PipeWire	s32le 8ch 48000Hz	SUSPENDED
+57	alsa_output.pci-0000_01_00.1.pro-output-9	PipeWire	s32le 8ch 48000Hz	SUSPENDED
+59	alsa_output.pci-0000_03_00.1.hdmi-stereo	PipeWire	s16le 2ch 48000Hz	SUSPENDED
