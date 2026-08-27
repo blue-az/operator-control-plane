@@ -1,0 +1,1122 @@
+{
+  "done": {
+    "ambiguous-anchor|L2|gemma4:26b|1": true,
+    "ambiguous-anchor|L2|gemma4:26b|2": true,
+    "ambiguous-anchor|L2|gemma4:26b|3": true,
+    "ambiguous-anchor|L2|gemma4:26b|4": true,
+    "ambiguous-anchor|L2|gemma4:26b|5": true,
+    "ambiguous-anchor|L2|gemma4:26b|6": true,
+    "ambiguous-anchor|L2|gemma4:31b|1": true,
+    "ambiguous-anchor|L2|gemma4:31b|2": true,
+    "ambiguous-anchor|L2|gemma4:31b|3": true,
+    "ambiguous-anchor|L2|gemma4:31b|4": true,
+    "ambiguous-anchor|L2|gemma4:31b|5": true,
+    "ambiguous-anchor|L2|gemma4:31b|6": true,
+    "csv-summarize-repair|L2|gemma4:26b|1": true,
+    "csv-summarize-repair|L2|gemma4:26b|2": true,
+    "csv-summarize-repair|L2|gemma4:26b|3": true,
+    "csv-summarize-repair|L2|gemma4:26b|4": true,
+    "csv-summarize-repair|L2|gemma4:26b|5": true,
+    "csv-summarize-repair|L2|gemma4:26b|6": true,
+    "csv-summarize-repair|L2|gemma4:31b|1": true,
+    "csv-summarize-repair|L2|gemma4:31b|2": true,
+    "csv-summarize-repair|L2|gemma4:31b|3": true,
+    "csv-summarize-repair|L2|gemma4:31b|4": true,
+    "csv-summarize-repair|L2|gemma4:31b|5": true,
+    "csv-summarize-repair|L2|gemma4:31b|6": true,
+    "strict-log-format|L2|gemma4:26b|1": true,
+    "strict-log-format|L2|gemma4:26b|2": true,
+    "strict-log-format|L2|gemma4:26b|3": true,
+    "strict-log-format|L2|gemma4:26b|4": true,
+    "strict-log-format|L2|gemma4:26b|5": true,
+    "strict-log-format|L2|gemma4:26b|6": true,
+    "strict-log-format|L2|gemma4:31b|1": true,
+    "strict-log-format|L2|gemma4:31b|2": true,
+    "strict-log-format|L2|gemma4:31b|3": true,
+    "strict-log-format|L2|gemma4:31b|4": true,
+    "strict-log-format|L2|gemma4:31b|5": true,
+    "strict-log-format|L2|gemma4:31b|6": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 11.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 4.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 4.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 4.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 4.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 4.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 23.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 16.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 15.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-31b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 15.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-31b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 16.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/ambiguous-anchor__L2__gemma4-31b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 16.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-sxaind1f/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-sxaind1f/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 24.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-g1x8m79n/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-g1x8m79n/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-g1x8m79n/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-g1x8m79n/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 14.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-4qdcn9ky/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-4qdcn9ky/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 17.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-sjjq4fh_/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-sjjq4fh_/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 19.1
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-kcwh5vsg/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-kcwh5vsg/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-kcwh5vsg/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-kcwh5vsg/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 14.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n9v3fl49/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-n9v3fl49/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 19.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-cr8753i8/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-cr8753i8/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 80.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jt4c3s83/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-jt4c3s83/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 68.7
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-y3jnzoxk/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-y3jnzoxk/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 69.7
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-nsfprf1v/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-nsfprf1v/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-31b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 64.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-c1ra5uwa/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-c1ra5uwa/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-31b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 70.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-_vtccsmo/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-_vtccsmo/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/csv-summarize-repair__L2__gemma4-31b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 62.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 30.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 22.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 22.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 22.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 23.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 21.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 59.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 47.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 49.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-31b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 50.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-31b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 48.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-l2/traces/strict-log-format__L2__gemma4-31b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 49.7
+    }
+  ]
+}
