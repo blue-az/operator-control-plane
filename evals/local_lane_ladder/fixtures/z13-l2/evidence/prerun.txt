@@ -1,0 +1,12 @@
+# z13-l2 pre-run
+captured_utc: 2026-08-17T04:37:37Z
+git_rev: 1229fc88d4be77803d657b357459caebf937d497
+hostname: z13
+ac: 1
+governor: powersave
+question: is z13 gemma4:26b actually 36/54?
+design: 3 fixtures x 2 models x n=6 = 36 cells, L2 only
+fixtures: ambiguous-anchor csv-summarize-repair strict-log-format
+controls: num_ctx 16384, temperature 0.8, think off
+ledger: pack-local fixtures/z13-l2/.operator
+take_over: ssh z13 -t tmux attach -t z13-l2
