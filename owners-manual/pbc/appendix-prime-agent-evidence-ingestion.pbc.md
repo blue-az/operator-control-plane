@@ -2,7 +2,7 @@
 id: pbc_prime_agent_evidence_ingestion
 title: "Prime Agent Session Evidence Ingestion — Behavior Contract"
 context: operator-evidence-intake
-status: draft
+status: active
 owners:
   - operator_user
 tags:
@@ -10,8 +10,7 @@ tags:
   - operator
   - evidence
   - usage
-  - proposed
-updated: 2026-08-09
+updated: 2026-08-27
 ---
 
 # Prime Agent Session Evidence Ingestion — Behavior Contract
@@ -20,13 +19,18 @@ updated: 2026-08-09
 > so that a claim about work done in a Prime Agent session can be checked against a structured
 > execution byproduct rather than against the agent's own prose.
 >
-> **Nothing in the Proposed sections is implemented.** Per repository convention, all unbuilt
-> behavior is fenced as `pbc:proposed-*` so tooling does not read it as active.
+> **PAE-RUL-007..012 are ratified (provisional trust) as of 2026-08-27.** Gates 0-2 (Observe,
+> Meter, Attest) are complete and verified under distinct-UID isolation on z13. See `claim-0112`
+> (the freeze/ruling claim) and `claim-0106`/`claim-0107`/`claim-0108` (the Gate evidence,
+> migrated from original z13 `claim-0011`/`claim-0012`/`claim-0013`) on ledger task `pa-evidence-z13`.
+> `PAE-BEH-001`/`PAE-BEH-002` in Proposed Behavior are unaffected by this ruling and remain proposed
+> — the Gates above satisfy their outcomes in substance but that equivalence was not itself part of
+> this ruling; a separate pass can retire them if that's confirmed deliberately.
 >
-> **Status is `draft` — awaiting an operator ruling.** Per this directory's trust model, a contract
-> stays `draft` until a human owner reviews and accepts it. The presence of this file authorizes no
-> work. Ledger task: `pa-evidence`. If Gate 0 shows the documented session shape is wrong enough to
-> change the design, rewrite this document rather than amending it (see Open Question 4).
+> **Status is `active` — ruled 2026-08-27 (approve, Erik).** Ledger task: `pa-evidence` (original,
+> z13) / `pa-evidence-z13` (seat-side migration and ruling). If a later gate shows the documented
+> session shape was wrong enough to change the design, rewrite this document rather than amending
+> it (see Open Question 4).
 
 ## Why This Exists
 
@@ -140,6 +144,50 @@ Three phases, each gating the next:
     make one impossible. No behavior in this PBC may be described to a reviewer as proof of
     execution.
   trust: verified
+- id: PAE-RUL-007
+  name: Observed Bytes Gate The Schema
+  rule: >
+    No field mapping may be implemented from documentation. Phase 0 must produce at least one
+    real session containing a subagent spawn and at least one compaction, and the adapter must be
+    written against those captured bytes. The captured fixture lands in tests/fixtures/ as the
+    adapter's regression basis, following the existing synthetic-harness-log convention.
+  trust: provisional
+- id: PAE-RUL-008
+  name: Own Usage And Aggregate Usage Are Different Units
+  rule: >
+    Prime Agent persists child_usage_attributed entries that fold a subagent's tokens into the
+    parent assistant turn, so a parent message carries an aggregate that already contains its
+    children. Summing message usage naively double-counts. The adapter must record which
+    quantity it took — own usage or subtree aggregate — in field_sources, and must never emit a
+    number whose unit is ambiguous. This is the USAGE_AUTOIMPORT_SPEC hard rule applied to a
+    tree-shaped source it was not written for.
+  trust: provisional
+- id: PAE-RUL-009
+  name: Tool Calls Remain The Comparable Metric
+  rule: >
+    tool_calls stays the cross-harness comparable. Prime Agent routes most work through a single
+    IPython tool, so its tool-call count is not commensurate with a harness that exposes a dozen
+    discrete tools. The adapter must record the count and flag the metering asymmetry rather than
+    silently placing it in a column that invites comparison.
+  trust: provisional
+- id: PAE-RUL-010
+  name: Unknown Models Cost Null
+  rule: >
+    Prime Agent sessions may run models absent from .operator/pricing.yaml. Missing model implies
+    cost_estimate_usd null and a doctor flag. No price is guessed.
+  trust: provisional
+- id: PAE-RUL-011
+  name: Adapter Pins The Session Version It Read
+  rule: >
+    Each imported record stores the session-format version observed at import. An import from an
+    unrecognized version warns and refuses rather than parsing optimistically.
+  trust: provisional
+- id: PAE-RUL-012
+  name: Read-Only Against Prime Agent State
+  rule: >
+    The adapter opens ~/.prime/agent/ read-only. It never writes, moves, migrates, or deletes
+    Prime Agent state, and never invokes the prime-agent binary as a side effect of import.
+  trust: provisional
 ```
 
 ## Proposed Behavior
@@ -158,55 +206,6 @@ Three phases, each gating the next:
     A claim about work performed in a Prime Agent session can carry that session's transcript as
     fingerprinted evidence, so a later doctor run fails closed if the transcript changed after
     verification.
-```
-
-## Proposed Rules
-
-```pbc:proposed-rules
-- id: PAE-RUL-007
-  name: Observed Bytes Gate The Schema
-  rule: >
-    No field mapping may be implemented from documentation. Phase 0 must produce at least one
-    real session containing a subagent spawn and at least one compaction, and the adapter must be
-    written against those captured bytes. The captured fixture lands in tests/fixtures/ as the
-    adapter's regression basis, following the existing synthetic-harness-log convention.
-  trust: proposed
-- id: PAE-RUL-008
-  name: Own Usage And Aggregate Usage Are Different Units
-  rule: >
-    Prime Agent persists child_usage_attributed entries that fold a subagent's tokens into the
-    parent assistant turn, so a parent message carries an aggregate that already contains its
-    children. Summing message usage naively double-counts. The adapter must record which
-    quantity it took — own usage or subtree aggregate — in field_sources, and must never emit a
-    number whose unit is ambiguous. This is the USAGE_AUTOIMPORT_SPEC hard rule applied to a
-    tree-shaped source it was not written for.
-  trust: proposed
-- id: PAE-RUL-009
-  name: Tool Calls Remain The Comparable Metric
-  rule: >
-    tool_calls stays the cross-harness comparable. Prime Agent routes most work through a single
-    IPython tool, so its tool-call count is not commensurate with a harness that exposes a dozen
-    discrete tools. The adapter must record the count and flag the metering asymmetry rather than
-    silently placing it in a column that invites comparison.
-  trust: proposed
-- id: PAE-RUL-010
-  name: Unknown Models Cost Null
-  rule: >
-    Prime Agent sessions may run models absent from .operator/pricing.yaml. Missing model implies
-    cost_estimate_usd null and a doctor flag. No price is guessed.
-  trust: proposed
-- id: PAE-RUL-011
-  name: Adapter Pins The Session Version It Read
-  rule: >
-    Each imported record stores the session-format version observed at import. An import from an
-    unrecognized version warns and refuses rather than parsing optimistically.
-  trust: proposed
-- id: PAE-RUL-012
-  name: Read-Only Against Prime Agent State
-  rule: >
-    The adapter opens ~/.prime/agent/ read-only. It never writes, moves, migrates, or deletes
-    Prime Agent state, and never invokes the prime-agent binary as a side effect of import.
-  trust: proposed
 ```
 
 ## Phase Gates
