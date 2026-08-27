@@ -1,0 +1,83 @@
+{
+  "answer": "[Stopped: model repeated an already-handled tool call 'list_dir: .'. State-changing steps that did run: none.]",
+  "answer_chars": 110,
+  "answer_words": 15,
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "This workspace holds the governing docs of project-phoenix as they are on disk today. Answer from files you open here, not from memory of other trees.\n\nCover these five, briefly:\n1. What this repo is for (one or two sentences).\n2. The names that must not be collapsed: the folder, the public line, the open-work board, the enforcement CLI \u2014 and where each lives.\n3. Where authoritative answers are supposed to come from.\n4. What is open *right now* (not a greatest-hits list).\n5. The first three files a new agent should read, in order.\n\nIf a file you need is missing, say so. Do not invent a current task. Prefer short and sourced over long and complete-sounding.",
+    "--model",
+    "gemma4:31b",
+    "--workspace",
+    "/tmp/opr-eval-map-probe-2rw1il0c",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "8",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off"
+  ],
+  "cell_key": "map-probe|ask|gemma4:31b|4",
+  "facets": {
+    "authority": "missing",
+    "names": "missing",
+    "open_now": "missing",
+    "read_first": "missing",
+    "what_for": "missing"
+  },
+  "files_read": [
+    "README.md"
+  ],
+  "git_rev": "18611de7fbae8483bde091b1cf37c186844a7b01",
+  "grade_detail": "0/5 facets sourced",
+  "harness": "local-lane-eval",
+  "level": "ask",
+  "machine": "desktop",
+  "model": "gemma4:31b",
+  "n_rounds": 3,
+  "n_sourced": 0,
+  "passed": false,
+  "prompt": "This workspace holds the governing docs of project-phoenix as they are on disk today. Answer from files you open here, not from memory of other trees.\n\nCover these five, briefly:\n1. What this repo is for (one or two sentences).\n2. The names that must not be collapsed: the folder, the public line, the open-work board, the enforcement CLI \u2014 and where each lives.\n3. Where authoritative answers are supposed to come from.\n4. What is open *right now* (not a greatest-hits list).\n5. The first three files a new agent should read, in order.\n\nIf a file you need is missing, say so. Do not invent a current task. Prefer short and sourced over long and complete-sounding.",
+  "prompt_tokens": 2071,
+  "recorded_utc": "2026-08-15T03:22:13.273347+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: gemma4:31b (lane_1_local_repair)\nDispatching governed query...\n[contract: goal-shaped \u2014 local models likely to flail; consider L2 phrasing (exact paths, an anchor, numbered steps, a success check) or a frontier lane]\nThinking...\n[tokens] prompt=570 completion=14 think_chars=0 done_reason=stop\n\n[Model requests tool call: list_dir]\nArguments: {\n  \"tool\": \"list_dir\",\n  \"path\": \".\"\n}\n\n[Tool Output]\nAGENTS.md\nBOTTLENECKS.md\nCLAUDE.md\nONBOARDING.md\nREADME.md\n\nThinking...\n[tokens] prompt=624 completion=17 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"README.md\"\n}\n\n[Tool Output]\n# Project Phoenix\n\nProject Phoenix is a local, deterministic agent portfolio for evaluating\ndomain-specific analytical workflows, routing surfaces, and model interfaces.\n\nThe core design rule is that authoritative answers come from grounded\nsubstrates: databases, files, schemas, solvers, and validation artifacts.\nLanguage models are optional interface layers for routing, formatting, and\nbounded generation; they are not the source of truth.\n\n## Current Focus\n\n- OpenClaw/Phoenix operator shell and incident workflow.\n- ShowcaseAgent deterministic domain routing.\n- PPR Agent medical-device Product Performance Report substrate.\n- Literal-substrate experiments for model/harness boundary analysis.\n\n## Useful Checks\n\n```bash\nuv run pytest -q\nscripts/check_openclaw_hardening.sh --skip-live\nscripts/openclaw_showcase_routing_demo.sh --human\npython domains/DemoAgents/PPR_Agent/test_agent.py\n```\n\nLive OpenClaw endpoint checks require the gateway to be running on\n`127.0.0.1:19001`.\n\n\nThinking...\n[tokens] prompt=877 completion=14 think_chars=0 done_reason=stop\n\n--- Output ---\n[Stopped: model repeated an already-handled tool call 'list_dir: .'. State-changing steps that did run: none.]\n--------------\n",
+  "task_id": "map-probe",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 45,
+    "distinct_tools": [
+      "list_dir",
+      "read_file"
+    ],
+    "n_calls": 2,
+    "n_failed_calls": 0,
+    "no_dispatch": false,
+    "stopped_repeat": true,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": ".",
+        "tool": "list_dir"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "README.md",
+        "tool": "read_file"
+      }
+    ]
+  },
+  "trial": 4,
+  "wall_clock_s": 5.2
+}

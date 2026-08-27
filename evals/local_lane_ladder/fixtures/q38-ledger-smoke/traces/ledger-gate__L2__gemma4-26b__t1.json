@@ -1,0 +1,72 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "1. Read ledger/claim-0007.yaml, ledger/claim-0008.yaml and ledger/notes.sha256.\n2. In ledger/claim-0007.yaml, replace the four lines\n   verification_status: true\n   verified_by: claude\n   required_gate: the attach tests pass\n   evidence_hash: 0000000000000000000000000000000000000000000000000000000000000000\n   with the four lines\n   verification_status: false\n   verified_by: null\n   required_gate: ledger/notes.txt\n   evidence_hash: 314fae877b423cbfbed03dbc3066bd294f820d6123b74263ac8426f84edf47f6\n   (that digest is the line in ledger/notes.sha256).\n3. Verify by running \"python3 tests/check_gate.py\" and\n   \"python3 tests/check_integrity.py\" from the fixture root; each should\n   exit 0 and print GATE_OK or INTEGRITY_OK.\nOnly touch ledger/claim-0007.yaml.\n",
+    "--model",
+    "gemma4:26b",
+    "--workspace",
+    "/tmp/opr-eval-ledger-gate-L2-e345hyle",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "3",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off"
+  ],
+  "cell_key": "ledger-gate|L2|gemma4:26b|1",
+  "git_rev": "18611de7fbae8483bde091b1cf37c186844a7b01",
+  "grade_detail": "2/3 checks failed: gate half: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-ledger-gate-L2-e345hyle/tests/check_gate.py\", line 13, in <module>\n    assert gate == \"ledger/notes.txt\", (\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: required_gate='the attach tests pass' expected 'ledger/notes.txt'; integrity half: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-ledger-gate-L2-e345hyle/tests/check_integrity.py\", line 14, in <module>\n    assert got == digest, f\"evidence_hash={got!r} expected {digest} (copy of notes.sha256)\"\n           ^^^^^^^^^^^^^\nAssertionError: evidence_hash='0000000000000000000000000000000000000000000000000000000000000000' expected 314fae877b423cbfbed03dbc3066bd294f820d6123b74263",
+  "harness": "local-lane-eval",
+  "level": "L2",
+  "machine": "desktop",
+  "model": "gemma4:26b",
+  "passed": false,
+  "prompt": "1. Read ledger/claim-0007.yaml, ledger/claim-0008.yaml and ledger/notes.sha256.\n2. In ledger/claim-0007.yaml, replace the four lines\n   verification_status: true\n   verified_by: claude\n   required_gate: the attach tests pass\n   evidence_hash: 0000000000000000000000000000000000000000000000000000000000000000\n   with the four lines\n   verification_status: false\n   verified_by: null\n   required_gate: ledger/notes.txt\n   evidence_hash: 314fae877b423cbfbed03dbc3066bd294f820d6123b74263ac8426f84edf47f6\n   (that digest is the line in ledger/notes.sha256).\n3. Verify by running \"python3 tests/check_gate.py\" and\n   \"python3 tests/check_integrity.py\" from the fixture root; each should\n   exit 0 and print GATE_OK or INTEGRITY_OK.\nOnly touch ledger/claim-0007.yaml.\n",
+  "recorded_utc": "2026-08-15T01:53:57.944345+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: gemma4:26b (lane_1_local_repair)\nDispatching governed query...\nThinking...\n[tokens] prompt=735 completion=24 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"ledger/claim-0007.yaml\"\n}\n\n[Tool Output]\nclaim_id: claim-0007\ntask_id: attach-run\ntype: test_passes\ntext: the attach battery passed\nmade_by: claude\nverification_status: true\nverified_by: claude\nrequired_gate: the attach tests pass\nevidence_hash: 0000000000000000000000000000000000000000000000000000000000000000\n\n\nThinking...\n[tokens] prompt=900 completion=24 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"ledger/claim-0008.yaml\"\n}\n\n[Tool Output]\nclaim_id: claim-0008\ntask_id: attach-run\ntype: file_exists\ntext: notes.txt is present\nmade_by: claude\nverification_status: false\nverified_by: null\nrequired_gate: ledger/notes.txt\nevidence_hash: 314fae877b423cbfbed03dbc3066bd294f820d6123b74263ac8426f84edf47f6\n\n\nThinking...\n[tokens] prompt=1053 completion=22 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"ledger/notes.sha256\"\n}\n\n[Tool Output]\n314fae877b423cbfbed03dbc3066bd294f820d6123b74263ac8426f84edf47f6\n\n\nThinking...\n[tokens] prompt=0 completion=0 think_chars=0 done_reason=None\n\n[No tool dispatched: response carried tool-shaped JSON that did not yield a dispatchable call]\n\n--- Output ---\n{\"tool\": \"patch_file\", \"path\": \"ledger/claim-0007.yaml\", \"target_content\": \"verification_status: true\\nverified_by: claude\\nrequired_gate: the attach tests pass\\nevidence_hash: 0000000000000000000000000000000\n--------------\n",
+  "task_id": "ledger-gate",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 70,
+    "distinct_tools": [
+      "read_file"
+    ],
+    "n_calls": 3,
+    "n_failed_calls": 0,
+    "no_dispatch": true,
+    "stopped_repeat": false,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": "ledger/claim-0007.yaml",
+        "tool": "read_file"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "ledger/claim-0008.yaml",
+        "tool": "read_file"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "ledger/notes.sha256",
+        "tool": "read_file"
+      }
+    ]
+  },
+  "trial": 1,
+  "wall_clock_s": 22.5
+}

@@ -1,0 +1,12 @@
+# qnext-80b-e9-ceiling pre-run — L2 ceiling, host-conditioned
+captured_utc: 2026-08-19T09:35:20Z
+git_rev: 3e495641589fe445c72a359f38e5d03401ec4185
+question: does qwen3-next:80b-a3b clear the 36/54 L2 ceiling
+design: 5 fixtures x L2 x 2 models x n=6 = 60 cells
+controls: num_ctx 16384, temperature 0.8, think off, --on-repeat default
+same-run control: qwen3.6:27b (E9 19/30). Not pooled with e9/e11.
+HOST-CONDITIONED: qwen3-next is 51 GB on a 24 GB card, ~55% CPU.
+  Gate 2 warned, did not veto. Print placement beside every score.
+hardware: single RTX 3090 @ 320 W. Second card still unpowered.
+measured speed this config: peak 18.4 t/s, @15k 28.1 t/s
+NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W

@@ -1,0 +1,182 @@
+/home/blueaz/models/q38rocm/z13-n4.sh; echo N4_DONE
+]3008;start=d6d0aeca-a29f-4f03-a717-bddfa949ac27;machineid=47da3890804d4b0793876f0e1e69daf6;user=blueaz;hostname=z13;bootid=fb11003e-7dd1-44a0-9afb-ef325fb3b93e;pid=00000000000000986676;type=shell;cwd=/home/blueaz\[?2004h[01;32mblueaz@z13[00m:[01;34m~[00m$ /home/blueaz/models/q38rocm/z13-n4.sh; echo N4_DONE
+[?2004l]3008;start=8e7f38fa-7702-4c04-8fa7-57d44c9128bb;machineid=47da3890804d4b0793876f0e1e69daf6;user=blueaz;hostname=z13;bootid=fb11003e-7dd1-44a0-9afb-ef325fb3b93e;pid=00000000000000986676;type=command;cwd=/home/blueaz\===== META 2026-08-17T17:53:50-07:00 =====
+ac0=1
+profile=balanced
+gov=powersave
+Available devices:
+  ROCm0: AMD Radeon 8050S Graphics (20480 MiB, 26098 MiB free)
+  Vulkan0: AMD Radeon 8050S Graphics (RADV GFX1151) (24576 MiB, 24288 MiB free)
+
+===== vulkan-n4-c8k-t1 2026-08-17T17:53:50-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a fundamental data structure that enables efficient lookup, insertion, and deletion of elements by using a hash function to compute an index into an array of buckets or slots. This function maps keys to specific indices, allowing for average-case constant time complexity, $O(1)$, for these operations. When two keys hash to the same index, a collision occurs, which is typically managed through methods like chaining or open addressing. By leveraging this direct addressing scheme, hash tables provide a highly performant solution for tasks such as database indexing, cache management, and rapid key-value retrieval.
+[35m
+[ Prompt: 48.0 t/s | Generation: 17.4 t/s ]
+[0m
+Exiting...
+END_t1 2026-08-17T17:54:02-07:00
+
+===== vulkan-n4-c8k-t2 2026-08-17T17:54:02-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a fundamental data structure that uses a hash function to compute an index into an array of buckets or slots, from which the desired value can be found. By mapping keys to specific locations in the array, it allows for extremely fast retrieval, insertion, and deletion of data, typically operating in average constant time, O(1). When two different keys produce the same index—a situation known as a collision—the table employs strategies such as chaining or open addressing to resolve the conflict and ensure data integrity.
+[35m
+[ Prompt: 47.2 t/s | Generation: 17.7 t/s ]
+[0m
+Exiting...
+END_t2 2026-08-17T17:54:13-07:00
+
+===== vulkan-n4-c8k-t3 2026-08-17T17:54:13-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a fundamental data structure that stores key-value pairs by using a mathematical function called a hash function to map keys to specific indices in an array. This mechanism allows for extremely efficient data retrieval, insertion, and deletion, typically achieving constant time complexity ($O(1)$) on average. When two different keys hash to the same index—a situation known as a collision—specific strategies such as chaining or open addressing are employed to manage the conflict, ensuring that the data structure remains functional and high-performing even as it scales.
+[35m
+[ Prompt: 47.9 t/s | Generation: 17.4 t/s ]
+[0m
+Exiting...
+END_t3 2026-08-17T17:54:24-07:00
+
+===== vulkan-n4-c8k-t4 2026-08-17T17:54:24-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\| 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a fundamental data structure that uses a hash function to compute an index, called a hash code, into an array of buckets or slots. By mapping keys to specific indices, it allows for average-case constant time $O(1)$ performance for lookups, insertions, and deletions. When two different keys map to the same index—a situation known as a collision—the table employs strategies such as chaining or open addressing to resolve the conflict, ensuring that each element remains accessible and the data structure remains efficient.
+[35m
+[ Prompt: 48.8 t/s | Generation: 17.8 t/s ]
+[0m
+Exiting...
+END_t4 2026-08-17T17:54:35-07:00
+
+===== vulkan-n4-c8k-t5 2026-08-17T17:54:35-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/ 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/- A hash table is a fundamental data structure that stores key-value pairs by using a hash function to compute an index into an array of buckets or slots. This mechanism allows for extremely fast average-time complexity ($O(1)$) for operations such as searching, insertion, and deletion, making it significantly more efficient than linear search methods for large datasets. When two different keys map to the same index—a phenomenon known as a collision—the hash table employs strategies like chaining or open addressing to resolve the conflict, ensuring that data remains accessible while maintaining performance efficiency.
+[35m
+[ Prompt: 41.8 t/s | Generation: 18.2 t/s ]
+[0m
+Exiting...
+END_t5 2026-08-17T17:54:47-07:00
+===== ALL_DONE 2026-08-17T17:54:47-07:00 =====
+N4_DONE
+]3008;end=8e7f38fa-7702-4c04-8fa7-57d44c9128bb;exit=success\]3008;start=d6d0aeca-a29f-4f03-a717-bddfa949ac27;machineid=47da3890804d4b0793876f0e1e69daf6;user=blueaz;hostname=z13;bootid=fb11003e-7dd1-44a0-9afb-ef325fb3b93e;pid=00000000000000986676;type=shell;cwd=/home/blueaz\[?2004h[01;32mblueaz@z13[00m:[01;34m~[00m$ 

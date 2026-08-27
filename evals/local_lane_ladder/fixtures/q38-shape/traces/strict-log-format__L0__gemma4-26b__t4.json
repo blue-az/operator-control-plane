@@ -1,0 +1,72 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "I need a summary of how many errors happened each hour from my logs.",
+    "--model",
+    "gemma4:26b",
+    "--workspace",
+    "/tmp/opr-eval-strict-log-format-L0-8pt1s0dh",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "3",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off"
+  ],
+  "cell_key": "strict-log-format|L0|gemma4:26b|4",
+  "git_rev": "18611de7fbae8483bde091b1cf37c186844a7b01",
+  "grade_detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L0-8pt1s0dh/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L0-8pt1s0dh/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+  "harness": "local-lane-eval",
+  "level": "L0",
+  "machine": "desktop",
+  "model": "gemma4:26b",
+  "passed": false,
+  "prompt": "I need a summary of how many errors happened each hour from my logs.",
+  "recorded_utc": "2026-08-14T23:46:16.010137+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: gemma4:26b (lane_1_local_repair)\nDispatching governed query...\n[contract: goal-shaped \u2014 local models likely to flail; consider L2 phrasing (exact paths, an anchor, numbered steps, a success check) or a frontier lane]\nThinking...\n[tokens] prompt=423 completion=14 think_chars=0 done_reason=stop\n\n[Model requests tool call: list_dir]\nArguments: {\n  \"tool\": \"list_dir\",\n  \"path\": \".\"\n}\n\n[Tool Output]\n[DIR] config\n[DIR] docs\n[DIR] scripts\n[DIR] src\n[DIR] tests\n.gitignore\nLICENSE\nREADME.md\n\nThinking...\n[tokens] prompt=482 completion=15 think_chars=0 done_reason=stop\n\n[Model requests tool call: list_dir]\nArguments: {\n  \"tool\": \"list_dir\",\n  \"path\": \"src\"\n}\n\n[Tool Output]\n__init__.py\nlogsum.py\nmodels.py\nutils.py\n\nThinking...\n[tokens] prompt=522 completion=15 think_chars=0 done_reason=stop\n\n[Model requests tool call: list_dir]\nArguments: {\n  \"tool\": \"list_dir\",\n  \"path\": \"logs\"\n}\n\n[Tool Output]\nError: Path not found: logs\n\nThinking...\n[tokens] prompt=551 completion=15 think_chars=0 done_reason=stop\n\n--- Output ---\n[Stopped: model repeated an already-handled tool call 'list_dir: src'. State-changing steps that did run: none.]\n--------------\n",
+  "task_id": "strict-log-format",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 59,
+    "distinct_tools": [
+      "list_dir"
+    ],
+    "n_calls": 3,
+    "n_failed_calls": 1,
+    "no_dispatch": false,
+    "stopped_repeat": true,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": ".",
+        "tool": "list_dir"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "src",
+        "tool": "list_dir"
+      },
+      {
+        "error": "Error: Path not found: logs",
+        "ok": false,
+        "path": "logs",
+        "tool": "list_dir"
+      }
+    ]
+  },
+  "trial": 4,
+  "wall_clock_s": 5.5
+}

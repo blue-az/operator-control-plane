@@ -1,0 +1,1753 @@
+{
+  "done": {
+    "ambiguous-anchor|L2|qwen3-next:latest|1": true,
+    "ambiguous-anchor|L2|qwen3-next:latest|2": true,
+    "ambiguous-anchor|L2|qwen3-next:latest|3": true,
+    "ambiguous-anchor|L2|qwen3-next:latest|4": true,
+    "ambiguous-anchor|L2|qwen3-next:latest|5": true,
+    "ambiguous-anchor|L2|qwen3-next:latest|6": true,
+    "ambiguous-anchor|L2|qwen3.6:27b|1": true,
+    "ambiguous-anchor|L2|qwen3.6:27b|2": true,
+    "ambiguous-anchor|L2|qwen3.6:27b|3": true,
+    "ambiguous-anchor|L2|qwen3.6:27b|4": true,
+    "ambiguous-anchor|L2|qwen3.6:27b|5": true,
+    "ambiguous-anchor|L2|qwen3.6:27b|6": true,
+    "booking-off-by-one|L2|qwen3-next:latest|1": true,
+    "booking-off-by-one|L2|qwen3-next:latest|2": true,
+    "booking-off-by-one|L2|qwen3-next:latest|3": true,
+    "booking-off-by-one|L2|qwen3-next:latest|4": true,
+    "booking-off-by-one|L2|qwen3-next:latest|5": true,
+    "booking-off-by-one|L2|qwen3-next:latest|6": true,
+    "booking-off-by-one|L2|qwen3.6:27b|1": true,
+    "booking-off-by-one|L2|qwen3.6:27b|2": true,
+    "booking-off-by-one|L2|qwen3.6:27b|3": true,
+    "booking-off-by-one|L2|qwen3.6:27b|4": true,
+    "booking-off-by-one|L2|qwen3.6:27b|5": true,
+    "booking-off-by-one|L2|qwen3.6:27b|6": true,
+    "constant-and-callers|L2|qwen3-next:latest|1": true,
+    "constant-and-callers|L2|qwen3-next:latest|2": true,
+    "constant-and-callers|L2|qwen3-next:latest|3": true,
+    "constant-and-callers|L2|qwen3-next:latest|4": true,
+    "constant-and-callers|L2|qwen3-next:latest|5": true,
+    "constant-and-callers|L2|qwen3-next:latest|6": true,
+    "constant-and-callers|L2|qwen3.6:27b|1": true,
+    "constant-and-callers|L2|qwen3.6:27b|2": true,
+    "constant-and-callers|L2|qwen3.6:27b|3": true,
+    "constant-and-callers|L2|qwen3.6:27b|4": true,
+    "constant-and-callers|L2|qwen3.6:27b|5": true,
+    "constant-and-callers|L2|qwen3.6:27b|6": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|1": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|2": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|3": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|4": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|5": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|6": true,
+    "csv-summarize-repair|L2|qwen3.6:27b|1": true,
+    "csv-summarize-repair|L2|qwen3.6:27b|2": true,
+    "csv-summarize-repair|L2|qwen3.6:27b|3": true,
+    "csv-summarize-repair|L2|qwen3.6:27b|4": true,
+    "csv-summarize-repair|L2|qwen3.6:27b|5": true,
+    "csv-summarize-repair|L2|qwen3.6:27b|6": true,
+    "strict-log-format|L2|qwen3-next:latest|1": true,
+    "strict-log-format|L2|qwen3-next:latest|2": true,
+    "strict-log-format|L2|qwen3-next:latest|3": true,
+    "strict-log-format|L2|qwen3-next:latest|4": true,
+    "strict-log-format|L2|qwen3-next:latest|5": true,
+    "strict-log-format|L2|qwen3-next:latest|6": true,
+    "strict-log-format|L2|qwen3.6:27b|1": true,
+    "strict-log-format|L2|qwen3.6:27b|2": true,
+    "strict-log-format|L2|qwen3.6:27b|3": true,
+    "strict-log-format|L2|qwen3.6:27b|4": true,
+    "strict-log-format|L2|qwen3.6:27b|5": true,
+    "strict-log-format|L2|qwen3.6:27b|6": true
+  },
+  "results": [
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3-next-latest__t1.json",
+      "trial": 1,
+      "wall_clock_s": 324.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "expected 1 occurrence(s) of 'restart the service --force', found 3",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex did not match: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: exactly one forced occurrence: expected 1 occurrence(s) of 'restart the service --force', found 3; other two occurrences untouched: regex did not match: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3-next-latest__t2.json",
+      "trial": 2,
+      "wall_clock_s": 407.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3-next-latest__t3.json",
+      "trial": 3,
+      "wall_clock_s": 178.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3-next-latest__t4.json",
+      "trial": 4,
+      "wall_clock_s": 224.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3-next-latest__t5.json",
+      "trial": 5,
+      "wall_clock_s": 306.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3-next-latest__t6.json",
+      "trial": 6,
+      "wall_clock_s": 305.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3.6-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 20.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3.6-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 6.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3.6-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 6.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3.6-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 6.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3.6-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 6.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/ambiguous-anchor__L2__qwen3.6-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 6.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3-next-latest__t1.json",
+      "trial": 1,
+      "wall_clock_s": 519.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3-next-latest__t2.json",
+      "trial": 2,
+      "wall_clock_s": 442.1
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3-next-latest__t3.json",
+      "trial": 3,
+      "wall_clock_s": 601.8
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3-next-latest__t4.json",
+      "trial": 4,
+      "wall_clock_s": 601.9
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3-next-latest__t5.json",
+      "trial": 5,
+      "wall_clock_s": 601.9
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3-next-latest__t6.json",
+      "trial": 6,
+      "wall_clock_s": 602.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3.6-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 24.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3.6-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 10.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3.6-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 10.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3.6-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 10.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3.6-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 10.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/booking-off-by-one__L2__qwen3.6-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 10.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3-next-latest__t1.json",
+      "trial": 1,
+      "wall_clock_s": 379.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3-next-latest__t2.json",
+      "trial": 2,
+      "wall_clock_s": 332.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3-next-latest__t3.json",
+      "trial": 3,
+      "wall_clock_s": 269.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3-next-latest__t4.json",
+      "trial": 4,
+      "wall_clock_s": 299.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3-next-latest__t5.json",
+      "trial": 5,
+      "wall_clock_s": 581.8
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3-next-latest__t6.json",
+      "trial": 6,
+      "wall_clock_s": 602.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3.6-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 26.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3.6-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 12.1
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-j5no3iq7/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-j5no3iq7/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3.6-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 6.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-iedebk74/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-iedebk74/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3.6-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 6.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-ozewr9r8/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-constant-and-callers-L2-ozewr9r8/tests/check_limits.py\", line 11, in <module>\n    assert \"up to 5 times\" in describe_policy(), f\"stale message: {describe_policy()!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: stale message: 'retrying up to 3 times before giving up'; no stale value in code: pattern not found: 'up to 5 times'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3.6-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 6.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/constant-and-callers__L2__qwen3.6-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 12.6
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3-next-latest__t1.json",
+      "trial": 1,
+      "wall_clock_s": 601.9
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3-next-latest__t2.json",
+      "trial": 2,
+      "wall_clock_s": 601.9
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3-next-latest__t3.json",
+      "trial": 3,
+      "wall_clock_s": 602.2
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3-next-latest__t4.json",
+      "trial": 4,
+      "wall_clock_s": 601.9
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3-next-latest__t5.json",
+      "trial": 5,
+      "wall_clock_s": 601.9
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3-next-latest__t6.json",
+      "trial": 6,
+      "wall_clock_s": 601.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-ftn3zwi0/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-ftn3zwi0/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3.6-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 61.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3.6-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 45.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-uywqfyyv/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-uywqfyyv/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=46.44 expected 1280.00",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3.6-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 38.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-r1z3fxhz/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-r1z3fxhz/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3.6-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 36.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-qeexgj4j/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-qeexgj4j/src/expenses.py\", line 42, in summarize_expenses\n    amount = float(amount_str)\nValueError: could not convert string to float: '\"1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-qeexgj4j/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-qeexgj4j/src/expenses.py\", line 42, in summarize_expenses\n    amount = float(amount_str)\nValueError: could not convert string to float: '\"1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3.6-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 39.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-qgtyg4v1/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L2-qgtyg4v1/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/csv-summarize-repair__L2__qwen3.6-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 40.8
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-udd8fjjm/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-udd8fjjm/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-udd8fjjm/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-udd8fjjm/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3-next-latest__t1.json",
+      "trial": 1,
+      "wall_clock_s": 57.6
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-titnugog/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-titnugog/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-titnugog/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-titnugog/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3-next-latest__t2.json",
+      "trial": 2,
+      "wall_clock_s": 53.3
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-h80tkleg/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-h80tkleg/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-h80tkleg/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-h80tkleg/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3-next-latest__t3.json",
+      "trial": 3,
+      "wall_clock_s": 55.6
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-5qk0muuq/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-5qk0muuq/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-5qk0muuq/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-5qk0muuq/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3-next-latest__t4.json",
+      "trial": 4,
+      "wall_clock_s": 54.0
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-1u3irsfm/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-1u3irsfm/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-1u3irsfm/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-1u3irsfm/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3-next-latest__t5.json",
+      "trial": 5,
+      "wall_clock_s": 54.5
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-_4rx9doi/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-_4rx9doi/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-_4rx9doi/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-_4rx9doi/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3-next-latest__t6.json",
+      "trial": 6,
+      "wall_clock_s": 54.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3.6-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 30.3
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-e71ksgmz/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-e71ksgmz/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-e71ksgmz/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-e71ksgmz/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3.6-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 12.5
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-zjb61rd4/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-zjb61rd4/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-strict-log-format-L2-zjb61rd4/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/opr-eval-strict-log-format-L2-zjb61rd4/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3.6-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 11.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3.6-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 19.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3.6-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 19.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qnext-80b-e9-ceiling/traces/strict-log-format__L2__qwen3.6-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 20.0
+    }
+  ]
+}

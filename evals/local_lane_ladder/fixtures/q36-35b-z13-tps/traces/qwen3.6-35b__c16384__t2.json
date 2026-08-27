@@ -1,0 +1,22 @@
+{
+  "model": "qwen3.6:35b",
+  "num_ctx": 16384,
+  "trial": 2,
+  "cold": false,
+  "tok_s": 59.7,
+  "eval_count": 92,
+  "eval_duration_s": 1.542,
+  "load_s": 0.3,
+  "done_reason": "stop",
+  "placement": "100% GPU",
+  "ps": "qwen3.6:35b    07d35212591f    22 GB    100% GPU     16384      2 minutes from now    ",
+  "power_state": {
+    "ac0_online": "1",
+    "bat0_status": "Full",
+    "governor": "powersave",
+    "powerprofile": "balanced"
+  },
+  "think_chars": 0,
+  "recorded_utc": "2026-08-17T23:29:15.039209+00:00",
+  "error": null
+}

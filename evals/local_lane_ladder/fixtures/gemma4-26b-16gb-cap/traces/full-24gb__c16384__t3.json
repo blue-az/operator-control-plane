@@ -1,0 +1,17 @@
+{
+  "tag": "full-24gb",
+  "num_gpu": null,
+  "num_ctx": 16384,
+  "trial": 3,
+  "cold": false,
+  "tok_s": 125.0,
+  "eval_count": 128,
+  "eval_duration_s": 1.024,
+  "load_s": 0.5,
+  "placement": "100% GPU",
+  "ps": "gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      2 minutes from now    ",
+  "smi": "18495 MiB, 24576 MiB, 60 %, 305.82 W",
+  "done_reason": "length",
+  "error": null,
+  "recorded_utc": "2026-08-18T00:17:49.559526+00:00"
+}

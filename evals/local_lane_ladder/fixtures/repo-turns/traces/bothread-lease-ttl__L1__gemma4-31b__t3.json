@@ -1,0 +1,69 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "DEFAULT_LEASE_TTL_MS is 15 minutes. Change it to 10 minutes (10 * 60 * 1000).\n",
+    "--model",
+    "gemma4:31b",
+    "--workspace",
+    "/tmp/opr-eval-bothread-lease-ttl-gemma4-31b-t3-a59jzsny",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "2",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--seed",
+    "3",
+    "--think",
+    "off"
+  ],
+  "cell_key": "bothread-lease-ttl|L1|gemma4:31b|3",
+  "git_rev": "3e495641589fe445c72a359f38e5d03401ec4185",
+  "grade_detail": "regex matched: 'DEFAULT_LEASE_TTL_MS\\\\s*=\\\\s*10\\\\s*\\\\*\\\\s*60\\\\s*\\\\*\\\\s*1000'",
+  "harness": "local-lane-eval",
+  "level": "L1",
+  "machine": "desktop",
+  "model": "gemma4:31b",
+  "passed": true,
+  "prompt": "DEFAULT_LEASE_TTL_MS is 15 minutes. Change it to 10 minutes (10 * 60 * 1000).\n",
+  "recorded_utc": "2026-08-17T03:43:58.220314+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: gemma4:31b (lane_1_local_repair)\nDispatching governed query...\n[contract: goal-shaped \u2014 local models likely to flail; consider L2 phrasing (exact paths, an anchor, numbered steps, a success check) or a frontier lane]\nThinking...\n[tokens] prompt=442 completion=26 think_chars=0 done_reason=stop\n\n[Model requests tool call: grep_search]\nArguments: {\n  \"tool\": \"grep_search\",\n  \"pattern\": \"DEFAULT_LEASE_TTL_MS\",\n  \"path\": \".\"\n}\n\n[Tool Output]\npackages/shared/src/index.ts:650: export const DEFAULT_LEASE_TTL_MS = 15 * 60 * 1000;\n\nThinking...\n[tokens] prompt=506 completion=84 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"packages/shared/src/index.ts\",\n  \"target_content\": \"export const DEFAULT_LEASE_TTL_MS = 15 * 60 * 1000;\",\n  \"replacement_content\": \"export const DEFAULT_LEASE_TTL_MS = 10 * 60 * 1000;\"\n}\n\n[Tool Output]\nSuccessfully patched packages/shared/src/index.ts.\n\nThinking...\n[tokens] prompt=549 completion=84 think_chars=0 done_reason=stop\n\n--- Output ---\n[Stopped: model repeated an already-handled tool call 'patch_file: packages/shared/src/index.ts'. State-changing steps that did run: patch_file.]\n--------------\n",
+  "task_id": "bothread-lease-ttl",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 194,
+    "distinct_tools": [
+      "grep_search",
+      "patch_file"
+    ],
+    "n_calls": 2,
+    "n_failed_calls": 0,
+    "no_dispatch": false,
+    "stopped_repeat": true,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": ".",
+        "tool": "grep_search"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "packages/shared/src/index.ts",
+        "tool": "patch_file"
+      }
+    ]
+  },
+  "trial": 3,
+  "wall_clock_s": 9.1
+}

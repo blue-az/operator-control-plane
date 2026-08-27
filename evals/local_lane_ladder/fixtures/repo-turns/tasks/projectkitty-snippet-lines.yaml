@@ -1,0 +1,20 @@
+task_id: projectkitty-snippet-lines
+repo: ProjectKitty
+description: >
+  Raise the intelligence snippet cap from 20 lines to 24.
+  Live tree has no harness AGENTS.md / CLAUDE.md. Nested
+  research/gemini/agents.md is Gemini reverse-engineering notes;
+  the copy still unlinks it.
+
+prompts:
+  L0: "Snippets are capped at 20 lines. Raise the cap to 24."
+  L1: >
+    maxSnippetLines is 20. Change it to 24.
+
+state_changes: 2
+
+postcondition:
+  type: grep
+  file: internal/intelligence/service.go
+  pattern: "maxSnippetLines = 24"
+  must_not_contain: "maxSnippetLines = 20"

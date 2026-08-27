@@ -1,0 +1,17 @@
+{
+  "model": "nemotron-3-nano:latest",
+  "num_ctx": 16384,
+  "trial": 3,
+  "cold": false,
+  "tok_s": 120.8,
+  "eval_count": 126,
+  "eval_duration_s": 1.043,
+  "load_s": 0.2,
+  "prompt_eval_count": 27,
+  "done_reason": "stop",
+  "placement": "7%/93% CPU/GPU",
+  "ps": "nemotron-3-nano:latest    b725f1117407    25 GB    7%/93% CPU/GPU    16384      2 minutes from now    ",
+  "smi": "22964 MiB, 24576 MiB, 57 %, 270.92 W",
+  "think_chars": 0,
+  "recorded_utc": "2026-08-15T06:24:40.188583+00:00"
+}

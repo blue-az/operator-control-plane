@@ -1,0 +1,37 @@
+{
+  "still": "comfy12b",
+  "image": false,
+  "think": false,
+  "trial": 1,
+  "model": "qwen3-vl:30b",
+  "leaky": true,
+  "gold": {
+    "subject": "ELEPHANT",
+    "rider": "ELEPHANT-RIDER",
+    "vehicle": "TRICYCLE",
+    "chroma": "MONO"
+  },
+  "empty": true,
+  "valid_row": false,
+  "facet_hits": {
+    "subject": false,
+    "rider": false,
+    "vehicle": false,
+    "chroma": false
+  },
+  "n_hit": 0,
+  "n_facet": 4,
+  "all_hit": false,
+  "wall_s": 1.77,
+  "eval_count": 256,
+  "eval_duration_s": 1.502,
+  "tok_s": 170.4,
+  "prompt_eval_count": 75,
+  "done_reason": "length",
+  "response": "",
+  "thinking_chars": 896,
+  "response_chars": 0,
+  "placement": "100% GPU",
+  "http_ok": true,
+  "recorded_utc": "2026-08-15T04:21:14.633761+00:00"
+}

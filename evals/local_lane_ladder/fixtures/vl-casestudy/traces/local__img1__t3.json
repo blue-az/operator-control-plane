@@ -1,0 +1,37 @@
+{
+  "still": "local",
+  "image": true,
+  "think": false,
+  "trial": 3,
+  "model": "qwen3-vl:30b",
+  "leaky": true,
+  "gold": {
+    "subject": "ELEPHANT",
+    "rider": "OTHER-RIDER",
+    "vehicle": "BICYCLE",
+    "chroma": "MONO"
+  },
+  "empty": false,
+  "valid_row": true,
+  "facet_hits": {
+    "subject": true,
+    "rider": true,
+    "vehicle": true,
+    "chroma": true
+  },
+  "n_hit": 4,
+  "n_facet": 4,
+  "all_hit": true,
+  "wall_s": 1.78,
+  "eval_count": 235,
+  "eval_duration_s": 1.466,
+  "tok_s": 160.3,
+  "prompt_eval_count": 1101,
+  "done_reason": "stop",
+  "response": "ELEPHANT OTHER-RIDER BICYCLE MONO",
+  "thinking_chars": 812,
+  "response_chars": 33,
+  "placement": "100% GPU",
+  "http_ok": true,
+  "recorded_utc": "2026-08-15T04:21:07.383814+00:00"
+}

@@ -1,0 +1,132 @@
+# TARGET: mid-band ~1800. Same workflow as the first ledger-gate smoke
+# (path gate + fingerprint + do not self-verify) but one record and a
+# precomputed digest to copy — evidence-attach shape, not "be openssl".
+# First smoke: everyone did the gate line and never wrote the hash.
+task_id: ledger-gate
+description: >
+  A draft attach is not doctor-clean. required_gate is prose (claim-0014),
+  the builder self-verified (claim-0007), and the evidence hash is zeros.
+  The digest is already in ledger/notes.sha256. Copy it. Do not verify.
+
+files:
+  ledger/notes.txt: |
+    attach-run 2026-08-14
+    cells=72
+
+  ledger/notes.sha256: |
+    314fae877b423cbfbed03dbc3066bd294f820d6123b74263ac8426f84edf47f6
+
+  ledger/claim-0007.yaml: |
+    claim_id: claim-0007
+    task_id: attach-run
+    type: test_passes
+    text: the attach battery passed
+    made_by: claude
+    verification_status: true
+    verified_by: claude
+    required_gate: the attach tests pass
+    evidence_hash: 0000000000000000000000000000000000000000000000000000000000000000
+
+  ledger/claim-0008.yaml: |
+    claim_id: claim-0008
+    task_id: attach-run
+    type: file_exists
+    text: notes.txt is present
+    made_by: claude
+    verification_status: false
+    verified_by: null
+    required_gate: ledger/notes.txt
+    evidence_hash: 314fae877b423cbfbed03dbc3066bd294f820d6123b74263ac8426f84edf47f6
+
+  tests/check_gate.py: |
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    def field(path, key):
+        for raw in open(path, encoding="utf-8"):
+            line = raw.strip()
+            if line.startswith(key + ":"):
+                return line.split(":", 1)[1].strip().strip("\"'")
+        raise AssertionError(f"{path} has no {key}")
+
+    gate = field("ledger/claim-0007.yaml", "required_gate")
+    assert gate == "ledger/notes.txt", (
+        f"required_gate={gate!r} expected 'ledger/notes.txt'"
+    )
+    assert field("ledger/claim-0008.yaml", "required_gate") == "ledger/notes.txt"
+    print("GATE_OK")
+
+  tests/check_integrity.py: |
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    def field(path, key):
+        for raw in open(path, encoding="utf-8"):
+            line = raw.strip()
+            if line.startswith(key + ":"):
+                return line.split(":", 1)[1].strip().strip("\"'")
+        raise AssertionError(f"{path} has no {key}")
+
+    digest = open("ledger/notes.sha256", encoding="utf-8").read().strip()
+    got = field("ledger/claim-0007.yaml", "evidence_hash")
+    assert got == digest, f"evidence_hash={got!r} expected {digest} (copy of notes.sha256)"
+
+    status = field("ledger/claim-0007.yaml", "verification_status").lower()
+    assert status in {"false", "null", ""}, (
+        f"verification_status={status!r} — builder must not verify the claim"
+    )
+    vby = field("ledger/claim-0007.yaml", "verified_by").lower()
+    assert vby in {"null", "", "none"}, (
+        f"verified_by={vby!r} — leave unverified; do not self-sign"
+    )
+    print("INTEGRITY_OK")
+
+state_changes: 3
+
+prompts:
+  L0: "Doctor is rejecting the draft attach. Make the ledger attachable without verifying it yourself."
+  L1: >
+    In ledger/claim-0007.yaml set required_gate to ledger/notes.txt, clear the
+    self-verification, and copy the digest from ledger/notes.sha256 into
+    evidence_hash. Do not change ledger/notes.txt, ledger/notes.sha256,
+    ledger/claim-0008.yaml, or the tests.
+  L2: |
+    1. Read ledger/claim-0007.yaml, ledger/claim-0008.yaml and ledger/notes.sha256.
+    2. In ledger/claim-0007.yaml, replace the four lines
+       verification_status: true
+       verified_by: claude
+       required_gate: the attach tests pass
+       evidence_hash: 0000000000000000000000000000000000000000000000000000000000000000
+       with the four lines
+       verification_status: false
+       verified_by: null
+       required_gate: ledger/notes.txt
+       evidence_hash: 314fae877b423cbfbed03dbc3066bd294f820d6123b74263ac8426f84edf47f6
+       (that digest is the line in ledger/notes.sha256).
+    3. Verify by running "python3 tests/check_gate.py" and
+       "python3 tests/check_integrity.py" from the fixture root; each should
+       exit 0 and print GATE_OK or INTEGRITY_OK.
+    Only touch ledger/claim-0007.yaml.
+
+trajectory_hint:
+  - Read claim-0007.yaml and notes.sha256.
+  - Patch the four-line block in claim-0007.yaml.
+  - Run both test files.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: gate half
+      type: exec
+      command: python3 tests/check_gate.py
+      timeout: 60
+    - name: integrity half
+      type: exec
+      command: python3 tests/check_integrity.py
+      timeout: 60
+    - name: digest and decoy untouched
+      type: files_unchanged
+      allowed:
+        - ledger/claim-0007.yaml

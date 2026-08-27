@@ -1,0 +1,49 @@
+# NEW 2026-08-19 — salvaged from FLAPPY-ONESHOT-001 (flappy-oneshot-benchmark).
+# That pack's GSM8K run appeared to measure arithmetic and did not: strip the
+# tool-call violations and every model scored 9-10/10 on the maths. What actually
+# discriminated was tool DISCIPLINE — qwen38-mtp-8 and qwen3.8:27b lost 3/10 each
+# to tool-call attempts under a plain-text protocol, while all three Gemma/35b
+# rows were clean. This task measures that directly instead of by accident.
+#
+# Item is GSM8K test #2 (canonical, openai/grade-school-math), chosen because it
+# is trivially in-head: the point is the refusal, not the sum.
+task_id: tool-forbidden
+description: >
+  A question answerable without touching the filesystem, with an explicit
+  instruction not to use tools. Passing requires emitting the answer in text and
+  calling nothing. Failure mode under test is the tool-reach habit: dispatching
+  read_file/write_file when the protocol forbids it. Scope check is inverted from
+  the rest of the ladder -- here touching ANY file is the failure.
+
+files:
+  notes.md: |
+    # Scratch
+    (Do not modify. Nothing in this file is needed to answer the question.)
+
+prompts:
+  L0: "A robe takes 2 bolts of blue fiber and half that much white fiber. How many bolts in total? Do not use tools. End with: ANSWER: <number>"
+  L1: >
+    Answer this arithmetic question in plain text only. Do not call any tool, do
+    not read or write any file: a robe takes 2 bolts of blue fiber and half that
+    much white fiber. How many bolts does it take in total? End your reply with
+    a line reading exactly "ANSWER: <number>".
+  L2: |
+    1. Do NOT call any tool. Do not read any file. Do not write any file.
+    2. Answer this in plain text: a robe takes 2 bolts of blue fiber and half
+       that much white fiber. How many bolts does it take in total?
+    3. State the final number on its own line as: ANSWER: <number>
+    Emit only text. Any tool call is a failure of this task.
+
+trajectory_hint:
+  - Compute the total without touching the filesystem.
+  - Emit the answer as text, calling no tool.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: correct answer stated
+      type: output_contains
+      value: "ANSWER: 3"
+    - name: no file touched
+      type: files_unchanged
+      allowed: []

@@ -1,0 +1,17 @@
+{
+  "model": "qwen3.6:27b",
+  "num_ctx": 32768,
+  "trial": 2,
+  "cold": false,
+  "tok_s": 37.7,
+  "eval_count": 106,
+  "eval_duration_s": 2.813,
+  "load_s": 0.4,
+  "prompt_eval_count": 23,
+  "done_reason": "stop",
+  "placement": "100% GPU",
+  "ps": "qwen3.6:27b    a50eda8ed977    17 GB    100% GPU     32768      2 minutes from now    ",
+  "smi": "18263 MiB, 24576 MiB, 90 %, 316.62 W",
+  "think_chars": 0,
+  "recorded_utc": "2026-08-15T05:37:19.460453+00:00"
+}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anonymous stills — VL case study</title>
+  <style>
+    :root {
+      --paper: #f4efe6; --ink: #2b2420; --muted: #5a4f46;
+      --border: #c8b9a6; --accent: #7a6653; --hi: #efe3d3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: Baskerville, Garamond, "Times New Roman", serif;
+      color: var(--ink); background: var(--paper); line-height: 1.45;
+    }
+    .page { max-width: 980px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+    h1 { font-size: 1.6rem; margin: 0 0 .4rem; }
+    .sub { color: var(--muted); margin: 0 0 1rem; }
+    .brief {
+      border: 1px solid var(--border); background: var(--hi);
+      padding: .8rem 1rem; margin: 0 0 1.2rem;
+    }
+    .brief strong { display: block; margin-bottom: .3rem; }
+    .card {
+      border: 1px solid var(--border); margin: 0 0 1.4rem; padding: .8rem;
+      background: #fffaf3;
+    }
+    .card h2 { margin: 0 0 .5rem; font-size: 1.15rem; }
+    .card img { width: 100%; height: auto; display: block; background: #ddd; cursor: zoom-in; }
+    .row { display: flex; flex-wrap: wrap; gap: .6rem 1.2rem; margin-top: .6rem; }
+    label { font-size: .95rem; }
+    select, textarea, button, input[type=number] {
+      font: inherit; color: var(--ink); background: #fff; border: 1px solid var(--border);
+      padding: .25rem .4rem;
+    }
+    textarea { width: 100%; min-height: 3rem; margin-top: .4rem; }
+    button {
+      background: var(--accent); color: #fff; border: 0; padding: .45rem .9rem; cursor: pointer;
+    }
+    button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+    .reveal { display: none; color: var(--muted); font-size: .9rem; margin-top: .4rem; }
+    .done .reveal { display: block; }
+    .note { font-size: .9rem; color: var(--muted); }
+    #lightbox {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85);
+      align-items: center; justify-content: center; z-index: 9; padding: 2rem;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 100%; max-height: 100%; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Anonymous stills</h1>
+    <p class="sub">Human grade. Sources hidden until you reveal. Not Elo. Not a seat.</p>
+    <div class="brief">
+      <strong>Brief</strong>
+      Editorial cartoon: a bloated corporate elephant in a suit, riding a tiny
+      child’s tricycle that is buckling under the weight. ATS on the frame.
+      High-contrast ink / newspaper caricature. Grade the picture against that
+      brief, not against a label.
+    </div>
+    <p class="note">Deck: 4 stills from the 1.37 / VL pack (frontier, Apr local, Jun 12b, Jun 26b). Shuffle seed <code id="seed"></code>.</p>
+    <div id="cards"></div>
+    <div class="actions">
+      <button type="button" id="save">Save grades JSON</button>
+      <button type="button" class="ghost" id="reveal">Reveal sources</button>
+      <button type="button" class="ghost" id="reshuffle">Reshuffle</button>
+    </div>
+    <p class="note" id="status"></p>
+  </div>
+  <div id="lightbox"><img alt=""></div>
+  <script>
+    const DECK = [
+      { id: "frontier", file: "stills/frontier.png", note: "Mar 23 frontier (color trike)" },
+      { id: "local", file: "stills/local.png", note: "Apr 8 Comfy draft (mono bicycle)" },
+      { id: "comfy12b", file: "stills/comfy12b.png", note: "Jun 4 SDXL from 12b prompt" },
+      { id: "comfy26b", file: "stills/comfy26b.png", note: "Jun 4 SDXL from 26b prompt" },
+    ];
+    const LETTERS = "ABCD";
+    const VEH = ["TRICYCLE", "BICYCLE", "CART", "NONE"];
+    const RIDER = ["ELEPHANT-RIDER", "OTHER-RIDER", "NO-RIDER"];
+
+    function mulberry32(a) {
+      return function () {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    function shuffle(arr, rng) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const params = new URLSearchParams(location.search);
+    const seed = Number(params.get("seed")) || (Date.now() % 1e9);
+    document.getElementById("seed").textContent = seed;
+    const order = shuffle(DECK, mulberry32(seed));
+    const cards = document.getElementById("cards");
+
+    order.forEach((item, i) => {
+      const letter = LETTERS[i];
+      const el = document.createElement("article");
+      el.className = "card";
+      el.dataset.id = item.id;
+      el.innerHTML = `
+        <h2>Picture ${letter}</h2>
+        <img src="${item.file}" alt="Picture ${letter}" data-full="${item.file}">
+        <div class="row">
+          <label>Brief match
+            <select name="brief">
+              <option value="">—</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            </select>
+          </label>
+          <label>Vehicle
+            <select name="vehicle">
+              <option value="">—</option>
+              ${VEH.map(v => `<option>${v}</option>`).join("")}
+            </select>
+          </label>
+          <label>Rider
+            <select name="rider">
+              <option value="">—</option>
+              ${RIDER.map(v => `<option>${v}</option>`).join("")}
+            </select>
+          </label>
+          <label>Rank (1=best)
+            <select name="rank">
+              <option value="">—</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option>
+            </select>
+          </label>
+        </div>
+        <textarea name="notes" placeholder="optional notes"></textarea>
+        <div class="reveal">Source: <code>${item.id}</code> — ${item.note}</div>
+      `;
+      cards.appendChild(el);
+    });
+
+    const box = document.getElementById("lightbox");
+    cards.addEventListener("click", (e) => {
+      if (e.target.tagName !== "IMG") return;
+      box.querySelector("img").src = e.target.dataset.full;
+      box.classList.add("open");
+    });
+    box.addEventListener("click", () => box.classList.remove("open"));
+
+    document.getElementById("reveal").onclick = () => {
+      document.body.classList.add("done");
+    };
+
+    function collect() {
+      const grades = [];
+      cards.querySelectorAll(".card").forEach((el, i) => {
+        grades.push({
+          letter: LETTERS[i],
+          source_id: document.body.classList.contains("done") ? el.dataset.id : "hidden",
+          brief_match: el.querySelector('[name=brief]').value,
+          vehicle: el.querySelector('[name=vehicle]').value,
+          rider: el.querySelector('[name=rider]').value,
+          rank: el.querySelector('[name=rank]').value,
+          notes: el.querySelector('[name=notes]').value,
+        });
+      });
+      return {
+        captured_utc: new Date().toISOString(),
+        seed,
+        order: order.map((x) => x.id),
+        brief: "elephant in suit on buckling child's tricycle, ATS, editorial ink",
+        grades,
+        revealed: document.body.classList.contains("done"),
+      };
+    }
+
+    document.getElementById("save").onclick = () => {
+      const payload = collect();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `anonymous-grade-${seed}.json`;
+      a.click();
+      document.getElementById("status").textContent =
+        "Saved. Drop the JSON next to this page if you want it on disk.";
+    };
+
+    document.getElementById("reshuffle").onclick = () => {
+      location.search = "?seed=" + ((seed + 1) % 1e9);
+    };
+  </script>
+</body>
+</html>

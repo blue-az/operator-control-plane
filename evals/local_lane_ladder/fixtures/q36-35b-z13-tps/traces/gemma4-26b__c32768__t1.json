@@ -1,0 +1,22 @@
+{
+  "model": "gemma4:26b",
+  "num_ctx": 32768,
+  "trial": 1,
+  "cold": true,
+  "tok_s": 56.4,
+  "eval_count": 124,
+  "eval_duration_s": 2.199,
+  "load_s": 7.2,
+  "done_reason": "stop",
+  "placement": "100% GPU",
+  "ps": "gemma4:26b    5571076f3d70    17 GB    100% GPU     32768      2 minutes from now    ",
+  "power_state": {
+    "ac0_online": "1",
+    "bat0_status": "Full",
+    "governor": "powersave",
+    "powerprofile": "balanced"
+  },
+  "think_chars": 0,
+  "recorded_utc": "2026-08-17T23:30:10.548828+00:00",
+  "error": null
+}

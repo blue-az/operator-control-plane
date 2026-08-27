@@ -1,0 +1,36 @@
+# q38-shape pre-run — L0/L1 shape dependence
+captured_utc: 2026-08-14T23:31:28Z
+git_rev: 18611de7fbae8483bde091b1cf37c186844a7b01
+question: does qwen3.8:27b need plan-shaped (L2) input, vs gemma4:26b
+design: 3 fixtures x 2 levels x 2 models x n=6 = 72 cells
+fixtures: csv-summarize-repair strict-log-format ambiguous-anchor
+levels: L0 L1 (L2 already measured: q38-ladder + e11-depth)
+controls: num_ctx 16384, temperature 0.8, think off, --on-repeat default (stop)
+same-run control: gemma4:26b (seat). Not pooled with any prior L2 pack.
+hardware: single RTX 3090, 320W. Second card still unpowered.
+NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
+
+==============NVSMI LOG==============
+
+Timestamp                                              : Fri Aug 14 16:31:28 2026
+Driver Version                                         : 580.159.04
+CUDA Version                                           : 13.0
+
+Attached GPUs                                          : 1
+GPU 00000000:02:00.0
+    GPU Power Readings
+        Average Power Draw                             : 47.72 W
+        Instantaneous Power Draw                       : 47.16 W
+        Current Power Limit                            : 320.00 W
+        Requested Power Limit                          : 320.00 W
+        Default Power Limit                            : 350.00 W
+        Min Power Limit                                : 100.00 W
+        Max Power Limit                                : 366.00 W
+    Power Samples
+        Duration                                       : 2.36 sec
+        Number of Samples                              : 119
+        Max                                            : 49.48 W
+        Min                                            : 46.13 W
+        Avg                                            : 47.68 W
+    GPU Memory Power Readings 
+        Average Power Draw                             : N/A

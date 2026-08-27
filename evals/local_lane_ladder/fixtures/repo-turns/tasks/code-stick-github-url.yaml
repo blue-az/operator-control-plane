@@ -1,0 +1,19 @@
+task_id: code-stick-github-url
+repo: code-stick
+description: >
+  Point the code-stick logger GitHub URL at blue-az/code-stick.
+  Live tree has no agent files.
+
+prompts:
+  L0: "The GitHub URL in the logger is wrong. Point it at blue-az/code-stick."
+  L1: >
+    GITHUB_URL still says github.com/MuhammadUsmanGM.
+    Change it to github.com/blue-az/code-stick.
+
+state_changes: 2
+
+postcondition:
+  type: grep
+  file: src/utils/logger.ts
+  pattern: "github.com/blue-az/code-stick"
+  must_not_contain: "github.com/MuhammadUsmanGM"

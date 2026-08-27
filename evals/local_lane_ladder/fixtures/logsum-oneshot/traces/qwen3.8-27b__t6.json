@@ -1,0 +1,12 @@
+{
+  "model": "qwen3.8:27b",
+  "trial": 6,
+  "kind": "pass",
+  "rc": 0,
+  "eval_count": 132,
+  "think_chars": 0,
+  "src_chars": 379,
+  "test_out": "LOGSUM_OK\n",
+  "src_head": "import re\n\n\ndef error_report(log_text):\n    pattern = re.compile(r'^\\d{4}-\\d{2}-\\d{2}T(\\d{2}):\\d{2}:\\d{2}Z\\s+ERROR\\s')\n    errors = {}\n    for line in log_text.splitlines():\n        match = pattern.match(line)\n        if match:\n            hour = match.group(1)\n            errors[hour] = errors.get(hour, 0) + 1\n    return [f\"{h}: {c} errors\" for h, c in sorted(errors.items())]",
+  "recorded_utc": "2026-08-15T07:46:37.229409+00:00"
+}

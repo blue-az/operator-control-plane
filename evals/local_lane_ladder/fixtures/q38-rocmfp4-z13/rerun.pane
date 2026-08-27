@@ -1,0 +1,228 @@
+/home/blueaz/models/q38rocm/z13-rerun.sh; echo RERUN_DONE
+]3008;start=35265350-8eb6-4081-8113-7a53a3a52fd1;machineid=47da3890804d4b0793876f0e1e69daf6;user=blueaz;hostname=z13;bootid=fb11003e-7dd1-44a0-9afb-ef325fb3b93e;pid=00000000000000974100;type=shell;cwd=/home/blueaz\[?2004h[01;32mblueaz@z13[00m:[01;34m~[00m$ /home/blueaz/models/q38rocm/z13-rerun.sh; echo RERUN_DONE
+[?2004l]3008;start=2edcf4f2-1157-439e-a311-d7185eeb09fe;machineid=47da3890804d4b0793876f0e1e69daf6;user=blueaz;hostname=z13;bootid=fb11003e-7dd1-44a0-9afb-ef325fb3b93e;pid=00000000000000974100;type=command;cwd=/home/blueaz\===== META 2026-08-17T17:50:02-07:00 =====
+ac0=1
+profile=balanced
+gov=powersave
+Available devices:
+  ROCm0: AMD Radeon 8050S Graphics (20480 MiB, 26015 MiB free)
+  Vulkan0: AMD Radeon 8050S Graphics (RADV GFX1151) (24576 MiB, 24288 MiB free)
+
+===== vulkan-n2-c8k-t1 ctx=8192 nmax=2 2026-08-17T17:50:02-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/ 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a fundamental data structure that uses a hash function to map keys to specific values, enabling extremely fast data retrieval. By converting a key into a unique index within an array, the table allows for average-case constant time complexity, denoted as O(1), for operations like searching, insertion, and deletion. While collisions—instances where different keys map to the same index—can occur, various strategies such as chaining or open addressing are employed to manage these conflicts, ensuring that the structure remains efficient and reliable for storing and accessing large datasets.
+[35m
+[ Prompt: 46.6 t/s | Generation: 21.4 t/s ]
+[0m
+Exiting...
+END_vulkan-n2-c8k-t1 2026-08-17T17:50:13-07:00
+
+===== vulkan-n2-c8k-t2 ctx=8192 nmax=2 2026-08-17T17:50:13-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\ 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a fundamental data structure that uses a hash function to map keys to specific array indices, enabling efficient storage and retrieval of data. By converting a key into a numerical index through hashing, the structure allows for average-case constant time complexity ($O(1)$) for operations like insertion, lookup, and deletion. While this approach offers remarkable speed, it requires managing "collisions"—situations where different keys hash to the same index—typically resolved through techniques like chaining or open addressing to ensure data integrity and performance.
+[35m
+[ Prompt: 51.3 t/s | Generation: 22.8 t/s ]
+[0m
+Exiting...
+END_vulkan-n2-c8k-t2 2026-08-17T17:50:22-07:00
+
+===== vulkan-n2-c4k-t1 ctx=4096 nmax=2 2026-08-17T17:50:22-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a data structure that uses a hash function to compute an index into an array of buckets or slots, from which the desired value can be found. This method allows for highly efficient retrieval, insertion, and deletion operations, typically achieving average-case constant time complexity, O(1), by mapping keys to specific locations within the table. When two keys hash to the same index—a situation known as a collision—various strategies such as chaining or open addressing are employed to resolve the conflict and ensure data integrity.
+[35m
+[ Prompt: 50.5 t/s | Generation: 20.2 t/s ]
+[0m
+Exiting...
+END_vulkan-n2-c4k-t1 2026-08-17T17:50:32-07:00
+
+===== vulkan-n2-c4k-t2 ctx=4096 nmax=2 2026-08-17T17:50:32-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/ 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a data structure that uses a hash function to compute an index into an array of buckets or slots, enabling efficient storage and retrieval of key-value pairs. When a key is added, the hash function converts it into a unique index, allowing for average-case constant time complexity ($O(1)$) for insertion, deletion, and lookup operations. While collisions—where different keys map to the same index—can occur, strategies such as chaining or open addressing are employed to resolve these conflicts and maintain performance.
+[35m
+[ Prompt: 50.5 t/s | Generation: 20.7 t/s ]
+[0m
+Exiting...
+END_vulkan-n2-c4k-t2 2026-08-17T17:50:41-07:00
+
+===== vulkan-n4-c4k-t1 ctx=4096 nmax=4 2026-08-17T17:50:41-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\ 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a data structure that uses a hash function to map keys to specific indices in an array, enabling rapid retrieval of data. When a key is inserted or accessed, the hash function converts it into a numerical value, which determines the storage location, or "bucket," within the table. This design typically allows for average-case constant time complexity ($O(1)$) for lookups, insertions, and deletions, making it highly efficient for tasks like caching, database indexing, and symbol tables. To handle situations where multiple keys produce the same index—a phenomenon known as a collision—various strategies such as chaining or open
+[35m
+[ Prompt: 52.4 t/s | Generation: 16.2 t/s ]
+[0m
+Exiting...
+END_vulkan-n4-c4k-t1 2026-08-17T17:50:54-07:00
+
+===== vulkan-n4-c4k-t2 ctx=4096 nmax=4 2026-08-17T17:50:54-07:00 =====
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\ 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b213-e87d53e
+model      : Qwen3.8-27B-ROCmFP4-FAST.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+[1m[32m
+> Write a short paragraph explaining what a hash table is.
+[0m
+|-\|/ A hash table is a data structure that uses a hash function to compute an index into an array of buckets or slots, from which the correct value can be found. By mapping keys to specific locations in memory, it allows for extremely efficient average-case time complexity—typically O(1)—for operations like insertion, lookup, and deletion, making it a fundamental tool in computer science for tasks ranging from database indexing to caching systems.
+[35m
+[ Prompt: 51.9 t/s | Generation: 18.0 t/s ]
+[0m
+Exiting...
+END_vulkan-n4-c4k-t2 2026-08-17T17:51:04-07:00
+
+===== llama-bench vulkan 4k 2026-08-17T17:51:04-07:00 =====
+ggml_rocm_init: found 1 ROCm devices (Total VRAM: 20480 MiB):
+  Device 0: AMD Radeon 8050S Graphics, gfx1151 (0x1151), VMM: no, Wave Size: 32, VRAM: 20480 MiB
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = AMD Radeon 8050S Graphics (RADV GFX1151) (radv) | uma: 1 | fp16: 1 | bf16: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: KHR_coopmat
+| model                          |       size |     params | backend    | ngl | type_k | type_v |  fa | dev          |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | -----: | --: | ------------ | --------------: | -------------------: |
+| qwen35 27B Q4_0_ROCMFP4_FAST   |  13.55 GiB |    27.32 B | ROCm,Vulkan |  99 |   q8_0 | turbo4 |   1 | Vulkan0      |            pp32 |        133.01 ± 3.23 |
+| qwen35 27B Q4_0_ROCMFP4_FAST   |  13.55 GiB |    27.32 B | ROCm,Vulkan |  99 |   q8_0 | turbo4 |   1 | Vulkan0      |           tg128 |         12.55 ± 0.09 |
+
+build: e87d53e (213)
+===== ALL_DONE 2026-08-17T17:51:40-07:00 =====
+RERUN_DONE
+]3008;end=2edcf4f2-1157-439e-a311-d7185eeb09fe;exit=success\]3008;start=35265350-8eb6-4081-8113-7a53a3a52fd1;machineid=47da3890804d4b0793876f0e1e69daf6;user=blueaz;hostname=z13;bootid=fb11003e-7dd1-44a0-9afb-ef325fb3b93e;pid=00000000000000974100;type=shell;cwd=/home/blueaz\[?2004h[01;32mblueaz@z13[00m:[01;34m~[00m$ 

@@ -1,0 +1,7 @@
+captured_utc: 2026-08-15T03:20:33Z
+git_rev: 18611de7fbae8483bde091b1cf37c186844a7b01
+question: five-facet orientation probe; concise allowed; grade final answer only
+models: gemma4:26b gemma4:31b qwen3.8:27b qwen3.6:27b
+n=6 think off ctx 16384 temp 0.8 no-bn
+records: wall_clock_s answer_words answer_chars completion_tokens prompt_tokens n_calls n_rounds files_read
+NVIDIA GeForce RTX 3090, 320.00 W

@@ -1,0 +1,31 @@
+{
+  "still": "composite",
+  "image": true,
+  "think": false,
+  "trial": 2,
+  "model": "qwen3-vl:30b",
+  "leaky": true,
+  "gold": {
+    "panel": "FRONTIER"
+  },
+  "empty": false,
+  "valid_row": true,
+  "facet_hits": {
+    "panel": true
+  },
+  "n_hit": 1,
+  "n_facet": 1,
+  "all_hit": true,
+  "wall_s": 0.83,
+  "eval_count": 90,
+  "eval_duration_s": 0.543,
+  "tok_s": 165.6,
+  "prompt_eval_count": 1110,
+  "done_reason": "stop",
+  "response": "FRONTIER",
+  "thinking_chars": 358,
+  "response_chars": 8,
+  "placement": "100% GPU",
+  "http_ok": true,
+  "recorded_utc": "2026-08-15T04:21:23.174239+00:00"
+}

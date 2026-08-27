@@ -1,0 +1,19 @@
+task_id: ollm-utf8-sig
+repo: ollm
+description: >
+  Make file_get_contents tolerate a UTF-8 BOM.
+  Live tree has no agent files.
+
+prompts:
+  L0: "Reading a text file with a BOM breaks. Fix the helper that reads files."
+  L1: >
+    file_get_contents opens as utf-8. Switch it to utf-8-sig so a BOM
+    does not leak into the string.
+
+state_changes: 2
+
+postcondition:
+  type: regex
+  file: src/ollm/utils.py
+  pattern: 'file_get_contents[\s\S]{0,200}encoding="utf-8-sig"'
+  dotall: true
