@@ -1,0 +1,17 @@
+{
+  "model": "qwen3.6:35b",
+  "num_ctx": 32768,
+  "trial": 1,
+  "cold": true,
+  "tok_s": 85.8,
+  "eval_count": 96,
+  "eval_duration_s": 1.119,
+  "load_s": 16.2,
+  "prompt_eval_count": 23,
+  "done_reason": "stop",
+  "placement": "4%/96% CPU/GPU",
+  "ps": "qwen3.6:35b    07d35212591f    23 GB    4%/96% CPU/GPU    32768      2 minutes from now    ",
+  "smi": "23289 MiB, 24576 MiB, 51 %, 218.86 W",
+  "think_chars": 0,
+  "recorded_utc": "2026-08-15T05:36:27.318792+00:00"
+}

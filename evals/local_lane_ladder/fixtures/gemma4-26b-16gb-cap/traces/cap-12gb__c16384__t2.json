@@ -1,0 +1,17 @@
+{
+  "tag": "cap-12gb",
+  "num_gpu": 20,
+  "num_ctx": 16384,
+  "trial": 2,
+  "cold": false,
+  "tok_s": 34.2,
+  "eval_count": 128,
+  "eval_duration_s": 3.738,
+  "load_s": 0.5,
+  "placement": "39%/61% CPU/GPU",
+  "ps": "gemma4:26b    5571076f3d70    18 GB    39%/61% CPU/GPU    16384      2 minutes from now    ",
+  "smi": "11696 MiB, 24576 MiB, 22 %, 146.83 W",
+  "done_reason": "stop",
+  "error": null,
+  "recorded_utc": "2026-08-18T00:22:41.783512+00:00"
+}

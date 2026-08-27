@@ -1,0 +1,268 @@
+{
+  "results": [
+    {
+      "model": "qwen3.6:35b",
+      "num_ctx": 16384,
+      "trial": 1,
+      "cold": true,
+      "tok_s": 60.9,
+      "eval_count": 96,
+      "eval_duration_s": 1.577,
+      "load_s": 8.1,
+      "done_reason": "stop",
+      "placement": "100% GPU",
+      "ps": "qwen3.6:35b    07d35212591f    22 GB    100% GPU     16384      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:29:12.589771+00:00",
+      "error": null
+    },
+    {
+      "model": "qwen3.6:35b",
+      "num_ctx": 16384,
+      "trial": 2,
+      "cold": false,
+      "tok_s": 59.7,
+      "eval_count": 92,
+      "eval_duration_s": 1.542,
+      "load_s": 0.3,
+      "done_reason": "stop",
+      "placement": "100% GPU",
+      "ps": "qwen3.6:35b    07d35212591f    22 GB    100% GPU     16384      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:29:15.039209+00:00",
+      "error": null
+    },
+    {
+      "model": "qwen3.6:35b",
+      "num_ctx": 16384,
+      "trial": 3,
+      "cold": false,
+      "tok_s": 58.7,
+      "eval_count": 94,
+      "eval_duration_s": 1.601,
+      "load_s": 0.3,
+      "done_reason": "stop",
+      "placement": "100% GPU",
+      "ps": "qwen3.6:35b    07d35212591f    22 GB    100% GPU     16384      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:29:17.579802+00:00",
+      "error": null
+    },
+    {
+      "model": "qwen3.6:35b",
+      "num_ctx": 32768,
+      "trial": 1,
+      "cold": true,
+      "tok_s": 61.1,
+      "eval_count": 104,
+      "eval_duration_s": 1.701,
+      "load_s": 8.1,
+      "done_reason": "stop",
+      "placement": "100% GPU",
+      "ps": "qwen3.6:35b    07d35212591f    22 GB    100% GPU     32768      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:29:31.965201+00:00",
+      "error": null
+    },
+    {
+      "model": "qwen3.6:35b",
+      "num_ctx": 32768,
+      "trial": 2,
+      "cold": false,
+      "tok_s": 59.3,
+      "eval_count": 117,
+      "eval_duration_s": 1.972,
+      "load_s": 0.3,
+      "done_reason": "stop",
+      "placement": "100% GPU",
+      "ps": "qwen3.6:35b    07d35212591f    22 GB    100% GPU     32768      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:29:34.866106+00:00",
+      "error": null
+    },
+    {
+      "model": "qwen3.6:35b",
+      "num_ctx": 32768,
+      "trial": 3,
+      "cold": false,
+      "tok_s": 57.8,
+      "eval_count": 95,
+      "eval_duration_s": 1.643,
+      "load_s": 0.3,
+      "done_reason": "stop",
+      "placement": "100% GPU",
+      "ps": "qwen3.6:35b    07d35212591f    22 GB    100% GPU     32768      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:29:37.479217+00:00",
+      "error": null
+    },
+    {
+      "model": "gemma4:26b",
+      "num_ctx": 16384,
+      "trial": 1,
+      "cold": true,
+      "tok_s": 57.4,
+      "eval_count": 123,
+      "eval_duration_s": 2.141,
+      "load_s": 7.2,
+      "done_reason": "stop",
+      "placement": "100% GPU",
+      "ps": "gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:29:51.116206+00:00",
+      "error": null
+    },
+    {
+      "model": "gemma4:26b",
+      "num_ctx": 16384,
+      "trial": 2,
+      "cold": false,
+      "tok_s": 56.2,
+      "eval_count": 128,
+      "eval_duration_s": 2.276,
+      "load_s": 0.4,
+      "done_reason": "length",
+      "placement": "100% GPU",
+      "ps": "gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:29:53.921527+00:00",
+      "error": null
+    },
+    {
+      "model": "gemma4:26b",
+      "num_ctx": 16384,
+      "trial": 3,
+      "cold": false,
+      "tok_s": 54.2,
+      "eval_count": 128,
+      "eval_duration_s": 2.362,
+      "load_s": 0.4,
+      "done_reason": "length",
+      "placement": "100% GPU",
+      "ps": "gemma4:26b    5571076f3d70    17 GB    100% GPU     16384      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:29:56.778555+00:00",
+      "error": null
+    },
+    {
+      "model": "gemma4:26b",
+      "num_ctx": 32768,
+      "trial": 1,
+      "cold": true,
+      "tok_s": 56.4,
+      "eval_count": 124,
+      "eval_duration_s": 2.199,
+      "load_s": 7.2,
+      "done_reason": "stop",
+      "placement": "100% GPU",
+      "ps": "gemma4:26b    5571076f3d70    17 GB    100% GPU     32768      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:30:10.548828+00:00",
+      "error": null
+    },
+    {
+      "model": "gemma4:26b",
+      "num_ctx": 32768,
+      "trial": 2,
+      "cold": false,
+      "tok_s": 56.1,
+      "eval_count": 128,
+      "eval_duration_s": 2.282,
+      "load_s": 0.4,
+      "done_reason": "length",
+      "placement": "100% GPU",
+      "ps": "gemma4:26b    5571076f3d70    17 GB    100% GPU     32768      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:30:13.310176+00:00",
+      "error": null
+    },
+    {
+      "model": "gemma4:26b",
+      "num_ctx": 32768,
+      "trial": 3,
+      "cold": false,
+      "tok_s": 54.4,
+      "eval_count": 128,
+      "eval_duration_s": 2.353,
+      "load_s": 0.4,
+      "done_reason": "length",
+      "placement": "100% GPU",
+      "ps": "gemma4:26b    5571076f3d70    17 GB    100% GPU     32768      2 minutes from now    ",
+      "power_state": {
+        "ac0_online": "1",
+        "bat0_status": "Full",
+        "governor": "powersave",
+        "powerprofile": "balanced"
+      },
+      "think_chars": 0,
+      "recorded_utc": "2026-08-17T23:30:16.162935+00:00",
+      "error": null
+    }
+  ]
+}

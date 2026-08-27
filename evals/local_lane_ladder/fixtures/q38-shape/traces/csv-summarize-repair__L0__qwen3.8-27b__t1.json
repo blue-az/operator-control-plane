@@ -1,0 +1,74 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "My expense totals come out wrong when amounts have dollar signs or brackets. Please sort it out.",
+    "--model",
+    "qwen3.8:27b",
+    "--workspace",
+    "/tmp/opr-eval-csv-summarize-repair-L0-03m1qmww",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "3",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off"
+  ],
+  "cell_key": "csv-summarize-repair|L0|qwen3.8:27b|1",
+  "git_rev": "18611de7fbae8483bde091b1cf37c186844a7b01",
+  "grade_detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/opr-eval-csv-summarize-repair-L0-03m1qmww/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+  "harness": "local-lane-eval",
+  "level": "L0",
+  "machine": "desktop",
+  "model": "qwen3.8:27b",
+  "passed": false,
+  "prompt": "My expense totals come out wrong when amounts have dollar signs or brackets. Please sort it out.",
+  "recorded_utc": "2026-08-14T23:36:39.234192+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: qwen3.8:27b (lane_1_local_repair)\nDispatching governed query...\n[contract: goal-shaped \u2014 local models likely to flail; consider L2 phrasing (exact paths, an anchor, numbered steps, a success check) or a frontier lane]\nThinking...\n[tokens] prompt=398 completion=13 think_chars=0 done_reason=stop\n\n[Model requests tool call: tree_dir]\nArguments: {\n  \"tool\": \"tree_dir\",\n  \"path\": \".\"\n}\n\n[Tool Output]\n\u251c\u2500\u2500 config\n\u2502   \u2514\u2500\u2500 settings.ini\n\u251c\u2500\u2500 docs\n\u2502   \u251c\u2500\u2500 architecture.md\n\u2502   \u2514\u2500\u2500 CHANGELOG.md\n\u251c\u2500\u2500 scripts\n\u2502   \u2514\u2500\u2500 deploy.sh\n\u251c\u2500\u2500 src\n\u2502   \u251c\u2500\u2500 __init__.py\n\u2502   \u251c\u2500\u2500 expenses.py\n\u2502   \u251c\u2500\u2500 models.py\n\u2502   \u2514\u2500\u2500 utils.py\n\u251c\u2500\u2500 tests\n\u2502   \u251c\u2500\u2500 __init__.py\n\u2502   \u251c\u2500\u2500 check_expenses.py\n\u2502   \u2514\u2500\u2500 test_utils.py\n\u251c\u2500\u2500 LICENSE\n\u2514\u2500\u2500 README.md\n\nThinking...\n[tokens] prompt=541 completion=17 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"src/expenses.py\"\n}\n\n[Tool Output]\ndef summarize_expenses(csv_text):\n    \"\"\"Total the amount column per category.\n\n    Returns {category: total} with each total rounded to 2 decimals.\n    Category keys are lowercase with surrounding whitespace stripped.\n    Amounts may be quoted and may use $ and thousands separators.\n    An amount wrapped in parentheses is negative, accounting style.\n    Rows with a missing or empty amount are skipped, as are blank lines.\n    \"\"\"\n    totals = {}\n    for line in csv_text.strip().splitlines()[1:]:\n        parts = line.split(\",\")\n        cat = parts[1]\n        amount = float(parts[2])\n        totals[cat] = totals.get(cat, 0) + amount\n    return totals\n\n\nThinking...\n[tokens] prompt=723 completion=607 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"src/expenses.py\",\n  \"target_content\": \"def summarize_expenses(csv_text):\\n    \\\"\\\"\\\"Total the amount column per category.\\n\\n    Returns {category: total} with each total rounded to 2 decimals.\\n    Category keys are lowercase with surrounding whitespace stripped.\\n    Amounts may be quoted and may use $ and thousands separators.\\n    An amount wrapped in parentheses is negative, accounting style.\\n    Rows with a missing or empty amount are skipped, as are blank lines.\\n    \\\"\\\"\\\"\\n    totals = {}\\n    for line in csv_text.strip().splitlines()[1:]:\\n        parts = line.split(\\\",\\\")\\n        cat = parts[1]\\n        amount = float(parts[2])\\n        totals[cat] = totals.get(cat, 0) + amount\\n    return totals\",\n  \"replacement_content\": \"def summarize_expenses(csv_text):\\n    \\\"\\\"\\\"Total the amount column per category.\\n\\n    Returns {category: total} with each total rounded to 2 decimals.\\n    Category keys are lowercase with surrounding whitespace stripped.\\n    Amounts may be quoted and may use $ and thousands separators.\\n    An amount wrapped in parentheses is negative, accounting style.\\n    Rows with a missing or empty amount are skipped, as are blank lines.\\n    \\\"\\\"\\\"\\n    totals = {}\\n    for line in csv_text.strip().splitlines()[1:]:\\n        if not line.strip():\\n            continue\\n        parts = [p.strip() for p in line.split(\\\",\\\")]\\n        cat = parts[1].strip().lower()\\n        raw_amount = parts[2].strip()\\n\\n        # Skip rows with missing or empty amount\\n        if not raw_amount:\\n            continue\\n\\n        # Remove surrounding quotes if present\\n        if raw_amount.startswith('\\\"') and raw_amount.endswith('\\\"'):\\n            raw_amount = raw_amount[1:-1]\\n        elif raw_amount.startswith(\\\"'\\\") and raw_amount.endswith(\\\"'\\\"):\\n            raw_amount = raw_amount[1:-1]\\n\\n        # Check for accounting-style negative: (123.45)\\n        negative = False\\n        if raw_amount.startswith('(') and raw_amount.endswith(')'):\\n            negative = True\\n            raw_amount = raw_amount[1:-1]\\n\\n        # Remove dollar sign and thousands separators\\n        raw_amount = raw_amount.replace('$', '').replace(',', '').strip()\\n\\n        try:\\n            amount = float(raw_amount)\\n        except ValueError:\\n            continue\\n\\n        if negative:\\n            amount = -amount\\n\\n        totals[cat] = totals.get(cat, 0) + amount\\n\\n    return {k: round(v, 2) for k, v in totals.items()}\"\n}\n\n[Tool Output]\nSuccessfully patched src/expenses.py.\n\nThinking...\n[tokens] prompt=754 completion=17 think_chars=0 done_reason=stop\n\n--- Output ---\n[Stopped: model repeated an already-handled tool call 'read_file: src/expenses.py'. State-changing steps that did run: patch_file.]\n--------------\n",
+  "task_id": "csv-summarize-repair",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 654,
+    "distinct_tools": [
+      "patch_file",
+      "read_file",
+      "tree_dir"
+    ],
+    "n_calls": 3,
+    "n_failed_calls": 0,
+    "no_dispatch": false,
+    "stopped_repeat": true,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": ".",
+        "tool": "tree_dir"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "src/expenses.py",
+        "tool": "read_file"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "src/expenses.py",
+        "tool": "patch_file"
+      }
+    ]
+  },
+  "trial": 1,
+  "wall_clock_s": 32.3
+}

@@ -1,0 +1,19 @@
+task_id: bothread-lease-ttl
+repo: bothread
+description: >
+  Cut the default file-lease TTL from 15 minutes to 10.
+  Live tree has CLAUDE.md; copy is stripped.
+
+prompts:
+  L0: "File leases last 15 minutes. Cut the default to 10 minutes."
+  L1: >
+    DEFAULT_LEASE_TTL_MS is 15 minutes. Change it to 10 minutes
+    (10 * 60 * 1000).
+
+state_changes: 2
+
+postcondition:
+  type: regex
+  file: packages/shared/src/index.ts
+  pattern: "DEFAULT_LEASE_TTL_MS\\s*=\\s*10\\s*\\*\\s*60\\s*\\*\\s*1000"
+  must_not_match: "DEFAULT_LEASE_TTL_MS\\s*=\\s*15\\s*\\*\\s*60\\s*\\*\\s*1000"

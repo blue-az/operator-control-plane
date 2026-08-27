@@ -1,0 +1,17 @@
+{
+  "tag": "razor-16.5gb",
+  "num_gpu": 30,
+  "num_ctx": 16384,
+  "trial": 3,
+  "cold": false,
+  "tok_s": 100.1,
+  "eval_count": 125,
+  "eval_duration_s": 1.249,
+  "load_s": 0.5,
+  "placement": "11%/89% CPU/GPU",
+  "ps": "gemma4:26b    5571076f3d70    18 GB    11%/89% CPU/GPU    16384      2 minutes from now    ",
+  "smi": "16843 MiB, 24576 MiB, 61 %, 291.69 W",
+  "done_reason": "stop",
+  "error": null,
+  "recorded_utc": "2026-08-18T00:18:29.849699+00:00"
+}

@@ -1,0 +1,14 @@
+# q36-35b-e9-z13 pre-run — E9 battery on unified memory
+captured_utc: 2026-08-17T23:30:34Z
+git_rev: 1229fc88d4be77803d657b357459caebf937d497
+hostname: z13
+question: where does qwen3.6:35b sit on the E9 battery on z13 vs gemma4:26b
+design: 5 fixtures x 2 models x n=6 = 60 cells
+fixtures: csv-summarize-repair booking-off-by-one constant-and-callers ambiguous-anchor strict-log-format
+controls: num_ctx 16384, temperature 0.8, think off
+same-run control: gemma4:26b (desktop seat)
+note: 35b reports 100% GPU on this host at 32k (same blob 07d35212591f)
+power: AC0=1 BAT0=Full
+governor=powersave
+powerprofile=balanced
+could_not_set_performance: power-profiles-daemon AccessDenied without sudo

@@ -1,0 +1,37 @@
+{
+  "still": "comfy26b",
+  "image": true,
+  "think": false,
+  "trial": 1,
+  "model": "qwen3-vl:30b",
+  "leaky": true,
+  "gold": {
+    "subject": "ELEPHANT",
+    "rider": "ELEPHANT-RIDER",
+    "vehicle": "CART",
+    "chroma": "MONO"
+  },
+  "empty": false,
+  "valid_row": true,
+  "facet_hits": {
+    "subject": true,
+    "rider": true,
+    "vehicle": false,
+    "chroma": true
+  },
+  "n_hit": 3,
+  "n_facet": 4,
+  "all_hit": false,
+  "wall_s": 1.74,
+  "eval_count": 105,
+  "eval_duration_s": 0.663,
+  "tok_s": 158.3,
+  "prompt_eval_count": 1101,
+  "done_reason": "stop",
+  "response": "ELEPHANT ELEPHANT-RIDER TRICYCLE MONO",
+  "thinking_chars": 286,
+  "response_chars": 37,
+  "placement": "100% GPU",
+  "http_ok": true,
+  "recorded_utc": "2026-08-15T04:21:16.386320+00:00"
+}

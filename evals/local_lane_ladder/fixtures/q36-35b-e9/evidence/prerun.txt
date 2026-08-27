@@ -1,0 +1,39 @@
+# q36-35b-e9 pre-run — E9 battery, host-conditioned 35b
+captured_utc: 2026-08-17T23:10:32Z
+git_rev: 3e495641589fe445c72a359f38e5d03401ec4185
+question: where does qwen3.6:35b sit on the E9 ceiling battery vs gemma4:26b
+design: 5 fixtures x 2 models x n=6 = 60 cells
+fixtures: csv-summarize-repair booking-off-by-one constant-and-callers ambiguous-anchor strict-log-format
+levels: L2
+controls: num_ctx 16384, temperature 0.8, think off, --on-repeat default (stop)
+same-run control: gemma4:26b (seat)
+framing: host-conditioned. Placement sampled every 30s. G2 is not a veto.
+not pooled with: q36-35b-spill-l2 (3-fixture subset)
+compare against: e9-ceiling-continued (26b 24/30)
+hardware: single RTX 3090, 320W. Second card still unpowered.
+NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
+
+==============NVSMI LOG==============
+
+Timestamp                                              : Mon Aug 17 16:10:32 2026
+Driver Version                                         : 580.178.04
+CUDA Version                                           : 13.0
+
+Attached GPUs                                          : 1
+GPU 00000000:02:00.0
+    GPU Power Readings
+        Average Power Draw                             : 40.87 W
+        Instantaneous Power Draw                       : 44.26 W
+        Current Power Limit                            : 320.00 W
+        Requested Power Limit                          : 320.00 W
+        Default Power Limit                            : 350.00 W
+        Min Power Limit                                : 100.00 W
+        Max Power Limit                                : 366.00 W
+    Power Samples
+        Duration                                       : 3.52 sec
+        Number of Samples                              : 119
+        Max                                            : 47.89 W
+        Min                                            : 38.80 W
+        Avg                                            : 42.34 W
+    GPU Memory Power Readings 
+        Average Power Draw                             : N/A

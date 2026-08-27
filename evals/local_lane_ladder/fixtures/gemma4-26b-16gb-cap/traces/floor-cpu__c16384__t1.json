@@ -1,0 +1,17 @@
+{
+  "tag": "floor-cpu",
+  "num_gpu": 0,
+  "num_ctx": 16384,
+  "trial": 1,
+  "cold": true,
+  "tok_s": 12.9,
+  "eval_count": 120,
+  "eval_duration_s": 9.327,
+  "load_s": 22.0,
+  "placement": "100% CPU",
+  "ps": "gemma4:26b    5571076f3d70    17 GB    100% CPU     16384      2 minutes from now    ",
+  "smi": "401 MiB, 24576 MiB, 2 %, 37.60 W",
+  "done_reason": "stop",
+  "error": null,
+  "recorded_utc": "2026-08-18T00:23:51.720751+00:00"
+}

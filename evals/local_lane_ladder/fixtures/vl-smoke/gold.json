@@ -1,0 +1,28 @@
+{
+  "captured_utc": "2026-08-15T04:12:24.770739+00:00",
+  "model": "qwen3-vl:30b",
+  "num_ctx": 16384,
+  "num_predict": 2048,
+  "stills": [
+    {
+      "id": "smi",
+      "path": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/vl-smoke/stills/smi.png",
+      "gold": "A83DFF",
+      "also_visible": "320.00",
+      "prompt": "This is a screenshot. What is the PROBE token printed at the bottom? Reply with only that token."
+    },
+    {
+      "id": "dash",
+      "path": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/vl-smoke/stills/dash.png",
+      "gold": "932",
+      "prompt": "This is a monitoring panel. What is the SPAN_COUNT value? Reply with only the number."
+    },
+    {
+      "id": "mark",
+      "path": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/vl-smoke/stills/mark.png",
+      "gold": "PHOENIX-VL-A4F9",
+      "prompt": "What is the fixture mark token in this image? Reply with only that token."
+    }
+  ],
+  "smi_text": "Fri Aug 14 21:12:24 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.159.04             Driver Version: 580.159.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 3090        On  |   00000000:02:00.0  On |                  N/A |\n|  0%   60C    P5             44W /  320W |     493MiB /  24576MiB |      8%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2051      G   sway                                     70MiB |\n|    0   N/A  N/A           16765      G   Xwayland                                  6MiB |\n|    0   N/A  N/A           27582    C+G   ...rack-uuid=3190708988185955192        235MiB |\n+-----------------------------------------------------------------------------------------+\n"
+}

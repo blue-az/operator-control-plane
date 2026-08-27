@@ -1,0 +1,82 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "file_get_contents opens as utf-8. Switch it to utf-8-sig so a BOM does not leak into the string.\n",
+    "--model",
+    "gemma4:31b",
+    "--workspace",
+    "/tmp/opr-eval-ollm-utf8-sig-gemma4-31b-t3-2cpw9_57",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "2",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--seed",
+    "3",
+    "--think",
+    "off"
+  ],
+  "cell_key": "ollm-utf8-sig|L1|gemma4:31b|3",
+  "git_rev": "3e495641589fe445c72a359f38e5d03401ec4185",
+  "grade_detail": "regex matched: 'file_get_contents[\\\\s\\\\S]{0,200}encoding=\"utf-8-sig\"'",
+  "harness": "local-lane-eval",
+  "level": "L1",
+  "machine": "desktop",
+  "model": "gemma4:31b",
+  "passed": true,
+  "prompt": "file_get_contents opens as utf-8. Switch it to utf-8-sig so a BOM does not leak into the string.\n",
+  "recorded_utc": "2026-08-17T03:48:33.232352+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: gemma4:31b (lane_1_local_repair)\nDispatching governed query...\n[contract: goal-shaped \u2014 local models likely to flail; consider L2 phrasing (exact paths, an anchor, numbered steps, a success check) or a frontier lane]\nThinking...\n[tokens] prompt=437 completion=24 think_chars=0 done_reason=stop\n\n[Model requests tool call: grep_search]\nArguments: {\n  \"tool\": \"grep_search\",\n  \"pattern\": \"file_get_contents\",\n  \"path\": \".\"\n}\n\n[Tool Output]\nexample_image.py:4: from ollm import Inference, file_get_contents, TextStreamer\nexample_audio.py:7: from ollm import Inference, file_get_contents, TextStreamer\nexample.py:1: from ollm import Inference, file_get_contents, TextStreamer\nexample.py:10: #sm, um = file_get_contents(\"./samples/85k_sample.txt\"), \"What's common between these articles?\"\nREADME.md:86: from ollm import Inference, file_get_contents, TextStreamer\nsrc/ollm/voxtral.py:9: from .utils import _walk_to_parent, _assign_tensor_to_module, _set_meta_placeholder, file_get_contents\nsrc/ollm/utils.py:9: def file_get_contents(name):\nsrc/ollm/qwen3_next.py:10: from .utils import _walk_to_parent, _assign_tensor_to_module, _set_meta_placeholder, file_get_contents\nsrc/ollm/inference.py:4: from .utils import Stats, file_get_contents\nsrc/ollm/gemma3.py:9: from .utils import _walk_to_parent, _assign_tensor_to_module, _set_meta_placeholder, file_get_contents\nsrc/ollm/__init__.py:3: from .utils import file_get_contents\nscripts/test_autoinference.py:5: from ollm import TextStreamer, AutoInference, file_get_contents\nscripts/test_autoinference.py:8: \treturn f\"Extract short summary from document: {file_get_contents(\"./temp/xsum_sample.txt\")}\\nSummary:\\n\",\nscripts/test.py:1: from ollm import Inference, file_get_contents\nscripts/qwen3_next_export.py:5: from ollm import file_get_contents\nscripts/qwen3_next_export.py:41: wmap = json.loads(file_get_contents(f\"{path}model.safetensors.index.json\"))[\"weight_map\"]\nscripts/full_tests.py:1: from ollm import Inference, TextStreamer, file_get_contents\nscripts/full_tests.py:30: \t\tsm, um = \"[CHATS]:\\n\"+file_get_contents(\"./samples/10k_sample.txt\")+\"[/END CHATS]\", \"Analyze chats above and write top 10 most popular questions (translate to english).\"\nscripts/full_tests.py:37: \t\tsm, um = \"[CHATS]:\\n\"+file_get_contents(\"./samples/2k_sample.txt\")+\"[/END CHATS]\", \"Analyze chats above and write top 10 most popular questions (translate to english).\"\nscripts/full_tests.py:44: \t\tsm, um = file_get_contents(\"./samples/85k_sample.txt\"), \"Analyze papers above and find 3 common similarities.\"\nscripts/full_tests.py:49: \t\tsm, um = file_get_contents(\"./samples/45k_sample.txt\"), \"Analyze papers above and find 3 common similarities.\",\nscripts/full_tests.py:54: \t\tsm, um = \"[CHATS]:\\n\"+file_get_contents(\"./samples/2k_sample.txt\")+\"[/END CHATS]\", \"Analyze chats above and write top 10 most popular questions (translate to english).\"\nscripts/full_tests.py:59: \t\tsm, um = \"[CHATS]:\\n\"+file_get_contents(\"./samples/2k_sample.txt\")+\"[/END CHATS]\", \"Analyze chats above and write top 10 most popular questions (translate to english).\"\n\nThinking...\n[tokens] prompt=1340 completion=27 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"src/ollm/utils.py\"\n}\n\n[Tool Output]\nimport codecs, io, time\nimport torch \n\ndef file_put_contents(filename, st):\n    file = codecs.open(filename, \"w\", \"utf-8\")\n    file.write(st)\n    file.close()\n\ndef file_get_contents(name):\n    f = io.open(name, mode=\"r\", encoding=\"utf-8\") #utf-8 | Windows-1252\n    return f.read()\n    \ndef tensor_size_gb(t: torch.Tensor) -> float:\n    return t.numel() * t.element_size() / 1024**3\n\nclass Stats:\n    def __init__(self):\n        self.d = {}\n\n    def set(self, name, t1):\n        if name not in self.d: self.d[name] = []\n        self.d[name].append( round(time.perf_counter() - t1, 3) ) \n\n    def print_and_clean(self):\n        st = \"Stats:\"\n        for name, a in self.d.items():\n            st+=f\" {name}: {a[:5]} t:{round(sum(a), 3)},\"\n        self.d = {}\n        return st\n\n\n# === Helper utilities ===\ndef _walk_to_parent(obj, attr_path):\n    \"\"\"Return (parent_obj, leaf_name) for attr_path like 'self_attn.q_proj.weight'\"\"\"\n    parts = attr_path.split('.')\n    parent = obj\n    for p in parts[:-1]:\n        parent = getattr(parent, p)\n    return parent, parts[-1]\n\ndef _assign_tensor_to_module(target_parent, leaf, tensor):\n    \"\"\"\n    Assign a tensor into target_parent.<leaf>.\n    - If target_parent.<leaf> has a .load call, call it with tensor.\n    - Else, if attribute endswith 'weight' or 'bias' and current attr is nn.Parameter, replace it.\n    - Else, set attribute to nn.Parameter(tensor) (read-only).\n    \"\"\"\n    existing = getattr(target_parent, leaf, None)\n\n    # If target object has a load(tensor) method (user's custom modules), call it.\n    if hasattr(existing, \"load\") and callable(getattr(existing, \"load\")):\n        existing.load(tensor)   # user-supplied API\n        return\n\n    # If existing is a Parameter (typical), replace with new Parameter on CUDA\n    if isinstance(existing, torch.nn.Parameter) or getattr(existing, \"__class__\", None) is torch.nn.Parameter:\n        param = torch.nn.Parameter(tensor.detach(), requires_grad=False)\n        setattr(target_parent, leaf, param)\n        return\n\n    # If attribute is a module (like a Linear) we attempt to set its weight/bias\n    if isinstance(existing, torch.nn.Linear) or hasattr(existing, \"weight\"):\n        # try to set weight and bias if given tensor is 2D weight\n        if tensor.ndim == 2 and hasattr(existing, \"weight\"):\n            existing.weight = torch.nn.Parameter(tensor.detach(), requires_grad=False)\n            return\n        # fallback: set attribute to Parameter\n    # Default fallback: replace attribute with a Parameter\n    setattr(target_parent, leaf, torch.nn.Parameter(tensor.detach(), requires_grad=False))\n\n\ndef _set_meta_placeholder(target_parent, leaf):\n    \"\"\"Replace parameter/module attribute with a tiny meta-device Parameter to free VRAM.\"\"\"\n    placeholder = torch.nn.Parameter(torch.empty(0, device=\"meta\"), requires_grad=False)\n    setattr(target_parent, leaf, placeholder)\n\n\ndef remove_layers_weights(model):\n    # 2. Remove heavy decoder block weights (keep skeleton)\n    for layer in model.model.layers:\n        for name, module in layer.named_children():\n            if hasattr(module, \"weight\"):\n                module.weight = torch.nn.Parameter(\n                    torch.empty(0), requires_grad=False\n                )                \n            if hasattr(module, \"bias\") and module.bias is not None:\n                module.bias = torch.nn.Parameter(\n                    torch.empty(0), requires_grad=False\n                )\n\n\n\n\nThinking...\n[tokens] prompt=2370 completion=141 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"src/ollm/utils.py\",\n  \"target_content\": \"def file_get_contents(name):\\n    f = io.open(name, mode=\\\"r\\\", encoding=\\\"utf-8\\\") #utf-8 | Windows-1252\\n    return f.read()\",\n  \"replacement_content\": \"def file_get_contents(name):\\n    f = io.open(name, mode=\\\"r\\\", encoding=\\\"utf-8-sig\\\") #utf-8-sig | Windows-1252\\n    return f.read()\"\n}\n\n[Tool Output]\nSuccessfully patched src/ollm/utils.py.\n\nThinking...\n[tokens] prompt=2411 completion=134 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"src/ollm/utils.py\",\n  \"target_content\": \"def file_get_contents(name):\\n    f = io.open(name, mode=\\\"r\\\", encoding=\\\"utf-8\\\") #utf-8 | Windows-1252\\n    return f.read()\",\n  \"replacement_content\": \"def file_get_contents(name):\\n    f = io.open(name, mode=\\\"r\\\", encoding=\\\"utf-8-sig\\\") #utf-8 | Windows-1252\\n    return f.read()\"\n}\n\n[Tool Output]\nError: Target content to replace not found in the file.\n\n\n--- Output ---\n[Tool failed or cancelled: patch_file]\nError: Target content to replace not found in the file.\n--------------\n",
+  "task_id": "ollm-utf8-sig",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 326,
+    "distinct_tools": [
+      "grep_search",
+      "patch_file",
+      "read_file"
+    ],
+    "n_calls": 4,
+    "n_failed_calls": 1,
+    "no_dispatch": false,
+    "stopped_repeat": false,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": ".",
+        "tool": "grep_search"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "src/ollm/utils.py",
+        "tool": "read_file"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "src/ollm/utils.py",
+        "tool": "patch_file"
+      },
+      {
+        "error": "Error: Target content to replace not found in the file.",
+        "ok": false,
+        "path": "src/ollm/utils.py",
+        "tool": "patch_file"
+      }
+    ]
+  },
+  "trial": 3,
+  "wall_clock_s": 17.6
+}

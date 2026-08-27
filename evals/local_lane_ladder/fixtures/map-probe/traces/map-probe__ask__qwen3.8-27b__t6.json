@@ -1,0 +1,90 @@
+{
+  "answer": "Ollama API Error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate",
+  "answer_chars": 102,
+  "answer_words": 12,
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "This workspace holds the governing docs of project-phoenix as they are on disk today. Answer from files you open here, not from memory of other trees.\n\nCover these five, briefly:\n1. What this repo is for (one or two sentences).\n2. The names that must not be collapsed: the folder, the public line, the open-work board, the enforcement CLI \u2014 and where each lives.\n3. Where authoritative answers are supposed to come from.\n4. What is open *right now* (not a greatest-hits list).\n5. The first three files a new agent should read, in order.\n\nIf a file you need is missing, say so. Do not invent a current task. Prefer short and sourced over long and complete-sounding.",
+    "--model",
+    "qwen3.8:27b",
+    "--workspace",
+    "/tmp/opr-eval-map-probe-y5tiq9q4",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "8",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off"
+  ],
+  "cell_key": "map-probe|ask|qwen3.8:27b|6",
+  "facets": {
+    "authority": "missing",
+    "names": "missing",
+    "open_now": "missing",
+    "read_first": "missing",
+    "what_for": "missing"
+  },
+  "files_read": [
+    "README.md",
+    "CLAUDE.md"
+  ],
+  "git_rev": "18611de7fbae8483bde091b1cf37c186844a7b01",
+  "grade_detail": "0/5 facets sourced",
+  "harness": "local-lane-eval",
+  "level": "ask",
+  "machine": "desktop",
+  "model": "qwen3.8:27b",
+  "n_rounds": 3,
+  "n_sourced": 0,
+  "passed": false,
+  "prompt": "This workspace holds the governing docs of project-phoenix as they are on disk today. Answer from files you open here, not from memory of other trees.\n\nCover these five, briefly:\n1. What this repo is for (one or two sentences).\n2. The names that must not be collapsed: the folder, the public line, the open-work board, the enforcement CLI \u2014 and where each lives.\n3. Where authoritative answers are supposed to come from.\n4. What is open *right now* (not a greatest-hits list).\n5. The first three files a new agent should read, in order.\n\nIf a file you need is missing, say so. Do not invent a current task. Prefer short and sourced over long and complete-sounding.",
+  "prompt_tokens": 1982,
+  "recorded_utc": "2026-08-15T03:23:56.121797+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: qwen3.8:27b (lane_1_local_repair)\nDispatching governed query...\n[contract: goal-shaped \u2014 local models likely to flail; consider L2 phrasing (exact paths, an anchor, numbered steps, a success check) or a frontier lane]\nThinking...\n[tokens] prompt=539 completion=13 think_chars=0 done_reason=stop\n\n[Model requests tool call: tree_dir]\nArguments: {\n  \"tool\": \"tree_dir\",\n  \"path\": \".\"\n}\n\n[Tool Output]\n\u251c\u2500\u2500 AGENTS.md\n\u251c\u2500\u2500 BOTTLENECKS.md\n\u251c\u2500\u2500 CLAUDE.md\n\u251c\u2500\u2500 ONBOARDING.md\n\u2514\u2500\u2500 README.md\n\nThinking...\n[tokens] prompt=602 completion=15 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"README.md\"\n}\n\n[Tool Output]\n# Project Phoenix\n\nProject Phoenix is a local, deterministic agent portfolio for evaluating\ndomain-specific analytical workflows, routing surfaces, and model interfaces.\n\nThe core design rule is that authoritative answers come from grounded\nsubstrates: databases, files, schemas, solvers, and validation artifacts.\nLanguage models are optional interface layers for routing, formatting, and\nbounded generation; they are not the source of truth.\n\n## Current Focus\n\n- OpenClaw/Phoenix operator shell and incident workflow.\n- ShowcaseAgent deterministic domain routing.\n- PPR Agent medical-device Product Performance Report substrate.\n- Literal-substrate experiments for model/harness boundary analysis.\n\n## Useful Checks\n\n```bash\nuv run pytest -q\nscripts/check_openclaw_hardening.sh --skip-live\nscripts/openclaw_showcase_routing_demo.sh --human\npython domains/DemoAgents/PPR_Agent/test_agent.py\n```\n\nLive OpenClaw endpoint checks require the gateway to be running on\n`127.0.0.1:19001`.\n\n\nThinking...\n[tokens] prompt=841 completion=17 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"CLAUDE.md\"\n}\n\n[Tool Output]\n# Claude Code \u2014 Project Phoenix\n\n**Read [`AGENTS.md`](AGENTS.md) first.** It is the canonical, tool-agnostic source of truth for project structure, architecture, commands, conventions, publishing workflow, and standing phase discipline. This file only contains Claude-Code-specific affordances and shortcuts that AGENTS.md doesn't cover.\n\n## Persistent Memory\n\nAuto-memory lives at `/home/blueaz/.claude/projects/-home-blueaz-Python/memory/`. The `MEMORY.md` index in that directory is loaded into every session; the linked `*.md` files are loaded on demand. When the user asks you to \"remember\" something, save it as a memory entry there. When you need historical context, check the memory index before re-deriving from the codebase.\n\nWhen a memory names a specific file, function, or flag: verify it still exists before recommending it. Memories are claims about state at write-time, not guarantees about state now.\n\n## Slash Commands and Skills\n\nThe harness exposes several skills that are useful in this repo:\n- `/ultrareview` \u2014 multi-agent cloud review of the current branch (or `/ultrareview <PR#>`). User-triggered and billed.\n- `/loop <interval> <prompt>` \u2014 recurring task on a schedule (e.g., `/loop 5m /babysit-prs`).\n- `/schedule` \u2014 create or manage remote scheduled agents for one-time follow-ups (cleanup PRs after a soak window, etc.).\n- `/review`, `/security-review` \u2014 review the pending diff or branch.\n- `/init` \u2014 generate a CLAUDE.md (do not regenerate this file unprompted).\n\n## Long-Running Work\n\nFor long benchmark runs, paper renders, or any task longer than a few minutes:\n- Use `Bash` with `run_in_background: true` and let the completion notification fire \u2014 do not poll, do not sleep in a loop.\n- For wait-and-check patterns, prefer `ScheduleWakeup` over chained sleeps. The 5-minute prompt cache is the binding constraint; either stay under 270 s or commit to 1200 s+.\n- Use `TaskCreate` / `TaskUpdate` only when the work has 3+ discrete steps and tracking actually helps. For short tasks, plain conversation is enough.\n\n## Verification\n\nThe repo's `verify-by-running` rule (memory: `feedback_verify_by_running.md`) applies in full: file presence is not proof. For load-bearing claims \u2014 especially anything that will land in a frozen paper, manifest, or live deploy \u2014 re-run from a clean shell before claiming success. The full publish chain (paper render \u2192 manifest \u2192 index \u2192 IONOS rsync) is documented in AGENTS.md.\n\n## What Not To Do Without Asking\n\n- Don't open a new phase. Phase boundaries are user-controlled.\n- Don't initiate destructive git operations (`reset --hard`, force push, branch deletion) without explicit instruction.\n- Pushing to Erik's own remotes (`github.com/blue-az/*`) is fine without asking once the commit itself is sanctioned. Pushing to any repo he doesn't own (upstreams, collaborators' repos, PRs against others' projects) requires consultation first. `./deploy.sh` always requires confirmation in this session \u2014 earlier authorization in a different scope does not carry over.\n- Don't create planning, decision, or analysis Markdown files unless explicitly asked. Work from conversation context.\n\n\nThinking...\n\n--- Output ---\nOllama API Error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate\n--------------\n",
+  "task_id": "map-probe",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 45,
+    "distinct_tools": [
+      "read_file",
+      "tree_dir"
+    ],
+    "n_calls": 3,
+    "n_failed_calls": 0,
+    "no_dispatch": false,
+    "stopped_repeat": false,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": ".",
+        "tool": "tree_dir"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "README.md",
+        "tool": "read_file"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "CLAUDE.md",
+        "tool": "read_file"
+      }
+    ]
+  },
+  "trial": 6,
+  "wall_clock_s": 7.1
+}

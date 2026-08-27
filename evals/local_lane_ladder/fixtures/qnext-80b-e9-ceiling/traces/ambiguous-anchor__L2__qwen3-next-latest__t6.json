@@ -1,0 +1,65 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n",
+    "--model",
+    "qwen3-next:latest",
+    "--workspace",
+    "/tmp/opr-eval-ambiguous-anchor-L2-_cphnjmo",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--think",
+    "off"
+  ],
+  "cell_key": "ambiguous-anchor|L2|qwen3-next:latest|6",
+  "git_rev": "3e495641589fe445c72a359f38e5d03401ec4185",
+  "grade_detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+  "harness": "local-lane-eval",
+  "level": "L2",
+  "machine": "desktop",
+  "model": "qwen3-next:latest",
+  "passed": false,
+  "prompt": "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n",
+  "recorded_utc": "2026-08-19T10:04:46.719488+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: qwen3-next:latest (lane_1_local_repair)\nDispatching governed query...\nThinking...\n[tokens] prompt=371 completion=4490 think_chars=0 done_reason=stop\n\n[Model requests tool call: read_file]\nArguments: {\n  \"tool\": \"read_file\",\n  \"path\": \"runbook.md\"\n}\n\n[Tool Output]\n# Service runbook\n\n## Production\n1. Drain connections.\n2. Run: restart the service\n3. Confirm health checks pass.\n\n## Staging\n1. Drain connections.\n2. Run: restart the service\n3. Confirm health checks pass.\n\n## Development\n1. Drain connections.\n2. Run: restart the service\n3. Confirm health checks pass.\n\n\nThinking...\n[tokens] prompt=458 completion=4232 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"relative/path\",\n  \"target_content\": \"exact text to replace\",\n  \"replacement_content\": \"new text\"\n}\n\n[Tool Output]\nError: File not found: relative/path\n\n\n--- Output ---\n[Tool failed or cancelled: patch_file]\nError: File not found: relative/path\n--------------\n",
+  "task_id": "ambiguous-anchor",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 8722,
+    "distinct_tools": [
+      "patch_file",
+      "read_file"
+    ],
+    "n_calls": 2,
+    "n_failed_calls": 1,
+    "no_dispatch": false,
+    "stopped_repeat": false,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": "runbook.md",
+        "tool": "read_file"
+      },
+      {
+        "error": "Error: File not found: relative/path",
+        "ok": false,
+        "path": "relative/path",
+        "tool": "patch_file"
+      }
+    ]
+  },
+  "trial": 6,
+  "wall_clock_s": 305.3
+}

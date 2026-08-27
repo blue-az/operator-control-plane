@@ -1,0 +1,7 @@
+captured_utc: 2026-08-15T04:12:24Z
+git_rev: 18611de7fbae8483bde091b1cf37c186844a7b01
+question: does qwen3-vl:30b see an image; is think=false leaky; is 167tok/s an answer rate
+model: qwen3-vl:30b
+design: 3 stills x (img+think_off, img+think_on, noimg+think_off) x n=3 = 27
+grade: message.content only; empty response invalid
+NVIDIA GeForce RTX 3090, 320.00 W, 24576 MiB

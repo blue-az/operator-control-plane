@@ -1,0 +1,81 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "GITHUB_URL still says github.com/MuhammadUsmanGM. Change it to github.com/blue-az/code-stick.\n",
+    "--model",
+    "gemma4:31b",
+    "--workspace",
+    "/tmp/opr-eval-code-stick-github-url-gemma4-31b-t2-_v7f2aar",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "2",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--seed",
+    "2",
+    "--think",
+    "off"
+  ],
+  "cell_key": "code-stick-github-url|L1|gemma4:31b|2",
+  "git_rev": "3e495641589fe445c72a359f38e5d03401ec4185",
+  "grade_detail": "pattern found: 'github.com/blue-az/code-stick'",
+  "harness": "local-lane-eval",
+  "level": "L1",
+  "machine": "desktop",
+  "model": "gemma4:31b",
+  "passed": true,
+  "prompt": "GITHUB_URL still says github.com/MuhammadUsmanGM. Change it to github.com/blue-az/code-stick.\n",
+  "recorded_utc": "2026-08-17T03:45:23.102067+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: gemma4:31b (lane_1_local_repair)\nDispatching governed query...\n[contract: semi-shaped \u2014 local models likely to flail; consider L2 phrasing (exact paths, an anchor, numbered steps, a success check) or a frontier lane]\nThinking...\n[tokens] prompt=437 completion=27 think_chars=0 done_reason=stop\n\n[Model requests tool call: grep_search]\nArguments: {\n  \"tool\": \"grep_search\",\n  \"pattern\": \"github.com/MuhammadUsmanGM\",\n  \"path\": \".\"\n}\n\n[Tool Output]\npackage.json:48:     \"url\": \"https://github.com/MuhammadUsmanGM\"\npackage.json:56:     \"url\": \"git+https://github.com/MuhammadUsmanGM/code-stick.git\"\npackage.json:59:     \"url\": \"https://github.com/MuhammadUsmanGM/code-stick/issues\"\npackage.json:61:   \"homepage\": \"https://github.com/MuhammadUsmanGM/code-stick#readme\",\nREADME.md:117: [github.com/MuhammadUsmanGM/code-stick/issues](https://github.com/MuhammadUsmanGM/code-stick/issues).\nREADME.md:141: MIT \u2014 Muhammad Usman ([github.com/MuhammadUsmanGM](https://github.com/MuhammadUsmanGM))\nsrc/utils/logger.ts:30: const GITHUB_URL = \"github.com/MuhammadUsmanGM\";\nsrc/utils/bug-report.ts:47: const ISSUE_URL = \"https://github.com/MuhammadUsmanGM/code-stick/issues/new\";\nsrc/core/downloader.ts:124:         \"The partial file has been deleted. Re-run; if it persists, run `npm run hashes:bump` against the catalog and report at github.com/MuhammadUsmanGM/code-stick/issues.\"\nscripts/postinstall.mjs:58: console.log(`  ${BOLD}Installed${RESET}  ${DIM}v${version}${RESET}  ${CORAL}github.com/MuhammadUsmanGM${RESET}`);\nscripts/postinstall.mjs:72: console.log(`  ${DIM}Docs: https://github.com/MuhammadUsmanGM/code-stick${RESET}`);\ndocs/TROUBLESHOOTING.md:198: [github.com/MuhammadUsmanGM/code-stick/issues](https://github.com/MuhammadUsmanGM/code-stick/issues).\ndocs/SECURITY.md:12: [github.com/MuhammadUsmanGM](https://github.com/MuhammadUsmanGM) so we can\ndocs/SECURITY.md:331:    [github.com/MuhammadUsmanGM](https://github.com/MuhammadUsmanGM)\n\nThinking...\n[tokens] prompt=985 completion=54 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"package.json\",\n  \"target_content\": \"https://github.com/MuhammadUsmanGM\",\n  \"replacement_content\": \"https://github.com/blue-az/code-stick\"\n}\n\n[Tool Output]\nSuccessfully patched package.json.\n\nThinking...\n[tokens] prompt=1016 completion=23 think_chars=0 done_reason=stop\n\n[Model requests tool call: grep_search]\nArguments: {\n  \"tool\": \"grep_search\",\n  \"pattern\": \"MuhammadUsmanGM\",\n  \"path\": \".\"\n}\n\n[Tool Output]\nvitest.config.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntsup.config.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nREADME.md:117: [github.com/MuhammadUsmanGM/code-stick/issues](https://github.com/MuhammadUsmanGM/code-stick/issues).\nREADME.md:141: MIT \u2014 Muhammad Usman ([github.com/MuhammadUsmanGM](https://github.com/MuhammadUsmanGM))\nLICENSE:3: Copyright (c) 2026 Muhammad Usman (MuhammadUsmanGM)\nCHANGELOG.md:1: <!-- Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-c4l3-log0 -->\ntest/usb.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/targets.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/preflight.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/paths.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/opencode-catalog.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a | MUGM-d3c1-ocv3\ntest/opencode-catalog.test.ts:99: const __mugmOrigin = () => \"MuhammadUsmanGM|MUGM-d3c1\"; // authorship marker\ntest/models.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/model-pull.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/manifest.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/launchers.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/extract.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/extract-symlink.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/copy.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/bug-report.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b9r3-tst1\ntest/archive-staging.test.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/__snapshots__/launchers.test.ts.snap:5: # Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/__snapshots__/launchers.test.ts.snap:131: # Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntest/__snapshots__/launchers.test.ts.snap:256: REM Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntemplates/start-windows.bat.ejs:2: REM Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntemplates/start-mac.command.ejs:2: # Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ntemplates/start-linux.sh.ejs:2: # Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/cli.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/utils/prompt.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/utils/platform.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a | MUGM-fix4-arch\nsrc/utils/paths.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/utils/logger.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/utils/logger.ts:30: const GITHUB_URL = \"github.com/MuhammadUsmanGM\";\nsrc/utils/install-log.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-d3f2-4b7c\nsrc/utils/exit-guard.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/utils/env.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/utils/bug-report.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b9r3-ep71\nsrc/utils/bug-report.ts:47: const ISSUE_URL = \"https://github.com/MuhammadUsmanGM/code-stick/issues/new\";\nsrc/state/manifest.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/usb.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/process-manager.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/preflight.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/opencode-prestage.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/opencode-config.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/model-pull.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/macos.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/launcher-gen.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/health.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/extract.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/engine-staging.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-c8a1-9e3d\nsrc/core/downloader.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/downloader.ts:124:         \"The partial file has been deleted. Re-run; if it persists, run `npm run hashes:bump` against the catalog and report at github.com/MuhammadUsmanGM/code-stick/issues.\"\nsrc/core/copy.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/cleanup.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/core/archive-staging.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/commands/upgrade-engine.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-c8a1-9e3d\nsrc/commands/update.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/commands/uninstall.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/commands/status.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/commands/start.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/commands/remove-model.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/commands/prune.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-pt3x-9y8z\nsrc/commands/install.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/commands/doctor.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-d3f2-4b7c\nsrc/commands/add-targets.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/commands/add-model.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/catalog/targets.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/catalog/opencode.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a | MUGM-d3c1-ocv2\nsrc/catalog/opencode.ts:121: const __mugmOrigin = () => \"MuhammadUsmanGM|MUGM-d3c1\"; // authorship marker\nsrc/catalog/ollama.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/catalog/models.ts:1: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nsrc/catalog/models.ts:46: const _MUGM = Object.freeze({ b: 0x4D756861, g: \"MuhammadUsmanGM\" });\nsrc/catalog/models.ts:212: export const __mugmOrigin = () => \"MuhammadUsmanGM|MUGM-b2e4\";\nscripts/verify-publish.mjs:2: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-v3p1-9k7m\nscripts/smoke.mjs:2: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nscripts/smoke.Dockerfile:1: # Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nscripts/postinstall.mjs:2: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\nscripts/postinstall.mjs:58: console.log(`  ${BOLD}Installed${RESET}  ${DIM}v${version}${RESET}  ${CORAL}github.com/MuhammadUsmanGM${RESET}`);\nscripts/postinstall.mjs:72: console.log(`  ${DIM}Docs: https://github.com/MuhammadUsmanGM/code-stick${RESET}`);\nscripts/compute-hashes.mjs:2: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a | MUGM-d3c1-ocv2\nscripts/check-catalog-hashes.mjs:2: // Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-b2e4-7f1a\ndocs/TROUBLESHOOTING.md:198: [github.com/MuhammadUsmanGM/code-stick/issues](https://github.com/MuhammadUsmanGM/code-stick/issues).\ndocs/SECURITY.md:1: <!-- Author: Muhammad Usman (MuhammadUsmanGM) | Sig: MUGM-sec-doc-01 -->\ndocs/SECURITY.md:12: [github.com/MuhammadUsmanGM](https://github.com/MuhammadUsmanGM) so we can\ndocs/SECURITY.md:331:    [github.com/MuhammadUsmanGM](https://github.com/MuhammadUsmanGM)\n\nThinking...\n[tokens] prompt=4400 completion=75 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"src/utils/logger.ts\",\n  \"target_content\": \"const GITHUB_URL = \\\"github.com/MuhammadUsmanGM\\\";\",\n  \"replacement_content\": \"const GITHUB_URL = \\\"github.com/blue-az/code-stick\\\";\"\n}\n\n[Tool Output]\nSuccessfully patched src/utils/logger.ts.\n\n\n--- Output ---\n[Halted: reached state-change budget of 2 (patch_file, patch_file). Task may be incomplete \u2014 no task_complete signal was received.]\nSuccessfully patched src/utils/logger.ts.\n--------------\n",
+  "task_id": "code-stick-github-url",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 179,
+    "distinct_tools": [
+      "grep_search",
+      "patch_file"
+    ],
+    "n_calls": 4,
+    "n_failed_calls": 0,
+    "no_dispatch": false,
+    "stopped_repeat": false,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": ".",
+        "tool": "grep_search"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "package.json",
+        "tool": "patch_file"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": ".",
+        "tool": "grep_search"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "src/utils/logger.ts",
+        "tool": "patch_file"
+      }
+    ]
+  },
+  "trial": 2,
+  "wall_clock_s": 15.2
+}

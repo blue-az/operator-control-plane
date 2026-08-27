@@ -1,0 +1,12 @@
+{
+  "model": "gemma4:26b",
+  "trial": 4,
+  "kind": "pass",
+  "rc": 0,
+  "eval_count": 384,
+  "think_chars": 0,
+  "src_chars": 1332,
+  "test_out": "LOGSUM_OK\n",
+  "src_head": "def error_report(log_text):\n    \"\"\"Summarise ERROR lines per UTC hour.\n\n    Each log line looks like:\n        2026-08-11T14:23:05Z LEVEL message\n\n    LEVEL is one of INFO, WARN, ERROR and is matched case-sensitively.\n    Return a list of strings, one per hour that has at least one ERROR,\n    formatted exactly as \"HH: N errors\" -- two-digit hour, then a colon and\n    a single space, then the count,",
+  "recorded_utc": "2026-08-15T07:47:10.345158+00:00"
+}

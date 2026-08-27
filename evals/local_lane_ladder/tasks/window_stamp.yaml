@@ -1,0 +1,161 @@
+# MEASURED: SATURATED — 11/12 on the first six models smoked (gemma4:26b
+# 2/2, 31b 2/2, qwen3.8 2/2, qwen3.6 2/2, gemma3:27b 2/2, qwen3-vl 1/2).
+# gemma3 is 0/54 on the E11 battery and still aces this. Do NOT use as a
+# mid-band discriminator. The two-half design is sound (vl t1 failed
+# window and stamp independently) but "rewrite the docstring" is below
+# the whole field. Retained as a sanity band, like booking-off-by-one.
+task_id: window-stamp
+description: >
+  Select events in a half-open time window and stamp each with an exact
+  output contract. Two independently checkable halves: (1) membership is
+  [start, end) with overnight wrap when start > end; (2) each kept event
+  stamps as HHMM|name. A model that includes the exclusive end-bound but
+  formats correctly fails only the window battery; a model that gets the
+  window right and ships "HH:MM name" fails only the stamp battery.
+
+files:
+  src/shifts.py: |
+    def stamp_window(events, start, end):
+        """Select events in the half-open window [start, end) and stamp them.
+
+        events: list of strings "HH:MM Name" (24-hour, zero-padded hour and minute).
+        start and end are "HH:MM" strings. An event at exactly end is excluded.
+        If start is later than end the window wraps midnight: keep events in
+        [start, 24:00) or [00:00, end). If start equals end, return [].
+        Return a list of strings in input order, each formatted exactly as
+        "HHMM|name" -- four digits, no colon, a single pipe, then the name
+        lowercased with surrounding whitespace stripped. Return [] when none match.
+        """
+        out = []
+        for ev in events:
+            time, name = ev.split(None, 1)
+            if start <= time <= end:
+                out.append(f"{time} {name.strip()}")
+        return out
+
+  tests/check_window.py: |
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    sys.path.insert(0, ".")
+    from src.shifts import stamp_window
+
+    def names(rows):
+        out = []
+        for line in rows:
+            if not isinstance(line, str):
+                raise AssertionError(f"expected str, got {type(line)}")
+            if "|" in line:
+                out.append(line.split("|", 1)[1].strip().lower())
+            else:
+                out.append(line.split()[-1].strip().lower())
+        return out
+
+    EVENTS = [
+        "08:30 Eve",
+        "09:00 Alice",
+        "10:30 Bob",
+        "11:00 Cara",
+        "11:01 Dan",
+    ]
+    got = stamp_window(EVENTS, "09:00", "11:00")
+    assert names(got) == ["alice", "bob"], (
+        f"window names={names(got)!r} expected ['alice', 'bob'] "
+        "(start inclusive, end exclusive; Cara at 11:00 must drop)"
+    )
+
+    assert names(stamp_window(EVENTS, "08:00", "08:30")) == [], (
+        "empty window (end exclusive, only event sits on end) must be []"
+    )
+    assert names(stamp_window(EVENTS, "11:01", "23:00")) == ["dan"]
+    assert names(stamp_window([], "00:00", "23:59")) == []
+    assert names(stamp_window(EVENTS, "09:00", "09:00")) == [], (
+        "start == end is empty, not the whole day"
+    )
+
+    # Overnight wrap: 22:00 -> 09:30 keeps Eve (08:30) and nothing in 09:30-22:00.
+    NIGHT = [
+        "21:00 Wes",
+        "22:00 Pia",
+        "23:45 Quin",
+        "00:10 Remy",
+        "08:30 Eve",
+        "09:30 Skip",
+    ]
+    assert names(stamp_window(NIGHT, "22:00", "09:30")) == ["pia", "quin", "remy", "eve"], (
+        f"overnight names={names(stamp_window(NIGHT, '22:00', '09:30'))!r} "
+        "expected ['pia', 'quin', 'remy', 'eve']"
+    )
+
+    print("WINDOW_OK")
+
+  tests/check_stamp.py: |
+    import re
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    sys.path.insert(0, ".")
+    from src.shifts import stamp_window
+
+    # Every event sits strictly inside the window so a wrong exclusive-end
+    # does not affect this half.
+    EVENTS = [
+        "01:05  ZED  ",
+        "12:00 Mia",
+        "22:59 Oak",
+    ]
+    got = stamp_window(EVENTS, "00:00", "23:59")
+    assert got == ["0105|zed", "1200|mia", "2259|oak"], (
+        f"stamp={got!r} expected ['0105|zed', '1200|mia', '2259|oak']"
+    )
+    for line in got:
+        assert re.fullmatch(r"\d{4}\|[a-z]+", line), f"bad stamp line: {line!r}"
+
+    assert stamp_window([], "00:00", "23:59") == []
+
+    print("STAMP_OK")
+
+state_changes: 3
+
+prompts:
+  L0: "The shift report is picking the wrong people and the stamps look messy. Please sort it out."
+  L1: >
+    Fix stamp_window in src/shifts.py so it keeps events in [start, end) and
+    stamps each as HHMM|name (lowercase, stripped). Do not change the tests.
+  L2: |
+    1. Read src/shifts.py and read tests/check_window.py and tests/check_stamp.py.
+    2. In src/shifts.py, rewrite the body of "def stamp_window(events, start, end):"
+       so that it satisfies the docstring already in that function.
+    3. Verify by running "python3 tests/check_window.py" and
+       "python3 tests/check_stamp.py" from the fixture root; each should exit 0
+       and print WINDOW_OK or STAMP_OK.
+    Only touch src/shifts.py.
+
+trajectory_hint:
+  - Read src/shifts.py.
+  - Read tests/check_window.py and tests/check_stamp.py.
+  - Patch the body of stamp_window in src/shifts.py.
+  - Run both test files and confirm they exit 0.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: window half
+      type: exec
+      command: python3 tests/check_window.py
+      timeout: 60
+    - name: stamp half
+      type: exec
+      command: python3 tests/check_stamp.py
+      timeout: 60
+    - name: function still defined
+      type: python_symbol
+      file: src/shifts.py
+      symbol: stamp_window
+      args: [events, start, end]
+    - name: tests not edited
+      type: files_unchanged
+      allowed:
+        - src/shifts.py

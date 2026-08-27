@@ -1,0 +1,69 @@
+{
+  "argv": [
+    "/home/blueaz/operator-control-plane/opr",
+    "DEFAULT_WEB_PORT is 8090. Change it to 8091.\n",
+    "--model",
+    "gemma4:26b",
+    "--workspace",
+    "/tmp/opr-eval-groundtruth-web-port-gemma4-26b-t1-ca4r5vpr",
+    "--eval-auto-confirm",
+    "--allow-write",
+    "--allow-run",
+    "--no-govern",
+    "--no-bn",
+    "--continue-steps",
+    "2",
+    "--num-ctx",
+    "16384",
+    "--temperature",
+    "0.8",
+    "--seed",
+    "1",
+    "--think",
+    "off"
+  ],
+  "cell_key": "groundtruth-web-port|L1|gemma4:26b|1",
+  "git_rev": "3e495641589fe445c72a359f38e5d03401ec4185",
+  "grade_detail": "pattern found: 'DEFAULT_WEB_PORT = 8091'",
+  "harness": "local-lane-eval",
+  "level": "L1",
+  "machine": "desktop",
+  "model": "gemma4:26b",
+  "passed": true,
+  "prompt": "DEFAULT_WEB_PORT is 8090. Change it to 8091.\n",
+  "recorded_utc": "2026-08-17T03:45:59.884074+00:00",
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "Routing task to: gemma4:26b (lane_1_local_repair)\nDispatching governed query...\n[contract: goal-shaped \u2014 local models likely to flail; consider L2 phrasing (exact paths, an anchor, numbered steps, a success check) or a frontier lane]\nThinking...\n[tokens] prompt=429 completion=24 think_chars=0 done_reason=stop\n\n[Model requests tool call: grep_search]\nArguments: {\n  \"tool\": \"grep_search\",\n  \"pattern\": \"DEFAULT_WEB_PORT\",\n  \"path\": \".\"\n}\n\n[Tool Output]\npackages/kb/paths.py:10: DEFAULT_WEB_PORT = 8090\ncli/membase.py:12: from packages.kb.paths import DEFAULT_KB_DIR, DEFAULT_WEB_PORT, kb_db_path, kb_dir, resolve_project_root\ncli/membase.py:108:             \"web_port\": DEFAULT_WEB_PORT,\ncli/membase.py:366:     kb_serve.add_argument(\"--port\", type=int, default=DEFAULT_WEB_PORT)\n\nThinking...\n[tokens] prompt=581 completion=68 think_chars=0 done_reason=stop\n\n[Model requests tool call: patch_file]\nArguments: {\n  \"tool\": \"patch_file\",\n  \"path\": \"packages/kb/paths.py\",\n  \"target_content\": \"DEFAULT_WEB_PORT = 8090\",\n  \"replacement_content\": \"DEFAULT_WEB_PORT = 8091\"\n}\n\n[Tool Output]\nSuccessfully patched packages/kb/paths.py.\n\nThinking...\n[tokens] prompt=620 completion=47 think_chars=0 done_reason=stop\n\n--- Output ---\n[Task complete after 1 state-changing step(s): patch_file]\nChanged DEFAULT_WEB_PORT from 8090 to 8091 in packages/kb/paths.py.\n--------------\n",
+  "task_id": "groundtruth-web-port",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "trajectory": {
+    "completion_tokens": 139,
+    "distinct_tools": [
+      "grep_search",
+      "patch_file"
+    ],
+    "n_calls": 2,
+    "n_failed_calls": 0,
+    "no_dispatch": false,
+    "stopped_repeat": false,
+    "think_chars": 0,
+    "tool_calls": [
+      {
+        "error": null,
+        "ok": true,
+        "path": ".",
+        "tool": "grep_search"
+      },
+      {
+        "error": null,
+        "ok": true,
+        "path": "packages/kb/paths.py",
+        "tool": "patch_file"
+      }
+    ]
+  },
+  "trial": 1,
+  "wall_clock_s": 21.6
+}

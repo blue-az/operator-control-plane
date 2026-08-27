@@ -1,0 +1,18 @@
+task_id: groundtruth-web-port
+repo: groundtruth
+description: >
+  Move the knowledge-base default web port off 8090.
+  Live tree has no agent files.
+
+prompts:
+  L0: "The knowledge-base web UI default port is 8090. Move it to 8091."
+  L1: >
+    DEFAULT_WEB_PORT is 8090. Change it to 8091.
+
+state_changes: 2
+
+postcondition:
+  type: grep
+  file: packages/kb/paths.py
+  pattern: "DEFAULT_WEB_PORT = 8091"
+  must_not_contain: "DEFAULT_WEB_PORT = 8090"

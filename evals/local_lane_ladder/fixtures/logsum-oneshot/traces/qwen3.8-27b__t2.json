@@ -1,0 +1,12 @@
+{
+  "model": "qwen3.8:27b",
+  "trial": 2,
+  "kind": "pass",
+  "rc": 0,
+  "eval_count": 320,
+  "think_chars": 0,
+  "src_chars": 1051,
+  "test_out": "LOGSUM_OK\n",
+  "src_head": "import re\n\ndef error_report(log_text):\n    \"\"\"Summarise ERROR lines per UTC hour.\n\n    Each log line looks like:\n        2026-08-11T14:23:05Z LEVEL message\n\n    LEVEL is one of INFO, WARN, ERROR and is matched case-sensitively.\n    Return a list of strings, one per hour that has at least one ERROR,\n    formatted exactly as \"HH: N errors\" -- two-digit hour, then a colon and\n    a single space, then",
+  "recorded_utc": "2026-08-15T07:46:20.334983+00:00"
+}

@@ -1,0 +1,73 @@
+{
+  "captured_utc": "2026-08-15T04:20:43.640469+00:00",
+  "model": "qwen3-vl:30b",
+  "num_ctx": 16384,
+  "num_predict": 256,
+  "source": {
+    "frontier": "/home/blueaz/Downloads/Elephant struggles with ATS tricycle.png",
+    "local": "/home/blueaz/Python/Evaluation/ComfyUI/output/ats_cartoon_draft_00001_.png",
+    "comfy12b": "/home/blueaz/Python/Evaluation/ComfyUI/output/ats_cartoon_12b_00001_.png",
+    "comfy26b": "/home/blueaz/Python/Evaluation/ComfyUI/output/ats_cartoon_26b_00001_.png",
+    "composite": "/home/blueaz/Python/Evaluation/ComfyUI/output/frontier_vs_local_elephants_corrected.png"
+  },
+  "stills": [
+    {
+      "id": "frontier",
+      "prompt": "Look at this image. Reply with exactly four labels separated by spaces, nothing else.\n1. ELEPHANT or NO-ELEPHANT\n2. ELEPHANT-RIDER or OTHER-RIDER or NO-RIDER\n3. TRICYCLE or BICYCLE or CART or NONE\n4. COLOR or MONO",
+      "facets": {
+        "subject": "ELEPHANT",
+        "rider": "ELEPHANT-RIDER",
+        "vehicle": "TRICYCLE",
+        "chroma": "COLOR"
+      },
+      "note": "color cartoon; elephant in suit on a yellow child's tricycle; ATS on the frame",
+      "path": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/vl-casestudy/stills/frontier.png"
+    },
+    {
+      "id": "local",
+      "prompt": "Look at this image. Reply with exactly four labels separated by spaces, nothing else.\n1. ELEPHANT or NO-ELEPHANT\n2. ELEPHANT-RIDER or OTHER-RIDER or NO-RIDER\n3. TRICYCLE or BICYCLE or CART or NONE\n4. COLOR or MONO",
+      "facets": {
+        "subject": "ELEPHANT",
+        "rider": "OTHER-RIDER",
+        "vehicle": "BICYCLE",
+        "chroma": "MONO"
+      },
+      "note": "B&W; elephant not the rider; a small human on a 2-wheel bicycle",
+      "path": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/vl-casestudy/stills/local.png"
+    },
+    {
+      "id": "comfy12b",
+      "prompt": "Look at this image. Reply with exactly four labels separated by spaces, nothing else.\n1. ELEPHANT or NO-ELEPHANT\n2. ELEPHANT-RIDER or OTHER-RIDER or NO-RIDER\n3. TRICYCLE or BICYCLE or CART or NONE\n4. COLOR or MONO",
+      "facets": {
+        "subject": "ELEPHANT",
+        "rider": "ELEPHANT-RIDER",
+        "vehicle": "TRICYCLE",
+        "chroma": "MONO"
+      },
+      "note": "Jun 4 SDXL from 12b narrative prompt; 3 wheels visible; elephant riding",
+      "path": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/vl-casestudy/stills/comfy12b.png"
+    },
+    {
+      "id": "comfy26b",
+      "prompt": "Look at this image. Reply with exactly four labels separated by spaces, nothing else.\n1. ELEPHANT or NO-ELEPHANT\n2. ELEPHANT-RIDER or OTHER-RIDER or NO-RIDER\n3. TRICYCLE or BICYCLE or CART or NONE\n4. COLOR or MONO",
+      "facets": {
+        "subject": "ELEPHANT",
+        "rider": "ELEPHANT-RIDER",
+        "vehicle": "CART",
+        "chroma": "MONO"
+      },
+      "note": "Jun 4 SDXL from 26b tag prompt; 2 large wheels, wagon/cart, garbled BUUCKINS",
+      "path": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/vl-casestudy/stills/comfy26b.png"
+    },
+    {
+      "id": "composite",
+      "prompt": "This is a two-panel figure. The left panel is labeled Frontier. The right panel is labeled Local. Which panel shows an elephant riding a child's tricycle? Reply with only one word: FRONTIER, LOCAL, BOTH, or NEITHER.",
+      "facets": {
+        "panel": "FRONTIER"
+      },
+      "note": "left=frontier trike (color); right=local bicycle (mono)",
+      "path": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/vl-casestudy/stills/composite.png"
+    }
+  ],
+  "smi_text": "Fri Aug 14 21:20:43 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.159.04             Driver Version: 580.159.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 3090        On  |   00000000:02:00.0  On |                  N/A |\n|  0%   62C    P8             41W /  320W |     428MiB /  24576MiB |     12%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A            2051      G   sway                                     69MiB |\n|    0   N/A  N/A           16765      G   Xwayland                                  6MiB |\n|    0   N/A  N/A           27582    C+G   ...rack-uuid=3190708988185955192        144MiB |\n+-----------------------------------------------------------------------------------------+\n"
+}

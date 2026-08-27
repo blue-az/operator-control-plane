@@ -1,0 +1,35 @@
+===== META 2026-08-17T17:25:27-07:00 =====
+ac0=1
+profile=balanced
+gov=powersave
+Available devices:
+  ROCm0: AMD Radeon 8050S Graphics (20480 MiB, 26012 MiB free)
+  Vulkan0: AMD Radeon 8050S Graphics (RADV GFX1151) (24576 MiB, 24278 MiB free)
+
+===== vulkan-mtp4 2026-08-17T17:25:27-07:00 =====
+/home/blueaz/models/q38rocm/z13-bench2.sh: line 33: script: command not found
+--- extract ---
+rg: /home/blueaz/models/q38rocm/tty-vulkan-mtp4.log: IO error for operation on /home/blueaz/models/q38rocm/tty-vulkan-mtp4.log: No such file or directory (os error 2)
+
+===== vulkan-plain 2026-08-17T17:25:27-07:00 =====
+/home/blueaz/models/q38rocm/z13-bench2.sh: line 33: script: command not found
+--- extract ---
+rg: /home/blueaz/models/q38rocm/tty-vulkan-plain.log: IO error for operation on /home/blueaz/models/q38rocm/tty-vulkan-plain.log: No such file or directory (os error 2)
+
+===== rocm-mtp4 2026-08-17T17:25:27-07:00 =====
+/home/blueaz/models/q38rocm/z13-bench2.sh: line 33: script: command not found
+--- extract ---
+rg: /home/blueaz/models/q38rocm/tty-rocm-mtp4.log: IO error for operation on /home/blueaz/models/q38rocm/tty-rocm-mtp4.log: No such file or directory (os error 2)
+
+===== llama-bench vulkan-plain 2026-08-17T17:25:27-07:00 =====
+ggml_rocm_init: found 1 ROCm devices (Total VRAM: 20480 MiB):
+  Device 0: AMD Radeon 8050S Graphics, gfx1151 (0x1151), VMM: no, Wave Size: 32, VRAM: 20480 MiB
+ggml_vulkan: Found 1 Vulkan devices:
+ggml_vulkan: 0 = AMD Radeon 8050S Graphics (RADV GFX1151) (radv) | uma: 1 | fp16: 1 | bf16: 0 | warp size: 64 | shared memory: 65536 | int dot: 0 | matrix cores: KHR_coopmat
+| model                          |       size |     params | backend    | ngl | type_k | type_v |  fa | dev          |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | -----: | -----: | --: | ------------ | --------------: | -------------------: |
+| qwen35 27B Q4_0_ROCMFP4_FAST   |  13.55 GiB |    27.32 B | ROCm,Vulkan |  99 |   q8_0 | turbo4 |   1 | Vulkan0      |            pp32 |        129.77 ± 3.80 |
+| qwen35 27B Q4_0_ROCMFP4_FAST   |  13.55 GiB |    27.32 B | ROCm,Vulkan |  99 |   q8_0 | turbo4 |   1 | Vulkan0      |           tg128 |         12.62 ± 0.20 |
+
+build: e87d53e (213)
+===== BENCH DONE 2026-08-17T17:26:05-07:00 =====

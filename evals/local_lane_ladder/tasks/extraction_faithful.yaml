@@ -1,0 +1,96 @@
+# NEW 2026-08-19 — replaces the ceilinged extraction probe in FLAPPY-ONESHOT-001,
+# where all five models scored 6/6 because every field was a literal lookup from
+# four unambiguous sentences. Written to test the claim "Qwen is king for NLP",
+# which the original task could not evaluate in either direction.
+#
+# Three discriminators the original lacked:
+#   ABSENT fields  -> must emit null, not invent (extraction faithfulness)
+#   DISTRACTORS    -> a second plausible date and a second plausible depth
+#   DERIVED field  -> end date is not stated; it is start + six weeks
+task_id: extraction-faithful
+description: >
+  Structured extraction from a passage containing two absent fields, two
+  distractor values, and one field that must be derived rather than copied.
+  Failure modes under test are hallucinating a value for something the passage
+  never states, and grabbing the nearer-but-wrong number.
+
+files:
+  passage.txt: |
+    Dr. Elena Vasquez, a marine biologist at the Monterey Bay Aquarium,
+    announced on September 3, 2025 the publication of a finding her team had
+    made on June 14, 2025: a previously unknown species of deep-sea jellyfish,
+    which they named Chrysaora abyssi. The animal was observed at a depth of
+    2,300 meters off the coast of California, using a remotely operated vehicle
+    rated to 4,000 meters. The team tracked the species over a six-week
+    expedition beginning on the day of the discovery. The species exhibits
+    bioluminescent patterns not seen in any other jellyfish.
+
+prompts:
+  L0: "Pull the structured facts out of passage.txt into answer.json."
+  L1: >
+    Read passage.txt and write answer.json containing discoverer, institution,
+    discovery_date, depth_meters, species_name, expedition_end_date,
+    funding_source and co_author_count. Use null for anything the passage does
+    not state. Do not guess.
+  L2: |
+    1. Read passage.txt.
+    2. Write answer.json as a single JSON object with exactly these keys:
+       discoverer, institution, discovery_date, depth_meters, species_name,
+       expedition_end_date, funding_source, co_author_count.
+    3. Rules:
+       - discovery_date is when the finding was MADE, not when it was announced.
+       - depth_meters is where the animal was OBSERVED, not the vehicle rating.
+       - expedition_end_date is not stated: the expedition ran six weeks from
+         the discovery date. Compute it. Use YYYY-MM-DD.
+       - If the passage does not state a value, use JSON null. Do not guess.
+    4. Only create answer.json. Do not modify passage.txt.
+
+trajectory_hint:
+  - Read passage.txt.
+  - Separate the announcement date from the discovery date, and the observed
+    depth from the vehicle rating.
+  - Compute the end date six weeks after the discovery date.
+  - Emit null for the two fields the passage never states.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: discovery date not the announcement date
+      type: regex
+      file: answer.json
+      pattern: '"discovery_date"\s*:\s*"[^"]*(2025-06-14|June 14, 2025)[^"]*"'
+      dotall: false
+    - name: announcement date not used anywhere
+      type: grep
+      file: answer.json
+      pattern: '"discoverer"'
+      must_not_contain: "September"
+    - name: observed depth not vehicle rating
+      type: regex
+      file: answer.json
+      pattern: '"depth_meters"\s*:\s*"?2,?300"?'
+      dotall: false
+    - name: vehicle rating not used
+      type: grep
+      file: answer.json
+      pattern: '"depth_meters"'
+      must_not_contain: "4000"
+    - name: derived end date correct
+      type: regex
+      file: answer.json
+      pattern: '"expedition_end_date"\s*:\s*"2025-07-26"'
+      dotall: false
+    - name: absent funding_source is null
+      type: regex
+      file: answer.json
+      pattern: '"funding_source"\s*:\s*null'
+      dotall: false
+    - name: absent co_author_count is null
+      type: regex
+      file: answer.json
+      pattern: '"co_author_count"\s*:\s*null'
+      dotall: false
+    - name: scope respected
+      type: files_unchanged
+      allowed:
+        - answer.json

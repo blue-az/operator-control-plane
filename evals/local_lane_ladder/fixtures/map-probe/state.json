@@ -1,0 +1,752 @@
+{
+  "results": [
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:26b",
+      "trial": 1,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "3/5 facets sourced",
+      "facets": {
+        "what_for": "sourced",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "sourced",
+        "read_first": "missing"
+      },
+      "n_sourced": 3,
+      "wall_clock_s": 26.1,
+      "answer_chars": 1295,
+      "answer_words": 131,
+      "n_calls": 3,
+      "completion_tokens": 432,
+      "prompt_tokens": 3944,
+      "n_rounds": 4,
+      "files_read": [
+        "README.md",
+        "ONBOARDING.md"
+      ],
+      "answer": "1. **Project Purpose**: Project Phoenix is a local, deterministic agent portfolio used for evaluating domain-specific analytical workflows, routing surfaces, and model interfaces.\n\n2. **Key Entities**:\n   - **Folder**: `project-phoenix` (root)\n   - **Public Line/Focus**: OpenClaw/Phoenix operator shell and incident workflow, ShowcaseAgent routing, PPR Agent substrate, and Literal-substrate experiments.\n   - **Open-work board/Current Focus**: Detailed in `README.md` under \"Current Focus\".\n   - **Enforcement CLI**: `uv run pytest -q`, `scripts/check_openclaw_hardening.sh`, and `python domains/DemoAgents/PPR_Agent/test_agent.py` (as listed in `README.md`).\n\n3. **Authoritative Answers**: They must come from \"grounded substrates: databases, files, schemas, solvers, and validation artifacts\" (from `README.md`).\n\n4. **What is open right now**: The investigation into LabWired \u00d7 Grafana Monitoring, specifically regarding the Proximity HIL proof loop, `shm_imu` boundary, and Grafana monitoring state (from `ONBOARDING.md`).\n\n5. **First three files to read**:\n   1. `docs/domain_runs/GRAFANA-OBS-001/Z13_LABWIRED_SHM_IMU_HANDOFF.md`\n   2. `docs/domain_runs/GRAFANA-OBS-001/HIL_ROADMAP_MAY15.md`\n   3. `domains/SensorAgents/ProximityAgent/ultrasonic_labwired_sim.py`\n   (from `ONBOARDING.md`)",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:26b",
+      "trial": 2,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "3/5 facets sourced",
+      "facets": {
+        "what_for": "sourced",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "sourced",
+        "read_first": "missing"
+      },
+      "n_sourced": 3,
+      "wall_clock_s": 7.3,
+      "answer_chars": 1228,
+      "answer_words": 125,
+      "n_calls": 3,
+      "completion_tokens": 415,
+      "prompt_tokens": 3944,
+      "n_rounds": 4,
+      "files_read": [
+        "README.md",
+        "ONBOARDING.md"
+      ],
+      "answer": "1. **Purpose**: Project Phoenix is a local, deterministic agent portfolio used for evaluating domain-specific analytical workflows, routing surfaces, and model interfaces.\n2. **Key Components**:\n    - **Folder**: `project-phoenix` (root).\n    - **Public Line**: Not explicitly named in the provided files, though \"OpenClaw/Phoenix operator shell\" is mentioned.\n    - **Open-work board**: Not explicitly named in the provided files.\n    - **Enforcement CLI**: `uv run pytest -q`, `scripts/check_openclaw_hardening.sh`, and `python domains/DemoAgents/PPR_Agent/test_agent.py` (found in `README.md`).\n3. **Authoritative Answers**: They must come from \"grounded substrates: databases, files, schemas, solvers, and validation artifacts\" (`README.md`).\n4. **Current Open Task**: Investigating the LabWired \u00d7 Grafana Monitoring state, specifically the Proximity HIL proof loop, `shm_imu` boundary, and Grafana observability (Tempo vs AI Observability) (`ONBOARDING.md`).\n5. **First Three Files to Read**:\n    1. `docs/domain_runs/GRAFANA-OBS-001/Z13_LABWIRED_SHM_IMU_HANDOFF.md`\n    2. `docs/domain_runs/GRAFANA-OBS-001/HIL_ROADMAP_MAY15.md`\n    3. `domains/SensorAgents/ProximityAgent/ultrasonic_labwired_sim.py`\n    (`ONBOARDING.md`)",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:26b",
+      "trial": 3,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "3/5 facets sourced",
+      "facets": {
+        "what_for": "sourced",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "sourced",
+        "read_first": "missing"
+      },
+      "n_sourced": 3,
+      "wall_clock_s": 6.4,
+      "answer_chars": 1006,
+      "answer_words": 112,
+      "n_calls": 3,
+      "completion_tokens": 335,
+      "prompt_tokens": 3944,
+      "n_rounds": 4,
+      "files_read": [
+        "README.md",
+        "ONBOARDING.md"
+      ],
+      "answer": "1. **Purpose**: Project Phoenix is a local, deterministic agent portfolio used for evaluating domain-specific analytical workflows, routing surfaces, and model interfaces.\n\n2. **Names and Locations**:\n   - **Folder**: `project-phoenix` (root)\n   - **Public line**: Not explicitly defined in the provided files.\n   - **Open-work board**: Not explicitly defined in the provided files.\n   - **Enforcement CLI**: Not explicitly defined in the provided files.\n\n3. **Authoritative Answers**: They must come from grounded substrates: databases, files, schemas, solvers, and validation artifacts.\n\n4. **What is open right now**: The investigation into LabWired \u00d7 Grafana Monitoring (specifically the Proximity HIL proof loop, `shm_imu` boundary, and Grafana monitoring state).\n\n5. **First three files to read**:\n   - `docs/domain_runs/GRAFANA-OBS-001/Z13_LABWIRED_SHM_IMU_HANDOFF.md`\n   - `docs/domain_runs/GRAFANA-OBS-001/HIL_ROADMAP_MAY15.md`\n   - `domains/SensorAgents/ProximityAgent/ultrasonic_labwired_sim.py`",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:26b",
+      "trial": 4,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "3/5 facets sourced",
+      "facets": {
+        "what_for": "sourced",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "sourced",
+        "read_first": "missing"
+      },
+      "n_sourced": 3,
+      "wall_clock_s": 6.9,
+      "answer_chars": 1161,
+      "answer_words": 112,
+      "n_calls": 3,
+      "completion_tokens": 379,
+      "prompt_tokens": 3944,
+      "n_rounds": 4,
+      "files_read": [
+        "README.md",
+        "ONBOARDING.md"
+      ],
+      "answer": "1. **Purpose**: Project Phoenix is a local, deterministic agent portfolio designed to evaluate domain-specific analytical workflows, routing surfaces, and model interfaces.\n2. **Key Components**:\n    * **Folder**: `project-phoenix` (root).\n    * **Public Line/Interface**: OpenClaw/Phoenix operator shell and incident workflow.\n    * **Open-work board/Focus**: Current focus includes OpenClaw hardening, ShowcaseAgent routing, PPR Agent substrates, and Literal-substrate experiments.\n    * **Enforcement CLI**: `uv run pytest -q`, `scripts/check_openclaw_hardening.sh`, and `python domains/DemoAgents/PPR_Agent/test_agent.py`.\n3. **Authoritative Answers**: Answers must come from grounded substrates: databases, files, schemas, solvers, and validation artifacts.\n4. **Current Open Tasks**: Investigating LabWired monitoring (Grafana/Tempo vs AI Observability), the Proximity HIL proof loop, and the `shm_imu` boundary.\n5. **First Three Files to Read**:\n    1. `docs/domain_runs/GRAFANA-OBS-001/Z13_LABWIRED_SHM_IMU_HANDOFF.md`\n    2. `docs/domain_runs/GRAFANA-OBS-001/HIL_ROADMAP_MAY15.md`\n    3. `domains/SensorAgents/ProximityAgent/ultrasonic_labwired_sim.py`",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:26b",
+      "trial": 5,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "2/5 facets sourced",
+      "facets": {
+        "what_for": "sourced",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 2,
+      "wall_clock_s": 4.1,
+      "answer_chars": 492,
+      "answer_words": 62,
+      "n_calls": 2,
+      "completion_tokens": 176,
+      "prompt_tokens": 2071,
+      "n_rounds": 3,
+      "files_read": [
+        "README.md"
+      ],
+      "answer": "Answered the five specific questions based on README.md: 1. A local, deterministic agent portfolio for evaluating domain-specific analytical workflows. 2. Not found in README.md. 3. Grounded substrates like databases, files, schemas, solvers, and validation artifacts. 4. OpenClaw/Phoenix operator shell/incident workflow, ShowcaseAgent routing, PPR Agent substrate, and Literal-substrate experiments. 5. Not specified in README.md, though ONBOARDING.md and AGENTS.md are present in the root.",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:26b",
+      "trial": 6,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "3/5 facets sourced",
+      "facets": {
+        "what_for": "sourced",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "sourced",
+        "read_first": "missing"
+      },
+      "n_sourced": 3,
+      "wall_clock_s": 6.7,
+      "answer_chars": 1093,
+      "answer_words": 115,
+      "n_calls": 3,
+      "completion_tokens": 366,
+      "prompt_tokens": 3944,
+      "n_rounds": 4,
+      "files_read": [
+        "README.md",
+        "ONBOARDING.md"
+      ],
+      "answer": "1. **Purpose**: Project Phoenix is a local, deterministic agent portfolio for evaluating domain-specific analytical workflows, routing surfaces, and model interfaces.\n2. **Key Entities**:\n    * **Folder**: `project-phoenix` (root).\n    * **Public line**: Not explicitly named in the provided files (though \"OpenClaw/Phoenix operator shell\" is mentioned).\n    * **Open-work board**: Not explicitly named in the provided files.\n    * **Enforcement CLI**: `uv run pytest -q` (for validation) and various scripts like `scripts/check_openclaw_hardening.sh`.\n3. **Authoritative Answers**: They come from \"grounded substrates: databases, files, schemas, solvers, and validation artifacts.\"\n4. **Current Open Task**: Investigating LabWired \u00d7 Grafana Monitoring (specifically the Proximity HIL proof loop, `shm_imu` boundary, and Grafana observability state).\n5. **First Three Files to Read**:\n    1. `docs/domain_runs/GRAFANA-OBS-001/Z13_LABWIRED_SHM_IMU_HANDOFF.md`\n    2. `docs/domain_runs/GRAFANA-OBS-001/HIL_ROADMAP_MAY15.md`\n    3. `domains/SensorAgents/ProximityAgent/ultrasonic_labwired_sim.py`",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:31b",
+      "trial": 1,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 26.3,
+      "answer_chars": 110,
+      "answer_words": 15,
+      "n_calls": 2,
+      "completion_tokens": 45,
+      "prompt_tokens": 2071,
+      "n_rounds": 3,
+      "files_read": [
+        "README.md"
+      ],
+      "answer": "[Stopped: model repeated an already-handled tool call 'list_dir: .'. State-changing steps that did run: none.]",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:31b",
+      "trial": 2,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 5.6,
+      "answer_chars": 110,
+      "answer_words": 15,
+      "n_calls": 2,
+      "completion_tokens": 45,
+      "prompt_tokens": 2071,
+      "n_rounds": 3,
+      "files_read": [
+        "README.md"
+      ],
+      "answer": "[Stopped: model repeated an already-handled tool call 'list_dir: .'. State-changing steps that did run: none.]",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:31b",
+      "trial": 3,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 5.0,
+      "answer_chars": 110,
+      "answer_words": 15,
+      "n_calls": 2,
+      "completion_tokens": 45,
+      "prompt_tokens": 2071,
+      "n_rounds": 3,
+      "files_read": [
+        "README.md"
+      ],
+      "answer": "[Stopped: model repeated an already-handled tool call 'list_dir: .'. State-changing steps that did run: none.]",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:31b",
+      "trial": 4,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 5.2,
+      "answer_chars": 110,
+      "answer_words": 15,
+      "n_calls": 2,
+      "completion_tokens": 45,
+      "prompt_tokens": 2071,
+      "n_rounds": 3,
+      "files_read": [
+        "README.md"
+      ],
+      "answer": "[Stopped: model repeated an already-handled tool call 'list_dir: .'. State-changing steps that did run: none.]",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:31b",
+      "trial": 5,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 5.1,
+      "answer_chars": 110,
+      "answer_words": 15,
+      "n_calls": 2,
+      "completion_tokens": 45,
+      "prompt_tokens": 2071,
+      "n_rounds": 3,
+      "files_read": [
+        "README.md"
+      ],
+      "answer": "[Stopped: model repeated an already-handled tool call 'list_dir: .'. State-changing steps that did run: none.]",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "gemma4:31b",
+      "trial": 6,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 5.1,
+      "answer_chars": 110,
+      "answer_words": 15,
+      "n_calls": 2,
+      "completion_tokens": 45,
+      "prompt_tokens": 2071,
+      "n_rounds": 3,
+      "files_read": [
+        "README.md"
+      ],
+      "answer": "[Stopped: model repeated an already-handled tool call 'list_dir: .'. State-changing steps that did run: none.]",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.8:27b",
+      "trial": 1,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 40.2,
+      "answer_chars": 85,
+      "answer_words": 14,
+      "n_calls": 5,
+      "completion_tokens": 270,
+      "prompt_tokens": 15236,
+      "n_rounds": 6,
+      "files_read": [
+        "README.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "Let me explore the workspace to understand the structure and find the relevant files.",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.8:27b",
+      "trial": 2,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 12.7,
+      "answer_chars": 53,
+      "answer_words": 8,
+      "n_calls": 4,
+      "completion_tokens": 130,
+      "prompt_tokens": 14305,
+      "n_rounds": 5,
+      "files_read": [
+        "README.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "I'll explore the workspace to answer these questions.",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.8:27b",
+      "trial": 3,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 11.3,
+      "answer_chars": 81,
+      "answer_words": 12,
+      "n_calls": 4,
+      "completion_tokens": 102,
+      "prompt_tokens": 14260,
+      "n_rounds": 5,
+      "files_read": [
+        "README.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "I'll explore the workspace structure first to understand what's actually on disk.",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.8:27b",
+      "trial": 4,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 9.4,
+      "answer_chars": 102,
+      "answer_words": 12,
+      "n_calls": 3,
+      "completion_tokens": 44,
+      "prompt_tokens": 1982,
+      "n_rounds": 3,
+      "files_read": [
+        "README.md",
+        "AGENTS.md"
+      ],
+      "answer": "Ollama API Error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.8:27b",
+      "trial": 5,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 12.1,
+      "answer_chars": 59,
+      "answer_words": 10,
+      "n_calls": 4,
+      "completion_tokens": 182,
+      "prompt_tokens": 14260,
+      "n_rounds": 5,
+      "files_read": [
+        "README.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "I'll explore the workspace to answer from the actual files.",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.8:27b",
+      "trial": 6,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 7.1,
+      "answer_chars": 102,
+      "answer_words": 12,
+      "n_calls": 3,
+      "completion_tokens": 45,
+      "prompt_tokens": 1982,
+      "n_rounds": 3,
+      "files_read": [
+        "README.md",
+        "CLAUDE.md"
+      ],
+      "answer": "Ollama API Error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.6:27b",
+      "trial": 1,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "0/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "missing",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 0,
+      "wall_clock_s": 33.0,
+      "answer_chars": 376,
+      "answer_words": 64,
+      "n_calls": 4,
+      "completion_tokens": 161,
+      "prompt_tokens": 14260,
+      "n_rounds": 5,
+      "files_read": [
+        "README.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "I cannot answer these questions from the files because **the repository context is empty**. No files were provided in the workspace for me to open or read.\n\nPer your instruction to \"Answer from files you open here, not from memory,\" and the rule to \"not invent a current task,\" I must state that the required authoritative source material is missing from this session's input.",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.6:27b",
+      "trial": 2,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "2/5 facets sourced",
+      "facets": {
+        "what_for": "sourced",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 2,
+      "wall_clock_s": 36.0,
+      "answer_chars": 3453,
+      "answer_words": 435,
+      "n_calls": 4,
+      "completion_tokens": 918,
+      "prompt_tokens": 14260,
+      "n_rounds": 5,
+      "files_read": [
+        "README.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "Based on the provided text (which appears to be the content of `docs/handoffs/NEXT_SESSION.md` or a similar operational log), here are the answers:\n\n1.  **What this repo is for**\n    It is the trust ledger and control plane for an AI agent workflow, enforcing producer/verifier separation via SHA-256 hashes and kernel-uid isolation, while acting as a deterministic file-backed system that spends no LLM tokens at runtime.\n\n2.  **Names that must not be collapsed**\n    *   **The folder:** `operator-control-plane` (the public repo holding the ledger).\n    *   **The public line:** `pbc-spec` (specifically `tennis-agent.pbc.md` as a composition example, though the \"public line\" likely refers to the Public Behavior Contract standard maintained by Vinh/pbc-spec). *Note: The text explicitly distinguishes `operator-control-plane` (ledger) from `pbc-spec` (composition examples).*\n    *   **The open-work board:** `docs/handoffs/NEXT_SESSION.md` (the operational log listing open items like \"Parked notes\" and \"Waiting on Others\").\n    *   **The enforcement CLI:** `opr` (migrated to the repo, loads `~/.config/operator/opr.yaml`, verified by `tests/test_opr.py`).\n\n3.  **Where authoritative answers are supposed to come from**\n    Authoritative architectural boundaries and taxonomy come from `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md` (specifically noting that `agent-crystallize` is a narration format, *not* a boundary itself). Operational truth comes from the deterministic ledger files in `.operator/` and the verified CLI behavior.\n\n4.  **What is open *right now***\n    *   **Waiting on Vinh:** Compatibility review of three schema asks (schema-version marker, provider-neutral external references, finalized/open lifecycle semantics) regarding crystal interoperability.\n    *   **Parked/Farm Outreach:** A draft message offering \"Farm-pass-2b\" evidence to Vinh is held; sending is deferred until there is real (non-fixture) Farm delegation evidence and honest motivation stated plainly.\n    *   **Alignerr MuJoCo Role:** Application pending; prep material (`PREP_BRIEF.md`, `INTERVIEW_CRIB.md`) complete, waiting for screen/interview.\n    *   **OpenWiki Upstream:** Waiting on LangChain to merge/review PRs #312 (hardening) and #336 (workspace pollution fix).\n\n5.  **The first three files a new agent should read**\n    The text implies this ordering via the \"cold-start verification\" and encoding discussions:\n    1.  `operator-control-plane/AGENTS.md` (contains the boundary map pointer and trust rules).\n    2.  `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md` (the canonical taxonomy for boundaries, PBC, Logbook, etc.).\n    3.  `docs/handoffs/NEXT_SESSION.md` (current operational status, open items, and recent history to avoid stale assumptions).\n\n*Missing files:* The text references `docs/crystal-format.md` and `MACHINE_PROVENANCE_SPEC.md` for specific technical details, but they are not explicitly listed as the *primary* orientation docs for a new agent in the same way the AGENTS.md/Boundaries doc pair is. If `BULKHEAD_TAU_BOUNDARIES.md` is not in this immediate workspace (it is referenced as being in `project-phoenix/docs/`, while this log is likely in `operator-control-plane` or `docs/handoffs/`), it should be flagged as missing from *this* tree if the user expects it to be local. However, based strictly on the provided text's narrative of what *should* be read: the AGENTS.md and Boundaries doc are the key sources.",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.6:27b",
+      "trial": 3,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "1/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 1,
+      "wall_clock_s": 29.5,
+      "answer_chars": 2403,
+      "answer_words": 317,
+      "n_calls": 4,
+      "completion_tokens": 677,
+      "prompt_tokens": 14305,
+      "n_rounds": 5,
+      "files_read": [
+        "README.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "Based on the provided text (which appears to be a project log or session history rather than the repository files themselves), here are the answers derived strictly from that content:\n\n1. **What this repo is for:** It serves as the \"scheduling pointer\" and historical record for the **Operator Control Plane** and **Bulkhead Tau (BT)** projects, tracking trust rules, phase completions, live smoke tests, and upstream partnerships (specifically with Vinh).\n2. **Names that must not be collapsed:**\n   *   **Folder/Repo:** `operator-control-plane` (holds the ledger, CLI, and specs).\n   *   **Public Line:** **Bulkhead Tau** (BT) \u2014 the canonical taxonomy for boundaries and evidence.\n   *   **Open-Work Board:** The log entries in this file itself serve as the tracking mechanism; specific open items are marked with dates or \"OPEN\" tags (e.g., waiting on Vinh for schema-version marker).\n   *   **Enforcement CLI:** `opr` (the Operator CLI client, migrated to `operator-control-plane`).\n3. **Where authoritative answers come from:** The **canonical taxonomy** defined in `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md` and the **Operator ledger** (`~/.config/operator/opr.yaml` for config, `.operator/evidence/` for attestation). Trust rules are enforced by the OS-level ledger (kernel-uid), not model narration.\n4. **What is open *right now*:**\n   *   **Waiting on Vinh:** Review of three header asks (stable Header field, schema-version marker, \"finalized\" convention) for backward-compatibility review. These are intentionally held out of the `0.1.10 \u2192 0.1.14` jump.\n   *   **OpenWiki Upstream:** Waiting on LangChain maintainer review for PR #312 (hardening) and #336 (workspace pollution fix).\n   *   **Subfloor Eval:** Parked/Watching \u2014 no action until workflow fit is confirmed with Operator/BT/Tennis toolkit.\n5. **First three files a new agent should read (in order):**\n   1.  `operator-control-plane/AGENTS.md` (contains the one-sentence boundary map and trust rules).\n   2.  `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md` (canonical taxonomy defining PBC, Logbook, etc.).\n   3.  `docs/CRYSTAL_LEDGER_INTEROP_SPEC.md` (specifies the crystal/bridge mechanics, corrected for boundary drift).\n\n*Note: The provided text is a log entry, not the repository file tree. If these files are missing from the actual disk workspace, the answers above reflect the intended state described in the log.*",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.6:27b",
+      "trial": 4,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "1/5 facets sourced",
+      "facets": {
+        "what_for": "missing",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "missing",
+        "read_first": "missing"
+      },
+      "n_sourced": 1,
+      "wall_clock_s": 23.0,
+      "answer_chars": 1623,
+      "answer_words": 202,
+      "n_calls": 4,
+      "completion_tokens": 471,
+      "prompt_tokens": 14260,
+      "n_rounds": 5,
+      "files_read": [
+        "README.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "I cannot fulfill this request as the required governing documents for `project-phoenix` are not present in the provided context. The text supplied is a status log/chronicle from a different project (referencing `operator-control-plane`, `bulkhead-tau`, and personal development logs), which explicitly states that the canonical taxonomy and boundary definitions reside in `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md`\u2014a file not included here.\n\nTo avoid hallucination, I must report:\n1. **Repo Purpose:** Cannot be determined from this text (it describes a personal engineering log, not the Phoenix repo itself).\n2. **Names/Paths:** The text mentions `operator-control-plane`, `blue-az/bulkhead-tau-gate`, and `stewie-sh/pbc-spec`, but these are external or adjacent projects. It references `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md` as the source of truth for boundaries, but that file is not provided.\n3. **Authoritative Source:** The text claims authority lies in `BULKHEAD_TAU_BOUNDARIES.md` and the \"canonical taxonomy,\" but these are absent.\n4. **Open Work:** The listed items (Alignerr MuJoCo, Golf sessions, Stroke sessions, Parked notes) are personal/external tasks from the log author's perspective, not necessarily the open work of the Phoenix repo itself.\n5. **Reading Order:** Cannot be determined without access to `AGENTS.md`, `CLAUDE.md`, or similar onboarding docs within the actual Phoenix repository.\n\n**Missing Files:**\n- `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md`\n- Any `AGENTS.md` or `CLAUDE.md` from the `project-phoenix` root.\n- The actual directory structure of `project-phoenix`.",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.6:27b",
+      "trial": 5,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "3/5 facets sourced",
+      "facets": {
+        "what_for": "sourced",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "sourced",
+        "read_first": "missing"
+      },
+      "n_sourced": 3,
+      "wall_clock_s": 30.4,
+      "answer_chars": 1912,
+      "answer_words": 240,
+      "n_calls": 5,
+      "completion_tokens": 605,
+      "prompt_tokens": 16590,
+      "n_rounds": 6,
+      "files_read": [
+        "README.md",
+        "CLAUDE.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "Based on the provided text (which appears to be the content of `operator-control-plane/AGENTS.md` or a similar state-file), here are the answers:\n\n1.  **What this repo is for:** It is a **trust ledger** and control plane that enforces identity, verifies claims against evidence (SHA-256 hashes, kernel-uid isolation), and manages session boundaries without spending LLM tokens at runtime.\n2.  **Names that must not be collapsed:**\n    *   **The folder/ledger:** `.operator` (lives in the repo root).\n    *   **The public line/spec:** `pbc-spec` (specifically `tennis-agent.pbc.md` is cited as a composed example, but the spec repo is `stewie-sh/pbc-spec`).\n    *   **The open-work board:** `AGENTS.md` (this file serves as the state/open-item tracker).\n    *   **The enforcement CLI:** `opr` (migrated to `operator-control-plane`, loads config from `~/.config/operator/opr.yaml`).\n3.  **Where authoritative answers come from:** The **GT-KB-derived Logbook** (evidence) and the **canonical taxonomy** defined in `project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md`. Do not trust narration; verify against evidence.\n4.  **What is open *right now*:**\n    *   Waiting on **Vinh** for compatibility review of three specific header asks (stable Header field, schema-version marker, \"finalized\" convention).\n    *   Watching **OpenWiki** upstream PRs #312 and #336 for merge status.\n    *   **Parked:** Subfloor eval (waiting to check workflow fit), LabWired integration (consultant posture only, no build work), Grok-CLI test (parked on personal grounds).\n5.  **First three files a new agent should read (in order):**\n    1.  `AGENTS.md` (this file, for current state/boundaries).\n    2.  `docs/BULKHEAD_TAU_BOUNDARIES.md` (for canonical taxonomy/architecture).\n    3.  `.operator/` directory contents (specifically the ledger/evidence structure) to verify claims against actual evidence rather than relying on narration.",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "task_id": "map-probe",
+      "level": "ask",
+      "model": "qwen3.6:27b",
+      "trial": 6,
+      "machine": "desktop",
+      "passed": false,
+      "detail": "3/5 facets sourced",
+      "facets": {
+        "what_for": "sourced",
+        "names": "missing",
+        "authority": "sourced",
+        "open_now": "sourced",
+        "read_first": "missing"
+      },
+      "n_sourced": 3,
+      "wall_clock_s": 35.5,
+      "answer_chars": 3259,
+      "answer_words": 412,
+      "n_calls": 4,
+      "completion_tokens": 855,
+      "prompt_tokens": 14260,
+      "n_rounds": 5,
+      "files_read": [
+        "README.md",
+        "AGENTS.md",
+        "BOTTLENECKS.md"
+      ],
+      "answer": "Based on the provided text (which appears to be a project log/brain dump rather than the repository files themselves), I cannot browse the actual `project-phoenix` directory tree or read live files like `AGENTS.md`, `CLAUDE.md`, or specific specs. However, I can extract the answers based strictly on the content of the provided log entry, which describes the state of the system.\n\n**1. What this repo is for**\nIt serves as a **trust ledger** and **control plane** for agent interactions, managing task/claim/evidence tracking with SHA-256 hashes and kernel-uid-enforced identity, acting as a \"fail-closed\" verification layer rather than a scheduler or memory substrate.\n\n**2. Names that must not be collapsed**\n*   **The Folder:** `project-phoenix` (the governing docs location).\n*   **The Public Line:** `operator-control-plane` (the shipped CLI/ledger implementation, distinct from the internal Phoenix repo).\n*   **The Open-Work Board:** The \"crystal entry\" / log file itself (acting as the scheduling pointer and open-work tracker); specifically referenced is `docs/handoffs/NEXT_SESSION.md`.\n*   **The Enforcement CLI:** `opr` (the migrated CLI client for Operator, loading `~/.config/operator/opr.yaml`).\n\n**3. Where authoritative answers are supposed to come from**\nAuthoritative architectural boundaries and taxonomy come from **`project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md`** (Voyage thesis). Operational trust rules and ledger mechanics are defined in the **Operator specs** (e.g., `MACHINE_PROVENANCE_SPEC.md`, crystal/bridge specs) and enforced by the `operator-control-plane` code. The log explicitly states that framing sentences in other docs (like `CRYSTAL_LEDGER_INTEROP_SPEC.md`) had drifted and must be checked against the boundaries doc.\n\n**4. What is open *right now***\n*   **Waiting on Vinh:** Resolution of three schema compatibility asks (stable Header field, schema-version marker, \"finalized\" convention) which are under backward-compatibility review.\n*   **OpenWiki Upstream:** Waiting for maintainer review/merge on PRs #312 (hardening) and #336 (`conversation_history/` pollution fix).\n*   **Parked/Deferred:** Subfloor eval integration, LabWired \"integrate\" work (consultant posture only), Grok-CLI cold-start test, and Farm-offer outreach.\n*   **No active implementation queues** for Phase 1\u20133 Crystal/Bridge work (all shipped/smoke-tested).\n\n**5. The first three files a new agent should read, in order**\n*(Note: The text does not explicitly list a \"read me first\" sequence, but implies the following hierarchy of authority):*\n1.  **`project-phoenix/docs/BULKHEAD_TAU_BOUNDARIES.md`** (Canonical taxonomy and boundaries; prevents architectural drift).\n2.  **`operator-control-plane/AGENTS.md`** (Contains the one-sentence boundary map pointer and operational context for the control plane).\n3.  **`docs/handoffs/NEXT_SESSION.md`** or the current **Crystal/Log Entry** (To understand what is currently open, waiting, or parked, as this file serves as the scheduling pointer).\n\n**Missing Files:** I did not have access to the actual `BULKHEAD_TAU_BOUNDARIES.md`, `operator-control-plane/AGENTS.md`, or `NEXT_SESSION.md` files on disk. The above answers are derived solely from the textual references within the provided log.",
+      "returncode": 0,
+      "timed_out": false
+    }
+  ]
+}

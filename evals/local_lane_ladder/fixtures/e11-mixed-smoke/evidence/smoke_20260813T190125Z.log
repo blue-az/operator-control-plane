@@ -1,0 +1,13 @@
+=== mixed GPU smoke ===
+utc: 2026-08-13T19:01:25Z
+host: desktop
+git: fe4211b
+out: /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e11-mixed-smoke
+models: A=gemma4:26b  B=qwen2.5-coder:14b  num_ctx=8192
+--- nvidia-smi -L ---
+GPU 0: NVIDIA GeForce RTX 3090 (UUID: GPU-22b9dafe-e97d-dbb2-50ba-2f1f1dea61f9)
+--- GPU table ---
+index, name, memory.total [MiB], memory.used [MiB], pcie.link.gen.current, pcie.link.width.current
+0, NVIDIA GeForce RTX 3090, 24576 MiB, 18664 MiB, 3, 16
+gpu_count=1
+FAIL_CLOSED: need ≥2 GPUs for mixed smoke (saw 1). Seat the second card first.

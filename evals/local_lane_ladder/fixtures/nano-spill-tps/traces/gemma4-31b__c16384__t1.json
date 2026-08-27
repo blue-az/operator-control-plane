@@ -1,0 +1,17 @@
+{
+  "model": "gemma4:31b",
+  "num_ctx": 16384,
+  "trial": 1,
+  "cold": true,
+  "tok_s": 34.3,
+  "eval_count": 118,
+  "eval_duration_s": 3.437,
+  "load_s": 19.9,
+  "prompt_eval_count": 24,
+  "done_reason": "stop",
+  "placement": "100% GPU",
+  "ps": "gemma4:31b    6316f0629137    19 GB    100% GPU     16384      2 minutes from now    ",
+  "smi": "21362 MiB, 24576 MiB, 97 %, 319.09 W",
+  "think_chars": 0,
+  "recorded_utc": "2026-08-15T06:25:33.532926+00:00"
+}
