@@ -1,0 +1,35 @@
+{
+  "out_dir": "/home/blueaz/operator-control-plane/evals/ppr_agent_benchmark/runs/20260826-204923",
+  "provider": "freetoken",
+  "ollama_host": "127.0.0.1:11435",
+  "base_url": "http://127.0.0.1:1934/v1",
+  "results": [
+    {
+      "task": "ppr1_product_boundary",
+      "label": "qwen36-35b",
+      "model": "qwen3.6:35b",
+      "request_model": "qwen36-35b-hf-freetoken",
+      "returncode": 0,
+      "elapsed_s": 17.649,
+      "stdout_path": "ppr1_product_boundary__qwen36-35b.out.md"
+    },
+    {
+      "task": "ppr2_gate_query_semantics",
+      "label": "qwen36-35b",
+      "model": "qwen3.6:35b",
+      "request_model": "qwen36-35b-hf-freetoken",
+      "returncode": 0,
+      "elapsed_s": 45.66,
+      "stdout_path": "ppr2_gate_query_semantics__qwen36-35b.out.md"
+    },
+    {
+      "task": "ppr3_real_data_report",
+      "label": "qwen36-35b",
+      "model": "qwen3.6:35b",
+      "request_model": "qwen36-35b-hf-freetoken",
+      "returncode": 0,
+      "elapsed_s": 44.341,
+      "stdout_path": "ppr3_real_data_report__qwen36-35b.out.md"
+    }
+  ]
+}

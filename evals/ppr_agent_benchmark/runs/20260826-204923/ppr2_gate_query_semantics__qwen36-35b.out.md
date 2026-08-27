@@ -1,0 +1,38 @@
+# RULES
+
+The PPR Agent operates under a strict charter defined by three core rules that govern how natural language queries are interpreted and validated before any data execution occurs.
+
+1.  **RUL-001 (Precedence)**: Pattern precedence dictates that comparative queries (e.g., "compare X and Y") must be prioritized over generic top-device plans. The agent identifies the intent to compare specific entities before falling back to general ranking tools.
+2.  **RUL-002 (Normalization)**: Company codes and names are normalized to standard abbreviations: ABT (Abbott), BSX (Biosense Webster), and MDT (Medtronic). This ensures consistent matching against the registry's company identifiers.
+3.  **RUL-003 (Year Cap)**: Years outside the valid registry range of 2008–2025 trigger a warning or a cap. A year alone does not hard-deny a query; instead, the year is capped to the nearest valid boundary (2008 or 2025) to allow the policy inspection to proceed.
+
+# GATE_RESULTS
+
+The `./ppr gate` command inspects policy against the charter rules without executing data queries. Below are the results for the two specified examples:
+
+**1. `./ppr gate "mdt 2030"`**
+*   **Allowed**: `true`
+*   **Company**: `MDT`
+*   **Year**: `2030`
+*   **Year_Capped**: `2025`
+*   **Rule Hits**: `RUL-002` (Normalization of "mdt" to MDT), `RUL-003` (Capping 2030 to 2025).
+
+**2. `./ppr gate "st jude 2007"`**
+*   **Allowed**: `true`
+*   **Company**: `null`
+*   **Year**: `2007`
+*   **Year_Capped**: `2008`
+*   **Rule Hits**: `RUL-003` (Capping 2007 to 2008). Note: "st jude" does not normalize to a known company code (ABT/BSX/MDT), resulting in a null company, but the query is not denied solely due to the year.
+
+# QUERY_VS_GATE
+
+It is critical to distinguish between the `query` and `gate` commands, as they serve fundamentally different purposes in the PPR Agent architecture:
+
+*   **`./ppr query`**: Executes deterministic tool plans and retrieves actual data from the registry. It does **not** surface a charter policy verdict. For example, `./ppr query "compare Abbott and Medtronic ICDs 2023"` triggers the `compare_companies` tool (per RUL-001) and returns specific implant counts and market share insights for MDT and ABT in the ICD category for 2023.
+*   **`./ppr gate`**: Inspects policy only. It does **not** execute data queries. It validates whether a natural language input adheres to the charter rules (RUL-001, RUL-002, RUL-003) and returns a boolean `allowed` status along with normalized parameters and rule hits.
+
+# FAILURE_MODES
+
+*   **Missing Charter**: If the charter is missing, the system fails closed.
+*   **Partial Charter Parse**: If the charter is partially parsed, the system remains fail-open by policy but exposes `partial_charter_parse` and `fallback` lines in the output.
+*   **Hard Denial**: While rare, a query could be denied if it violates core constraints beyond simple capping (e.g., if a rule explicitly hard-denied a specific pattern, though RUL-0

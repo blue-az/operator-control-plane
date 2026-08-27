@@ -1,0 +1,79 @@
+{
+  "run_dir": "/home/blueaz/operator-control-plane/evals/ppr_agent_benchmark/runs/20260826-204923",
+  "rows": [
+    {
+      "task": "ppr1_product_boundary",
+      "label": "qwen36-35b",
+      "model": "qwen3.6:35b",
+      "request_model": "qwen36-35b-hf-freetoken",
+      "returncode": 0,
+      "elapsed_s": 17.649,
+      "stdout_path": "ppr1_product_boundary__qwen36-35b.out.md",
+      "score": 9,
+      "max_score": 9,
+      "checks": {
+        "four_surfaces": true,
+        "fifteen_tools": true,
+        "full_count": true,
+        "published_count": true,
+        "published_pct": true,
+        "not_clinical": true,
+        "offline_pdf": true,
+        "not_chatbot": true,
+        "extract_boundary": true
+      }
+    },
+    {
+      "task": "ppr2_gate_query_semantics",
+      "label": "qwen36-35b",
+      "model": "qwen3.6:35b",
+      "request_model": "qwen36-35b-hf-freetoken",
+      "returncode": 0,
+      "elapsed_s": 45.66,
+      "stdout_path": "ppr2_gate_query_semantics__qwen36-35b.out.md",
+      "score": 9,
+      "max_score": 9,
+      "checks": {
+        "rul001": true,
+        "rul002": true,
+        "rul003": true,
+        "mdt2030": true,
+        "stjude2007": true,
+        "allowed_not_reject": true,
+        "query_vs_gate": true,
+        "missing_fail_closed": true,
+        "partial_visible": true
+      }
+    },
+    {
+      "task": "ppr3_real_data_report",
+      "label": "qwen36-35b",
+      "model": "qwen3.6:35b",
+      "request_model": "qwen36-35b-hf-freetoken",
+      "returncode": 0,
+      "elapsed_s": 44.341,
+      "stdout_path": "ppr3_real_data_report__qwen36-35b.out.md",
+      "score": 10,
+      "max_score": 10,
+      "checks": {
+        "mdt_icd": true,
+        "abt_icd": true,
+        "top_azure": true,
+        "top_adapta": true,
+        "top_abt_pm": true,
+        "top_bsx": true,
+        "hhi": true,
+        "high": true,
+        "shares": true,
+        "historical": true
+      }
+    }
+  ],
+  "totals": {
+    "qwen36-35b": {
+      "score": 28,
+      "max_score": 28,
+      "elapsed_s": 107.65
+    }
+  }
+}
