@@ -1,0 +1,35 @@
+{
+  "returncode": 0,
+  "elapsed_s": 17.649,
+  "stdout": "SURFACES\nRegistry tools, CLI `./ppr`, Charter/PBC, Analyst Desk.\n\nDATA_BOUNDARY\nStandalone source-legible extract of PPR_Agent CRM domain, not the full Phoenix system. Analytical historical registry only; not clinical monitoring or device programming. PDF extraction is offline ingestion; not part of live query path. Natural-language query is deterministic plan-building/tool dispatch; not a chatbot/free-text LLM assistant.\n\nNON_GOALS\nNot clinical monitoring. Not device programming. Not live query path for PDF ingestion. Not a chatbot or free-text LLM assistant.\n\nNUMBERS\nTool catalog: 15 statically registered tools. Full registry: 3576 device models, 92,071,191 registered US implants (2008-2025, 18 years, 3 companies). Desk published subset: 1483 devices; full devices.json: 3576 devices; published is 41.5% of full.\n\nRISK_NOTES\nMissing charter fails closed. Partial charter parse remains fail-open by policy but exposes partial_charter_parse/fallback lines. `./ppr query` executes deterministic tool plans and does not surface a charter policy verdict; `./ppr gate` inspects policy and does not execute data queries.",
+  "stderr": "",
+  "raw_response": {
+    "id": "chatcmpl-9",
+    "object": "chat.completion",
+    "created": 1787802581,
+    "model": "qwen36-35b-hf-freetoken",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "SURFACES\nRegistry tools, CLI `./ppr`, Charter/PBC, Analyst Desk.\n\nDATA_BOUNDARY\nStandalone source-legible extract of PPR_Agent CRM domain, not the full Phoenix system. Analytical historical registry only; not clinical monitoring or device programming. PDF extraction is offline ingestion; not part of live query path. Natural-language query is deterministic plan-building/tool dispatch; not a chatbot/free-text LLM assistant.\n\nNON_GOALS\nNot clinical monitoring. Not device programming. Not live query path for PDF ingestion. Not a chatbot or free-text LLM assistant.\n\nNUMBERS\nTool catalog: 15 statically registered tools. Full registry: 3576 device models, 92,071,191 registered US implants (2008-2025, 18 years, 3 companies). Desk published subset: 1483 devices; full devices.json: 3576 devices; published is 41.5% of full.\n\nRISK_NOTES\nMissing charter fails closed. Partial charter parse remains fail-open by policy but exposes partial_charter_parse/fallback lines. `./ppr query` executes deterministic tool plans and does not surface a charter policy verdict; `./ppr gate` inspects policy and does not execute data queries."
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1188,
+      "completion_tokens": 280,
+      "total_tokens": 1468
+    }
+  },
+  "cmd": [
+    "POST",
+    "http://127.0.0.1:1934/v1/chat/completions"
+  ],
+  "task": "ppr1_product_boundary",
+  "label": "qwen36-35b",
+  "model": "qwen3.6:35b",
+  "request_model": "qwen36-35b-hf-freetoken"
+}

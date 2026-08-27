@@ -1,0 +1,35 @@
+{
+  "returncode": 0,
+  "elapsed_s": 44.341,
+  "stdout": "# PPR Analyst Report: 2023 ICD Market Analysis\n\n## ICD_2023_COMPARISON\n**Period:** 2023-2023 | **Category:** ICD\n\nThe comparative analysis between Medtronic (MDT) and Abbott (ABT) for Implantable Cardioverter Defibrillators (ICD) in 2023 reveals a significant disparity in market volume and product breadth. Medtronic maintained its position as the dominant market leader.\n\n*   **Medtronic (MDT):**\n    *   Device Families: 23\n    *   Total Device Models: 60\n    *   Total Implants: 918,205\n*   **Abbott (ABT):**\n    *   Device Families: 10\n    *   Total Device Models: 32\n    *   Total Implants: 423,440\n\n**Insight:** Medtronic recorded more than double the implant volume of Abbott in the ICD category for 2023, with a broader portfolio of device families and models.\n\n## TOP_2023_DEVICES\n**Query:** `get_top_devices --year 2023 --limit 5`\n\nThe following five devices recorded the highest implant volumes across all categories in 2023. Notably, the top four positions are held by Pacemakers, with the highest-volume ICD-specific device not appearing in the global top five due to the dominance of pacemaker volumes.\n\n1.  **MDT Pacemaker Azure XT DR W1DR01** \u2014 623,926 implants\n2.  **MDT Pacemaker Adapta DR ADDR01** \u2014 454,869 implants\n3.  **ABT Pacemaker Unknown PM2272 US R** \u2014 383,089 implants\n4.  **MDT Pacemaker Advisa DR MRI A2DR01** \u2014 344,410 implants\n5.  **BSX Pacemaker ACCOLADE/PROPONENT/ESSENTIO DR L101/L111/L201/L211/L301/L311** \u2014 278,000 implants\n\n## MARKET_CONCENTRATION\n**Query:** `get_market_concentration --year 2023 --device-category ICD`\n\nThe ICD market in 2023 exhibits high concentration, as measured by the Herfindahl-Hirschman Index (HHI).\n\n*   **HHI Score:** 3912.31\n*   **Concentration Level:** High\n*   **Market Shares:**\n    *   **Medtronic (MDT):** 52.96%\n    *   **Abbott (ABT):** 24.42%\n    *   **Boston Scientific (BSX):** 22.61%\n\nThe HHI score of 3912.31 indicates a highly concentrated market where Medtronic holds a majority share, while Abbott and Boston Scientific share the remainder.\n\n## SCOPE_LIMITS\nThis report is derived from the PPR Agent local ground truth snapshot (`/home/blueaz/Python/ppr-agent`).\n\n*   **Data Nature:** This is historical analytical registry data. It is **not** clinical advice, nor is it intended for clinical monitoring or device programming.\n*   **Source:** The data represents a standalone extract of the PPR_Agent CRM domain, not the full Phoenix system.\n*   **Ingestion:** PDF extraction is an offline ingestion process and is not part of the live query path.\n*   **Query Type:** Natural-language queries generate deterministic plans and tool dispatches; this is not a chatbot or free-text LLM",
+  "stderr": "",
+  "raw_response": {
+    "id": "chatcmpl-11",
+    "object": "chat.completion",
+    "created": 1787802671,
+    "model": "qwen36-35b-hf-freetoken",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "# PPR Analyst Report: 2023 ICD Market Analysis\n\n## ICD_2023_COMPARISON\n**Period:** 2023-2023 | **Category:** ICD\n\nThe comparative analysis between Medtronic (MDT) and Abbott (ABT) for Implantable Cardioverter Defibrillators (ICD) in 2023 reveals a significant disparity in market volume and product breadth. Medtronic maintained its position as the dominant market leader.\n\n*   **Medtronic (MDT):**\n    *   Device Families: 23\n    *   Total Device Models: 60\n    *   Total Implants: 918,205\n*   **Abbott (ABT):**\n    *   Device Families: 10\n    *   Total Device Models: 32\n    *   Total Implants: 423,440\n\n**Insight:** Medtronic recorded more than double the implant volume of Abbott in the ICD category for 2023, with a broader portfolio of device families and models.\n\n## TOP_2023_DEVICES\n**Query:** `get_top_devices --year 2023 --limit 5`\n\nThe following five devices recorded the highest implant volumes across all categories in 2023. Notably, the top four positions are held by Pacemakers, with the highest-volume ICD-specific device not appearing in the global top five due to the dominance of pacemaker volumes.\n\n1.  **MDT Pacemaker Azure XT DR W1DR01** \u2014 623,926 implants\n2.  **MDT Pacemaker Adapta DR ADDR01** \u2014 454,869 implants\n3.  **ABT Pacemaker Unknown PM2272 US R** \u2014 383,089 implants\n4.  **MDT Pacemaker Advisa DR MRI A2DR01** \u2014 344,410 implants\n5.  **BSX Pacemaker ACCOLADE/PROPONENT/ESSENTIO DR L101/L111/L201/L211/L301/L311** \u2014 278,000 implants\n\n## MARKET_CONCENTRATION\n**Query:** `get_market_concentration --year 2023 --device-category ICD`\n\nThe ICD market in 2023 exhibits high concentration, as measured by the Herfindahl-Hirschman Index (HHI).\n\n*   **HHI Score:** 3912.31\n*   **Concentration Level:** High\n*   **Market Shares:**\n    *   **Medtronic (MDT):** 52.96%\n    *   **Abbott (ABT):** 24.42%\n    *   **Boston Scientific (BSX):** 22.61%\n\nThe HHI score of 3912.31 indicates a highly concentrated market where Medtronic holds a majority share, while Abbott and Boston Scientific share the remainder.\n\n## SCOPE_LIMITS\nThis report is derived from the PPR Agent local ground truth snapshot (`/home/blueaz/Python/ppr-agent`).\n\n*   **Data Nature:** This is historical analytical registry data. It is **not** clinical advice, nor is it intended for clinical monitoring or device programming.\n*   **Source:** The data represents a standalone extract of the PPR_Agent CRM domain, not the full Phoenix system.\n*   **Ingestion:** PDF extraction is an offline ingestion process and is not part of the live query path.\n*   **Query Type:** Natural-language queries generate deterministic plans and tool dispatches; this is not a chatbot or free-text LLM"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1227,
+      "completion_tokens": 820,
+      "total_tokens": 2047
+    }
+  },
+  "cmd": [
+    "POST",
+    "http://127.0.0.1:1934/v1/chat/completions"
+  ],
+  "task": "ppr3_real_data_report",
+  "label": "qwen36-35b",
+  "model": "qwen3.6:35b",
+  "request_model": "qwen36-35b-hf-freetoken"
+}

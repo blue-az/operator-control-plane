@@ -12,6 +12,8 @@ import json
 import os
 import subprocess
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -63,7 +65,42 @@ def read_sources(paths: list[str], max_chars: int = 26000) -> str:
     return "\n".join(chunks)
 
 
-def run_one(provider: str, model: str, task_name: str, prompt: str, timeout: int, ollama_host: str) -> dict:
+def run_openai_compatible(model: str, prompt: str, timeout: int, base_url: str) -> dict:
+    url = base_url.rstrip("/") + "/chat/completions"
+    body = json.dumps({
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0,
+        "max_tokens": 2048,
+        "thinking": {"type": "disabled"},
+        "reasoning_effort": "none",
+    }).encode()
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+    started = time.time()
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            raw = response.read().decode()
+        data = json.loads(raw)
+        message = data.get("choices", [{}])[0].get("message", {})
+        return {
+            "returncode": 0,
+            "elapsed_s": round(time.time() - started, 3),
+            "stdout": message.get("content", ""),
+            "stderr": "",
+            "raw_response": data,
+            "cmd": ["POST", url],
+            "model": model,
+        }
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode(errors="replace")
+        return {"returncode": exc.code, "elapsed_s": round(time.time() - started, 3), "stdout": "", "stderr": raw, "cmd": ["POST", url], "model": model}
+
+
+def run_one(provider: str, model: str, task_name: str, prompt: str, timeout: int, ollama_host: str, base_url: str) -> dict:
+    if provider in {"openai-compatible", "freetoken"}:
+        result = run_openai_compatible(model, prompt, timeout, base_url)
+        result["task"] = task_name
+        return result
     env = os.environ.copy()
     env["OLLAMA_HOST"] = ollama_host
     cmd = [
@@ -98,6 +135,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--provider", default="ollama")
     parser.add_argument("--ollama-host", default="127.0.0.1:11435")
+    parser.add_argument("--base-url", default="http://127.0.0.1:1934/v1")
+    parser.add_argument("--served-model", default=None, help="Override model id sent to an OpenAI-compatible server, e.g. a FreeToken served-model-name.")
     parser.add_argument("--timeout", type=int, default=420)
     parser.add_argument("--models", default=",".join(label for label, _ in MODELS))
     args = parser.parse_args()
@@ -105,14 +144,18 @@ def main() -> int:
     selected = {x.strip() for x in args.models.split(",") if x.strip()}
     models = [(label, model) for label, model in MODELS if label in selected]
     OUT.mkdir(parents=True, exist_ok=True)
-    manifest = {"out_dir": str(OUT), "provider": args.provider, "ollama_host": args.ollama_host, "results": []}
+    manifest = {"out_dir": str(OUT), "provider": args.provider, "ollama_host": args.ollama_host, "base_url": args.base_url, "results": []}
 
     for task_name, spec in TASKS.items():
         prompt = spec["prompt"] + "\n" + read_sources(spec["sources"])
         (OUT / f"{task_name}.prompt.txt").write_text(prompt)
         for label, model in models:
             print(f"RUN {task_name} {label} {model}", flush=True)
-            result = run_one(args.provider, model, task_name, prompt, args.timeout, args.ollama_host)
+            request_model = args.served_model or model
+            result = run_one(args.provider, request_model, task_name, prompt, args.timeout, args.ollama_host, args.base_url)
+            result["label"] = label
+            result["model"] = model
+            result["request_model"] = request_model
             stem = f"{task_name}__{label}"
             (OUT / f"{stem}.json").write_text(json.dumps(result, indent=2))
             (OUT / f"{stem}.out.md").write_text(result["stdout"])
@@ -120,6 +163,7 @@ def main() -> int:
                 "task": task_name,
                 "label": label,
                 "model": model,
+                "request_model": request_model,
                 "returncode": result["returncode"],
                 "elapsed_s": result["elapsed_s"],
                 "stdout_path": f"{stem}.out.md",
