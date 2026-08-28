@@ -1,0 +1,38 @@
+# qwenflash-e9 pre-run — E9 battery, qwen-flash
+captured_utc: 2026-08-28T05:38:53Z
+git_rev: fa6eaf5767110b1f9b42ba3b679a41c8b5a3777a
+question: where does qwen3-next:latest sit on the E9 ceiling battery vs gemma4:26b
+design: 5 fixtures x 2 models x n=6 = 60 cells
+fixtures: csv-summarize-repair booking-off-by-one constant-and-callers ambiguous-anchor strict-log-format
+levels: L2
+controls: num_ctx 16384, temperature 0.8, think off, --on-repeat default (stop)
+same-run control: gemma4:26b (seat)
+framing: host-conditioned. Placement sampled every 30s. G2 is not a veto.
+compare against: e9-ceiling-continued (26b 24/30, 31b 24/30, qwen3.6:27b 19/30, qwen3-vl:30b 16/30, qwen2.5-coder:14b 14/30, qwen3:32b 13/30, gemma3:27b 12/30)
+NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
+NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
+
+==============NVSMI LOG==============
+
+Timestamp                                              : Thu Aug 27 22:38:53 2026
+Driver Version                                         : 580.178.04
+CUDA Version                                           : 13.0
+
+Attached GPUs                                          : 2
+GPU 00000000:01:00.0
+    GPU Power Readings
+        Average Power Draw                             : 30.14 W
+        Instantaneous Power Draw                       : 30.12 W
+        Current Power Limit                            : 320.00 W
+        Requested Power Limit                          : 320.00 W
+        Default Power Limit                            : 350.00 W
+        Min Power Limit                                : 100.00 W
+        Max Power Limit                                : 366.00 W
+    Power Samples
+        Duration                                       : 33.71 sec
+        Number of Samples                              : 119
+        Max                                            : 324.03 W
+        Min                                            : 29.97 W
+        Avg                                            : 84.83 W
+    GPU Memory Power Readings 
+        Average Power Draw                             : N/A
