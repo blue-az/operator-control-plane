@@ -3898,11 +3898,11 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertNotIn(f"Usage record {gemini_rec['usage_id']} has stale role tag", res.stdout)
 
     def test_usage_cache_waste(self) -> None:
-        # USAGE_CACHE_WASTE_SPEC.md: a Claude cache write only counts as
-        # wasted once a LATER write supersedes it with no intervening read.
-        # Fixture cw001: msg1 writes 1000 (never read before msg2 writes
-        # again) -> wasted; msg2 writes 500, later redeemed by msg3's read
-        # -> not wasted. Expect wasted=1000/1500 (66.7%).
+        # USAGE_CACHE_WASTE_SPEC.md: the compatibility field counts an earlier
+        # Claude cache write when a later write follows with no observed read
+        # in between. Fixture cw001: msg1 writes 1000, then msg2 writes again;
+        # msg2 writes 500, followed by msg3's read. Expect the proxy to count
+        # 1000/1500 (66.7%) without claiming cache-entry identity.
         import glob
 
         import yaml
@@ -3975,12 +3975,13 @@ class TestOperatorCLI(unittest.TestCase):
         res = self.run_operator("usage-summary", "--cache-waste-audit")
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertIn("66.7% of Claude cache-write spend", res.stdout)
-        self.assertIn("v1-superseded-no-reuse method, Claude only", res.stdout)
+        self.assertIn("v1-superseded-no-reuse proxy, Claude only", res.stdout)
 
-        # doctor: advisory-only high-cache-waste warning above the 0.5 threshold.
+        # doctor: advisory-only cache non-reuse proxy above the 0.5 threshold.
         res = self.run_operator("doctor")
         self.assertIn(
-            f"Usage record {rec['usage_id']} has high cache waste: 67% of cache-write spend",
+            f"Usage record {rec['usage_id']} has high cache non-reuse proxy: "
+            "67% of cache-write spend",
             res.stdout,
         )
 
