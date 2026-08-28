@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Local-lane eval ladder runner. LOCAL_LANE_CONTRACT_SPEC.md Deliverable 3.
 
-Historical instrument: drives the old `opr` tool loop (via --eval-auto-confirm
-against a disposable fixture). `opr` is now a deprecation stub that points at
-OpenCode. Re-running this sweep requires restoring the old binary:
+Drives `pi` (the local implementer as of 2026-08-28 -- opr is carved out of
+this codebase, opencode is deprecated) in non-interactive JSON mode across a
+grid of task x specificity-level x model x trial, grades deterministically
+(grading.py, no LLM judging), records each trial into the operator ledger,
+and writes a results matrix.
 
-    git checkout fe4211b09bc164c3dc0b7b48bad929e39ab68356 -- opr
-
-Drives opr's own tool loop (via --eval-auto-confirm against a disposable
-fixture) across a grid of task x specificity-level x model x trial, grades
-deterministically (grading.py, no LLM judging), records each trial into the
-operator ledger, and writes a results matrix.
+Migration note (2026-08-28, opr -> pi): this runner previously drove `opr`.
+That code path, its trajectory parser, and the opr-specific safety/sampling
+mechanics it depended on are gone, replaced below. If you find a reference to
+opr anywhere else in this file's comments, it is describing history, not
+current behavior. Historical restore path, kept for archaeology only: `git
+checkout fe4211b09bc164c3dc0b7b48bad929e39ab68356 -- opr`.
 
 Usage:
     python3 runner.py --models gemma4:26b gemma4:31b qwen2.5-coder:32b llama3.1:8b \
@@ -19,11 +21,19 @@ Usage:
         [--trace-dir DIR]
 
 Safety: never runs against a real repo -- every trial gets its own disposable
-temp fixture (fixtures.build_fixture, always under tempfile.gettempdir()),
-and opr is invoked with --eval-auto-confirm, which itself independently
-refuses to run outside tempfile.gettempdir() (see opr's main(), the check
-right after workspace_root is resolved). This runner does not weaken or
-duplicate that check -- it relies on opr's own refusal as the actual gate.
+temp fixture (fixtures.build_fixture, always under tempfile.gettempdir()). pi
+has no --workspace flag and no opr-style internal refusal-to-run-outside-tempdir
+check, so the sandbox boundary is entirely this runner's responsibility: pi is
+always invoked with `cwd` pinned to that fixture directory (see run_trial).
+There is no independent second gate the way opr's own check was; do not change
+run_trial's cwd handling without preserving this property.
+
+Sampling: pi's CLI has no --temperature or context-window flag at all (checked
+--help and the coding-agent/ai package sources directly). --num-ctx and
+--temperature are pinned by creating a derived Ollama model via a temp
+Modelfile and pointing pi at that tag (see ensure_pinned_model) rather than by
+a request-level option. --seed and --on-repeat have no pi equivalent and are
+dropped with a warning, not silently ignored -- see main().
 
 Resumability: a local state.json (not the operator ledger itself) tracks
 which (task, level, model, trial) cells are already done, per the spec's
@@ -32,24 +42,26 @@ resumable. Ledger recording (session-start/session-end with lane=local,
 task_class=bounded) is a separate, best-effort concern -- a ledger failure
 logs a warning and does not abort the sweep or lose grading data.
 
-Trace retention: --trace-dir writes one JSON per cell holding opr's raw
-stdout and stderr (which carry the tool-call log), the exact argv and prompt,
-the git revision, and the grade outcome. It is off by default, so runs that
-omit it behave exactly as before. GOLD_STANDARD.md rule 4 requires retained
-traces for a scoreable cell, so a matrix run without --trace-dir is not
-Front E evidence. Traces are written for passes, fails, AND timeouts: a
-failure with no retained output is precisely the confound that invalidated
-the 88 pre-890d595 negatives, so the write fails closed -- if it raises, the
-caller must not mark the cell done.
+Trace retention: --trace-dir writes one JSON per cell holding pi's raw
+`--mode json` stdout and stderr (which carry the tool-call log), the exact
+argv and prompt, the git revision, and the grade outcome. It is off by
+default, so runs that omit it behave exactly as before. GOLD_STANDARD.md rule
+4 requires retained traces for a scoreable cell, so a matrix run without
+--trace-dir is not Front E evidence. Traces are written for passes, fails,
+AND timeouts: a failure with no retained output is precisely the confound
+that invalidated the 88 pre-890d595 negatives (opr-era; the general principle
+still applies), so the write fails closed -- if it raises, the caller must
+not mark the cell done.
 
 Trajectory: every trace now carries a parsed `trajectory` object -- the ordered
 tool calls with their paths and errors, call counts, the two harness-visible
-terminations (repeat-guard, non-dispatch), and token/thinking accounting. This
-closes the previous "tool-call count is not parsed" gap. It is descriptive only:
-the deterministic postcondition remains the sole gate, and the parse is
-deliberately tolerant so it can never fail a cell the grader already decided.
+terminations (repeat-guard, non-dispatch), and token/thinking accounting.
+`stopped_repeat` is always False under the pi backend (no repeat-guard
+concept). It is descriptive only: the deterministic postcondition remains the
+sole gate, and the parse is deliberately tolerant so it can never fail a cell
+the grader already decided.
 
-Scope: run_trial hashes the fixture before opr runs and passes that manifest to
+Scope: run_trial hashes the fixture before pi runs and passes that manifest to
 the grader, which is what makes a `files_unchanged` postcondition able to enforce
 LOCAL_LANE_CONTRACT R6. Tasks without such a postcondition are unaffected.
 """
@@ -61,8 +73,10 @@ import json
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -77,8 +91,48 @@ from fixtures import build_fixture, cleanup_fixture, hash_tree  # noqa: E402
 from grading import grade  # noqa: E402
 
 TASKS_DIR = Path(__file__).resolve().parent / "tasks"
-OPR_BIN = REPO_ROOT / "opr"
+PI_BIN = shutil.which("pi") or "pi"
 OPERATOR_BIN = REPO_ROOT / "operator"
+
+# pi has no --num-ctx/--temperature CLI flags (checked --help and the
+# coding-agent/ai package sources directly, 2026-08-28) -- num_ctx and
+# temperature are pinned by creating a derived Ollama model via a temp
+# Modelfile instead, and pi is pointed at that tag. Cached per (base model,
+# ctx, temperature) so a multi-cell run creates each derived model once.
+_PINNED_MODEL_CACHE: dict[tuple[str, int | None, float | None], str] = {}
+
+
+def ensure_pinned_model(base_model: str, num_ctx: int | None, temperature: float | None) -> str:
+    if num_ctx is None and temperature is None:
+        return base_model
+    key = (base_model, num_ctx, temperature)
+    if key in _PINNED_MODEL_CACHE:
+        return _PINNED_MODEL_CACHE[key]
+    suffix_parts = []
+    if num_ctx is not None:
+        suffix_parts.append(f"ctx{num_ctx}")
+    if temperature is not None:
+        suffix_parts.append(f"t{str(temperature).replace('.', 'p')}")
+    base_name = base_model.split(":")[0]
+    tag = f"{base_name}-e9pin-{'-'.join(suffix_parts)}:latest"
+    lines = [f"FROM {base_model}"]
+    if num_ctx is not None:
+        lines.append(f"PARAMETER num_ctx {num_ctx}")
+    if temperature is not None:
+        lines.append(f"PARAMETER temperature {temperature}")
+    fd, modelfile_path = tempfile.mkstemp(suffix=".Modelfile")
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write("\n".join(lines) + "\n")
+        print(f"Pinning {base_model} -> {tag} ({', '.join(lines[1:]) or 'no overrides'})")
+        subprocess.run(
+            ["ollama", "create", tag, "-f", modelfile_path],
+            check=True, capture_output=True, text=True,
+        )
+    finally:
+        os.unlink(modelfile_path)
+    _PINNED_MODEL_CACHE[key] = tag
+    return tag
 DEFAULT_LEVELS = ("L0", "L1", "L2")
 HARNESS_ID = "local-lane-eval"
 MAX_WALL_CLOCK_SECONDS = 600  # 10 minutes per trial, per spec
@@ -178,58 +232,80 @@ def _as_text(blob: str | bytes | None) -> str:
     return blob
 
 
-_TOOL_CALL_MARKER = "[Model requests tool call: "
-_TOOL_OUTPUT_MARKER = "[Tool Output]"
-
-
 def parse_trajectory(stdout: str) -> dict:
-    """Turn opr's stdout into a structured trajectory.
+    """Turn pi's `--mode json` line-delimited event stream into a structured
+    trajectory.
 
-    The runner previously recorded only pass/fail and wall clock, so the one
-    thing an eval most wants to know about an agentic failure -- what the model
-    actually did -- had to be read by eye out of a trace. This parses it.
+    Replaces the previous opr-stdout-marker parser (2026-08-28 migration off
+    opr, which is carved out of this codebase -- pi is the local implementer
+    now; see AGENTS.md/CLAUDE.md local-implementer-dispatch notes). pi's JSON
+    events are structurally parseable -- no marker-scraping needed, which is
+    strictly easier than what this replaced.
 
-    Fields mirror the Alignerr trajectory rules the gold standard composes in:
-    each dispatched call is one action (their "do not combine scanning and
-    extraction in one step"), and failed calls are retained rather than dropped
-    (their mandatory drop-reasons for discarded candidates). `stopped_repeat`
-    and `no_dispatch` capture the two harness-visible terminations.
+    Fields are kept the same shape as the opr-era parser where a pi equivalent
+    exists. `stopped_repeat` is always False under this backend: pi has no
+    repeat-guard concept, so a model re-issuing an identical tool call is not
+    distinguished from any other tool call here.
 
-    Parsing is deliberately tolerant: an unrecognised line is skipped rather
-    than raising, because a trajectory parse must never be able to fail a cell
-    that the deterministic postcondition already graded.
+    Parsing is deliberately tolerant: a malformed or unrecognised line is
+    skipped rather than raising, because a trajectory parse must never be able
+    to fail a cell that the deterministic postcondition already graded.
     """
     calls: list[dict] = []
-    for chunk in stdout.split(_TOOL_CALL_MARKER)[1:]:
-        tool = chunk.split("]", 1)[0].strip()
-        args = None
-        start = chunk.find("{")
-        if start != -1:
+    completion_tokens = 0
+    think_chars = 0
+    saw_tool_call = False
+    pending_args: dict[str, dict] = {}  # toolCallId -> args, from tool_execution_start
+    for line in stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        etype = event.get("type")
+        if etype == "tool_execution_start":
+            call_id = event.get("toolCallId")
+            if call_id:
+                pending_args[call_id] = event.get("args") or {}
+        elif etype == "tool_execution_end":
+            saw_tool_call = True
+            call_id = event.get("toolCallId")
+            args = pending_args.pop(call_id, {}) if call_id else {}
+            result = event.get("result") or {}
+            is_error = bool(result.get("isError"))
+            content = result.get("content") or []
+            text = ""
+            if content and isinstance(content[0], dict):
+                text = content[0].get("text", "") or ""
+            calls.append(
+                {
+                    "tool": event.get("toolName"),
+                    "path": args.get("path"),
+                    "ok": not is_error,
+                    "error": text.splitlines()[0][:200] if is_error and text else None,
+                }
+            )
+        elif etype == "message_end":
+            msg = event.get("message") or {}
+            usage = msg.get("usage") or {}
             try:
-                args, _ = json.JSONDecoder().raw_decode(chunk, start)
-            except ValueError:
-                args = None
-        output = ""
-        if _TOOL_OUTPUT_MARKER in chunk:
-            output = chunk.split(_TOOL_OUTPUT_MARKER, 1)[1].strip()
-        ok = not output.startswith("Error:")
-        calls.append(
-            {
-                "tool": tool,
-                "path": (args or {}).get("path"),
-                "ok": ok,
-                "error": output.splitlines()[0][:200] if not ok else None,
-            }
-        )
+                completion_tokens += int(usage.get("output") or 0)
+            except (TypeError, ValueError):
+                pass
+            for block in msg.get("content") or []:
+                if isinstance(block, dict) and block.get("type") == "thinking":
+                    think_chars += len(block.get("text") or "")
     return {
         "tool_calls": calls,
         "n_calls": len(calls),
         "n_failed_calls": sum(1 for c in calls if not c["ok"]),
-        "distinct_tools": sorted({c["tool"] for c in calls}),
-        "stopped_repeat": "[Stopped: model repeated" in stdout,
-        "no_dispatch": "[No tool dispatched" in stdout,
-        "completion_tokens": sum(int(m) for m in re.findall(r"completion=(\d+)", stdout)),
-        "think_chars": sum(int(m) for m in re.findall(r"think_chars=(\d+)", stdout)),
+        "distinct_tools": sorted({c["tool"] for c in calls if c["tool"]}),
+        "stopped_repeat": False,
+        "no_dispatch": not saw_tool_call,
+        "completion_tokens": completion_tokens,
+        "think_chars": think_chars,
     }
 
 
@@ -398,51 +474,46 @@ def _ledger_session_end(ledger_dir: Path, usage_id: str, outcome: str) -> None:
 
 def run_trial(
     task: dict, level: str, model: str, trial_idx: int, ledger_dir: Path, use_ledger: bool,
-    trace_dir: Path | None = None, sampling: list[str] | None = None,
+    trace_dir: Path | None = None, sampling: dict | None = None,
 ) -> dict:
     prompt = task["prompts"][level]
     fixture_root = build_fixture(
         task.get("files", {}), prefix=f"{task['task_id']}-{level}", remove=task.get("remove")
     )
     # Pre-run state, so a scope postcondition can tell "edited the declared file"
-    # from "edited the declared file and three others". Taken before opr runs.
+    # from "edited the declared file and three others". Taken before pi runs.
     manifest = hash_tree(fixture_root)
     usage_id = None
+    sampling = sampling or {}
+
+    # num_ctx/temperature are pinned by model, not CLI flag -- see
+    # ensure_pinned_model. --seed has no pi equivalent (dropped, not silently
+    # ignored -- see the warning main() prints once if --seed is passed).
+    dispatch_model = ensure_pinned_model(
+        model, sampling.get("num_ctx"), sampling.get("temperature")
+    )
     argv = [
-        str(OPR_BIN), prompt,
-        "--model", model,
-        "--workspace", str(fixture_root),
-        "--eval-auto-confirm",
-        "--allow-write", "--allow-run",
-        "--no-govern",  # runner does its own explicit ledger tagging above
-        "--no-bn",
+        PI_BIN,
+        "--provider", "ollama",
+        "--model", dispatch_model,
+        "--mode", "json",
+        "--print",
     ]
-    # OPR-RUL-008 exits opr after the FIRST successful state-changing tool
-    # (write_file / patch_file / run_command). A task needing more than one --
-    # a multi-file edit, or any L2 that ends "verify by running ..." -- is
-    # structurally unpassable without a continuation budget, regardless of the
-    # model. Measured: constant-and-callers scored 0/42 across seven models at
-    # the default, and the same model passes it with a budget. Tasks declare
-    # what they need; omitting the key preserves the single-state-change
-    # default exactly.
-    budget = task.get("state_changes")
-    if budget:
-        argv += ["--continue-steps", str(budget)]
-    # Recorded in the trace's argv, so a reader can see exactly which sampling
-    # and context settings produced a cell rather than inferring them.
-    #
-    # --seed is offset by the trial index. At temperature 0 a fixed seed makes
-    # every trial in a cell byte-identical, which turns n=3 into n=1 reported
-    # three times -- reproducible but blind to reliability. Offsetting keeps
-    # each trial independently reproducible while still sampling the model's
-    # behaviour across three draws.
-    for i, token in enumerate(sampling or []):
-        if token == "--seed":
-            argv.extend(["--seed", str(int(sampling[i + 1]) + trial_idx)])
-        elif i and (sampling or [])[i - 1] == "--seed":
-            continue
-        else:
-            argv.append(token)
+    think = sampling.get("think")
+    if think is not None:
+        # runner.py's own --think choices include "on", which pi's --thinking
+        # does not accept (its levels are off/minimal/low/medium/high/xhigh/max).
+        # Every call to date in this repo has used "off"; "on" is mapped to
+        # "medium" (pi's own documented default) rather than erroring.
+        argv += ["--thinking", "medium" if think == "on" else think]
+    # No --continue-steps equivalent, and none is needed: that flag existed to
+    # work around OPR-RUL-008 (opr exiting after the first successful
+    # state-changing tool call). pi does not impose that cap -- it continues
+    # its own tool loop until it decides it's done or MAX_WALL_CLOCK_SECONDS
+    # kills it, same as the multi-call sequence in the pi migration smoke test
+    # (bash -> edit -> bash -> stop). task.get("state_changes") is therefore
+    # unused under this backend; left in task defs for opr-era provenance.
+    argv += ["--", prompt]
     start = time.monotonic()
     try:
         if use_ledger:
@@ -450,15 +521,13 @@ def run_trial(
         try:
             completed = subprocess.run(
                 argv, capture_output=True, text=True, timeout=MAX_WALL_CLOCK_SECONDS,
+                cwd=str(fixture_root),  # pi has no --workspace flag; this is the sandbox boundary
                 # PYTHONUNBUFFERED is load-bearing for diagnosis, not a tidy-up.
-                # opr has no flush=True anywhere, so with stdout on a pipe its
-                # prints sit in a block buffer. On timeout the runner SIGKILLs
-                # the process and the buffer dies with it -- which is why two
-                # 600s hangs on 2026-08-15 recorded 0 bytes of stdout despite
-                # opr printing "Routing task to:" before it ever contacts the
-                # model. The trace was empty for exactly the cells that needed
-                # it. Unbuffered, partial output survives the kill and shows how
-                # far the turn got.
+                # On timeout the runner SIGKILLs the process and an unflushed
+                # buffer dies with it -- unbuffered, partial output survives the
+                # kill and shows how far the turn got. (Originally documented
+                # against opr; pi's own buffering behavior under a pipe hasn't
+                # been separately characterized, so this is left set.)
                 env={**os.environ, "PYTHONUNBUFFERED": "1"},
             )
         except subprocess.TimeoutExpired as exc:
@@ -617,9 +686,9 @@ def main() -> int:
     parser.add_argument(
         "--on-repeat", choices=["stop", "feedback"], default=None,
         help=(
-            "EXPERIMENTAL. Pass through to opr: what to do when a model re-issues "
-            "an identical tool call. Unset keeps opr's default ('stop'), under "
-            "which every pack to date was measured."
+            "OPR-ERA, NO LONGER FUNCTIONAL: was pass-through to opr for what to do "
+            "when a model re-issues an identical tool call. pi has no equivalent; "
+            "setting this now only prints a warning and is otherwise ignored."
         ),
     )
     parser.add_argument(
@@ -673,18 +742,28 @@ def main() -> int:
     if use_ledger:
         ensure_eval_harness_registered(ledger_dir / ".operator")
 
-    sampling: list[str] = []
-    for flag, value in (
-        ("--num-ctx", args.num_ctx),
-        ("--temperature", args.temperature),
-        ("--seed", args.seed),
-        ("--think", args.think),
-        ("--on-repeat", args.on_repeat),
-    ):
-        if value is not None:
-            sampling.extend([flag, str(value)])
-    if sampling:
-        print(f"Sampling pinned: {' '.join(sampling)}")
+    sampling = {
+        "num_ctx": args.num_ctx,
+        "temperature": args.temperature,
+        "think": args.think,
+    }
+    if args.seed is not None:
+        print(
+            "WARNING: --seed has no pi equivalent and is IGNORED under this "
+            "backend (dropped 2026-08-28 opr->pi migration). Trials are "
+            "independently sampled, not seed-reproducible.",
+            file=sys.stderr,
+        )
+    if args.on_repeat is not None:
+        print(
+            "WARNING: --on-repeat has no pi equivalent and is IGNORED -- pi has "
+            "no repeat-guard concept. A model re-issuing an identical tool call "
+            "is not distinguished from any other tool call.",
+            file=sys.stderr,
+        )
+    if any(v is not None for v in sampling.values()):
+        pinned = {k: v for k, v in sampling.items() if v is not None}
+        print(f"Sampling pinned: {pinned}")
     else:
         print(
             "Sampling NOT pinned -- model defaults for temperature/context. Cells are "
