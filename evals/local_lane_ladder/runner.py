@@ -133,6 +133,67 @@ def ensure_pinned_model(base_model: str, num_ctx: int | None, temperature: float
         os.unlink(modelfile_path)
     _PINNED_MODEL_CACHE[key] = tag
     return tag
+
+
+# LOCAL_INFERENCE_BENCH_HARNESS.md contract v1's own prompt (436 bytes, 121
+# tokens) -- reused here, not a bespoke one, so this probe's tok/s is directly
+# comparable to existing Front I throughput data (e.g. MODEL-RANKING-001),
+# not just an internal-only number.
+_CONTRACT_PROMPT_PATH = Path(
+    "/home/blueaz/Python/project-phoenix/docs/domain_runs/"
+    "GEMMA4-CTX8192-3090-VS-Z13-001/prompt.txt"
+)
+
+
+def measure_tok_s(model: str) -> dict | None:
+    """Direct Ollama /api/generate probe for a genuine decode tok/s alongside
+    each trial's wall-clock completion time.
+
+    Added 2026-08-28 because pi's `--mode json` cannot supply this: checked
+    directly, message_start and message_end share the identical millisecond
+    even for a pure-text (non-tool-call) response, so there is no way to
+    derive per-turn generation duration from pi's own event stream. This
+    probe is a supplementary measurement, run against the same pinned model
+    tag (so num_ctx matches the trial), contract-v1 prompt/num_predict, and
+    temperature 0 (greedy decode-rate measurement, independent of whatever
+    temperature is pinned for the capability trial itself). Two calls per the
+    contract's "run 2 is the warm figure" rule -- the model may have been
+    evicted by tool-call activity during the pi turn.
+
+    Returns None on any failure. This must never be able to fail a cell; it
+    is not part of the grade.
+    """
+    if not _CONTRACT_PROMPT_PATH.is_file():
+        return None
+    try:
+        prompt = _CONTRACT_PROMPT_PATH.read_text()
+        payload = json.dumps(
+            {
+                "model": model,
+                "prompt": prompt,
+                "stream": False,
+                "keep_alive": "5m",
+                "options": {"num_predict": 128, "temperature": 0},
+            }
+        )
+        data = None
+        for _ in range(2):
+            result = subprocess.run(
+                ["curl", "-s", "http://localhost:11434/api/generate", "-d", payload],
+                capture_output=True, text=True, timeout=120,
+            )
+            data = json.loads(result.stdout)
+        eval_count = data.get("eval_count") if data else None
+        eval_duration = data.get("eval_duration") if data else None  # nanoseconds
+        if not eval_count or not eval_duration:
+            return None
+        return {
+            "tok_s": round(eval_count / (eval_duration / 1e9), 1),
+            "eval_count": eval_count,
+            "eval_duration_s": round(eval_duration / 1e9, 2),
+        }
+    except Exception:  # noqa: BLE001 -- supplementary measurement, never fails a cell
+        return None
 DEFAULT_LEVELS = ("L0", "L1", "L2")
 HARNESS_ID = "local-lane-eval"
 MAX_WALL_CLOCK_SECONDS = 600  # 10 minutes per trial, per spec
@@ -343,6 +404,8 @@ def write_trace(
         "wall_clock_s": record.get("wall_clock_s"),
         "passed": record.get("passed"),
         "grade_detail": record.get("detail"),
+        "tok_s": record.get("tok_s"),
+        "tok_s_probe": record.get("tok_s_probe"),
         "prompt": prompt,
         "argv": argv,
         "trajectory": parse_trajectory(stdout),
@@ -560,6 +623,7 @@ def run_trial(
         outcome = "pass" if grade_result.passed else "fail"
         if use_ledger and usage_id:
             _ledger_session_end(ledger_dir, usage_id, outcome)
+        tok_s_probe = measure_tok_s(dispatch_model)
         record = {
             "task_id": task["task_id"],
             "level": level,
@@ -575,6 +639,8 @@ def run_trial(
             ],
             "wall_clock_s": round(wall_clock, 1),
             "returncode": completed.returncode,
+            "tok_s": tok_s_probe.get("tok_s") if tok_s_probe else None,
+            "tok_s_probe": tok_s_probe,
         }
         if trace_dir is not None:
             record["trace"] = str(write_trace(
@@ -610,14 +676,32 @@ def write_results_md(results: list[dict], output_path: Path) -> None:
     lines.append("")
     lines.append("## Pass rate per model x level (all tasks combined)")
     lines.append("")
-    lines.append("| Model | L0 | L1 | L2 |")
-    lines.append("|---|---|---|---|")
+    lines.append(
+        "| Model | L0 | L1 | L2 | decode tok/s (mean, contract-v1 probe) | "
+        "wall_clock_s (mean, per trial) |"
+    )
+    lines.append("|---|---|---|---|---|---|")
     for model in models:
         row = [model]
         for level in DEFAULT_LEVELS:
             cell = [r for r in results if r["model"] == model and r["level"] == level]
             row.append("—" if not cell else f"{sum(1 for r in cell if r['passed'])}/{len(cell)}")
+        model_results = [r for r in results if r["model"] == model]
+        tok_s_values = [r["tok_s"] for r in model_results if r.get("tok_s") is not None]
+        row.append(f"{sum(tok_s_values) / len(tok_s_values):.1f}" if tok_s_values else "—")
+        wall_values = [r["wall_clock_s"] for r in model_results if r.get("wall_clock_s") is not None]
+        row.append(f"{sum(wall_values) / len(wall_values):.1f}" if wall_values else "—")
         lines.append("| " + " | ".join(row) + " |")
+    lines.append("")
+    lines.append(
+        "> decode tok/s is a supplementary direct-Ollama probe "
+        "(`LOCAL_INFERENCE_BENCH_HARNESS.md` contract-v1 prompt, `num_predict 128`, "
+        "`temperature 0`, run against the same pinned model config as the trial), "
+        "not derived from the implementer's own turn timing -- see runner.py's "
+        "`measure_tok_s` docstring for why. wall_clock_s is task-completion time "
+        "(includes tool-execution, not decode-only) and is what the capability "
+        "pass/fail cells above were actually measured under."
+    )
     lines.append("")
     lines.append("## Per-task breakdown")
     lines.append("")
