@@ -1,0 +1,119 @@
+{
+    "id": "1f095307-1f5a-4d25-9b10-af34041a9173",
+    "task_name": "terminal-bench/polyglot-rust-c",
+    "trial_name": "polyglot-rust-c__HuvEeYH",
+    "trial_uri": "file:///home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task/polyglot-rust-c__HuvEeYH",
+    "task_id": {
+        "org": "terminal-bench",
+        "name": "polyglot-rust-c",
+        "ref": "sha256:a33dc72e2278d225513c0724abe2e4539653d5ee7e4c2a90ba2d676586ba9f3d"
+    },
+    "source": "terminal-bench/terminal-bench-2-1",
+    "task_checksum": "aabe829791a3d41a79deb775717a64fab08f286349cb07640e50dcfff6f497be",
+    "config": {
+        "task": {
+            "path": null,
+            "git_url": null,
+            "git_commit_id": null,
+            "name": "terminal-bench/polyglot-rust-c",
+            "ref": "sha256:a33dc72e2278d225513c0724abe2e4539653d5ee7e4c2a90ba2d676586ba9f3d",
+            "overwrite": false,
+            "download_dir": null,
+            "source": "terminal-bench/terminal-bench-2-1"
+        },
+        "trial_name": "polyglot-rust-c__HuvEeYH",
+        "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "pi",
+            "import_path": null,
+            "model_name": "openrouter/z-ai/glm-5.2",
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {},
+            "mcp_servers": []
+        },
+        "user_agent": null,
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": null,
+            "extra_docker_compose": [],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "disable": false
+        },
+        "artifacts": [],
+        "extra_instruction_paths": [],
+        "extra_instructions": [],
+        "job_id": "6d49b7b1-8760-4b79-81a8-dae42fbcb50f",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "pi",
+        "version": "0.84.3",
+        "model_info": {
+            "name": "z-ai/glm-5.2",
+            "provider": "openrouter"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 177415,
+        "n_cache_tokens": 132032,
+        "n_output_tokens": 35719,
+        "cost_usd": 0.17779144440000003,
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 1.0
+        }
+    },
+    "verifier_environment_mode": "shared",
+    "exception_info": null,
+    "started_at": "2026-08-27T04:57:06.877582Z",
+    "finished_at": "2026-08-27T05:05:01.735748Z",
+    "environment_setup": {
+        "started_at": "2026-08-27T04:57:06.884210Z",
+        "finished_at": "2026-08-27T04:57:08.138553Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-08-27T04:57:08.138590Z",
+        "finished_at": "2026-08-27T04:57:33.166925Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-08-27T04:57:33.167003Z",
+        "finished_at": "2026-08-27T05:04:41.588681Z"
+    },
+    "verifier": {
+        "started_at": "2026-08-27T05:04:41.885674Z",
+        "finished_at": "2026-08-27T05:04:49.772591Z"
+    },
+    "step_results": null
+}

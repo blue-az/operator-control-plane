@@ -1,0 +1,14 @@
+{
+    "task": {
+        "name": "terminal-bench/polyglot-rust-c",
+        "ref": "sha256:a33dc72e2278d225513c0724abe2e4539653d5ee7e4c2a90ba2d676586ba9f3d",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "polyglot-rust-c__HuvEeYH",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task",
+    "agent": {
+        "name": "pi",
+        "model_name": "openrouter/z-ai/glm-5.2"
+    },
+    "job_id": "6d49b7b1-8760-4b79-81a8-dae42fbcb50f"
+}

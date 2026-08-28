@@ -1,0 +1,14 @@
+{
+    "task": {
+        "name": "terminal-bench/distribution-search",
+        "ref": "sha256:8787d3004ac4dd9d78f0c14f5b5ef94a4ad3e69d8828d7d35b9fbd7828a69ed1",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "distribution-search__AXvZNvb",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task",
+    "agent": {
+        "name": "pi",
+        "model_name": "openrouter/z-ai/glm-5.2"
+    },
+    "job_id": "6d49b7b1-8760-4b79-81a8-dae42fbcb50f"
+}
