@@ -1,0 +1,13 @@
+# e9-pi-rerun pre-run
+captured_utc: 2026-08-28T18:56:05Z
+git_rev: 3c28718e51222b8028a3c228ad89ee8c811aa408
+question: does the qwenflash-e9 opr-vs-pi gap hold across the current 4-model roster
+design: 5 fixtures x 4 models x n=6 = 120 cells
+fixtures: csv-summarize-repair booking-off-by-one constant-and-callers ambiguous-anchor strict-log-format
+levels: L2
+controls: num_ctx 16384, temperature 0.8, think off
+models: gemma4:26b gemma4:31b qwen3.6:35b qwen3.8:27b (freshly pulled 2026-08-28)
+compare against: e9-ceiling-continued (opr, older 7-model roster incl. gemma4:26b 24/30, gemma4:31b 24/30, qwen3.6:27b 19/30) and q36-35b-e9 (opr, qwen3.6:35b vs gemma4:26b)
+tok/s: this run includes the direct-Ollama decode probe added post-qwenflash-e9 (runner.py measure_tok_s) -- qwenflash-e9 itself does not have it
+NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W
+NVIDIA GeForce RTX 3090, 24576 MiB, 320.00 W

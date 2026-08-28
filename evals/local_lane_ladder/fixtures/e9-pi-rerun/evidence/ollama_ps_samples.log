@@ -1,0 +1,261 @@
+--- 18:56:05Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 18:56:35Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:57:05Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:57:35Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:58:05Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:58:35Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:59:05Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 18:59:35Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:00:05Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      3 minutes from now    
+--- 19:00:35Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      3 minutes from now    
+--- 19:01:05Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      2 minutes from now    
+--- 19:01:35Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      2 minutes from now    
+--- 19:02:05Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL                   
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now         
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      About a minute from now    
+--- 19:02:35Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL                   
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now         
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      About a minute from now    
+--- 19:03:06Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL               
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now     
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      41 seconds from now    
+--- 19:03:36Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL               
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now     
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      11 seconds from now    
+--- 19:04:06Z
+NAME                                      ID              SIZE     PROCESSOR         CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    2%/98% CPU/GPU    16384      4 minutes from now    
+--- 19:04:36Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:05:06Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:05:36Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:06:06Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:06:36Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:07:06Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:07:36Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:08:06Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:08:36Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:09:06Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:09:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:10:06Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:10:36Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:11:06Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:11:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:12:06Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:12:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:13:06Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:13:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:14:06Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:14:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:15:06Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:15:36Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:16:06Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.8-27b-e9pin-ctx16384-t0p8:latest    99a401b2669b    18 GB    100% GPU     16384      4 minutes from now    
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:16:36Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.8-27b-e9pin-ctx16384-t0p8:latest    99a401b2669b    18 GB    100% GPU     16384      4 minutes from now    
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:17:06Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.8-27b-e9pin-ctx16384-t0p8:latest    99a401b2669b    18 GB    100% GPU     16384      4 minutes from now    
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      3 minutes from now    
+--- 19:17:36Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.8-27b-e9pin-ctx16384-t0p8:latest    99a401b2669b    18 GB    100% GPU     16384      4 minutes from now    
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      3 minutes from now    
+--- 19:18:06Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:18:36Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:19:06Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:19:36Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:20:06Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:20:36Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:21:06Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      4 minutes from now    
+--- 19:21:36Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      3 minutes from now    
+--- 19:22:06Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      3 minutes from now    
+--- 19:22:36Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      2 minutes from now    
+--- 19:23:06Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      2 minutes from now    
+--- 19:23:37Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL                   
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now         
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      About a minute from now    
+--- 19:24:07Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL                   
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now         
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      About a minute from now    
+--- 19:24:37Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL               
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now     
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      41 seconds from now    
+--- 19:25:07Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL               
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now     
+gemma4-26b-e9pin-ctx16384-t0p8:latest    5ec025ab555b    17 GB    100% GPU     16384      11 seconds from now    
+--- 19:25:37Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+--- 19:26:07Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+--- 19:26:37Z
+NAME                                     ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+gemma4-31b-e9pin-ctx16384-t0p8:latest    31dfb0166862    20 GB    100% GPU     16384      4 minutes from now    
+--- 19:27:07Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:27:37Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:28:07Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:28:37Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:29:07Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:29:37Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:30:07Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:30:37Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:31:07Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
+--- 19:31:37Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:32:07Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:32:37Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:33:07Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:33:37Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:34:07Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:34:37Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:35:07Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:35:37Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:36:07Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:36:37Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:37:07Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:37:37Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:38:07Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:38:37Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:39:07Z
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- 19:39:37Z
+NAME                                      ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+qwen3.6-35b-e9pin-ctx16384-t0p8:latest    34930c368232    22 GB    100% GPU     16384      4 minutes from now    
