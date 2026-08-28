@@ -3586,14 +3586,12 @@ def parse_claude_session_file(filepath: str) -> dict | None:
     if not timestamps:
         return None
 
-    # v1-superseded-no-reuse cache-waste proxy (USAGE_CACHE_WASTE_SPEC.md): a
-    # cache write only counts as wasted once a LATER write supersedes it with
-    # no cache_read in between -- proof the earlier cached content was paid
-    # for and then abandoned, not merely proof it went unread so far. The
-    # final pending write of the session is deliberately left uncounted: the
-    # session ending doesn't prove abandonment, a follow-up session could
-    # still reuse that cache entry, and counting it would flag nearly every
-    # session's tail as "wasted" regardless of real reuse behavior.
+    # v1-superseded-no-reuse proxy (USAGE_CACHE_WASTE_SPEC.md): count an
+    # earlier write only when another write follows with no observed read in
+    # between. Scalar counters cannot bind a read or write to a cache-entry
+    # identity, so this is an ordered non-reuse signal, not proof of eviction,
+    # supersession, or permanent waste. The final pending write stays
+    # unresolved because nothing later in this transcript observes it.
     wasted_cache_write_tokens = 0
     pending_write_amt = 0
     for write_amt, read_amt in cache_sequence:
@@ -5964,9 +5962,10 @@ def doctor_cmd(args) -> int:
                     waste_pct = cache_waste.get("wasted_cache_write_pct") or 0.0
                     if waste_pct > 0.5:
                         issues.append(
-                            f"[Warning] Usage record {usage_id} has high cache waste: "
-                            f"{waste_pct * 100:.0f}% of cache-write spend never reused "
-                            "in-session (v1-superseded-no-reuse method)."
+                            f"[Warning] Usage record {usage_id} has high cache non-reuse proxy: "
+                            f"{waste_pct * 100:.0f}% of cache-write spend had no observed "
+                            "intervening read before the next write "
+                            "(v1-superseded-no-reuse method)."
                         )
     infos.sort()
 
@@ -6436,8 +6435,9 @@ def usage_summary_cmd(args) -> int:
             wasted_usd += wasted * rate / 1000000.0
         pct = (total_wasted / total_cache_write * 100.0) if total_cache_write > 0 else 0.0
         print(
-            f"{pct:.1f}% of Claude cache-write spend (~${wasted_usd:.4f} USD) was never reused "
-            "in-session (v1-superseded-no-reuse method, Claude only)."
+            f"{pct:.1f}% of Claude cache-write spend (~${wasted_usd:.4f} USD) had no observed "
+            "intervening read before the next write "
+            "(v1-superseded-no-reuse proxy, Claude only)."
         )
         return 0
 
@@ -7928,7 +7928,7 @@ def main() -> None:
     usage_summary_parser.add_argument(
         "--cache-waste-audit",
         action="store_true",
-        help="Produce one-line Claude cache-write waste report (v1-superseded-no-reuse method).",
+        help="Report the Claude ordered cache non-reuse proxy (v1-superseded-no-reuse).",
     )
 
     # operator usage-import
