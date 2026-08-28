@@ -1,0 +1,1146 @@
+{
+  "done": {
+    "ambiguous-anchor|L2|qwen3.6:35b|1": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|2": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|3": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|4": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|5": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|6": true,
+    "booking-off-by-one|L2|qwen3.6:35b|1": true,
+    "booking-off-by-one|L2|qwen3.6:35b|2": true,
+    "booking-off-by-one|L2|qwen3.6:35b|3": true,
+    "booking-off-by-one|L2|qwen3.6:35b|4": true,
+    "booking-off-by-one|L2|qwen3.6:35b|5": true,
+    "booking-off-by-one|L2|qwen3.6:35b|6": true,
+    "constant-and-callers|L2|qwen3.6:35b|1": true,
+    "constant-and-callers|L2|qwen3.6:35b|2": true,
+    "constant-and-callers|L2|qwen3.6:35b|3": true,
+    "constant-and-callers|L2|qwen3.6:35b|4": true,
+    "constant-and-callers|L2|qwen3.6:35b|5": true,
+    "constant-and-callers|L2|qwen3.6:35b|6": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|1": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|2": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|3": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|4": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|5": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|6": true,
+    "strict-log-format|L2|qwen3.6:35b|1": true,
+    "strict-log-format|L2|qwen3.6:35b|2": true,
+    "strict-log-format|L2|qwen3.6:35b|3": true,
+    "strict-log-format|L2|qwen3.6:35b|4": true,
+    "strict-log-format|L2|qwen3.6:35b|5": true,
+    "strict-log-format|L2|qwen3.6:35b|6": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 129.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.99,
+        "tok_s": 129.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/ambiguous-anchor__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 19.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 131.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.98,
+        "tok_s": 131.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/ambiguous-anchor__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 9.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 130.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.98,
+        "tok_s": 130.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/ambiguous-anchor__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 11.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 131.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 131.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/ambiguous-anchor__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 10.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 130.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.98,
+        "tok_s": 130.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/ambiguous-anchor__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 9.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 136.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/ambiguous-anchor__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 8.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 129.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.99,
+        "tok_s": 129.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/booking-off-by-one__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 10.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 132.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 132.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/booking-off-by-one__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 13.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 130.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.98,
+        "tok_s": 130.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/booking-off-by-one__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 9.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 131.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 131.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/booking-off-by-one__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 9.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 131.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 131.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/booking-off-by-one__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 8.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 136.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/booking-off-by-one__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 10.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 135.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.95,
+        "tok_s": 135.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/constant-and-callers__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 10.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 135.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/constant-and-callers__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 11.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 132.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 132.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/constant-and-callers__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 10.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 131.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 131.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/constant-and-callers__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 9.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 130.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.98,
+        "tok_s": 130.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/constant-and-callers__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 10.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 132.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 132.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/constant-and-callers__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 12.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 132.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 132.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/csv-summarize-repair__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 21.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 135.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/csv-summarize-repair__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 15.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 135.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/csv-summarize-repair__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 24.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 135.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/csv-summarize-repair__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 34.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 135.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/csv-summarize-repair__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 22.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 134.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.95,
+        "tok_s": 134.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/csv-summarize-repair__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 19.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 135.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/strict-log-format__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 10.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 136.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/strict-log-format__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 9.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 135.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/strict-log-format__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 10.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 135.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/strict-log-format__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 9.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 135.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/strict-log-format__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 14.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 134.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.95,
+        "tok_s": 134.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces-q36-35b-singlegpu/strict-log-format__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 8.6
+    }
+  ]
+}

@@ -1,0 +1,3900 @@
+{
+  "done": {
+    "ambiguous-anchor|L2|gemma4:26b|1": true,
+    "ambiguous-anchor|L2|gemma4:26b|2": true,
+    "ambiguous-anchor|L2|gemma4:26b|3": true,
+    "ambiguous-anchor|L2|gemma4:26b|4": true,
+    "ambiguous-anchor|L2|gemma4:26b|5": true,
+    "ambiguous-anchor|L2|gemma4:26b|6": true,
+    "ambiguous-anchor|L2|gemma4:31b|1": true,
+    "ambiguous-anchor|L2|gemma4:31b|2": true,
+    "ambiguous-anchor|L2|gemma4:31b|3": true,
+    "ambiguous-anchor|L2|gemma4:31b|4": true,
+    "ambiguous-anchor|L2|gemma4:31b|5": true,
+    "ambiguous-anchor|L2|gemma4:31b|6": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|1": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|2": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|3": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|4": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|5": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|6": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|1": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|2": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|3": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|4": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|5": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|6": true,
+    "booking-off-by-one|L2|gemma4:26b|1": true,
+    "booking-off-by-one|L2|gemma4:26b|2": true,
+    "booking-off-by-one|L2|gemma4:26b|3": true,
+    "booking-off-by-one|L2|gemma4:26b|4": true,
+    "booking-off-by-one|L2|gemma4:26b|5": true,
+    "booking-off-by-one|L2|gemma4:26b|6": true,
+    "booking-off-by-one|L2|gemma4:31b|1": true,
+    "booking-off-by-one|L2|gemma4:31b|2": true,
+    "booking-off-by-one|L2|gemma4:31b|3": true,
+    "booking-off-by-one|L2|gemma4:31b|4": true,
+    "booking-off-by-one|L2|gemma4:31b|5": true,
+    "booking-off-by-one|L2|gemma4:31b|6": true,
+    "booking-off-by-one|L2|qwen3.6:35b|1": true,
+    "booking-off-by-one|L2|qwen3.6:35b|2": true,
+    "booking-off-by-one|L2|qwen3.6:35b|3": true,
+    "booking-off-by-one|L2|qwen3.6:35b|4": true,
+    "booking-off-by-one|L2|qwen3.6:35b|5": true,
+    "booking-off-by-one|L2|qwen3.6:35b|6": true,
+    "booking-off-by-one|L2|qwen3.8:27b|1": true,
+    "booking-off-by-one|L2|qwen3.8:27b|2": true,
+    "booking-off-by-one|L2|qwen3.8:27b|3": true,
+    "booking-off-by-one|L2|qwen3.8:27b|4": true,
+    "booking-off-by-one|L2|qwen3.8:27b|5": true,
+    "booking-off-by-one|L2|qwen3.8:27b|6": true,
+    "constant-and-callers|L2|gemma4:26b|1": true,
+    "constant-and-callers|L2|gemma4:26b|2": true,
+    "constant-and-callers|L2|gemma4:26b|3": true,
+    "constant-and-callers|L2|gemma4:26b|4": true,
+    "constant-and-callers|L2|gemma4:26b|5": true,
+    "constant-and-callers|L2|gemma4:26b|6": true,
+    "constant-and-callers|L2|gemma4:31b|1": true,
+    "constant-and-callers|L2|gemma4:31b|2": true,
+    "constant-and-callers|L2|gemma4:31b|3": true,
+    "constant-and-callers|L2|gemma4:31b|4": true,
+    "constant-and-callers|L2|gemma4:31b|5": true,
+    "constant-and-callers|L2|gemma4:31b|6": true,
+    "constant-and-callers|L2|qwen3.8:27b|1": true,
+    "constant-and-callers|L2|qwen3.8:27b|2": true,
+    "constant-and-callers|L2|qwen3.8:27b|3": true,
+    "constant-and-callers|L2|qwen3.8:27b|4": true,
+    "constant-and-callers|L2|qwen3.8:27b|5": true,
+    "constant-and-callers|L2|qwen3.8:27b|6": true,
+    "csv-summarize-repair|L2|gemma4:26b|1": true,
+    "csv-summarize-repair|L2|gemma4:26b|2": true,
+    "csv-summarize-repair|L2|gemma4:26b|3": true,
+    "csv-summarize-repair|L2|gemma4:26b|4": true,
+    "csv-summarize-repair|L2|gemma4:26b|5": true,
+    "csv-summarize-repair|L2|gemma4:26b|6": true,
+    "csv-summarize-repair|L2|gemma4:31b|1": true,
+    "csv-summarize-repair|L2|gemma4:31b|2": true,
+    "csv-summarize-repair|L2|gemma4:31b|3": true,
+    "csv-summarize-repair|L2|gemma4:31b|4": true,
+    "csv-summarize-repair|L2|gemma4:31b|5": true,
+    "csv-summarize-repair|L2|gemma4:31b|6": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|1": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|2": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|3": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|4": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|5": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|6": true,
+    "strict-log-format|L2|gemma4:26b|1": true,
+    "strict-log-format|L2|gemma4:26b|2": true,
+    "strict-log-format|L2|gemma4:26b|3": true,
+    "strict-log-format|L2|gemma4:26b|4": true,
+    "strict-log-format|L2|gemma4:26b|5": true,
+    "strict-log-format|L2|gemma4:26b|6": true,
+    "strict-log-format|L2|gemma4:31b|1": true,
+    "strict-log-format|L2|gemma4:31b|2": true,
+    "strict-log-format|L2|gemma4:31b|3": true,
+    "strict-log-format|L2|gemma4:31b|4": true,
+    "strict-log-format|L2|gemma4:31b|5": true,
+    "strict-log-format|L2|gemma4:31b|6": true,
+    "strict-log-format|L2|qwen3.8:27b|1": true,
+    "strict-log-format|L2|qwen3.8:27b|2": true,
+    "strict-log-format|L2|qwen3.8:27b|3": true,
+    "strict-log-format|L2|qwen3.8:27b|4": true,
+    "strict-log-format|L2|qwen3.8:27b|5": true,
+    "strict-log-format|L2|qwen3.8:27b|6": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 139.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 139.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 30.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 138.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 24.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 138.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 24.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 17.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 23.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 137.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 22.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.73,
+        "tok_s": 34.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 51.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.74,
+        "tok_s": 34.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 25.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.76,
+        "tok_s": 34.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 42.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.75,
+        "tok_s": 34.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-31b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 42.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.75,
+        "tok_s": 34.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-31b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 42.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.76,
+        "tok_s": 34.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__gemma4-31b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 27.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 134.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.95,
+        "tok_s": 134.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 119.8
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 133.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.96,
+        "tok_s": 133.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 100.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 131.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 131.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 99.1
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 132.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 132.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 100.7
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 132.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.96,
+        "tok_s": 132.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 95.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 131.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 131.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 100.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 77.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.64,
+        "tok_s": 77.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 26.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 79.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.61,
+        "tok_s": 79.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 10.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 79.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.61,
+        "tok_s": 79.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 11.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 78.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 78.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 9.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 78.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.63,
+        "tok_s": 78.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 10.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 79.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 79.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/ambiguous-anchor__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 13.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 138.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 26.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 138.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 20.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 138.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 15.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 138.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 19.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 137.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 20.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 135.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 19.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 34.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.76,
+        "tok_s": 34.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 69.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 33.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.83,
+        "tok_s": 33.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 54.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 34.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.76,
+        "tok_s": 34.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 40.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 34.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.75,
+        "tok_s": 34.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-31b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 51.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 34.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.76,
+        "tok_s": 34.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-31b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 54.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 34.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.72,
+        "tok_s": 34.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__gemma4-31b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 37.1
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-3id5qvrq/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-3id5qvrq/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 135.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 117.0
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-cehklhaw/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-cehklhaw/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 135.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.95,
+        "tok_s": 135.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 102.7
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-u3mwgcaf/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-u3mwgcaf/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 132.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 132.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 101.3
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-mjhum6yu/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-mjhum6yu/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 133.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.96,
+        "tok_s": 133.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 101.2
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-4488wfip/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-4488wfip/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 129.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.99,
+        "tok_s": 129.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 99.8
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-49f6uvgl/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-booking-off-by-one-L2-49f6uvgl/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 132.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.97,
+        "tok_s": 132.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 102.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 81.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 81.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 16.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 81.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 81.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 14.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 81.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 81.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 14.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 81.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 81.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 12.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 81.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 81.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 13.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 81.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 81.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/booking-off-by-one__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 15.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 138.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 27.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 138.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 13.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 18.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 137.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 12.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 138.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 15.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 14.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 33.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.87,
+        "tok_s": 33.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 37.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 33.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.81,
+        "tok_s": 33.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 36.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 33.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.83,
+        "tok_s": 33.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 25.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 34.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.75,
+        "tok_s": 34.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-31b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 35.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 34.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.75,
+        "tok_s": 34.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-31b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 23.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 32.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.91,
+        "tok_s": 32.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__gemma4-31b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 34.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 70.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.82,
+        "tok_s": 70.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 33.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 68.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.87,
+        "tok_s": 68.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 14.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 69.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.84,
+        "tok_s": 69.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 18.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 71.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.79,
+        "tok_s": 71.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 14.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 71.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.79,
+        "tok_s": 71.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 18.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 72.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.78,
+        "tok_s": 72.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/constant-and-callers__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 18.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 47.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 70.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 41.6
+    },
+    {
+      "check_score": 0.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-yh8ccaxq/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-yh8ccaxq/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "created out of scope: ['test_logic.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "2/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-yh8ccaxq/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-yh8ccaxq/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'; tests not edited: created out of scope: ['test_logic.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 42.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 52.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 31.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 33.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.77,
+        "tok_s": 33.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 170.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 34.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.74,
+        "tok_s": 34.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 130.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 34.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.73,
+        "tok_s": 34.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 121.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 34.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.73,
+        "tok_s": 34.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-31b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 83.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 34.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.76,
+        "tok_s": 34.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-31b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 67.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 34.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.75,
+        "tok_s": 34.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__gemma4-31b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 112.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 81.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 33.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 80.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 80.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 18.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 20.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 81.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 19.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 20.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 81.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/csv-summarize-repair__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 32.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 135.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 74.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 136.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 55.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 135.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 53.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 135.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 68.3
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/3 checks failed: tests not edited: created out of scope: ['test_implementation.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 135.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 125.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 135.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.95,
+        "tok_s": 135.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 83.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 35.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.58,
+        "tok_s": 35.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 98.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 35.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.57,
+        "tok_s": 35.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 175.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 35.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.57,
+        "tok_s": 35.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 83.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 36.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.56,
+        "tok_s": 36.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-31b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 49.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 36.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.56,
+        "tok_s": 36.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-31b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 93.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 33.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.8,
+        "tok_s": 33.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__gemma4-31b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 146.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 77.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.66,
+        "tok_s": 77.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 32.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 74.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.73,
+        "tok_s": 74.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 22.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 71.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.79,
+        "tok_s": 71.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 21.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 75.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.69,
+        "tok_s": 75.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 19.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 76.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.66,
+        "tok_s": 76.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 24.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 77.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.65,
+        "tok_s": 77.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-pi-rerun/traces/strict-log-format__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 21.2
+    }
+  ]
+}
