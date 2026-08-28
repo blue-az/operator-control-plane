@@ -2426,7 +2426,11 @@ def _evidence_attach_cmd_impl(
         temp_fd, temp_path = tempfile.mkstemp(prefix=f".{artifact_name}.", dir=dest_dir)
         os.close(temp_fd)
         try:
-            shutil.copy2(source_path, temp_path)
+            # copyfile (not copy2): copy2's copystat would carry the source file's
+            # permission bits onto the retained snapshot, undoing the chmod below and
+            # reopening the write-access-by-author gap evidence-snapshot-hardening found.
+            shutil.copyfile(source_path, temp_path)
+            os.chmod(temp_path, 0o440)
             fingerprint = fingerprint_regular_file(temp_path)
             if fingerprint["value"] != source_fingerprint["value"]:
                 raise EvidenceFingerprintError(

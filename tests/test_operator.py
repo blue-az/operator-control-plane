@@ -376,6 +376,10 @@ class TestOperatorCLI(unittest.TestCase):
 
         source.write_bytes(b"alpha")
         retained_snapshot = Path(evidence["path_or_url"])
+        # The snapshot is written read-only (0o440, see test below); simulate an
+        # adversary who chmods it back before mutating, since content-hash detection
+        # is the real backstop, not the mode bit.
+        retained_snapshot.chmod(0o600)
         retained_snapshot.write_bytes(b"bravo")
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1, res.stdout + res.stderr)
@@ -394,6 +398,58 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("retained snapshot is unreadable", res.stdout)
         self.assertIn("is not a regular file", res.stdout)
         self.assertFalse(sentinel.exists())
+
+    def test_evidence_snapshot_is_written_read_only_against_the_author(self) -> None:
+        # Regression for evidence-snapshot-hardening: shutil.copy2 carries the
+        # source file's permission bits onto the retained snapshot (copystat),
+        # so a group-writable source silently produced a group-writable "tamper
+        # evident" snapshot the claim author could edit undetected by mode alone.
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Snapshot hardening", "--id", "snapshot-hardening"
+        )
+        self.run_operator(
+            "claim-add",
+            "--type",
+            "real_data",
+            "--text",
+            "Evidence snapshot is not author-writable",
+            "--gate",
+            "manual review",
+        )
+
+        source = Path(self.temp_dir) / "permissive-evidence.bin"
+        source.write_bytes(b"gamma")
+        source.chmod(0o666)  # deliberately permissive, as the demo's source was
+
+        res = self.run_operator(
+            "evidence-attach",
+            str(source),
+            "--claim",
+            "claim-0001",
+            "--type",
+            "manifest",
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+        evidence_path = (
+            Path(self.temp_dir)
+            / ".operator"
+            / "evidence"
+            / "snapshot-hardening"
+            / "evidence-0001.yaml"
+        )
+        evidence = yaml.safe_load(evidence_path.read_text())
+        retained_snapshot = Path(evidence["path_or_url"])
+        mode = stat.S_IMODE(retained_snapshot.stat().st_mode)
+        self.assertEqual(
+            mode,
+            0o440,
+            f"retained snapshot mode {oct(mode)} should not inherit the source's "
+            "permissive mode",
+        )
+        with self.assertRaises(PermissionError):
+            retained_snapshot.write_bytes(b"tampered")
 
     def test_expected_evidence_hash_is_validated_before_trust_writes(self) -> None:
         self.run_operator("init")
@@ -4449,7 +4505,11 @@ class TestOperatorCLI(unittest.TestCase):
         crystal_ev = yaml.safe_load(crystal_ev_path.read_text())
         snapshot = Path(crystal_ev["path_or_url"])
         self.assertTrue(snapshot.is_file())
-        snapshot.write_text(snapshot.read_text() + "\n# mutated after verification\n")
+        # Snapshot is written read-only (0o440); simulate an adversary who chmods it
+        # back before mutating -- content-hash detection is the real backstop.
+        content = snapshot.read_text()
+        snapshot.chmod(0o600)
+        snapshot.write_text(content + "\n# mutated after verification\n")
 
         doc = self.run_operator("doctor")
         self.assertEqual(doc.returncode, 1, doc.stdout + "\n" + doc.stderr)
