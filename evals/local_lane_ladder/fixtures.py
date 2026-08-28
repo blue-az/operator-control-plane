@@ -43,7 +43,11 @@ def build_fixture(
     paths the task explicitly removes (e.g. simulating a file that was moved
     away). Caller owns cleanup.
     """
-    root = Path(tempfile.mkdtemp(prefix=f"opr-eval-{prefix}-")).resolve()
+    # Prefix is the harness id, not the implementer tool -- opr-eval-* was a
+    # leftover from before the 2026-08-28 opr->pi migration (fixed once it
+    # showed up in a run's postcondition error output looking like a stray
+    # opr reference had crept back in; it hadn't, this was just the name).
+    root = Path(tempfile.mkdtemp(prefix=f"local-lane-eval-{prefix}-")).resolve()
     for rel_path, spec in {**DISTRACTOR_FILES, **task_files}.items():
         target = root / rel_path
         target.parent.mkdir(parents=True, exist_ok=True)

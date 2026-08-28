@@ -92,7 +92,7 @@ def copy_repo(repo: str, prefix: str) -> Path:
     src = (EVAL_ROOT / repo).resolve()
     if not src.is_dir():
         raise FileNotFoundError(f"repo not found: {src}")
-    dest = Path(tempfile.mkdtemp(prefix=f"opr-eval-{prefix}-")).resolve()
+    dest = Path(tempfile.mkdtemp(prefix=f"local-lane-eval-{prefix}-")).resolve()
     shutil.copytree(
         src,
         dest,
