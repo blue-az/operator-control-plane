@@ -39,7 +39,7 @@ MODELS = ("gemma4:26b", "gemma4:31b", "qwen3.8:27b", "qwen3.6:27b")
 
 
 def build_workspace() -> Path:
-    root = Path(tempfile.mkdtemp(prefix="opr-eval-map-probe-")).resolve()
+    root = Path(tempfile.mkdtemp(prefix="local-lane-eval-map-probe-")).resolve()
     for name in GUIDES:
         src = PHOENIX / name
         if not src.is_file():
