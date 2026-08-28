@@ -113,7 +113,15 @@ def ensure_pinned_model(base_model: str, num_ctx: int | None, temperature: float
         suffix_parts.append(f"ctx{num_ctx}")
     if temperature is not None:
         suffix_parts.append(f"t{str(temperature).replace('.', 'p')}")
-    base_name = base_model.split(":")[0]
+    # Bug fix 2026-08-28: this used to be base_model.split(":")[0], which
+    # collapses e.g. gemma4:26b and gemma4:31b to the identical "gemma4"
+    # prefix -- both derived to the SAME tag, so whichever model's
+    # ensure_pinned_model call ran second silently overwrote the first's
+    # weights under that tag. Any trial dispatched to the shared tag *after*
+    # the overwrite ran against the wrong model while still being labeled
+    # with its own model name in the results. Sanitizing the full tag instead
+    # of just its prefix makes every base model's derived tag unique.
+    base_name = re.sub(r"[^A-Za-z0-9._-]", "-", base_model)
     tag = f"{base_name}-e9pin-{'-'.join(suffix_parts)}:latest"
     lines = [f"FROM {base_model}"]
     if num_ctx is not None:
