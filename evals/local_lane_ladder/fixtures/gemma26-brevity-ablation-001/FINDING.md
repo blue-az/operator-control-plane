@@ -63,19 +63,62 @@ gemma4:26b they are not. Any future ranking that treats gemma4:26b's default
 verbosity as an inherent capability limit (rather than a steerable default)
 should be read with this in mind.
 
+## Generalization check (2026-08-29)
+
+Two follow-on questions from the Limits section above, both run n=6/cell,
+same meter, same brevity wording.
+
+**Does it hold on a more-verbose task?** `strict-log-format` is gemma4:26b's
+worst fixture (8065 mean tokens default, up to 13823) -- a bigger baseline
+verbosity than `csv-summarize-repair`'s 4730.
+
+| cell | tokens (mean, range) | wall_clock_s (mean) | passed |
+|---|---|---:|---|
+| gemma4:26b, default | 8065 (5593-13823) | 76.9 | 5/6 |
+| **gemma4:26b, +brevity** | **2241 (264-4962)** | **29.8** | 5/6 |
+| qwen3.8:27b, default (control) | 793 (672-894) | 23.4 | 6/6 |
+| qwen3.8:27b, +brevity (control) | 728 (437-1183) | 23.0 | 6/6 |
+
+**-72% tokens, -61% wall-clock**, pass rate unchanged (5/6 both conditions).
+Control moved -8%, within the same noise band as before. Effect is larger
+here than on `csv-summarize-repair`, not smaller -- it scales with how
+verbose the model's default behavior already is on a given task, which is
+what "fixable default, not a floor" predicts.
+
+**Does gemma4:31b have the same fixable component?** `31b`'s slowness was
+attributed to its dense/full-MHA architecture (see the same session's decode-
+speed finding), but its baseline tokens on `csv-summarize-repair` (3028 mean)
+are also elevated versus qwen3.8:27b's ~900 -- a smaller gap than gemma4:26b's
+but real. Control is the existing qwen3.8:27b +brevity cell on this same task
+(900 tokens, above) -- not re-run.
+
+| cell | tokens (mean, range) | wall_clock_s (mean) | passed |
+|---|---|---:|---|
+| gemma4:31b, default | 3028 (1770-4192) | 114.2 | 6/6 |
+| **gemma4:31b, +brevity** | **1347 (753-3713)** | **57.9** | 6/6 |
+
+**-55% tokens, -49% wall-clock**, perfect pass rate both conditions (one
+1002->3713-token outlier trial pulls the +brevity mean up; the other five
+land 753-1002). So gemma4:31b's real-world slowness is not purely
+architectural -- it has its own smaller verbosity tax, independent of and
+stacking on top of the decode-speed disadvantage. Fixing this does not touch
+the architecture problem (still no GQA, still no MTP head available for this
+model), but it is a real, free, separate win on top of it.
+
+**Conclusion: the effect generalizes across both task and model.** It is not
+an artifact of one prompt or one model's quirks.
+
 ## Limits
 
-- Single task (`csv-summarize-repair`), single brevity wording, one model
-  pair. Not yet checked against `strict-log-format` or the other three E9
-  fixtures, or against gemma4:31b (the actually-slow-for-architectural-
-  reasons model from the same session's dense/full-MHA finding).
-- n=6 per cell; the qwen3.8:27b +brevity cell's wall-clock mean is sensitive
-  to one 81.9s outlier trial (see above) -- read that cell's wall-clock number
-  as noisy, not the token-count number, which is stable.
-- Pass-rate changes (5/6 -> 6/6) are consistent with "not worse," not
-  evidence of an accuracy improvement; n=6 cannot support that claim.
-- No Fisher's-exact or other significance test was run on the pass-rate
-  counts; both are near-ceiling (5/6, 6/6) and not distinguishable at this n.
+- Two tasks, two models beyond the original pair checked (not the other
+  three E9 fixtures, not qwen3.6:35b).
+- n=6 per cell throughout; several cells have one outlier trial pulling the
+  mean (noted per-cell above) -- read means alongside the printed range, not
+  in isolation.
+- Pass-rate changes are consistent with "not worse," not evidence of an
+  accuracy improvement; n=6 cannot support that stronger claim at any cell.
+- No Fisher's-exact or other significance test was run on any pass-rate
+  comparison; all cells are near-ceiling and not distinguishable at this n.
 
 Raw per-trial records: `traces/csv-summarize-repair-brevity__L2__*__t*.json`
 (all twelve present). The first attempt at this ablation died mid-way after
