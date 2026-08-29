@@ -234,6 +234,19 @@ Stated here so it does not have to be discovered:
   remains a reviewer's judgment. See the README's "Known limitations."
 - **The repo-local policy gate is self-amendable.** An agent with write access to
   `.operator/identity.yaml` can weaken the gate binding it.
+- **It records disagreement but does not adjudicate it.** `operator decide --decision
+  {approve,reject,defer} --rationale ...` is the surface, and rejection is handled
+  carefully: reject and defer are first-class and *do not delete the proposal*, so the
+  builder's claim and the reviewer's refusal both survive with a stated reason, in the
+  task and in the event ledger. Neither position is silently erased by the other.
 
-If those four are unacceptable for your use, this is the wrong tool, and that is a
+  What is missing is everything after that. There is no tie-break, no escalation path,
+  no rule for whose ruling prevails, and no way to mark a dispute resolved as opposed to
+  merely rejected. A rejected claim sits rejected until a human moves it. For a ledger
+  that is arguably the correct stopping point — adjudicating would mean the record
+  taking a side — but for a coordination layer driving two agents that must actually
+  proceed, "reviewer says no, builder says yes" is exactly the state that needs a
+  policy, and there isn't one here.
+
+If those five are unacceptable for your use, this is the wrong tool, and that is a
 better thing to learn from a README than from a ledger you already trusted.
