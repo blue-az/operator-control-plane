@@ -1,5 +1,7 @@
 # Operator Control Plane
 
+[![tests](https://github.com/blue-az/operator-control-plane/actions/workflows/tests.yml/badge.svg)](https://github.com/blue-az/operator-control-plane/actions/workflows/tests.yml)
+
 **Your AI coding agent just said "done, tests pass." Do you actually know that's true?**
 
 Multi-agent and autonomous coding workflows run on trust: an agent claims it finished a task, and
