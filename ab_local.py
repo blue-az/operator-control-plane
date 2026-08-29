@@ -7,15 +7,15 @@ of scope for this command.
 
 from __future__ import annotations
 
-import subprocess
 import json
-import time
 import os
+import subprocess
 import tempfile
-from urllib.request import Request, urlopen
+import time
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.request import Request, urlopen
 
 import harness_adapter
 

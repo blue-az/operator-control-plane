@@ -36,12 +36,12 @@ import re
 import sys
 import tempfile
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 # Allow importing runner helpers from this directory.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from runner import write_results_md, trace_path_for  # noqa: E402
+from runner import trace_path_for, write_results_md
 
 REQUIRED_TRACE_KEYS = {
     "cell_key",
@@ -395,7 +395,7 @@ def _finish(pack_dir: Path, checks: list, errors: list, extras: dict) -> dict:
         "pack": str(pack_dir),
         "pack_name": pack_dir.name,
         "ok": ok,
-        "checked_at_utc": datetime.now(timezone.utc).isoformat(),
+        "checked_at_utc": datetime.now(UTC).isoformat(),
         "checker": {
             "uid": os.getuid(),
             "user": os.environ.get("USER") or os.environ.get("LOGNAME") or "unknown",

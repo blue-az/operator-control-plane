@@ -15,9 +15,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))  # audio_* moved to scripts/ 2026-08-29
 
-import audio_cycle  # noqa: E402
-from audio_ports import Output  # noqa: E402
+import audio_cycle
+from audio_ports import Output
 
 CARD = "alsa_card.pci-0000_03_00.1"
 XB = Output("XB271HU", CARD, "output:hdmi-stereo", True, "hdmi-output-0")

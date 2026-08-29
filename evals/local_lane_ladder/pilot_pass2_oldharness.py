@@ -36,9 +36,9 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-import yaml  # noqa: E402
-from fixtures import build_fixture  # noqa: E402
-from grading import grade  # noqa: E402
+import yaml
+from fixtures import build_fixture
+from grading import grade
 
 TASKS_DIR = Path(__file__).parent / "tasks"
 REPO_ROOT = Path(__file__).resolve().parents[2]

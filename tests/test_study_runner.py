@@ -29,8 +29,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import harness_adapter as ha  # noqa: E402
-import study_runner as sr  # noqa: E402
+import harness_adapter as ha
+import study_runner as sr
 
 OPERATOR_BIN = str(Path(__file__).resolve().parents[1] / "operator")
 _op_loader = importlib.machinery.SourceFileLoader("operator_mod_study", OPERATOR_BIN)

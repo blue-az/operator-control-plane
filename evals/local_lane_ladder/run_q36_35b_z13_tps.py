@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import subprocess
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 import requests
@@ -109,7 +109,7 @@ def main() -> int:
                     "ps": line,
                     "power_state": ps,
                     "think_chars": len(d.get("thinking") or ""),
-                    "recorded_utc": datetime.now(timezone.utc).isoformat(),
+                    "recorded_utc": datetime.now(UTC).isoformat(),
                     "error": d.get("error"),
                 }
                 rows.append(rec)

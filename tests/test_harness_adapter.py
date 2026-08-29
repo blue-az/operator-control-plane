@@ -20,7 +20,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import harness_adapter as ha  # noqa: E402
+import harness_adapter as ha
 
 
 def write_fake_cli(directory: Path, name: str, body: str) -> str:

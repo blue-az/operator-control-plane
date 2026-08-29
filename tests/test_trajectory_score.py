@@ -14,7 +14,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "evals" / "local_lane_ladder"))
 
-from trajectory_score import classify_failure, score_trajectory  # noqa: E402
+from trajectory_score import classify_failure, score_trajectory
 
 
 def traj(calls, **kw):

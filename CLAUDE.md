@@ -170,8 +170,12 @@ identities and log sources without touching real ones:
 
 ## Docs
 
-Behavior specs are the top-level `*_SPEC.md` files (identity, verified-by guard, usage autoimport,
-usage lane tagging, governed dispatch, authority broker/policy/integration, local lane contract).
-`CRYSTAL_LEDGER_INTEROP_SPEC.md` is a **draft proposal** (not built). The user-facing manual is
-`owners-manual/` (chapters, PBC drafts, mermaid figures). `OPERATIONS_RUNBOOK.md` covers recovery.
-`AGENTS.md` holds repository contribution conventions and boundary taxonomy.
+Behavior specs live in `docs/specs/*_SPEC.md` (identity, verified-by guard, usage autoimport,
+usage lane tagging, governed dispatch, authority broker/policy/integration, local lane contract,
+machine provenance/role). They were at the repo root until 2026-08-29; a reference to a bare
+`FOO_SPEC.md` in older prose means `docs/specs/FOO_SPEC.md`.
+`docs/specs/CRYSTAL_LEDGER_INTEROP_SPEC.md` is a **draft proposal** (not built). Narrative and
+operational notes are in `docs/`. The user-facing manual is `owners-manual/` (chapters, PBC drafts,
+mermaid figures). `OPERATIONS_RUNBOOK.md` (repo root, pinned there by `tests/test_runbook.py`)
+covers recovery. `AGENTS.md` holds repository contribution conventions and boundary taxonomy.
+One-off analysis scripts and machine utilities are in `scripts/`.

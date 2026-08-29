@@ -26,7 +26,6 @@ import time
 from pathlib import Path
 
 import requests
-
 from hard_probes import HARD_PROBES, grade
 
 # Funnel measures 40,510 real tokens -- a chars/4 estimate understates it by

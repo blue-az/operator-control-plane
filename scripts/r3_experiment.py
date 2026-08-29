@@ -1,11 +1,12 @@
+import hashlib
 import json
 import subprocess
-import time
-import hashlib
-from pathlib import Path
 import tempfile
-import gated_runner
+import time
 from dataclasses import asdict
+from pathlib import Path
+
+import gated_runner
 
 # --- R3 Tool Implementation ---
 
@@ -71,7 +72,7 @@ def run_trial(task_id, content, anchor, replacement, use_anchoring=True):
                 file_path.write_text(new_text)
                 return 1, "success"
             except ValueError as e:
-                return 1, f"tool_error: {str(e)}"
+                return 1, f"tool_error: {e!s}"
         
         return gated_runner.run_invocation(
             cell=cell,
@@ -128,5 +129,5 @@ if __name__ == "__main__":
 
         res_r = gated_runner.run_invocation(cell, "h", "m", raw_fail_callback, file_path)
         
-        print(f"{'Anchored':<15} | {res_a.gate_verdict:<10} | {str(res_a.artifact_hash_changed):<12} | {res_a.exit_cause:<15}")
-        print(f"{'Raw (Fail)':<15} | {res_r.gate_verdict:<10} | {str(res_r.artifact_hash_changed):<12} | {res_r.exit_cause:<15}")
+        print(f"{'Anchored':<15} | {res_a.gate_verdict:<10} | {res_a.artifact_hash_changed!s:<12} | {res_a.exit_cause:<15}")
+        print(f"{'Raw (Fail)':<15} | {res_r.gate_verdict:<10} | {res_r.artifact_hash_changed!s:<12} | {res_r.exit_cause:<15}")

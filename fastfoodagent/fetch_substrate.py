@@ -10,7 +10,7 @@ import argparse
 import hashlib
 import json
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 # Confirmed live via a partial range fetch during planning: real columns
@@ -24,7 +24,7 @@ MENUSTAT_CSV_URL = (
 def fetch(output_dir: Path, url: str = MENUSTAT_CSV_URL) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "menustat_raw.csv"
-    retrieved_at = datetime.now(timezone.utc).isoformat()
+    retrieved_at = datetime.now(UTC).isoformat()
 
     with urllib.request.urlopen(url, timeout=120) as response:
         data = response.read()

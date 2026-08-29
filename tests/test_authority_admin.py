@@ -21,9 +21,9 @@ from unittest import mock
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-import authority_admin  # noqa: E402
-import authority_broker  # noqa: E402
-import socket_permission_helper  # noqa: E402
+import authority_admin
+import authority_broker
+import socket_permission_helper
 
 
 class TestAuthorityAdmin(unittest.TestCase):
@@ -1238,15 +1238,14 @@ class TestAuthorityAdmin(unittest.TestCase):
             self.write_policy("wrong.json", 2, first.sha256, ledger_id="wrong-ledger")[0],
         ]
         for path in attempts:
-            with self.subTest(path=path):
-                with self.assertRaises(authority_admin.AdminError):
-                    authority_admin.rotate_deployment(
-                        self.layout,
-                        path,
-                        os.getuid(),
-                        os.getgid(),
-                        validate_accounts=False,
-                    )
+            with self.subTest(path=path), self.assertRaises(authority_admin.AdminError):
+                authority_admin.rotate_deployment(
+                    self.layout,
+                    path,
+                    os.getuid(),
+                    os.getgid(),
+                    validate_accounts=False,
+                )
         valid_path, _ = self.write_policy("generation-2.json", 2, first.sha256)
         authority_admin.rotate_deployment(
             self.layout,
@@ -2062,18 +2061,17 @@ class TestAuthorityAdmin(unittest.TestCase):
             authority_admin,
             "write_registry_file_safely",
             side_effect=OSError("simulated registry write failure"),
-        ):
-            with self.assertRaisesRegex(authority_admin.AdminError, "registry publication failed"):
-                authority_admin.rebind_repository(
-                    registry_path,
-                    repo_path,
-                    "ledger-rebind-retry",
-                    Path("/tmp/socket.sock"),
-                    registry_owner_uid=os.getuid(),
-                    registry_owner_gid=os.getgid(),
-                    registry_anchor=self.root,
-                    request_sender=committed_rebind,
-                )
+        ), self.assertRaisesRegex(authority_admin.AdminError, "registry publication failed"):
+            authority_admin.rebind_repository(
+                registry_path,
+                repo_path,
+                "ledger-rebind-retry",
+                Path("/tmp/socket.sock"),
+                registry_owner_uid=os.getuid(),
+                registry_owner_gid=os.getgid(),
+                registry_anchor=self.root,
+                request_sender=committed_rebind,
+            )
         self.assertEqual(len(seen_operation_keys), 1)
         with open(registry_path) as f:
             still_corrupted = json.load(f)
@@ -2848,7 +2846,6 @@ class TestAuthorityAdmin(unittest.TestCase):
             call_count += 1
             if call_count < 3:
                 raise OSError("connection refused")
-            return None
 
         mock_socket_instance.connect = mock_connect
 

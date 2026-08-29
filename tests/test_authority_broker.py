@@ -21,7 +21,7 @@ from unittest import mock
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-import authority_broker  # noqa: E402
+import authority_broker
 
 BROKER_BIN = REPO_ROOT / "operator-broker"
 
@@ -1367,13 +1367,12 @@ class TestAuthorityBroker(unittest.TestCase):
                 authority_broker,
                 "fsync_directory",
                 side_effect=fail_shard_fsync,
-            ):
-                with self.assertRaises(OSError):
-                    authority_broker.AuthorityBroker(store).handle(
-                        request,
-                        peer,
-                        source_fd,
-                    )
+            ), self.assertRaises(OSError):
+                authority_broker.AuthorityBroker(store).handle(
+                    request,
+                    peer,
+                    source_fd,
+                )
         finally:
             os.close(source_fd)
         self.assertEqual(self.table_count("authority_commits"), 1)
@@ -1420,13 +1419,12 @@ class TestAuthorityBroker(unittest.TestCase):
                 authority_broker.os,
                 "fsync",
                 side_effect=fail_regular_file_fsync,
-            ):
-                with self.assertRaises(OSError):
-                    authority_broker.AuthorityBroker(store).handle(
-                        request,
-                        peer,
-                        source_fd,
-                    )
+            ), self.assertRaises(OSError):
+                authority_broker.AuthorityBroker(store).handle(
+                    request,
+                    peer,
+                    source_fd,
+                )
         finally:
             os.close(source_fd)
         self.assertEqual(self.table_count("authority_commits"), 1)

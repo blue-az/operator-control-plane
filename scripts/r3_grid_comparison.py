@@ -1,6 +1,7 @@
 import subprocess
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
 import gated_runner
 
 # --- Models to Test ---
@@ -144,7 +145,7 @@ def run_measurement_grid(mode="raw", trials=3):
                         "model": model, "task": task_id, "trial": trial,
                         "verdict": record.gate_verdict, "drift": record.artifact_hash_changed
                     })
-                    print(f"{model[:12]:<12} | {task_id:<12} | {mode:<8} | {record.gate_verdict:<10} | {str(record.artifact_hash_changed):<6}")
+                    print(f"{model[:12]:<12} | {task_id:<12} | {mode:<8} | {record.gate_verdict:<10} | {record.artifact_hash_changed!s:<6}")
 
     return results
 

@@ -1,8 +1,8 @@
+import hashlib
 import json
 import subprocess
 import time
-import hashlib
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -10,7 +10,6 @@ from typing import Optional
 class CellError(Exception):
     """Raised for any invalid cell."""
 
-    pass
 
 
 @dataclass
@@ -175,7 +174,7 @@ def run_invocation(
     model: str,
     action_callback: callable,
     artifact_path: Path,
-    storage_dir: Optional[Path] = None,
+    storage_dir: Path | None = None,
 ) -> OutcomeRecord:
     """
     The core R6 orchestration loop.
@@ -195,7 +194,7 @@ def run_invocation(
         # Action callback returns (tool_call_count, exit_cause)
         tool_calls, exit_cause = action_callback()
     except Exception as e:
-        tool_calls, exit_cause = 0, f"exception: {str(e)}"
+        tool_calls, exit_cause = 0, f"exception: {e!s}"
     
     # Post-state
     post_hash = _calculate_hash(artifact_path)

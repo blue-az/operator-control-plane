@@ -11,7 +11,7 @@ import json
 import re
 import subprocess
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 import requests
@@ -79,7 +79,7 @@ def extract_py(text: str) -> str:
     t = (text or "").strip()
     if not t:
         return ""
-    m = re.search(r"```(?:python)?\s*\n(.*?)```", t, re.S | re.I)
+    m = re.search(r"```(?:python)?\s*\n(.*?)```", t, re.DOTALL | re.IGNORECASE)
     if m:
         t = m.group(1).strip()
     # drop a leading "src/logsum.py" filename line
@@ -174,7 +174,7 @@ def main() -> int:
                 "src_chars": len(src),
                 "test_out": test_out[-500:],
                 "src_head": src[:400],
-                "recorded_utc": datetime.now(timezone.utc).isoformat(),
+                "recorded_utc": datetime.now(UTC).isoformat(),
             }
             rows.append(rec)
             (PACK / "traces" / f"{model.replace(':', '-')}__t{trial}.json").write_text(

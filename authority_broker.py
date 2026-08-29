@@ -20,9 +20,9 @@ import tempfile
 import threading
 import traceback
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
 PROTOCOL_VERSION = 1
 STORE_SCHEMA_VERSION = 1
@@ -112,7 +112,7 @@ class StagedBlob:
 
 
 def utc_now() -> str:
-    return datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+    return datetime.datetime.now(datetime.UTC).replace(microsecond=0).isoformat()
 
 
 def canonical_json(value: object) -> str:

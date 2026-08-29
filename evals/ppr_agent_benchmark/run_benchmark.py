@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse, json, os, subprocess, time, urllib.error, urllib.request
+import argparse
+import json
+import os
+import subprocess
+import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent

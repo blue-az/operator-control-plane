@@ -32,9 +32,10 @@ import os
 import re
 import subprocess
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 import yaml
 
@@ -82,7 +83,7 @@ class StudyPlanError(StudyError):
 
 
 class StudyExecutionError(StudyError):
-    def __init__(self, message: str, payload: Optional[dict] = None):
+    def __init__(self, message: str, payload: dict | None = None):
         super().__init__(message)
         self.payload = payload or {}
 
@@ -116,7 +117,7 @@ def sha256_hex(data: bytes) -> str:
 def iso_now() -> str:
     import datetime
 
-    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+    return datetime.datetime.now(datetime.UTC).isoformat()
 
 
 def atomic_write_bytes(path: Path, data: bytes) -> None:
@@ -167,7 +168,7 @@ def _empty_stdin():
         sys.stdin = original
 
 
-def run_git(args: list[str], cwd: Path) -> Optional[str]:
+def run_git(args: list[str], cwd: Path) -> str | None:
     try:
         res = subprocess.run(
             ["git", *args], cwd=str(cwd), capture_output=True, text=True, timeout=30
@@ -179,7 +180,7 @@ def run_git(args: list[str], cwd: Path) -> Optional[str]:
     return res.stdout
 
 
-def git_worktree_dirty_snapshot(path: Path) -> Optional[list[str]]:
+def git_worktree_dirty_snapshot(path: Path) -> list[str] | None:
     """Sorted list of paths with uncommitted changes, or None if `path` isn't
     a (readable) git worktree -- callers must treat None as "cannot verify",
     never as "clean"."""
@@ -189,7 +190,7 @@ def git_worktree_dirty_snapshot(path: Path) -> Optional[list[str]]:
     return sorted(line[3:] for line in out.splitlines() if line.strip())
 
 
-def git_head_sha(path: Path) -> Optional[str]:
+def git_head_sha(path: Path) -> str | None:
     out = run_git(["rev-parse", "HEAD"], path)
     return out.strip() if out else None
 
@@ -541,7 +542,7 @@ def append_run_history(op_dir: str, run_id: str, entry: dict) -> None:
         handle.write(line)
 
 
-def phase_checkpoint_state(op_dir: str, run_id: str, phase: dict) -> tuple[str, Optional[dict]]:
+def phase_checkpoint_state(op_dir: str, run_id: str, phase: dict) -> tuple[str, dict | None]:
     for state in ("completed", "failed", "waiting_quota", "pending"):
         path = checkpoint_path(op_dir, run_id, phase["phase_id"], phase["operation"], state)
         if path.exists():
@@ -603,7 +604,7 @@ LANE_FOR_ROLE = {
 
 def _open_session(
     ledger_ops: LedgerOps, task_id: str, harness_id: str, role: harness_adapter.Role
-) -> Optional[str]:
+) -> str | None:
     ns = argparse.Namespace(
         task_id=task_id,
         harness_id=harness_id,
@@ -640,7 +641,7 @@ def _attach_evidence(
     evidence_type: str,
     by: str,
     notes: str,
-    diff_base: Optional[str] = None,
+    diff_base: str | None = None,
 ) -> None:
     ns = argparse.Namespace(
         path_or_url=path,
@@ -666,7 +667,7 @@ def _import_usage(
     task_id: str,
     since: str,
     until: str,
-    session_id: Optional[str],
+    session_id: str | None,
 ) -> None:
     ns = argparse.Namespace(
         harness=ledger_harness_id,
@@ -698,7 +699,7 @@ def _record_supervision_claim(ledger_ops: LedgerOps, task_id: str, phase: dict) 
         ledger_ops.claim_add(ns)
 
 
-def _extract_session_id(result: harness_adapter.AdapterResult) -> Optional[str]:
+def _extract_session_id(result: harness_adapter.AdapterResult) -> str | None:
     if result.parsed_output is None:
         return None
     value = result.parsed_output.get("session_id")
@@ -743,10 +744,10 @@ class PhaseContext:
     def artifacts_dir(self) -> Path:
         return run_dir(self.op_dir, self.run_id) / "artifacts"
 
-    def workspace_for(self, row: Optional[str]) -> Path:
+    def workspace_for(self, row: str | None) -> Path:
         return Path(self.plan.workspaces[row if row else "shared"])
 
-    def task_for(self, row: Optional[str]) -> str:
+    def task_for(self, row: str | None) -> str:
         return self.plan.task_ids[row if row else "shared"]
 
 
@@ -815,7 +816,7 @@ def _run_harness_phase(ctx: PhaseContext, phase: dict, role: harness_adapter.Rol
     return payload, result
 
 
-def load_task_repo(op_dir: str, task_id: str) -> Optional[str]:
+def load_task_repo(op_dir: str, task_id: str) -> str | None:
     task_path = Path(op_dir) / "tasks" / f"{task_id}.yaml"
     if not task_path.exists():
         return None
@@ -1053,7 +1054,7 @@ def execute_phase(
     ctx: PhaseContext,
     phase: dict,
     *,
-    approve_phase: Optional[int],
+    approve_phase: int | None,
     acknowledge_quota_reset: bool,
 ) -> dict:
     request_digest = compute_request_digest(ctx.plan.plan_digest, phase)
@@ -1161,7 +1162,7 @@ def execute_run(
     run_id: str,
     ledger_ops: LedgerOps,
     *,
-    approve_phase: Optional[int] = None,
+    approve_phase: int | None = None,
     acknowledge_quota_reset: bool = False,
 ) -> dict:
     plan = load_run_plan(op_dir, run_id)
@@ -1240,10 +1241,10 @@ def study_plan_command(op_dir: str, plan_path: str) -> dict:
 def study_run_command(
     op_dir: str,
     plan_digest: str,
-    run_id: Optional[str],
+    run_id: str | None,
     ledger_ops: LedgerOps,
     *,
-    approve_phase: Optional[int] = None,
+    approve_phase: int | None = None,
 ) -> dict:
     if run_id:
         RUN_ID_RE.fullmatch(run_id) or (_ for _ in ()).throw(
@@ -1272,7 +1273,7 @@ def study_resume_command(
     run_id: str,
     ledger_ops: LedgerOps,
     *,
-    approve_phase: Optional[int] = None,
+    approve_phase: int | None = None,
     acknowledge_quota_reset: bool = False,
 ) -> dict:
     return execute_run(

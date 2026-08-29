@@ -14,8 +14,8 @@ from unittest import mock
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-import authority_admin  # noqa: E402
-import authority_broker  # noqa: E402
+import authority_admin
+import authority_broker
 
 
 class TestAuthorityUpgrade(unittest.TestCase):
@@ -484,18 +484,17 @@ class TestAuthorityUpgrade(unittest.TestCase):
 
         with mock.patch(
             "authority_admin.write_protected_file", side_effect=crashing_write_protected
-        ):
-            with self.assertRaises(RuntimeError):
-                authority_admin.upgrade_deployment(
-                    self.layout,
-                    candidate_dir,
-                    self.identity.admin_uid,
-                    self.identity.admin_gid,
-                    validate_accounts=False,
-                    health_probe=lambda *args, **kwargs: True,
-                    service_stop=mock.Mock(),
-                    service_start=mock.Mock(),
-                )
+        ), self.assertRaises(RuntimeError):
+            authority_admin.upgrade_deployment(
+                self.layout,
+                candidate_dir,
+                self.identity.admin_uid,
+                self.identity.admin_gid,
+                validate_accounts=False,
+                health_probe=lambda *args, **kwargs: True,
+                service_stop=mock.Mock(),
+                service_start=mock.Mock(),
+            )
 
         # Journal is still at "health_verified"
         journal = authority_admin.load_upgrade_journal(self.layout, self.identity)
@@ -545,18 +544,17 @@ class TestAuthorityUpgrade(unittest.TestCase):
 
         with mock.patch(
             "authority_admin.write_protected_file", side_effect=crashing_write_protected
-        ):
-            with self.assertRaises(RuntimeError):
-                authority_admin.upgrade_deployment(
-                    self.layout,
-                    candidate_dir,
-                    self.identity.admin_uid,
-                    self.identity.admin_gid,
-                    validate_accounts=False,
-                    health_probe=health_probe_candidate_unhealthy,
-                    service_stop=mock.Mock(),
-                    service_start=mock.Mock(),
-                )
+        ), self.assertRaises(RuntimeError):
+            authority_admin.upgrade_deployment(
+                self.layout,
+                candidate_dir,
+                self.identity.admin_uid,
+                self.identity.admin_gid,
+                validate_accounts=False,
+                health_probe=health_probe_candidate_unhealthy,
+                service_stop=mock.Mock(),
+                service_start=mock.Mock(),
+            )
 
         # Journal state is at "rolling_back" because we crashed during rollback manifest write
         journal = authority_admin.load_upgrade_journal(self.layout, self.identity)

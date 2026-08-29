@@ -1,11 +1,12 @@
+import hashlib
 import json
 import subprocess
-import time
-import hashlib
-from pathlib import Path
 import tempfile
-import gated_runner
+import time
 from dataclasses import asdict
+from pathlib import Path
+
+import gated_runner
 
 # --- Models to Test ---
 MODELS = ["gemma4:31b", "gemma4:26b"]
@@ -14,9 +15,9 @@ MODELS = ["gemma4:31b", "gemma4:26b"]
 def anchored_replace(content: str, anchor: str, replacement: str) -> str:
     """The R3 Primitive: Strict anchored replacement."""
     if anchor not in content:
-        raise ValueError(f"Anchor not found")
+        raise ValueError("Anchor not found")
     if content.count(anchor) > 1:
-        raise ValueError(f"Anchor not unique")
+        raise ValueError("Anchor not unique")
     return content.replace(anchor, replacement)
 
 # --- Tasks ---
@@ -46,7 +47,7 @@ def call_llm(model, prompt):
         )
         return result.stdout.strip()
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: {e!s}"
 
 def run_trial(model, task, mode):
     """
@@ -92,7 +93,7 @@ def run_trial(model, task, mode):
                         file_path.write_text(new_text)
                         return 1, "success"
                     except Exception as e:
-                        return 1, f"tool_error: {str(e)}"
+                        return 1, f"tool_error: {e!s}"
                 else:
                     return 1, "no_tool_call"
 
@@ -118,4 +119,4 @@ if __name__ == "__main__":
         for task in TASKS:
             for mode in ['raw', 'anchored']:
                 res = run_trial(model, task, mode)
-                print(f"{model:<12} | {task['id']:<15} | {mode:<10} | {res.gate_verdict:<10} | {str(res.artifact_hash_changed):<6}")
+                print(f"{model:<12} | {task['id']:<15} | {mode:<10} | {res.gate_verdict:<10} | {res.artifact_hash_changed!s:<6}")

@@ -53,12 +53,12 @@ HEADER_RE = re.compile(r"^\t\t(\S+): (.*?) \(type:.*,\s*(not available|available
 
 def parse_cards(text):
     cards = []
-    for match in re.finditer(r"Card #\d+\n(.*?)(?=Card #|\Z)", text, re.S):
+    for match in re.finditer(r"Card #\d+\n(.*?)(?=Card #|\Z)", text, re.DOTALL):
         block = match.group(1)
         name = re.search(r"\tName: (.*)", block).group(1)
         active_match = re.search(r"\tActive Profile: (.*)", block)
         active_profile = active_match.group(1) if active_match else ""
-        ports_match = re.search(r"\tPorts:\n(.*)", block, re.S)
+        ports_match = re.search(r"\tPorts:\n(.*)", block, re.DOTALL)
         ports_text = ports_match.group(1) if ports_match else ""
         cards.append(Card(name, active_profile, ports_text))
     return cards

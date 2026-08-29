@@ -22,8 +22,8 @@ sys.path.insert(0, str(REPO_ROOT))
 BROKER_BIN = REPO_ROOT / "operator-broker"
 OPERATOR_BIN = REPO_ROOT / "operator"
 
-import authority_admin  # noqa: E402
-import authority_broker  # noqa: E402
+import authority_admin
+import authority_broker
 
 
 class TestAuthorityIntegration(unittest.TestCase):
@@ -1897,8 +1897,9 @@ class TestAuthorityIntegration(unittest.TestCase):
         )
         self.assertIn("Acknowledged store reset", res_ack.stdout)
 
-        import authority_projection
         import sqlite3
+
+        import authority_projection
 
         journal_path = self.temp_dir / ".operator" / "client_journal.sqlite3"
         conn = sqlite3.connect(journal_path)
@@ -1921,8 +1922,9 @@ class TestAuthorityIntegration(unittest.TestCase):
         After a store rebuild, force the client journal last_applied down so a
         pure sequence comparison would *not* fail, while incarnation still must.
         """
-        import authority_projection
         import sqlite3
+
+        import authority_projection
 
         res = self.run_operator(
             "task-create", "--id", "task-inc-1", "--objective", "Incarnation test"

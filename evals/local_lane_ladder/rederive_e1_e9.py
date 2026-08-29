@@ -14,11 +14,11 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from rederive_pack import rederive_pack, render_md  # noqa: E402
+from rederive_pack import rederive_pack, render_md
 
 # Logical span for Front E freeze integrity (e0 excluded: harness-repro only).
 SPAN: list[tuple[str, str]] = [
@@ -81,7 +81,7 @@ def main() -> int:
                     print(f"  - {c['name']}: {c['detail'][:160]}")
 
     agg = {
-        "checked_at_utc": datetime.now(timezone.utc).isoformat(),
+        "checked_at_utc": datetime.now(UTC).isoformat(),
         "checker": {
             "uid": os.getuid(),
             "user": os.environ.get("USER") or os.environ.get("LOGNAME") or "unknown",

@@ -436,7 +436,7 @@ def project_record(
     local_version += 1
     event_type = "record_created" if local_version == 1 else "record_updated"
     payload_json = canonical_json(normalized)
-    created_at = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+    created_at = datetime.datetime.now(datetime.UTC).replace(microsecond=0).isoformat()
     local_event_hash = event_hash_for_fields(
         record_type,
         local_record_id,
@@ -772,8 +772,7 @@ def reconcile_projections(
 
         if res_check.get("ok") and "receipt" in res_check:
             commit_transaction(conn_journal, op_key, res_check["receipt"])
-            if res_check["receipt"]["commit_sequence"] > broker_seq:
-                broker_seq = res_check["receipt"]["commit_sequence"]
+            broker_seq = max(broker_seq, res_check["receipt"]["commit_sequence"])
         else:
             # The broker gave a definitive answer: this operation was never
             # committed under this key (rejected, or the key was never seen).

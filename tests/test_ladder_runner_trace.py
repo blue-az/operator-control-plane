@@ -21,7 +21,7 @@ from unittest import mock
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "evals" / "local_lane_ladder"))
 
-import runner  # noqa: E402
+import runner
 
 
 def _alias_add_task() -> dict:

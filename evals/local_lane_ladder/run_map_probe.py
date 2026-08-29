@@ -16,7 +16,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -25,8 +25,8 @@ PHOENIX = Path("/home/blueaz/Python/project-phoenix")
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO))
 
-from map_probe import PROMPT, extract_answer, grade_answer, measure  # noqa: E402
-from runner import (  # noqa: E402
+from map_probe import PROMPT, extract_answer, grade_answer, measure
+from runner import (
     MACHINE,
     MAX_WALL_CLOCK_SECONDS,
     OPR_BIN,
@@ -215,7 +215,7 @@ def main() -> int:
         flush=True,
     )
     print(f"guides copied from {PHOENIX}: {', '.join(GUIDES)}", flush=True)
-    print(f"started {datetime.now(timezone.utc).isoformat()}", flush=True)
+    print(f"started {datetime.now(UTC).isoformat()}", flush=True)
 
     for model in args.models:
         for trial in range(1, args.trials + 1):

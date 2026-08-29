@@ -1,7 +1,8 @@
 import subprocess
+import tempfile
 import time
 from pathlib import Path
-import tempfile
+
 import gated_runner
 
 MODELS = ["gemma4:31b", "gemma4:26b"]
@@ -38,7 +39,7 @@ def call_llm(model, prompt):
         )
         return result.stdout.strip()
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: {e!s}"
 
 def run_validation():
     print("--- GPU Cable Swap Validation Run ---")

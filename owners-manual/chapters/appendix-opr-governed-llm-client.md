@@ -53,7 +53,7 @@ context is sent to a frontier harness, `opr` should ask for confirmation.
 The target config file is `~/.config/operator/opr.yaml`. It should hold the ledger root, default
 workspace, default local model, Ollama endpoint, frontier command templates, and tool permissions.
 
-See [OPR_GENERALIZATION_SPEC.md](../../OPR_GENERALIZATION_SPEC.md) for the proposed schema and
+See [OPR_GENERALIZATION_SPEC.md](../../docs/specs/OPR_GENERALIZATION_SPEC.md) for the proposed schema and
 migration plan.
 
 ## Attention Cards

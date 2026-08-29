@@ -20,7 +20,7 @@ import re
 import shutil
 import subprocess
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 import requests
@@ -264,7 +264,7 @@ def main() -> int:
     stage_stills(stills_dir)
 
     gold = {
-        "captured_utc": datetime.now(timezone.utc).isoformat(),
+        "captured_utc": datetime.now(UTC).isoformat(),
         "model": args.model,
         "num_ctx": NUM_CTX,
         "num_predict": NUM_PREDICT,
@@ -282,7 +282,7 @@ def main() -> int:
     (evidence / "prerun.txt").write_text(
         "\n".join(
             [
-                f"captured_utc: {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}",
+                f"captured_utc: {datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ')}",
                 f"git_rev: {subprocess.check_output(['git', '-C', str(HERE.parents[1]), 'rev-parse', 'HEAD'], text=True).strip()}",
                 "question: can qwen3-vl:30b grade the ATS cartoon case-study stills (paper 1.37 / frontier vs local)",
                 f"model: {args.model}",
@@ -343,7 +343,7 @@ def main() -> int:
                 "gold": still["facets"],
                 **g,
                 **rec,
-                "recorded_utc": datetime.now(timezone.utc).isoformat(),
+                "recorded_utc": datetime.now(UTC).isoformat(),
             }
             state["results"].append(row)
             state_path.write_text(json.dumps(state, indent=2), encoding="utf-8")

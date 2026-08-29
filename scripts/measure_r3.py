@@ -1,7 +1,9 @@
 import json
 import tempfile
 from pathlib import Path
+
 import gated_runner
+
 
 def mock_agent_success(artifact_path: Path):
     # Simulates a successful anchored edit
@@ -76,4 +78,4 @@ if __name__ == "__main__":
     
     for name, agent in cases:
         rec = run_experiment_case(name, agent, cell_data, "Initial state: Fail")
-        print(f"{name:<25} | {rec.gate_verdict:<10} | {str(rec.artifact_hash_changed):<12} | {rec.tool_call_count:<6} | {rec.exit_cause:<10}")
+        print(f"{name:<25} | {rec.gate_verdict:<10} | {rec.artifact_hash_changed!s:<12} | {rec.tool_call_count:<6} | {rec.exit_cause:<10}")
