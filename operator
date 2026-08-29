@@ -1393,6 +1393,16 @@ def get_next_handoff_id(operator_dir: str, task_id: str) -> str:
 
 def init_cmd(args) -> int:
     target_dir = os.path.abspath(os.path.join(os.getcwd(), ".operator"))
+    current_machine = get_machine_identity()
+    seat_machine = args.seat_machine or current_machine
+    if args.role == "seat" and seat_machine != current_machine:
+        print(
+            f"Error: seat store machine '{seat_machine}' does not match executing machine "
+            f"'{current_machine}'; use --role outbox for a different seat machine.",
+            file=sys.stderr,
+        )
+        return 1
+
     if os.path.exists(target_dir):
         if not os.path.isdir(target_dir):
             print(
@@ -1613,7 +1623,10 @@ def init_cmd(args) -> int:
     for hid, hdata in harnesses_data.items():
         save_yaml(hdata, os.path.join(target_dir, "harnesses", f"{hid}.yaml"))
 
-    save_yaml({"current_task": None}, os.path.join(target_dir, "operator.yaml"))
+    save_yaml(
+        {"current_task": None, "role": args.role, "seat_machine": seat_machine},
+        os.path.join(target_dir, "operator.yaml"),
+    )
 
     print(f"Initialized empty Operator Control Plane repository in {target_dir}")
     return 0
@@ -5230,6 +5243,49 @@ def doctor_cmd(args) -> int:
 
     issues = []
     infos = []
+
+    # MACHINE_ROLE_ENFORCEMENT_SPEC: this is deliberately a structural,
+    # read-only check.  It only reads operator.yaml and counts projections.
+    operator_config = load_yaml(os.path.join(op_dir, "operator.yaml"))
+    if not isinstance(operator_config, dict):
+        issues.append("[Error] operator.yaml must contain a mapping")
+    else:
+        store_role = operator_config.get("role", "seat")
+        seat_machine = operator_config.get("seat_machine")
+        if "role" not in operator_config:
+            infos.append(
+                "[Info] operator.yaml has no role; defaulting store role to 'seat'"
+            )
+        if store_role not in {"seat", "outbox"}:
+            issues.append(
+                f"[Error] operator.yaml has invalid role {store_role!r}; expected "
+                "'seat' or 'outbox'"
+            )
+        elif seat_machine is not None and not isinstance(seat_machine, str):
+            issues.append("[Error] operator.yaml seat_machine must be a string")
+        elif store_role == "seat" and seat_machine and seat_machine != get_machine_identity():
+            issues.append(
+                f"[Error] seat store is assigned to machine '{seat_machine}', but executing "
+                f"machine is '{get_machine_identity()}'"
+            )
+        elif store_role == "outbox":
+            record_counts = {
+                "tasks": len(glob.glob(os.path.join(op_dir, "tasks", "*.yaml"))),
+                "claims": len(glob.glob(os.path.join(op_dir, "claims", "*.yaml"))),
+                "evidence": len(
+                    glob.glob(
+                        os.path.join(op_dir, "evidence", "**", "*.yaml"), recursive=True
+                    )
+                ),
+                "usage": len(glob.glob(os.path.join(op_dir, "usage", "*.yaml"))),
+            }
+            counts = ", ".join(f"{name}={count}" for name, count in record_counts.items())
+            destination = seat_machine or "unspecified"
+            infos.append(
+                f"[Warning] Store role is 'outbox' ({counts}); records destined for "
+                f"seat_machine '{destination}'"
+            )
+
     issues.extend(audit_event_store(op_dir))
 
     builder_briefs_issued = set()
@@ -7470,8 +7526,19 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # operator init
-    subparsers.add_parser(
+    init_parser = subparsers.add_parser(
         "init", help="Initialize .operator ledger directories in the current folder."
+    )
+    init_parser.add_argument(
+        "--role",
+        choices=["seat", "outbox"],
+        default="seat",
+        help="Store role (default: seat).",
+    )
+    init_parser.add_argument(
+        "--seat-machine",
+        default=None,
+        help="Machine holding (or receiving) the canonical seat store.",
     )
 
     # operator task create
