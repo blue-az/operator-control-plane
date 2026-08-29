@@ -16,7 +16,7 @@ cabinet. Most of what follows is about which half this is.
 |---|---|---|
 | 1 | Treat Claude Code / Codex / dsh / OpenCode as options | **Covered**, with gaps |
 | 2 | Sessions talk to each other | **Covered, deliberately indirect** |
-| 3 | Sessions talk across machines | **Refused**, with a mechanism enforcing it |
+| 3 | Sessions talk across machines | **Covered** — records yes, messaging yes, ledger *distribution* refused |
 | 4 | Sessions talk across harnesses | **Covered** — and load-bearing for the trust model |
 | 5 | Fork (copy\|move) sessions across machines | **Refused by construction** |
 | 6 | Missions have memory; the Fleet has memory | **Mission: yes. Fleet: refused** |
@@ -42,10 +42,22 @@ fields. They confer nothing: see `AGENTS.md`, "Harness roles are not ranks." Not
 here infers that Claude is the supervisor and a local 26B is the builder from brand
 name. What the harness id is *for* is answering "who claimed this" later.
 
-**Gaps, stated plainly:** there is no `dsh` profile, and — worse — no `pi` profile,
-even though `pi` became the implementer carrier on 2026-08-27 (`ed22df8`). The
-adapter was not migrated with the carrier. Dispatch to `pi` today happens by invoking
-it directly, outside the adapter.
+**Gaps, stated plainly:** there is no `dsh` profile. `dsh` is DeepSeek Harness,
+DeepSeek AI's plugin-first agent runtime (MIT, released 2026-08-13), in which the model
+adapter, tool registry, session log and the agent loop itself are all swappable plugins.
+Base `dsh` has no interactive CLI — the Claude Code-style terminal surface comes from
+`dsh-tui`, an out-of-tree plugin bundle, or from a separate CLI-focused fork. So "dsh"
+names at least three invocations, and a profile asserting flags nobody confirmed would
+be worse than its absence: every flag in this table was checked against that CLI's own
+`--help`, which is the only reason the table is worth anything.
+
+`pi` was the other gap and is now closed: `ed22df8` made pi the implementer carrier on
+2026-08-27 and migrated the ladder runner, but left the adapter behind, so dispatch to
+pi had to bypass it. The profile now exists, with flags confirmed against `pi --help`
+at v0.84.4, and it declares no workspace flag because pi genuinely has none — the
+sandbox boundary is the caller's responsibility, and claiming otherwise would be a
+false guarantee. `--plan` is deliberately not claimed: pi's own help notes it comes
+from a plan-mode extension, not the core CLI.
 
 ## 2. Sessions talk to each other
 
@@ -70,24 +82,43 @@ learns there is something for it when a human says so, or when it checks.
 
 ## 3. Sessions talk across machines
 
-**Refused, and as of 2026-08-29 the refusal is enforced rather than documented.**
+**Covered — but "cross-machine" is three different things, and conflating them is
+why this question keeps reopening.** Splitting them first, then answering each:
 
-`docs/specs/MACHINE_PROVENANCE_SPEC.md`: the ledger is single-machine by design.
-"Multi-machine support is therefore **provenance, not distribution**: every record
-says WHERE it was produced, and nothing attempts ledger sync or merge." Every record
-carries `executor.machine`. Background machines contribute two ways, both supported:
-work products via git, ingested at the seat as evidence; and usage via
-`usage-import --machine <producer>`.
+| | What it means | Status |
+|---|---|---|
+| **Records** | a record knows which machine produced it | **Built** |
+| **Messaging** | a session on one box reaches a session on another | **Works, deliberately outside this repo** |
+| **Distribution** | two machines share one ledger and reconcile | **Refused** |
 
-That rule existed in prose for months and was violated continuously — a background
-machine had accumulated two parallel ledgers, because `operator init` and
-`task-create` simply worked there and nothing checked. `docs/specs/MACHINE_ROLE_ENFORCEMENT_SPEC.md`
-closed that: `operator.yaml` now carries `role: seat|outbox` and `seat_machine`, and
-`doctor` fails closed when a seat store is opened on a machine that is not the seat.
+**Records — built, and first-class.** Every record carries `executor.machine`,
+stamped by `get_machine_identity()` (`OPERATOR_MACHINE` override → short hostname →
+`"unknown"`). Work produced elsewhere is not second-class: `usage-import --source-dir
+PATH --machine NAME` labels imported records with the **producer** machine rather than
+the importer, and `usage-summary --by-machine` groups runs, cost and tokens by machine
+× harness. So the ledger has always been able to say "z13 did this, and it cost that."
 
-Cross-machine *messaging* is a separate concern and is deliberately not in this repo.
-It is ssh plus a file drop, versioned in the operator's dotfiles rather than here,
-because a message bus is machine infrastructure and this is a ledger.
+**Messaging — works, and is intentionally not in this repo.** ssh already reaches every
+box; a message is a file drop plus a carrier. That carrier is versioned in the
+operator's dotfiles, not here, because a message bus is machine infrastructure and this
+is a ledger — the same boundary `AUTHORITY_BROKER_SPEC.md` draws for the broker.
+Nothing about it needs ledger authority: when a background machine needs to record
+something at the seat, the right move is to write to *the seat's* ledger over ssh, not
+to open one locally.
+
+**Distribution — refused, and since 2026-08-29 enforced rather than merely documented.**
+`docs/specs/MACHINE_PROVENANCE_SPEC.md`: "Multi-machine support is therefore
+**provenance, not distribution**." Record ids are sequential (`claim-0001`), so two
+stores that both allocated `claim-0042` cannot merge without rewriting an append-only
+history. The rule existed in prose for months and was violated continuously — one
+background machine had accumulated two parallel ledgers, because `operator init` simply
+worked there and nothing checked. `docs/specs/MACHINE_ROLE_ENFORCEMENT_SPEC.md` closed
+it: `operator.yaml` carries `role: seat|outbox` and `seat_machine`, and `doctor` fails
+closed when a seat store is opened on a machine that is not the seat.
+
+**So the honest answer to the bullet as written** — *allow sessions to talk across
+machines* — is yes, and it has been all along. What is refused is the thing the bullet
+does not actually ask for: making every machine authoritative.
 
 ## 4. Sessions talk across harnesses
 

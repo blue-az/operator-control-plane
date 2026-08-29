@@ -566,6 +566,51 @@ class TestHarnessAdapter(unittest.TestCase):
         self.assertEqual(ha.LEGACY_FALLBACK_COMMANDS["agy"], "agy")
         self.assertNotEqual(ha.LEGACY_FALLBACK_COMMANDS["agy"], "antigravity")
 
+    # --- pi profile (carrier since 2026-08-27, ed22df8) ---
+
+    def test_pi_profile_exists_because_pi_is_the_carrier(self) -> None:
+        """ed22df8 migrated the ladder runner from opr to pi but left the
+        adapter behind, so internal dispatch had to bypass it entirely."""
+        self.assertIn("pi", ha.PROFILES)
+        self.assertEqual(ha.PROFILES["pi"].executable, "pi")
+
+    def test_pi_argv_matches_the_invocation_known_to_work(self) -> None:
+        """evals/local_lane_ladder/runner.py drives pi as
+        `pi --print ... -- <prompt>`; the adapter must not invent a different shape."""
+        argv = ha.build_argv(
+            ha.PROFILES["pi"],
+            ha.Role.IMPLEMENTER,
+            "openai-codex/gpt-5.6-luna",
+            inline_prompt="do the thing",
+        )
+        self.assertEqual(
+            argv,
+            ["pi", "--print", "--approve", "--model",
+             "openai-codex/gpt-5.6-luna", "--", "do the thing"],
+        )
+
+    def test_pi_separator_protects_a_prompt_that_starts_with_a_hyphen(self) -> None:
+        """pi documents `--` as ending option parsing. Without it a brief
+        beginning with a hyphen is read as a flag -- a silent wrong answer,
+        which is the failure mode this adapter exists to prevent."""
+        argv = ha.build_argv(
+            ha.PROFILES["pi"], ha.Role.JUDGE, "m", inline_prompt="-not-a-flag"
+        )
+        self.assertEqual(argv[-2:], ["--", "-not-a-flag"])
+
+    def test_pi_declares_no_workspace_flag(self) -> None:
+        """pi has no --workspace equivalent, so the sandbox boundary is the
+        caller's responsibility. Claiming one here would be a false guarantee."""
+        self.assertIsNone(ha.PROFILES["pi"].workspace_flag)
+
+    def test_trailing_separator_is_opt_in_and_opencode_is_unchanged(self) -> None:
+        self.assertIsNone(ha.PROFILES["opencode"].prompt_separator)
+        argv = ha.build_argv(
+            ha.PROFILES["opencode"], ha.Role.IMPLEMENTER, "m", inline_prompt="hello"
+        )
+        self.assertEqual(argv[-1], "hello")
+        self.assertNotIn("--", argv)
+
 
 if __name__ == "__main__":
     unittest.main()
