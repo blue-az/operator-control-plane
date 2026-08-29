@@ -20,6 +20,19 @@ Only an enforced verification by a registered verifier OS UID distinct from the 
 recorded as `uid_isolated`. Same-UID and default `single_user` verification still work but are
 explicitly advisory — no self-grading.
 
+## Is this a fleet harness?
+
+No, and the distinction is the point. A multi-agent "fleet harness" is usually pitched as six
+capabilities: treat every coding CLI as an option, let sessions talk to each other, across machines,
+and across harnesses, fork sessions between machines, and give missions and the fleet shared memory.
+Those are *capability* questions — can the fleet do X.
+
+This answers a different one: **an agent said it finished. Is that true, and did a different identity
+check?** Two of the six are covered here, two are refused on purpose with the reasons written down,
+and the rest sit somewhere in between. **[docs/FLEET_CAPABILITIES.md](docs/FLEET_CAPABILITIES.md)
+answers all six one at a time**, names the file that decides each, and lists what this tool does not
+do — including the parts that would make it the wrong choice for you.
+
 **Contributions welcome** — especially on the open problems below. Operator was developed alongside
 [Bulkhead τ](https://bulkheadtau.com), but it is a standalone, domain-neutral control plane. Bulkhead
 Tau may use Operator; Operator does not import, invoke, or require Bulkhead Tau.
@@ -145,6 +158,16 @@ YAML-only ledger baselines those records into SQLite without changing their visi
 - `handoff-add [--task ID] [--changed …] [--verified …] [--claimed …] [--open …]` — record a closeout.
 
 ## Worked example
+
+**A runnable version of this lives at [`examples/verified-work/run.sh`](examples/verified-work/run.sh)**
+and is executed on every CI run, so it cannot quietly stop working. Nothing in it is stubbed: it
+writes a real module, runs a real `pytest`, then tries two things that should fail and shows them
+failing —
+
+- editing an evidence file after attachment → `doctor` reports a SHA-256 mismatch and exits non-zero
+- a builder verifying its own claim under `mode: enforced` → refused before anything is written
+
+The snippet below is the same lifecycle written out for reading rather than running.
 
 The following end-to-end script demonstrates the creation and lifecycle of a task and claim. It shows how to initialize the local ledger, create a task, register a gate-bound claim, attach verifiable evidence (with an explicit verification command and reviewer signature), run the integrity doctor check, track a session's usage metrics, and generate a downstream brief.
 

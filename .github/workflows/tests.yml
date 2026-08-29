@@ -36,6 +36,9 @@ jobs:
       - name: PBC invariants (fail-closed)
         run: python pbc_lint.py owners-manual/pbc
 
+      - name: Worked example - real work, tampered evidence, refused self-verification
+        run: ./examples/verified-work/run.sh
+
       - name: Cold-start smoke - init and doctor in a clean ledger
         run: |
           mkdir -p /tmp/operator-smoke && cd /tmp/operator-smoke
