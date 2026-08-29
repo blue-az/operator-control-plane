@@ -22,8 +22,9 @@ explicitly advisory — no self-grading.
 [Bulkhead τ](https://bulkheadtau.com), but it is a standalone, domain-neutral control plane. Bulkhead
 Tau may use Operator; Operator does not import, invoke, or require Bulkhead Tau.
 
-Local-model implementer work runs through **OpenCode** (`opencode run`). Operator stays the
-ledger. The old `opr` governed REPL is deprecated; `./opr` prints that pointer and exits.
+Implementer work runs through **pi**, which drives any model it is pointed at (Claude only in
+extra-usage mode). Operator stays the ledger. OpenCode is deprecated as the carrier but not
+disallowed. The old `opr` governed REPL is deprecated; `./opr` prints that pointer and exits.
 
 ## Quickstart
 
@@ -216,7 +217,8 @@ proof remains issue #7. Initial installation must execute a root-owned staged co
 
 ## Local-lane task contract
 
-OpenCode (`opencode run`) is the local-model implementer. `operator` is the ledger.
+`pi` is the implementer carrier (since 2026-08-27); `operator` is the ledger. OpenCode
+held this role through 2026-08-27 and is deprecated as carrier, not disallowed.
 The old `opr` governed REPL is a deprecation stub; restore the last full
 implementation from git if you need it:
 

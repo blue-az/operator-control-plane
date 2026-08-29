@@ -20,9 +20,10 @@ Use these files as structured context for coding agents, QA review, drift checks
 - `appendix-multi-session-coordination.pbc.md` — draft working agreement for concurrent agent
   sessions sharing one ledger. Ledger task: `session-coordination-protocol`. Both Claude sessions
   have signed off; awaiting an operator ruling on the identity labels.
-- `appendix-local-implementer-dispatch.pbc.md` — live contract for dispatching a local-model
-  seat from a ledger brief via `opencode run`. Ledger task: `proposal-lifecycle`.
-  LID-RUL-101–105 are provisional; LID-BHV-001 remains proposed.
+- `appendix-local-implementer-dispatch.pbc.md` — dispatch contract, ratified 2026-08-23 against
+  an OpenCode carrier. Ledger task: `proposal-lifecycle`. LID-RUL-101–105 are provisional and
+  LID-BHV-001 remains proposed; all of them need re-ratification against the `pi` carrier
+  (superseded 2026-08-28) before they bind.
 
 ## Trust Model
 

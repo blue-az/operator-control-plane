@@ -159,7 +159,7 @@ Net new surface: **one CLI verb and one linter.**
 
 **`appendix-opr-governed-llm-client.pbc.md` (Shape A, now deprecated).**
 OPR-RUL-010..018 were DRAFTED and unfrozen. Continuation is rejected;
-OpenCode is the carrier. Do not freeze those rules on
+the carrier is `pi` (OpenCode at the time of this ruling). Do not freeze those rules on
 `opr-continuation-loop-audit`. Historical note:
 Note OPR-RUL-012 should be withdrawn rather than approved — its own measurement
 (5/5 functional, 1/5 signalled) contradicts it, and OPR-RUL-018 supersedes it.

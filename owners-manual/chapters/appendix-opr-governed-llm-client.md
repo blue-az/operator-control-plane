@@ -1,7 +1,7 @@
 # Appendix: opr Governed LLM Client
 
-> **Deprecated (2026-08-23).** `opr` is no longer the local implementer. Use
-> OpenCode (`opencode run`). This appendix describes the old governed REPL;
+> **Deprecated (2026-08-23; successor updated 2026-08-28).** `opr` is no longer
+> the implementer. Use `pi`. This appendix describes the old governed REPL;
 > restore it from git commit `fe4211b09bc164c3dc0b7b48bad929e39ab68356`.
 > Live dispatch: `owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md`.
 

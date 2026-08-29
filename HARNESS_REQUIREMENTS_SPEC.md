@@ -4,7 +4,8 @@ Status: **PROPOSED**, not implemented. Written 2026-08-21.
 Companion to `LOCAL_LANE_CONTRACT_SPEC.md` and `GATED_RUNNER_SPEC.md`.
 Evidence base: `docs/HARNESS_TURN_COST_ANECDOTES.md` entries 2026-08-20 and
 2026-08-23.
-`opr` is deprecated; the live local implementer is OpenCode (`opencode run`).
+`opr` is deprecated; the live implementer carrier is `pi` (migrated 2026-08-27). OpenCode is
+deprecated as the carrier but not disallowed.
 
 ## Purpose
 
@@ -153,7 +154,7 @@ still-dirty tree. Record: `docs/HARNESS_TURN_COST_ANECDOTES.md` 2026-08-23.
 
 Local implementer *seats* do not receive `git commit`, rebase, or history
 rewrite unless the human is explicitly running a git experiment. The
-carrier (OpenCode) can still run other models. A recap of hygiene is
+carrier (`pi`) can still run other models. A recap of hygiene is
 narration. `git status` and `git log` are the gate. Paper lifecycle is not
 the implementer's to advance.
 

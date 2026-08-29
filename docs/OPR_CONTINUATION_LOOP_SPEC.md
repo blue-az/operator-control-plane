@@ -6,7 +6,8 @@
 > historical client. See
 > `owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md`.
 
-**Status:** rejected — not implementing. OpenCode is the carrier.
+**Status:** rejected — not implementing. OpenCode was the carrier at this
+ruling; the carrier is `pi` as of 2026-08-27. The rejection is unaffected.
 **Date:** 2026-08-07
 **PBC:** `owners-manual/pbc/appendix-opr-governed-llm-client.pbc.md` (OPR-RUL-010..013, OPR-BHV-005)
 **Target:** `opr` `run_agent_loop`, currently lines ~818–884

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Deprecated. The governed REPL is no longer the local implementer.
+"""Deprecated. The governed REPL is no longer the implementer.
 
-OpenCode is the carrier: ``opencode run``. Operator remains the ledger.
+pi is the carrier. Operator remains the ledger.
 See ``owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md``.
 
 The last full implementation is in git at commit
@@ -20,12 +20,12 @@ OPR_RESTORE_COMMIT = "fe4211b09bc164c3dc0b7b48bad929e39ab68356"
 MESSAGE = """\
 opr is deprecated.
 
-Use OpenCode for local-model implementer work:
+Use pi for implementer work:
 
-    opencode run
+    pi
 
 Operator remains the ledger (task → claim → evidence → verification).
-OpenCode is the runner. See
+pi is the runner and drives any model it is pointed at. See
 owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md.
 
 To restore the old governed REPL from git:
