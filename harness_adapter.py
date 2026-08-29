@@ -74,6 +74,11 @@ class HarnessProfile:
     prompt_file_flag: str | None = None
     prompt_arg_flag: str | None = None
     workspace_flag: str | None = None
+    # Emitted immediately before a TRAILING prompt. pi documents `--` as
+    # "End option parsing; treat remaining arguments as messages/files", so a
+    # brief beginning with a hyphen would otherwise be read as a flag. opencode
+    # has no such separator and leaves this None.
+    prompt_separator: str | None = None
     version_args: tuple[str, ...] = ("--version",)
     # Best-effort, case-insensitive substrings checked against combined
     # stdout+stderr to recognize quota/rate-limit exhaustion. This is
@@ -153,6 +158,35 @@ PROFILES: dict[str, HarnessProfile] = {
             Role.JUDGE.value: ("--permission-mode", "plan"),
             Role.IMPLEMENTER.value: ("--permission-mode", "acceptEdits"),
         },
+    ),
+    # pi is the implementer carrier as of 2026-08-27 (ed22df8). Flags confirmed
+    # against `pi --help` at v0.84.4:
+    #   --print, -p                non-interactive: process prompt and exit
+    #   --provider <name>          provider selector (default google)
+    #   --model <pattern>          model pattern or "provider/id"
+    #   --approve, -a              trust project-local files for this run
+    #   --no-approve, -na          ignore project-local files for this run
+    #   --                         end option parsing; rest are messages/files
+    # pi has NO workspace flag (see evals/local_lane_ladder/runner.py), so the
+    # sandbox boundary is the caller's responsibility, not the adapter's.
+    # `--plan` is NOT core -- pi's help notes it comes from a plan-mode
+    # extension -- so no plan flag is claimed here.
+    "pi": HarnessProfile(
+        harness_id="pi",
+        executable="pi",
+        base_args=("--print",),
+        prompt_transport=PromptTransport.TRAILING,
+        prompt_separator="--",
+        output_format="text",
+        role_args={
+            # A reviewer should not let the reviewed project's own config steer
+            # it; --no-approve is the documented lever for that.
+            Role.SUPERVISOR.value: (),
+            Role.JUDGE.value: ("--no-approve",),
+            Role.IMPLEMENTER.value: ("--approve",),
+        },
+        version_args=("--version",),
+        quota_markers=("rate limit", "usage limit", "quota exceeded"),
     ),
     "opencode": HarnessProfile(
         harness_id="opencode",
@@ -345,6 +379,8 @@ def build_argv(
             )
         argv.extend([profile.prompt_file_flag, prompt_file_path or "<prompt-file>"])
     if profile.prompt_transport == PromptTransport.TRAILING:
+        if profile.prompt_separator:
+            argv.append(profile.prompt_separator)
         argv.append(inline_prompt if inline_prompt is not None else "<prompt>")
     return argv
 
