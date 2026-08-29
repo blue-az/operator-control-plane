@@ -179,6 +179,46 @@ state across machines, reconciled later. Same merge hazard, same refusal.
 
 ---
 
+## What "fail-closed" is actually buying
+
+Worth making explicit, because it is the axis all six answers turn on.
+
+`dsh` (DeepSeek Harness) is a useful contrast — not a criticism of it, and this is
+read from its published documentation rather than its source. It is plugin-first to an
+unusual degree: the model adapter, the tool registry, **the session log**, and the agent
+loop itself are all swappable, and its architecture notes state there is no privileged
+core to patch. That is a real and defensible design goal. Nothing is hard-coded, so
+nothing is unreachable.
+
+It is also the exact inverse of the premise here. A runtime in which an agent can
+replace the component that records what the agent did has made the recording layer
+answerable to the thing being recorded. This repo lists that same property as a **known
+limitation** — "the repo CLI policy gate is self-amendable; any agent with write access
+to the local config can weaken the gate it is supposed to be bound by" — and treats
+closing it as unfinished work (that is what the standalone P3 broker is for). A
+plugin-first runtime lists it as a feature.
+
+Both positions are coherent, and which one is right depends entirely on the question
+being asked. If the question is *what can this system do*, replaceability is strictly
+good: every limit becomes negotiable. If the question is *is this record trustworthy*,
+replaceability is the whole problem, because the record's value comes precisely from
+the parts the recorded party could not negotiate.
+
+That is why the mechanisms here look conservative to the point of being annoying —
+`doctor` is read-only and will not execute a stored `verification_command` even for a
+UID-isolated verifier; `evidence-attach --status` fails closed without `--claim`;
+trusted verification requires a distinct kernel-attested OS uid rather than a different
+harness name; record ids are sequential, which forecloses merging. Each of those is a
+capability deliberately given up. They are the price of the answer being worth
+something, and if the question you have is the fleet's question rather than this one,
+they are simply cost with no return.
+
+**A note on where the two could meet.** A harness whose session log is a swappable
+plugin is the natural place for a ledger to attach: the harness would not need to know
+what a claim is, and the log plugin could write records the harness cannot later edit.
+That is a more interesting integration than a CLI profile in `harness_adapter.py`, and
+nobody has built it.
+
 ## What this does not do
 
 Stated here so it does not have to be discovered:
