@@ -22,21 +22,29 @@ limitations").
 
 ```bash
 pip install -r requirements.txt          # only runtime dep is PyYAML
-./operator --help                        # 23 subcommands; ./operator <cmd> --help for flags
+python3 -m pip install --user pytest     # test dep; invoke as `python3 -m pytest`, see note below
+./operator --help                        # 33 subcommands; ./operator <cmd> --help for flags
 ./operator doctor                        # consistency check over local .operator/ ledger
-pytest tests/                            # full subprocess-driven integration suite
-pytest tests/test_operator.py -q         # fastest focused repo-CLI run
-pytest tests/test_pbc_lint.py -q         # PBC fence linter
+python3 -m pytest tests/                 # full subprocess-driven integration suite
+python3 -m pytest tests/test_operator.py -q  # fastest focused repo-CLI run
+python3 -m pytest tests/test_pbc_lint.py -q  # PBC fence linter
 python3 pbc_lint.py owners-manual/pbc    # fail-closed PBC invariants 1/3/4
-pytest tests/test_operator.py -q -k doctor   # run a single test by name pattern
-pytest tests/test_authority_broker.py -q     # standalone P3a broker/store tests
-pytest tests/test_dogfood_runner.py -q   # dogfood runner unit suite
+python3 -m pytest tests/test_operator.py -q -k doctor   # run a single test by name pattern
+python3 -m pytest tests/test_authority_broker.py -q  # standalone P3a broker/store tests
+python3 -m pytest tests/test_dogfood_runner.py -q  # dogfood runner unit suite
 ./operator-broker --help                    # isolated P3a development surfaces
 ./operator-admin --help                     # root-managed P3b policy & dogfood runner surfaces
 ruff check .                             # lint check configured in pyproject.toml
 black --check .                          # formatting check
 isort --check-only .                     # import sorting check
 ```
+
+> **Invoke pytest as `python3 -m pytest`, not bare `pytest`.** A dangling
+> `project-phoenix/.venv` sits first on `PATH` here; its launcher points at
+> `~/miniconda3/bin/python3`, which no longer exists, so bare `pytest` dies with
+> "No module named pytest" regardless of what is installed. That venv belongs to
+> another project and is not this repo's to repair. Suites also run under
+> `python3 -m unittest tests.test_operator`.
 
 `./operator init` creates a local `.operator/` ledger in the current directory — only run it in a
 throwaway/intended workspace. The `.operator/` dir is gitignored; never commit its YAML records or
