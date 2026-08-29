@@ -184,6 +184,110 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertTrue((op_path / "harnesses" / "fable.yaml").exists())
         self.assertTrue((op_path / "harnesses" / "opencode.yaml").exists())
 
+    def test_machine_role_init_round_trips_role_and_seat_machine(self) -> None:
+        res = self.run_operator(
+            "init",
+            "--role",
+            "outbox",
+            "--seat-machine",
+            "seat-fixture",
+            env={
+                "OPERATOR_TEST_UID": "1001",
+                "OPERATOR_TEST_SENTINEL": "1",
+                "OPERATOR_MACHINE": "outbox-fixture",
+            },
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        config = yaml.safe_load((Path(self.temp_dir) / ".operator" / "operator.yaml").read_text())
+        self.assertEqual(config["role"], "outbox")
+        self.assertEqual(config["seat_machine"], "seat-fixture")
+
+        doctor = self.run_operator(
+            "doctor",
+            env={
+                "OPERATOR_TEST_UID": "1001",
+                "OPERATOR_TEST_SENTINEL": "1",
+                "OPERATOR_MACHINE": "outbox-fixture",
+            },
+        )
+        self.assertEqual(doctor.returncode, 0, doctor.stdout + doctor.stderr)
+        self.assertIn("[Warning] Store role is 'outbox'", doctor.stdout)
+        self.assertIn("tasks=0, claims=0, evidence=0, usage=0", doctor.stdout)
+        self.assertIn("seat_machine 'seat-fixture'", doctor.stdout)
+
+    def test_machine_role_doctor_rejects_seat_on_other_machine(self) -> None:
+        self.assertEqual(
+            self.run_operator(
+                "init",
+                "--role",
+                "seat",
+                "--seat-machine",
+                "seat-fixture",
+                env={
+                    "OPERATOR_TEST_UID": "1001",
+                    "OPERATOR_TEST_SENTINEL": "1",
+                    "OPERATOR_MACHINE": "seat-fixture",
+                },
+            ).returncode,
+            0,
+        )
+        doctor = self.run_operator(
+            "doctor",
+            env={
+                "OPERATOR_TEST_UID": "1001",
+                "OPERATOR_TEST_SENTINEL": "1",
+                "OPERATOR_MACHINE": "other-fixture",
+            },
+        )
+        self.assertEqual(doctor.returncode, 1, doctor.stdout + doctor.stderr)
+        self.assertIn("[Error] seat store is assigned to machine 'seat-fixture'", doctor.stdout)
+        self.assertIn("executing machine is 'other-fixture'", doctor.stdout)
+
+    def test_machine_role_init_rejects_mismatched_seat(self) -> None:
+        res = self.run_operator(
+            "init",
+            "--role",
+            "seat",
+            "--seat-machine",
+            "seat-fixture",
+            env={
+                "OPERATOR_TEST_UID": "1001",
+                "OPERATOR_TEST_SENTINEL": "1",
+                "OPERATOR_MACHINE": "other-fixture",
+            },
+        )
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("use --role outbox", res.stderr)
+        self.assertFalse((Path(self.temp_dir) / ".operator").exists())
+
+    def test_machine_role_legacy_config_defaults_to_seat_with_info(self) -> None:
+        self.assertEqual(
+            self.run_operator(
+                "init",
+                env={
+                    "OPERATOR_TEST_UID": "1001",
+                    "OPERATOR_TEST_SENTINEL": "1",
+                    "OPERATOR_MACHINE": "legacy-fixture",
+                },
+            ).returncode,
+            0,
+        )
+        config_path = Path(self.temp_dir) / ".operator" / "operator.yaml"
+        config = yaml.safe_load(config_path.read_text())
+        config.pop("role", None)
+        config.pop("seat_machine", None)
+        config_path.write_text(yaml.safe_dump(config, sort_keys=False))
+        doctor = self.run_operator(
+            "doctor",
+            env={
+                "OPERATOR_TEST_UID": "1001",
+                "OPERATOR_TEST_SENTINEL": "1",
+                "OPERATOR_MACHINE": "legacy-fixture",
+            },
+        )
+        self.assertEqual(doctor.returncode, 0, doctor.stdout + doctor.stderr)
+        self.assertIn("[Info] operator.yaml has no role; defaulting store role to 'seat'", doctor.stdout)
+
     def test_durable_event_ledger_tracks_record_history(self) -> None:
         self.assertEqual(self.run_operator("init").returncode, 0)
         self.assertEqual(
