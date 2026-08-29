@@ -95,9 +95,12 @@ if pi proves troublesome. `opr` is a deprecation stub; the old governed REPL is 
 
 **Ledger layout** (created by `init_cmd`):
 `.operator/{tasks,claims,evidence,handoffs,usage,briefs}/` plus `harnesses/<id>.yaml` (the
-known AI harnesses — claude, codex, gemini-agy, grok, copilot, opencode, openrouter, fable,
+known AI harnesses — claude, codex, gemini-agy, grok, copilot, pi, opencode, openrouter, fable,
 gemma3_local, gemma4_local, gpt-oss_local; their default definitions are hardcoded in
-`init_cmd`'s `harnesses_data` — note pi is not among them). Local seats are the models pi is pointed at, labeled in the ledger as
+`init_cmd`'s `harnesses_data`). Carriers that have an adapter profile carry their real
+executable in `command`; local seats keep `command: null` because a seat is a model a carrier is
+pointed at, not an executable (LID-RUL-001). `tests/test_harness_adapter.py` pins the two registries
+in agreement. Local seats are the models pi is pointed at, labeled in the ledger as
 `<model-base>_local` (e.g. gpt-oss:20b → gpt-oss_local — defaults differ per machine), so a new
 local default model needs a matching `harnesses/<id>.yaml` in existing ledgers. `operator.yaml` holds top-level state like
 `current_task`. Record IDs are sequential and zero-padded: `claim-0001`, `evidence-0001`, `usage-0001`,

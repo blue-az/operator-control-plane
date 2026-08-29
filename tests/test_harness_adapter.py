@@ -611,6 +611,46 @@ class TestHarnessAdapter(unittest.TestCase):
         self.assertEqual(argv[-1], "hello")
         self.assertNotIn("--", argv)
 
+    def test_every_adapter_carrier_has_a_ledger_entry_with_a_matching_command(self) -> None:
+        """The two registries drifted apart once already: opencode carried
+        `command: null` in the ledger while having a working adapter profile,
+        and pi was the implementer carrier with no ledger entry at all. A null
+        command is not cosmetic -- session-start prints "Launch command: X" when
+        it is set and falls back to "open your target environment" plus paste
+        instructions when it is not.
+
+        Local seats (gemma4_local and friends) are deliberately excluded: they
+        are models a carrier is pointed at, not executables, so `command: null`
+        is correct for them (see LID-RUL-001).
+        """
+        import subprocess
+        import tempfile
+
+        import yaml as _yaml
+
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as tmp:
+            subprocess.run(
+                [str(repo_root / "operator"), "init"],
+                cwd=tmp, capture_output=True, check=True,
+            )
+            registry = {}
+            for f in (Path(tmp) / ".operator" / "harnesses").glob("*.yaml"):
+                data = _yaml.safe_load(f.read_text())
+                registry[data["harness_id"]] = data
+
+        for harness_id, profile in ha.PROFILES.items():
+            # the adapter calls it "agy"; the ledger calls that seat "gemini-agy"
+            ledger_id = "gemini-agy" if harness_id == "agy" else harness_id
+            self.assertIn(
+                ledger_id, registry,
+                f"{harness_id} has an adapter profile but no ledger harness entry",
+            )
+            self.assertEqual(
+                registry[ledger_id]["command"], profile.executable,
+                f"{ledger_id} ledger command does not match its adapter executable",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
