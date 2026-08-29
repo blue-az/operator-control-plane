@@ -260,6 +260,33 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("use --role outbox", res.stderr)
         self.assertFalse((Path(self.temp_dir) / ".operator").exists())
 
+    def test_machine_role_init_cmd_accepts_namespace_without_role_fields(self) -> None:
+        """Programmatic callers (study_runner, dogfood_runner) build a bare
+        Namespace and never set --role/--seat-machine. init_cmd must default
+        them rather than raising AttributeError."""
+        import argparse
+        import importlib.machinery
+        import importlib.util
+
+        loader = importlib.machinery.SourceFileLoader("operator_mod", str(OPERATOR_BIN))
+        spec = importlib.util.spec_from_loader("operator_mod", loader)
+        module = importlib.util.module_from_spec(spec)
+        loader.exec_module(module)
+
+        workdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, workdir, True)
+        cwd = os.getcwd()
+        os.chdir(workdir)
+        try:
+            rc = module.init_cmd(argparse.Namespace())
+        finally:
+            os.chdir(cwd)
+        self.assertEqual(rc, 0)
+        with open(os.path.join(workdir, ".operator", "operator.yaml")) as fh:
+            config = yaml.safe_load(fh)
+        self.assertEqual(config["role"], "seat")
+        self.assertTrue(config["seat_machine"])
+
     def test_machine_role_legacy_config_defaults_to_seat_with_info(self) -> None:
         self.assertEqual(
             self.run_operator(

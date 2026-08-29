@@ -14,6 +14,7 @@ clobbered README.md scored identically to one that stayed in bounds.
 
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 import unittest
@@ -165,15 +166,30 @@ class GraderTest(unittest.TestCase):
 
 
 class TrajectoryParseTest(unittest.TestCase):
-    SUCCESS = (
-        "Routing task to: m (lane_1_local_repair)\n"
-        "[tokens] prompt=10 completion=84 think_chars=0 done_reason=stop\n"
-        "[Model requests tool call: read_file]\n"
-        'Arguments: {\n  "tool": "read_file",\n  "path": "a.txt"\n}\n'
-        "[Tool Output]\nhello\n"
-        "[Model requests tool call: patch_file]\n"
-        'Arguments: {\n  "tool": "patch_file",\n  "path": "a.txt"\n}\n'
-        "[Tool Output]\nSuccessfully patched a.txt.\n"
+    # pi `--mode json` line-delimited events. The opr stdout-marker format these
+    # tests used until 2026-08-28 is gone with opr; see runner.parse_trajectory.
+    @staticmethod
+    def _ev(**kw) -> str:
+        return json.dumps(kw)
+
+    SUCCESS = "\n".join(
+        [
+            json.dumps({"type": "tool_execution_start", "toolCallId": "c1",
+                        "args": {"path": "a.txt"}}),
+            json.dumps({"type": "tool_execution_end", "toolCallId": "c1",
+                        "toolName": "read_file",
+                        "result": {"isError": False,
+                                   "content": [{"type": "text", "text": "hello"}]}}),
+            json.dumps({"type": "tool_execution_start", "toolCallId": "c2",
+                        "args": {"path": "a.txt"}}),
+            json.dumps({"type": "tool_execution_end", "toolCallId": "c2",
+                        "toolName": "patch_file",
+                        "result": {"isError": False,
+                                   "content": [{"type": "text",
+                                                "text": "Successfully patched a.txt."}]}}),
+            json.dumps({"type": "message_end",
+                        "message": {"usage": {"output": 84}, "content": []}}),
+        ]
     )
 
     def test_orders_and_counts_calls(self) -> None:
@@ -187,23 +203,36 @@ class TrajectoryParseTest(unittest.TestCase):
     def test_retains_failed_calls_rather_than_dropping_them(self) -> None:
         """The Alignerr rule is that discarded candidates are named with a
         reason, not silently omitted. A wrong-path attempt is exactly that."""
-        s = (
-            "[Model requests tool call: patch_file]\n"
-            'Arguments: {"tool": "patch_file", "path": ".bash_aliases"}\n'
-            "[Tool Output]\nError: File not found: .bash_aliases\n"
+        s = "\n".join(
+            [
+                json.dumps({"type": "tool_execution_start", "toolCallId": "c1",
+                            "args": {"path": ".bash_aliases"}}),
+                json.dumps({"type": "tool_execution_end", "toolCallId": "c1",
+                            "toolName": "patch_file",
+                            "result": {"isError": True,
+                                       "content": [{"type": "text",
+                                                    "text": "Error: File not found: .bash_aliases"}]}}),
+            ]
         )
         t = runner.parse_trajectory(s)
         self.assertEqual(t["n_failed_calls"], 1)
         self.assertFalse(t["tool_calls"][0]["ok"])
         self.assertIn("File not found", t["tool_calls"][0]["error"])
 
-    def test_flags_the_two_harness_terminations(self) -> None:
-        self.assertTrue(runner.parse_trajectory(
-            "[Stopped: model repeated an already-handled tool call 'read_file: a']"
-        )["stopped_repeat"])
-        self.assertTrue(runner.parse_trajectory(
-            "[No tool dispatched: response carried tool-shaped JSON]"
-        )["no_dispatch"])
+    def test_flags_no_dispatch_and_pins_stopped_repeat_to_false(self) -> None:
+        """opr had a repeat guard and a no-dispatch marker. pi has neither
+        marker and no repeat-guard concept at all, so `stopped_repeat` is
+        pinned False under this backend (runner.parse_trajectory docstring).
+        Prose-only output with no tool_execution_end is `no_dispatch`."""
+        prose = json.dumps(
+            {"type": "message_end",
+             "message": {"usage": {"output": 12},
+                         "content": [{"type": "text", "text": "I would edit a.txt."}]}}
+        )
+        t = runner.parse_trajectory(prose)
+        self.assertTrue(t["no_dispatch"])
+        self.assertFalse(t["stopped_repeat"])
+        self.assertFalse(runner.parse_trajectory(self.SUCCESS)["no_dispatch"])
 
     def test_tolerates_prose_only_output(self) -> None:
         """A trajectory parse must never be able to fail a cell the

@@ -29,10 +29,20 @@ disallowed. The old `opr` governed REPL is deprecated; `./opr` prints that point
 ## Quickstart
 
 ```bash
-pip install -r requirements.txt        # just PyYAML
+pip install -r requirements.txt        # runtime: just PyYAML
+pip install -r requirements-dev.txt    # tests/lint: pytest, ruff, black, isort
 ./operator --help
-./operator doctor                      # consistency check over the local .operator/ ledger
-pytest tests/                          # subprocess-driven tests + synthetic session fixtures
+
+mkdir /tmp/operator-demo && cd /tmp/operator-demo   # init writes into the current directory
+/path/to/operator init                 # create a .operator/ ledger here
+/path/to/operator doctor               # consistency check -> "All records consistent."
+```
+
+Run the tests from the repo:
+
+```bash
+python3 -m pytest tests/test_operator.py -q   # repo CLI, ledger layout, identity, doctor, usage
+python3 -m pytest tests/ -q                   # everything (some suites need a Linux host)
 ```
 
 The ledger (`.operator/`) is gitignored — it's your work history, not the tool. Its durable local event

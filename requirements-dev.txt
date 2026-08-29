@@ -1,0 +1,6 @@
+# Development and test dependencies. Runtime needs only requirements.txt (PyYAML).
+#   python3 -m pip install -r requirements.txt -r requirements-dev.txt
+pytest
+ruff
+black
+isort

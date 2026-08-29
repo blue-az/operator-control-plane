@@ -99,7 +99,17 @@ class TestAuthorityIntegration(unittest.TestCase):
         # code has no environment-variable registry selector.
         self.cli_dir = self.temp_dir / "cli"
         self.cli_dir.mkdir()
-        for filename in ("operator", "authority_client.py", "authority_projection.py"):
+        # `operator` imports these at module scope; a staged copy that omits any
+        # of them dies with ModuleNotFoundError before argv is even parsed.
+        for filename in (
+            "operator",
+            "authority_client.py",
+            "authority_projection.py",
+            "crystal_parse.py",
+            "ab_local.py",
+            "study_runner.py",
+            "harness_adapter.py",
+        ):
             shutil.copy2(REPO_ROOT / filename, self.cli_dir / filename)
         client_path = self.cli_dir / "authority_client.py"
         client_source = client_path.read_text()
