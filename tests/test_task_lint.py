@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from task_lint import (  # noqa: E402
+from task_lint import (
     check_r1_exact_paths,
     check_r2_anchored_edits,
     check_r3_one_tool_call_per_step,
@@ -19,7 +19,6 @@ from task_lint import (  # noqa: E402
     check_r6_bounded_scope,
     lint,
 )
-
 
 # ---------------------------------------------------------------------------
 # Evidence prompts from LOCAL_LANE_CONTRACT_SPEC.md's Evidence section /

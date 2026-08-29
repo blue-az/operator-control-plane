@@ -20,9 +20,9 @@ import stat
 import subprocess
 import sys
 import time
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Iterable, Iterator
 
 import authority_broker as broker
 
@@ -2190,9 +2190,7 @@ def verify_deployment(
     if active != active_index(head) and active != allowed_stale_active:
         raise AdminError("active_index_mismatch", "active index differs from event head")
     expected_revocations: set[str] = set()
-    if head["event_type"] == "revoke":
-        expected_revocations.add(revoke_path(layout, head["ledger_id"], head["policy_sha256"]).name)
-    elif allowed_revocation is not None:
+    if head["event_type"] == "revoke" or allowed_revocation is not None:
         expected_revocations.add(revoke_path(layout, head["ledger_id"], head["policy_sha256"]).name)
     with open_layout_directory(
         layout.revocations_root / manifest["ledger_id"], layout, identity

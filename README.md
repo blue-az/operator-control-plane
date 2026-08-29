@@ -67,7 +67,7 @@ policy/service installation, CLI integration, and enrollment remain separate wor
     --content-dir /tmp/operator-authority-content
 ```
 
-See [`AUTHORITY_BROKER_SPEC.md`](AUTHORITY_BROKER_SPEC.md) for the protocol, transaction, crash-recovery,
+See [`AUTHORITY_BROKER_SPEC.md`](docs/specs/AUTHORITY_BROKER_SPEC.md) for the protocol, transaction, crash-recovery,
 and issue-boundary contracts.
 
 ## Commands
@@ -217,7 +217,7 @@ genuinely distinct OS UIDs; the CLI does not provision those users or containers
 ### Root-managed external policy (P3b)
 
 Issue #5 adds the separate `operator-admin` installation and policy lifecycle described in
-[`AUTHORITY_POLICY_SPEC.md`](AUTHORITY_POLICY_SPEC.md). It installs the standalone broker under fixed
+[`AUTHORITY_POLICY_SPEC.md`](docs/specs/AUTHORITY_POLICY_SPEC.md). It installs the standalone broker under fixed
 root-controlled paths, creates SQLite only after dropping to the broker UID, and supports strict
 generation-one install, append-only rotation, terminal revocation, audit, and conservative privilege
 preflight.
@@ -263,17 +263,17 @@ Three pieces formalize and measure this:
   × 3 levels × 4 models × 3 trials = 216 cells): the monotonic pass-rate claim
   holds for 3 of 4 models tested and is honestly reported as refuted for the
   fourth, plus a per-task breakdown of exactly where each model needs how much
-  specificity. Full design: [`LOCAL_LANE_CONTRACT_SPEC.md`](LOCAL_LANE_CONTRACT_SPEC.md).
+  specificity. Full design: [`LOCAL_LANE_CONTRACT_SPEC.md`](docs/specs/LOCAL_LANE_CONTRACT_SPEC.md).
   Live dispatch contract: [`owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md`](owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md).
 
 ## Design specs
 
-- [`EXECUTOR_IDENTITY_SPEC.md`](EXECUTOR_IDENTITY_SPEC.md) — process-level identity binding via `os.getuid()`.
-- [`AUTHORITY_BROKER_SPEC.md`](AUTHORITY_BROKER_SPEC.md) — standalone external broker and store.
-- [`AUTHORITY_POLICY_SPEC.md`](AUTHORITY_POLICY_SPEC.md) — root-managed installation and policy lifecycle.
-- [`VERIFIED_BY_GUARD_SPEC.md`](VERIFIED_BY_GUARD_SPEC.md) — fail-closed on self-verification (a builder can't sign off its own claim).
-- [`USAGE_AUTOIMPORT_SPEC.md`](USAGE_AUTOIMPORT_SPEC.md) — ingest per-session token/usage from Claude/Codex/Gemini harness logs without unit conflation.
-- [`LOCAL_LANE_CONTRACT_SPEC.md`](LOCAL_LANE_CONTRACT_SPEC.md) — task-shaping contract, linter, and eval ladder for routing local models (see "Local-lane task contract" above).
+- [`EXECUTOR_IDENTITY_SPEC.md`](docs/specs/EXECUTOR_IDENTITY_SPEC.md) — process-level identity binding via `os.getuid()`.
+- [`AUTHORITY_BROKER_SPEC.md`](docs/specs/AUTHORITY_BROKER_SPEC.md) — standalone external broker and store.
+- [`AUTHORITY_POLICY_SPEC.md`](docs/specs/AUTHORITY_POLICY_SPEC.md) — root-managed installation and policy lifecycle.
+- [`VERIFIED_BY_GUARD_SPEC.md`](docs/specs/VERIFIED_BY_GUARD_SPEC.md) — fail-closed on self-verification (a builder can't sign off its own claim).
+- [`USAGE_AUTOIMPORT_SPEC.md`](docs/specs/USAGE_AUTOIMPORT_SPEC.md) — ingest per-session token/usage from Claude/Codex/Gemini harness logs without unit conflation.
+- [`LOCAL_LANE_CONTRACT_SPEC.md`](docs/specs/LOCAL_LANE_CONTRACT_SPEC.md) — task-shaping contract, linter, and eval ladder for routing local models (see "Local-lane task contract" above).
 
 ## Known limitations — help wanted
 

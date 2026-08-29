@@ -11,7 +11,7 @@ import argparse
 import json
 import subprocess
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 import requests
@@ -102,7 +102,7 @@ def main() -> int:
                     "ps": line,
                     "smi": smi(),
                     "think_chars": len(d.get("thinking") or ""),
-                    "recorded_utc": datetime.now(timezone.utc).isoformat(),
+                    "recorded_utc": datetime.now(UTC).isoformat(),
                 }
                 rows.append(rec)
                 (pack / "traces" / f"{model.replace(':', '-')}__c{ctx}__t{trial}.json").write_text(

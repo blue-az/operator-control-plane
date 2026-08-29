@@ -9,7 +9,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-import authority_admin  # noqa: E402
+import authority_admin
 
 RUNBOOK_PATH = REPO_ROOT / "OPERATIONS_RUNBOOK.md"
 OPERATOR_BIN = str(REPO_ROOT / "operator")

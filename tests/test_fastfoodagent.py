@@ -20,8 +20,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-from fastfoodagent import build_substrate as bs  # noqa: E402
-from fastfoodagent import queries as q  # noqa: E402
+from fastfoodagent import build_substrate as bs
+from fastfoodagent import queries as q
 
 CSV_HEADER = [
     "Menu_Item_ID",

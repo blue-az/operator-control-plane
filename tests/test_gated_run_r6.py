@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import unittest
-import tempfile
 import json
 import sys
+import tempfile
+import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -10,6 +10,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 import gated_runner
 from gated_runner import OutcomeRecord
+
 
 class TestGatedRunnerR6(unittest.TestCase):
     def setUp(self):

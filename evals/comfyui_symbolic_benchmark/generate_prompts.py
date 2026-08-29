@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse, json, os, subprocess, time
+import argparse
+import json
+import os
+import subprocess
+import time
 from pathlib import Path
 
 MODELS = [("qwen38","qwen3.8:27b"),("qwen36-35b","qwen3.6:35b"),("gemma31","gemma4:31b"),("gemma26","gemma4:26b")]

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 
@@ -20,7 +20,7 @@ def main() -> int:
         "e5-floor",
     ]
     agg = {
-        "checked_at_utc": datetime.now(timezone.utc).isoformat(),
+        "checked_at_utc": datetime.now(UTC).isoformat(),
         "checker": {
             "uid": os.getuid(),
             "user": os.environ.get("USER") or os.environ.get("LOGNAME") or "unknown",

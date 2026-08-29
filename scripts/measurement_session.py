@@ -1,12 +1,13 @@
-import json
-import subprocess
-import time
 import hashlib
+import json
 import os
-from pathlib import Path
+import subprocess
 import tempfile
-import gated_runner
+import time
 from dataclasses import asdict
+from pathlib import Path
+
+import gated_runner
 
 # --- Models to Test ---
 MODELS = ["gemma4:31b", "gemma4:26b", "qwen3.8:27b", "qwen3.6:27b"]
@@ -59,7 +60,7 @@ def get_model_response(model, prompt):
         )
         return result.stdout.strip()
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: {e!s}"
 
 def apply_edit(response):
     """Robust extraction of content from model response."""
@@ -96,6 +97,7 @@ def get_gpu_temps():
         return []
 
 import argparse
+
 
 def run_measurement(model_filter=None, trials_per_cell=3):
     storage_dir = Path("./measurement_results")
@@ -154,7 +156,7 @@ def run_measurement(model_filter=None, trials_per_cell=3):
                         "drift": record.artifact_hash_changed,
                         "pre_temps": pre_temps
                     })
-                    print(f"{model[:12]:<12} | {task_id:<12} | T{trial} | {record.gate_verdict:<10} | {str(record.artifact_hash_changed):<6}")
+                    print(f"{model[:12]:<12} | {task_id:<12} | T{trial} | {record.gate_verdict:<10} | {record.artifact_hash_changed!s:<6}")
         
         post_temps = get_gpu_temps()
         print(f"Model {model} finished. GPU Temps: Pre {pre_temps} -> Post {post_temps}")

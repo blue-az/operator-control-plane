@@ -34,9 +34,9 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-import yaml  # noqa: E402
-from fixtures import build_fixture  # noqa: E402
-from grading import grade  # noqa: E402
+import yaml
+from fixtures import build_fixture
+from grading import grade
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OPR_BIN = REPO_ROOT / "opr"

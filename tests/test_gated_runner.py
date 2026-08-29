@@ -18,7 +18,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-import gated_runner  # noqa: E402
+import gated_runner
 
 
 def write_cell(root: Path, **overrides) -> Path:

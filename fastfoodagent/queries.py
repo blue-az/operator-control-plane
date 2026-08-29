@@ -52,7 +52,7 @@ def _sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def open_substrate(db_path: Path, provenance_path: Optional[Path] = None) -> sqlite3.Connection:
+def open_substrate(db_path: Path, provenance_path: Path | None = None) -> sqlite3.Connection:
     """Opens the frozen substrate read-only, verifying its schema (and, if a
     provenance report is supplied, its hash) before returning a connection --
     aborts rather than silently querying a substrate that doesn't match what
@@ -103,9 +103,9 @@ def dataset_provenance(conn: sqlite3.Connection) -> dict:
 def lookup_items(
     conn: sqlite3.Connection,
     *,
-    restaurant: Optional[str] = None,
-    name_contains: Optional[str] = None,
-    category: Optional[str] = None,
+    restaurant: str | None = None,
+    name_contains: str | None = None,
+    category: str | None = None,
 ) -> list[dict]:
     """Item lookup by chain/name/category. Any combination of filters may be
     given; omitting all of them returns every item, ordered the same way."""
@@ -129,8 +129,8 @@ def top_items_under_calorie_budget(
     conn: sqlite3.Connection,
     *,
     calorie_budget: float,
-    min_protein_g: Optional[float] = None,
-    max_sodium_mg: Optional[float] = None,
+    min_protein_g: float | None = None,
+    max_sodium_mg: float | None = None,
     limit: int = 20,
 ) -> list[dict]:
     """Top items under a calorie budget, with optional protein/sodium

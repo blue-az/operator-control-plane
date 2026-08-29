@@ -118,7 +118,7 @@ def main():
         if rec.get("failed"):
             print(f"[{rec['model']:20s}] FAILED -- {rec['error'][:96]}", flush=True)
             continue
-        print(f"[{rec['model']:20s}] {str(rec['tok_s']):>6s} tok/s  "
+        print(f"[{rec['model']:20s}] {rec['tok_s']!s:>6s} tok/s  "
               f"load {rec['load_s']:5.1f}s  {rec['placement']:18s} "
               f"gen={rec['eval_count']}", flush=True)
 

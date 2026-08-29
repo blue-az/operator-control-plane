@@ -42,7 +42,7 @@ CHECKS = {
 
 
 def passed(text: str, patterns: list[str]) -> bool:
-    return any(re.search(p, text, re.I | re.S) for p in patterns)
+    return any(re.search(p, text, re.IGNORECASE | re.DOTALL) for p in patterns)
 
 
 def main() -> int:

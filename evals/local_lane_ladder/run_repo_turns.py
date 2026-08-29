@@ -17,7 +17,7 @@ import sys
 import tempfile
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 import yaml
@@ -25,18 +25,18 @@ import yaml
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from fixtures import cleanup_fixture, hash_tree  # noqa: E402
-from grading import grade  # noqa: E402
-from runner import (  # noqa: E402
+from fixtures import cleanup_fixture, hash_tree
+from grading import grade
+from runner import (
     MACHINE,
     OPR_BIN,
     REPO_ROOT,
+    _as_text,
     cell_key,
     load_state,
     parse_trajectory,
     save_state,
     write_trace,
-    _as_text,
 )
 
 EVAL_ROOT = Path("/home/blueaz/Python/Evaluation")
@@ -321,7 +321,7 @@ def main() -> int:
             continue
         print(f"[{key}] running...", flush=True)
         rec = run_trial(task, model, trial, sampling=sampling, trace_dir=trace_dir)
-        rec["recorded_utc"] = datetime.now(timezone.utc).isoformat()
+        rec["recorded_utc"] = datetime.now(UTC).isoformat()
         rows.append(rec)
         done.add(key)
         save_state(state_path, {"done": sorted(done), "results": rows})

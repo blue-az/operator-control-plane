@@ -1,7 +1,8 @@
-import json
 import glob
-from pathlib import Path
+import json
 from collections import defaultdict
+from pathlib import Path
+
 
 def analyze_results():
     results_dir = Path("./measurement_results")

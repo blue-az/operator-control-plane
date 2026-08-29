@@ -1916,7 +1916,7 @@ class TestOperatorCLI(unittest.TestCase):
         # Verify usage placeholder file exists
         import datetime
 
-        utc_now_date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        utc_now_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
         usage_file = op_path / "usage" / f"{utc_now_date}.yaml"
         self.assertTrue(usage_file.exists())
 
@@ -1989,7 +1989,7 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("Successfully closed usage session 'usage-0001'", res4.stdout)
 
         # Verify usage record update
-        utc_now_date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        utc_now_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
         usage_file = op_path / "usage" / f"{utc_now_date}.yaml"
         usage_records = yaml.safe_load(usage_file.read_text())
 
@@ -2173,7 +2173,7 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("Usage record 'usage-0001' successfully added", res.stdout)
 
         op_path = Path(self.temp_dir) / ".operator"
-        utc_now_date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        utc_now_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
         usage_file = op_path / "usage" / f"{utc_now_date}.yaml"
         records = yaml.safe_load(usage_file.read_text())
         rec = records[0]
@@ -2211,7 +2211,7 @@ class TestOperatorCLI(unittest.TestCase):
         payload_file = Path(self.temp_dir) / "payload.txt"
         payload_file.write_text("machine provenance payload")
 
-        today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
         usage_file = op_path / "usage" / f"{today}.yaml"
 
         # 1. usage-import --source-dir + --machine: provenance is the producer,
@@ -2317,7 +2317,7 @@ class TestOperatorCLI(unittest.TestCase):
         # suite is self-contained on a clean clone.
         shutil.copy(fixtures_dir / "pricing.yaml", op_path / "pricing.yaml")
 
-        today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
         usage_file = op_path / "usage" / f"{today}.yaml"
 
         def adjust_start_time(usage_id, new_start):
@@ -3692,7 +3692,7 @@ class TestOperatorCLI(unittest.TestCase):
         op_path = Path(self.temp_dir) / ".operator"
         shutil.copy(fixtures_dir / "pricing.yaml", op_path / "pricing.yaml")
 
-        today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
         usage_file = op_path / "usage" / f"{today}.yaml"
 
         # 1. session-start with lane/class
@@ -3864,7 +3864,7 @@ class TestOperatorCLI(unittest.TestCase):
         self.run_operator("init")
         fixtures_dir = Path(__file__).resolve().parent / "fixtures"
         op_path = Path(self.temp_dir) / ".operator"
-        today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
         usage_file = op_path / "usage" / f"{today}.yaml"
         payload_file = Path(self.temp_dir) / "payload.txt"
         payload_file.write_text("dummy usage payload")

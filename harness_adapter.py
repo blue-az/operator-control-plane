@@ -71,9 +71,9 @@ class HarnessProfile:
     # well-formed JSON line is treated as the result.
     output_format: str
     role_args: dict[str, tuple[str, ...]]
-    prompt_file_flag: Optional[str] = None
-    prompt_arg_flag: Optional[str] = None
-    workspace_flag: Optional[str] = None
+    prompt_file_flag: str | None = None
+    prompt_arg_flag: str | None = None
+    workspace_flag: str | None = None
     version_args: tuple[str, ...] = ("--version",)
     # Best-effort, case-insensitive substrings checked against combined
     # stdout+stderr to recognize quota/rate-limit exhaustion. This is
@@ -195,10 +195,10 @@ class FrozenAdapter:
 @dataclass(frozen=True)
 class AdapterResult:
     exit_state: ExitState
-    returncode: Optional[int]
+    returncode: int | None
     stdout: str
     stderr: str
-    parsed_output: Optional[dict]
+    parsed_output: dict | None
     duration_seconds: float
     argv: tuple[str, ...]
     # Caller provenance: who invoked this adapter, if they said so. See
@@ -207,14 +207,14 @@ class AdapterResult:
     # auto-detects a caller; a process shelling out to Python (e.g. a live
     # agy or claude session's own run_command-style tool) has no built-in
     # way to know who its parent is, so this is opt-in, not inferred.
-    initiator: Optional[dict]
+    initiator: dict | None
 
 
 INITIATOR_HARNESS_ENV = "OPERATOR_INITIATOR_HARNESS"
 INITIATOR_SESSION_ENV = "OPERATOR_INITIATOR_SESSION_ID"
 
 
-def resolve_initiator_identity() -> Optional[dict]:
+def resolve_initiator_identity() -> dict | None:
     """Reads the calling process's self-declared identity, if any, from
     OPERATOR_INITIATOR_HARNESS / OPERATOR_INITIATOR_SESSION_ID. Mirrors the
     same explicit, opt-in environment-variable convention `operator` itself
@@ -314,9 +314,9 @@ def build_argv(
     profile: HarnessProfile,
     role: Role,
     model: str,
-    prompt_file_path: Optional[str] = None,
-    inline_prompt: Optional[str] = None,
-    workspace: Optional[str] = None,
+    prompt_file_path: str | None = None,
+    inline_prompt: str | None = None,
+    workspace: str | None = None,
 ) -> list[str]:
     argv = [profile.executable]
     if profile.prompt_transport == PromptTransport.INLINE_ARG:
@@ -351,7 +351,7 @@ def build_argv(
 
 def _classify_and_parse(
     profile: HarnessProfile, returncode: int, stdout: str, stderr: str
-) -> tuple[ExitState, Optional[dict]]:
+) -> tuple[ExitState, dict | None]:
     combined_lower = (stdout + "\n" + stderr).lower()
     if any(marker in combined_lower for marker in profile.quota_markers):
         return ExitState.QUOTA_EXHAUSTED, None
@@ -401,7 +401,7 @@ def invoke(
     prompt: str,
     workspace: Path,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
-    extra_env: Optional[dict[str, str]] = None,
+    extra_env: dict[str, str] | None = None,
 ) -> AdapterResult:
     """Run one headless harness call. Never raises for a failed call -- every
     outcome short of a well-formed success is returned as a typed

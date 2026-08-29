@@ -21,8 +21,9 @@ import csv
 import hashlib
 import json
 import sqlite3
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Optional
 
 SCHEMA = """
 CREATE TABLE items (
@@ -55,7 +56,7 @@ EXPECTED_COLUMNS = [
 EXCLUDED_CATEGORY = "Beverages"
 
 
-def _to_float(value: Optional[str]) -> Optional[float]:
+def _to_float(value: str | None) -> float | None:
     if value is None:
         return None
     value = value.strip()
@@ -67,7 +68,7 @@ def _to_float(value: Optional[str]) -> Optional[float]:
         return None
 
 
-def _to_bool01(value: Optional[str]) -> bool:
+def _to_bool01(value: str | None) -> bool:
     return (value or "").strip() == "1"
 
 
@@ -168,7 +169,7 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def build(csv_path: Path, output_dir: Path, fetch_manifest: Optional[dict] = None) -> dict:
+def build(csv_path: Path, output_dir: Path, fetch_manifest: dict | None = None) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     all_rows, raw_count = normalize_rows(load_rows(csv_path))
     max_year = select_max_year(all_rows)

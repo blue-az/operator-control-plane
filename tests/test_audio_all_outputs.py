@@ -21,8 +21,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))  # audio_* moved to scripts/ 2026-08-29
 
-import audio_ports  # noqa: E402
+import audio_ports
 
 FIX = Path(__file__).parent / "fixtures" / "audio"
 THREE = (FIX / "pactl_cards_three_live.txt").read_text()

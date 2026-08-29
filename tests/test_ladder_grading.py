@@ -23,9 +23,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "evals" / "local_lane_ladder"))
 
-import fixtures  # noqa: E402
-import grading  # noqa: E402
-import runner  # noqa: E402
+import fixtures
+import grading
+import runner
 
 
 class GraderTest(unittest.TestCase):

@@ -12,7 +12,10 @@ mechanism works while leaving the outcome unproven, and conflating the two is
 the easy mistake here.
 """
 from __future__ import annotations
-import glob, json, sys
+
+import glob
+import json
+import sys
 from math import comb
 from pathlib import Path
 

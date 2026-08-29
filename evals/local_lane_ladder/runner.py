@@ -78,17 +78,17 @@ import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
-import task_lint  # noqa: E402
+from fixtures import build_fixture, cleanup_fixture, hash_tree
+from grading import grade
 
-from fixtures import build_fixture, cleanup_fixture, hash_tree  # noqa: E402
-from grading import grade  # noqa: E402
+import task_lint
 
 TASKS_DIR = Path(__file__).resolve().parent / "tasks"
 PI_BIN = shutil.which("pi") or "pi"
@@ -405,7 +405,7 @@ def write_trace(
         "machine": MACHINE,
         "git_rev": _git_rev(),
         "harness": HARNESS_ID,
-        "recorded_utc": datetime.now(timezone.utc).isoformat(),
+        "recorded_utc": datetime.now(UTC).isoformat(),
         "timed_out": timed_out,
         "timeout_limit_s": MAX_WALL_CLOCK_SECONDS,
         "returncode": record.get("returncode"),

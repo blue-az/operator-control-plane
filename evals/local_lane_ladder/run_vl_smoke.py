@@ -15,7 +15,7 @@ import secrets
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 import requests
@@ -209,7 +209,7 @@ def run_cell(still: dict, *, image: bool, think: bool, trial: int, model: str) -
         "leaky": leaky,
         **g,
         **rec,
-        "recorded_utc": datetime.now(timezone.utc).isoformat(),
+        "recorded_utc": datetime.now(UTC).isoformat(),
     }
 
 
@@ -271,7 +271,7 @@ def main() -> int:
 
     stills = build_stills(stills_dir)
     gold = {
-        "captured_utc": datetime.now(timezone.utc).isoformat(),
+        "captured_utc": datetime.now(UTC).isoformat(),
         "model": args.model,
         "num_ctx": NUM_CTX,
         "num_predict": NUM_PREDICT,

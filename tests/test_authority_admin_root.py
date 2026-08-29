@@ -15,8 +15,8 @@ from unittest import mock
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-import authority_admin  # noqa: E402
-import authority_broker  # noqa: E402
+import authority_admin
+import authority_broker
 
 
 @unittest.skipUnless(os.geteuid() == 0, "requires root for a real broker UID drop")
