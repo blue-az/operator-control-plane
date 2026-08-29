@@ -77,16 +77,19 @@ completion must go through `task-transition` (broker-authenticated); `authority-
 projection snapshots from the broker. `session-end --status verified|complete` is rejected in that
 mode. See `OPERATIONS_RUNBOOK.md` for operator recovery procedures.
 
-**Local implementer.** OpenCode (`opencode run`) is the local-model implementer; Operator is the
-ledger. `opr` is a deprecation stub that points at OpenCode. The old governed REPL is in git at
-`fe4211b` (`OPR_GENERALIZATION_SPEC.md` is historical). See
+**Implementer.** `pi` is the implementer carrier (migrated 2026-08-27, `ed22df8`); Operator is the
+ledger. pi is not local-only — it drives any model it is pointed at, including Claude, though Claude
+only in extra-usage mode. Whether pi can drive grok or gemini-agy is untested; neither is in use.
+OpenCode is out as the default carrier — deprecated but not disallowed, and it can earn a seat back
+if pi proves troublesome. `opr` is a deprecation stub; the old governed REPL is in git at `fe4211b`
+(`OPR_GENERALIZATION_SPEC.md` is historical). See
 `owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md`.
 
 **Ledger layout** (created by `init_cmd`):
 `.operator/{tasks,claims,evidence,handoffs,usage,briefs}/` plus `harnesses/<id>.yaml` (the
 known AI harnesses — claude, codex, gemini-agy, grok, copilot, opencode, openrouter, fable,
 gemma3_local, gemma4_local, gpt-oss_local; their default definitions are hardcoded in
-`init_cmd`'s `harnesses_data`). Local seats are OpenCode-configured models labeled in the ledger as
+`init_cmd`'s `harnesses_data` — note pi is not among them). Local seats are the models pi is pointed at, labeled in the ledger as
 `<model-base>_local` (e.g. gpt-oss:20b → gpt-oss_local — defaults differ per machine), so a new
 local default model needs a matching `harnesses/<id>.yaml` in existing ledgers. `operator.yaml` holds top-level state like
 `current_task`. Record IDs are sequential and zero-padded: `claim-0001`, `evidence-0001`, `usage-0001`,
@@ -94,7 +97,7 @@ local default model needs a matching `harnesses/<id>.yaml` in existing ledgers. 
 full-snapshot versions for trust-relevant writes. Session commands version their `usage-XXXX` record.
 `find_operator_dir()` walks upward from cwd to locate the active ledger.
 
-**Git is not a local-seat default.** OpenCode is the carrier and can run many
+**Git is not a local-seat default.** `pi` is the carrier and can run many
 models. Local *seats* (e.g. `gemma4:31b`) do not run `git commit` / rebase /
 history rewrite unless the human is explicitly running a git experiment.
 Recaps of git hygiene are narration. See

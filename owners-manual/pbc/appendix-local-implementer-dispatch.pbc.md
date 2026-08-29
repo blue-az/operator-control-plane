@@ -7,9 +7,10 @@ tags:
   - pbc
   - operator
   - opencode
+  - pi
   - local-lane
   - proposed
-updated: 2026-08-23
+updated: 2026-08-28
 ---
 
 # Local Implementer Dispatch — Behavior Contract
@@ -17,14 +18,24 @@ updated: 2026-08-23
 > PBC for sending a local-model seat at a ledger task without a human
 > copy-pasting supervisor recaps. Ledger task: `proposal-lifecycle`.
 > LID-RUL-101–105 ratified 2026-08-23 (`trust: provisional`, claim-0077).
-> LID-BHV-001 and its outcomes remain proposed until `opencode run` + brief
-> dispatch is implemented. No opr continuation.
+> LID-BHV-001 and its outcomes remain proposed; brief dispatch is not
+> implemented. No opr continuation.
 >
-> **Carrier: OpenCode, not opr.** `opencode run` already completes multi-step
-> local jobs (gemma4:26b, 3-file edit plus verification, 2026-08-13, recorded
-> on the opencode harness yaml). `opr` still exits after one state-changing
-> tool (OPR-RUL-008). Building a continuation loop to make opr an implementer
-> seat is the wrong investment for this problem.
+> **Carrier superseded 2026-08-28: `pi`, not OpenCode.** The rules below were
+> ratified 2026-08-23 against an OpenCode carrier and are retained verbatim as
+> the record of that ratification — `trust: verified` entries (LID-RUL-001–004)
+> are *observations of runs that actually happened on OpenCode*, and rewriting
+> them would falsify evidence. Read every "opencode run" in the ratified rules
+> as naming the carrier of record at that date. The live carrier is now `pi`
+> (migrated `ed22df8`, 2026-08-27), which drives any model it is pointed at,
+> Claude only in extra-usage mode. OpenCode is deprecated as the carrier but not
+> disallowed and may earn a seat back. Whether pi can drive grok or gemini-agy
+> is untested; neither is in use. **LID-RUL-101–105 and LID-BHV-001 need
+> re-ratification against pi before they bind.**
+>
+> **Carrier: not opr.** `opr` exits after one state-changing tool
+> (OPR-RUL-008); it now exits 2 with a deprecation notice. Building a
+> continuation loop to make opr an implementer seat is the wrong investment.
 >
 > This contract does **not** add a progress or work-tracker record type.
 > Progress is a claim or a handoff. Completion remains claim → evidence →
@@ -46,15 +57,16 @@ Three product facts produced that failure:
 
 ## Scope
 
-How a local implementer is dispatched at an existing task via OpenCode, how
-the seat (model) is distinguished from the harness label, and what counts as
-a result.
+How an implementer is dispatched at an existing task via the carrier of record,
+how the seat (model) is distinguished from the harness label, and what counts as
+a result. Ratified below against OpenCode; the live carrier is `pi`.
 
 ## Non-Goals
 
 - A new `progress` or `proposal` record type.
-- Making `opr` the implementer runner. `opr` is deprecated; OpenCode is the
-  carrier. OPR continuation (010–018) is rejected, not deferred.
+- Making `opr` the implementer runner. `opr` is deprecated; `pi` is the
+  carrier (OpenCode was, through 2026-08-27). OPR continuation (010–018) is
+  rejected, not deferred.
 - Automatic routing of arbitrary work to local models.
 - Changing verification UID isolation.
 - Freezing Paper 1.45 from this contract.
@@ -73,7 +85,11 @@ a result.
 - id: opencode_harness
   name: opencode
   type: external
-  description: Provider-agnostic coding harness. Headless opencode run is the implementer dispatch. opencode export produces JSON evidence.
+  description: Provider-agnostic coding harness. Carrier of record for the 2026-08-23 ratification; headless opencode run was the implementer dispatch. Deprecated as carrier 2026-08-28, not disallowed.
+- id: pi_harness
+  name: pi
+  type: external
+  description: Live implementer carrier as of 2026-08-27 (ed22df8). Drives any model it is pointed at, Claude only in extra-usage mode. Dispatch rules not yet re-ratified against it.
 - id: gemma4_local
   name: gemma4_local
   type: system
@@ -174,4 +190,4 @@ trust: proposed
 
 Shows: opr is the wrong implementer carrier; OpenCode already runs multi-step local jobs; five provisional rules keep Operator as a trust ledger.
 
-Does not show: an Operator wrapper around `opencode run`; that Gemma 4 31B will claim-add without a supervisor prompt; or that harness-R3 cells have been run.
+Does not show: an Operator wrapper around the carrier; that Gemma 4 31B will claim-add without a supervisor prompt; that harness-R3 cells have been run; or that any rule here holds under the `pi` carrier — LID-RUL-101–105 were ratified against OpenCode and are unverified against pi.

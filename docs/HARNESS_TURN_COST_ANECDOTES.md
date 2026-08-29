@@ -236,9 +236,10 @@ different model the same way.
 ### Policy
 
 Do not give the `gemma4:31b` seat `git commit` / rebase / history rewrite
-unless the human is explicitly studying that failure mode. Do not point
-OpenCode at 31B for git hygiene or paper lifecycle. OpenCode stays the
-local implementer carrier; pick another seat, or keep git with the human.
+unless the human is explicitly studying that failure mode. Do not point the
+carrier at 31B for git hygiene or paper lifecycle. The carrier (OpenCode at the
+time of this entry; `pi` since 2026-08-27) stays the implementer carrier; pick
+another seat, or keep git with the human.
 Operator is the ledger. Paper 1.45 stays a draft until a real four-model
 harness-R3 packet exists.
 

@@ -20,7 +20,7 @@ Compact Python CLI (Python ≥ 3.12).
 | Path | Role |
 |------|------|
 | `operator` | Main ledger CLI (~6000 lines; primary logic) |
-| `opr` | Deprecated stub. Use OpenCode (`opencode run`) as the local implementer. Restore the old REPL from git (`fe4211b`). |
+| `opr` | Deprecated stub. Use `pi` as the implementer carrier. Restore the old REPL from git (`fe4211b`). |
 | `operator-broker` / `authority_broker.py` | P3a authority broker (Isolated; no `.operator` access) |
 | `operator-admin` / `authority_admin.py` | P3b policy install/lifecycle (Root-managed) |
 | `authority_client.py` / `authority_projection.py` | CLI ↔ broker integration |
@@ -59,7 +59,7 @@ Compact Python CLI (Python ≥ 3.12).
 - **Evidence:** Prefer re-runnable commands (`--verify-cmd`) over static blobs.
 - **P3 Mode:** Use `task-transition` / `authority-reconcile` for broker-backed state; avoid smuggling statuses via `session-end`.
 - **Doctor:** Must remain read-only; it validates bytes/hashes but never executes stored verification commands.
-- **Git:** OpenCode is the carrier (many models). Local-model *seats* do not `git commit`, rebase, or rewrite history unless the human is explicitly running a git experiment. Recaps of hygiene are narration; `git status` and `git log` are the record. See `docs/HARNESS_TURN_COST_ANECDOTES.md` 2026-08-23 and `HARNESS_REQUIREMENTS_SPEC.md` R7.
+- **Git:** `pi` is the carrier (many models). Local-model *seats* do not `git commit`, rebase, or rewrite history unless the human is explicitly running a git experiment. Recaps of hygiene are narration; `git status` and `git log` are the record. See `docs/HARNESS_TURN_COST_ANECDOTES.md` 2026-08-23 and `HARNESS_REQUIREMENTS_SPEC.md` R7.
 
 ## Lane Economics
 - **Billing:** Cost is the driver's price, not the author's (`usage-summary --by-lane`).

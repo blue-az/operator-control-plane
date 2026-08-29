@@ -1,4 +1,4 @@
-"""The opr binary is a deprecation stub that points at OpenCode."""
+"""The opr binary is a deprecation stub that points at pi."""
 from __future__ import annotations
 
 import subprocess
@@ -10,7 +10,7 @@ OPR_BIN = REPO_ROOT / "opr"
 
 
 class TestOprDeprecated(unittest.TestCase):
-    def test_stub_exits_nonzero_and_points_at_opencode(self) -> None:
+    def test_stub_exits_nonzero_and_points_at_pi(self) -> None:
         result = subprocess.run(
             [str(OPR_BIN)],
             capture_output=True,
@@ -20,7 +20,7 @@ class TestOprDeprecated(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         combined = result.stdout + result.stderr
         self.assertIn("deprecated", combined.lower())
-        self.assertIn("opencode run", combined)
+        self.assertIn("pi is the runner", combined)
         self.assertIn("fe4211b09bc164c3dc0b7b48bad929e39ab68356", combined)
 
     def test_module_flag_is_set(self) -> None:

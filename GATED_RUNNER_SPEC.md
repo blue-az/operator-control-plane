@@ -7,8 +7,8 @@
 
 The historical `opr` client recorded that a session happened and what it cost
 (`opr:408-436` called `task-create`, `session-start`, `session-end`). It never
-called `claim-add` or `evidence-attach`. `opr` is now deprecated; OpenCode is
-the local implementer. An agent's *assertion* is still not captured unless the
+called `claim-add` or `evidence-attach`. `opr` is now deprecated; `pi` is
+the implementer carrier. An agent's *assertion* is still not captured unless the
 wrapper writes it, and `--verify-cmd` is recorded but deliberately never
 executed — `doctor` is read-only and must stay that way.
 
