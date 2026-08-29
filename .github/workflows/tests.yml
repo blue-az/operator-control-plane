@@ -1,0 +1,43 @@
+name: tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      # The suite drives the `operator` binary as a subprocess and binds writes
+      # to the executing OS uid, so it needs a real POSIX host. Identity and
+      # machine are overridden via the documented test hooks, never real values.
+      - name: Run tests
+        run: python -m pytest tests/ -q
+
+      # Lint is deliberately NOT gated yet. `ruff check .` reports 413 findings
+      # and `black --check .` would reformat 58 files as of 2026-08-29. Gating
+      # now would either fail every build or require a formatting commit large
+      # enough to bury real changes. Clean it up deliberately, then gate.
+
+      - name: PBC invariants (fail-closed)
+        run: python pbc_lint.py owners-manual/pbc
+
+      - name: Cold-start smoke - init and doctor in a clean ledger
+        run: |
+          mkdir -p /tmp/operator-smoke && cd /tmp/operator-smoke
+          "$GITHUB_WORKSPACE/operator" init
+          "$GITHUB_WORKSPACE/operator" doctor

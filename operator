@@ -1394,8 +1394,11 @@ def get_next_handoff_id(operator_dir: str, task_id: str) -> str:
 def init_cmd(args) -> int:
     target_dir = os.path.abspath(os.path.join(os.getcwd(), ".operator"))
     current_machine = get_machine_identity()
-    seat_machine = args.seat_machine or current_machine
-    if args.role == "seat" and seat_machine != current_machine:
+    # Programmatic callers (study_runner, dogfood_runner, tests) build a bare
+    # Namespace and never set these; default them rather than raising.
+    store_role = getattr(args, "role", None) or "seat"
+    seat_machine = getattr(args, "seat_machine", None) or current_machine
+    if store_role == "seat" and seat_machine != current_machine:
         print(
             f"Error: seat store machine '{seat_machine}' does not match executing machine "
             f"'{current_machine}'; use --role outbox for a different seat machine.",
@@ -1624,7 +1627,7 @@ def init_cmd(args) -> int:
         save_yaml(hdata, os.path.join(target_dir, "harnesses", f"{hid}.yaml"))
 
     save_yaml(
-        {"current_task": None, "role": args.role, "seat_machine": seat_machine},
+        {"current_task": None, "role": store_role, "seat_machine": seat_machine},
         os.path.join(target_dir, "operator.yaml"),
     )
 

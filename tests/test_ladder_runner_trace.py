@@ -65,7 +65,12 @@ class LadderRunnerTraceTest(unittest.TestCase):
         self.assertEqual(trace["stdout"], "model rambled and edited nothing")
         self.assertEqual(trace["stderr"], "warn: x")
         self.assertEqual(trace["cell_key"], "alias-add|L2|fake-model:1b|1")
-        self.assertIn("--eval-auto-confirm", trace["argv"])
+        # opr-era argv asserted --eval-auto-confirm. pi has no such flag; the
+        # invariants that matter under this backend are the JSON event stream
+        # the trajectory parser consumes and non-interactive execution.
+        self.assertIn("--mode", trace["argv"])
+        self.assertIn("json", trace["argv"])
+        self.assertIn("--print", trace["argv"])
         self.assertTrue(trace["prompt"].strip(), "prompt must be recorded for reproducibility")
 
     def test_timeout_retains_partial_output(self) -> None:
