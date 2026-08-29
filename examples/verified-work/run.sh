@@ -60,10 +60,13 @@ echo "   an Error, and doctor exits non-zero. This is the check you cannot talk 
 echo '1 passed in 0.01s' > result.log   # put the honest bytes back
 
 say "4. Turn on enforced identity and let the builder try to verify itself"
-cat > .operator/identity.yaml <<'YML'
+# The uid must be this machine's real one -- the registry keys on the executing
+# OS uid, not on a name. Hardcoding 1000 works on a laptop and fails on a CI
+# runner, which is the gate behaving correctly.
+cat > .operator/identity.yaml <<YML
 mode: enforced
 uids:
-  1000:
+  $(id -u):
     name: builder-seat
     roles:
       - builder
