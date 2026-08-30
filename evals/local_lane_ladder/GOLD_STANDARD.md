@@ -80,6 +80,41 @@ Use for **hardware / tok/s / residency** claims. Same spirit: no unsourced “te
 
 ---
 
+## 2a. Sample-size policy — how much n before a claim counts
+
+**Added 2026-08-30**, directly motivated by `fixtures/gemma26-csv-n100-baseline/FINDING.md`:
+a cell that looked clean at n=6 across three separate runs (5/6, 6/6, 6/6) turned out
+to have a true pass rate of 75% (95% CI [66.5%, 83.5%]) at n=100. `P(6/6 by chance at
+that true rate) = 17.8%` — not rare. Two same-night findings (a brevity-instruction
+fix, a VRAM-cap accuracy check) had been read with more confidence than an n=6 sample
+against an unknown true rate can actually support. Neither finding was wrong, but the
+confidence level attached to the pass-rate claim specifically was.
+
+**Rule: every ablation result must be labeled with the tier its n actually supports,
+and the label travels with the claim wherever it's cited.**
+
+| n | Tier | What it can support | What it cannot |
+|---:|---|---|---|
+| 1 | **Screen** | "worth running further" / "not obviously broken" | Never cited as a finding on its own |
+| 6 (this harness's floor) | **Directional** | A hypothesis, a plausible effect, a reason to run more | A "clean X/6" is not evidence of a *rate* — see the n=100 result above. Continuous measures (token counts, wall-clock) have real power at n=6 even when pass/fail does not; a large effect-size claim on a continuous metric can stand at n=6, a pass-rate claim cannot. |
+| 30 | **Reportable** | A real comparison between two conditions, with an honest CI | Precision below roughly ±9 points (binomial, p≈0.5) |
+| 100 | **Rate estimate** | A defensible point estimate with CI narrow enough to compare against another n=100 run | Anything finer than the CI width — don't over-read a 3rd n=100 run landing a few points differently as a trend without a proper two-sample test |
+
+**Practical consequence:** a pass/fail comparison written up from an n=6 ablation must
+say so explicitly and must not use language like "no accuracy cost" or "clean sweep"
+as a settled conclusion — "consistent with no cost, underpowered to confirm" is the
+correct phrasing until a matched higher-n run exists. This is not new caution invented
+for its own sake; it's the exact caveat `gemma26-12gb-cap-e9`'s own Limits section
+already carried, now backed by a real number instead of a general hedge.
+
+**When n=100 is worth the GPU time:** reserve it for the most-contested, most-cited
+cell in a given investigation — not every cell. `gemma26-csv-n100-baseline` was worth
+it specifically because three separate n=6 samples had already disagreed with each
+other on that exact cell. A cell nobody has questioned does not need this treatment
+pre-emptively.
+
+---
+
 ## 3. Model seats (from measured work, not preference)
 
 **Rates below are chip-to-chip: RTX 3090 (320 W) vs Ryzen AI MAX 390
