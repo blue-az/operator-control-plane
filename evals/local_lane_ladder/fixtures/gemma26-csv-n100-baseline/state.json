@@ -1,0 +1,3206 @@
+{
+  "done": {
+    "csv-summarize-repair|L2|gemma4:26b|1": true,
+    "csv-summarize-repair|L2|gemma4:26b|10": true,
+    "csv-summarize-repair|L2|gemma4:26b|100": true,
+    "csv-summarize-repair|L2|gemma4:26b|11": true,
+    "csv-summarize-repair|L2|gemma4:26b|12": true,
+    "csv-summarize-repair|L2|gemma4:26b|13": true,
+    "csv-summarize-repair|L2|gemma4:26b|14": true,
+    "csv-summarize-repair|L2|gemma4:26b|15": true,
+    "csv-summarize-repair|L2|gemma4:26b|16": true,
+    "csv-summarize-repair|L2|gemma4:26b|17": true,
+    "csv-summarize-repair|L2|gemma4:26b|18": true,
+    "csv-summarize-repair|L2|gemma4:26b|19": true,
+    "csv-summarize-repair|L2|gemma4:26b|2": true,
+    "csv-summarize-repair|L2|gemma4:26b|20": true,
+    "csv-summarize-repair|L2|gemma4:26b|21": true,
+    "csv-summarize-repair|L2|gemma4:26b|22": true,
+    "csv-summarize-repair|L2|gemma4:26b|23": true,
+    "csv-summarize-repair|L2|gemma4:26b|24": true,
+    "csv-summarize-repair|L2|gemma4:26b|25": true,
+    "csv-summarize-repair|L2|gemma4:26b|26": true,
+    "csv-summarize-repair|L2|gemma4:26b|27": true,
+    "csv-summarize-repair|L2|gemma4:26b|28": true,
+    "csv-summarize-repair|L2|gemma4:26b|29": true,
+    "csv-summarize-repair|L2|gemma4:26b|3": true,
+    "csv-summarize-repair|L2|gemma4:26b|30": true,
+    "csv-summarize-repair|L2|gemma4:26b|31": true,
+    "csv-summarize-repair|L2|gemma4:26b|32": true,
+    "csv-summarize-repair|L2|gemma4:26b|33": true,
+    "csv-summarize-repair|L2|gemma4:26b|34": true,
+    "csv-summarize-repair|L2|gemma4:26b|35": true,
+    "csv-summarize-repair|L2|gemma4:26b|36": true,
+    "csv-summarize-repair|L2|gemma4:26b|37": true,
+    "csv-summarize-repair|L2|gemma4:26b|38": true,
+    "csv-summarize-repair|L2|gemma4:26b|39": true,
+    "csv-summarize-repair|L2|gemma4:26b|4": true,
+    "csv-summarize-repair|L2|gemma4:26b|40": true,
+    "csv-summarize-repair|L2|gemma4:26b|41": true,
+    "csv-summarize-repair|L2|gemma4:26b|42": true,
+    "csv-summarize-repair|L2|gemma4:26b|43": true,
+    "csv-summarize-repair|L2|gemma4:26b|44": true,
+    "csv-summarize-repair|L2|gemma4:26b|45": true,
+    "csv-summarize-repair|L2|gemma4:26b|46": true,
+    "csv-summarize-repair|L2|gemma4:26b|47": true,
+    "csv-summarize-repair|L2|gemma4:26b|48": true,
+    "csv-summarize-repair|L2|gemma4:26b|49": true,
+    "csv-summarize-repair|L2|gemma4:26b|5": true,
+    "csv-summarize-repair|L2|gemma4:26b|50": true,
+    "csv-summarize-repair|L2|gemma4:26b|51": true,
+    "csv-summarize-repair|L2|gemma4:26b|52": true,
+    "csv-summarize-repair|L2|gemma4:26b|53": true,
+    "csv-summarize-repair|L2|gemma4:26b|54": true,
+    "csv-summarize-repair|L2|gemma4:26b|55": true,
+    "csv-summarize-repair|L2|gemma4:26b|56": true,
+    "csv-summarize-repair|L2|gemma4:26b|57": true,
+    "csv-summarize-repair|L2|gemma4:26b|58": true,
+    "csv-summarize-repair|L2|gemma4:26b|59": true,
+    "csv-summarize-repair|L2|gemma4:26b|6": true,
+    "csv-summarize-repair|L2|gemma4:26b|60": true,
+    "csv-summarize-repair|L2|gemma4:26b|61": true,
+    "csv-summarize-repair|L2|gemma4:26b|62": true,
+    "csv-summarize-repair|L2|gemma4:26b|63": true,
+    "csv-summarize-repair|L2|gemma4:26b|64": true,
+    "csv-summarize-repair|L2|gemma4:26b|65": true,
+    "csv-summarize-repair|L2|gemma4:26b|66": true,
+    "csv-summarize-repair|L2|gemma4:26b|67": true,
+    "csv-summarize-repair|L2|gemma4:26b|68": true,
+    "csv-summarize-repair|L2|gemma4:26b|69": true,
+    "csv-summarize-repair|L2|gemma4:26b|7": true,
+    "csv-summarize-repair|L2|gemma4:26b|70": true,
+    "csv-summarize-repair|L2|gemma4:26b|71": true,
+    "csv-summarize-repair|L2|gemma4:26b|72": true,
+    "csv-summarize-repair|L2|gemma4:26b|73": true,
+    "csv-summarize-repair|L2|gemma4:26b|74": true,
+    "csv-summarize-repair|L2|gemma4:26b|75": true,
+    "csv-summarize-repair|L2|gemma4:26b|76": true,
+    "csv-summarize-repair|L2|gemma4:26b|77": true,
+    "csv-summarize-repair|L2|gemma4:26b|78": true,
+    "csv-summarize-repair|L2|gemma4:26b|79": true,
+    "csv-summarize-repair|L2|gemma4:26b|8": true,
+    "csv-summarize-repair|L2|gemma4:26b|80": true,
+    "csv-summarize-repair|L2|gemma4:26b|81": true,
+    "csv-summarize-repair|L2|gemma4:26b|82": true,
+    "csv-summarize-repair|L2|gemma4:26b|83": true,
+    "csv-summarize-repair|L2|gemma4:26b|84": true,
+    "csv-summarize-repair|L2|gemma4:26b|85": true,
+    "csv-summarize-repair|L2|gemma4:26b|86": true,
+    "csv-summarize-repair|L2|gemma4:26b|87": true,
+    "csv-summarize-repair|L2|gemma4:26b|88": true,
+    "csv-summarize-repair|L2|gemma4:26b|89": true,
+    "csv-summarize-repair|L2|gemma4:26b|9": true,
+    "csv-summarize-repair|L2|gemma4:26b|90": true,
+    "csv-summarize-repair|L2|gemma4:26b|91": true,
+    "csv-summarize-repair|L2|gemma4:26b|92": true,
+    "csv-summarize-repair|L2|gemma4:26b|93": true,
+    "csv-summarize-repair|L2|gemma4:26b|94": true,
+    "csv-summarize-repair|L2|gemma4:26b|95": true,
+    "csv-summarize-repair|L2|gemma4:26b|96": true,
+    "csv-summarize-repair|L2|gemma4:26b|97": true,
+    "csv-summarize-repair|L2|gemma4:26b|98": true,
+    "csv-summarize-repair|L2|gemma4:26b|99": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 79.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 43.2
+    },
+    {
+      "check_score": 0.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-q4afynq1/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-q4afynq1/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "2/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-q4afynq1/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-q4afynq1/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'; tests not edited: created out of scope: ['test_implementation.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 46.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 75.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 38.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 57.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t7.json",
+      "trial": 7,
+      "wall_clock_s": 53.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t8.json",
+      "trial": 8,
+      "wall_clock_s": 42.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t9.json",
+      "trial": 9,
+      "wall_clock_s": 49.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 135.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t10.json",
+      "trial": 10,
+      "wall_clock_s": 52.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t11.json",
+      "trial": 11,
+      "wall_clock_s": 66.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t12.json",
+      "trial": 12,
+      "wall_clock_s": 46.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-tla92v83/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-tla92v83/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-tla92v83/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-tla92v83/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t13.json",
+      "trial": 13,
+      "wall_clock_s": 48.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t14.json",
+      "trial": 14,
+      "wall_clock_s": 59.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_implementation.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 136.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t15.json",
+      "trial": 15,
+      "wall_clock_s": 59.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t16.json",
+      "trial": 16,
+      "wall_clock_s": 43.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t17.json",
+      "trial": 17,
+      "wall_clock_s": 55.7
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-zb57u6im/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-zb57u6im/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-zb57u6im/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-zb57u6im/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t18.json",
+      "trial": 18,
+      "wall_clock_s": 32.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_implementation.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t19.json",
+      "trial": 19,
+      "wall_clock_s": 53.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t20.json",
+      "trial": 20,
+      "wall_clock_s": 37.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t21.json",
+      "trial": 21,
+      "wall_clock_s": 62.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t22.json",
+      "trial": 22,
+      "wall_clock_s": 63.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t23.json",
+      "trial": 23,
+      "wall_clock_s": 40.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t24.json",
+      "trial": 24,
+      "wall_clock_s": 34.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t25.json",
+      "trial": 25,
+      "wall_clock_s": 56.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t26.json",
+      "trial": 26,
+      "wall_clock_s": 49.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_implementation.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t27.json",
+      "trial": 27,
+      "wall_clock_s": 44.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t28.json",
+      "trial": 28,
+      "wall_clock_s": 43.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t29.json",
+      "trial": 29,
+      "wall_clock_s": 68.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t30.json",
+      "trial": 30,
+      "wall_clock_s": 36.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t31.json",
+      "trial": 31,
+      "wall_clock_s": 56.7
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-5nyyuqee/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-5nyyuqee/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-5nyyuqee/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-5nyyuqee/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t32.json",
+      "trial": 32,
+      "wall_clock_s": 69.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t33.json",
+      "trial": 33,
+      "wall_clock_s": 47.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-xzu5w1bf/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-xzu5w1bf/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-xzu5w1bf/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-xzu5w1bf/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t34.json",
+      "trial": 34,
+      "wall_clock_s": 58.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t35.json",
+      "trial": 35,
+      "wall_clock_s": 29.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t36.json",
+      "trial": 36,
+      "wall_clock_s": 46.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-76n_0qer/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-76n_0qer/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-76n_0qer/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-76n_0qer/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 136.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t37.json",
+      "trial": 37,
+      "wall_clock_s": 47.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t38.json",
+      "trial": 38,
+      "wall_clock_s": 59.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t39.json",
+      "trial": 39,
+      "wall_clock_s": 43.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t40.json",
+      "trial": 40,
+      "wall_clock_s": 68.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t41.json",
+      "trial": 41,
+      "wall_clock_s": 64.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t42.json",
+      "trial": 42,
+      "wall_clock_s": 36.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t43.json",
+      "trial": 43,
+      "wall_clock_s": 60.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t44.json",
+      "trial": 44,
+      "wall_clock_s": 52.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t45.json",
+      "trial": 45,
+      "wall_clock_s": 62.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t46.json",
+      "trial": 46,
+      "wall_clock_s": 86.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t47.json",
+      "trial": 47,
+      "wall_clock_s": 75.7
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_implementation.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t48.json",
+      "trial": 48,
+      "wall_clock_s": 41.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t49.json",
+      "trial": 49,
+      "wall_clock_s": 54.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t50.json",
+      "trial": 50,
+      "wall_clock_s": 76.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t51.json",
+      "trial": 51,
+      "wall_clock_s": 40.8
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8oqytutd/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8oqytutd/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8oqytutd/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8oqytutd/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t52.json",
+      "trial": 52,
+      "wall_clock_s": 59.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_csv_parsing.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_csv_parsing.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t53.json",
+      "trial": 53,
+      "wall_clock_s": 51.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t54.json",
+      "trial": 54,
+      "wall_clock_s": 78.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t55.json",
+      "trial": 55,
+      "wall_clock_s": 48.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-gyvxgx7p/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-gyvxgx7p/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-gyvxgx7p/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-gyvxgx7p/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t56.json",
+      "trial": 56,
+      "wall_clock_s": 30.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t57.json",
+      "trial": 57,
+      "wall_clock_s": 62.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t58.json",
+      "trial": 58,
+      "wall_clock_s": 42.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t59.json",
+      "trial": 59,
+      "wall_clock_s": 50.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-kazvt_d_/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-kazvt_d_/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-kazvt_d_/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-kazvt_d_/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t60.json",
+      "trial": 60,
+      "wall_clock_s": 33.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t61.json",
+      "trial": 61,
+      "wall_clock_s": 52.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t62.json",
+      "trial": 62,
+      "wall_clock_s": 43.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 139.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 139.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t63.json",
+      "trial": 63,
+      "wall_clock_s": 42.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_fix.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_fix.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t64.json",
+      "trial": 64,
+      "wall_clock_s": 52.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t65.json",
+      "trial": 65,
+      "wall_clock_s": 49.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t66.json",
+      "trial": 66,
+      "wall_clock_s": 56.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t67.json",
+      "trial": 67,
+      "wall_clock_s": 48.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t68.json",
+      "trial": 68,
+      "wall_clock_s": 55.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t69.json",
+      "trial": 69,
+      "wall_clock_s": 55.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-uzitnims/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-uzitnims/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-uzitnims/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-uzitnims/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t70.json",
+      "trial": 70,
+      "wall_clock_s": 39.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t71.json",
+      "trial": 71,
+      "wall_clock_s": 51.7
+    },
+    {
+      "check_score": 0.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8_yz3xa_/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8_yz3xa_/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py', 'test_implementation_v2.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "2/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8_yz3xa_/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8_yz3xa_/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'; tests not edited: created out of scope: ['test_implementation.py', 'test_implementation_v2.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t72.json",
+      "trial": 72,
+      "wall_clock_s": 61.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t73.json",
+      "trial": 73,
+      "wall_clock_s": 64.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t74.json",
+      "trial": 74,
+      "wall_clock_s": 54.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t75.json",
+      "trial": 75,
+      "wall_clock_s": 38.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t76.json",
+      "trial": 76,
+      "wall_clock_s": 43.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t77.json",
+      "trial": 77,
+      "wall_clock_s": 39.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-bg3suajb/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-bg3suajb/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-bg3suajb/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-bg3suajb/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t78.json",
+      "trial": 78,
+      "wall_clock_s": 17.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_implementation.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t79.json",
+      "trial": 79,
+      "wall_clock_s": 55.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t80.json",
+      "trial": 80,
+      "wall_clock_s": 61.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t81.json",
+      "trial": 81,
+      "wall_clock_s": 98.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-bq93_dew/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-bq93_dew/src/expenses.py\", line 17, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-bq93_dew/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-bq93_dew/src/expenses.py\", line 17, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t82.json",
+      "trial": 82,
+      "wall_clock_s": 38.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t83.json",
+      "trial": 83,
+      "wall_clock_s": 51.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t84.json",
+      "trial": 84,
+      "wall_clock_s": 33.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t85.json",
+      "trial": 85,
+      "wall_clock_s": 41.5
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_fix.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_fix.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t86.json",
+      "trial": 86,
+      "wall_clock_s": 46.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py', 'test_implementation_v2.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_implementation.py', 'test_implementation_v2.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t87.json",
+      "trial": 87,
+      "wall_clock_s": 50.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t88.json",
+      "trial": 88,
+      "wall_clock_s": 50.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t89.json",
+      "trial": 89,
+      "wall_clock_s": 56.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t90.json",
+      "trial": 90,
+      "wall_clock_s": 55.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t91.json",
+      "trial": 91,
+      "wall_clock_s": 52.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t92.json",
+      "trial": 92,
+      "wall_clock_s": 47.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t93.json",
+      "trial": 93,
+      "wall_clock_s": 70.9
+    },
+    {
+      "check_score": 0.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-jy9bsi67/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-jy9bsi67/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "created out of scope: ['test_my_fix.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "2/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-jy9bsi67/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-jy9bsi67/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'; tests not edited: created out of scope: ['test_my_fix.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t94.json",
+      "trial": 94,
+      "wall_clock_s": 50.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t95.json",
+      "trial": 95,
+      "wall_clock_s": 73.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t96.json",
+      "trial": 96,
+      "wall_clock_s": 42.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_implementation.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_implementation.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t97.json",
+      "trial": 97,
+      "wall_clock_s": 50.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t98.json",
+      "trial": 98,
+      "wall_clock_s": 69.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t99.json",
+      "trial": 99,
+      "wall_clock_s": 61.8
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['\\t`test_csv_reader_v3.py`\\n', 'test_csv_reader.py', 'test_csv_reader_v2.py', 'test_csv_reader_v3.py', 'test_tmp.py', 'test_tmp_v2.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['\\t`test_csv_reader_v3.py`\\n', 'test_csv_reader.py', 'test_csv_reader_v2.py', 'test_csv_reader_v3.py', 'test_tmp.py', 'test_tmp_v2.py']",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma26-csv-n100-baseline/traces/csv-summarize-repair__L2__gemma4-26b__t100.json",
+      "trial": 100,
+      "wall_clock_s": 96.0
+    }
+  ]
+}
