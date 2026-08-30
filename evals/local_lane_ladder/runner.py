@@ -98,14 +98,21 @@ OPERATOR_BIN = REPO_ROOT / "operator"
 # coding-agent/ai package sources directly, 2026-08-28) -- num_ctx and
 # temperature are pinned by creating a derived Ollama model via a temp
 # Modelfile instead, and pi is pointed at that tag. Cached per (base model,
-# ctx, temperature) so a multi-cell run creates each derived model once.
-_PINNED_MODEL_CACHE: dict[tuple[str, int | None, float | None], str] = {}
+# ctx, temperature, num_gpu) so a multi-cell run creates each derived model once.
+_PINNED_MODEL_CACHE: dict[tuple[str, int | None, float | None, int | None], str] = {}
 
 
-def ensure_pinned_model(base_model: str, num_ctx: int | None, temperature: float | None) -> str:
-    if num_ctx is None and temperature is None:
+def ensure_pinned_model(
+    base_model: str, num_ctx: int | None, temperature: float | None, num_gpu: int | None = None,
+) -> str:
+    # num_gpu added 2026-08-30 for the VRAM-envelope accuracy ablation --
+    # same rationale as num_ctx/temperature: pi has no CLI flag for it, so
+    # forcing a layer-count cap (the mechanism gemma4-26b-16gb-cap/FINDING.md
+    # validated as actually effective, unlike OLLAMA_GPU_OVERHEAD) requires
+    # baking it into a derived Modelfile.
+    if num_ctx is None and temperature is None and num_gpu is None:
         return base_model
-    key = (base_model, num_ctx, temperature)
+    key = (base_model, num_ctx, temperature, num_gpu)
     if key in _PINNED_MODEL_CACHE:
         return _PINNED_MODEL_CACHE[key]
     suffix_parts = []
@@ -113,6 +120,8 @@ def ensure_pinned_model(base_model: str, num_ctx: int | None, temperature: float
         suffix_parts.append(f"ctx{num_ctx}")
     if temperature is not None:
         suffix_parts.append(f"t{str(temperature).replace('.', 'p')}")
+    if num_gpu is not None:
+        suffix_parts.append(f"gpu{num_gpu}")
     # Bug fix 2026-08-28: this used to be base_model.split(":")[0], which
     # collapses e.g. gemma4:26b and gemma4:31b to the identical "gemma4"
     # prefix -- both derived to the SAME tag, so whichever model's
@@ -128,6 +137,8 @@ def ensure_pinned_model(base_model: str, num_ctx: int | None, temperature: float
         lines.append(f"PARAMETER num_ctx {num_ctx}")
     if temperature is not None:
         lines.append(f"PARAMETER temperature {temperature}")
+    if num_gpu is not None:
+        lines.append(f"PARAMETER num_gpu {num_gpu}")
     fd, modelfile_path = tempfile.mkstemp(suffix=".Modelfile")
     try:
         with os.fdopen(fd, "w") as f:
@@ -561,7 +572,7 @@ def run_trial(
     # ensure_pinned_model. --seed has no pi equivalent (dropped, not silently
     # ignored -- see the warning main() prints once if --seed is passed).
     dispatch_model = ensure_pinned_model(
-        model, sampling.get("num_ctx"), sampling.get("temperature")
+        model, sampling.get("num_ctx"), sampling.get("temperature"), sampling.get("num_gpu")
     )
     argv = [
         PI_BIN,
@@ -776,6 +787,15 @@ def main() -> int:
         help="Pin the sampling seed for every cell. Pair with --temperature 0.",
     )
     parser.add_argument(
+        "--num-gpu", type=int, default=None,
+        help=(
+            "Cap GPU-resident layer count for every cell (VRAM-envelope "
+            "ablation -- see gemma4-26b-16gb-cap/FINDING.md for calibrated "
+            "envelope-to-num_gpu values on this rig). Unset means full "
+            "GPU residency at whatever the model needs."
+        ),
+    )
+    parser.add_argument(
         "--on-repeat", choices=["stop", "feedback"], default=None,
         help=(
             "OPR-ERA, NO LONGER FUNCTIONAL: was pass-through to opr for what to do "
@@ -838,6 +858,7 @@ def main() -> int:
         "num_ctx": args.num_ctx,
         "temperature": args.temperature,
         "think": args.think,
+        "num_gpu": args.num_gpu,
     }
     if args.seed is not None:
         print(
