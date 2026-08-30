@@ -5383,10 +5383,27 @@ def doctor_cmd(args) -> int:
         check_executor_block(task, f"Task {task_id}")
         task_status = task.get("status")
 
-        # Repo existence check
+        # Repo existence check.
+        #
+        # A missing repo on a verified/complete task is an Error because verified
+        # work should stay inspectable. But a worktree under the system temp dir
+        # was never durable by construction -- study scratch trees are cleared on
+        # reboot -- so its absence is expected rather than a consistency failure.
+        # Reporting it as a permanent unfixable Error trains readers to ignore
+        # Errors, which costs more than the check gains. The evidence itself is
+        # unaffected: local evidence is copied into .operator/evidence/ after
+        # fingerprinting and is checked separately.
         repo_path = task.get("repo")
         if repo_path and not os.path.exists(repo_path):
-            if task_status in ["verified", "complete"]:
+            temp_root = os.path.realpath(tempfile.gettempdir())
+            under_temp = os.path.realpath(repo_path).startswith(temp_root + os.sep)
+            if task_status in ["verified", "complete", "quarantined"] and under_temp:
+                infos.append(
+                    f"[Info] Task {task_id} repo path is gone and was under the system "
+                    f"temp dir; expected for a finished study, evidence is checked "
+                    f"separately: {repo_path}"
+                )
+            elif task_status in ["verified", "complete"]:
                 issues.append(
                     f"[Error] Task {task_id} repo path does not exist on disk: {repo_path}"
                 )

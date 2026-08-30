@@ -25,6 +25,36 @@ construction — never `operator init` a second ledger for the same work).
 - `usage-summary --by-machine` — group by `executor.machine` × `harness_id`
   (runs, cost, tokens), mirroring `--by-lane`.
 
+## Study worktrees and the repo path (added 2026-08-30)
+
+A task's `repo` field records where the work happened. For a live task a missing
+repo is a real blocker; for a finished one it is provenance, and the distinction
+matters because `doctor` treats them differently.
+
+**Convention: study worktrees go somewhere durable**, e.g. `~/operator-studies/<id>/`,
+not under the system temp directory. A scratch tree under `/tmp` is cleared on
+reboot, and a verified task then permanently points at a path that will never
+exist again.
+
+**`doctor` behaviour**, in `doctor_cmd`'s repo existence check:
+
+| Task status | Repo under temp dir | Elsewhere |
+|---|---|---|
+| verified / complete / quarantined | Info -- expected | **Error** |
+| anything else | Warning | Warning |
+
+The downgrade is narrow on purpose. A missing durable repo on verified work is
+still an Error, because verified work should stay inspectable. A missing temp
+worktree is not a consistency failure -- it was never durable by construction --
+and reporting it as a permanent unfixable Error trains readers to ignore Errors,
+which costs more than the check gains. Evidence is unaffected either way: local
+evidence is copied into `.operator/evidence/` after fingerprinting and is checked
+separately.
+
+Historical note: `ffsi-001-row-a` and `ffsi-001-accuracy-separation` were run
+under `/tmp/operator-study-FFSI-001/` in August 2026 and are the reason this is
+written down. Their claims and evidence survived; only the worktrees are gone.
+
 ## Seat modes and travel (added 2026-08-15)
 
 The model above says "exactly one `.operator/` seat (the supervisor's machine)"

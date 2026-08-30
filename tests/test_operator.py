@@ -260,6 +260,46 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("use --role outbox", res.stderr)
         self.assertFalse((Path(self.temp_dir) / ".operator").exists())
 
+    def test_doctor_downgrades_missing_temp_repo_on_terminal_task(self) -> None:
+        """A verified task whose repo was a temp-dir scratch tree is expected to
+        lose that tree; a durable repo vanishing is not. Downgrading the first
+        keeps the second meaningful -- a permanent unfixable Error trains readers
+        to ignore Errors."""
+        workdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, workdir, True)
+        subprocess.run([OPERATOR_BIN, "init"], cwd=workdir, capture_output=True, check=True)
+
+        tasks = os.path.join(workdir, ".operator", "tasks")
+        gone_temp = os.path.join(tempfile.gettempdir(), "operator-study-gone-xyz")
+        # Must be outside the temp root, or this test proves nothing -- the
+        # workdir itself is a mkdtemp, which is exactly the trap this caught.
+        gone_durable = os.path.expanduser("~/no-such-durable-repo-doctor-test")
+        self.assertFalse(os.path.exists(gone_durable))
+
+        for tid, repo in (("temp-study", gone_temp), ("durable-study", gone_durable)):
+            with open(os.path.join(tasks, f"{tid}.yaml"), "w") as fh:
+                yaml.safe_dump(
+                    {
+                        "task_id": tid,
+                        "repo": repo,
+                        "status": "verified",
+                        "claims": [],
+                        "evidence": [],
+                        "handoffs": [],
+                        "created_at": "2026-01-01T00:00:00+00:00",
+                        "updated_at": "2026-01-01T00:00:00+00:00",
+                    },
+                    fh,
+                )
+
+        out = subprocess.run(
+            [OPERATOR_BIN, "doctor"], cwd=workdir, capture_output=True, text=True
+        ).stdout
+
+        self.assertIn("[Info] Task temp-study repo path is gone", out)
+        self.assertNotIn("[Error] Task temp-study", out)
+        self.assertIn("[Error] Task durable-study repo path does not exist", out)
+
     def test_machine_role_init_cmd_accepts_namespace_without_role_fields(self) -> None:
         """Programmatic callers (study_runner, dogfood_runner) build a bare
         Namespace and never set --role/--seat-machine. init_cmd must default
