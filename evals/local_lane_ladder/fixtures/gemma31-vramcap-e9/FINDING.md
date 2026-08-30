@@ -80,13 +80,56 @@ a modest accuracy dip would have been.
   `constant-and-callers` result and the uniform `csv-summarize-repair`
   timeout (3/3, effectively deterministic at this severity) are both
   strong enough signals that a larger n is unlikely to change the
-  qualitative conclusion, but the exact boundary (what `num_gpu` value
-  would let `csv-summarize-repair` complete, and whether other tasks
-  behave like `constant-and-callers` or like `csv-summarize-repair`) is
-  unmapped.
-- Single severity level tested (num_gpu=40, ~13GB). Unlike gemma4:26b's
-  two-level test (12GB and 8GB), this run does not establish whether a
-  milder cap on gemma4:31b (e.g., 16GB) would avoid the timeout -- that
-  would be the natural next screen if this line of work continues.
+  qualitative conclusion.
 - The stall mechanism (prefill vs. compute-bound tool step) was not
   isolated -- worth a targeted follow-up if this matters operationally.
+
+## Addendum 2026-08-30 — boundary mapped, and a methodology correction along the way
+
+The "unmapped boundary" limit above was closed the same day. A follow-up sweep
+on `csv-summarize-repair` (the task that timed out here) tested `num_gpu` in
+{55, 50, 45, 40}, n=2 each, at `~18.4, 16.9, 15.4, 13.9 GiB` respectively.
+
+**The methodology correction, disclosed because it matters for how to read
+this file:** the first attempt at that sweep hit a genuine kernel OOM kill
+(confirmed via `dmesg`/`journalctl` -- `oom-kill: ... task=llama-server`),
+not caused by the model, by Erik, or by this task -- caused by this sweep
+script's own gap: it never explicitly evicted the previous derived-model tag
+before loading the next one, and a dense model's CPU-resident footprint
+*grows* as `num_gpu` shrinks, so two derived tags briefly coexisting in
+system RAM (31 GiB total on this host) is a real risk that gets worse at
+exactly the lower `num_gpu` values this investigation cares about most. That
+first attempt's `num_gpu=50` cell came back 1 pass / 1 timeout -- the timeout
+looked like a "danger zone" at the time but was very likely the OOM killing
+the model mid-generation, not genuine compute-bound stalling. A second sweep
+added explicit `keep_alive:0` eviction between levels and a live free-RAM
+floor (aborting a trial rather than risking another OOM) before re-testing
+everything.
+
+**Corrected, precise result:**
+
+| num_gpu | size_vram | decode tok/s | `csv-summarize-repair` result |
+|---:|---:|---:|---|
+| 55 | 18.4 GiB | 12.3 | clean (2/2) |
+| 50 | 16.9 GiB | 8.1 | **clean (2/2)** -- corrects the original sweep's contaminated 1-pass-1-timeout read |
+| 45 | 15.4 GiB | 6.0 | clean (2/2) |
+| **40** | **13.9 GiB** | **4.8** | **timeout (2/2), re-confirmed with clean methodology and adequate RAM headroom (13.2, 11.6 GiB free before each trial)** |
+
+`num_gpu=40`'s timeout is real -- re-verified independently of the OOM, ruling
+out the possibility that this file's headline finding was itself an artifact.
+**But the boundary is narrow and specific, not general:** it sits precisely
+between `num_gpu=40` and `num_gpu=45` (roughly 14-15 GiB) for this task, not
+at "any severe cap" as the original write-up's Interpretation section could
+be read to imply. gemma4:31b tolerates real, substantial VRAM reduction
+(down to ~15.4 GiB, a ~27% cut from its ~19-21 GiB full footprint, with decode
+already down to 6.0 tok/s) with **zero** viability cost, and only becomes
+unworkable past that specific, now-located point. The core claim --
+dense models can hit a hard viability wall that MoE models under comparable
+relative severity do not -- still holds. The claim that this happens at
+*any* severe compute-placement constraint does not, and should be read down
+to this specific, narrow boundary until further fixtures are tested there.
+
+This is the same category of lesson `gemma26-csv-n100-baseline` taught the
+night before with sample size: a result that looks decisive from one data
+point can be an artifact, and the fix is to test the boundary, not to trust
+or discard the single point on intuition.
