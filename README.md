@@ -94,11 +94,12 @@ YAML-only ledger baselines those records into SQLite without changing their visi
 **Tasks**
 - `task-create --objective "…" [--id ID] [--repo R] [--assign A] [--review R]` — open a task.
 - `task-show [ID]` — show a task's claims, evidence, and status.
+- `task-route --task ID --review H` / `task-route --task ID --clear-review` — append an auditable correction to reviewer routing.
 - `task-list` — list all tasks with outcome summaries.
 - `decide --claim ID --decision approve|reject|defer --rationale "…"` — operator ruling on a frozen proposal claim. Records UID; does not require a distinct verifier UID.
 
 **Claims** (a claim is a typed, checkable assertion bound to a gate)
-- `claim-add --type TYPE --text "…" [--task ID] [--gate GATE] [--by WHO]` — register a claim.
+- `claim-add --type TYPE --text "…" [--task ID] [--gate GATE] [--verify-cmd CMD] [--by WHO]` — register a claim. `--gate` is an artifact path; `--verify-cmd` is the command a verifier reruns.
   Types: `file_exists, test_passes, numeric_measurement, real_data, model_output,
   firmware_behavior, deployment_state, supervision_credit, paper_or_report_claim`.
 - `claim-show [ID]` / `claim-list [--task ID]` — inspect claims.

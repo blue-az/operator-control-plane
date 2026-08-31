@@ -462,7 +462,7 @@ def normalize_operation(raw_operation: object) -> dict:
     if kind == "claim.create":
         require_exact_keys(
             raw_operation,
-            {"kind", "task_id", "claim_id", "claim_type", "text", "required_gate"},
+            {"kind", "task_id", "claim_id", "claim_type", "text", "required_gate", "verify_cmd"},
             "operation",
         )
         operation = {
@@ -475,6 +475,9 @@ def normalize_operation(raw_operation: object) -> dict:
         required_gate = raw_operation.get("required_gate")
         if required_gate is not None:
             operation["required_gate"] = require_text(required_gate, "required_gate")
+        verify_cmd = raw_operation.get("verify_cmd")
+        if verify_cmd is not None:
+            operation["verify_cmd"] = require_text(verify_cmd, "verify_cmd")
         return operation
 
     if kind.startswith("evidence."):
@@ -1605,6 +1608,7 @@ class AuthorityStore:
                 "claim_type": operation["claim_type"],
                 "text": operation["text"],
                 "required_gate": operation.get("required_gate"),
+                "verify_cmd": operation.get("verify_cmd"),
                 "evidence_ids": [],
                 "verification_status": "unverified",
                 "author_uid": peer.uid,

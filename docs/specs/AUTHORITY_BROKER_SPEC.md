@@ -109,7 +109,9 @@ The broker constructs all resulting record snapshots. In particular, a builder c
 status change through `claim.create`, and a client cannot label its own evidence `uid_isolated` or
 `external_broker`.
 
-`claim.create` accepts `task_id`, `claim_id`, `claim_type`, `text`, and optional `required_gate`.
+`claim.create` accepts `task_id`, `claim_id`, `claim_type`, `text`, and optional `required_gate` and
+`verify_cmd`. `required_gate` is an artifact path; `verify_cmd` is the separately recorded command
+used by a verifier to rerun the gate.
 
 Evidence operations accept `task_id`, `claim_id`, `evidence_id`, and `evidence_type`.
 `evidence.attach_status` additionally requires `verification_status` equal to `verified`, `false`, or
