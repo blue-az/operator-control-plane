@@ -1,6 +1,10 @@
 # MEASURED: BEST DISCRIMINATOR — 63/126 at n=18 (e9+e11), difficulty ~1511 Elo,
 # squarely inside the field's range. Failures are genuine: models patch all
 # three occurrences instead of the one under the named heading.
+# 2026-08-30: SUPERSEDED for the current 5-model roster -- now 30/30 (100%),
+# zero spread where this used to split the field in half. This rating
+# describes the e9+e11 corpus, not current models. See
+# fixtures/e9-full-battery-saturation/FINDING.md.
 task_id: ambiguous-anchor
 description: >
   The anchor text appears three times, once under each environment heading. Only

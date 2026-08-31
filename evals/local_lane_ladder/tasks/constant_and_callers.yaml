@@ -1,5 +1,7 @@
 # MEASURED: MILD — 36/42 (e9). Separates qwen3.6:27b from the field, little
 # else. Needs state_changes:5; it scored 0/42 before continuation existed.
+# 2026-08-30: still saturated (30/30) for the current 5-model roster, as
+# expected -- see fixtures/e9-full-battery-saturation/FINDING.md.
 task_id: constant-and-callers
 description: >
   Change a constant and every caller that hard-codes its old value. Three files

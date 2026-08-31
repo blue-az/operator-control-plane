@@ -1,0 +1,129 @@
+# CANDIDATE CEILING FIXTURE (drafted 2026-08-30) -- csv-summarize-repair's
+# retirement (see docs/ or FINDING.md at fixtures/e9-full-battery-saturation/)
+# left the battery without a discriminator for the current roster. This stacks
+# four traps instead of two: RFC4180 escaped-quote parsing (not just a quoted
+# comma), multi-currency symbols (not just $), and a round-half-up requirement
+# that Python's round() gets wrong on an exact binary fraction (0.125 -> 0.12,
+# not 0.13) -- plus the original parens-negative / footer-row-skip traps.
+# Not yet screened against the current roster. Do not cite a difficulty
+# rating for this task until it has been run.
+task_id: ledger-strict-reconciliation
+description: >
+  Repair a ledger summariser that looks correct and silently produces wrong
+  totals or crashes outright. The naive split(",") breaks on a description
+  field containing both a comma and an RFC4180-escaped internal quote, not
+  just a quoted comma; float() rejects multiple currency symbols and
+  accounting parentheses; a trailing report/footer line (not a data row)
+  crashes the naive parser instead of being skipped; and round() uses
+  round-half-to-even where the spec requires round-half-up, which is wrong
+  by exactly one cent on an exact halfway value. The characteristic failure
+  is either an unhandled crash or a total that is wrong but plausible.
+
+files:
+  src/ledger.py: |
+    def summarize_ledger(csv_text):
+        """Total the amount column per category from a ledger export.
+
+        Returns {category: total} with each total rounded to 2 decimals,
+        using round-half-up (accounting convention), not Python's default
+        round-half-to-even.
+
+        Columns are date,category,description,amount. Category keys are
+        lowercase with surrounding whitespace stripped. The description
+        field may contain commas and RFC4180-escaped internal quotes
+        (a doubled "" represents one literal ").
+
+        Amounts may be quoted, may use $, EUR (€), or GBP (£) symbols,
+        thousands separators, and may have a third decimal place (a sub-cent
+        remainder from currency conversion). A negative amount is written
+        either in accounting parentheses, e.g. (45.00), or with a leading
+        minus sign.
+
+        Rows with a missing or empty amount are skipped, as are blank lines.
+        A row that does not have exactly four fields once quoting is
+        accounted for (e.g. a trailing report/footer line) is not a data
+        row and must be skipped without raising an error.
+        """
+        totals = {}
+        for line in csv_text.strip().splitlines()[1:]:
+            parts = line.split(",")
+            cat = parts[1]
+            amount = float(parts[3].replace("$", ""))
+            totals[cat] = totals.get(cat, 0) + amount
+        return {k: round(v, 2) for k, v in totals.items()}
+
+  tests/check_ledger.py: |
+    import sys
+
+    sys.dont_write_bytecode = True
+
+    sys.path.insert(0, ".")
+    from src.ledger import summarize_ledger
+
+    CSV_TEXT = (
+        'date,category,description,amount\n'
+        '2026-01-02,Food,Lunch,$45.00\n'
+        '2026-01-03,Food,Dinner,"$1,234.56"\n'
+        '2026-01-04,Travel,"He said ""go now"", then left",$300.00\n'
+        '2026-01-05,Travel,Refund,(45.00)\n'
+        '2026-01-06,Office,Supplies,"€2,500.00"\n'
+        '2026-01-07,Office,Adjustment,-45.00\n'
+        '2026-01-08,Fees,Conversion fee,$0.125\n'
+        '2026-01-09,Food,Snack,\n'
+        '\n'
+        'Report generated 2026-01-15 by finance-export v2.1\n'
+    )
+
+    r = summarize_ledger(CSV_TEXT)
+    assert abs(r.get("food", 0) - 1279.56) < 0.005, f"food={r.get('food')!r} expected 1279.56"
+    assert abs(r.get("travel", 0) - 255.00) < 0.005, f"travel={r.get('travel')!r} expected 255.00"
+    assert abs(r.get("office", 0) - 2455.00) < 0.005, f"office={r.get('office')!r} expected 2455.00"
+    assert abs(r.get("fees", 0) - 0.13) < 0.005, (
+        f"fees={r.get('fees')!r} expected 0.13 (round-half-up of 0.125, "
+        "not Python round()'s banker's-rounding 0.12)"
+    )
+    assert not any("generated" in k.lower() or "report" in k.lower() for k in r), (
+        f"footer/report line leaked into totals: {r!r}"
+    )
+
+    assert summarize_ledger("date,category,description,amount\n") == {}, "header-only must give {}"
+
+    only_fee = summarize_ledger(
+        'date,category,description,amount\n2026-02-01,Fees,Late fee,(12.50)\n'
+    )
+    assert abs(only_fee.get("fees", 0) + 12.50) < 0.005, f"fees={only_fee!r} expected -12.50"
+
+    print("LEDGER_OK")
+
+prompts:
+  L0: "My ledger totals come out wrong, or the script crashes entirely on some exports. Please sort it out."
+  L1: >
+    Fix summarize_ledger in src/ledger.py so it handles escaped quotes and
+    commas in the description field, multiple currency symbols, thousands
+    separators, parenthesised and minus-sign negatives, round-half-up
+    rounding, and a trailing non-data footer line. Do not change the tests.
+  L2: |
+    1. Read src/ledger.py and read tests/check_ledger.py.
+    2. In src/ledger.py, rewrite the body of "def summarize_ledger(csv_text):"
+       so that it satisfies the docstring already in that function.
+    3. Verify by running "python3 tests/check_ledger.py" from the fixture root;
+       it should exit 0 and print "LEDGER_OK".
+    Only touch src/ledger.py.
+
+trajectory_hint:
+  - Read src/ledger.py.
+  - Read tests/check_ledger.py to see the required behaviour.
+  - Patch the body of summarize_ledger in src/ledger.py.
+  - Run python3 tests/check_ledger.py and confirm it exits 0.
+
+postcondition:
+  type: all_of
+  checks:
+    - name: battery passes
+      type: exec
+      command: python3 tests/check_ledger.py
+      timeout: 60
+    - name: tests not edited
+      type: files_unchanged
+      allowed:
+        - src/ledger.py

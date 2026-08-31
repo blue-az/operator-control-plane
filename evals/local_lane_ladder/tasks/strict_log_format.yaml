@@ -1,6 +1,9 @@
 # MEASURED: GOOD DISCRIMINATOR — 51/126 at n=18 (e9+e11), difficulty ~1598 Elo.
 # The trap is the output contract (zero-padded hour, fixed ungrammatical
 # plural), not the logic. Models solve the counting and ship a nicer format.
+# 2026-08-30: near-saturated for the current 5-model roster (29/30 -- one
+# gemma4:26b miss, its own known failure mode, not new spread). See
+# fixtures/e9-full-battery-saturation/FINDING.md.
 task_id: strict-log-format
 description: >
   Build a log summariser against an exact output contract. The traps are all in
