@@ -1,0 +1,21 @@
+Grid: 1 tasks x 1 levels x 1 models x 5 trials = 5 cells
+Sampling pinned: {'num_ctx': 16384, 'temperature': 0.8, 'think': 'off'}
+Trace retention: ON -> /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/ledger-strict-screen/gemma26-recheck/traces
+[ledger-strict-reconciliation|L2|gemma4:26b|1] running...
+Pinning gemma4:26b -> gemma4-26b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+[ledger-strict-reconciliation|L2|gemma4:26b|1] FAIL (65.8s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-ledger-strict-reconciliation-L2-gljhvdz7/tests/check_ledger.py", line 22, in <module>
+    r = summarize_ledger(CSV_TEXT)
+  File "/tmp/local-lane-eval-ledger-strict-reconciliation-L2-gljhvdz7/src/ledger.py", line 28, in summarize_ledger
+    amount = float(parts[3].replace("$", ""))
+ValueError: could not convert string to float: '"1'
+[ledger-strict-reconciliation|L2|gemma4:26b|2] running...
+[ledger-strict-reconciliation|L2|gemma4:26b|2] PASS (48.0s) -- all 2 checks passed
+[ledger-strict-reconciliation|L2|gemma4:26b|3] running...
+[ledger-strict-reconciliation|L2|gemma4:26b|3] PASS (61.2s) -- all 2 checks passed
+[ledger-strict-reconciliation|L2|gemma4:26b|4] running...
+[ledger-strict-reconciliation|L2|gemma4:26b|4] PASS (116.2s) -- all 2 checks passed
+[ledger-strict-reconciliation|L2|gemma4:26b|5] running...
+[ledger-strict-reconciliation|L2|gemma4:26b|5] PASS (74.0s) -- all 2 checks passed
+
+Wrote fixtures/ledger-strict-screen/gemma26-recheck/RESULTS.md
