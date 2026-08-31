@@ -378,6 +378,7 @@ def normalize_record(op_dir: str, record: dict, read_only: bool = False) -> tupl
                 for evidence_id in payload.get("evidence_ids", [])
             ],
             "required_gate": payload.get("required_gate"),
+            "verify_cmd": payload.get("verify_cmd"),
             "verification_authority": payload.get("verification_authority"),
             "policy_authority": "external_broker",
             "authority_binding": binding,

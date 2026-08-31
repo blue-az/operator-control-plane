@@ -45,11 +45,13 @@ TRUST_RECORD_DIRS = {
     "claims": "claim",
     "evidence": "evidence",
     "handoffs": "handoff",
+    "route_corrections": "route_correction",
     "usage": "usage",
 }
 MUTATING_COMMANDS = {
     "init",
     "task-create",
+    "task-route",
     "claim-add",
     "evidence-attach",
     "crystal-attach",
@@ -252,13 +254,14 @@ def logical_record_id(record_type: str, record: dict) -> str:
         "claim": "claim_id",
         "evidence": "evidence_id",
         "handoff": "handoff_id",
+        "route_correction": "correction_id",
         "usage": "usage_id",
     }
     field = id_fields[record_type]
     record_id = record.get(field)
     if not record_id:
         raise LedgerWriteError(f"{record_type} record is missing required field '{field}'")
-    if record_type in {"evidence", "handoff"}:
+    if record_type in {"evidence", "handoff", "route_correction"}:
         task_id = record.get("task_id")
         if not task_id:
             raise LedgerWriteError(
@@ -289,7 +292,7 @@ def record_items_for_data(filepath: str, data: any) -> list[tuple[str, str, dict
             raise LedgerWriteError(f"Usage ledger '{filepath}' must contain a YAML list")
         records = data
     else:
-        expected_depth = 3 if record_type in {"evidence", "handoff"} else 2
+        expected_depth = 3 if record_type in {"evidence", "handoff", "route_correction"} else 2
         if len(relative_parts) != expected_depth or not relative_parts[-1].endswith(".yaml"):
             return []
         if not isinstance(data, dict):
@@ -319,6 +322,7 @@ def visible_record_files(operator_dir: str) -> list[str]:
         os.path.join(operator_dir, "claims", "*.yaml"),
         os.path.join(operator_dir, "evidence", "*", "evidence-*.yaml"),
         os.path.join(operator_dir, "handoffs", "*", "handoff-*.yaml"),
+        os.path.join(operator_dir, "route_corrections", "*", "route-correction-*.yaml"),
         os.path.join(operator_dir, "usage", "*.yaml"),
     ]
     return sorted(path for pattern in patterns for path in glob.glob(pattern))
@@ -739,6 +743,12 @@ def audit_event_store(operator_dir: str) -> list[str]:
                 messages.append(
                     f"[Error] Handoff {record_id} is not referenced by owning task {task_id}"
                 )
+        elif record_type == "route_correction":
+            correction_ref = f"route_corrections/{task_id}/{record.get('correction_id')}.yaml"
+            if correction_ref not in (task.get("route_corrections") or []):
+                messages.append(
+                    f"[Error] Route correction {record_id} is not referenced by owning task {task_id}"
+                )
     return messages
 
 
@@ -967,7 +977,7 @@ def load_identity_policy(operator_dir: str) -> dict:
             ):
                 raise IdentityPolicyError(f"identity UID {uid} roles must be a list of role names")
             roles = set(raw_roles)
-            unknown_roles = roles - {"builder", "verifier"}
+            unknown_roles = roles - {"builder", "verifier", "operator"}
             if unknown_roles:
                 rendered = ", ".join(sorted(unknown_roles))
                 raise IdentityPolicyError(f"identity UID {uid} has unknown role(s): {rendered}")
@@ -1388,6 +1398,17 @@ def get_next_handoff_id(operator_dir: str, task_id: str) -> str:
     return f"handoff-{max_id + 1:04d}"
 
 
+def get_next_route_correction_id(operator_dir: str, task_id: str) -> str:
+    correction_dir = os.path.join(operator_dir, "route_corrections", task_id)
+    os.makedirs(correction_dir, exist_ok=True)
+    max_id = max_durable_sequence(operator_dir, "route_correction", "route-correction-", task_id)
+    for path in glob.glob(os.path.join(correction_dir, "route-correction-*.yaml")):
+        match = re.match(r"route-correction-(\d+)\.yaml", os.path.basename(path))
+        if match:
+            max_id = max(max_id, int(match.group(1)))
+    return f"route-correction-{max_id + 1:04d}"
+
+
 # --- Commands ---
 
 
@@ -1648,6 +1669,88 @@ def init_cmd(args) -> int:
     )
 
     print(f"Initialized empty Operator Control Plane repository in {target_dir}")
+    return 0
+
+
+def task_route_cmd(args) -> int:
+    """Correct reviewer routing while retaining the prior route in history."""
+    enrollment, op_dir = resolve_operator_context()
+    if enrollment:
+        print(
+            "Error: task-route is not available for enrolled repositories; use the authority broker.",
+            file=sys.stderr,
+        )
+        return 1
+    if not op_dir:
+        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        return 1
+    if args.review is None and not args.clear_review:
+        print("Error: provide --review or --clear-review.", file=sys.stderr)
+        return 1
+    if args.review is not None and args.clear_review:
+        print("Error: --review and --clear-review are mutually exclusive.", file=sys.stderr)
+        return 1
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
+        return 1
+    task_id, task_path, task = resolved_task
+    if args.review:
+        harness_path = os.path.join(op_dir, "harnesses", f"{args.review}.yaml")
+        if not os.path.exists(harness_path):
+            print(f"Error: Review harness '{args.review}' does not exist in registry.", file=sys.stderr)
+            return 1
+    identity_policy = identity_policy_for_write(op_dir)
+    if identity_policy is None:
+        return 1
+    exec_identity = get_executor_identity()
+    if identity_policy["mode"] == "enforced" and not require_executor_role(
+        identity_policy, exec_identity, "operator", "correct task routing"
+    ):
+        return 1
+    preflight_projection(op_dir, task_path, task)
+    previous = task.get("review_harness")
+    current = None if args.clear_review else args.review
+    if previous == current:
+        print(f"Task '{task_id}' already has review harness '{current or 'None'}'.")
+        return 0
+    correction_id = get_next_route_correction_id(op_dir, task_id)
+    correction = {
+        "correction_id": correction_id,
+        "task_id": task_id,
+        "previous_review_harness": previous,
+        "review_harness": current,
+        "rationale": args.rationale,
+        "corrected_at": get_current_utc_iso(),
+        "executor": dict(exec_identity),
+    }
+    correction_path = os.path.join(
+        op_dir, "route_corrections", task_id, f"{correction_id}.yaml"
+    )
+    save_yaml(correction, correction_path)
+
+    history = task.get("review_harness_history") or []
+    history.append({
+        "previous": previous,
+        "current": current,
+        "corrected_at": get_current_utc_iso(),
+        "executor": dict(exec_identity),
+    })
+    task["review_harness_history"] = history
+    task["review_harness"] = current
+    decisions = task.get("operator_decision") or {}
+    decisions["review_harness"] = {
+        "decision": "route-correction",
+        "rationale": args.rationale,
+        "decided_at": get_current_utc_iso(),
+        "executor": dict(exec_identity),
+    }
+    task["operator_decision"] = decisions
+    corrections = task.get("route_corrections") or []
+    corrections.append(f"route_corrections/{task_id}/{correction_id}.yaml")
+    task["route_corrections"] = corrections
+    task["updated_at"] = get_current_utc_iso()
+    save_yaml(task, task_path)
+    print(f"Corrected review routing for task '{task_id}': {previous or 'None'} -> {current or 'None'}.")
     return 0
 
 
@@ -1994,6 +2097,9 @@ def claim_add_cmd(args) -> int:
         }
         if args.gate:
             request["operation"]["required_gate"] = args.gate
+        verify_cmd = getattr(args, "verify_cmd", None)
+        if verify_cmd:
+            request["operation"]["verify_cmd"] = verify_cmd
 
         conn_journal = authority_projection.ensure_journal(op_dir)
         failure = prepare_journal_transaction(conn_journal, operation_key, request)
@@ -2055,6 +2161,7 @@ def claim_add_cmd(args) -> int:
         "verified_by": None,
         "evidence_refs": [],
         "required_gate": args.gate,
+        "verify_cmd": getattr(args, "verify_cmd", None),
         "supervision_layer": args.layer,
         "executor": dict(exec_identity),
         "author_executor": dict(exec_identity),
@@ -2610,9 +2717,13 @@ def review_delegate_cmd(args) -> int:
         )
         return 1
 
-    reviewer = args.reviewer or task.get("review_harness")
+    reviewer = args.reviewer
     if not reviewer:
-        print("Error: --reviewer is required when the task has no review_harness.", file=sys.stderr)
+        print(
+            "Error: --reviewer is required; review_harness is routing metadata and "
+            "cannot supply verifier identity.",
+            file=sys.stderr,
+        )
         return 1
 
     repo_root = os.path.abspath(os.path.join(op_dir, os.pardir))
@@ -2650,7 +2761,14 @@ def review_delegate_cmd(args) -> int:
 
     evidence_refs = claim.get("evidence_refs") or []
     evidence_paths = [os.path.join(op_dir, ref) for ref in evidence_refs]
-    verify_cmd = args.verify_cmd or claim.get("required_gate") or "# TODO: provide verification command"
+    verify_cmd = args.verify_cmd or claim.get("verify_cmd")
+    if not verify_cmd:
+        print(
+            "Error: no verification command is recorded; provide --verify-cmd "
+            "(required_gate is an artifact path, not a command).",
+            file=sys.stderr,
+        )
+        return 1
 
     delegation_id = f"review-{args.claim}-{get_current_utc_iso().replace(':', '').replace('+', 'Z')}"
     delegation_dir = os.path.join(op_dir, "review_delegations")
@@ -6452,6 +6570,7 @@ def claim_show_cmd(args) -> int:
         print(f"Verdict:             {claim.get('verdict')}")
 
     print(f"Required Gate:       {claim.get('required_gate') or 'N/A'}")
+    print(f"Verification Command: {claim.get('verify_cmd') or 'N/A'}")
     if claim.get("type") == "supervision_credit":
         print(f"Supervision Layer:   {claim.get('supervision_layer') or 'AMBIGUOUS (no layer)'}")
     print("-" * 80)
@@ -7608,6 +7727,18 @@ def main() -> None:
         help="Open assumptions to document.",
     )
 
+    route_parser = subparsers.add_parser(
+        "task-route", help="Correct reviewer routing while retaining its history."
+    )
+    route_parser.add_argument("--task", dest="task_id", required=True, help="Task ID.")
+    route_parser.add_argument("--review", default=None, help="Replacement reviewer harness ID.")
+    route_parser.add_argument(
+        "--clear-review", action="store_true", help="Clear the reviewer routing field."
+    )
+    route_parser.add_argument(
+        "--rationale", required=True, help="Operator rationale for correcting the route."
+    )
+
     # operator task use
     use_parser = subparsers.add_parser(
         "task-use",
@@ -7667,7 +7798,12 @@ def main() -> None:
         help="Actor who made the claim (defaults to assigned harness).",
     )
     claim_parser.add_argument(
-        "--gate", "-g", default=None, help="Required verification gate description."
+        "--gate", "-g", default=None,
+        help="Required gate artifact path (for example tests/test_operator.py).",
+    )
+    claim_parser.add_argument(
+        "--verify-cmd", default=None,
+        help="Exact command a verifier can rerun; stored separately from the gate artifact path.",
     )
     claim_parser.add_argument(
         "--layer",
@@ -7924,7 +8060,7 @@ def main() -> None:
     review_delegate_parser.add_argument(
         "--reviewer",
         default=None,
-        help="Reviewer harness ID (defaults to task review_harness).",
+        help="Verifier harness ID (required; task review_harness is routing metadata only).",
     )
     review_delegate_parser.add_argument(
         "--mode",
@@ -7945,7 +8081,7 @@ def main() -> None:
     review_delegate_parser.add_argument(
         "--verify-cmd",
         default=None,
-        help="Exact command the reviewer should rerun (defaults to claim required gate).",
+        help="Exact command the reviewer should rerun (defaults to claim verify_cmd).",
     )
 
     # operator usage add
@@ -8456,6 +8592,7 @@ def main() -> None:
     cmd_map = {
         "init": init_cmd,
         "task-create": task_create_cmd,
+        "task-route": task_route_cmd,
         "task-use": task_use_cmd,
         "task-show": task_show_cmd,
         "task-list": task_list_cmd,

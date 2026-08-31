@@ -31,7 +31,7 @@ uids:
     roles: [verifier]
 ```
 
-Valid roles are `builder` and `verifier`. A UID may hold both roles, but it still cannot verify its
+The local `.operator/identity.yaml` accepts `builder`, `verifier`, and `operator` roles. A UID may hold multiple roles, but it still cannot verify its
 own claim. For compatibility, a scalar entry such as `1001: codex` is normalized to the name
 `codex` with both roles. Missing configuration defaults to `single_user`. Malformed configuration
 fails role-gated writes and is an error in `doctor`.
