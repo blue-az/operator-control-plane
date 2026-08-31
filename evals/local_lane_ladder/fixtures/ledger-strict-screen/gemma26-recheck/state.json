@@ -1,0 +1,166 @@
+{
+  "done": {
+    "ledger-strict-reconciliation|L2|gemma4:26b|1": true,
+    "ledger-strict-reconciliation|L2|gemma4:26b|2": true,
+    "ledger-strict-reconciliation|L2|gemma4:26b|3": true,
+    "ledger-strict-reconciliation|L2|gemma4:26b|4": true,
+    "ledger-strict-reconciliation|L2|gemma4:26b|5": true
+  },
+  "results": [
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-ledger-strict-reconciliation-L2-gljhvdz7/tests/check_ledger.py\", line 22, in <module>\n    r = summarize_ledger(CSV_TEXT)\n  File \"/tmp/local-lane-eval-ledger-strict-reconciliation-L2-gljhvdz7/src/ledger.py\", line 28, in summarize_ledger\n    amount = float(parts[3].replace(\"$\", \"\"))\nValueError: could not convert string to float: '\"1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/ledger.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-ledger-strict-reconciliation-L2-gljhvdz7/tests/check_ledger.py\", line 22, in <module>\n    r = summarize_ledger(CSV_TEXT)\n  File \"/tmp/local-lane-eval-ledger-strict-reconciliation-L2-gljhvdz7/src/ledger.py\", line 28, in summarize_ledger\n    amount = float(parts[3].replace(\"$\", \"\"))\nValueError: could not convert string to float: '\"1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ledger-strict-reconciliation",
+      "tok_s": 139.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 139.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/ledger-strict-screen/gemma26-recheck/traces/ledger-strict-reconciliation__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 65.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/ledger.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ledger-strict-reconciliation",
+      "tok_s": 137.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/ledger-strict-screen/gemma26-recheck/traces/ledger-strict-reconciliation__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 48.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/ledger.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ledger-strict-reconciliation",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/ledger-strict-screen/gemma26-recheck/traces/ledger-strict-reconciliation__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 61.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/ledger.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ledger-strict-reconciliation",
+      "tok_s": 135.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/ledger-strict-screen/gemma26-recheck/traces/ledger-strict-reconciliation__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 116.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/ledger.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ledger-strict-reconciliation",
+      "tok_s": 135.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 135.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/ledger-strict-screen/gemma26-recheck/traces/ledger-strict-reconciliation__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 74.0
+    }
+  ]
+}
