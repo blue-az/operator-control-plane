@@ -1,0 +1,966 @@
+{
+  "done": {
+    "csv-summarize-repair|L2|qwen3.8:27b|1": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|10": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|11": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|12": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|13": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|14": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|15": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|16": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|17": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|18": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|19": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|2": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|20": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|21": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|22": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|23": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|24": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|25": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|26": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|27": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|28": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|29": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|3": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|30": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|4": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|5": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|6": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|7": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|8": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|9": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.55,
+        "tok_s": 82.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 38.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 28.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 18.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 19.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 17.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 33.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 81.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t7.json",
+      "trial": 7,
+      "wall_clock_s": 40.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t8.json",
+      "trial": 8,
+      "wall_clock_s": 22.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t9.json",
+      "trial": 9,
+      "wall_clock_s": 24.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t10.json",
+      "trial": 10,
+      "wall_clock_s": 27.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t11.json",
+      "trial": 11,
+      "wall_clock_s": 19.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t12.json",
+      "trial": 12,
+      "wall_clock_s": 18.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 81.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t13.json",
+      "trial": 13,
+      "wall_clock_s": 37.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 81.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t14.json",
+      "trial": 14,
+      "wall_clock_s": 18.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t15.json",
+      "trial": 15,
+      "wall_clock_s": 18.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 80.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.59,
+        "tok_s": 80.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t16.json",
+      "trial": 16,
+      "wall_clock_s": 17.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t17.json",
+      "trial": 17,
+      "wall_clock_s": 34.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 81.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t18.json",
+      "trial": 18,
+      "wall_clock_s": 35.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t19.json",
+      "trial": 19,
+      "wall_clock_s": 24.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 81.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t20.json",
+      "trial": 20,
+      "wall_clock_s": 20.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t21.json",
+      "trial": 21,
+      "wall_clock_s": 23.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t22.json",
+      "trial": 22,
+      "wall_clock_s": 29.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t23.json",
+      "trial": 23,
+      "wall_clock_s": 33.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t24.json",
+      "trial": 24,
+      "wall_clock_s": 28.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t25.json",
+      "trial": 25,
+      "wall_clock_s": 22.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 81.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t26.json",
+      "trial": 26,
+      "wall_clock_s": 27.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 80.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.58,
+        "tok_s": 80.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t27.json",
+      "trial": 27,
+      "wall_clock_s": 38.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 78.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 78.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t28.json",
+      "trial": 28,
+      "wall_clock_s": 21.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 81.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 81.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t29.json",
+      "trial": 29,
+      "wall_clock_s": 105.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 82.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.56,
+        "tok_s": 82.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen38-csv-n30-spotcheck/traces/csv-summarize-repair__L2__qwen3.8-27b__t30.json",
+      "trial": 30,
+      "wall_clock_s": 16.9
+    }
+  ]
+}
