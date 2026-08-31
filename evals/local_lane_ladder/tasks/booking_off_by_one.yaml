@@ -3,6 +3,8 @@
 # discriminator. Its apparent spread in e8 was the OPR-RUL-008 one-state-change
 # cap, not capability. Retained as a sanity band: a strong model failing this
 # means suspect the harness, not the model.
+# 2026-08-30: still saturated (30/30) for the current 5-model roster, as
+# expected -- see fixtures/e9-full-battery-saturation/FINDING.md.
 task_id: booking-off-by-one
 description: >
   A boundary bug in a booking overlap check. The end date is the checkout day and

@@ -1,6 +1,13 @@
 # MEASURED: CEILING MARKER — 5/126 at n=18 (e9+e11). Difficulty ~1994 Elo,
 # roughly 180 points above the strongest model tested. Only qwen3.6:27b has
 # ever solved it. Read as 'brackets the top', not as a ranking.
+# 2026-08-30: RETIRED as a ceiling marker -- SUPERSEDED for the current
+# 5-model roster. gemma4:26b's true rate is 75% at n=100 (not 4%);
+# qwen3.8:27b is >=90%-at-95%-confidence at n=30; the other three models
+# are 6/6. This was ~180 Elo above the strongest model in the e9+e11
+# corpus; it no longer brackets the top of anything current. See
+# fixtures/e9-full-battery-saturation/FINDING.md and
+# fixtures/gemma26-csv-n100-baseline/FINDING.md.
 task_id: csv-summarize-repair
 description: >
   Repair an expense summariser that looks correct and silently produces wrong
