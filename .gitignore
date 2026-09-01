@@ -19,3 +19,4 @@ graphify-out/
 # side-effect-prone (a90626d). Don't repeat that churn for future runs.
 evals/ppr_agent_benchmark/runs/
 evals/alignerr_usecase_benchmark/runs/
+evals/alignerr_usecase_benchmark/sources.local.json

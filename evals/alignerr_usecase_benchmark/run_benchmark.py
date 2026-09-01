@@ -26,25 +26,37 @@ MODELS = [
     ("gemma26", "gemma4:26b"),
 ]
 
+# Source artifact paths live in sources.local.json, which is gitignored.
+# They are NOT hardcoded here: the paths themselves name confidential and
+# personal files, and this repo is public. Copy sources.local.json.example
+# and fill in your own. See FINDING.md for why.
+SOURCES_FILE = ROOT / "sources.local.json"
+
+
+def load_sources() -> dict:
+    if not SOURCES_FILE.exists():
+        raise SystemExit(
+            f"Missing {SOURCES_FILE.name}. Copy {SOURCES_FILE.name}.example to "
+            f"{SOURCES_FILE.name} and fill in absolute paths to your local source "
+            "artifacts. It is gitignored by design -- do not commit it."
+        )
+    return {k: v for k, v in json.loads(SOURCES_FILE.read_text()).items()
+            if not k.startswith("_")}
+
+
+SOURCES = load_sources()
+
 TASKS = {
     "aub1_code_preference": {
-        "sources": [
-            "/home/blueaz/Documents/Career/Applications/Alignerr/ALIGNERR_EVAL_RESULT_2026-04-24.md",
-            "/home/blueaz/Alignerr/Test_Instructions.md",
-        ],
-        "prompt": """You are doing an internal benchmark derived from a saved local evaluator task.\nDo not use network or external systems.\n\nTask: Given the local notes about a Koalas code-preference eval, identify the correct preference and explain why in reviewer form.\n\nReturn exactly these sections:\nPREFERENCE: <A or B>\nRATIONALE: <5-8 sentences>\nRISKS: <bullets>\nVERIFICATION_GAPS: <bullets>\n\nScoring rewards: preferring the narrower localized patch, identifying reset-index/rebuild-index workaround risk, noticing TODOs in final code, and not overclaiming correctness without verification.\n""",
+        "sources": SOURCES["aub1_code_preference"],
+        "prompt":"""You are doing an internal benchmark derived from a saved local evaluator task.\nDo not use network or external systems.\n\nTask: Given the local notes about a Koalas code-preference eval, identify the correct preference and explain why in reviewer form.\n\nReturn exactly these sections:\nPREFERENCE: <A or B>\nRATIONALE: <5-8 sentences>\nRISKS: <bullets>\nVERIFICATION_GAPS: <bullets>\n\nScoring rewards: preferring the narrower localized patch, identifying reset-index/rebuild-index workaround risk, noticing TODOs in final code, and not overclaiming correctness without verification.\n""",
     },
     "aub2_dispute_rederivation": {
-        "sources": ["/home/blueaz/Alignerr/batch4_failure_catalog.md"],
+        "sources": SOURCES["aub2_dispute_rederivation"],
         "prompt": """You are doing an internal benchmark derived from saved local dispute-handling work.\nDo not use network or external systems.\n\nTask: Extract the operating rule for handling reviewer disputes. Explain how to decide which disputed additions/removals/arithmetic changes to accept, reject, or hold for clarification.\n\nReturn exactly these sections:\nCORE_RULE: <one sentence>\nPROCEDURE: <numbered steps>\nFAILURE_MODES: <bullets>\nWHEN_TO_HOLD: <bullets>\n\nScoring rewards: treating disputes as claims not verdicts, independently re-deriving file sets and arithmetic, decomposing subclaims, literal-rule adherence, and routing corrections through claim/evidence/review.\n""",
     },
     "aub3_mujoco_verification": {
-        "sources": [
-            "/home/blueaz/Alignerr/mujoco-prep/PREP_BRIEF.md",
-            "/home/blueaz/Alignerr/mujoco-prep/GPU_CPU_BENCH_SECTION.md",
-            "/home/blueaz/Alignerr/mujoco-prep/INTERVIEW_CRIB.md",
-            "/home/blueaz/Alignerr/mujoco_spike/MUJOCO_LESSONS_LEARNED.md",
-        ],
+        "sources": SOURCES["aub3_mujoco_verification"],
         "prompt": """You are doing an internal benchmark derived from saved local MuJoCo/RL work.\nDo not use network or external systems.\n\nTask: Extract benchmarkable claims and propose rerunnable verification gates. Separate throughput from convergence, Gym-MuJoCo learner-device tests from MJX/GPU physics, and contact/model invariants from subjective visual assessment.\n\nReturn exactly these sections:\nMEASURED_CLAIMS: <bullets with numbers>\nRERUNNABLE_GATES: <bullets with commands or test types>\nPHYSICS_API_RULES: <bullets>\nSCOPE_LIMITS: <bullets>\n\nScoring rewards: closed-form geometry checks, mj_forward not mj_step for set-pose/read-sensor tests, support-force-equals-weight after self-contact filtering, CPU/GPU crossover correctness, and honest limits.\n""",
     },
 }

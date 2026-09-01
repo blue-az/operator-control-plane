@@ -1,8 +1,8 @@
 id: AUB-2
 name: Reviewer dispute re-derivation
 task_type: evidence_discipline
-source_artifacts:
-  - /home/blueaz/Alignerr/batch4_failure_catalog.md
+source_artifacts:  # local-only; see sources.local.json (gitignored)
+  - a reviewer-dispute failure catalog
 prompt: >
   A reviewer disputes a submitted answer and proposes additions/removals/arithmetic changes. Determine which
   subclaims should be accepted, rejected, or held for clarification. Treat the dispute as a claim, not a verdict.

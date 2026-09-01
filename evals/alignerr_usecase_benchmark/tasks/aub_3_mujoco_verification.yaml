@@ -1,11 +1,11 @@
 id: AUB-3
 name: MuJoCo / robotics verification methodology
 task_type: technical_benchmark_design
-source_artifacts:
-  - /home/blueaz/Alignerr/mujoco-prep/PREP_BRIEF.md
-  - /home/blueaz/Alignerr/mujoco-prep/GPU_CPU_BENCH_SECTION.md
-  - /home/blueaz/Alignerr/mujoco-prep/INTERVIEW_CRIB.md
-  - /home/blueaz/Alignerr/mujoco_spike/MUJOCO_LESSONS_LEARNED.md
+source_artifacts:  # local-only; see sources.local.json (gitignored)
+  - simulation prep brief
+  - GPU/CPU benchmark notes
+  - domain crib notes
+  - simulation lessons learned
 prompt: >
   Given saved MuJoCo/RL notes, extract the benchmarkable claims and propose rerunnable verification gates.
   Separate throughput from convergence, single-env Gym-MuJoCo from MJX/GPU physics, and contact/model

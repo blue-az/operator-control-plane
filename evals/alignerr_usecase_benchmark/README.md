@@ -12,14 +12,15 @@ This benchmark is separate from FastFoodAgent. FastFoodAgent measures local mode
 
 ## Source artifacts used locally
 
-- `/home/blueaz/Documents/Career/Applications/Alignerr/ALIGNERR_EVAL_RESULT_2026-04-24.md`
-- `/home/blueaz/Documents/Career/Applications/Alignerr/ALIGNERR_EVAL_DECISION_2026-04-24.md`
-- `/home/blueaz/Alignerr/Test_Instructions.md`
-- `/home/blueaz/Alignerr/batch4_failure_catalog.md`
-- `/home/blueaz/Alignerr/mujoco-prep/PREP_BRIEF.md`
-- `/home/blueaz/Alignerr/mujoco-prep/GPU_CPU_BENCH_SECTION.md`
-- `/home/blueaz/Alignerr/mujoco-prep/INTERVIEW_CRIB.md`
-- `/home/blueaz/Alignerr/mujoco_spike/MUJOCO_LESSONS_LEARNED.md`
+The three lanes are grounded in saved local work artifacts: a code-preference
+eval result and its project instructions, a reviewer-dispute failure catalog,
+and a set of MuJoCo/RL prep and lessons-learned notes.
+
+**Their paths and contents are deliberately not in this repo.** The assembled
+prompt inlines these documents verbatim, and some are confidential or personal.
+Paths live in `sources.local.json`, which is gitignored; copy
+`sources.local.json.example` and fill in your own to run the benchmark. See
+`FINDING.md` for the incident that motivated this.
 
 ## Benchmark lanes
 

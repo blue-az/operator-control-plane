@@ -1,8 +1,8 @@
 id: AUB-1
 name: Code transcript preference judgment
-source_artifacts:
-  - /home/blueaz/Documents/Career/Applications/Alignerr/ALIGNERR_EVAL_RESULT_2026-04-24.md
-  - /home/blueaz/Alignerr/Test_Instructions.md
+source_artifacts:  # local-only; see sources.local.json (gitignored)
+  - a saved code-preference eval result
+  - the eval project instructions
 task_type: reviewer_judgment
 prompt: >
   Given two coding-task responses for a repo issue, choose the better response and justify the preference.
