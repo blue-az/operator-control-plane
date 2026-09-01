@@ -125,7 +125,11 @@ def run_one(provider: str, model: str, task_name: str, prompt: str, timeout: int
         "elapsed_s": round(elapsed, 3),
         "stdout": proc.stdout,
         "stderr": proc.stderr,
-        "cmd": cmd,
+        # The assembled prompt embeds verbatim source artifacts (see SOURCES).
+        # Never persist it: storing cmd wholesale put those artifacts into a
+        # public repo once already. The prompt is reproducible from the task
+        # yaml plus the local source files, so it does not need to be on disk.
+        "cmd": cmd[:-1] + ["<prompt omitted: embeds source artifacts>"],
         "task": task_name,
         "model": model,
     }
@@ -148,6 +152,10 @@ def main() -> int:
 
     for task_name, spec in TASKS.items():
         prompt = spec["prompt"] + "\n" + read_sources(spec["sources"])
+        # The assembled prompt inlines verbatim source artifacts, some of them
+        # confidential (client eval instructions, personal career notes). It is
+        # written only under runs/, which is gitignored, and is reproducible on
+        # demand from the task spec plus the local sources.
         (OUT / f"{task_name}.prompt.txt").write_text(prompt)
         for label, model in models:
             print(f"RUN {task_name} {label} {model}", flush=True)
