@@ -31,21 +31,16 @@ scoring:
 
   coverage:
     - name: rederive_file_set
-      sections: [PROCEDURE]
       patterns: ['re-?derive', 'independent(ly)? .{0,25}(check|verif|determin)', 'from the (literal )?source']
     - name: recompute_arithmetic
-      sections: [PROCEDURE]
       patterns: ['re-?sum', 're-?compute', 're-?calculat', 'independent(ly)? .{0,20}(sum|add|total)']
       note: bare "sum" previously matched here and earned free credit.
     - name: decompose_subclaims
-      sections: [PROCEDURE]
       patterns: ['sub-?claim', 'each (proposed|disputed|item)', 'individually', 'one at a time', 'separately']
     - name: literal_rules
-      sections: [PROCEDURE, WHEN_TO_HOLD]
       patterns: ['literal', 'as written', 'rule text', 'exact wording']
       note: bare "query" previously matched here.
     - name: claim_evidence_workflow
-      sections: [PROCEDURE]
       patterns: ['claim/evidence', 'claim and evidence', 'evidence .{0,20}(ledger|record|trail)', 'through review']
       note: bare "evidence" previously matched here.
     - name: hold_clarification

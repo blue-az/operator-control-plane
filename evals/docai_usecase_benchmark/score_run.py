@@ -23,9 +23,9 @@ Design: four classes, reported separately and never summed.
   COVERAGE  a consideration was mentioned; weak signal, explicitly labeled
   MANUAL    rubric dimensions no regex can judge; emitted unscored
 
-Checks live in the task YAMLs, so this stays generic. Matching is anchored to
-the output section a check belongs in, so a keyword in a preamble earns
-nothing.
+Checks live in the task YAMLs, so this stays generic. Matching is scoped to the
+declared contract sections (excluding preamble), narrowing to one section only
+when that section IS the requirement.
 
 This scorer is still not an LLM judge. It reports what is mechanically
 checkable and refuses to fake the rest.
@@ -55,6 +55,27 @@ def load_specs() -> dict:
     for task_id, fname in TASK_FILES.items():
         specs[task_id] = yaml.safe_load((TASKS_DIR / fname).read_text())
     return specs
+
+
+# Models emit typographic punctuation. gpt-oss:120b writes "closed-form" and
+# "self-contact" with U+2011 NON-BREAKING HYPHEN, not ASCII "-". Patterns
+# written with an ASCII hyphen never match it, silently zeroing real content:
+# it scored 0/5 coverage on AUB-3 while its text plainly discussed closed-form
+# geometry, contact force equalling weight, and self-contact filtering. Any
+# scorer matching literal punctuation against LLM prose must normalise first.
+_PUNCT = {
+    0x2010: "-", 0x2011: "-", 0x2012: "-", 0x2013: "-", 0x2014: "-", 0x2015: "-",
+    0x2212: "-", 0x00AD: "-",
+    0x2018: "'", 0x2019: "'", 0x201A: "'", 0x201B: "'",
+    0x201C: '"', 0x201D: '"', 0x201E: '"',
+    0x00A0: " ", 0x2007: " ", 0x202F: " ", 0x2009: " ", 0x200A: " ", 0x2002: " ",
+    0x2003: " ", 0x200B: "",
+}
+
+
+def normalize(text: str) -> str:
+    """Fold typographic punctuation to ASCII so patterns match real output."""
+    return text.translate(_PUNCT)
 
 
 def split_sections(text: str, section_names: list[str]) -> dict[str, str]:
@@ -101,14 +122,26 @@ def split_sections(text: str, section_names: list[str]) -> dict[str, str]:
 def scope_text(check: dict, sections: dict[str, str], full: str) -> str:
     """The text a check is allowed to match against.
 
-    Section-anchored by default. Falls back to the whole document only when a
-    check declares no section -- and if the declared sections are missing from
-    a malformed output, the check simply has nothing to match, which is the
-    honest result.
+    Default scope is EVERY declared contract section -- which excludes preamble
+    and trailing chatter, the thing anchoring exists to exclude, without
+    discriminating between legitimate places to put a claim.
+
+    A check narrows to a specific `section:` only when the section IS the
+    requirement (a preference belongs under PREFERENCE; a hold condition
+    belongs under WHEN_TO_HOLD).
+
+    Narrowing further than that is actively harmful. The first version
+    anchored AUB-3's physics checks to RERUNNABLE_GATES/PHYSICS_API_RULES
+    only. gemma4:31b stated its closed-form check and support-force invariant
+    once each, under MEASURED_CLAIMS, and scored 0 on both; qwen3.6:35b scored
+    4/5 by repeating the same content in two sections. That made the scorer
+    reward duplication and penalise saying a thing once in a reasonable place
+    -- a verbosity bias, which is the defect this rewrite exists to remove.
     """
     names = check.get("sections") or ([check["section"]] if check.get("section") else [])
     if not names:
-        return full
+        # All contract sections, in declared order; preamble excluded.
+        return "\n".join(sections.values())
     return "\n".join(sections.get(n.upper(), "") for n in names)
 
 
@@ -125,7 +158,8 @@ def run_check(check: dict, sections: dict[str, str], full: str) -> bool:
     return True
 
 
-def score_one(text: str, spec: dict) -> dict:
+def score_one(raw: str, spec: dict) -> dict:
+    text = normalize(raw)
     scoring = spec.get("scoring", {})
     contract = [s.upper() for s in scoring.get("contract_sections", [])]
 
@@ -153,7 +187,7 @@ def score_one(text: str, spec: dict) -> dict:
         "verdict": verdict,
         "coverage": coverage,
         "manual": [m["name"] for m in scoring.get("manual", [])],
-        "chars": len(text),
+        "chars": len(raw),
     }
 
 

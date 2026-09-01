@@ -128,45 +128,74 @@ scorer is generic; matching is anchored to the output section a check
 belongs to, so a keyword in a preamble earns nothing. The old 0-3 `rubric:`
 blocks were replaced with what is actually checkable.
 
-**The rescore found something the collapsed total was hiding: verdict and
-coverage diverge, and the old score tracked coverage.**
+**The rescore's finding: coverage saturates, verdict discriminates.** Once
+false negatives were removed, coverage is near-uniform (4/4, 6/6, 4/5 almost
+everywhere) and carries essentially no signal. Every remaining distinction
+sits in `VERDICT`:
 
-| run | model | lane | verdict | coverage |
-|---|---|---|---:|---:|
-| 08-25 | qwen3.8:27b | AUB-2 | **0/1** | **6/6** |
-| 08-29 | qwen3-next:80b | AUB-2 | **0/1** | **6/6** |
-| 08-25 | gemma4:31b | AUB-3 | **2/2** | **1/5** |
-| 08-29 | gpt-oss:120b | AUB-3 | 1/2 | 0/5 |
-| 08-29 | gpt-oss:120b | AUB-1 | **0/1** | 3/4 |
+| run | model | lane | verdict | coverage | failed check |
+|---|---|---|---:|---:|---|
+| 08-25 | qwen3.8:27b | AUB-2 | **0/1** | 6/6 | `dispute_is_claim_not_verdict` |
+| 08-29 | qwen3-next:80b | AUB-2 | **0/1** | 6/6 | `dispute_is_claim_not_verdict` |
+| 08-29 | gpt-oss:120b | AUB-1 | **0/1** | 4/4 | `correct_preference` |
+| 08-25 | gemma4:26b | AUB-3 | 1/2 | 4/5 | `gpu_cpu_crossover_direction` |
+| 08-29 | gpt-oss:120b | AUB-3 | 1/2 | 4/5 | `gpu_cpu_crossover_direction` |
 
-Two models scored *perfect coverage while failing the single check the lane
-exists to test* — AUB-2's `dispute_is_claim_not_verdict`. They named every
-correct consideration and still treated the dispute as a verdict. Under the
-old scorer `qwen3.8:27b` took 6/7 on that lane. Inverted, `gemma4:31b` got
-AUB-3 fully right (2/2) while mentioning almost nothing (1/5), and was
-penalised for it.
+Three models scored **full coverage while failing the single check their lane
+exists to test**. `qwen3.8:27b` and `qwen3-next:80b` named every correct
+consideration about handling reviewer disputes and still treated the dispute
+as a verdict. `gpt-oss:120b` discussed every relevant risk on AUB-1 and picked
+the wrong response. Under the old scorer `qwen3.8:27b` took 6/7 on AUB-2 and
+`gpt-oss:120b` took 4/5 on AUB-1 — identical to models that got them right.
 
-So the original 17-20/20 spread wasn't a weak capability ranking. It was a
-**verbosity ranking**, on an axis that in the decisive cells runs *opposite*
-to correctness.
+So the original 17-20/20 was not a capability ranking. It was a **coverage
+ranking**, on an axis that is saturated and therefore uninformative, while
+the axis that discriminates was averaged into invisibility.
 
 Other corrections:
 - `qwen3-next:80b` AUB-3 is now `INVALID` (0-byte output), not 0/8. Its
   reported 10/20 was never a measurement.
 - `gemma4:26b` AUB-2 is `MALFORMED` — it genuinely omitted `PROCEDURE`, a
   real output-contract violation the old scorer had no concept of.
-- `verification_gap` was missed by all four models in the 08-25 run, which
-  the old collapsed score buried.
 
-**Two scorer artifacts were caught during verification, before trusting any
-output.** The first header regex required a trailing colon, so
-`**MEASURED_CLAIMS**` parsed as absent and zeroed every check in a 4,672-char
-correctly-sectioned answer. The second normalised `CORE RULE` to match but
-then looked it up as `CORE_RULE`, so the split found a section the lookup
-missed. Both produced confident, plausible, entirely false MALFORMED rows —
-the same failure class this document exists to describe. Caught only by
-checking every one of the 18 cells against its raw output rather than
-reading the summary table.
+**Retraction, same day:** an earlier version of this addendum reported
+`gemma4:31b` scoring AUB-3 `2/2` verdict against `1/5` coverage, and drew
+from it a claim that verdict and coverage *anti-correlate*. That 1/5 was a
+scorer artifact (over-narrow section anchoring, below). Its real coverage is
+4/5. **The anti-correlation claim is withdrawn** — the evidence supports the
+weaker and different claim above: coverage is saturated, not inverted.
+
+### Five artifacts in the replacement scorer, all found before trusting output
+
+Every one produced confident, plausible, false numbers:
+
+1. **Header regex required a trailing colon.** `**MEASURED_CLAIMS**` parsed as
+   absent, zeroing every check in a 4,672-char correctly-sectioned answer.
+2. **Name normalisation mismatch.** The splitter accepted `CORE RULE` and
+   stored it under that key; the lookup asked for `CORE_RULE`. The split found
+   a section the lookup could not see.
+3. **Over-narrow section anchoring.** AUB-3 physics checks were anchored to
+   `RERUNNABLE_GATES`/`PHYSICS_API_RULES`. `gemma4:31b` stated each claim once
+   under `MEASURED_CLAIMS` and scored 0; `qwen3.6:35b` scored 4/5 by repeating
+   itself across two sections. **The scorer was rewarding duplication and
+   penalising concision — a verbosity bias, the exact defect it was written to
+   remove.**
+4. **Typographic punctuation.** `gpt-oss:120b` writes `closed‑form` with U+2011
+   NON-BREAKING HYPHEN. Patterns using ASCII `-` matched nothing; it scored 0/5
+   on content it plainly discussed.
+5. **`verification_gap` patterns too literal.** Matched **zero of six** models
+   whose `VERIFICATION_GAPS` sections read "No test harness run", "Absence of
+   any CI/lint", "Neither response validates".
+
+**All five failed in the same direction: false negatives.** That is not
+coincidence. Tight patterns fail closed, so an unvalidated keyword scorer
+systematically *under*-reports, and it penalises hardest the models whose
+prose style diverges most from whatever the pattern author imagined. A
+keyword scorer's errors are not randomly distributed noise that averages out
+across models — they are a systematic bias correlated with writing style.
+
+None were visible in the summary tables. All were found by checking each of
+the 18 cells against its raw output.
 
 **Still true:** the benchmark remains saturated on verdict (most models get
 most verdicts right), every cell is n=1, and no ranking claim is supportable.
