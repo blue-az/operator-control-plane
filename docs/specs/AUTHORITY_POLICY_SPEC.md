@@ -60,7 +60,7 @@ Every generation is strict canonical JSON with exactly:
 
 Unknown fields fail. Generation one requires a null predecessor. Later generations increment by
 exactly one and name the prior generation's canonical SHA-256. Policy and ledger IDs never change.
-Only `builder` and `verifier` roles exist, and at least one distinct builder/verifier UID pair is
+The broker policy surface accepts only `builder` and `verifier` roles, and at least one distinct builder/verifier UID pair is
 required. Only `mode: enforced` is accepted.
 
 Account names are audit labels bound to numeric IDs. Production install, rotation, audit, and preflight
