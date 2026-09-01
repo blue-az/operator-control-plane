@@ -118,6 +118,61 @@ deterministically, since keyword presence cannot measure them. Those
 dimensions need a human pass or a separately validated judge, and should
 read as not-implemented rather than be silently faked.
 
+## Addendum 2026-09-01 — scorer replaced, both runs rescored
+
+`score_run.py` was rewritten to report four classes that are never summed:
+`STATUS` (OK / MALFORMED / **INVALID**), `VERDICT` (objectively correct
+conclusion), `COVERAGE` (weak presence signal), and `MANUAL` (rubric
+dimensions emitted unscored). Checks moved into the task YAMLs, so the
+scorer is generic; matching is anchored to the output section a check
+belongs to, so a keyword in a preamble earns nothing. The old 0-3 `rubric:`
+blocks were replaced with what is actually checkable.
+
+**The rescore found something the collapsed total was hiding: verdict and
+coverage diverge, and the old score tracked coverage.**
+
+| run | model | lane | verdict | coverage |
+|---|---|---|---:|---:|
+| 08-25 | qwen3.8:27b | AUB-2 | **0/1** | **6/6** |
+| 08-29 | qwen3-next:80b | AUB-2 | **0/1** | **6/6** |
+| 08-25 | gemma4:31b | AUB-3 | **2/2** | **1/5** |
+| 08-29 | gpt-oss:120b | AUB-3 | 1/2 | 0/5 |
+| 08-29 | gpt-oss:120b | AUB-1 | **0/1** | 3/4 |
+
+Two models scored *perfect coverage while failing the single check the lane
+exists to test* — AUB-2's `dispute_is_claim_not_verdict`. They named every
+correct consideration and still treated the dispute as a verdict. Under the
+old scorer `qwen3.8:27b` took 6/7 on that lane. Inverted, `gemma4:31b` got
+AUB-3 fully right (2/2) while mentioning almost nothing (1/5), and was
+penalised for it.
+
+So the original 17-20/20 spread wasn't a weak capability ranking. It was a
+**verbosity ranking**, on an axis that in the decisive cells runs *opposite*
+to correctness.
+
+Other corrections:
+- `qwen3-next:80b` AUB-3 is now `INVALID` (0-byte output), not 0/8. Its
+  reported 10/20 was never a measurement.
+- `gemma4:26b` AUB-2 is `MALFORMED` — it genuinely omitted `PROCEDURE`, a
+  real output-contract violation the old scorer had no concept of.
+- `verification_gap` was missed by all four models in the 08-25 run, which
+  the old collapsed score buried.
+
+**Two scorer artifacts were caught during verification, before trusting any
+output.** The first header regex required a trailing colon, so
+`**MEASURED_CLAIMS**` parsed as absent and zeroed every check in a 4,672-char
+correctly-sectioned answer. The second normalised `CORE RULE` to match but
+then looked it up as `CORE_RULE`, so the split found a section the lookup
+missed. Both produced confident, plausible, entirely false MALFORMED rows —
+the same failure class this document exists to describe. Caught only by
+checking every one of the 18 cells against its raw output rather than
+reading the summary table.
+
+**Still true:** the benchmark remains saturated on verdict (most models get
+most verdicts right), every cell is n=1, and no ranking claim is supportable.
+The scorer is now honest about what it measures; it does not make the task
+set discriminate.
+
 ## Limits
 
 - This finding rates the instrument, not the models. Nothing here says the

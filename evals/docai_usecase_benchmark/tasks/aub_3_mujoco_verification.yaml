@@ -16,8 +16,54 @@ expected_findings:
   - Treat support force equals weight as a contact invariant after filtering self-contacts.
   - Preserve the CPU/GPU crossover finding: default PPO/SAC do not benefit from GPU; scaled SAC does.
   - State scope limits: throughput not convergence where applicable, single env, power-capped GPU.
-rubric:
-  measurable_claim_extraction: 3
-  rerunnable_gate_design: 3
-  physics_api_accuracy: 3
-  scope_honesty: 3
+
+# See aub_1 for why the old 0-3 `rubric:` block was replaced. Classes are
+# reported separately and never summed.
+scoring:
+  contract_sections: [MEASURED_CLAIMS, RERUNNABLE_GATES, PHYSICS_API_RULES, SCOPE_LIMITS]
+
+  verdict:
+    - name: mj_forward_not_mj_step
+      section: PHYSICS_API_RULES
+      patterns: ['mj_forward']
+      forbidden: ['mj_step .{0,30}(set-?pose|read-?sensor)', 'use mj_step to (set|read)']
+      note: >
+        Correct API for set-pose/read-sensor. Naming mj_forward while also
+        prescribing mj_step for the same test fails.
+    - name: gpu_cpu_crossover_direction
+      sections: [MEASURED_CLAIMS, SCOPE_LIMITS]
+      patterns:
+        - 'default .{0,40}(PPO|SAC).{0,60}(not|no) .{0,20}benefit'
+        - 'GPU .{0,25}(slower|no faster|not faster)'
+        - 'CPU .{0,25}(faster|outperform)'
+        - 'scaled SAC .{0,30}benefit'
+      note: >
+        Direction matters, not the digits. The old pattern matched the bare
+        string "3.0", which hits any version number or dollar amount.
+
+  coverage:
+    - name: closed_form
+      sections: [RERUNNABLE_GATES, PHYSICS_API_RULES]
+      patterns: ['closed[- ]form', 'analytic(al)? .{0,20}(check|solution)']
+    - name: support_equals_weight
+      sections: [RERUNNABLE_GATES, PHYSICS_API_RULES]
+      patterns: ['support .{0,25}weight', 'contact force .{0,25}weight', 'sum .{0,20}force .{0,25}weight']
+    - name: self_contact_filtering
+      sections: [RERUNNABLE_GATES, PHYSICS_API_RULES]
+      patterns: ['self[- ]contact', 'grandparent', 'exclude .{0,20}own']
+    - name: throughput_not_convergence
+      sections: [SCOPE_LIMITS, MEASURED_CLAIMS]
+      patterns: ['throughput .{0,30}not .{0,20}convergence', 'not .{0,15}convergence', 'steps?/s(ec)? .{0,30}not .{0,20}learn']
+    - name: mjx_distinction
+      sections: [SCOPE_LIMITS, MEASURED_CLAIMS]
+      patterns: ['MJX', 'Gym-?MuJoCo', 'GPU physics', 'batched .{0,20}(env|sim)']
+
+  manual:
+    - name: scope_honesty
+      criterion: >
+        Are the stated limits real constraints on the conclusions drawn, or a
+        generic caveats paragraph that does not bind any specific claim?
+    - name: gate_rerunnability
+      criterion: >
+        Could someone actually rerun the proposed gates from what is written --
+        concrete commands, thresholds, pass/fail criteria?

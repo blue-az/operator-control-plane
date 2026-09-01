@@ -13,8 +13,45 @@ expected_findings:
   - Identify reset-index/rebuild-index workaround patterns as semantic-risk signals.
   - Note TODOs in final code as a serious mergeability concern.
   - Do not overclaim correctness without runnable verification.
-rubric:
-  correct_preference: 3
-  semantic_risk_detection: 3
-  verification_gap_honesty: 3
-  rationale_quality: 3
+
+# Scoring is declared here so score_run.py stays generic. The previous
+# `rubric:` block (0-3 across four dimensions) was never implemented and could
+# not be -- a regex cannot produce a 2-versus-3 judgment. See FINDING.md.
+# The three classes below are reported separately and never summed.
+scoring:
+  # The prompt demands these exact sections. Missing any => status MALFORMED.
+  contract_sections: [PREFERENCE, RATIONALE, RISKS, VERIFICATION_GAPS]
+
+  # Objectively right or wrong. This is the point of the task.
+  verdict:
+    - name: correct_preference
+      section: PREFERENCE
+      patterns: ['^\s*(\*\*)?A(\*\*)?\s*$', '^\s*A\b']
+      note: A is correct -- narrower localized fix, both have verification gaps.
+
+  # Weak signal: presence of a consideration, not the quality of its use.
+  # Section-anchored so a keyword in a preamble does not earn credit.
+  coverage:
+    - name: narrow_localized
+      section: RATIONALE
+      patterns: ['narrow', 'localiz', 'less invasive', 'minimal', 'surgical']
+    - name: workaround_risk
+      sections: [RATIONALE, RISKS]
+      patterns: ['reset[- _]?index', 'rebuild[- _]?index', 'workaround', 'semantic']
+    - name: todo_detected
+      sections: [RATIONALE, RISKS]
+      patterns: ['\bTODO\b']
+    - name: verification_gap
+      section: VERIFICATION_GAPS
+      patterns: ['unverified', 'not (been )?run', 'no(t| )? .{0,20}verif', 'untested', 'cannot confirm']
+
+  # Requires a human pass. Never scored automatically; emitted as MANUAL.
+  manual:
+    - name: rationale_quality
+      criterion: >
+        Is the rationale reviewer-grade -- concise, specific to these two
+        responses, and free of restated boilerplate?
+    - name: verification_gap_honesty
+      criterion: >
+        Does it acknowledge its own uncertainty, or merely name the phrase
+        "verification gap" while still asserting correctness?
