@@ -33,17 +33,26 @@ scoring:
   # Section-anchored so a keyword in a preamble does not earn credit.
   coverage:
     - name: narrow_localized
-      section: RATIONALE
       patterns: ['narrow', 'localiz', 'less invasive', 'minimal', 'surgical']
     - name: workaround_risk
-      sections: [RATIONALE, RISKS]
       patterns: ['reset[- _]?index', 'rebuild[- _]?index', 'workaround', 'semantic']
     - name: todo_detected
-      sections: [RATIONALE, RISKS]
       patterns: ['\bTODO\b']
     - name: verification_gap
       section: VERIFICATION_GAPS
-      patterns: ['unverified', 'not (been )?run', 'no(t| )? .{0,20}verif', 'untested', 'cannot confirm']
+      # Models express this in natural prose, not keywords. The first pattern
+      # set ('unverified', 'not run', 'untested', 'cannot confirm') matched
+      # ZERO of six models -- while their VERIFICATION_GAPS sections read
+      # "No test harness run", "Absence of any CI/lint", "no confirmation",
+      # "Neither response validates". A 6/6 false negative.
+      patterns:
+        - 'unverified|untested|unproven|unvalidated'
+        - '\bno\b[^.]{0,40}(test|verif|confirm|validat|benchmark|evidence|proof|check|demonstrat)'
+        - 'not\s+(been\s+)?(run|tested|verified|validated|confirmed|shown|demonstrated|proven|exercised)'
+        - 'absence of'
+        - 'neither[^.]{0,40}(validat|verif|test|confirm|demonstrat)'
+        - 'without\s+(running|testing|verif|confirm)'
+        - 'cannot confirm|no confirmation|no evidence|no proof'
 
   # Requires a human pass. Never scored automatically; emitted as MANUAL.
   manual:

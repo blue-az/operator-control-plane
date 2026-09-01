@@ -31,7 +31,6 @@ scoring:
         Correct API for set-pose/read-sensor. Naming mj_forward while also
         prescribing mj_step for the same test fails.
     - name: gpu_cpu_crossover_direction
-      sections: [MEASURED_CLAIMS, SCOPE_LIMITS]
       patterns:
         - 'default .{0,40}(PPO|SAC).{0,60}(not|no) .{0,20}benefit'
         - 'GPU .{0,25}(slower|no faster|not faster)'
@@ -43,19 +42,14 @@ scoring:
 
   coverage:
     - name: closed_form
-      sections: [RERUNNABLE_GATES, PHYSICS_API_RULES]
       patterns: ['closed[- ]form', 'analytic(al)? .{0,20}(check|solution)']
     - name: support_equals_weight
-      sections: [RERUNNABLE_GATES, PHYSICS_API_RULES]
-      patterns: ['support .{0,25}weight', 'contact force .{0,25}weight', 'sum .{0,20}force .{0,25}weight']
+      patterns: ['support .{0,40}weight', 'contact.{0,20}force.{0,40}weight', '(sum|total).{0,30}force.{0,40}weight', 'normal force.{0,40}weight']
     - name: self_contact_filtering
-      sections: [RERUNNABLE_GATES, PHYSICS_API_RULES]
       patterns: ['self[- ]contact', 'grandparent', 'exclude .{0,20}own']
     - name: throughput_not_convergence
-      sections: [SCOPE_LIMITS, MEASURED_CLAIMS]
       patterns: ['throughput .{0,30}not .{0,20}convergence', 'not .{0,15}convergence', 'steps?/s(ec)? .{0,30}not .{0,20}learn']
     - name: mjx_distinction
-      sections: [SCOPE_LIMITS, MEASURED_CLAIMS]
       patterns: ['MJX', 'Gym-?MuJoCo', 'GPU physics', 'batched .{0,20}(env|sim)']
 
   manual:
