@@ -1,0 +1,16 @@
+{
+  "_comment": "Copy to sources.local.json and fill in absolute paths to your own local source artifacts. That file is gitignored on purpose: the assembled prompt inlines these documents verbatim, so both their contents and their paths stay off the public repo. See FINDING.md.",
+  "aub1_code_preference": [
+    "/absolute/path/to/a-saved-code-preference-eval-result.md",
+    "/absolute/path/to/the-eval-project-instructions.md"
+  ],
+  "aub2_dispute_rederivation": [
+    "/absolute/path/to/a-reviewer-dispute-failure-catalog.md"
+  ],
+  "aub3_mujoco_verification": [
+    "/absolute/path/to/simulation-prep-brief.md",
+    "/absolute/path/to/gpu-cpu-benchmark-notes.md",
+    "/absolute/path/to/domain-crib-notes.md",
+    "/absolute/path/to/simulation-lessons-learned.md"
+  ]
+}
