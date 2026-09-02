@@ -32,6 +32,7 @@ python3 pbc_lint.py owners-manual/pbc    # fail-closed PBC invariants 1/3/4
 python3 -m pytest tests/test_operator.py -q -k doctor   # run a single test by name pattern
 python3 -m pytest tests/test_authority_broker.py -q  # standalone P3a broker/store tests
 python3 -m pytest tests/test_dogfood_runner.py -q  # dogfood runner unit suite
+python3 -m pytest tests/test_pi_operator_extension.py -q  # project-local pi extension
 ./operator-broker --help                    # isolated P3a development surfaces
 ./operator-admin --help                     # root-managed P3b policy & dogfood runner surfaces
 ruff check .                             # lint check configured in pyproject.toml
@@ -107,6 +108,17 @@ local default model needs a matching `harnesses/<id>.yaml` in existing ledgers. 
 `handoff-0001`. These YAML files are current projections; `.operator/ledger.sqlite3` retains immutable
 full-snapshot versions for trust-relevant writes. Session commands version their `usage-XXXX` record.
 `find_operator_dir()` walks upward from cwd to locate the active ledger.
+
+**Project-local pi extension.** `.pi/extensions/operator/` is a pi extension providing
+`/op:doctor`, `/op:status`, `/op:tasks`, `/op:use` (step 1) plus `/op:claim`,
+`/op:evidence`, `/op:handoff` (step 2 of
+`owners-manual/pbc/appendix-pi-operator-extension.pbc.md`). It wraps `./operator`
+through a fixed argv allowlist in `core.ts` -- no raw passthrough, no
+`--status`/`--verified-by`/`--verdict`, `--task` always explicit, `--by`
+session-derived provenance only -- and writes only after a confirmation dialog.
+It registers no model-callable tools. Verify with
+`node --experimental-strip-types .pi/extensions/operator/selftest.ts` or
+`tests/test_pi_operator_extension.py`. See `.pi/extensions/operator/README.md`.
 
 **Git is not a local-seat default.** `pi` is the carrier and can run many
 models. Local *seats* (e.g. `gemma4:31b`) do not run `git commit` / rebase /

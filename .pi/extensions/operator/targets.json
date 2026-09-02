@@ -1,0 +1,52 @@
+{
+  "targets": [
+    {
+      "alias": "claude",
+      "harness_id": "claude",
+      "carrier_id": "claude",
+      "model": null,
+      "isolation": "in-repo",
+      "brief_format": "export"
+    },
+    {
+      "alias": "codex",
+      "harness_id": "codex",
+      "carrier_id": "codex",
+      "model": null,
+      "isolation": "in-repo",
+      "brief_format": "export"
+    },
+    {
+      "alias": "grok",
+      "harness_id": "grok",
+      "carrier_id": "grok",
+      "model": null,
+      "isolation": "in-repo",
+      "brief_format": "export"
+    },
+    {
+      "alias": "pi",
+      "harness_id": "pi",
+      "carrier_id": "pi",
+      "model": null,
+      "isolation": "in-repo",
+      "brief_format": "export"
+    },
+    {
+      "alias": "opencode",
+      "harness_id": "opencode",
+      "carrier_id": "opencode",
+      "model": null,
+      "isolation": "in-repo",
+      "brief_format": "export"
+    },
+    {
+      "alias": "gemini-agy",
+      "harness_id": "gemini-agy",
+      "carrier_id": "agy",
+      "model": null,
+      "isolation": "in-repo",
+      "brief_format": "export"
+    }
+  ]
+}
