@@ -25,14 +25,6 @@
       "brief_format": "export"
     },
     {
-      "alias": "pi",
-      "harness_id": "pi",
-      "carrier_id": "pi",
-      "model": null,
-      "isolation": "in-repo",
-      "brief_format": "export"
-    },
-    {
       "alias": "opencode",
       "harness_id": "opencode",
       "carrier_id": "opencode",

@@ -17,6 +17,7 @@
  *   /op:supervisor-review   wrap ./operator review-delegate for one named claim (step 3)
  *   /op:delegate            send bounded implementation work to another agent (step 4)
  *   /op:roadmap             show ladder, recent dogfood issues, and future features
+ *   /op:next-steps          summarize the active task's recommended next actions
  *
  * Deliberately absent at step 4: the /pbc:* commands. Also absent: any
  * model-callable tool. These commands are human ergonomics (POE-RUL-103);
@@ -270,6 +271,47 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 			);
 			} finally {
 				ctx.ui.setStatus("operator", undefined);
+			}
+		},
+	});
+
+	pi.registerCommand("op:next-steps", {
+		description: "Operator: show prioritized next actions for the active task (read-only; add 'popup' for chooser)",
+		handler: async (args, ctx) => {
+			const ledger = requireLedger(ctx);
+			if (!ledger) return;
+			const { taskId, origin } = resolveActiveTask(ledger);
+			const invocations: string[] = [];
+			let taskShow: core.TaskShowSummary | null = null;
+			let claims: core.ClaimRow[] = [];
+			if (taskId && core.taskRecordExists(ledger, taskId)) {
+				const showArgv = core.taskShowArgv(taskId);
+				invocations.push(core.formatInvocation(showArgv));
+				taskShow = core.parseTaskShow((await runOperator(pi, ledger, showArgv)).stdout);
+				const claimArgv = core.claimListArgv(taskId);
+				invocations.push(core.formatInvocation(claimArgv));
+				claims = core.parseClaimList((await runOperator(pi, ledger, claimArgv)).stdout);
+			}
+			try {
+				const report = core.buildNextStepsReport({
+					roadmap: core.readPiOperatorRoadmap(ledger.root),
+					activeTask: taskId,
+					activeOrigin: origin,
+					taskShow,
+					claims,
+					invocations,
+				});
+				const wantsPopup = ["popup", "choose", "select"].includes(args.trim().toLowerCase());
+				if (wantsPopup && ctx.hasUI) {
+					const choices = report.lines.filter((line) => /^\d+\.\s/.test(line));
+					if (choices.length > 0) {
+						const picked = await ctx.ui.select("Operator next steps", choices);
+						if (picked) ctx.ui.notify(`Selected next step: ${picked}`, "info");
+					}
+				}
+				emit(ctx, report);
+			} catch (err) {
+				refuse(ctx, "/op:next-steps", "Operator next steps", err);
 			}
 		},
 	});
@@ -808,17 +850,17 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 			let reviewer = "";
 			if (reviewHarness && harnesses.includes(reviewHarness) && reviewHarness !== sessionAuthor && reviewHarness !== assignedHarness) {
 				reviewer = reviewHarness;
-				ctx.ui.notify(`Defaulting supervisor-review reviewer to task review_harness: ${reviewer}.`, "info");
+				ctx.ui.notify(`Defaulting supervisor-review target to task review_harness model/persona: ${reviewer}.`, "info");
 			} else {
 				const reviewerLabels = harnesses.map((id) => {
 					const notes: string[] = [];
-					if (id === reviewHarness) notes.push("task review_harness, routing only");
-					if (id === assignedHarness) notes.push("task assigned_harness");
+					if (id === reviewHarness) notes.push("task review_harness model/persona hint");
+					if (id === assignedHarness) notes.push("task assigned_harness implementer");
 					if (sessionAuthor && id === sessionAuthor) notes.push("this session — not selectable");
 					return notes.length > 0 ? `${id}  (${notes.join("; ")})` : id;
 				});
 				const pickedReviewer = await ctx.ui.select(
-					`Reviewer harness for ${claimId}${reviewHarness ? ` (task review_harness ${reviewHarness} was not safe to auto-use)` : ""}`,
+					`Review model/persona for ${claimId}${reviewHarness ? ` (task review_harness ${reviewHarness} was not safe to auto-use)` : ""}`,
 					reviewerLabels,
 				);
 				if (!pickedReviewer) {

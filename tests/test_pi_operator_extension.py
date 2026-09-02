@@ -184,6 +184,7 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
                 "op:doctor",
                 "op:evidence",
                 "op:handoff",
+                "op:next-steps",
                 "op:roadmap",
                 "op:status",
                 "op:supervisor-review",
@@ -195,6 +196,7 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
         self.assertIn('pi.registerCommand("op:delegate"', text)
         self.assertIn('pi.registerCommand("op:supervisor-review"', text)
         self.assertIn('pi.registerCommand("op:roadmap"', text)
+        self.assertIn('pi.registerCommand("op:next-steps"', text)
         self.assertNotIn('pi.registerCommand("pbc:define"', text)
         self.assertNotIn('pi.registerCommand("pbc:feature"', text)
 

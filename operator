@@ -2781,7 +2781,8 @@ def review_delegate_cmd(args) -> int:
         f"Review claim {args.claim} and its evidence only. Read the bundle at {bundle_path}. "
         f"Rerun the verification command exactly where possible. If supported, attach a concise review evidence note "
         f"with ./operator evidence-attach --task {task_id} --claim {args.claim} --status verified "
-        f"--verified-by {reviewer} --by {reviewer} --verdict '<verdict>'. "
+        f"--verified-by $(whoami) --by $(whoami) --verdict '<verdict>'. "
+        "The reviewer/model label is not the Unix verifier identity. "
         "If unsupported, do not verify; explain why. Do not modify product code or tests."
     )
 
