@@ -1,5 +1,13 @@
 # The entire E9 battery is now saturated for the current roster -- including its own ceiling marker and best discriminator
 
+> **SCOPE CORRECTION 2026-09-02 — this finding is L2-only, and its title
+> overstates it.** Every run it draws on used L2. When the same battery was
+> run at **L1** under the same harness and roster, it still discriminated:
+> gemma4:31b and gpt-oss:120b 30/30, qwen3.8:27b 26/30, gemma4:26b 24/30,
+> with two tasks carrying clean spread. **The battery is not exhausted; it
+> was being run at the wrong rung.** Read every claim below as
+> "E9-at-L2", not "E9". See `../e9-l1-pi-screen/FINDING.md`.
+
 **Type:** synthesis finding. No new trials were run for this write-up; it
 pulls together numbers already collected and committed this session
 (`e9-pi-rerun`, `gptoss-120b-e9`, `gemma26-csv-n100-baseline`,
