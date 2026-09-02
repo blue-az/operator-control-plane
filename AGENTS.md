@@ -25,6 +25,7 @@ Compact Python CLI (Python ≥ 3.12).
 | `operator-admin` / `authority_admin.py` | P3b policy install/lifecycle (Root-managed) |
 | `authority_client.py` / `authority_projection.py` | CLI ↔ broker integration |
 | `dogfood_runner.py` | Resumable dogfood plan engine |
+| `.pi/extensions/operator/` | Project-local pi extension: orientation plus claim/evidence/handoff commands |
 | `tests/test_operator.py` | Main CLI integration suite |
 | `tests/test_authority_*.py` | Broker, admin, and integration suites |
 | `*_SPEC.md` | Source of truth for semantics/contracts |
