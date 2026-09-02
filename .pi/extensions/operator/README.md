@@ -36,18 +36,19 @@ shows the exact argv. `/op:handoff` opens an editor with the six closeout
 sections; continuity transfer is the mode where a successor is named under
 "Next action", not a separate command.
 
-`/op:supervisor-review` is chooser-first over one named claim. The reviewer
-harness and the review path (trusted uid-isolated vs same-UID advisory notes)
-are explicit; neither is taken from the session or from `review_harness`. A
-verify command must already be on the claim or be supplied. Trusted UID runs
-ask for a Unix user and write a `sudo -u` script for **you** to authorize;
-this session does not run it and does not silently fall back to advisory.
-Broker-enrolled ledgers fail closed as unavailable.
+`/op:supervisor-review` is chooser-first over one named claim. The review
+target is a model/persona label such as `grok`, `luna`, or `claude`; `pi` is
+only the carrier/runtime. The task's `review_harness` may suggest a default
+review target, but trusted authority is still a separate Unix verifier identity
+such as `operator-verifier`. Trusted UID runs write a `sudo -u` script for
+**you** to authorize; this session does not run it and does not silently fall
+back to advisory. Broker-enrolled ledgers fail closed as unavailable.
 
-`/op:delegate` is chooser-first over configured targets in
+`/op:delegate` is chooser-first over configured model/persona targets in
 `targets.json`. Each target shows ledger harness id, carrier/adapter id,
-model, isolation, and brief format as separate axes. If the target is already
-this task's `assigned_harness` and is not also `review_harness`, it
+model, isolation, and brief format as separate axes. `pi` itself is not a
+normal delegation target because it is the runtime that launches many models.
+If the target is already this task's `assigned_harness` and is not also `review_harness`, it
 session-starts a builder brief on the parent. If the target is not an
 implementer on the parent, you confirm a scoped child task with explicit
 `--assign` instead of mutating parent routing. A target that would be both

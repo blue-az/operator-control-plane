@@ -1437,6 +1437,41 @@ export interface RoadmapReportInput {
 	invocations: string[];
 }
 
+export function buildNextStepsReport(input: RoadmapReportInput & { claims: ClaimRow[] }): Report {
+	const lines: string[] = [];
+	const f = input.taskShow?.fields ?? {};
+	const unverified = input.claims.filter((c) => c.status.toUpperCase() !== "VERIFIED");
+	lines.push(`Showing task: ${input.activeTask ?? "(none)"} - from ${describeOrigin(input.activeOrigin)}`);
+	if (f.Status) lines.push(`Task status: ${f.Status}`);
+	lines.push("", "Recommended next steps");
+	let n = 1;
+	if (f["Next Action"]) lines.push(`${n++}. Current ledger next_action: ${truncate(f["Next Action"], 240)}`);
+	if (unverified.length > 0) {
+		lines.push(`${n++}. Review or intentionally leave unverified claim(s): ${unverified.map((c) => c.id).join(", ")}.`);
+		const latest = unverified[unverified.length - 1];
+		if (latest) lines.push(`   Suggested: /op:supervisor-review ${latest.id}`);
+	}
+	if (input.activeTask && input.taskShow && unverified.length === 0 && f.Status !== "verified") {
+		lines.push(`${n++}. Task has no unverified claims shown here; consider final /op:handoff and task transition/verification closeout.`);
+	}
+	const recentIssue = input.roadmap.issues[input.roadmap.issues.length - 1];
+	if (recentIssue) lines.push(`${n++}. Latest dogfood issue: ${recentIssue.id} — ${truncate(recentIssue.nextStep, 220)}`);
+	const recentFeatures = input.roadmap.futureFeatures.slice(-3);
+	if (recentFeatures.length > 0) {
+		lines.push(`${n++}. Candidate feature slices: ${recentFeatures.map((x) => x.command ?? x.id).join(", ")}.`);
+	}
+	if (n === 1) lines.push("1. No active task context found. Run /op:tasks then /op:use <task-id>.");
+	lines.push("", "This is guidance only. It does not execute commands or write the ledger.");
+	return {
+		command: "/op:next-steps",
+		title: "Operator next steps",
+		headline: input.activeTask ? `next steps for ${input.activeTask}` : "no active task selected",
+		level: input.activeTask ? "info" : "warning",
+		lines,
+		invocations: input.invocations,
+	};
+}
+
 export function buildRoadmapReport(input: RoadmapReportInput): Report {
 	const lines: string[] = [];
 	const currentStep = input.activeTask ? /step(\d+)/.exec(input.activeTask)?.[1] ?? null : null;
@@ -1622,9 +1657,10 @@ export function describeHandoffPlan(taskId: string, by: string, draft: HandoffDr
 // --- step 3 supervisor-review reports ----------------------------------------
 
 export const SUPERVISOR_REVIEW_BOUNDARY_NOTES = [
-	"--reviewer is an explicit harness id. It is never taken from the session, from --by, or from task review_harness (POE-RUL-003/102).",
+	"The review target is a model/persona label recorded as --reviewer. Pi is only a carrier/runtime; --reviewer is never taken from --by or the session (POE-RUL-003/102).",
+	"The task's review_harness may suggest a default review target, but it is routing/economics metadata, not Unix verifier authority.",
 	"This command writes a review bundle only. It does not verify, does not attach evidence, and does not emit --status, --verified-by or --verdict (POE-RUL-113).",
-	"Trusted verification still requires a distinct registered verifier UID. Same-UID review is advisory (POE-ISS-007).",
+	"Trusted verification still requires a distinct registered verifier UID such as operator-verifier. Same-UID review is advisory (POE-ISS-007).",
 	"A verifier-only identity cannot attach draft/no-status evidence; this command does not offer that path (POE-ISS-008).",
 ] as const;
 
@@ -1647,7 +1683,7 @@ export function describeSupervisorReviewPlan(opts: SupervisorReviewPlanInput): s
 	const lines = [
 		`task:       ${opts.taskId}`,
 		`claim:      ${opts.claimId}   (one named claim; not a session or claim-set)`,
-		`reviewer:   ${opts.reviewer}   (explicit harness id)`,
+		`reviewer:   ${opts.reviewer}   (review model/persona label; not the Unix verifier user)`,
 		`mode:       ${opts.mode}`,
 	];
 	if (opts.mode === "uid-isolated") {
@@ -1662,10 +1698,10 @@ export function describeSupervisorReviewPlan(opts: SupervisorReviewPlanInput): s
 		lines.push(`session --by: ${opts.sessionAuthor}   (provenance only; not used as --reviewer)`);
 	}
 	if (opts.assignedHarness) {
-		lines.push(`assigned:   ${opts.assignedHarness}   (routing; not used as the reviewer default)`);
+		lines.push(`assigned:   ${opts.assignedHarness}   (implementer routing; not reviewer authority)`);
 	}
 	if (opts.reviewHarness) {
-		lines.push(`review_harness: ${opts.reviewHarness}   (routing metadata only; not used as --reviewer)`);
+		lines.push(`review_harness: ${opts.reviewHarness}   (review target routing hint; separate from verifier UID)`);
 	}
 	if (opts.authorUid !== null && opts.authorUid !== undefined) {
 		lines.push(`claim author UID: ${opts.authorUid}`);
@@ -1805,7 +1841,6 @@ export const DEFAULT_DELEGATE_TARGETS: readonly DelegateTarget[] = [
 	{ alias: "claude", harnessId: "claude", carrierId: "claude", model: null, isolation: "in-repo", briefFormat: "export", commandTemplate: null },
 	{ alias: "codex", harnessId: "codex", carrierId: "codex", model: null, isolation: "in-repo", briefFormat: "export", commandTemplate: null },
 	{ alias: "grok", harnessId: "grok", carrierId: "grok", model: null, isolation: "in-repo", briefFormat: "export", commandTemplate: null },
-	{ alias: "pi", harnessId: "pi", carrierId: "pi", model: null, isolation: "in-repo", briefFormat: "export", commandTemplate: null },
 	{ alias: "opencode", harnessId: "opencode", carrierId: "opencode", model: null, isolation: "in-repo", briefFormat: "export", commandTemplate: null },
 	{ alias: "gemini-agy", harnessId: "gemini-agy", carrierId: "agy", model: null, isolation: "in-repo", briefFormat: "export", commandTemplate: null },
 ];

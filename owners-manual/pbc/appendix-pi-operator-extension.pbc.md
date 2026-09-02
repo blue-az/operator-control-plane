@@ -409,6 +409,10 @@ future_features:
     name: Trusted verifier run command
     command: /op:verify-run
     description: Launch a generated review_delegations verifier script through a visible human authorization prompt, stream/report failures, and attach verifier run logs when possible, so users do not copy/paste sudo bash while still preserving the no-silent-cross-UID boundary.
+  - id: POE-FUT-010
+    name: Operator next-steps command
+    command: /op:next-steps
+    description: Turn the active task's ledger state into a short prioritized action list: current next_action first, then unverified claims, missing review/verification gates, recent dogfood issues, and recommended future slices.
 ```
 
 ## Dogfood Issue Backlog
@@ -460,6 +464,14 @@ issues:
     source: pi-operator-extension-step5 live TUI dogfood
     summary: /op:doctor and /op:status are slow on large ledgers and previously showed no visible progress while running.
     next_step: Add visible working/status notifications before long Operator reads and clear them when the command finishes.
+  - id: POE-ISS-012
+    source: pi-operator-extension-step5 verifier run dogfood
+    summary: Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.
+    next_step: Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity.
+  - id: POE-ISS-013
+    source: pi-operator-extension-target-ux-cleanup
+    summary: Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.
+    next_step: Rename prompts/docs around model/persona targets, remove Pi as a default delegation target, and keep reviewer labels distinct from verifier Unix users in generated review instructions.
 ```
 
 ## Implementation Ladder

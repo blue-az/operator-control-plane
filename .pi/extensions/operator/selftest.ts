@@ -750,7 +750,7 @@ function tierA3(ledger: core.Ledger): void {
 	);
 	check("the report records the invocation", written.invocations[0].startsWith("./operator review-delegate"));
 	check(
-		"the plan says review_harness is not the reviewer default",
+		"the plan separates review target from verifier UID",
 		core
 			.describeSupervisorReviewPlan({
 				claimId,
@@ -761,7 +761,7 @@ function tierA3(ledger: core.Ledger): void {
 				reviewHarness: "pi",
 				sessionAuthor: by,
 			})
-			.some((l) => l.includes("routing metadata only")),
+			.some((l) => l.includes("separate from verifier UID")),
 	);
 
 	const after = core.summarizeDoctor(op(fixture, core.doctorArgv()));
@@ -1161,6 +1161,7 @@ async function tierB(piPackage: string | null): Promise<unknown[] | null> {
 		"op:doctor",
 		"op:evidence",
 		"op:handoff",
+		"op:next-steps",
 		"op:roadmap",
 		"op:status",
 		"op:supervisor-review",
@@ -1317,6 +1318,18 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	check("/op:roadmap shows the implementation ladder", report.lines.some((l) => l.includes("Implementation ladder")));
 	check("/op:roadmap shows future features", report.lines.some((l) => l.includes("POE-FUT-009") || l.includes("Recommended next feature slices")));
 	check("/op:roadmap is read-only", report.invocations.every((i) => !/task-use|claim-add|evidence-attach|handoff-add|review-delegate/.test(i)), report.invocations.join(" | "));
+
+	const notificationsBeforeNextSteps = notifications.length;
+	await commands.get("op:next-steps")!.handler("", ctx);
+	report = lastReport();
+	eq("/op:next-steps emits a report entry", report.command, "/op:next-steps");
+	check("/op:next-steps shows recommendations", report.lines.some((l) => l.includes("Recommended next steps")));
+	check("/op:next-steps is read-only", report.invocations.every((i) => !/task-use|claim-add|evidence-attach|handoff-add|review-delegate/.test(i)), report.invocations.join(" | "));
+	check("/op:next-steps default does not open chooser", notifications.length === notificationsBeforeNextSteps + 1, notifications.slice(notificationsBeforeNextSteps).map((n) => n.join(":" )).join(" | "));
+	selectQueue.push("1. Current ledger next_action: test");
+	await commands.get("op:next-steps")!.handler("popup", ctx);
+	check("/op:next-steps popup is opt-in", notifications.some(([, m]) => m.includes("Selected next step:")));
+
 
 	// The load-bearing one: declining the confirmation must not write the ledger.
 	confirmAnswer = false;
