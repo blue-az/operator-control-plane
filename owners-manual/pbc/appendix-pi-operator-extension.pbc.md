@@ -413,6 +413,10 @@ future_features:
     name: Operator next-steps command
     command: /op:next-steps
     description: Turn the active task's ledger state into a short prioritized action list: current next_action first, then unverified claims, missing review/verification gates, recent dogfood issues, and recommended future slices.
+  - id: POE-FUT-011
+    name: Operator project dashboard
+    command: /op:project or /op:roadmap --project <prefix>
+    description: Visualize a multi-task project prefix as phases: task id, status, verified claims versus total claims, evidence count, handoff count, stale next_action warnings, latest verified claim, latest open issue, and recommended next phase. Intended for dogfood/project-level orientation before moving the extension to other repos.
 ```
 
 ## Dogfood Issue Backlog
