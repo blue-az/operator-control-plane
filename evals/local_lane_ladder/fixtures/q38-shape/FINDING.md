@@ -1,5 +1,15 @@
 # q38-shape — L0/L1 distinguishes qwen3.8:27b from the seat
 
+> **RETIRED 2026-09-02 — opr-era artifact. Do not cite.** This pack's
+> central claim (qwen3.8:27b needs plan-shaped input, L1 7/18 vs gemma4:26b
+> 14/18, Fisher p=0.0409) **does not replicate under `pi`**. Re-run at L1
+> on the current harness: gemma4:26b 80% (essentially unchanged from 78%
+> here), **qwen3.8:27b 87%, up from 39%**. `opr` was suppressing that model
+> specifically, by roughly the margin that produced the significant result.
+> The two harnesses' numbers are not comparable. Retained as the record of
+> what was measured, not as evidence about model capability. See
+> `../e9-l1-pi-screen/FINDING.md`.
+
 **Measured:** 2026-08-14, desktop, `num_ctx 16384`, `temperature 0.8`,
 `think off`, n=6, 72/72 cells, 72/72 traces. Same-run control: `gemma4:26b`.
 **Not UID-verified. No claim verified.**
