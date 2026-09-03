@@ -1,0 +1,87 @@
+{
+  "done": {
+    "ambiguous-anchor|L0|gemma4:26b|1": true,
+    "ambiguous-anchor|L0|gemma4:26b|2": true,
+    "ambiguous-anchor|L0|gemma4:26b|3": true,
+    "ambiguous-anchor|L0|gemma4:26b|4": true
+  },
+  "results": [
+    {
+      "detail": "timed out after 600s",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": null,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-pi-screen/traces/ambiguous-anchor__L0__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 602.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 139.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 139.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-pi-screen/traces/ambiguous-anchor__L0__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 590.6
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": null,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-pi-screen/traces/ambiguous-anchor__L0__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 602.4
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": null,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-pi-screen/traces/ambiguous-anchor__L0__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 602.3
+    }
+  ]
+}

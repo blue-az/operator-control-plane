@@ -1,0 +1,6 @@
+Grid: 1 tasks x 1 levels x 3 models x 3 trials = 9 cells
+Sampling pinned: {'num_ctx': 16384, 'temperature': 0.8, 'think': 'off'}
+Trace retention: ON -> /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces
+[ambiguous-anchor|L0|gemma4:31b|1] running...
+Pinning gemma4:31b -> gemma4-31b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
