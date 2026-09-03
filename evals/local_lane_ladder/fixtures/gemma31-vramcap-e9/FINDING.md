@@ -1,5 +1,17 @@
 # gemma4:31b (dense) VRAM cap — density breaks the MoE resilience pattern
 
+> **SCOPE CORRECTION 2026-09-03 — the boundary below is task-specific, not a
+> model property.** Re-tested at the same `num_gpu=40` on the three E9 tasks
+> never covered here: `ambiguous-anchor` **3/3 pass**, `booking-off-by-one`
+> **3/3 pass**, `strict-log-format` **1/3**. Only `csv-summarize-repair`
+> fails outright. Further, the failures are **stochastic stalls, not a
+> viability wall** — timeouts emit 79-193 tokens after exactly 2 tool calls
+> (~0.3 tok/s) while completions emit 692-1600 (~4 tok/s), and
+> `strict-log-format` produced both behaviours at the same setting. Read the
+> 40/45 boundary below as "the point at which `csv-summarize-repair` stalls
+> reliably", not as gemma4:31b's operating limit. See
+> `../gemma31-wall-taskdep/FINDING.md`.
+
 **Run:** desktop, 2026-08-30 (overnight), same meter as the gemma4:26b
 VRAM-cap runs (`num_ctx` 16384, `temperature` 0.8, `think` off, dispatched
 via `pi`). **Deliberately scoped down**: 2 tasks x n=3 = 6 cells

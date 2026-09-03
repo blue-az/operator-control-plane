@@ -1,0 +1,306 @@
+{
+  "done": {
+    "ambiguous-anchor|L2|gemma4:31b|1": true,
+    "ambiguous-anchor|L2|gemma4:31b|2": true,
+    "ambiguous-anchor|L2|gemma4:31b|3": true,
+    "booking-off-by-one|L2|gemma4:31b|1": true,
+    "booking-off-by-one|L2|gemma4:31b|2": true,
+    "booking-off-by-one|L2|gemma4:31b|3": true,
+    "strict-log-format|L2|gemma4:31b|1": true,
+    "strict-log-format|L2|gemma4:31b|2": true,
+    "strict-log-format|L2|gemma4:31b|3": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 5.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 25.35,
+        "tok_s": 5.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma31-wall-taskdep/traces/ambiguous-anchor__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 249.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 5.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 25.35,
+        "tok_s": 5.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma31-wall-taskdep/traces/ambiguous-anchor__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 201.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 5.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 25.47,
+        "tok_s": 5.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma31-wall-taskdep/traces/ambiguous-anchor__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 178.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 4.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 26.26,
+        "tok_s": 4.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma31-wall-taskdep/traces/booking-off-by-one__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 394.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 4.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 26.35,
+        "tok_s": 4.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma31-wall-taskdep/traces/booking-off-by-one__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 341.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "booking-off-by-one",
+      "tok_s": 5.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 25.39,
+        "tok_s": 5.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma31-wall-taskdep/traces/booking-off-by-one__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 357.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 5.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 25.48,
+        "tok_s": 5.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma31-wall-taskdep/traces/strict-log-format__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 371.4
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": null,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma31-wall-taskdep/traces/strict-log-format__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 608.1
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": null,
+      "task_id": "strict-log-format",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/gemma31-wall-taskdep/traces/strict-log-format__L2__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 608.2
+    }
+  ]
+}
