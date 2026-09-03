@@ -107,6 +107,30 @@ correct phrasing until a matched higher-n run exists. This is not new caution in
 for its own sake; it's the exact caveat `gemma26-12gb-cap-e9`'s own Limits section
 already carried, now backed by a real number instead of a general hedge.
 
+**Selection bias in screen-then-confirm (added 2026-09-02).** The tiers above
+govern how big an n must be. This governs *which cells you re-run*, and it is a
+separate trap.
+
+When a screen produces many cells and you confirm only the most extreme ones,
+those cells regress toward the mean **whether or not any effect is real** — they
+were selected partly for their noise. Confirming only extremes therefore cannot
+distinguish a genuine effect from selection.
+
+Measured instance: `e9-l1-pi-screen` screened 20 model x task cells at n=6 and
+sent the two most extreme (both 2/6) to n=30. One came back **27/30 (90%)** —
+the screen result had a 0.1% chance at that rate, and mechanical causes were
+ruled out. The other came back **16/30 (53%)**, consistent with its screen. Half
+the finding was selection artifact, and the write-up's central framing had to be
+retracted.
+
+**Rule:** treat screen numbers as *targeting*, never as effect estimates, and
+never quote a screen cell's rate in a finding. When confirming, either
+(a) confirm a random subset alongside the extremes so regression is measurable,
+or (b) state explicitly that the confirmed cells were selected on extremity and
+that a single regressing cell is the expected outcome rather than a surprise.
+A screen cell that survives confirmation is evidence; one that regresses is not
+evidence of anything, including that the screen was broken.
+
 **When n=100 is worth the GPU time:** reserve it for the most-contested, most-cited
 cell in a given investigation — not every cell. `gemma26-csv-n100-baseline` was worth
 it specifically because three separate n=6 samples had already disagreed with each

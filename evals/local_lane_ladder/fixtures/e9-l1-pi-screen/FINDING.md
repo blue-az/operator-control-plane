@@ -95,6 +95,65 @@ instrument.
 4. **Surface `no_dispatch` in RESULTS.md** so stalls are visible rather than
    silently pooled into wrong answers.
 
+## Amendment 2026-09-02 — half of this finding was the winner's curse
+
+Both spread cells were confirmed at n=30. **One survived, one evaporated.**
+
+| cell | screen | n=30 | 95% CI | P(screen \| n=30 rate) |
+|---|---:|---:|---|---:|
+| qwen3.8:27b x constant-and-callers | 2/6 | **27/30 = 90%** | [79%, 100%] | **0.001** |
+| gemma4:26b x csv-summarize-repair | 2/6 | **16/30 = 53%** | [35%, 71%] | 0.284 |
+
+**`qwen3.8:27b`'s deficit was not real.** Its true rate on
+`constant-and-callers` is ~90%, statistically indistinguishable from
+gemma4:26b's 5/6 on the same task. The screen's 2/6 had a 0.1% chance of
+occurring at that rate. Mechanical causes were checked and ruled out: all
+six screen trials ran consecutively on a warm model (one switch before the
+block, no per-trial churn), failures were not clustered at the start
+(F,F,P,F,F,P), decode speed was identical (80.1 vs 81.8 tok/s), and the
+failure mode was the same in both runs.
+
+**`gemma4:26b`'s deficit is real.** 53% [35%, 71%] against the other three
+models at 6/6 — a CI nowhere near 100%. Failure modes are its documented
+ones: 11 wrong outputs, 3 out-of-scope file creations. It is also
+consistently worse at L1 (53%) than at L2 (75% at n=100), which is the
+coherent direction for reduced scaffolding.
+
+### The methodological error was mine, and it is general
+
+**These two cells were selected for confirmation precisely because they were
+the most extreme of twenty.** Extremity partly reflects noise, so
+re-measuring only the extremes guarantees regression toward the mean. Across
+20 cells, one deviating this far is ~2.5% likely — unlikely, not remarkable.
+
+That makes this finding's original framing wrong. "Different models fail
+different tasks — capability structure, not one weak model" was built on two
+cells, one of which was noise. **The corrected picture is one model failing
+one task**, which is exactly the "one weak model" reading that framing
+rejected.
+
+Corrected roster estimate, substituting confirmed rates into the screen:
+
+| model | screen | corrected |
+|---|---:|---:|
+| gemma4:31b | 30/30 | 30/30 |
+| gpt-oss:120b | 30/30 | 30/30 |
+| qwen3.8:27b | 26/30 | **~29/30** |
+| gemma4:26b | 24/30 | **~25/30** |
+
+Flatter than reported. L1 is closer to saturated than this finding claimed —
+it retains exactly one discriminating cell on this roster.
+
+**Standing consequence for the program:** a screen tells you where to look,
+but the cells it flags are biased high in extremity by construction.
+Confirming only the extremes will show regression every time and cannot
+distinguish a real effect from selection. Confirm a random subset alongside
+the extremes, or treat screen numbers strictly as targeting rather than as
+effect estimates. This is a second, distinct sample-size trap from the one
+`GOLD_STANDARD.md` §2a already covers: §2a says a clean n=6 can hide a low
+true rate; this says an *extreme* n=6, chosen because it was extreme, will
+regress regardless of whether anything is there.
+
 ## Limits
 
 - **n=6. Screen tier. No pass rate here is reportable.** A 2/6 is consistent

@@ -1,0 +1,966 @@
+{
+  "done": {
+    "csv-summarize-repair|L1|gemma4:26b|1": true,
+    "csv-summarize-repair|L1|gemma4:26b|10": true,
+    "csv-summarize-repair|L1|gemma4:26b|11": true,
+    "csv-summarize-repair|L1|gemma4:26b|12": true,
+    "csv-summarize-repair|L1|gemma4:26b|13": true,
+    "csv-summarize-repair|L1|gemma4:26b|14": true,
+    "csv-summarize-repair|L1|gemma4:26b|15": true,
+    "csv-summarize-repair|L1|gemma4:26b|16": true,
+    "csv-summarize-repair|L1|gemma4:26b|17": true,
+    "csv-summarize-repair|L1|gemma4:26b|18": true,
+    "csv-summarize-repair|L1|gemma4:26b|19": true,
+    "csv-summarize-repair|L1|gemma4:26b|2": true,
+    "csv-summarize-repair|L1|gemma4:26b|20": true,
+    "csv-summarize-repair|L1|gemma4:26b|21": true,
+    "csv-summarize-repair|L1|gemma4:26b|22": true,
+    "csv-summarize-repair|L1|gemma4:26b|23": true,
+    "csv-summarize-repair|L1|gemma4:26b|24": true,
+    "csv-summarize-repair|L1|gemma4:26b|25": true,
+    "csv-summarize-repair|L1|gemma4:26b|26": true,
+    "csv-summarize-repair|L1|gemma4:26b|27": true,
+    "csv-summarize-repair|L1|gemma4:26b|28": true,
+    "csv-summarize-repair|L1|gemma4:26b|29": true,
+    "csv-summarize-repair|L1|gemma4:26b|3": true,
+    "csv-summarize-repair|L1|gemma4:26b|30": true,
+    "csv-summarize-repair|L1|gemma4:26b|4": true,
+    "csv-summarize-repair|L1|gemma4:26b|5": true,
+    "csv-summarize-repair|L1|gemma4:26b|6": true,
+    "csv-summarize-repair|L1|gemma4:26b|7": true,
+    "csv-summarize-repair|L1|gemma4:26b|8": true,
+    "csv-summarize-repair|L1|gemma4:26b|9": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 67.8
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_fix.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_fix.py']",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 54.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 61.7
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-jh_a05a2/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-jh_a05a2/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-jh_a05a2/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-jh_a05a2/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 6.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-izj6mhnj/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-izj6mhnj/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-izj6mhnj/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-izj6mhnj/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 5.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-ptmzxqps/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-ptmzxqps/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-ptmzxqps/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-ptmzxqps/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 5.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t7.json",
+      "trial": 7,
+      "wall_clock_s": 38.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t8.json",
+      "trial": 8,
+      "wall_clock_s": 85.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t9.json",
+      "trial": 9,
+      "wall_clock_s": 57.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_fix.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_fix.py']",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t10.json",
+      "trial": 10,
+      "wall_clock_s": 66.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t11.json",
+      "trial": 11,
+      "wall_clock_s": 52.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t12.json",
+      "trial": 12,
+      "wall_clock_s": 60.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_csv_parser.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_csv_parser.py']",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t13.json",
+      "trial": 13,
+      "wall_clock_s": 55.8
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-55a099w9/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-55a099w9/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-55a099w9/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-55a099w9/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t14.json",
+      "trial": 14,
+      "wall_clock_s": 40.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 136.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.94,
+        "tok_s": 136.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t15.json",
+      "trial": 15,
+      "wall_clock_s": 86.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-_hq5zi67/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-_hq5zi67/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-_hq5zi67/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-_hq5zi67/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t16.json",
+      "trial": 16,
+      "wall_clock_s": 5.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t17.json",
+      "trial": 17,
+      "wall_clock_s": 61.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-rlwonp90/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-rlwonp90/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-rlwonp90/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-rlwonp90/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t18.json",
+      "trial": 18,
+      "wall_clock_s": 5.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t19.json",
+      "trial": 19,
+      "wall_clock_s": 51.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t20.json",
+      "trial": 20,
+      "wall_clock_s": 65.9
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-uhqexsx6/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-uhqexsx6/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-uhqexsx6/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-uhqexsx6/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t21.json",
+      "trial": 21,
+      "wall_clock_s": 58.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t22.json",
+      "trial": 22,
+      "wall_clock_s": 110.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t23.json",
+      "trial": 23,
+      "wall_clock_s": 82.5
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-caciczrp/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-caciczrp/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-caciczrp/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-caciczrp/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t24.json",
+      "trial": 24,
+      "wall_clock_s": 22.1
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-9rz6j873/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-9rz6j873/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-9rz6j873/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-9rz6j873/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 138.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t25.json",
+      "trial": 25,
+      "wall_clock_s": 22.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t26.json",
+      "trial": 26,
+      "wall_clock_s": 45.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 138.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.92,
+        "tok_s": 138.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t27.json",
+      "trial": 27,
+      "wall_clock_s": 104.0
+    },
+    {
+      "check_score": 0.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-xo9io9ds/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-xo9io9ds/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "created out of scope: ['repro.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "2/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-xo9io9ds/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-xo9io9ds/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'; tests not edited: created out of scope: ['repro.py']",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 137.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t28.json",
+      "trial": 28,
+      "wall_clock_s": 36.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 133.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.96,
+        "tok_s": 133.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t29.json",
+      "trial": 29,
+      "wall_clock_s": 67.1
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-gm44v0sr/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-gm44v0sr/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-gm44v0sr/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L1-gm44v0sr/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L1",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 133.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.96,
+        "tok_s": 133.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces/csv-summarize-repair__L1__gemma4-26b__t30.json",
+      "trial": 30,
+      "wall_clock_s": 81.1
+    }
+  ]
+}
