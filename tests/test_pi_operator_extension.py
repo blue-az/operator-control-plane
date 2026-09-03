@@ -11,6 +11,7 @@ too old to strip TypeScript types or when pi is not installed.
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import unittest
@@ -217,6 +218,9 @@ class PiOperatorExtensionSelftest(unittest.TestCase):
             self.skipTest("node is not installed")
         if not _node_supports_type_stripping(node):
             self.skipTest("node is older than 22.6 (no --experimental-strip-types)")
+        # selftest.ts discovers pi via PI_PACKAGE_DIR or a `pi` on PATH; the
+        # module contract is to skip Tiers B/C (not fail) when pi is absent.
+        pi_present = bool(os.environ.get("PI_PACKAGE_DIR") or shutil.which("pi"))
         result = subprocess.run(
             [node, "--experimental-strip-types", str(SELFTEST)],
             cwd=REPO_ROOT,
@@ -228,8 +232,9 @@ class PiOperatorExtensionSelftest(unittest.TestCase):
         output = result.stdout + result.stderr
         self.assertEqual(result.returncode, 0, output)
         self.assertIn("0 failed", output)
-        self.assertNotIn("skipped: Tier B", output)
-        self.assertNotIn("skipped: Tier C", output)
+        if pi_present:
+            self.assertNotIn("skipped: Tier B", output)
+            self.assertNotIn("skipped: Tier C", output)
 
 
 if __name__ == "__main__":
