@@ -1,5 +1,38 @@
 # Pre-registration — L0 screen under `pi`
 
+> ## AMENDMENT 2026-09-02 — protocol changed after 4 cells, for feasibility
+>
+> **The 120-cell screen below was stopped after 4 cells and replaced with a
+> focused probe.** Recording this as an amendment rather than editing the
+> plan, because silently re-scoping a pre-registration defeats its purpose.
+>
+> **Reason (feasibility, not result-chasing):** mean cell time was **599s**
+> against an estimated ~60s. 3 of the first 4 cells hit the 600s timeout.
+> Projected runtime **20 hours**, a 10x overshoot, and most cells would have
+> produced timeouts rather than pass/fail measurements.
+>
+> **What the 4 cells showed** (gemma4:26b x ambiguous-anchor, all failed):
+> 6, 56, 72 and 57 tool calls against **6-10 at L1** — a tenfold explosion —
+> using only `bash` and `read`. **It never called an edit tool.** L0 does not
+> produce wrong answers here; it produces unbounded exploration that never
+> commits to an action. That is an exploration-budget floor, mechanically
+> distinct from the capability floor `q38-shape` implied.
+>
+> **Replacement probe:** the other three models on `ambiguous-anchor` at L0,
+> n=3 each (9 cells, ~1.5h). It answers the single question the full screen
+> was funding: **is the explosion universal, or gemma4:26b-specific?** If
+> gemma4:31b and gpt-oss:120b complete L0 where gemma4:26b cannot, that is a
+> harder discriminator than the 53%-vs-100% already confirmed at L1.
+>
+> **What this amendment costs:** the confirmation rule below (2 extreme + 3
+> random at n=30) is void — there is no 20-cell screen to select from. No
+> n=30 confirmation is claimed for L0. Anything from the probe is **n=3,
+> Screen tier**, targeting only, and cannot support a rate. The random-arm
+> protection against selection bias is therefore *not* in force for L0; any
+> follow-up must re-establish it.
+>
+> The original plan is preserved below unchanged.
+
 **Written and committed BEFORE any results existed.** Check the commit
 timestamp against `run.log`'s first PASS/FAIL line. The point of writing it
 first is that the confirmation rule cannot then be chosen to suit whatever
