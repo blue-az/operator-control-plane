@@ -26,7 +26,17 @@
  */
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	mkdtempSync,
+	readdirSync,
+	readFileSync,
+	realpathSync,
+	rmSync,
+	symlinkSync,
+	writeFileSync,
+} from "node:fs";
 import { delimiter, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -152,9 +162,14 @@ function tierA(ledger: core.Ledger): void {
 		Object.values(core.ALLOWED_FLAGS).every((flags) => !flags.some((f) => (core.FORBIDDEN_FLAGS as readonly string[]).includes(f))),
 	);
 
-	// ledger discovery on the real repo
-	const found = core.findLedger(join(REPO_ROOT, ".pi", "extensions", "operator"));
-	check("findLedger walks up to the repo root", found?.root === REPO_ROOT, `got ${found?.root}`);
+	// ledger discovery: walk up from a nested directory of the fixture. The
+	// repo's own .operator/ is gitignored runtime state (absent in CI), so
+	// relying on the real checkout here would pass locally and fail on any
+	// fresh clone.
+	const nested = join(fixture, "deep", "nested", "dir");
+	mkdirSync(nested, { recursive: true });
+	const found = core.findLedger(nested);
+	check("findLedger walks up to the fixture root", found?.root === fixture, `got ${found?.root}`);
 	check("findLedger fails closed above any ledger", core.findLedger("/") === null);
 
 	// task record existence
