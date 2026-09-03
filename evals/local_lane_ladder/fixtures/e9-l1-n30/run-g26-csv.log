@@ -1,0 +1,121 @@
+Grid: 1 tasks x 1 levels x 1 models x 30 trials = 30 cells
+Sampling pinned: {'num_ctx': 16384, 'temperature': 0.8, 'think': 'off'}
+Trace retention: ON -> /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l1-n30/traces
+[csv-summarize-repair|L1|gemma4:26b|1] running...
+Pinning gemma4:26b -> gemma4-26b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+[csv-summarize-repair|L1|gemma4:26b|1] PASS (67.8s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|2] running...
+[csv-summarize-repair|L1|gemma4:26b|2] FAIL (54.5s) -- 1/2 checks failed: tests not edited: created out of scope: ['test_fix.py']
+[csv-summarize-repair|L1|gemma4:26b|3] running...
+[csv-summarize-repair|L1|gemma4:26b|3] PASS (61.7s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|4] running...
+[csv-summarize-repair|L1|gemma4:26b|4] FAIL (6.2s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-jh_a05a2/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-jh_a05a2/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L1|gemma4:26b|5] running...
+[csv-summarize-repair|L1|gemma4:26b|5] FAIL (5.4s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-izj6mhnj/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-izj6mhnj/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L1|gemma4:26b|6] running...
+[csv-summarize-repair|L1|gemma4:26b|6] FAIL (5.6s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-ptmzxqps/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-ptmzxqps/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L1|gemma4:26b|7] running...
+[csv-summarize-repair|L1|gemma4:26b|7] PASS (38.2s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|8] running...
+[csv-summarize-repair|L1|gemma4:26b|8] PASS (85.7s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|9] running...
+[csv-summarize-repair|L1|gemma4:26b|9] PASS (57.3s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|10] running...
+[csv-summarize-repair|L1|gemma4:26b|10] FAIL (66.3s) -- 1/2 checks failed: tests not edited: created out of scope: ['test_fix.py']
+[csv-summarize-repair|L1|gemma4:26b|11] running...
+[csv-summarize-repair|L1|gemma4:26b|11] PASS (52.1s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|12] running...
+[csv-summarize-repair|L1|gemma4:26b|12] PASS (60.3s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|13] running...
+[csv-summarize-repair|L1|gemma4:26b|13] FAIL (55.8s) -- 1/2 checks failed: tests not edited: created out of scope: ['test_csv_parser.py']
+[csv-summarize-repair|L1|gemma4:26b|14] running...
+[csv-summarize-repair|L1|gemma4:26b|14] FAIL (40.4s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-55a099w9/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-55a099w9/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L1|gemma4:26b|15] running...
+[csv-summarize-repair|L1|gemma4:26b|15] PASS (86.9s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|16] running...
+[csv-summarize-repair|L1|gemma4:26b|16] FAIL (5.8s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-_hq5zi67/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-_hq5zi67/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L1|gemma4:26b|17] running...
+[csv-summarize-repair|L1|gemma4:26b|17] PASS (61.2s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|18] running...
+[csv-summarize-repair|L1|gemma4:26b|18] FAIL (5.3s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-rlwonp90/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-rlwonp90/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L1|gemma4:26b|19] running...
+[csv-summarize-repair|L1|gemma4:26b|19] PASS (51.6s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|20] running...
+[csv-summarize-repair|L1|gemma4:26b|20] PASS (65.9s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|21] running...
+[csv-summarize-repair|L1|gemma4:26b|21] FAIL (58.4s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-uhqexsx6/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-uhqexsx6/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L1|gemma4:26b|22] running...
+[csv-summarize-repair|L1|gemma4:26b|22] PASS (110.1s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|23] running...
+[csv-summarize-repair|L1|gemma4:26b|23] PASS (82.5s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|24] running...
+[csv-summarize-repair|L1|gemma4:26b|24] FAIL (22.1s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-caciczrp/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-caciczrp/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L1|gemma4:26b|25] running...
+[csv-summarize-repair|L1|gemma4:26b|25] FAIL (22.3s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-9rz6j873/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-9rz6j873/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L1|gemma4:26b|26] running...
+[csv-summarize-repair|L1|gemma4:26b|26] PASS (45.9s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|27] running...
+[csv-summarize-repair|L1|gemma4:26b|27] PASS (104.0s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|28] running...
+[csv-summarize-repair|L1|gemma4:26b|28] FAIL (36.8s) -- 2/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-xo9io9ds/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-xo9io9ds/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'; tests not edited: created out of scope: ['repro.py']
+[csv-summarize-repair|L1|gemma4:26b|29] running...
+[csv-summarize-repair|L1|gemma4:26b|29] PASS (67.1s) -- all 2 checks passed
+[csv-summarize-repair|L1|gemma4:26b|30] running...
+[csv-summarize-repair|L1|gemma4:26b|30] FAIL (81.1s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-gm44v0sr/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L1-gm44v0sr/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+
+Wrote fixtures/e9-l1-n30/RESULTS-g26-csv.md
