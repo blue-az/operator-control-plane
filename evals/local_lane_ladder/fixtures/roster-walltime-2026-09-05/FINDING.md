@@ -53,19 +53,28 @@ single factor.
 `gpt-oss:120b` is worst hit: 45.6 GB resident across both cards, and 3.5x of its
 decode rate disappears into overhead.
 
-## Caveat: the decode probe itself drifted 1.6x today
+## RESOLVED: the 1.6x decode gap was a two-card split, not drift
 
 `gemma4:26b` measured **133.3 tok/s** in this morning's re-baseline and **214.1**
 here, same machine, same day. The configurations differ (this run pins
 `num_ctx 16384`, `temperature 0.8`; the probe baseline was unconstrained), which
 is a plausible cause but was not isolated.
 
-Whatever the cause, it means **the decode column is not stable across
-configurations to better than ~1.6x**, which is larger than several of the
-distinctions the program has drawn with it. This is the fourth instrument problem
-in a week, after ollama's Vulkan fallback, `/api/ps` VRAM misreporting, and the
-hardcoded prompt path. It does not affect the wall-clock column, which is
-measured directly.
+**Confirmed the same day (n=6, interleaved, order-alternated):** this is not
+drift and not noise. The base tag's **default context length is 262,144**, which
+sizes the KV cache to take the model from 19.7 GB to **39.3 GB — past one 24 GB
+card, so it splits across both**, at a 35% decode penalty. Base measures 139.9
+tok/s (135.8–142.3); pinned `num_ctx` 16384 measures 214.4 (213.2–215.4). Ranges
+do not overlap.
+
+**This run is unaffected** — it used pinned tags throughout, so the 214.1 above is
+the correct single-card rate and the 2.9x gap against `qwen3.8:27b` stands. The
+morning re-baseline's 133.3 is the figure that was wrong. Full account:
+`../gemma4-26b-ctx-default-split/FINDING.md`.
+
+The wider lesson is the same as the week's other three instrument problems
+(Vulkan fallback, `/api/ps` VRAM, the hardcoded prompt path): **an unpinned
+default silently changed the hardware configuration and nothing reported it.**
 
 ## Consequence
 
