@@ -1,5 +1,27 @@
 # gpt-oss:120b — E9 ceiling battery
 
+> ## ⚠️ THE "65% CPU-OFFLOADED" CLAIM IS WRONG — corrected 2026-09-05
+>
+> That split came from **`ollama ps`**, which was proven on 2026-09-05 to
+> misreport memory badly — it returns 0.8-1.2 GB for an 18 GB model, on two
+> different machines. See `../rtx2080-8gb-real/FINDING.md`.
+>
+> **Measured directly on the same pair today: `offloaded 37/37 layers`, with
+> 22,828 + 22,753 MiB = 45.6 GB resident. The model is fully GPU-resident and
+> very likely always was.** 45.6 GB fits inside 48 GB with room to spare.
+>
+> **This weakens the headline.** "A 120B-class MoE, two-thirds CPU-offloaded,
+> clears E9" is a much stronger claim than "a 120B model that fits in a 48 GB
+> pool clears E9." Only the second is supported. The **30/30 pass result stands**
+> — only the resource characterisation was wrong.
+>
+> **Separately, the 32.7 tok/s figure does not reproduce.** Re-measured today on
+> the same hardware, the warm plateau is **~28.7** (runs climb 14.5 -> 22.3 ->
+> 28.7 over six calls; a split model needs a plateau, not the contract's "run 2"
+> rule). The 4 tok/s gap is unexplained and was not chased. Do not cite 32.7
+> without re-measuring.
+
+
 **Run:** desktop, 2026-08-29, same meter as `e9-pi-rerun` (`num_ctx` 16384,
 `temperature` 0.8, `think` off, dispatched via `pi`). 5 fixtures x n=6 = 30
 cells, standard `runner.py` path (`ensure_pinned_model`, trace retention on).
