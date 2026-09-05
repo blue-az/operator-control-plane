@@ -1,0 +1,746 @@
+{
+  "done": {
+    "constant-and-callers|L2|gemma4:26b|1": true,
+    "constant-and-callers|L2|gemma4:26b|2": true,
+    "constant-and-callers|L2|gemma4:31b|1": true,
+    "constant-and-callers|L2|gemma4:31b|2": true,
+    "constant-and-callers|L2|gpt-oss:120b|1": true,
+    "constant-and-callers|L2|gpt-oss:120b|2": true,
+    "constant-and-callers|L2|qwen3.6:35b|1": true,
+    "constant-and-callers|L2|qwen3.6:35b|2": true,
+    "constant-and-callers|L2|qwen3.8:27b|1": true,
+    "constant-and-callers|L2|qwen3.8:27b|2": true,
+    "csv-summarize-repair|L2|gemma4:26b|1": true,
+    "csv-summarize-repair|L2|gemma4:26b|2": true,
+    "csv-summarize-repair|L2|gemma4:31b|1": true,
+    "csv-summarize-repair|L2|gemma4:31b|2": true,
+    "csv-summarize-repair|L2|gpt-oss:120b|1": true,
+    "csv-summarize-repair|L2|gpt-oss:120b|2": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|1": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|2": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|1": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|2": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 213.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.6,
+        "tok_s": 213.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 26.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 212.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.6,
+        "tok_s": 212.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 15.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 33.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.78,
+        "tok_s": 33.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 47.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 33.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.84,
+        "tok_s": 33.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 25.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 67.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.88,
+        "tok_s": 67.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 34.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 71.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.79,
+        "tok_s": 71.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 18.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 137.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 36.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 137.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.93,
+        "tok_s": 137.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 15.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 34.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.67,
+        "tok_s": 34.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__gpt-oss-120b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 117.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": 35.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.64,
+        "tok_s": 35.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/constant-and-callers__L2__gpt-oss-120b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 32.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 215.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.6,
+        "tok_s": 215.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 64.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 214.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 0.6,
+        "tok_s": 214.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 33.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 36.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.56,
+        "tok_s": 36.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 196.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 36.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.56,
+        "tok_s": 36.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 199.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 77.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.64,
+        "tok_s": 77.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 40.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 78.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.64,
+        "tok_s": 78.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 21.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 114.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.12,
+        "tok_s": 114.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 48.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 116.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.1,
+        "tok_s": 116.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 15.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 35.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.64,
+        "tok_s": 35.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__gpt-oss-120b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 136.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 35.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.64,
+        "tok_s": 35.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/roster-walltime-2026-09-05/traces/csv-summarize-repair__L2__gpt-oss-120b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 79.0
+    }
+  ]
+}
