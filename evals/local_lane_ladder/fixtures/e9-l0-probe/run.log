@@ -4,3 +4,32 @@ Trace retention: ON -> /home/blueaz/operator-control-plane/evals/local_lane_ladd
 [ambiguous-anchor|L0|gemma4:31b|1] running...
 Pinning gemma4:31b -> gemma4-31b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
   [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
+[ambiguous-anchor|L0|gemma4:31b|1] PASS (207.2s) -- all 4 checks passed
+[ambiguous-anchor|L0|gemma4:31b|2] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
+[ambiguous-anchor|L0|gemma4:31b|2] FAIL (541.3s) -- 2/4 checks failed: staging line changed: regex did not match: '## Staging\\n1\\. Drain connections\\.\\n2\\. Run: restart the service --force\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'
+[ambiguous-anchor|L0|gemma4:31b|3] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
+[ambiguous-anchor|L0|gemma4:31b|3] FAIL (600.2s) -- timed out after 600s
+[ambiguous-anchor|L0|qwen3.8:27b|1] running...
+Pinning qwen3.8:27b -> qwen3.8-27b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
+[ambiguous-anchor|L0|qwen3.8:27b|1] PASS (35.0s) -- all 4 checks passed
+[ambiguous-anchor|L0|qwen3.8:27b|2] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
+[ambiguous-anchor|L0|qwen3.8:27b|2] FAIL (26.2s) -- 2/4 checks failed: staging line changed: regex did not match: '## Staging\\n1\\. Drain connections\\.\\n2\\. Run: restart the service --force\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'
+[ambiguous-anchor|L0|qwen3.8:27b|3] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
+[ambiguous-anchor|L0|qwen3.8:27b|3] FAIL (18.8s) -- 2/4 checks failed: staging line changed: regex did not match: '## Staging\\n1\\. Drain connections\\.\\n2\\. Run: restart the service --force\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'
+[ambiguous-anchor|L0|gpt-oss:120b|1] running...
+Pinning gpt-oss:120b -> gpt-oss-120b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
+[ambiguous-anchor|L0|gpt-oss:120b|1] FAIL (149.5s) -- 3/4 checks failed: staging line changed: regex did not match: '## Staging\\n1\\. Drain connections\\.\\n2\\. Run: restart the service --force\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']
+[ambiguous-anchor|L0|gpt-oss:120b|2] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
+[ambiguous-anchor|L0|gpt-oss:120b|2] FAIL (49.9s) -- 3/4 checks failed: staging line changed: regex did not match: '## Staging\\n1\\. Drain connections\\.\\n2\\. Run: restart the service --force\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']
+[ambiguous-anchor|L0|gpt-oss:120b|3] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260902' is already running. Use --force to override.
+[ambiguous-anchor|L0|gpt-oss:120b|3] FAIL (70.6s) -- 3/4 checks failed: staging line changed: regex did not match: '## Staging\\n1\\. Drain connections\\.\\n2\\. Run: restart the service --force\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']
+
+Wrote fixtures/e9-l0-probe/RESULTS.md

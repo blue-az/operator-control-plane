@@ -1,5 +1,20 @@
 # gemma4:26b at an 8GB VRAM cap — the more extreme envelope
 
+> ## ⚠️ ENVELOPE FRAMING IS WRONG — corrected 2026-09-05
+>
+> **`num_gpu` caps layer count, not VRAM, and for an MoE model those are very
+> different constraints.** A real RTX 2080 (8 GB) fits **31/31 layers of
+> gemma4:26b in 7.4 GB** and decodes at **31.0 tok/s** — because the 128 experts
+> dominate the model's 18 GB and stream from RAM regardless. The `num_gpu=12`
+> cap used here forced **12 of 30** layers off the GPU, which is far more
+> constrained than the card it was meant to simulate, and produced 23.5 tok/s.
+>
+> **The accuracy conclusions below stand** — pass rates genuinely did not move
+> under this constraint. **The "GB envelope" language does not.** Do not read the
+> tok/s figures here as predictions for real hardware of that VRAM.
+> See `../rtx2080-8gb-real/FINDING.md`.
+
+
 **Run:** desktop, 2026-08-30, same meter as `gemma26-12gb-cap-e9`
 (`num_ctx` 16384, `temperature` 0.8, `think` off, dispatched via `pi`).
 Full 5-fixture x n=6 = 30-cell E9 battery. `num_gpu=12` -- the "8GB

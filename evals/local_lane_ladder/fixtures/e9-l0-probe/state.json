@@ -1,0 +1,355 @@
+{
+  "done": {
+    "ambiguous-anchor|L0|gemma4:31b|1": true,
+    "ambiguous-anchor|L0|gemma4:31b|2": true,
+    "ambiguous-anchor|L0|gemma4:31b|3": true,
+    "ambiguous-anchor|L0|gpt-oss:120b|1": true,
+    "ambiguous-anchor|L0|gpt-oss:120b|2": true,
+    "ambiguous-anchor|L0|gpt-oss:120b|3": true,
+    "ambiguous-anchor|L0|qwen3.8:27b|1": true,
+    "ambiguous-anchor|L0|qwen3.8:27b|2": true,
+    "ambiguous-anchor|L0|qwen3.8:27b|3": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 36.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.48,
+        "tok_s": 36.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces/ambiguous-anchor__L0__gemma4-31b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 207.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 36.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.49,
+        "tok_s": 36.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces/ambiguous-anchor__L0__gemma4-31b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 541.3
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gemma4:31b",
+      "passed": false,
+      "returncode": null,
+      "task_id": "ambiguous-anchor",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces/ambiguous-anchor__L0__gemma4-31b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 600.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 81.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces/ambiguous-anchor__L0__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 35.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 81.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces/ambiguous-anchor__L0__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 26.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 81.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.57,
+        "tok_s": 81.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces/ambiguous-anchor__L0__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 18.8
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "modified out of scope: ['scripts/deploy.sh']",
+          "name": "scope respected",
+          "passed": false
+        }
+      ],
+      "detail": "3/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 31.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 4.07,
+        "tok_s": 31.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces/ambiguous-anchor__L0__gpt-oss-120b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 149.5
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "modified out of scope: ['scripts/deploy.sh']",
+          "name": "scope respected",
+          "passed": false
+        }
+      ],
+      "detail": "3/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 30.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 4.16,
+        "tok_s": 30.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces/ambiguous-anchor__L0__gpt-oss-120b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 49.9
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "modified out of scope: ['scripts/deploy.sh']",
+          "name": "scope respected",
+          "passed": false
+        }
+      ],
+      "detail": "3/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 30.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 4.2,
+        "tok_s": 30.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/e9-l0-probe/traces/ambiguous-anchor__L0__gpt-oss-120b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 70.6
+    }
+  ]
+}
