@@ -1,18 +1,19 @@
 # gemma4:26b at a 12GB VRAM cap — does speed constraint also constrain accuracy?
 
-> ## ⚠️ ENVELOPE FRAMING IS WRONG — corrected 2026-09-05
+> ## ⚠️ THE tok/s FIGURE HERE HAS EXPIRED — corrected 2026-09-05
 >
-> **`num_gpu` caps layer count, not VRAM, and for an MoE model those are very
-> different constraints.** A real RTX 2080 (8 GB) fits **31/31 layers of
-> gemma4:26b in 7.4 GB** and decodes at **31.0 tok/s** — because the 128 experts
-> dominate the model's 18 GB and stream from RAM regardless. The `num_gpu=12`
-> cap used here forced **12 of 30** layers off the GPU, which is far more
-> constrained than the card it was meant to simulate, and produced 23.5 tok/s.
+> **The envelope framing is fine** — `num_gpu=12` was measured directly at
+> **8,099 MiB**, and it predicts a real 8 GB card to within 1.7%. An earlier
+> correction notice here claimed otherwise; that was wrong and is withdrawn.
 >
-> **The accuracy conclusions below stand** — pass rates genuinely did not move
-> under this constraint. **The "GB envelope" language does not.** Do not read the
-> tok/s figures here as predictions for real hardware of that VRAM.
-> See `../rtx2080-8gb-real/FINDING.md`.
+> **What is stale is the throughput number.** Re-running this exact
+> configuration on 2026-09-05 gives **31.55 tok/s**, not the 23.5 recorded
+> below. Nothing was changed by hand: **MTP speculative decoding**
+> (`--spec-type draft-mtp`) appeared in the runtime between 30 August and
+> 5 September and is worth about **+34%**.
+>
+> **The accuracy conclusions stand.** Pass rates are unaffected. Do not cite the
+> tok/s figure without re-measuring. See `../rtx2080-8gb-real/FINDING.md`.
 
 
 **Run:** desktop, 2026-08-30, same meter as `e9-pi-rerun` (`num_ctx` 16384,
