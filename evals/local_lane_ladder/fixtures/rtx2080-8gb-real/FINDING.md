@@ -30,13 +30,14 @@ i3-9100F vs an i9-9900KF, and 15 vs 31 GB of system RAM.
 **2026-08-30**. Re-running that identical configuration today gives **31.55**.
 Same machine, same `num_gpu`, same model tag, same ollama version.
 
-The difference is **MTP speculative decoding**. The desktop's llama-server now
-runs `--spec-type draft-mtp --spec-draft-n-max 3` with a 5-layer draft model;
-it did not on 30 August. That is a **+34%** decode improvement, and it arrived
-on its own — a model or runtime update between the two dates.
+**A number in a committed finding stopped being reproducible six days after it
+was written, on the machine that produced it, with nothing changed by hand.**
 
-**So the number in a committed finding stopped being reproducible six days after
-it was written, on the machine that produced it, with nothing changed by hand.**
+The cause is **not established** — see the correction section below. MTP
+speculative decoding is active now (`--spec-type draft-mtp --spec-draft-n-max 3`,
+5-layer draft model) and fits the pattern, but whether it was absent on 30 August
+was never verified. Critically, the drift is **confined to the capped
+configuration**: the same model at full VRAM reproduces to within 3%.
 
 ## The revision history, because it is the finding
 
