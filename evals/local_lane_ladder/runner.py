@@ -158,8 +158,12 @@ def ensure_pinned_model(
 # tokens) -- reused here, not a bespoke one, so this probe's tok/s is directly
 # comparable to existing Front I throughput data (e.g. MODEL-RANKING-001),
 # not just an internal-only number.
-_CONTRACT_PROMPT_PATH = Path(
-    "/home/blueaz/Python/project-phoenix/docs/domain_runs/"
+# Resolved relative to $HOME, not hardcoded to one user. The desktop runs as
+# `blueaz` and the testbench as `ef-tb`; the absolute path silently made
+# measure_tok_s return None on the bench, so a whole run's decode column came
+# back empty with no error (testbench-2080-e9-batch1, 2026-09-05).
+_CONTRACT_PROMPT_PATH = Path.home() / (
+    "Python/project-phoenix/docs/domain_runs/"
     "GEMMA4-CTX8192-3090-VS-Z13-001/prompt.txt"
 )
 
