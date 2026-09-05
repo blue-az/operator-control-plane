@@ -1,99 +1,118 @@
-# The simulated 8 GB envelope predicted a real 8 GB card to within 7%
+# `num_gpu` capping does not simulate a smaller card — it caps layers, which is a different constraint
 
 **Run:** testbench (System 2), 2026-09-05. `gemma4:26b` on a real **RTX 2080,
-8 GB**, contract-v1 probe (`num_predict 128`, `temperature 0`, two calls, run 2
-is the warm figure per the contract).
+8 GB**, contract-v1 probe (`num_predict 128`, `temperature 0`), ollama 0.32.12
+deliberately version-matched to the desktop.
 
-**Question:** `gemma26-8gb-cap-e9` measured gemma4:26b at a *simulated* 8 GB
-envelope — a 24 GB RTX 3090 with `num_gpu=12` — and reported **23.5 tok/s**.
-Does that ablation method predict what a genuine 8 GB card does?
+> ## ⚠️ SUPERSEDES an earlier version of this file
+>
+> An earlier revision reported the real 8 GB card at **21.97 tok/s** against a
+> predicted 23.5 — "within 7%" — and cited it as the counter-example
+> `EVERY_WIDENING_SHRANK_THE_CLAIM_STUB.md` was asking for. **That was wrong.**
+> The 21.97 figure was measured on **Vulkan**, because the bench's driver (535)
+> was below ollama's 550 requirement for CUDA and silently fell back. The match
+> was a coincidence: Vulkan's penalty happened to drag the real card down to
+> meet a prediction that was itself too low.
+>
+> With CUDA working, the real card does **31.0 tok/s**. The prediction was off
+> by **+32%**, and the counter-example is withdrawn.
 
-## Result: yes, and closer than it had any right to be
+## Result
 
-| | decode tok/s |
+| condition | decode tok/s |
 |---|---:|
-| **Predicted** — 3090 capped to 8 GB (`num_gpu=12`), CUDA | **23.5** |
-| **Measured** — real RTX 2080, 8 GB, Vulkan | **21.97** |
-| delta | **−6.5%** |
+| **Predicted** — 3090 at `num_gpu=12`, "8 GB envelope" | **23.5** |
+| Measured — real 2080, **Vulkan** (driver too old for CUDA) | 21.97 |
+| **Measured — real 2080, CUDA, `num_ctx` 4096** | **31.10** |
+| **Measured — real 2080, CUDA, `num_ctx` 16384** (matched to desktop) | **31.02** |
 
-Cold run: 11.88 tok/s (48.4 s wall, prefill 14.5 tok/s). Warm run 2: **21.97
-tok/s**, 7.3 s wall, prefill 177.7 tok/s. Residency: **7,608 MiB of 8,192 MiB on
-the GPU**, the rest mmap'd into page cache (13 GB in `buff/cache` on a 15 GB
-box).
+Context length was tested and is **not** the explanation — 31.10 at 4k versus
+31.02 at 16k. Warm run 3 in both cases; cold runs were 8.9 and 26.8.
 
-**gemma4:26b runs on 8 GB.** That was the prediction and it holds.
+## The mechanism: layers are not bytes, and for MoE they are wildly not bytes
 
-## Why the closeness is surprising, and why that is the interesting part
+`gemma4:26b` is **30 blocks, 128 experts, 8 active per token**, 18 GB on disk.
 
-Four things differ between the prediction and the measurement, and every one of
-them should have moved the number:
-
-| | desktop (predicted) | bench (measured) |
+| | layers on GPU | VRAM used |
 |---|---|---|
-| backend | **CUDA** | **Vulkan** — driver 535 is below ollama's 550 requirement, so it fell back |
-| GPU | 3090, Ampere, 936 GB/s | **2080, Turing, 448 GB/s** |
-| CPU running offloaded layers | i9-9900KF, 8C/16T | **i3-9100F, 4C/4T** |
-| system RAM | 31 GB | **15 GB** |
+| Real RTX 2080 (8 GB) | **31/31** — every block plus the output layer | 7.4 GB |
+| Desktop `num_gpu=12` ("8 GB envelope") | **12 of 30** | — |
 
-A different compute backend, half the memory bandwidth, half the CPU, half the
-RAM — and the result lands within 6.5%.
+**The real 8 GB card fits the entire model's layer stack in 7.4 GB.** It can,
+because for an MoE model the per-layer non-expert weights are small — the 128
+experts dominate the 18 GB and stream from system RAM regardless of what the GPU
+holds. The simulation, meanwhile, forced two-fifths of the layers off the GPU.
 
-**The most likely reading: at a severe VRAM cap, decode rate is dominated by the
-memory-bandwidth cost of streaming CPU-resident weights, and everything else is
-second-order.** That is exactly the mechanism the MoE constraint findings
-proposed, and it is the first time this program has predicted a number on
-different hardware and been right.
+So `num_gpu=12` was **far more constrained than a real 8 GB card**, and the
+resulting 23.5 tok/s was not an 8 GB measurement. It was a 12-layer measurement.
 
-## This is the counter-example the widening stub asked for
+## What this invalidates
 
-`EVERY_WIDENING_SHRANK_THE_CLAIM_STUB.md` lists as required evidence:
+**The "envelope" framing of the VRAM-cap findings is wrong**, and those files say
+"8GB envelope" and "12GB envelope" throughout:
 
-> **A case where widening did *not* shrink a claim**, to establish that the
-> program is capable of producing one. Its absence so far is suggestive but also
-> consistent with never having tested a true effect.
+- `gemma26-8gb-cap-e9` (`num_gpu=12`)
+- `gemma26-12gb-cap-e9` (`num_gpu=20`)
+- `gemma4-26b-16gb-cap` — the calibration those two rest on
 
-**This is that case.** Widening from a simulated envelope to real hardware — a
-harder test than any of the five instances in that stub — left the claim
-standing. The 8 GB VRAM-cap result was not an artifact of the cap mechanism.
+Their **accuracy** conclusions are untouched: pass rates genuinely did not move
+under layer-count constraint (30/30 and 29/30). But they did not measure what a
+smaller card does, and the tok/s figures should not be read as predictions for
+real hardware of that VRAM.
 
-It nudged 6.5% lower, which is directionally consistent with the stub's thesis
-but well inside what a single warm probe across four confounds can resolve. The
-claim survived; it did not collapse.
+**And it may reach further than the framing.** The dense-vs-MoE constraint
+asymmetry — MoE absorbing severe caps while `gemma4:31b` stalled — was measured
+with the same instrument. For a **dense** model, layer count and memory footprint
+are close to proportional, so `num_gpu` does approximate a VRAM cut. For an
+**MoE** model it does not, because experts stream from RAM either way. Some of
+"MoE tolerates constraint better" may simply be that the cap constrains MoE
+models less, in a way the mechanism made invisible. **Not established here** —
+but the 2×2 that killed the architecture claim, and this, are pointing at the
+same instrument.
 
-## Caveats, and one that favours the bench
+## Consequence for the widening stub
 
-- **n=1 warm probe.** Screen tier for pass/fail purposes. Decode tok/s is a
-  continuous measure and has real power at low n where pass/fail does not
-  (`GOLD_STANDARD.md` §2a), but this is one number, not a distribution.
-- **Context length differs and it favours the bench.** The desktop's cap runs
-  pinned `num_ctx 16384`; the bench ran ollama's vram-based default of
-  **`-c 4096`**, reserving far less KV cache and leaving more of 8 GB for
-  weights. A matched-context run would likely be slower than 21.97.
-- **MTP speculative decoding is active** on the bench
-  (`--spec-type draft-mtp --spec-draft-n-max 3`). Whether the desktop's capped
-  runs had it enabled is unverified; same ollama version (0.32.12, deliberately
-  matched) makes it likely but it is not confirmed.
-- **Vulkan, not CUDA.** Not a like-for-like backend, and this number should not
-  be quoted as a CUDA figure.
+`EVERY_WIDENING_SHRANK_THE_CLAIM_STUB.md` still has **no counter-example.** This
+looked like one for about an hour, and removing a confound turned it into
+instance six:
 
-## Next
+| axis widened | before | after |
+|---|---|---|
+| simulated envelope → real hardware | "8 GB gives 23.5 tok/s" | real 8 GB gives **31.0**, and the ablation was measuring layer count |
 
-A driver upgrade to 550+ on the bench would allow a CUDA run and remove the
-largest confound. Debian 12 ships only 535 with no backports configured, so that
-needs bookworm-backports. **If CUDA lands materially faster than 21.97, the
-match here was partly luck** — Vulkan happening to cost about what the weaker
-hardware saved. Worth knowing which.
+Six widenings, six shrinks or breaks. The stub's requirement — "a case where
+widening did *not* shrink a claim" — remains unmet, and its thesis is stronger
+than when it was written.
 
-A matched-context run (`num_ctx 16384`) would remove the one confound that
-currently favours the bench.
+## Caveats
+
+- n=1 warm probe per condition, three runs each, warm figure taken per the
+  contract. Continuous metric, so more power at low n than pass/fail, but not a
+  distribution.
+- Driver versions differ: bench 610.57.04, desktop 580.178.04. The intended pin
+  to 580.178.04-1 did not take during a messy install and the newest branch went
+  on instead. Both are far above ollama's 550 CUDA threshold, so this does not
+  explain a 32% gap, but it is not a matched comparison either.
+- Hardware still differs by design: Turing 448 GB/s vs Ampere 936 GB/s, i3-9100F
+  4C/4T vs i9-9900KF 8C/16T, 15 GB vs 31 GB RAM. The real card wins by 32%
+  *despite* all of these being worse, which is how much the layer cap was
+  costing.
+- MTP speculative decoding is active on the bench
+  (`--spec-type draft-mtp`, draft model 5/5 layers on GPU). Desktop status
+  unverified. Same ollama version makes it likely, not certain.
+
+## What would settle the remaining question
+
+Run the desktop's 3090 at a `num_gpu` chosen so that **VRAM used matches 7.4 GB**
+rather than at a guessed layer count — then the two are comparable and the
+"envelope" language can be either repaired or retired. That is a single probe
+and it decides whether the cap findings need rewriting or only relabelling.
 
 ## Provenance
 
-- Prediction: `../gemma26-8gb-cap-e9/FINDING.md` (23.5 tok/s, `num_gpu=12`).
-- Envelope calibration: `../gemma4-26b-16gb-cap/FINDING.md`.
-- Probe: contract-v1 prompt at
-  `project-phoenix/docs/domain_runs/GEMMA4-CTX8192-3090-VS-Z13-001/prompt.txt`,
-  the same file `runner.py`'s `measure_tok_s` uses, so this figure is directly
-  comparable to existing Front I throughput data.
-- Bench: `~/.dotfiles/machines/testbench/` — Debian 12, kernel 6.1.0-52,
-  ollama 0.32.12 user-local, version-matched to the desktop.
+- Superseded prediction: `../gemma26-8gb-cap-e9/FINDING.md`.
+- Calibration those rest on: `../gemma4-26b-16gb-cap/FINDING.md`.
+- Probe: contract-v1 prompt,
+  `project-phoenix/docs/domain_runs/GEMMA4-CTX8192-3090-VS-Z13-001/prompt.txt`.
+- Bench: `~/.dotfiles/machines/testbench/`. Debian 12, kernel 6.1.0-52, driver
+  610.57.04 from NVIDIA's debian12 repo, ollama 0.32.12 user-local.
