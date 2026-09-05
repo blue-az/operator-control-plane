@@ -61,19 +61,45 @@ figure is otherwise not comparable to anything.
 both machines. Every VRAM figure here comes from `nvidia-smi`, which was the
 only instrument that tracked reality. Do not use `size_vram` from `/api/ps`.
 
-## Standing consequence: throughput baselines expire
+## Correction: only the CAPPED baseline drifted, not all of them
 
-A decode-rate number in this repo is only valid against the runtime that
-produced it. MTP appeared without a version bump on our side and moved every
-gemma4:26b figure by a third.
+The first version of this section claimed throughput baselines expire generally.
+**That was too broad.** A full-roster re-measurement on 2026-09-05, same day,
+same prompt, against the committed figures:
 
-**Rule: never compare a fresh measurement to a committed one. Re-measure the
-baseline in the same session.** The cost is one probe. The cost of not doing it
-was two wrong findings, an invented mechanism, and a correction notice applied to
-two other files that did not need one.
+| model | committed | 2026-09-05 | delta | MTP active now |
+|---|---:|---:|---:|---|
+| gemma4:26b | 137.3 | 133.33 | **-3%** | yes |
+| gemma4:31b | 34.3 | 36.12 | **+5%** | no |
+| qwen3.8:27b | 77.5 | 74.16 | **-4%** | yes |
+| qwen3.6:35b | 133.4 | 120.71 | **-10%** | yes |
 
-Pass/fail results are far more robust to this than tok/s — none of the E9
-accuracy conclusions are affected.
+**Full-VRAM decode rates reproduce within +/-10%, three of four within +/-5%.**
+The committed figures are sound. What did not reproduce is the *capped*
+measurement: gemma4:26b at `num_gpu=12` went 23.5 -> 31.55, **+34%**, while the
+same model at full VRAM moved -3%.
+
+**So the drift is specific to the offloaded configuration, and the cause is not
+established.** MTP speculative decoding is active now and is a plausible
+candidate — its benefit should scale with forward-pass cost, which is high when
+layers are CPU-resident and low when they are not, which would fit the pattern
+exactly. **But this was never verified against the 30 August runtime.** Asserting
+MTP as the cause was an assumption presented as a finding, and it is withdrawn
+as such. What is established is *what* moved, not *why*.
+
+**Practical rule, narrowed:** full-VRAM throughput figures in this repo can be
+cited. **Any tok/s measured under a `num_gpu` cap or with CPU offload should be
+re-measured before use** — that is the regime that moved, and it is also the
+regime most of the constraint findings live in.
+
+Two side observations from the same run:
+
+- **`gemma4:31b` has no MTP at all.** Speculative decoding here is model-specific,
+  not a runtime-wide change.
+- **`qwen3.6:35b` completed without the cross-GPU CUDA fault**, because a vLLM
+  process occupying GPU0 forced ollama onto a single card. That confirms the
+  single-GPU workaround functions in the ordinary daemon, not only in an
+  isolated one.
 
 ## Consequence for the widening stub
 
