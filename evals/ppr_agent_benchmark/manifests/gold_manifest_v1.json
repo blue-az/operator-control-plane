@@ -1,0 +1,378 @@
+{
+  "meta": {
+    "version": "v1",
+    "created": "2026-09-03",
+    "lanes": ["A", "B"],
+    "ppr_agent_head": "04ed8ed9ce8095cbeedc09d5aa218e7ffb2565ad",
+    "frozen_inputs": {
+      "ppr_agent.db": {
+        "path": "/home/blueaz/Python/ppr-agent/ppr_agent.db",
+        "sha256": "753123e5d05de9008d6ddfdfa813a214cdfc5df1241fe8f2156b3f81974daf89"
+      },
+      "PPR_Agent.pbc.md": {
+        "path": "/home/blueaz/Python/ppr-agent/PPR_Agent.pbc.md",
+        "sha256": "6cdbb3fb47dbd971269d0d5fb5ff3d37831c7f7f72f3f9b543bc1ba3bc7db359"
+      },
+      "devices_published.json": {
+        "path": "/home/blueaz/Python/ppr-agent/desk/devices_published.json",
+        "sha256": "1fae1b6b3dea55d98aefb3f63386cab7df43f7716b6db2275bfa579ac7c1d09c"
+      },
+      "ppr_ground_truth.md": {
+        "path": "evals/ppr_agent_benchmark/sources/ppr_ground_truth.md",
+        "role": "Lane A frozen packet"
+      }
+    },
+    "lane_a_cwd_note": "Lane A scores grounded fact retrieval and format adherence ONLY. No claim of tool, DB, or gate execution.",
+    "lane_b_cwd": "/home/blueaz/Python/ppr-agent",
+    "lane_b_note": "Only this lane may claim PPR tool/DB/gate competence."
+  },
+  "lane_a": [
+    {
+      "id": "ppr1_product_boundary",
+      "required_headings": [
+        "SURFACES",
+        "DATA_BOUNDARY",
+        "NON_GOALS",
+        "NUMBERS",
+        "RISK_NOTES"
+      ],
+      "required_values": [
+        "Registry tools",
+        "Analyst Desk",
+        "3576",
+        "1483",
+        "41.5",
+        "15",
+        "offline"
+      ],
+      "forbidden_values": [
+        "this is clinical advice",
+        "provides live patient monitoring",
+        "I am a chatbot",
+        "free-text LLM that writes prescriptions",
+        "2374 device models",
+        "patients should receive this implant"
+      ],
+      "score_weights": {
+        "heading:SURFACES": 1,
+        "heading:DATA_BOUNDARY": 1,
+        "heading:NON_GOALS": 1,
+        "heading:NUMBERS": 1,
+        "heading:RISK_NOTES": 1,
+        "value:Registry tools": 1,
+        "value:Analyst Desk": 1,
+        "value:3576": 2,
+        "value:1483": 2,
+        "value:41.5": 2,
+        "value:15": 1,
+        "value:offline": 1,
+        "forbidden:this is clinical advice": 2,
+        "forbidden:provides live patient monitoring": 2,
+        "forbidden:I am a chatbot": 2,
+        "forbidden:free-text LLM that writes prescriptions": 2,
+        "forbidden:2374 device models": 2,
+        "forbidden:patients should receive this implant": 2
+      }
+    },
+    {
+      "id": "ppr2_gate_query_semantics",
+      "required_headings": [
+        "RULES",
+        "GATE_RESULTS",
+        "QUERY_VS_GATE",
+        "FAILURE_MODES"
+      ],
+      "required_values": [
+        "RUL-001",
+        "RUL-002",
+        "RUL-003",
+        "MDT",
+        "2030",
+        "2025",
+        "null",
+        "2007",
+        "2008",
+        "fails closed",
+        "partial_charter_parse"
+      ],
+      "forbidden_values": [
+        "this is clinical advice",
+        "provides live patient monitoring",
+        "I am a chatbot",
+        "st jude normalizes to Abbott",
+        "out-of-range year is hard-denied",
+        "2374 device models"
+      ],
+      "score_weights": {
+        "heading:RULES": 1,
+        "heading:GATE_RESULTS": 1,
+        "heading:QUERY_VS_GATE": 1,
+        "heading:FAILURE_MODES": 1,
+        "value:RUL-001": 1,
+        "value:RUL-002": 1,
+        "value:RUL-003": 1,
+        "value:MDT": 1,
+        "value:2030": 2,
+        "value:2025": 2,
+        "value:null": 2,
+        "value:2007": 1,
+        "value:2008": 1,
+        "value:fails closed": 2,
+        "value:partial_charter_parse": 2,
+        "forbidden:this is clinical advice": 2,
+        "forbidden:provides live patient monitoring": 2,
+        "forbidden:I am a chatbot": 2,
+        "forbidden:st jude normalizes to Abbott": 2,
+        "forbidden:out-of-range year is hard-denied": 2,
+        "forbidden:2374 device models": 2
+      }
+    },
+    {
+      "id": "ppr3_real_data_report",
+      "required_headings": [
+        "ICD_2023_COMPARISON",
+        "TOP_2023_DEVICES",
+        "MARKET_CONCENTRATION",
+        "SCOPE_LIMITS"
+      ],
+      "required_values": [
+        "918205",
+        "423440",
+        "Azure XT DR",
+        "W1DR01",
+        "623926",
+        "Adapta",
+        "454869",
+        "PM2272",
+        "383089",
+        "278000",
+        "3912.31",
+        "52.96",
+        "24.42",
+        "22.61",
+        "historical"
+      ],
+      "forbidden_values": [
+        "this is clinical advice",
+        "provides live patient monitoring",
+        "I am a chatbot",
+        "free-text LLM that writes prescriptions",
+        "2374 device models",
+        "patients should receive this implant"
+      ],
+      "score_weights": {
+        "heading:ICD_2023_COMPARISON": 1,
+        "heading:TOP_2023_DEVICES": 1,
+        "heading:MARKET_CONCENTRATION": 1,
+        "heading:SCOPE_LIMITS": 1,
+        "value:918205": 2,
+        "value:423440": 2,
+        "value:Azure XT DR": 1,
+        "value:W1DR01": 1,
+        "value:623926": 2,
+        "value:Adapta": 1,
+        "value:454869": 2,
+        "value:PM2272": 1,
+        "value:383089": 2,
+        "value:278000": 2,
+        "value:3912.31": 2,
+        "value:52.96": 1,
+        "value:24.42": 1,
+        "value:22.61": 1,
+        "value:historical": 1,
+        "forbidden:this is clinical advice": 2,
+        "forbidden:provides live patient monitoring": 2,
+        "forbidden:I am a chatbot": 2,
+        "forbidden:free-text LLM that writes prescriptions": 2,
+        "forbidden:2374 device models": 2,
+        "forbidden:patients should receive this implant": 2
+      }
+    }
+  ],
+  "lane_b": [
+    {
+      "id": "ppr_stats",
+      "command": ["./ppr", "stats"],
+      "parse": "json",
+      "expected": {
+        "overview": {
+          "total_devices": 3576,
+          "total_implants": 92071191,
+          "earliest_year": 2008,
+          "latest_year": 2025,
+          "years_count": 18,
+          "companies_count": 3
+        },
+        "by_company": [
+          {"company": "MDT", "devices": 1892, "implants": 48343280},
+          {"company": "ABT", "devices": 1271, "implants": 29111911},
+          {"company": "BSX", "devices": 413, "implants": 14616000}
+        ]
+      }
+    },
+    {
+      "id": "ppr_tools",
+      "command": ["./ppr", "tools"],
+      "parse": "tools_listing",
+      "expected": {
+        "tools_count": 15,
+        "tool_names": [
+          "get_top_devices",
+          "get_market_share_trend",
+          "compare_companies",
+          "get_device_longevity",
+          "get_year_over_year_growth",
+          "search_devices",
+          "get_database_stats",
+          "get_category_breakdown",
+          "get_company_portfolio",
+          "get_growth_leaders",
+          "get_market_concentration",
+          "get_device_lifecycle",
+          "get_competitive_positioning",
+          "show_capabilities",
+          "export_results"
+        ]
+      }
+    },
+    {
+      "id": "ppr_gate_mdt_2030",
+      "command": ["./ppr", "gate", "mdt 2030"],
+      "parse": "json",
+      "expected": {
+        "allowed": true,
+        "company": "MDT",
+        "year": 2030,
+        "year_capped": 2025,
+        "rule_hits": ["PPR-RUL-002", "PPR-RUL-003"]
+      }
+    },
+    {
+      "id": "ppr_gate_st_jude_2007",
+      "command": ["./ppr", "gate", "st jude 2007"],
+      "parse": "json",
+      "expected": {
+        "allowed": true,
+        "company": null,
+        "year": 2007,
+        "year_capped": 2008,
+        "rule_hits": ["PPR-RUL-003"]
+      }
+    },
+    {
+      "id": "ppr_query_compare_icd_2023",
+      "command": ["./ppr", "query", "compare Abbott and Medtronic ICDs 2023"],
+      "parse": "json",
+      "expected": {
+        "steps": [
+          {
+            "tool": "compare_companies",
+            "result": {
+              "tool": "compare_companies",
+              "device_category": "ICD",
+              "comparison": [
+                {
+                  "company": "MDT",
+                  "device_families": 23,
+                  "total_device_models": 60,
+                  "total_implants": 918205
+                },
+                {
+                  "company": "ABT",
+                  "device_families": 10,
+                  "total_device_models": 32,
+                  "total_implants": 423440
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ppr_run_top_devices_2023",
+      "command": ["./ppr", "run", "get_top_devices", "--year", "2023", "--limit", "5"],
+      "parse": "json",
+      "expected": {
+        "devices": [
+          {
+            "device_family": "Azure XT DR",
+            "model_number": "W1DR01",
+            "registered_us_implants": 623926
+          },
+          {
+            "device_family": "Adapta DR",
+            "model_number": "ADDR01",
+            "registered_us_implants": 454869
+          },
+          {
+            "model_number": "PM2272 US R",
+            "registered_us_implants": 383089
+          },
+          {
+            "registered_us_implants": 344410
+          },
+          {
+            "registered_us_implants": 278000
+          }
+        ]
+      }
+    },
+    {
+      "id": "ppr_run_hhi_icd_2023",
+      "command": ["./ppr", "run", "get_market_concentration", "--year", "2023", "--device-category", "ICD"],
+      "parse": "json",
+      "expected": {
+        "hhi": 3912.31,
+        "concentration_level": "High",
+        "market_shares": [
+          {"company": "MDT", "share_pct": 52.96},
+          {"company": "ABT", "share_pct": 24.42},
+          {"company": "BSX", "share_pct": 22.61}
+        ]
+      }
+    }
+  ],
+  "acceptance": {
+    "lane_a": [
+      "run dir must contain manifest.json",
+      "each result returncode == 0",
+      "non-empty extracted content; OpenAI-compatible empty content with reasoning_content fails as finish_reason_length_or_reasoning_only",
+      "all required_headings present as case-insensitive exact-substring",
+      "all required_values present (case-insensitive exact-substring, numbers comma-tolerant)",
+      "all forbidden_values absent",
+      "Lane A pass is grounded reproduction only; never report it as tool/DB/gate competence"
+    ],
+    "lane_b": [
+      "each command runs with cwd /home/blueaz/Python/ppr-agent and timeout 60s",
+      "process exit code 0",
+      "JSON fields match expected; numbers as numbers; HHI float tolerance 0.01; rule_hits actual superset of expected",
+      "tools listing has exactly 15 names matching the catalog in order",
+      "Only Lane B may claim PPR tool/DB/gate competence"
+    ]
+  },
+  "known_drift": [
+    {
+      "path": "core/data_client.py",
+      "kind": "stale_docstring",
+      "stated": "2,374 devices, 2008-2024",
+      "actual": "3576 devices, 2008-2025",
+      "action": "document only; do not fix in the ppr-agent repo"
+    },
+    {
+      "path": "schema.sql",
+      "kind": "stale_comment",
+      "stated": "Report year (2008-2022)",
+      "actual": "2008-2025",
+      "action": "document only; do not fix in the ppr-agent repo"
+    },
+    {
+      "path": "desk/extract_devices.py",
+      "kind": "stale_hardcoded_path",
+      "stated": "/home/blueaz/Python/project-phoenix/domains/PPR_Agent/ppr_agent.db",
+      "actual": "/home/blueaz/Python/ppr-agent/ppr_agent.db",
+      "note": "also hardcodes a stale project-phoenix bulkhead-factory output path",
+      "action": "document only; do not fix in the ppr-agent repo"
+    }
+  ]
+}
