@@ -61,3 +61,81 @@ That constraint is fixture difficulty: the three fixtures sit at ~1511, ~1598 an
 ~1994 Elo while the top band sits near ~1800, so the band is measured only by
 items that are saturated or out of reach. No amount of VRAM fixes an item gap
 between 1650 and 1990.
+
+---
+
+## Addendum 2026-09-05 — the 3090s-to-bench swap
+
+Planned end state: **both 3090s + the 32 GB RAM move to the testbench; the 2080
+moves to the desktop; CPUs stay put.** Checked before the swap:
+
+### Topology risk: none. Both machines are the same board.
+
+| | desktop | testbench |
+|---|---|---|
+| board | **MSI MPG Z390 GAMING PLUS (MS-7B51)** | **MSI MPG Z390 GAMING PLUS (MS-7B51)** |
+| CPU | i9-9900KF (8c/16t) | i3-9100F (4c/4t) |
+| RAM | 31 GB | 15 GB (32 GB after swap) |
+
+Identical boards means identical slot wiring, so the dual-card link topology
+transfers exactly.
+
+### What that topology actually is — worth knowing on its own
+
+**The desktop's second 3090 has been running at PCIe x4 this whole time.**
+
+```
+01:00.0  max_x16  cur_x16   -> root port 00:01.0  (CPU lanes)
+03:00.0  max_x16  cur_x4    -> root port 00:1b.4  (PCH)
+```
+
+This board feeds one x16 slot from the CPU; the second card lands on a chipset
+x4 port. **Every dual-card result in this program was measured with card 2 on a
+PCIe 3.0 x4 link** — the 45 GB residency work, `CONCURRENCY-001`, and the
+co-residency experiment.
+
+Two consequences:
+
+1. **Layer-split decode is not PCIe-bound.** `qwen3-next` at 79.1 tok/s and
+   `gpt-oss:120b` at 34.1 tok/s are split across an x4 link. Ollama splits by
+   layer, so per-token inter-card traffic is one activation vector, not weights.
+   The x4 does not appear to be the constraint on decode.
+2. **Model load time over x4 is not measured** and is the place the narrow link
+   should hurt. Loading 45–65 GB across it is likely a large share of the
+   observed load latency. Untested.
+
+If a future board offers x8/x8, that is a real variable to re-test — and it
+means these numbers are a **floor**, not a ceiling.
+
+### What transfers, per this document's own framework
+
+Unchanged: pass/fail outcomes on deterministic postconditions. The E9 battery
+has the same properties the 2026-08-14 check established — no timeout-mediated
+cells, and residency now verified from daemon layer counts rather than
+`ollama ps`.
+
+**Does not transfer:** every wall-clock, tok/s and residency figure, exactly as
+before. The CPU changes from 8c/16t to 4c/4t under the dual-card pool.
+
+The one measurement bearing on that: on the 2080, the **i3 came within 1.7% of
+the i9** (31.55 vs 31.02 tok/s) on heavily-offloaded MoE work
+(`fixtures/rtx2080-8gb-real/`). For fully-GPU-resident models the CPU should
+matter even less. **The exception is the co-residency result (RQ3)**, which was
+explicitly RAM-bandwidth-bound; it is the finding most likely to move and should
+not be quoted post-swap without re-running.
+
+### Caveat on this document's original criterion 2
+
+The 2026-08-14 residency argument rested on **279 `ollama ps` samples**. That
+instrument is now known to misreport (`docs/VRAM_IS_A_BUDGET_STUB.md`). The
+error direction is favourable — the two audited cases had `ollama ps` claiming
+*more* CPU offload than reality — so "100% GPU" readings are conservative and
+the original conclusion stands. But the evidence is weaker than it reads.
+
+### Recommended pre-swap action
+
+Capture a pinned-config decode baseline on the desktop **before** the cards
+move, so post-swap differences are attributable to the hardware rather than to
+drift or config mismatch. Three separate figures were wrong on 2026-09-05 purely
+from comparing across configurations; a swap is exactly the event that generates
+more of those.
