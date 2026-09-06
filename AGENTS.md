@@ -39,6 +39,7 @@ Compact Python CLI (Python ≥ 3.12).
 - `pytest tests/test_operator.py -q -k doctor` (Targeted doctor tests)
 - `pytest tests/test_authority_broker.py -q` (P3a broker tests)
 - `./operator-broker --help` / `./operator-admin --help` (P3a/P3b surfaces)
+- `python3 scripts/pbc_validate_operator.py` (Route C local PBC wrapper; not upstream `--profile`)
 - `ruff check .` / `black --check .` / `isort --check-only .` (Lint/Format)
 - `./operator init` (Creates local ledger; use only in intended workspaces)
 

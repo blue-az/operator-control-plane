@@ -1,0 +1,117 @@
+{
+  "id": "poe_fut014_manifest",
+  "task": "pi-operator-extension-pbc-profile",
+  "note": "Expected observations for POE-FUT-014. Not a ratification of Operator dialect or upstream spec.",
+  "fixtures": [
+    {
+      "file": "poe_fut014_valid_upstream_core.pbc.md",
+      "class": "valid_upstream_core",
+      "expect_cli_exit": 0,
+      "expect_cli_error_ids": [],
+      "expect_pbc_lint_errors": false,
+      "must_surface_block_types": []
+    },
+    {
+      "file": "poe_fut014_valid_proposed_lifecycle.pbc.md",
+      "class": "valid_operator_proposed",
+      "expect_cli_exit": 1,
+      "expect_cli_error_ids": ["E004"],
+      "expect_pbc_lint_errors": false,
+      "must_surface_block_types": [
+        "proposed-rules",
+        "proposed-behavior",
+        "proposed-outcomes"
+      ]
+    },
+    {
+      "file": "poe_fut014_valid_local_trust.pbc.md",
+      "class": "valid_operator_local_trust",
+      "expect_cli_exit": 0,
+      "expect_cli_error_ids": [],
+      "expect_cli_warning_ids": ["W013"],
+      "expect_pbc_lint_errors": false,
+      "must_surface_block_types": []
+    },
+    {
+      "file": "poe_fut014_invalid_yaml.pbc.md",
+      "class": "invalid_yaml",
+      "expect_cli_exit": 1,
+      "expect_cli_error_ids": ["E005"],
+      "expect_pbc_lint_errors": false,
+      "pbc_lint_gap": "operator pbc_lint does not parse YAML",
+      "must_surface_block_types": []
+    },
+    {
+      "file": "poe_fut014_invalid_frontmatter_missing.pbc.md",
+      "class": "invalid_frontmatter",
+      "expect_cli_exit": 1,
+      "expect_cli_error_ids": ["E001"],
+      "expect_pbc_lint_errors": false,
+      "pbc_lint_gap": "operator pbc_lint does not require frontmatter",
+      "must_surface_block_types": []
+    },
+    {
+      "file": "poe_fut014_invalid_frontmatter_no_id.pbc.md",
+      "class": "invalid_frontmatter",
+      "expect_cli_exit": 1,
+      "expect_cli_error_ids": ["E002"],
+      "expect_pbc_lint_errors": false,
+      "pbc_lint_gap": "operator pbc_lint does not require frontmatter id",
+      "must_surface_block_types": []
+    },
+    {
+      "file": "poe_fut014_invalid_frontmatter_no_title.pbc.md",
+      "class": "invalid_frontmatter",
+      "expect_cli_exit": 1,
+      "expect_cli_error_ids": ["E003"],
+      "expect_pbc_lint_errors": false,
+      "pbc_lint_gap": "operator pbc_lint does not require frontmatter title",
+      "must_surface_block_types": []
+    },
+    {
+      "file": "poe_fut014_invalid_frontmatter_broken.pbc.md",
+      "class": "invalid_frontmatter",
+      "expect_cli_exit": 1,
+      "expect_cli_error_ids": ["E001"],
+      "expect_pbc_lint_errors": false,
+      "pbc_lint_gap": "operator pbc_lint does not parse frontmatter YAML",
+      "must_surface_block_types": []
+    },
+    {
+      "file": "poe_fut014_invalid_unclosed.pbc.md",
+      "class": "invalid_yaml",
+      "expect_cli_exit": 1,
+      "expect_cli_error_ids": ["E005"],
+      "expect_pbc_lint_errors": false,
+      "pbc_lint_gap": "operator pbc_lint ignores unclosed fences",
+      "must_surface_block_types": []
+    },
+    {
+      "file": "poe_fut014_invalid_unknown_block.pbc.md",
+      "class": "invalid_unknown_block",
+      "expect_cli_exit": 1,
+      "expect_cli_error_ids": ["E004"],
+      "expect_pbc_lint_errors": false,
+      "must_surface_block_types": ["not-a-block"]
+    },
+    {
+      "file": "poe_fut014_invalid_rules_trust_proposed.pbc.md",
+      "class": "operator_invariant_one",
+      "expect_cli_exit": 0,
+      "expect_cli_error_ids": [],
+      "expect_cli_warning_ids": ["W013"],
+      "expect_pbc_lint_errors": true,
+      "pbc_lint_must_match": "trust: proposed",
+      "must_surface_block_types": []
+    },
+    {
+      "file": "poe_fut014_invalid_provenance_confidence.pbc.md",
+      "class": "invalid_operator_local_vocab",
+      "expect_cli_exit": 1,
+      "expect_cli_error_ids": ["E011"],
+      "expect_pbc_lint_errors": false,
+      "pbc_lint_gap": "operator pbc_lint does not check provenance confidence",
+      "must_surface_block_types": []
+    }
+  ]
+}

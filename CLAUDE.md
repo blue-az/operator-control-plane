@@ -29,6 +29,7 @@ python3 -m pytest tests/                 # full subprocess-driven integration su
 python3 -m pytest tests/test_operator.py -q  # fastest focused repo-CLI run
 python3 -m pytest tests/test_pbc_lint.py -q  # PBC fence linter
 python3 pbc_lint.py owners-manual/pbc    # fail-closed PBC invariants 1/3/4
+python3 scripts/pbc_validate_operator.py  # Route C local wrapper; not upstream --profile
 python3 -m pytest tests/test_operator.py -q -k doctor   # run a single test by name pattern
 python3 -m pytest tests/test_authority_broker.py -q  # standalone P3a broker/store tests
 python3 -m pytest tests/test_dogfood_runner.py -q  # dogfood runner unit suite
