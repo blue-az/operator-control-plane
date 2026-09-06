@@ -412,12 +412,29 @@ future_features:
   - id: POE-FUT-010
     name: Operator next-steps command
     command: /op:next-steps
-    description: Turn the active task's ledger state into a short prioritized action list: current next_action first, then unverified claims, missing review/verification gates, recent dogfood issues, and recommended future slices.
+    description: "Turn the active task's ledger state into a short prioritized action list: current next_action first, then unverified claims, missing review/verification gates, recent dogfood issues, and recommended future slices."
   - id: POE-FUT-011
     name: Operator project dashboard
     command: /op:project or /op:roadmap --project <prefix>
-    description: Visualize a multi-task project prefix as phases: task id, status, verified claims versus total claims, evidence count, handoff count, stale next_action warnings, latest verified claim, latest open issue, and recommended next phase. Intended for dogfood/project-level orientation before moving the extension to other repos.
+    description: "Visualize a multi-task project prefix as phases: task id, status, verified claims versus total claims, evidence count, handoff count, stale next_action warnings, latest verified claim, latest open issue, and recommended next phase. Intended for dogfood/project-level orientation before moving the extension to other repos."
+  - id: POE-FUT-012
+    name: Cross-project install and publish path
+    command: /op:install or package-level install instructions
+    description: "Make the Operator Pi extension usable from other project directories without copy/paste: discover or configure the Operator control-plane ledger, install/copy/link the project-local extension into a target repo, provide constrained starter instructions for subagents, and define the packaging/testing criteria needed before publishing the extension beyond this repository."
+  - id: POE-FUT-013
+    name: Workflow strictness modes
+    command: /op:mode or guidance inside /op:next-steps
+    description: "Offer a lightweight taxonomy for choosing process strictness without adding mandatory ceremony: support/deliverable mode can close on user acceptance; engineering-light mode expects tests plus claim/evidence/handoff; engineering-trust mode expects PBC/spec, review, evidence, and distinct verifier. This should guide defaults, not become another required gate."
+  - id: POE-FUT-014
+    name: PBC spec CLI compatibility/profile
+    command: /pbc:validate or pbc validate --profile operator
+    description: "Align Operator-authored PBC files with the upstream pbc-spec CLI before publishing: either upstream proposed-* lifecycle block support, avoid custom block names, or define an Operator dialect/profile that accepts proposed-rules/proposed-behavior/proposed-outcomes and local trust vocabulary while still catching real YAML/frontmatter errors."
 ```
+
+> Factual implementation note (2026-09-05; not a ratification or lifecycle change):
+> `/op:next-steps`, `/op:project`, and `/op:roadmap --project` exist as read-only orientation commands.
+> Cross-project install is `scripts/install-operator-extension.py` plus `.pi/operator-ledger.json`; there is no `/op:install` command.
+> POE-FUT-014 Route C is recorded as a compatibility-route choice only. The check is local wrapper `scripts/pbc_validate_operator.py` around the pinned pbc-spec CLI. The upstream CLI has no `--profile`. `proposed-*` fences are not canonical upstream types. `/pbc:*` commands remain unimplemented.
 
 ## Dogfood Issue Backlog
 
@@ -463,18 +480,18 @@ issues:
   - id: POE-ISS-010
     source: pi-operator-extension-step5 live TUI dogfood
     summary: /op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.
-    next_step: Add a defaults pass for authoring flows: infer current task and session author, suggest claim type and gate from recent context, prefer the active/recent claim for evidence, and keep advanced fields behind an edit/details path.
+    next_step: "Add a defaults pass for authoring flows: infer current task and session author, suggest claim type and gate from recent context, prefer the active/recent claim for evidence, and keep advanced fields behind an edit/details path."
   - id: POE-ISS-011
     source: pi-operator-extension-step5 live TUI dogfood
     summary: /op:doctor and /op:status are slow on large ledgers and previously showed no visible progress while running.
     next_step: Add visible working/status notifications before long Operator reads and clear them when the command finishes.
   - id: POE-ISS-012
     source: pi-operator-extension-step5 verifier run dogfood
-    summary: Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.
+    summary: "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity."
     next_step: Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity.
   - id: POE-ISS-013
     source: pi-operator-extension-target-ux-cleanup
-    summary: Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.
+    summary: "Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity."
     next_step: Rename prompts/docs around model/persona targets, remove Pi as a default delegation target, and keep reviewer labels distinct from verifier Unix users in generated review instructions.
 ```
 

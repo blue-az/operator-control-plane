@@ -32,13 +32,21 @@
  */
 
 import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 
 /** Directory name of the ledger, relative to the repository root. */
 export const LEDGER_DIR = ".operator";
 
 /** Name of the ledger CLI executable, relative to the repository root. */
 export const OPERATOR_BIN = "operator";
+
+/**
+ * Explicit cross-project ledger contract written by
+ * `scripts/install-operator-extension.py`. Relative to a consumer cwd (or an
+ * ancestor). findLedger reads this; it does not copy `.operator/`.
+ */
+export const LEDGER_CONTRACT_SCHEMA = "operator-pi-extension-ledger-contract/v1";
+export const LEDGER_CONTRACT_RELATIVE = ".pi/operator-ledger.json";
 
 /**
  * Subcommands this extension is allowed to invoke at step 4.
@@ -190,29 +198,174 @@ export interface Ledger {
 	tasksDir: string;
 }
 
+export type LedgerDiscoveryFailureKind = "malformed" | "ambiguous" | "missing-pair";
+
 /**
- * Walk upward from `startDir` for a directory holding both `.operator/` and an
- * `operator` executable. Fails closed (null) rather than guessing: a ledger
- * without its CLI, or a CLI without its ledger, is not something to wrap.
+ * Fail-closed discovery error. `findLedger` returns null only when nothing was
+ * found. A present-but-unusable contract or two disagreeing canonical roots
+ * throw rather than guessing a parent or honoring env/settings.
+ */
+export class LedgerDiscoveryError extends Error {
+	readonly kind: LedgerDiscoveryFailureKind;
+	readonly contractPath?: string;
+	constructor(kind: LedgerDiscoveryFailureKind, message: string, contractPath?: string) {
+		super(message);
+		this.name = "LedgerDiscoveryError";
+		this.kind = kind;
+		this.contractPath = contractPath;
+	}
+}
+
+export function isLedgerDiscoveryError(err: unknown): err is LedgerDiscoveryError {
+	return err instanceof LedgerDiscoveryError;
+}
+
+function makeLedger(root: string): Ledger | null {
+	const ledgerDir = join(root, LEDGER_DIR);
+	const operatorBin = join(root, OPERATOR_BIN);
+	if (!isDir(ledgerDir) || !isFile(operatorBin)) return null;
+	return {
+		root,
+		ledgerDir,
+		operatorBin,
+		operatorYaml: join(ledgerDir, "operator.yaml"),
+		tasksDir: join(ledgerDir, "tasks"),
+	};
+}
+
+function canonicalDir(p: string): string | null {
+	try {
+		const real = realpathSync(p);
+		return isDir(real) ? real : null;
+	} catch {
+		return null;
+	}
+}
+
+function ledgerFromContract(contractPath: string): Ledger {
+	let text: string;
+	try {
+		text = readFileSync(contractPath, "utf8");
+	} catch (err) {
+		throw new LedgerDiscoveryError(
+			"malformed",
+			`error: malformed ledger contract at ${contractPath}: ${err instanceof Error ? err.message : String(err)}`,
+			contractPath,
+		);
+	}
+	let data: unknown;
+	try {
+		data = JSON.parse(text);
+	} catch {
+		throw new LedgerDiscoveryError(
+			"malformed",
+			`error: malformed ledger contract at ${contractPath}: invalid JSON`,
+			contractPath,
+		);
+	}
+	if (data === null || typeof data !== "object" || Array.isArray(data)) {
+		throw new LedgerDiscoveryError(
+			"malformed",
+			`error: malformed ledger contract at ${contractPath}: expected a JSON object`,
+			contractPath,
+		);
+	}
+	const rec = data as Record<string, unknown>;
+	if (rec.schema !== LEDGER_CONTRACT_SCHEMA) {
+		throw new LedgerDiscoveryError(
+			"malformed",
+			`error: malformed ledger contract at ${contractPath}: schema must be ${LEDGER_CONTRACT_SCHEMA}`,
+			contractPath,
+		);
+	}
+	if (typeof rec.ledger_root !== "string" || rec.ledger_root.trim() === "") {
+		throw new LedgerDiscoveryError(
+			"malformed",
+			`error: malformed ledger contract at ${contractPath}: ledger_root must be an absolute path`,
+			contractPath,
+		);
+	}
+	const rawRoot = rec.ledger_root.trim();
+	if (!isAbsolute(rawRoot)) {
+		throw new LedgerDiscoveryError(
+			"malformed",
+			`error: malformed ledger contract at ${contractPath}: ledger_root must be an absolute path`,
+			contractPath,
+		);
+	}
+	if (rawRoot.split(/[\\/]/).includes("..")) {
+		throw new LedgerDiscoveryError(
+			"malformed",
+			`error: malformed ledger contract at ${contractPath}: ledger_root must not contain '..' path segments`,
+			contractPath,
+		);
+	}
+	const canonical = canonicalDir(rawRoot);
+	if (!canonical) {
+		throw new LedgerDiscoveryError(
+			"missing-pair",
+			`error: missing ledger at ${rawRoot} recorded by ${contractPath}: need both a ${LEDGER_DIR}/ directory and a file named ${OPERATOR_BIN}`,
+			contractPath,
+		);
+	}
+	const ledger = makeLedger(canonical);
+	if (!ledger) {
+		throw new LedgerDiscoveryError(
+			"missing-pair",
+			`error: missing ledger at ${canonical} recorded by ${contractPath}: need both a ${LEDGER_DIR}/ directory and a file named ${OPERATOR_BIN}`,
+			contractPath,
+		);
+	}
+	return ledger;
+}
+
+/**
+ * Walk upward from `startDir` once, collecting at most:
+ *   1. the first sibling pair (`.operator/` directory + a file named `operator`)
+ *   2. the first `.pi/operator-ledger.json` file
+ *
+ * Then:
+ *   - contract only: require schema `operator-pi-extension-ledger-contract/v1`
+ *     and an absolute `ledger_root` that itself has the sibling pair
+ *   - sibling pair only: return that ledger (historical behavior)
+ *   - both, same canonical root: return that ledger
+ *   - both, different canonical roots: throw ambiguous
+ *   - malformed JSON, relative `ledger_root`, missing pair: throw, no parent guess
+ *
+ * Does not read `OPERATOR_DIR`, `OPERATOR_LEDGER_ROOT`, or settings.json.
+ * Does not copy or synthesize a consumer `.operator/`.
  */
 export function findLedger(startDir: string): Ledger | null {
 	let dir = resolve(startDir);
+	let siblingRoot: string | null = null;
+	let contractPath: string | null = null;
 	for (;;) {
-		const ledgerDir = join(dir, LEDGER_DIR);
-		const operatorBin = join(dir, OPERATOR_BIN);
-		if (isDir(ledgerDir) && isFile(operatorBin)) {
-			return {
-				root: dir,
-				ledgerDir,
-				operatorBin,
-				operatorYaml: join(ledgerDir, "operator.yaml"),
-				tasksDir: join(ledgerDir, "tasks"),
-			};
+		if (!siblingRoot && makeLedger(dir)) siblingRoot = dir;
+		if (!contractPath) {
+			const candidate = join(dir, ".pi", "operator-ledger.json");
+			if (isFile(candidate)) contractPath = candidate;
 		}
+		if (siblingRoot && contractPath) break;
 		const parent = dirname(dir);
-		if (parent === dir) return null;
+		if (parent === dir) break;
 		dir = parent;
 	}
+
+	const siblingCanonical = siblingRoot ? (canonicalDir(siblingRoot) ?? siblingRoot) : null;
+	const siblingLedger = siblingCanonical ? makeLedger(siblingCanonical) : null;
+
+	if (contractPath) {
+		const contractLedger = ledgerFromContract(contractPath);
+		if (siblingLedger && siblingLedger.root !== contractLedger.root) {
+			throw new LedgerDiscoveryError(
+				"ambiguous",
+				`error: ambiguous ledger: sibling control plane at ${siblingLedger.root} differs from contract ledger_root ${contractLedger.root} (from ${contractPath})`,
+				contractPath,
+			);
+		}
+		return contractLedger;
+	}
+	return siblingLedger;
 }
 
 function isDir(p: string): boolean {
@@ -1435,41 +1588,6 @@ export interface RoadmapReportInput {
 	activeOrigin: TaskOrigin;
 	taskShow: TaskShowSummary | null;
 	invocations: string[];
-}
-
-export function buildNextStepsReport(input: RoadmapReportInput & { claims: ClaimRow[] }): Report {
-	const lines: string[] = [];
-	const f = input.taskShow?.fields ?? {};
-	const unverified = input.claims.filter((c) => c.status.toUpperCase() !== "VERIFIED");
-	lines.push(`Showing task: ${input.activeTask ?? "(none)"} - from ${describeOrigin(input.activeOrigin)}`);
-	if (f.Status) lines.push(`Task status: ${f.Status}`);
-	lines.push("", "Recommended next steps");
-	let n = 1;
-	if (f["Next Action"]) lines.push(`${n++}. Current ledger next_action: ${truncate(f["Next Action"], 240)}`);
-	if (unverified.length > 0) {
-		lines.push(`${n++}. Review or intentionally leave unverified claim(s): ${unverified.map((c) => c.id).join(", ")}.`);
-		const latest = unverified[unverified.length - 1];
-		if (latest) lines.push(`   Suggested: /op:supervisor-review ${latest.id}`);
-	}
-	if (input.activeTask && input.taskShow && unverified.length === 0 && f.Status !== "verified") {
-		lines.push(`${n++}. Task has no unverified claims shown here; consider final /op:handoff and task transition/verification closeout.`);
-	}
-	const recentIssue = input.roadmap.issues[input.roadmap.issues.length - 1];
-	if (recentIssue) lines.push(`${n++}. Latest dogfood issue: ${recentIssue.id} — ${truncate(recentIssue.nextStep, 220)}`);
-	const recentFeatures = input.roadmap.futureFeatures.slice(-3);
-	if (recentFeatures.length > 0) {
-		lines.push(`${n++}. Candidate feature slices: ${recentFeatures.map((x) => x.command ?? x.id).join(", ")}.`);
-	}
-	if (n === 1) lines.push("1. No active task context found. Run /op:tasks then /op:use <task-id>.");
-	lines.push("", "This is guidance only. It does not execute commands or write the ledger.");
-	return {
-		command: "/op:next-steps",
-		title: "Operator next steps",
-		headline: input.activeTask ? `next steps for ${input.activeTask}` : "no active task selected",
-		level: input.activeTask ? "info" : "warning",
-		lines,
-		invocations: input.invocations,
-	};
 }
 
 export function buildRoadmapReport(input: RoadmapReportInput): Report {

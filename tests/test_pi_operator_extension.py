@@ -186,6 +186,7 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
                 "op:evidence",
                 "op:handoff",
                 "op:next-steps",
+                "op:project",
                 "op:roadmap",
                 "op:status",
                 "op:supervisor-review",
@@ -198,6 +199,7 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
         self.assertIn('pi.registerCommand("op:supervisor-review"', text)
         self.assertIn('pi.registerCommand("op:roadmap"', text)
         self.assertIn('pi.registerCommand("op:next-steps"', text)
+        self.assertIn('pi.registerCommand("op:project"', text)
         self.assertNotIn('pi.registerCommand("pbc:define"', text)
         self.assertNotIn('pi.registerCommand("pbc:feature"', text)
 
@@ -232,9 +234,27 @@ class PiOperatorExtensionSelftest(unittest.TestCase):
         output = result.stdout + result.stderr
         self.assertEqual(result.returncode, 0, output)
         self.assertIn("0 failed", output)
+        self.assertIn("Integration coverage:", output)
+        self.assertIn("Tier A-A5 (core unit, throwaway ledger): executed", output)
+        self.assertNotIn("skip (pi import failed)", output)
         if pi_present:
-            self.assertNotIn("skipped: Tier B", output)
-            self.assertNotIn("skipped: Tier C", output)
+            if "optional @earendil-works/pi-server is not installed" in output:
+                self.assertIn("Tier B (pi discoverAndLoadExtensions): not executed", output)
+                self.assertIn("Tier C (handler e2e with stub UI): not executed", output)
+                self.assertIn(
+                    "skipped: Tier B: optional @earendil-works/pi-server is not installed", output
+                )
+                self.assertIn(
+                    "skipped: Tier C: optional @earendil-works/pi-server is not installed", output
+                )
+            else:
+                self.assertIn("Tier B (pi discoverAndLoadExtensions): executed", output)
+                self.assertIn("Tier C (handler e2e with stub UI): executed", output)
+                self.assertNotIn("skipped: Tier B", output)
+                self.assertNotIn("skipped: Tier C", output)
+        else:
+            self.assertIn("Tier B (pi discoverAndLoadExtensions): not executed", output)
+            self.assertIn("Tier C (handler e2e with stub UI): not executed", output)
 
 
 if __name__ == "__main__":

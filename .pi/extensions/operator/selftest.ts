@@ -11,10 +11,11 @@
  *
  *   A. core.ts against a throwaway ledger built by the real ./operator, so the
  *      argv builders and output parsers are pinned to actual CLI output.
- *   B. index.ts loaded through pi's own extension loader, asserting the nine
- *      /op:* commands (step 1 orientation, step 2 authoring writes, step 3
- *      supervisor-review, step 4 delegate) register with no load errors and no
- *      tools. Skipped when pi is absent.
+ *   B. index.ts loaded through pi's own extension loader, asserting the
+ *      implemented /op:* commands (step 1 orientation including next-steps
+ *      and project, step 2 authoring writes, step 3 supervisor-review, step 4
+ *      delegate) register with no load errors and no tools. Skipped when pi
+ *      is absent and the optional pi-server import cannot be satisfied.
  *   C. the registered command handlers driven end to end against the throwaway
  *      ledger with a stub UI, asserting the reports and, critically, that
  *      declining a confirmation leaves the ledger untouched -- for /op:use's
@@ -37,10 +38,13 @@ import {
 	symlinkSync,
 	writeFileSync,
 } from "node:fs";
+import { registerHooks } from "node:module";
 import { delimiter, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
+import { pathToFileURL } from "node:url";
 
 import * as core from "./core.ts";
+import * as orientation from "./orientation/actions.ts";
 
 const REPO_ROOT = resolve(dirname(new URL(import.meta.url).pathname), "../../..");
 const OPERATOR = join(REPO_ROOT, "operator");
@@ -72,6 +76,140 @@ function throws(name: string, fn: () => unknown): void {
 	} catch {
 		check(name, true);
 	}
+}
+
+function throwsKind(name: string, fn: () => unknown, kind: core.LedgerDiscoveryFailureKind): void {
+	try {
+		fn();
+		check(name, false, "expected a throw, got a value");
+	} catch (err) {
+		const actual = core.isLedgerDiscoveryError(err) ? err.kind : "";
+		check(name, actual === kind, `got kind ${JSON.stringify(actual)}, want ${kind}`);
+	}
+}
+
+function errorText(err: unknown): string {
+	if (err instanceof Error) {
+		const cause = "cause" in err && err.cause !== undefined ? ` | ${errorText(err.cause)}` : "";
+		return `${err.message}${cause}`;
+	}
+	return String(err);
+}
+
+/** Only the optional-package miss, not every error that happens to mention pi-server. */
+function isMissingOptionalPiServer(err: unknown): boolean {
+	return /Cannot find package '@earendil-works\/pi-server'/.test(errorText(err));
+}
+
+type PiImportResult<T> =
+	| { status: "ok"; mod: T }
+	| { status: "skip"; reason: string }
+	| { status: "fail"; reason: string };
+
+const PI_SERVER_SKIP_REASON =
+	"optional @earendil-works/pi-server is not installed; pi's loader statically imports the package root which pulls it";
+
+async function importPiModule<T>(primary: string, fallback?: string): Promise<PiImportResult<T>> {
+	try {
+		return { status: "ok", mod: (await import(primary)) as T };
+	} catch (err) {
+		if (isMissingOptionalPiServer(err)) {
+			return { status: "skip", reason: PI_SERVER_SKIP_REASON };
+		}
+		const primaryMissing =
+			typeof err === "object" &&
+			err !== null &&
+			"code" in err &&
+			(err as { code?: string }).code === "ERR_MODULE_NOT_FOUND" &&
+			!isMissingOptionalPiServer(err);
+		if (fallback && primaryMissing) {
+			try {
+				return { status: "ok", mod: (await import(fallback)) as T };
+			} catch (err2) {
+				if (isMissingOptionalPiServer(err2)) {
+					return { status: "skip", reason: PI_SERVER_SKIP_REASON };
+				}
+				return { status: "fail", reason: `unexpected pi import error (${errorText(err2)})` };
+			}
+		}
+		return { status: "fail", reason: `unexpected pi import error (${errorText(err)})` };
+	}
+}
+
+/**
+ * Isolated temp module so Pi's real loader can import. Installed
+ * `@earendil-works/pi-coding-agent@0.85.0` statically imports the package
+ * root, which re-exports `main`, which imports optional `@earendil-works/pi-server`.
+ * That package is not a declared dependency and is not installed here.
+ * The local pi-mono `packages/server` checkout is unbuilt 0.84.3 and does not
+ * export the 0.85 names (`ServerError`, `getUnixSocketPath`).
+ *
+ * This is not a mock of `discoverAndLoadExtensions` / `loadExtensions`.
+ * It only satisfies the optional-package static import.
+ */
+function installIsolatedPiServerImportFixture(): string | null {
+	if (typeof registerHooks !== "function") return null;
+	const dir = mkdtempSync(join(tmpdir(), "op-ext-pi-server-"));
+	process.on("exit", () => rmSync(dir, { recursive: true, force: true }));
+	const rootFile = join(dir, "index.js");
+	const unixFile = join(dir, "unix.js");
+	writeFileSync(
+		rootFile,
+		[
+			'export class ServerError extends Error { constructor(message) { super(message); this.name = "ServerError"; } }',
+			'export class SessionAmbiguousError extends Error { constructor(message) { super(message ?? "Session is ambiguous"); this.name = "SessionAmbiguousError"; } }',
+			'export class SessionNotFoundError extends Error { constructor(message) { super(message ?? "Session was not found"); this.name = "SessionNotFoundError"; } }',
+			"",
+		].join("\n"),
+	);
+	writeFileSync(
+		unixFile,
+		[
+			'export function createUnixServer() { throw new Error("isolated pi-server fixture: createUnixServer is not implemented"); }',
+			'export function getUnixSocketPath() { throw new Error("isolated pi-server fixture: getUnixSocketPath is not implemented"); }',
+			"",
+		].join("\n"),
+	);
+	const rootUrl = pathToFileURL(rootFile).href;
+	const unixUrl = pathToFileURL(unixFile).href;
+	registerHooks({
+		resolve(specifier, context, nextResolve) {
+			if (specifier === "@earendil-works/pi-server") {
+				return { shortCircuit: true, url: rootUrl };
+			}
+			if (specifier === "@earendil-works/pi-server/unix") {
+				return { shortCircuit: true, url: unixUrl };
+			}
+			return nextResolve(specifier, context);
+		},
+	});
+	return dir;
+}
+
+function applyImportResult<T>(tier: string, result: PiImportResult<T>): T | null {
+	if (result.status === "ok") return result.mod;
+	if (result.status === "skip") {
+		skips.push(`${tier}: ${result.reason}`);
+		console.log(`  skip (${result.reason})`);
+		return null;
+	}
+	failed += 1;
+	console.log(`  FAIL ${tier}: ${result.reason}`);
+	return null;
+}
+
+const integrationCoverage = {
+	tierA: false,
+	tierB: false,
+	tierC: false,
+};
+
+function writeLedgerContract(dir: string, payload: unknown): string {
+	const contractDir = join(dir, ".pi");
+	mkdirSync(contractDir, { recursive: true });
+	const path = join(contractDir, "operator-ledger.json");
+	writeFileSync(path, `${JSON.stringify(payload, null, 2)}\n`);
+	return path;
 }
 
 function op(cwd: string, args: string[]) {
@@ -259,6 +397,114 @@ function tierA(ledger: core.Ledger): void {
 	);
 	check("status names where the shown task came from", status.lines.some((l) => l.includes("pi session selection")));
 	check("status states that nothing was written", status.lines.some((l) => l.includes("No authority record was written")));
+	integrationCoverage.tierA = true;
+}
+
+function validContract(ledgerRoot: string): Record<string, unknown> {
+	return {
+		schema: core.LEDGER_CONTRACT_SCHEMA,
+		ledger_root: ledgerRoot,
+		wired_into_findLedger: true,
+		runtime_ledger_copied: false,
+	};
+}
+
+/**
+ * External-ledger contract wiring. Consumers are throwaway dirs that do not
+ * sit inside the fixture, so walking up does not find the sibling pair.
+ */
+function tierAContract(external: core.Ledger): void {
+	console.log("\nTier A-contract: findLedger reads .pi/operator-ledger.json");
+	const consumers = mkdtempSync(join(tmpdir(), "op-ext-contract-"));
+	process.on("exit", () => rmSync(consumers, { recursive: true, force: true }));
+	const consumerA = join(consumers, "consumer-a");
+	const consumerB = join(consumers, "consumer-b");
+	mkdirSync(consumerA);
+	mkdirSync(consumerB);
+	writeLedgerContract(consumerA, validContract(external.root));
+	writeLedgerContract(consumerB, validContract(external.root));
+
+	const foundA = core.findLedger(consumerA);
+	const foundB = core.findLedger(consumerB);
+	eq("consumer A resolves the external ledger_root", foundA?.root, external.root);
+	eq("consumer B resolves the same external ledger_root", foundB?.root, external.root);
+	check("consumer A has no copied .operator/", !existsSync(join(consumerA, core.LEDGER_DIR)));
+	check("consumer B has no copied .operator/", !existsSync(join(consumerB, core.LEDGER_DIR)));
+
+	const nested = join(consumerA, "src", "nested");
+	mkdirSync(nested, { recursive: true });
+	eq("findLedger walks up to the consumer contract", core.findLedger(nested)?.root, external.root);
+
+	const relative = join(consumers, "relative");
+	mkdirSync(relative);
+	writeLedgerContract(relative, { ...validContract(external.root), ledger_root: "relative/path" });
+	throwsKind("relative ledger_root is malformed", () => core.findLedger(relative), "malformed");
+
+	const badJson = join(consumers, "bad-json");
+	mkdirSync(badJson);
+	mkdirSync(join(badJson, ".pi"), { recursive: true });
+	writeFileSync(join(badJson, ".pi", "operator-ledger.json"), "{not json");
+	throwsKind("invalid JSON is malformed", () => core.findLedger(badJson), "malformed");
+
+	const wrongSchema = join(consumers, "wrong-schema");
+	mkdirSync(wrongSchema);
+	writeLedgerContract(wrongSchema, { ...validContract(external.root), schema: "nope/v0" });
+	throwsKind("wrong schema is malformed", () => core.findLedger(wrongSchema), "malformed");
+
+	const missingRoot = join(consumers, "missing-root");
+	mkdirSync(missingRoot);
+	writeLedgerContract(missingRoot, { schema: core.LEDGER_CONTRACT_SCHEMA });
+	throwsKind("missing ledger_root is malformed", () => core.findLedger(missingRoot), "malformed");
+
+	const missingPair = join(consumers, "missing-pair");
+	mkdirSync(missingPair);
+	const emptyRoot = join(consumers, "empty-root");
+	mkdirSync(emptyRoot);
+	writeLedgerContract(missingPair, validContract(emptyRoot));
+	throwsKind("absolute ledger_root without the sibling pair is missing-pair", () => core.findLedger(missingPair), "missing-pair");
+
+	const traversal = join(consumers, "traversal");
+	mkdirSync(traversal);
+	writeLedgerContract(traversal, {
+		...validContract(external.root),
+		// Concatenate so the stored string still contains '..'. path.join()
+		// would normalize it away before the contract is written.
+		ledger_root: `${external.root}/../nope`,
+	});
+	throwsKind("ledger_root with '..' segments is malformed", () => core.findLedger(traversal), "malformed");
+
+	const ambiguous = join(consumers, "ambiguous");
+	mkdirSync(ambiguous);
+	mkdirSync(join(ambiguous, core.LEDGER_DIR));
+	symlinkSync(OPERATOR, join(ambiguous, core.OPERATOR_BIN));
+	const other = join(consumers, "other-plane");
+	mkdirSync(other);
+	mkdirSync(join(other, core.LEDGER_DIR));
+	symlinkSync(OPERATOR, join(other, core.OPERATOR_BIN));
+	writeLedgerContract(ambiguous, validContract(other));
+	throwsKind("sibling pair plus a different contract root is ambiguous", () => core.findLedger(ambiguous), "ambiguous");
+
+	const matching = join(consumers, "matching");
+	mkdirSync(matching);
+	mkdirSync(join(matching, core.LEDGER_DIR));
+	symlinkSync(OPERATOR, join(matching, core.OPERATOR_BIN));
+	writeLedgerContract(matching, validContract(matching));
+	eq("matching sibling pair and contract is not ambiguous", core.findLedger(matching)?.root, realpathSync(matching));
+
+	const isolated = join(consumers, "env-isolated");
+	mkdirSync(isolated);
+	const previousDir = process.env.OPERATOR_DIR;
+	const previousRoot = process.env.OPERATOR_LEDGER_ROOT;
+	process.env.OPERATOR_DIR = external.root;
+	process.env.OPERATOR_LEDGER_ROOT = external.root;
+	try {
+		eq("findLedger ignores OPERATOR_DIR / OPERATOR_LEDGER_ROOT", core.findLedger(isolated), null);
+	} finally {
+		if (previousDir === undefined) delete process.env.OPERATOR_DIR;
+		else process.env.OPERATOR_DIR = previousDir;
+		if (previousRoot === undefined) delete process.env.OPERATOR_LEDGER_ROOT;
+		else process.env.OPERATOR_LEDGER_ROOT = previousRoot;
+	}
 }
 
 // --- tier A2: the step 2 authoring writes ------------------------------------
@@ -1127,6 +1373,326 @@ function tierA4(ledger: core.Ledger): void {
 	check("doctor still passes after delegate child-task writes", after.ok, after.headline);
 }
 
+// --- tier A5: orientation next-steps / project / workflow guidance -----------
+
+function sampleRoadmap(): core.RoadmapPbc {
+	return {
+		path: "owners-manual/pbc/appendix-pi-operator-extension.pbc.md",
+		steps: [{ step: 1, name: "Read-only orientation", gate: "doctor/status/tasks/use" }],
+		futureFeatures: [
+			{ id: "POE-FUT-010", name: "next-steps", command: "/op:next-steps", description: "prioritized actions" },
+			{ id: "POE-FUT-011", name: "dashboard", command: "/op:project", description: "prefix dashboard" },
+			{ id: "POE-FUT-013", name: "workflow", command: null, description: "strictness guidance" },
+		],
+		issues: [
+			{ id: "POE-ISS-009", summary: "handoff go treated as prose", nextStep: "generate a closeout draft" },
+			{ id: "POE-ISS-013", summary: "review/delegation UI plumbing", nextStep: "rename prompts around model/persona" },
+		],
+	};
+}
+
+function sampleTaskShow(overrides: Partial<core.TaskShowSummary["fields"]> = {}, counts: Partial<core.TaskShowSummary> = {}): core.TaskShowSummary {
+	return {
+		fields: {
+			"Task ID": "selftest-alpha",
+			Status: "assigned",
+			"Assigned Harness": "claude",
+			"Review Harness": "codex",
+			"Next Action": "Ask a distinct identity to verify claim-0001.",
+			...overrides,
+		},
+		assumptions: 0,
+		claims: 1,
+		evidence: 0,
+		handoffs: 0,
+		...counts,
+	};
+}
+
+function tierA5(): void {
+	console.log("\nTier A5: orientation next-steps, project dashboard, workflow guidance");
+
+	eq("parseNextStepsArgs empty", orientation.parseNextStepsArgs(""), { popup: false, mode: "unset", unknown: [] });
+	eq("parseNextStepsArgs popup + trust", orientation.parseNextStepsArgs("popup engineering-trust"), {
+		popup: true,
+		mode: "engineering-trust",
+		unknown: [],
+	});
+	eq("parseNextStepsArgs mode=support", orientation.parseNextStepsArgs("mode=support"), {
+		popup: false,
+		mode: "support",
+		unknown: [],
+	});
+	eq("parseProjectArgs missing", orientation.parseProjectArgs(""), {
+		prefix: null,
+		error: "Project prefix required. Example: /op:project pi-operator-extension",
+	});
+	eq("parseProjectArgs extra tokens are ambiguous", orientation.parseProjectArgs("foo bar").prefix, null);
+	check("parseProjectArgs extra tokens error names ambiguous", (orientation.parseProjectArgs("foo bar").error ?? "").includes("Ambiguous"));
+	eq("parseProjectArgs roadmap flag", orientation.parseProjectArgs("--project selftest"), { prefix: "selftest", error: null });
+	check("flag-shaped prefix is refused", (orientation.parseProjectArgs("--status").error ?? "").includes("flag-shaped"));
+
+	const empty = orientation.buildNextStepsReport({
+		roadmap: sampleRoadmap(),
+		activeTask: null,
+		activeOrigin: "none",
+		taskShow: null,
+		claims: [],
+		invocations: ["./operator task-list"],
+		taskCount: 0,
+	});
+	check("empty ledger is explicit", empty.headline === "empty ledger" && empty.lines.some((l) => l.includes("Empty ledger")));
+	check("empty ledger is a warning", empty.level === "warning");
+	check("empty ledger agent text includes the action", orientation.orientationAgentContent(empty).includes("Empty ledger"));
+	const emptyMsg = orientation.orientationSendMessage(empty);
+	eq("orientation sendMessage uses nextTurn", emptyMsg.options.deliverAs, "nextTurn");
+	eq("orientation sendMessage is not TUI-only display", emptyMsg.message.display, false);
+	eq("orientation sendMessage customType", emptyMsg.message.customType, "operator-orientation");
+	check("orientation sendMessage content is the action list", emptyMsg.message.content.includes("Empty ledger"));
+
+	const noTask = orientation.buildNextStepsReport({
+		roadmap: sampleRoadmap(),
+		activeTask: null,
+		activeOrigin: "none",
+		taskShow: null,
+		claims: [],
+		invocations: ["./operator task-list"],
+		taskCount: 2,
+	});
+	check("no-active-task is explicit", noTask.headline === "no active task selected" && noTask.lines.some((l) => l.includes("/op:use")));
+
+	const unverified: core.ClaimRow[] = [
+		{ id: "claim-0001", taskId: "selftest-alpha", type: "file_exists", status: "UNVERIFIED", text: "exists" },
+	];
+	const withNext = orientation.buildNextStepsReport({
+		roadmap: sampleRoadmap(),
+		activeTask: "selftest-alpha",
+		activeOrigin: "session",
+		taskShow: sampleTaskShow(),
+		claims: unverified,
+		invocations: ["./operator task-show --id selftest-alpha"],
+		identity: { mode: "enforced", uids: [{ uid: 966, name: "operator-verifier", roles: ["verifier"] }] },
+		taskCount: 2,
+	});
+	const withNextActions = orientation.prioritizeNextActions({
+		roadmap: sampleRoadmap(),
+		activeTask: "selftest-alpha",
+		activeOrigin: "session",
+		taskShow: sampleTaskShow(),
+		claims: unverified,
+		invocations: [],
+		identity: { mode: "enforced", uids: [] },
+		taskCount: 2,
+	});
+	eq("next_action is priority 1", withNextActions[0]?.kind, "next_action");
+	eq("unverified claims come after next_action", withNextActions[1]?.kind, "unverified-claim");
+	check("missing evidence gate is listed", withNextActions.some((a) => a.kind === "missing-gate" && a.text.includes("Missing evidence gate")));
+	check("next-steps distinguishes approval", withNext.lines.some((l) => l.includes("Approval / user acceptance")));
+	check("next-steps distinguishes advisory", withNext.lines.some((l) => l.includes("Advisory review")));
+	check("next-steps distinguishes uid-isolated", withNext.lines.some((l) => l.includes("UID-isolated verification")));
+	check("enforced mode says policy is unchanged", withNext.lines.some((l) => l.includes("Enforced identity policy is unchanged")));
+	check("agent content includes next_action text", orientation.orientationAgentContent(withNext).includes("Ask a distinct identity to verify claim-0001"));
+	check("future slices are PBC id order not last-3-only", withNext.lines.some((l) => l.includes("POE-FUT-010") && l.includes("/op:next-steps")));
+	check("next-steps does not execute a verify command", withNext.lines.some((l) => l.includes("does not execute stored verification commands")));
+
+	const staleHandoff = orientation.detectStaleNextAction({
+		nextAction: "Reload Pi and run /op:handoff go",
+		status: "verified",
+		claims: [],
+		evidenceCount: 0,
+		handoffCount: 2,
+	});
+	check("completed handoff go is stale", staleHandoff.stale);
+	const staleVerified = orientation.detectStaleNextAction({
+		nextAction: "Verify claim-0001",
+		status: "assigned",
+		claims: [{ id: "claim-0001", taskId: "t", type: "file_exists", status: "VERIFIED", text: "x" }],
+		evidenceCount: 1,
+		handoffCount: 0,
+	});
+	check("verifying an already-VERIFIED claim is stale", staleVerified.stale);
+	const notStaleOwnerDecision = orientation.detectStaleNextAction({
+		nextAction: "Owner decision: proceed to Step 2",
+		status: "verified",
+		claims: [{ id: "claim-0001", taskId: "t", type: "file_exists", status: "VERIFIED", text: "x" }],
+		evidenceCount: 1,
+		handoffCount: 1,
+	});
+	check("owner decision to proceed is not stale", !notStaleOwnerDecision.stale);
+	const staleReport = orientation.buildNextStepsReport({
+		roadmap: sampleRoadmap(),
+		activeTask: "selftest-alpha",
+		activeOrigin: "ledger",
+		taskShow: sampleTaskShow({ Status: "verified", "Next Action": "Reload Pi and run /op:handoff go" }, { handoffs: 1, evidence: 1 }),
+		claims: [{ id: "claim-0001", taskId: "selftest-alpha", type: "file_exists", status: "VERIFIED", text: "x" }],
+		invocations: [],
+		taskCount: 2,
+	});
+	check("stale next_action is warned rather than recommended blindly", staleReport.lines.some((l) => l.includes("STALE ledger next_action")));
+	check("stale report level is warning", staleReport.level === "warning");
+
+	const missingReview = orientation.prioritizeNextActions({
+		roadmap: sampleRoadmap(),
+		activeTask: "selftest-alpha",
+		activeOrigin: "session",
+		taskShow: sampleTaskShow({ "Review Harness": "None", "Next Action": "None" }),
+		claims: unverified,
+		invocations: [],
+		identity: { mode: "enforced", uids: [] },
+		taskCount: 1,
+	});
+	check("missing review harness is a gate", missingReview.some((a) => a.kind === "missing-gate" && a.text.includes("Missing review gate")));
+
+	const support = orientation.buildNextStepsReport({
+		roadmap: sampleRoadmap(),
+		activeTask: "selftest-alpha",
+		activeOrigin: "session",
+		taskShow: sampleTaskShow(),
+		claims: unverified,
+		invocations: [],
+		identity: { mode: "enforced", uids: [{ uid: 966, name: "operator-verifier", roles: ["verifier"] }] },
+		taskCount: 1,
+		mode: "support",
+	});
+	check("support mode names user acceptance", support.lines.some((l) => l.includes("user acceptance may close the deliverable")));
+	check("support mode says acceptance is not verification", support.lines.some((l) => /User acceptance is not verification/i.test(l)));
+	check("support mode does not weaken enforced UID policy", support.lines.some((l) => l.includes("cannot downgrade UID-isolated")));
+	check("support mode still lists unverified claims", support.lines.some((l) => l.includes("Unverified claim(s): claim-0001")));
+
+	const light = orientation.buildNextStepsReport({
+		roadmap: sampleRoadmap(),
+		activeTask: "selftest-alpha",
+		activeOrigin: "session",
+		taskShow: sampleTaskShow(),
+		claims: unverified,
+		invocations: [],
+		identity: { mode: "single_user", uids: [] },
+		taskCount: 1,
+		mode: "engineering-light",
+	});
+	check("engineering-light expects claim/evidence/handoff", light.lines.some((l) => l.includes("claim, evidence, and handoff")));
+	check("engineering-light treats advisory as not trusted", light.lines.some((l) => l.includes("not trusted verification")));
+
+	const trust = orientation.buildNextStepsReport({
+		roadmap: sampleRoadmap(),
+		activeTask: "selftest-alpha",
+		activeOrigin: "session",
+		taskShow: sampleTaskShow(),
+		claims: unverified,
+		invocations: [],
+		identity: { mode: "enforced", uids: [] },
+		taskCount: 1,
+		mode: "engineering-trust",
+	});
+	check("engineering-trust requires distinct verifier", trust.lines.some((l) => l.includes("distinct verifier UID")));
+	check("engineering-trust rejects same-UID as sufficient", trust.lines.some((l) => l.includes("Same-UID advisory review cannot satisfy")));
+	check("engineering-trust rejects acceptance as substitute", trust.lines.some((l) => l.includes("User acceptance cannot substitute")));
+	eq(
+		"engineering-trust unverified authority is uid-isolated",
+		orientation.prioritizeNextActions({
+			roadmap: sampleRoadmap(),
+			activeTask: "selftest-alpha",
+			activeOrigin: "session",
+			taskShow: sampleTaskShow(),
+			claims: unverified,
+			invocations: [],
+			identity: { mode: "enforced", uids: [] },
+			taskCount: 1,
+			mode: "engineering-trust",
+		}).find((a) => a.kind === "unverified-claim")?.authority,
+		"uid-isolated",
+	);
+	eq(
+		"support unverified authority stays approval, not a verifier",
+		orientation.prioritizeNextActions({
+			roadmap: sampleRoadmap(),
+			activeTask: "selftest-alpha",
+			activeOrigin: "session",
+			taskShow: sampleTaskShow(),
+			claims: unverified,
+			invocations: [],
+			identity: { mode: "enforced", uids: [] },
+			taskCount: 1,
+			mode: "support",
+		}).find((a) => a.kind === "unverified-claim")?.authority,
+		"approval",
+	);
+
+	eq("parseClaimsCell", orientation.parseClaimsCell("V:1 Q:0 O:3"), {
+		verified: 1,
+		quarantined: 0,
+		open: 3,
+		total: 4,
+		parsed: true,
+	});
+
+	const rows: core.TaskRow[] = [
+		{ id: "selftest-beta", status: "assigned", assigned: "pi", reviewer: "None", claims: "V:0 Q:0 O:1", nextAction: "None" },
+		{ id: "selftest-alpha", status: "verified", assigned: "claude", reviewer: "codex", claims: "V:1 Q:0 O:0", nextAction: "Reload Pi and run /op:handoff go" },
+		{ id: "other-task", status: "new", assigned: "None", reviewer: "None", claims: "V:0 Q:0 O:0", nextAction: "None" },
+	];
+	const matched = orientation.matchTasksByPrefix(rows, "selftest");
+	eq(
+		"prefix grouping is lexicographic",
+		matched.matches.map((r) => r.id),
+		["selftest-alpha", "selftest-beta"],
+	);
+	check("prefix grouping does not invent phases", !matched.warnings.some((w) => /phase 1|planning|implementation phase/i.test(w)));
+	eq("unrelated ids are excluded", matched.matches.some((r) => r.id === "other-task"), false);
+	eq("empty prefix match set", orientation.matchTasksByPrefix(rows, "no-such").matches.length, 0);
+	const incomplete = orientation.matchTasksByPrefix(rows, "selftest-alp");
+	check("incomplete token boundary is warned", incomplete.incompleteBoundary && incomplete.warnings.some((w) => w.includes("token boundary")));
+	const ambiguous = orientation.matchTasksByPrefix(
+		[
+			{ id: "pi-alpha-one", status: "new", assigned: "None", reviewer: "None", claims: "V:0 Q:0 O:0", nextAction: "None" },
+			{ id: "pi-beta-one", status: "new", assigned: "None", reviewer: "None", claims: "V:0 Q:0 O:0", nextAction: "None" },
+		],
+		"pi",
+	);
+	check("single-token prefix across families is ambiguous", ambiguous.ambiguousFamilies);
+
+	const dash = orientation.buildProjectDashboardReport({
+		prefix: "selftest",
+		match: matched,
+		snapshots: [
+			{
+				row: rows[1]!,
+				taskShow: sampleTaskShow({ Status: "verified", "Next Action": "Reload Pi and run /op:handoff go" }, { evidence: 2, handoffs: 1, claims: 1 }),
+				claims: [{ id: "claim-0001", taskId: "selftest-alpha", type: "file_exists", status: "VERIFIED", text: "x" }],
+			},
+			{
+				row: rows[0]!,
+				taskShow: sampleTaskShow({ "Task ID": "selftest-beta", Status: "assigned", "Next Action": "None", "Review Harness": "None" }, { evidence: 0, handoffs: 0, claims: 1 }),
+				claims: [{ id: "claim-0002", taskId: "selftest-beta", type: "file_exists", status: "UNVERIFIED", text: "y" }],
+			},
+		],
+		roadmap: sampleRoadmap(),
+		activeTask: "selftest-beta",
+		invocations: ["./operator task-list"],
+		identity: { mode: "enforced", uids: [] },
+	});
+	check("dashboard headline counts tasks", dash.headline.includes("2 task(s)"));
+	check("dashboard lists both task ids", dash.lines.some((l) => l.includes("selftest-alpha")) && dash.lines.some((l) => l.includes("selftest-beta")));
+	check("dashboard shows verified/total claims", dash.lines.some((l) => l.includes("1/1")) && dash.lines.some((l) => l.includes("0/1")));
+	check("dashboard shows latest verified claim", dash.lines.some((l) => l.includes("claim-0001")));
+	check("dashboard flags stale next_action", dash.lines.some((l) => /STALE/.test(l)));
+	check("dashboard labels grouping as not a phase order", dash.lines.some((l) => l.includes("Not a project phase order")));
+	check("dashboard uses the active task for recommended next", dash.lines.some((l) => l.includes("task selftest-beta") && l.includes("active task")));
+	check("dashboard does not mutate", dash.lines.some((l) => l.includes("Task status was not mutated")));
+
+	const emptyDash = orientation.buildProjectDashboardReport({
+		prefix: "missing",
+		match: { matches: [], families: [], incompleteBoundary: false, ambiguousFamilies: false, warnings: [] },
+		snapshots: [],
+		roadmap: sampleRoadmap(),
+		activeTask: null,
+		invocations: [],
+	});
+	check("empty prefix match is explicit", emptyDash.headline.includes("no tasks match") && emptyDash.lines.some((l) => l.includes("No tasks match prefix")));
+	const required = orientation.buildPrefixRequiredReport("Project prefix required. Example: /op:project pi-operator-extension");
+	check("missing prefix is explicit", required.headline === "prefix required");
+}
+
 // --- pi discovery ------------------------------------------------------------
 
 function findPiPackage(): string | null {
@@ -1161,7 +1727,31 @@ async function tierB(piPackage: string | null): Promise<unknown[] | null> {
 		console.log("  skip (pi not installed)");
 		return null;
 	}
-	const pi = await import(join(piPackage, "dist", "index.js"));
+	type PiLoader = {
+		discoverAndLoadExtensions: (...args: never[]) => Promise<{
+			errors: unknown[];
+			extensions: Array<{
+				path: string;
+				commands: Map<string, { description?: string }>;
+				tools: Map<string, unknown>;
+				entryRenderers?: Map<string, unknown>;
+			}>;
+		}>;
+	};
+	const imported = applyImportResult<PiLoader>(
+		"Tier B",
+		await importPiModule<PiLoader>(
+			join(piPackage, "dist", "core", "extensions", "index.js"),
+			join(piPackage, "dist", "index.js"),
+		),
+	);
+	if (!imported) return null;
+	const pi = imported;
+	if (typeof pi.discoverAndLoadExtensions !== "function") {
+		skips.push("Tier B: pi package has no discoverAndLoadExtensions");
+		console.log("  skip (pi loader shape changed)");
+		return null;
+	}
 	const agentDir = mkdtempSync(join(tmpdir(), "op-ext-agentdir-"));
 	process.on("exit", () => rmSync(agentDir, { recursive: true, force: true }));
 	const result = await pi.discoverAndLoadExtensions([], REPO_ROOT, agentDir);
@@ -1177,6 +1767,7 @@ async function tierB(piPackage: string | null): Promise<unknown[] | null> {
 		"op:evidence",
 		"op:handoff",
 		"op:next-steps",
+		"op:project",
 		"op:roadmap",
 		"op:status",
 		"op:supervisor-review",
@@ -1199,6 +1790,7 @@ async function tierB(piPackage: string | null): Promise<unknown[] | null> {
 		!!ext.entryRenderers?.get("operator-report"),
 		`renderers: ${[...(ext.entryRenderers?.keys() ?? [])].join(", ")}`,
 	);
+	integrationCoverage.tierB = true;
 	return [pi, ext];
 }
 
@@ -1216,22 +1808,23 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 		console.log("  skip (pi not installed)");
 		return;
 	}
-	let loader: {
+	type Loader = {
 		createExtensionRuntime: () => Record<string, unknown>;
 		loadExtensions: (
 			paths: string[],
 			cwd: string,
 			eventBus: unknown,
 			runtime: unknown,
-		) => Promise<{ errors: unknown[]; extensions: Array<{ commands: Map<string, { handler: (a: string, c: unknown) => Promise<void> }> }> }>;
+		) => Promise<{
+			errors: unknown[];
+			extensions: Array<{ commands: Map<string, { handler: (a: string, c: unknown) => Promise<void> }> }>;
+		}>;
 	};
-	try {
-		loader = await import(join(piPackage, "dist", "core", "extensions", "loader.js"));
-	} catch (err) {
-		skips.push(`Tier C: pi loader internals unavailable (${err instanceof Error ? err.message : String(err)})`);
-		console.log("  skip (loader internals unavailable)");
-		return;
-	}
+	const loader = applyImportResult<Loader>(
+		"Tier C",
+		await importPiModule<Loader>(join(piPackage, "dist", "core", "extensions", "loader.js")),
+	);
+	if (!loader) return;
 	if (typeof loader.loadExtensions !== "function" || typeof loader.createExtensionRuntime !== "function") {
 		skips.push("Tier C: pi loader internals changed shape");
 		console.log("  skip (loader internals changed shape)");
@@ -1242,6 +1835,17 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	const runtime = loader.createExtensionRuntime();
 	runtime.appendEntry = (type: string, data: unknown) => {
 		entries.push({ type, data: data as core.Report });
+	};
+	const agentMessages: Array<{ content: string; deliverAs?: string; customType?: string }> = [];
+	runtime.sendMessage = (
+		message: { customType?: string; content?: string },
+		options?: { deliverAs?: string },
+	) => {
+		agentMessages.push({
+			content: message.content ?? "",
+			deliverAs: options?.deliverAs,
+			customType: message.customType,
+		});
 	};
 
 	// The extension resolves its ledger from ctx.cwd, so run it in a directory
@@ -1335,15 +1939,41 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	check("/op:roadmap is read-only", report.invocations.every((i) => !/task-use|claim-add|evidence-attach|handoff-add|review-delegate/.test(i)), report.invocations.join(" | "));
 
 	const notificationsBeforeNextSteps = notifications.length;
+	const agentBeforeNextSteps = agentMessages.length;
 	await commands.get("op:next-steps")!.handler("", ctx);
 	report = lastReport();
 	eq("/op:next-steps emits a report entry", report.command, "/op:next-steps");
 	check("/op:next-steps shows recommendations", report.lines.some((l) => l.includes("Recommended next steps")));
 	check("/op:next-steps is read-only", report.invocations.every((i) => !/task-use|claim-add|evidence-attach|handoff-add|review-delegate/.test(i)), report.invocations.join(" | "));
-	check("/op:next-steps default does not open chooser", notifications.length === notificationsBeforeNextSteps + 1, notifications.slice(notificationsBeforeNextSteps).map((n) => n.join(":" )).join(" | "));
+	check("/op:next-steps distinguishes approval vs advisory vs uid-isolated", report.lines.some((l) => l.includes("Approval / user acceptance")) && report.lines.some((l) => l.includes("Advisory review")) && report.lines.some((l) => l.includes("UID-isolated verification")));
+	check("/op:next-steps default does not open chooser", !notifications.slice(notificationsBeforeNextSteps).some(([, m]) => m.includes("Selected next step:")), notifications.slice(notificationsBeforeNextSteps).map((n) => n.join(":")).join(" | "));
+	check("/op:next-steps sends action text to agent context", agentMessages.length === agentBeforeNextSteps + 1 && (agentMessages[agentMessages.length - 1]?.content ?? "").includes("Recommended next steps"));
+	eq("/op:next-steps agent delivery is nextTurn", agentMessages[agentMessages.length - 1]?.deliverAs, "nextTurn");
+	eq("/op:next-steps agent customType", agentMessages[agentMessages.length - 1]?.customType, "operator-orientation");
 	selectQueue.push("1. Current ledger next_action: test");
 	await commands.get("op:next-steps")!.handler("popup", ctx);
 	check("/op:next-steps popup is opt-in", notifications.some(([, m]) => m.includes("Selected next step:")));
+
+	await commands.get("op:next-steps")!.handler("engineering-trust", ctx);
+	report = lastReport();
+	check("/op:next-steps engineering-trust guidance is present", report.lines.some((l) => l.includes("Workflow guidance (engineering-trust)")));
+	check("/op:next-steps engineering-trust does not treat acceptance as verification", report.lines.some((l) => l.includes("User acceptance cannot substitute")));
+
+	await commands.get("op:project")!.handler("", ctx);
+	report = lastReport();
+	eq("/op:project without prefix is explicit", report.headline, "prefix required");
+	await commands.get("op:project")!.handler("selftest", ctx);
+	report = lastReport();
+	eq("/op:project emits a report entry", report.command, "/op:project");
+	check("/op:project lists multiple selftest tasks", report.lines.some((l) => l.includes("selftest-alpha")) && report.lines.some((l) => l.includes("selftest-beta")));
+	check("/op:project labels grouping as not a phase order", report.lines.some((l) => /not a project phase order/i.test(l)));
+	check("/op:project is read-only", report.invocations.every((i) => !/task-use|claim-add|evidence-attach|handoff-add|review-delegate/.test(i)), report.invocations.join(" | "));
+	check("/op:project sends dashboard text to agent context", agentMessages.some((m) => m.customType === "operator-orientation" && m.content.includes("Operator project dashboard")));
+
+	await commands.get("op:roadmap")!.handler("--project selftest", ctx);
+	report = lastReport();
+	eq("/op:roadmap --project reuses the dashboard", report.command, "/op:project");
+	check("/op:roadmap --project lists the prefix", report.lines.some((l) => l.includes("Project prefix: selftest")));
 
 
 	// The load-bearing one: declining the confirmation must not write the ledger.
@@ -1771,6 +2401,7 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	report = lastReport();
 	eq("declining parent-routed /op:delegate writes no extra task", yamlNames(join(ledger.ledgerDir, "tasks")), tasksBeforeParentDecline);
 	eq("declining parent-routed /op:delegate reports nothing written", report.headline, "nothing written");
+	integrationCoverage.tierC = true;
 }
 
 // --- main --------------------------------------------------------------------
@@ -1782,18 +2413,51 @@ async function main(): Promise<void> {
 	}
 	console.log(`repo:    ${REPO_ROOT}`);
 	console.log(`fixture: ${fixture}`);
+	check(
+		"pi-server skip matcher requires the optional-package miss",
+		isMissingOptionalPiServer(new Error("Cannot find package '@earendil-works/pi-server' imported from /x")),
+	);
+	check(
+		"pi-server skip matcher ignores unrelated errors that mention pi-server",
+		!isMissingOptionalPiServer(new Error("TypeError: pi-server returned 500")),
+	);
 	const ledger = buildFixture();
 	tierA(ledger);
+	tierAContract(ledger);
 	tierA2(ledger);
 	tierA3(ledger);
 	tierA4(ledger);
+	tierA5();
 	const piPackage = findPiPackage();
 	console.log(`\npi package: ${piPackage ?? "(not found)"}`);
+	let piServerFixture: string | null = null;
+	try {
+		piServerFixture = installIsolatedPiServerImportFixture();
+	} catch (err) {
+		console.log(`pi-server import fixture failed to register: ${errorText(err)}`);
+	}
+	if (piServerFixture) {
+		console.log(
+			`pi-server import fixture: ${piServerFixture} (isolated temp module; real Pi loader; optional package not installed)`,
+		);
+	} else {
+		console.log("pi-server import fixture: unavailable (need node:module.registerHooks)");
+	}
 	await tierB(piPackage);
 	await tierC(piPackage, ledger);
 
 	console.log(`\n${passed} passed, ${failed} failed, ${skips.length} skipped`);
 	for (const s of skips) console.log(`  skipped: ${s}`);
+	console.log("\nIntegration coverage:");
+	console.log(
+		`  Tier A-A5 (core unit, throwaway ledger): ${integrationCoverage.tierA ? "executed" : "not executed"}`,
+	);
+	console.log(
+		`  Tier B (pi discoverAndLoadExtensions): ${integrationCoverage.tierB ? "executed" : "not executed"}`,
+	);
+	console.log(
+		`  Tier C (handler e2e with stub UI): ${integrationCoverage.tierC ? "executed" : "not executed"}`,
+	);
 	process.exit(failed === 0 ? 0 : 1);
 }
 

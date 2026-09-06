@@ -17,7 +17,9 @@
  *   /op:supervisor-review   wrap ./operator review-delegate for one named claim (step 3)
  *   /op:delegate            send bounded implementation work to another agent (step 4)
  *   /op:roadmap             show ladder, recent dogfood issues, and future features
- *   /op:next-steps          summarize the active task's recommended next actions
+ *   /op:roadmap --project   read-only project-prefix dashboard (alias of /op:project)
+ *   /op:next-steps          prioritized ledger actions; optional workflow guidance
+ *   /op:project             read-only project-prefix dashboard
  *
  * Deliberately absent at step 4: the /pbc:* commands. Also absent: any
  * model-callable tool. These commands are human ergonomics (POE-RUL-103);
@@ -46,6 +48,7 @@ import { existsSync, readdirSync } from "node:fs";
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { REPORT_ENTRY_TYPE } from "./core.ts";
 import * as core from "./core.ts";
+import * as orientation from "./orientation/actions.ts";
 
 /** Session-scoped task selection. Never written to the ledger on its own. */
 let sessionTask: string | null = null;
@@ -58,6 +61,10 @@ interface Runner {
 		stderr: string;
 		code: number;
 	}>;
+	sendMessage?: (
+		message: { customType: string; content: string; display: boolean; details?: unknown },
+		options?: { triggerTurn?: boolean; deliverAs?: "steer" | "followUp" | "nextTurn" },
+	) => void;
 }
 
 /** Run one allowlisted ./operator invocation. */
@@ -69,18 +76,33 @@ async function runOperator(pi: Runner, ledger: core.Ledger, argv: string[]): Pro
 
 /**
  * Resolve the ledger or explain why we will not guess. Returns null after
- * notifying, so callers just bail.
+ * notifying, so callers just bail. Completions must not throw, so they use
+ * `ledgerForCompletions` instead.
  */
 function requireLedger(ctx: ExtensionCommandContext): core.Ledger | null {
-	const ledger = core.findLedger(ctx.cwd);
-	if (!ledger) {
-		ctx.ui.notify(
-			`No Operator ledger above ${ctx.cwd}: need a directory holding both ${core.LEDGER_DIR}/ and an executable 'operator'.`,
-			"error",
-		);
+	try {
+		const ledger = core.findLedger(ctx.cwd);
+		if (!ledger) {
+			ctx.ui.notify(
+				`No Operator ledger above ${ctx.cwd}: need a directory holding both ${core.LEDGER_DIR}/ and a file named '${core.OPERATOR_BIN}', or an explicit ${core.LEDGER_CONTRACT_RELATIVE} contract (schema ${core.LEDGER_CONTRACT_SCHEMA}) whose absolute ledger_root has that pair.`,
+				"error",
+			);
+			return null;
+		}
+		return ledger;
+	} catch (err) {
+		ctx.ui.notify(err instanceof Error ? err.message : String(err), "error");
 		return null;
 	}
-	return ledger;
+}
+
+/** Completions fail closed to "no suggestions" rather than throwing into Pi. */
+function ledgerForCompletions(): core.Ledger | null {
+	try {
+		return core.findLedger(process.cwd());
+	} catch {
+		return null;
+	}
 }
 
 /** The task these commands act on, and where that choice came from. */
@@ -180,6 +202,26 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 		ctx.ui.notify(`${report.command} ${report.headline}`, report.level);
 	};
 
+	/**
+	 * TUI reports from appendEntry do not enter LLM context (Pi docs:
+	 * custom entries are display-only). Orientation commands also send
+	 * the action text via sendMessage(..., { deliverAs: "nextTurn" }) so
+	 * the agent sees the same list without triggering a turn.
+	 */
+	const emitOrientation = (ctx: ExtensionCommandContext, report: core.Report) => {
+		emit(ctx, report);
+		if (typeof pi.sendMessage === "function") {
+			const payload = orientation.orientationSendMessage(report);
+			pi.sendMessage(payload.message, payload.options);
+		}
+		if (ctx.hasUI) {
+			const actions = orientation.numberedActionLines(report);
+			if (actions.length > 0) {
+				ctx.ui.notify(actions.slice(0, 8).join("\n"), report.level);
+			}
+		}
+	};
+
 	// Restore the session selection after /reload or a session restart.
 	pi.on("session_start", async (_event, ctx) => {
 		sessionTask = null;
@@ -275,15 +317,53 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 		},
 	});
 
+	const loadProjectDashboard = async (
+		ledger: core.Ledger,
+		prefix: string,
+		activeTask: string | null,
+	): Promise<core.Report> => {
+		const listArgv = core.taskListArgv();
+		const invocations = [core.formatInvocation(listArgv)];
+		const rows = core.parseTaskList((await runOperator(pi, ledger, listArgv)).stdout);
+		const match = orientation.matchTasksByPrefix(rows, prefix);
+		const snapshots: orientation.ProjectTaskSnapshot[] = [];
+		for (const row of match.matches) {
+			if (!core.taskRecordExists(ledger, row.id)) {
+				snapshots.push({ row, taskShow: null, claims: [] });
+				continue;
+			}
+			const showArgv = core.taskShowArgv(row.id);
+			invocations.push(core.formatInvocation(showArgv));
+			const taskShow = core.parseTaskShow((await runOperator(pi, ledger, showArgv)).stdout);
+			const claimArgv = core.claimListArgv(row.id);
+			invocations.push(core.formatInvocation(claimArgv));
+			const claims = core.parseClaimList((await runOperator(pi, ledger, claimArgv)).stdout);
+			snapshots.push({ row, taskShow, claims });
+		}
+		return orientation.buildProjectDashboardReport({
+			prefix,
+			match,
+			snapshots,
+			roadmap: core.readPiOperatorRoadmap(ledger.root),
+			activeTask,
+			invocations,
+			identity: core.readIdentityPolicy(ledger),
+		});
+	};
+
 	pi.registerCommand("op:next-steps", {
-		description: "Operator: show prioritized next actions for the active task (read-only; add 'popup' for chooser)",
+		description: "Operator: prioritized next actions (read-only; optional support|engineering-light|engineering-trust; add 'popup' for chooser)",
 		handler: async (args, ctx) => {
 			const ledger = requireLedger(ctx);
 			if (!ledger) return;
+			const parsed = orientation.parseNextStepsArgs(args);
 			const { taskId, origin } = resolveActiveTask(ledger);
 			const invocations: string[] = [];
 			let taskShow: core.TaskShowSummary | null = null;
 			let claims: core.ClaimRow[] = [];
+			const listArgv = core.taskListArgv();
+			invocations.push(core.formatInvocation(listArgv));
+			const taskCount = core.parseTaskList((await runOperator(pi, ledger, listArgv)).stdout).length;
 			if (taskId && core.taskRecordExists(ledger, taskId)) {
 				const showArgv = core.taskShowArgv(taskId);
 				invocations.push(core.formatInvocation(showArgv));
@@ -293,35 +373,76 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 				claims = core.parseClaimList((await runOperator(pi, ledger, claimArgv)).stdout);
 			}
 			try {
-				const report = core.buildNextStepsReport({
+				const report = orientation.buildNextStepsReport({
 					roadmap: core.readPiOperatorRoadmap(ledger.root),
 					activeTask: taskId,
 					activeOrigin: origin,
 					taskShow,
 					claims,
 					invocations,
+					identity: core.readIdentityPolicy(ledger),
+					taskCount,
+					mode: parsed.mode,
 				});
-				const wantsPopup = ["popup", "choose", "select"].includes(args.trim().toLowerCase());
-				if (wantsPopup && ctx.hasUI) {
-					const choices = report.lines.filter((line) => /^\d+\.\s/.test(line));
+				if (parsed.popup && ctx.hasUI) {
+					const choices = orientation.numberedActionLines(report);
 					if (choices.length > 0) {
 						const picked = await ctx.ui.select("Operator next steps", choices);
 						if (picked) ctx.ui.notify(`Selected next step: ${picked}`, "info");
 					}
 				}
-				emit(ctx, report);
+				emitOrientation(ctx, report);
 			} catch (err) {
 				refuse(ctx, "/op:next-steps", "Operator next steps", err);
 			}
 		},
 	});
 
+	pi.registerCommand("op:project", {
+		description: "Operator: read-only project-prefix dashboard (/op:project <prefix>)",
+		getArgumentCompletions: (prefix) => {
+			const ledger = ledgerForCompletions();
+			if (!ledger) return null;
+			const ids = listTaskIds(ledger).filter((id) => id.startsWith(prefix));
+			return ids.length > 0 ? ids.slice(0, 50).map((id) => ({ value: id, label: id })) : null;
+		},
+		handler: async (args, ctx) => {
+			const ledger = requireLedger(ctx);
+			if (!ledger) return;
+			const parsed = orientation.parseProjectArgs(args);
+			if (parsed.error || !parsed.prefix) {
+				emitOrientation(ctx, orientation.buildPrefixRequiredReport(parsed.error ?? "Project prefix required."));
+				return;
+			}
+			const { taskId } = resolveActiveTask(ledger);
+			try {
+				emitOrientation(ctx, await loadProjectDashboard(ledger, parsed.prefix, taskId));
+			} catch (err) {
+				refuse(ctx, "/op:project", "Operator project dashboard", err);
+			}
+		},
+	});
+
 	pi.registerCommand("op:roadmap", {
-		description: "Operator: show implementation ladder, current step, dogfood issues, and future features",
-		handler: async (_args, ctx) => {
+		description: "Operator: show implementation ladder, current step, dogfood issues, and future features; /op:roadmap --project <prefix> for the project dashboard",
+		handler: async (args, ctx) => {
 			const ledger = requireLedger(ctx);
 			if (!ledger) return;
 			const { taskId, origin } = resolveActiveTask(ledger);
+			const wantsProject = /(?:^|\s)(--project|project)(?:\s|$)/.test(args);
+			if (wantsProject) {
+				const parsed = orientation.parseProjectArgs(args);
+				if (parsed.error || !parsed.prefix) {
+					emitOrientation(ctx, orientation.buildPrefixRequiredReport(parsed.error ?? "Project prefix required."));
+					return;
+				}
+				try {
+					emitOrientation(ctx, await loadProjectDashboard(ledger, parsed.prefix, taskId));
+				} catch (err) {
+					refuse(ctx, "/op:roadmap", "Operator project dashboard", err);
+				}
+				return;
+			}
 			const invocations: string[] = [];
 			let taskShow: core.TaskShowSummary | null = null;
 			if (taskId && core.taskRecordExists(ledger, taskId)) {
@@ -367,7 +488,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 	pi.registerCommand("op:use", {
 		description: "Operator: select a task for this pi session (/op:use [task-id])",
 		getArgumentCompletions: (prefix) => {
-			const ledger = core.findLedger(process.cwd());
+			const ledger = ledgerForCompletions();
 			if (!ledger) return null;
 			const ids = listTaskIds(ledger).filter((id) => id.startsWith(prefix));
 			return ids.length > 0 ? ids.slice(0, 50).map((id) => ({ value: id, label: id })) : null;
@@ -735,7 +856,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 	pi.registerCommand("op:supervisor-review", {
 		description: "Operator: request distinct-agent review of one named claim (/op:supervisor-review [claim-id])",
 		getArgumentCompletions: (prefix) => {
-			const ledger = core.findLedger(process.cwd());
+			const ledger = ledgerForCompletions();
 			if (!ledger) return null;
 			const ids = core.listClaimIds(ledger).filter((id) => id.startsWith(prefix));
 			return ids.length > 0 ? ids.slice(0, 50).map((id) => ({ value: id, label: id })) : null;
@@ -1032,7 +1153,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 	pi.registerCommand("op:delegate", {
 		description: "Operator: send bounded implementation work to another agent (/op:delegate [task-id] [target-alias])",
 		getArgumentCompletions: (prefix) => {
-			const ledger = core.findLedger(process.cwd());
+			const ledger = ledgerForCompletions();
 			if (!ledger) return null;
 			const taskIds = listTaskIds(ledger);
 			let aliases: string[] = [];
