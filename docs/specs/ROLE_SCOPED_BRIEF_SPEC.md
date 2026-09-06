@@ -82,7 +82,9 @@ Upon generating and writing a brief (via `brief`, `export-brief`, or `session-st
 
 `doctor` inspects `ledger_events` for `brief_issued` records:
 
-- **Rule:** If a claim's `verified_by` harness was issued a `builder`-role brief for that task, `doctor` flags it as an Error:
+- **Rule:** If a **currently verified** claim's `verified_by` harness was issued a `builder`-role brief for that task, `doctor` flags it as an Error:
   `[Error] claim <cid> verified by '<vby>' who was issued a builder brief for task '<task_id>'`
+
+  `false`/`quarantined` outcomes are exempt. Retraction records `verified_by` of the retracting identity as provenance, not as a live verification (same exemption class as `VERIFIED_BY_GUARD_SPEC.md` §3).
 
 This prevents a harness that received builder-oriented brief narrative from acting as the verifier for claims on that task.

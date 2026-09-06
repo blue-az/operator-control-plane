@@ -5697,7 +5697,10 @@ def doctor_cmd(args) -> int:
             authority = c_data.get("verification_authority")
             recorded_mode = c_data.get("verification_mode")
 
-            if vby and (task_id, vby) in builder_briefs_issued:
+            # Live verification only. Retraction keeps verified_by as provenance
+            # (operator-verify-retract records the retracting identity) and is
+            # exempt, matching VERIFIED_BY_GUARD_SPEC.md quarantine exemption.
+            if verified and vby and (task_id, vby) in builder_briefs_issued:
                 issues.append(
                     f"[Error] claim {cid} verified by '{vby}' who was issued a builder brief for task '{task_id}'"
                 )

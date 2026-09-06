@@ -5219,6 +5219,30 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertNotEqual(res_doctor.returncode, 0)
         self.assertIn("verified by 'codex' who was issued a builder brief", res_doctor.stdout)
 
+        # Quarantine is not a live verification. verified_by remains as provenance
+        # of the retraction; doctor must not keep failing the builder-brief rule.
+        res_ev_quarantine = self.run_operator(
+            "evidence-attach",
+            str(ev_file),
+            "--claim",
+            "claim-0001",
+            "--type",
+            "test_output",
+            "--status",
+            "quarantined",
+            "--verified-by",
+            "codex",
+            "--verdict",
+            "Verification withdrawn; quarantined, not refuted.",
+        )
+        self.assertEqual(res_ev_quarantine.returncode, 0, res_ev_quarantine.stderr)
+
+        res_doctor_retracted = self.run_operator("doctor")
+        self.assertNotIn(
+            "verified by 'codex' who was issued a builder brief",
+            res_doctor_retracted.stdout,
+        )
+
     def test_decide_records_ruling_on_task_and_event_log(self) -> None:
         self.assertEqual(self.run_operator("init").returncode, 0)
         created = self.run_operator(
