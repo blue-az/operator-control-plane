@@ -639,10 +639,33 @@ def run_trial(
     # (bash -> edit -> bash -> stop). task.get("state_changes") is therefore
     # unused under this backend; left in task defs for opr-era provenance.
     argv += ["--", prompt]
+    # Fallback only -- overwritten below. Kept assigned so the TimeoutExpired
+    # handler cannot hit an unbound `start` if the ledger call itself raises.
     start = time.monotonic()
     try:
         if use_ledger:
             usage_id = _ledger_session_start(ledger_dir, prompt)
+        # Clock starts AFTER the ledger call, not before it. Fixed 2026-09-07.
+        # _ledger_session_start shells out to the operator CLI (two
+        # subprocess.run calls, 15 s timeout each), and until this change that
+        # sat inside wall_clock_s. Measured back-to-back on the same cell:
+        # 15.7 / 16.1 s with the ledger against 11.4 / 10.0 s with --no-ledger,
+        # about +4.5 s per trial.
+        #
+        # It mattered more than a constant offset suggests: a FIXED cost on a
+        # VARIABLE quantity inflates an 11 s task by 40% and a 46 s task by 10%,
+        # so it does not cancel in a ratio and it systematically flattered slow
+        # models. wall_clock_s is the power ranking's speed axis
+        # (LOCAL_LANE_POWER_RANKING_PROTOCOL.md, amendment 2026-09-06), so this
+        # was contaminating the published ranking.
+        #
+        # Every wall-clock figure produced before this fix is inflated unless
+        # its run passed --no-ledger: roster-walltime-2026-09-05,
+        # preswap-wallclock-2026-09-05, testbench-2080-e9-batch1 and
+        # z13-wallclock-2026-09-07 are all affected.
+        # _ledger_session_end is already outside the window (it runs after
+        # wall_clock is computed) and needs no change.
+        start = time.monotonic()
         try:
             completed = subprocess.run(
                 argv, capture_output=True, text=True, timeout=MAX_WALL_CLOCK_SECONDS,
