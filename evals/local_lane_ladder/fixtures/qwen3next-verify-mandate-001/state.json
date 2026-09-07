@@ -1,0 +1,179 @@
+{
+  "done": {
+    "csv-summarize-repair|L2|qwen3-next:latest|1": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|2": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|3": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|4": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|5": true,
+    "csv-summarize-repair|L2|qwen3-next:latest|6": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 73.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.74,
+        "tok_s": 73.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen3next-verify-mandate-001/traces/csv-summarize-repair__L2__qwen3-next-latest__t1.json",
+      "trial": 1,
+      "wall_clock_s": 309.3
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-etwr0dh8/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-etwr0dh8/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-etwr0dh8/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-etwr0dh8/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 73.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.74,
+        "tok_s": 73.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen3next-verify-mandate-001/traces/csv-summarize-repair__L2__qwen3-next-latest__t2.json",
+      "trial": 2,
+      "wall_clock_s": 533.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-dpn2xbvd/tests/check_expenses.py\", line 6, in <module>\n    from src.expenses import summarize_expenses\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-dpn2xbvd/src/expenses.py\", line 23\n    if amount_str.startswith('(') and amount_str.endswith(')':\n                                                          ",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-dpn2xbvd/tests/check_expenses.py\", line 6, in <module>\n    from src.expenses import summarize_expenses\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-dpn2xbvd/src/expenses.py\", line 23\n    if amount_str.startswith('(') and amount_str.endswith(')':\n                                                          ",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 75.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.7,
+        "tok_s": 75.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen3next-verify-mandate-001/traces/csv-summarize-repair__L2__qwen3-next-latest__t3.json",
+      "trial": 3,
+      "wall_clock_s": 390.6
+    },
+    {
+      "detail": "timed out after 600s",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": false,
+      "returncode": null,
+      "task_id": "csv-summarize-repair",
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen3next-verify-mandate-001/traces/csv-summarize-repair__L2__qwen3-next-latest__t4.json",
+      "trial": 4,
+      "wall_clock_s": 603.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 74.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.71,
+        "tok_s": 74.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen3next-verify-mandate-001/traces/csv-summarize-repair__L2__qwen3-next-latest__t5.json",
+      "trial": 5,
+      "wall_clock_s": 157.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "qwen3-next:latest",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 73.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.73,
+        "tok_s": 73.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen3next-verify-mandate-001/traces/csv-summarize-repair__L2__qwen3-next-latest__t6.json",
+      "trial": 6,
+      "wall_clock_s": 233.8
+    }
+  ]
+}

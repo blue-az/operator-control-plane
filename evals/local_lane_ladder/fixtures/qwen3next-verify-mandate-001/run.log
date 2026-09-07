@@ -1,0 +1,28 @@
+Grid: 1 tasks x 1 levels x 1 models x 6 trials = 6 cells
+Sampling pinned: {'num_ctx': 16384, 'temperature': 0.8, 'think': 'off'}
+Trace retention: ON -> /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/qwen3next-verify-mandate-001/traces
+[csv-summarize-repair|L2|qwen3-next:latest|1] running...
+Pinning qwen3-next:latest -> qwen3-next-latest-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+[csv-summarize-repair|L2|qwen3-next:latest|1] PASS (309.3s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3-next:latest|2] running...
+[csv-summarize-repair|L2|qwen3-next:latest|2] FAIL (533.4s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L2-etwr0dh8/tests/check_expenses.py", line 16, in <module>
+    r = summarize_expenses(BASIC)
+  File "/tmp/local-lane-eval-csv-summarize-repair-L2-etwr0dh8/src/expenses.py", line 14, in summarize_expenses
+    amount = float(parts[2])
+ValueError: could not convert string to float: '"$1'
+[csv-summarize-repair|L2|qwen3-next:latest|3] running...
+[csv-summarize-repair|L2|qwen3-next:latest|3] FAIL (390.6s) -- 1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):
+  File "/tmp/local-lane-eval-csv-summarize-repair-L2-dpn2xbvd/tests/check_expenses.py", line 6, in <module>
+    from src.expenses import summarize_expenses
+  File "/tmp/local-lane-eval-csv-summarize-repair-L2-dpn2xbvd/src/expenses.py", line 23
+    if amount_str.startswith('(') and amount_str.endswith(')':
+                                                          
+[csv-summarize-repair|L2|qwen3-next:latest|4] running...
+[csv-summarize-repair|L2|qwen3-next:latest|4] FAIL (603.9s) -- timed out after 600s
+[csv-summarize-repair|L2|qwen3-next:latest|5] running...
+[csv-summarize-repair|L2|qwen3-next:latest|5] PASS (157.7s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3-next:latest|6] running...
+[csv-summarize-repair|L2|qwen3-next:latest|6] PASS (233.8s) -- all 2 checks passed
+
+Wrote fixtures/qwen3next-verify-mandate-001/RESULTS.md
