@@ -71,6 +71,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import pathlib
 import platform
 import re
 import shutil
@@ -217,6 +218,44 @@ def measure_tok_s(model: str) -> dict | None:
         }
     except Exception:  # noqa: BLE001 -- supplementary measurement, never fails a cell
         return None
+
+_PRIV_SHIM_DIR = None
+
+
+def _privilege_shim_dir() -> str:
+    """A PATH-prepended directory whose `sudo` (and friends) refuse to run.
+
+    Added 2026-09-07 after an L0 battery raised repeated sudo password prompts
+    on the operator's desktop: `strict-log-format` at L0 says "a summary of how
+    many errors happened each hour from my logs" and never names the artifact,
+    so models read "my logs" as the host's real system logs and ran
+    `sudo grep /var/log/messages`. See
+    fixtures/l0-tiebreak-2026-09-06/FINDING.md.
+
+    A fixture task never legitimately needs root, so refusing is free. This is
+    NOT filesystem confinement -- trials still run as the invoking user and can
+    read anything that user can, including ~/.pi/agent/auth.json. Real
+    confinement needs a sandbox; a naive bubblewrap config was tried and broke
+    the harness (the model could no longer edit files), so it is deferred rather
+    than shipped half-working.
+    """
+    global _PRIV_SHIM_DIR
+    if _PRIV_SHIM_DIR is not None:
+        return _PRIV_SHIM_DIR
+    d = tempfile.mkdtemp(prefix="local-lane-noroot-")
+    for name in ("sudo", "pkexec", "doas", "su"):
+        f = pathlib.Path(d) / name
+        f.write_text(
+            "#!/bin/sh\n"
+            "echo \"local-lane-eval: '$0' is blocked inside a trial.\" >&2\n"
+            "echo \"Fixture tasks never require root. Work inside the fixture "
+            "directory.\" >&2\n"
+            "exit 1\n"
+        )
+        f.chmod(0o755)
+    _PRIV_SHIM_DIR = d
+    return d
+
 DEFAULT_LEVELS = ("L0", "L1", "L2")
 HARNESS_ID = "local-lane-eval"
 MAX_WALL_CLOCK_SECONDS = 600  # 10 minutes per trial, per spec
@@ -614,7 +653,12 @@ def run_trial(
                 # kill and shows how far the turn got. (Originally documented
                 # against opr; pi's own buffering behavior under a pipe hasn't
                 # been separately characterized, so this is left set.)
-                env={**os.environ, "PYTHONUNBUFFERED": "1"},
+                env={
+                    **os.environ,
+                    "PYTHONUNBUFFERED": "1",
+                    # Privilege shim first on PATH -- see _privilege_shim_dir().
+                    "PATH": _privilege_shim_dir() + os.pathsep + os.environ.get("PATH", ""),
+                },
             )
         except subprocess.TimeoutExpired as exc:
             wall_clock = time.monotonic() - start
