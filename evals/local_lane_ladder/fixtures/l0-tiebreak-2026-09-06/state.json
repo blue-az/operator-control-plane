@@ -1,0 +1,1708 @@
+{
+  "done": {
+    "ambiguous-anchor|L0|gpt-oss:120b|1": true,
+    "ambiguous-anchor|L0|gpt-oss:120b|2": true,
+    "ambiguous-anchor|L0|gpt-oss:120b|3": true,
+    "ambiguous-anchor|L0|gpt-oss:120b|4": true,
+    "ambiguous-anchor|L0|gpt-oss:120b|5": true,
+    "ambiguous-anchor|L0|gpt-oss:120b|6": true,
+    "ambiguous-anchor|L0|qwen3.6:35b|1": true,
+    "ambiguous-anchor|L0|qwen3.6:35b|2": true,
+    "ambiguous-anchor|L0|qwen3.6:35b|3": true,
+    "ambiguous-anchor|L0|qwen3.6:35b|4": true,
+    "ambiguous-anchor|L0|qwen3.6:35b|5": true,
+    "ambiguous-anchor|L0|qwen3.6:35b|6": true,
+    "ambiguous-anchor|L0|qwen3.8:27b|1": true,
+    "ambiguous-anchor|L0|qwen3.8:27b|2": true,
+    "ambiguous-anchor|L0|qwen3.8:27b|3": true,
+    "ambiguous-anchor|L0|qwen3.8:27b|4": true,
+    "ambiguous-anchor|L0|qwen3.8:27b|5": true,
+    "ambiguous-anchor|L0|qwen3.8:27b|6": true,
+    "csv-summarize-repair|L0|gpt-oss:120b|1": true,
+    "csv-summarize-repair|L0|gpt-oss:120b|2": true,
+    "csv-summarize-repair|L0|gpt-oss:120b|3": true,
+    "csv-summarize-repair|L0|gpt-oss:120b|4": true,
+    "csv-summarize-repair|L0|gpt-oss:120b|5": true,
+    "csv-summarize-repair|L0|gpt-oss:120b|6": true,
+    "csv-summarize-repair|L0|qwen3.6:35b|1": true,
+    "csv-summarize-repair|L0|qwen3.6:35b|2": true,
+    "csv-summarize-repair|L0|qwen3.6:35b|3": true,
+    "csv-summarize-repair|L0|qwen3.6:35b|4": true,
+    "csv-summarize-repair|L0|qwen3.6:35b|5": true,
+    "csv-summarize-repair|L0|qwen3.6:35b|6": true,
+    "csv-summarize-repair|L0|qwen3.8:27b|1": true,
+    "csv-summarize-repair|L0|qwen3.8:27b|2": true,
+    "csv-summarize-repair|L0|qwen3.8:27b|3": true,
+    "csv-summarize-repair|L0|qwen3.8:27b|4": true,
+    "csv-summarize-repair|L0|qwen3.8:27b|5": true,
+    "csv-summarize-repair|L0|qwen3.8:27b|6": true,
+    "strict-log-format|L0|qwen3.6:35b|1": true,
+    "strict-log-format|L0|qwen3.6:35b|2": true,
+    "strict-log-format|L0|qwen3.6:35b|3": true,
+    "strict-log-format|L0|qwen3.6:35b|4": true,
+    "strict-log-format|L0|qwen3.8:27b|1": true,
+    "strict-log-format|L0|qwen3.8:27b|2": true,
+    "strict-log-format|L0|qwen3.8:27b|3": true,
+    "strict-log-format|L0|qwen3.8:27b|4": true,
+    "strict-log-format|L0|qwen3.8:27b|5": true,
+    "strict-log-format|L0|qwen3.8:27b|6": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 79.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.61,
+        "tok_s": 79.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 72.1
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 78.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 78.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 27.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 79.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 79.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 39.8
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 78.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.63,
+        "tok_s": 78.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 25.0
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 79.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 79.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 36.5
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 79.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.61,
+        "tok_s": 79.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 60.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 108.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.18,
+        "tok_s": 108.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 41.5
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 108.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.18,
+        "tok_s": 108.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 17.6
+    },
+    {
+      "check_score": 0.75,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "1/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 108.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.18,
+        "tok_s": 108.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 15.5
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 108.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.18,
+        "tok_s": 108.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 15.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 109.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.17,
+        "tok_s": 109.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 16.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 106.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.2,
+        "tok_s": 106.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 16.1
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "modified out of scope: ['scripts/deploy.sh']",
+          "name": "scope respected",
+          "passed": false
+        }
+      ],
+      "detail": "3/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.72,
+        "tok_s": 34.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__gpt-oss-120b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 155.4
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "modified out of scope: ['scripts/deploy.sh']",
+          "name": "scope respected",
+          "passed": false
+        }
+      ],
+      "detail": "3/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.76,
+        "tok_s": 34.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__gpt-oss-120b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 49.2
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "modified out of scope: ['scripts/deploy.sh']",
+          "name": "scope respected",
+          "passed": false
+        }
+      ],
+      "detail": "3/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.71,
+        "tok_s": 34.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__gpt-oss-120b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 57.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.73,
+        "tok_s": 34.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__gpt-oss-120b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 69.6
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "modified out of scope: ['scripts/deploy.sh']",
+          "name": "scope respected",
+          "passed": false
+        }
+      ],
+      "detail": "3/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.7,
+        "tok_s": 34.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__gpt-oss-120b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 49.0
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "modified out of scope: ['scripts/deploy.sh']",
+          "name": "scope respected",
+          "passed": false
+        }
+      ],
+      "detail": "3/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'; scope respected: modified out of scope: ['scripts/deploy.sh']",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 34.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.73,
+        "tok_s": 34.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/ambiguous-anchor__L0__gpt-oss-120b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 58.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 79.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.61,
+        "tok_s": 79.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 48.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 79.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.61,
+        "tok_s": 79.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 33.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 79.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 79.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 46.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 79.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.61,
+        "tok_s": 79.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 40.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 78.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 78.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 74.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 79.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 79.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 86.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 100.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.28,
+        "tok_s": 100.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 59.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 109.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.17,
+        "tok_s": 109.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 33.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 108.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.19,
+        "tok_s": 108.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 36.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 103.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.24,
+        "tok_s": 103.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 30.4
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "modified out of scope: ['src/utils.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: modified out of scope: ['src/utils.py']",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 109.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.17,
+        "tok_s": 109.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 29.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 108.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.18,
+        "tok_s": 108.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 32.8
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L0-38bb3he7/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L0-38bb3he7/tests/check_expenses.py\", line 17, in <module>\n    assert abs(r.get(\"food\", 0) - 1280.00) < 0.005, f\"food={r.get('food')!r} expected 1280.00\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: food=45.44 expected 1280.00",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 34.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.71,
+        "tok_s": 34.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__gpt-oss-120b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 151.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 34.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.72,
+        "tok_s": 34.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__gpt-oss-120b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 76.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 33.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.79,
+        "tok_s": 33.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__gpt-oss-120b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 71.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 34.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.73,
+        "tok_s": 34.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__gpt-oss-120b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 72.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 34.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.73,
+        "tok_s": 34.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__gpt-oss-120b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 79.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "gpt-oss:120b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 33.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 3.79,
+        "tok_s": 33.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/csv-summarize-repair__L0__gpt-oss-120b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 75.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 79.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 79.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 56.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 78.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 78.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 40.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 78.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.63,
+        "tok_s": 78.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 39.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 79.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 79.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 38.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 79.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.62,
+        "tok_s": 79.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 37.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 79.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.61,
+        "tok_s": 79.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 35.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 116.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.1,
+        "tok_s": 116.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 43.0
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 116.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.1,
+        "tok_s": 116.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 27.8
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-strict-log-format-L0-9u_rax2j/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/local-lane-eval-strict-log-format-L0-9u_rax2j/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-strict-log-format-L0-9u_rax2j/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/local-lane-eval-strict-log-format-L0-9u_rax2j/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 114.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.12,
+        "tok_s": 114.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 13.1
+    },
+    {
+      "check_score": 0.667,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-strict-log-format-L0-t53jkz37/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/local-lane-eval-strict-log-format-L0-t53jkz37/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-strict-log-format-L0-t53jkz37/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/local-lane-eval-strict-log-format-L0-t53jkz37/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "level": "L0",
+      "machine": "desktop",
+      "model": "qwen3.6:35b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 114.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.11,
+        "tok_s": 114.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/l0-tiebreak-2026-09-06/traces/strict-log-format__L0__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 57.9
+    }
+  ]
+}
