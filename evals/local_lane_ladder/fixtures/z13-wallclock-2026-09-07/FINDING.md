@@ -60,13 +60,20 @@ layers against `gemma4:26b`'s 31/31 (8.2x), and the MAX 390 shows 2.4x.
 **Memory-constrained machines punish dense models disproportionately**; the
 effect scales with how constrained the machine is.
 
-### Operator consequence for the seat
+### Note on the seat — scope clarified by the operator 2026-09-07
 
-The seat is `qwen3.8:27b` (operator decision, 2026-09-06, dense preferred). That
-choice is **3090-optimal and MAX 390-hostile**: on the short task it is the
-*slowest of the three* on that chip (57.9 s against `gemma4:26b`'s 20.6 s). A
-single seat model across both chips is not obviously right on this evidence.
-Recorded for the operator, not decided here.
+The seat is `qwen3.8:27b` (operator decision, 2026-09-06, dense preferred).
+
+On this chip it is the **slowest of the three on the short task** — 57.9 s
+against `gemma4:26b`'s 20.6 s. **That is not an objection to the choice.** Per
+the operator, **the seat is selected on desktop evidence and then used as the
+cross-chip normalisation baseline.** It is a reference point, not a per-machine
+deployment recommendation, so a model may hold the seat while being a poor pick
+on a chip it is not selected for.
+
+What the data above *does* say is narrower and still worth acting on: **do not
+read seat rank as a deployment recommendation for the MAX 390.** On that chip the
+two MoE models are roughly 2.4x faster at decode than the dense seat model.
 
 ## Quality
 
