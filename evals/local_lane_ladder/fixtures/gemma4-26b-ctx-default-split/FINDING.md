@@ -75,3 +75,35 @@ unaffected** — the 2.9x decode gap it reports between `gemma4:26b` and
   the cost of splitting *this* model, not a general cross-GPU constant.
 - Only decode was measured. Prompt processing may split differently, and a very
   long prompt is exactly the case where 256K context would be needed.
+
+---
+
+## Addendum 2026-09-05 — the 214.4 figure was thermally depressed; the correct value is ~226
+
+Re-measured twice since, same tag, same machine: **226.3** (n=3,
+`preswap-baseline-2026-09-05`) and **226.0** (n=6, min 224.4 max 229.0). Both
+agree. The **214.4** reported above (213.2–215.4, n=6) is ~5% low.
+
+**Cause: the interleaving partner.** This finding's A/B design alternated the
+pinned tag against the **base tag, which loads 39.3 GB across both cards** — a
+much heavier thermal and power load than the 19.3 GB single-card pinned arm. GPU
+telemetry over a clean 6-rep run shows temperature climbing 46 °C → 61 °C with
+throughput falling 229.0 → 224.8 in step, so the pinned arm was being measured
+against a progressively hotter card than it would see alone.
+
+**Interleaving cancels time-ordered drift, not load-asymmetric drift.** When the
+two arms of an A/B impose materially different power draw, alternating them does
+not remove the bias — it *couples* each arm's measurement to the other's thermal
+footprint. Every A/B in this program with asymmetric arms is exposed to this,
+including the `num_gpu` cap ablations.
+
+**What this does and does not change:**
+
+- **The finding stands.** 139.9 vs 214.4 is a 1.53x gap; a ~5% thermal effect
+  cannot produce it, and the residency evidence (39.3 GB across two cards vs
+  19.7 GB on one) is independent of throughput entirely.
+- **The absolute number was wrong.** Anywhere `gemma4:26b` single-card decode is
+  quoted, it is **~226 tok/s**, not 214.4.
+- **Noise floor established: 2.0% within a session** for this model, and ~5%
+  across sessions with differing thermal history. Post-swap differences below
+  ~5% are not attributable to hardware.
