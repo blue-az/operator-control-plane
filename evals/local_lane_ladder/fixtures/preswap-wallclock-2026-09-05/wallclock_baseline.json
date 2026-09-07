@@ -1,0 +1,498 @@
+{
+  "note": "trial 1 = cold (post-load). warm = trials 2-4. Do not average across tasks.",
+  "env": "desktop i9-9900KF, 31GB, dual 3090 (x16/x4), e9pin ctx16384 t0.8, ollama 0.32.12",
+  "cells": {
+    "gemma4:26b|constant-and-callers": {
+      "cold_t1_s": 15.8,
+      "warm_mean_s": 15.0,
+      "warm_min_s": 14.9,
+      "warm_max_s": 15.1,
+      "warm_out_tokens": 711,
+      "warm_tool_calls": 8,
+      "decode_tok_s": 236.0,
+      "passed": "4/4",
+      "cold_warm_ratio": 1.06,
+      "warm_out_tokens_range": [
+        696,
+        730
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 15.8,
+          "out_tok": 931,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 14.9,
+          "out_tok": 706,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 14.9,
+          "out_tok": 696,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 15.1,
+          "out_tok": 730,
+          "passed": true
+        }
+      ]
+    },
+    "gemma4:31b|constant-and-callers": {
+      "cold_t1_s": 60.0,
+      "warm_mean_s": 39.2,
+      "warm_min_s": 29.3,
+      "warm_max_s": 44.8,
+      "warm_out_tokens": 657,
+      "warm_tool_calls": 7.7,
+      "decode_tok_s": 36.2,
+      "passed": "4/4",
+      "cold_warm_ratio": 1.53,
+      "warm_out_tokens_range": [
+        502,
+        757
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 60.0,
+          "out_tok": 668,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 29.3,
+          "out_tok": 502,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 44.8,
+          "out_tok": 757,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 43.4,
+          "out_tok": 711,
+          "passed": true
+        }
+      ]
+    },
+    "qwen3.8:27b|constant-and-callers": {
+      "cold_t1_s": 35.4,
+      "warm_mean_s": 17.9,
+      "warm_min_s": 15.3,
+      "warm_max_s": 19.9,
+      "warm_out_tokens": 577,
+      "warm_tool_calls": 5,
+      "decode_tok_s": 70.6,
+      "passed": "4/4",
+      "cold_warm_ratio": 1.97,
+      "warm_out_tokens_range": [
+        453,
+        698
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 35.4,
+          "out_tok": 595,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 19.9,
+          "out_tok": 698,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 15.3,
+          "out_tok": 453,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 18.6,
+          "out_tok": 580,
+          "passed": true
+        }
+      ]
+    },
+    "qwen3.6:35b|constant-and-callers": {
+      "cold_t1_s": 31.1,
+      "warm_mean_s": 13.0,
+      "warm_min_s": 11.9,
+      "warm_max_s": 14.6,
+      "warm_out_tokens": 862,
+      "warm_tool_calls": 7.7,
+      "decode_tok_s": 130.5,
+      "passed": "4/4",
+      "cold_warm_ratio": 2.39,
+      "warm_out_tokens_range": [
+        727,
+        989
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 31.1,
+          "out_tok": 984,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 14.6,
+          "out_tok": 989,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 11.9,
+          "out_tok": 727,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 12.5,
+          "out_tok": 871,
+          "passed": true
+        }
+      ]
+    },
+    "qwen3-next:latest|constant-and-callers": {
+      "cold_t1_s": 130.0,
+      "warm_mean_s": 73.6,
+      "warm_min_s": 57.8,
+      "warm_max_s": 102.2,
+      "warm_out_tokens": 4669,
+      "warm_tool_calls": 4,
+      "decode_tok_s": 79.1,
+      "passed": "4/4",
+      "cold_warm_ratio": 1.77,
+      "warm_out_tokens_range": [
+        3595,
+        6687
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 130.0,
+          "out_tok": 4499,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 102.2,
+          "out_tok": 6687,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 60.7,
+          "out_tok": 3725,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 57.8,
+          "out_tok": 3595,
+          "passed": true
+        }
+      ]
+    },
+    "gpt-oss:120b|constant-and-callers": {
+      "cold_t1_s": 120.5,
+      "warm_mean_s": 36.1,
+      "warm_min_s": 32.8,
+      "warm_max_s": 40.2,
+      "warm_out_tokens": 717,
+      "warm_tool_calls": 8,
+      "decode_tok_s": 34.2,
+      "passed": "4/4",
+      "cold_warm_ratio": 3.34,
+      "warm_out_tokens_range": [
+        605,
+        856
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 120.5,
+          "out_tok": 637,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 40.2,
+          "out_tok": 856,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 35.2,
+          "out_tok": 689,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 32.8,
+          "out_tok": 605,
+          "passed": true
+        }
+      ]
+    },
+    "gemma4:26b|csv-summarize-repair": {
+      "cold_t1_s": 59.3,
+      "warm_mean_s": 46.0,
+      "warm_min_s": 37.7,
+      "warm_max_s": 60.5,
+      "warm_out_tokens": 7004,
+      "warm_tool_calls": 6,
+      "decode_tok_s": 225.0,
+      "passed": "3/4",
+      "cold_warm_ratio": 1.29,
+      "warm_out_tokens_range": [
+        5375,
+        9963
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 59.3,
+          "out_tok": 6627,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 60.5,
+          "out_tok": 9963,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 39.8,
+          "out_tok": 5675,
+          "passed": false
+        },
+        {
+          "trial": 4,
+          "wall_s": 37.7,
+          "out_tok": 5375,
+          "passed": true
+        }
+      ]
+    },
+    "gemma4:31b|csv-summarize-repair": {
+      "cold_t1_s": 137.9,
+      "warm_mean_s": 168.5,
+      "warm_min_s": 129.0,
+      "warm_max_s": 232.4,
+      "warm_out_tokens": 5063,
+      "warm_tool_calls": 4,
+      "decode_tok_s": 36.5,
+      "passed": "4/4",
+      "cold_warm_ratio": 0.82,
+      "warm_out_tokens_range": [
+        3848,
+        7004
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 137.9,
+          "out_tok": 3476,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 144.1,
+          "out_tok": 4338,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 129.0,
+          "out_tok": 3848,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 232.4,
+          "out_tok": 7004,
+          "passed": true
+        }
+      ]
+    },
+    "qwen3.8:27b|csv-summarize-repair": {
+      "cold_t1_s": 48.9,
+      "warm_mean_s": 29.7,
+      "warm_min_s": 21.0,
+      "warm_max_s": 37.3,
+      "warm_out_tokens": 1362,
+      "warm_tool_calls": 4.7,
+      "decode_tok_s": 78.8,
+      "passed": "4/4",
+      "cold_warm_ratio": 1.65,
+      "warm_out_tokens_range": [
+        809,
+        1739
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 48.9,
+          "out_tok": 1372,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 30.7,
+          "out_tok": 1538,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 21.0,
+          "out_tok": 809,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 37.3,
+          "out_tok": 1739,
+          "passed": true
+        }
+      ]
+    },
+    "qwen3.6:35b|csv-summarize-repair": {
+      "cold_t1_s": 33.2,
+      "warm_mean_s": 21.2,
+      "warm_min_s": 16.6,
+      "warm_max_s": 29.7,
+      "warm_out_tokens": 1858,
+      "warm_tool_calls": 4,
+      "decode_tok_s": 132.2,
+      "passed": "4/4",
+      "cold_warm_ratio": 1.57,
+      "warm_out_tokens_range": [
+        1318,
+        2898
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 33.2,
+          "out_tok": 950,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 29.7,
+          "out_tok": 2898,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 17.2,
+          "out_tok": 1358,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 16.6,
+          "out_tok": 1318,
+          "passed": true
+        }
+      ]
+    },
+    "qwen3-next:latest|csv-summarize-repair": {
+      "cold_t1_s": 202.7,
+      "warm_mean_s": 319.3,
+      "warm_min_s": 162.5,
+      "warm_max_s": 532.8,
+      "warm_out_tokens": 21309,
+      "warm_tool_calls": 5.3,
+      "decode_tok_s": 78.8,
+      "passed": "2/4",
+      "cold_warm_ratio": 0.63,
+      "warm_out_tokens_range": [
+        10803,
+        35026
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 202.7,
+          "out_tok": 9084,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 532.8,
+          "out_tok": 35026,
+          "passed": false
+        },
+        {
+          "trial": 3,
+          "wall_s": 162.5,
+          "out_tok": 10803,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 262.7,
+          "out_tok": 18097,
+          "passed": false
+        }
+      ]
+    },
+    "gpt-oss:120b|csv-summarize-repair": {
+      "cold_t1_s": 180.8,
+      "warm_mean_s": 78.3,
+      "warm_min_s": 61.5,
+      "warm_max_s": 109.5,
+      "warm_out_tokens": 1862,
+      "warm_tool_calls": 7,
+      "decode_tok_s": 33.9,
+      "passed": "4/4",
+      "cold_warm_ratio": 2.31,
+      "warm_out_tokens_range": [
+        1278,
+        2785
+      ],
+      "per_trial": [
+        {
+          "trial": 1,
+          "wall_s": 180.8,
+          "out_tok": 1748,
+          "passed": true
+        },
+        {
+          "trial": 2,
+          "wall_s": 109.5,
+          "out_tok": 2785,
+          "passed": true
+        },
+        {
+          "trial": 3,
+          "wall_s": 61.5,
+          "out_tok": 1278,
+          "passed": true
+        },
+        {
+          "trial": 4,
+          "wall_s": 63.9,
+          "out_tok": 1522,
+          "passed": true
+        }
+      ]
+    }
+  }
+}
