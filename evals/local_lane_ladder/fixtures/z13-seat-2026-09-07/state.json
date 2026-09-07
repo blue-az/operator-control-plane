@@ -1,0 +1,2004 @@
+{
+  "done": {
+    "ambiguous-anchor|L2|gemma4:26b|1": true,
+    "ambiguous-anchor|L2|gemma4:26b|2": true,
+    "ambiguous-anchor|L2|gemma4:26b|3": true,
+    "ambiguous-anchor|L2|gemma4:26b|4": true,
+    "ambiguous-anchor|L2|gemma4:26b|5": true,
+    "ambiguous-anchor|L2|gemma4:26b|6": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|1": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|2": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|3": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|4": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|5": true,
+    "ambiguous-anchor|L2|qwen3.6:35b|6": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|1": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|2": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|3": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|4": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|5": true,
+    "ambiguous-anchor|L2|qwen3.8:27b|6": true,
+    "csv-summarize-repair|L2|gemma4:26b|1": true,
+    "csv-summarize-repair|L2|gemma4:26b|2": true,
+    "csv-summarize-repair|L2|gemma4:26b|3": true,
+    "csv-summarize-repair|L2|gemma4:26b|4": true,
+    "csv-summarize-repair|L2|gemma4:26b|5": true,
+    "csv-summarize-repair|L2|gemma4:26b|6": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|1": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|2": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|3": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|4": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|5": true,
+    "csv-summarize-repair|L2|qwen3.6:35b|6": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|1": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|2": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|3": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|4": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|5": true,
+    "csv-summarize-repair|L2|qwen3.8:27b|6": true,
+    "strict-log-format|L2|gemma4:26b|1": true,
+    "strict-log-format|L2|gemma4:26b|2": true,
+    "strict-log-format|L2|gemma4:26b|3": true,
+    "strict-log-format|L2|gemma4:26b|4": true,
+    "strict-log-format|L2|gemma4:26b|5": true,
+    "strict-log-format|L2|gemma4:26b|6": true,
+    "strict-log-format|L2|qwen3.6:35b|1": true,
+    "strict-log-format|L2|qwen3.6:35b|2": true,
+    "strict-log-format|L2|qwen3.6:35b|3": true,
+    "strict-log-format|L2|qwen3.6:35b|4": true,
+    "strict-log-format|L2|qwen3.6:35b|5": true,
+    "strict-log-format|L2|qwen3.6:35b|6": true,
+    "strict-log-format|L2|qwen3.8:27b|1": true,
+    "strict-log-format|L2|qwen3.8:27b|2": true,
+    "strict-log-format|L2|qwen3.8:27b|3": true,
+    "strict-log-format|L2|qwen3.8:27b|4": true,
+    "strict-log-format|L2|qwen3.8:27b|5": true,
+    "strict-log-format|L2|qwen3.8:27b|6": true
+  },
+  "results": [
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 53.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.39,
+        "tok_s": 53.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 39.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 54.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.35,
+        "tok_s": 54.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 38.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 53.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.4,
+        "tok_s": 53.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 38.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 52.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.44,
+        "tok_s": 52.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 54.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": false
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 52.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.43,
+        "tok_s": 52.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 28.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 52.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.46,
+        "tok_s": 52.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 31.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 21.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.05,
+        "tok_s": 21.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 43.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 21.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.01,
+        "tok_s": 21.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 36.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 22.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 5.66,
+        "tok_s": 22.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 40.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 21.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.08,
+        "tok_s": 21.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 36.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 21.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 5.85,
+        "tok_s": 21.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 26.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 21.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.09,
+        "tok_s": 21.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 31.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 55.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.31,
+        "tok_s": 55.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 30.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 55.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.33,
+        "tok_s": 55.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 19.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 55.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.32,
+        "tok_s": 55.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 16.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 54.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.34,
+        "tok_s": 54.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 22.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 54.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.37,
+        "tok_s": 54.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 21.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "ambiguous-anchor",
+      "tok_s": 54.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.33,
+        "tok_s": 54.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/ambiguous-anchor__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 21.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 51.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.48,
+        "tok_s": 51.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 134.2
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "created out of scope: ['test_temp.py']",
+          "name": "tests not edited",
+          "passed": false
+        }
+      ],
+      "detail": "1/2 checks failed: tests not edited: created out of scope: ['test_temp.py']",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 52.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.46,
+        "tok_s": 52.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 129.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 52.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.45,
+        "tok_s": 52.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 109.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 51.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.48,
+        "tok_s": 51.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 89.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 52.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.46,
+        "tok_s": 52.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 159.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 51.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.48,
+        "tok_s": 51.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 212.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 20.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.26,
+        "tok_s": 20.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 75.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 20.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.32,
+        "tok_s": 20.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 60.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 20.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.28,
+        "tok_s": 20.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 278.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 20.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.3,
+        "tok_s": 20.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 92.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 20.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.3,
+        "tok_s": 20.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 45.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 20.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 6.31,
+        "tok_s": 20.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 99.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 54.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.35,
+        "tok_s": 54.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 41.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 54.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.37,
+        "tok_s": 54.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 52.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 54.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.36,
+        "tok_s": 54.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 30.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 53.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.4,
+        "tok_s": 53.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 32.7
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 54.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.36,
+        "tok_s": 54.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 43.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": 54.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.36,
+        "tok_s": 54.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/csv-summarize-repair__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 25.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 51.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.51,
+        "tok_s": 51.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__gemma4-26b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 185.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 52.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.42,
+        "tok_s": 52.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__gemma4-26b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 195.2
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 51.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.49,
+        "tok_s": 51.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__gemma4-26b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 223.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 51.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.5,
+        "tok_s": 51.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__gemma4-26b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 172.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 51.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.46,
+        "tok_s": 51.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__gemma4-26b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 166.3
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "gemma4:26b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 52.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.46,
+        "tok_s": 52.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__gemma4-26b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 230.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 24.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 5.17,
+        "tok_s": 24.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.8-27b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 59.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 24.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 5.23,
+        "tok_s": 24.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.8-27b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 39.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 24.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 5.17,
+        "tok_s": 24.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.8-27b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 36.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 24.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 5.19,
+        "tok_s": 24.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.8-27b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 52.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 24.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 5.18,
+        "tok_s": 24.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.8-27b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 52.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.8:27b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 24.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 5.22,
+        "tok_s": 24.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.8-27b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 63.6
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 54.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.37,
+        "tok_s": 54.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.6-35b__t1.json",
+      "trial": 1,
+      "wall_clock_s": 28.5
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 54.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.34,
+        "tok_s": 54.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.6-35b__t2.json",
+      "trial": 2,
+      "wall_clock_s": 18.8
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 54.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.36,
+        "tok_s": 54.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.6-35b__t3.json",
+      "trial": 3,
+      "wall_clock_s": 27.4
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 54.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.36,
+        "tok_s": 54.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.6-35b__t4.json",
+      "trial": 4,
+      "wall_clock_s": 19.1
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 54.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.35,
+        "tok_s": 54.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.6-35b__t5.json",
+      "trial": 5,
+      "wall_clock_s": 24.9
+    },
+    {
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "level": "L2",
+      "machine": "z13",
+      "model": "qwen3.6:35b",
+      "passed": true,
+      "returncode": 0,
+      "task_id": "strict-log-format",
+      "tok_s": 54.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.35,
+        "tok_s": 54.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-seat-2026-09-07/traces/strict-log-format__L2__qwen3.6-35b__t6.json",
+      "trial": 6,
+      "wall_clock_s": 18.3
+    }
+  ]
+}
