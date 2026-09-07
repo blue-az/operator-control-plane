@@ -1,0 +1,80 @@
+Grid: 2 tasks x 1 levels x 3 models x 4 trials = 24 cells
+Sampling pinned: {'num_ctx': 16384, 'temperature': 0.8, 'think': 'off'}
+Trace retention: ON -> /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/z13-wallclock-2026-09-07/traces
+[constant-and-callers|L2|gemma4:26b|1] running...
+Pinning gemma4:26b -> gemma4-26b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|gemma4:26b|1] PASS (27.5s) -- all 4 checks passed
+[constant-and-callers|L2|gemma4:26b|2] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|gemma4:26b|2] PASS (20.5s) -- all 4 checks passed
+[constant-and-callers|L2|gemma4:26b|3] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|gemma4:26b|3] PASS (21.2s) -- all 4 checks passed
+[constant-and-callers|L2|gemma4:26b|4] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|gemma4:26b|4] PASS (20.0s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|1] running...
+Pinning qwen3.8:27b -> qwen3.8-27b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|qwen3.8:27b|1] PASS (52.0s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|2] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|qwen3.8:27b|2] PASS (53.4s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|3] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|qwen3.8:27b|3] PASS (43.0s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.8:27b|4] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|qwen3.8:27b|4] PASS (77.4s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:35b|1] running...
+Pinning qwen3.6:35b -> qwen3.6-35b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|qwen3.6:35b|1] PASS (36.6s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:35b|2] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|qwen3.6:35b|2] PASS (25.6s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:35b|3] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|qwen3.6:35b|3] PASS (23.0s) -- all 4 checks passed
+[constant-and-callers|L2|qwen3.6:35b|4] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[constant-and-callers|L2|qwen3.6:35b|4] PASS (29.6s) -- all 4 checks passed
+[csv-summarize-repair|L2|gemma4:26b|1] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|gemma4:26b|1] FAIL (161.5s) -- 1/2 checks failed: tests not edited: created out of scope: ['test_implementation.py']
+[csv-summarize-repair|L2|gemma4:26b|2] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|gemma4:26b|2] PASS (150.4s) -- all 2 checks passed
+[csv-summarize-repair|L2|gemma4:26b|3] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|gemma4:26b|3] PASS (138.7s) -- all 2 checks passed
+[csv-summarize-repair|L2|gemma4:26b|4] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|gemma4:26b|4] FAIL (150.6s) -- 1/2 checks failed: tests not edited: created out of scope: ['test_implementation.py']
+[csv-summarize-repair|L2|qwen3.8:27b|1] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|qwen3.8:27b|1] PASS (68.0s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.8:27b|2] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|qwen3.8:27b|2] PASS (53.0s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.8:27b|3] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|qwen3.8:27b|3] PASS (80.2s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.8:27b|4] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|qwen3.8:27b|4] PASS (49.3s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.6:35b|1] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|qwen3.6:35b|1] PASS (70.1s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.6:35b|2] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|qwen3.6:35b|2] PASS (63.5s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.6:35b|3] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|qwen3.6:35b|3] PASS (47.3s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.6:35b|4] running...
+  [ledger] session-start failed (non-fatal): Error: Task 'eval-pack-20260907' is already running. Use --force to override.
+[csv-summarize-repair|L2|qwen3.6:35b|4] PASS (48.1s) -- all 2 checks passed
+
+Wrote fixtures/z13-wallclock-2026-09-07/RESULTS.md
