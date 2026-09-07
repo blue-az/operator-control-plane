@@ -90,3 +90,25 @@ quality axis yet.
 - `gemma4:26b` emits 6,106 output tokens on csv here against 7,004 on the
   desktop — verbosity is a model property and travels across chips.
 - The MAX 390 has no L0/L1 data and no seat-fixture data in clean config.
+
+---
+
+## SUPERSEDED 2026-09-07 — timings here include ledger overhead
+
+Every wall-clock figure in this finding was measured with the runner's ledger
+path enabled, which put ~+4.5 s/trial of `operator` CLI bookkeeping inside
+`wall_clock_s` (fixed in `runner.py` the same day). **Use
+`z13-wallclock-noledger-2026-09-07` instead.**
+
+The correction is not a uniform shift. `qwen3.8:27b` moves 57.9 → **35.3 s** on
+the short task and 60.8 → **96.8 s** on the long one — opposite directions,
+because run-to-run variance is larger than the ledger effect.
+
+**The claim this finding drew from those numbers does not survive.** It argued
+the dense model is disproportionately punished on this chip, citing 57.9 s
+against `gemma4:26b`'s 20.6 s. Clean, that gap is 35.3 vs 26.3, and on the long
+task 27b *beats* 26b. The dense penalty is real in **decode** (22.4 vs 53–54
+tok/s) but does not carry into task time, because token economy compensates.
+
+What stands: there is no single chip factor (1.95x–3.40x, reversing between
+tasks), and the seat-scope note.
