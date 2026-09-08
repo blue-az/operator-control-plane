@@ -1,0 +1,5 @@
+    ctx  27b MiB  35b MiB   total  both?  switch s  27b dec  35b dec  processor
+  16384    20382    23268   43650   True       0.6     69.9     88.2  GB | GB
+  24576    21112    22588   43700   True       0.6     70.8     78.9  GB | GB
+  32768    22041    21652   43693   True       0.6     68.9     72.9  GB | GB
+  49152    25478     1358   26836  False      14.0     54.5     94.0  GB
