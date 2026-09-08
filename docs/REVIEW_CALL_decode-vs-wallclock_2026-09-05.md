@@ -134,13 +134,14 @@ cd ~/operator-control-plane
 tokens**, which is why this work moved here in the first place, so the default
 cannot serve.
 
-The established pattern is cross-family review, and the reviewer must not be
-`claude` — `doctor` errors when a claim is verified by an identity issued a
-builder brief for that task (`operator:5699`), and I am the builder here.
+The requirement is simply a **separate agent** from the builder - the reviewer
+must not be `claude`, and I am the builder here. (`doctor` enforces a *distinct
+verification identity*, not a different model family: it errors when a claim is
+verified by an identity issued the builder brief for that task (`operator:5699`).)
 
 Candidates, with the tradeoff:
 
-- **Gemini** — genuinely cross-family and capable of attacking §3's reasoning.
+- **Gemini** — a separate agent from the builder and capable of attacking §3's reasoning.
   Requires the Gemini lane, which memory records as deprioritized.
 - **`gemma4_local`** — available and free, but it is *the model under test* in
   C1–C4. Self-review by the subject; also unlikely to land §3.1.
