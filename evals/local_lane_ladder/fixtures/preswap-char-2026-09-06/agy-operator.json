@@ -1,0 +1,35 @@
+{
+  "model": "gemini-3.7-flash-low",
+  "reps": [
+    {
+      "kind": "operator",
+      "task": "constant-and-callers",
+      "rep": 1,
+      "wall_s": 31.139,
+      "returncode": 0,
+      "passed": false,
+      "grade_detail": "3/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-agy-cac-1-zvpaaocw/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5; constant updated: regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'; no stale value in code: pattern not found: 'up to 5 times'",
+      "fixture": "/tmp/local-lane-eval-agy-cac-1-zvpaaocw"
+    },
+    {
+      "kind": "operator",
+      "task": "constant-and-callers",
+      "rep": 2,
+      "wall_s": 35.654,
+      "returncode": 0,
+      "passed": true,
+      "grade_detail": "all 4 checks passed",
+      "fixture": "/tmp/local-lane-eval-agy-cac-2-jf893s92"
+    },
+    {
+      "kind": "operator",
+      "task": "constant-and-callers",
+      "rep": 3,
+      "wall_s": 21.462,
+      "returncode": 0,
+      "passed": false,
+      "grade_detail": "3/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-agy-cac-3-k7tc_vi0/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5; constant updated: regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'; no stale value in code: pattern not found: 'up to 5 times'",
+      "fixture": "/tmp/local-lane-eval-agy-cac-3-k7tc_vi0"
+    }
+  ]
+}

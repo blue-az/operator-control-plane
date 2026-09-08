@@ -1,0 +1,8 @@
+All requested updates have been verified:
+
+1. [src/limits.py](file:///home/blueaz/Public/LinkedIn/fable-control/limits/src/limits.py): Updated to `MAX_RETRIES = 5`.
+2. [src/fetcher.py](file:///home/blueaz/Public/LinkedIn/fable-control/limits/src/fetcher.py): Updated string to `"retrying up to 5 times before giving up"`.
+3. [docs/retry_policy.md](file:///home/blueaz/Public/LinkedIn/fable-control/limits/docs/retry_policy.md): Updated text to `"retries up to 5 times before giving up"`.
+4. Verification: Ran `python3 tests/check_limits.py` from the fixture root, which exited `0` with output `LIMITS_OK`.
+
+--- stderr ---

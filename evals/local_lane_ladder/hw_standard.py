@@ -20,7 +20,16 @@ USAGE
     hw_standard.py --models qwen3.8:27b --ctx 16384 --solo-host 127.0.0.1:11435
 
     A solo host is a second ollama daemon pinned to one GPU:
-        sudo -u ollama env CUDA_VISIBLE_DEVICES=0 OLLAMA_HOST=127.0.0.1:11435 ollama serve
+        sudo -u ollama env CUDA_VISIBLE_DEVICES=0 OLLAMA_LLM_LIBRARY=cuda_v13 \
+             OLLAMA_HOST=127.0.0.1:11435 ollama serve
+
+    OLLAMA_LLM_LIBRARY is REQUIRED, not optional. CUDA_VISIBLE_DEVICES hides a
+    card from CUDA but NOT from Vulkan: without it the daemon enumerates
+    Vulkan0 = the OTHER card and can allocate on it, so "solo" silently stops
+    meaning one card. Observed 2026-09-08 -- a solo daemon listed
+    library=Vulkan pci_id=0000:03:00.0 alongside library=CUDA
+    pci_id=0000:01:00.0, and one configuration died on "failed to allocate
+    Vulkan0 buffer".
     It shares the system model store, so no re-pull is needed.
 
 PROTOCOL (fixed -- do not vary these between runs or the numbers are not comparable)
@@ -38,6 +47,19 @@ NUM_PREDICT, TEMPERATURE, REPS = 128, 0, 3
 VRAM_LOADED_MIB = 2000          # a real load moves at least this much
 
 def sh(*a, **k): return subprocess.run(a, capture_output=True, text=True, **k)
+
+def ocli(host, *args):
+    """Run the ollama CLI against a SPECIFIC daemon.
+
+    Fixed 2026-09-08: evict() and the ps check previously used a bare `ollama`,
+    which always talks to :11434 regardless of which daemon is under test. When
+    measuring a solo daemon on :11435 that checked the wrong process entirely --
+    it saw an empty `ps`, reported "model absent from ollama ps", then looped on
+    "GPU not idle" because the solo daemon's model was resident and invisible to
+    it. All six solo rows of the first pre-swap run failed this way.
+    """
+    return subprocess.run(["ollama", *args], capture_output=True, text=True,
+                          env={**os.environ, "OLLAMA_HOST": host})
 
 def gpu_rows():
     r = sh("nvidia-smi","--query-gpu=index,memory.used","--format=csv,noheader,nounits")
@@ -61,14 +83,32 @@ def provenance():
                         "corpus":str(CORPUS),"warmup":"1 discarded generate"}}
 
 def evict(host, tags):
+    """Evict on BOTH daemons -- they share the same physical GPUs, so a model
+    resident on the other one still occupies the memory under test."""
+    hosts={host, "127.0.0.1:11434"}
     for _ in range(30):
-        ps=[l.split()[0] for l in sh("ollama","ps").stdout.splitlines()[1:] if l.strip()]
-        if not ps and sum(gpu_rows()) < 1500: return True
-        for m in ps: sh("ollama","stop",m)
+        live=[]
+        for h in hosts:
+            live += [(h,l.split()[0]) for l in ocli(h,"ps").stdout.splitlines()[1:] if l.strip()]
+        if not live and sum(gpu_rows()) < 1500: return True
+        for h,m in live: ocli(h,"stop",m)
         time.sleep(3)
     return False
 
-def generate(host, tag, prompt):
+_NONCE=[0]
+def generate(host, tag, prompt, uncached=True):
+    """One measured generate.
+
+    `uncached` prepends a unique nonce so ollama's prompt cache MISSES. Without
+    it every rep after the warmup re-serves a cached prompt and prompt_eval
+    time reads ~0.2 s instead of the real cost -- caught 2026-09-08 on this
+    script's own first row, where a 12,811-token prompt reported 0.2 s against
+    a known ~11.6 s. Prompt processing is the dominant cost at depth, so
+    measuring the cache instead of the work would invert the conclusion.
+    """
+    if uncached:
+        _NONCE[0]+=1
+        prompt=f"[run {_NONCE[0]} {time.time_ns()}]\n"+prompt
     fd,p = tempfile.mkstemp(suffix=".json")
     with os.fdopen(fd,"w") as f:
         json.dump({"model":tag,"prompt":prompt,"stream":False,"keep_alive":"5m",
@@ -93,7 +133,7 @@ def layers(since):
 def measure(host, base, ctx, depth_mult, label):
     tag=f"hwstd-{ctx}-{base.split(':')[0].replace('.','')}:latest"
     open("/tmp/hwstd.Modelfile","w").write(f"FROM {base}\nPARAMETER num_ctx {ctx}\n")
-    if sh("ollama","create",tag,"-f","/tmp/hwstd.Modelfile").returncode:
+    if ocli(host,"create",tag,"-f","/tmp/hwstd.Modelfile").returncode:
         return {"config":label,"status":"FAILED","why":"ollama create failed"}
     if not evict(host,[tag]):
         return {"config":label,"status":"FAILED","why":"could not reach a clean idle GPU state "
@@ -107,7 +147,7 @@ def measure(host, base, ctx, depth_mult, label):
         return {"config":label,"status":"FAILED","why":first["err"]}
     time.sleep(3); v=gpu_rows()
     net=[max(0,v[i]-idle[i]) for i in range(len(v))]
-    ps=[l for l in sh("ollama","ps").stdout.splitlines()[1:] if l.strip()]
+    ps=[l for l in ocli(host,"ps").stdout.splitlines()[1:] if l.strip()]
     # THREE independent confirmations that a load really happened
     if not ps:                       return _fail(tag,label,"model absent from `ollama ps` after generate")
     if sum(net) < VRAM_LOADED_MIB:   return _fail(tag,label,f"VRAM moved only {sum(net)} MiB; no real load")
@@ -115,20 +155,25 @@ def measure(host, base, ctx, depth_mult, label):
     if any("err" in r for r in reps): return _fail(tag,label,"a measured rep failed")
     dec=[r["eval_tok"]/r["eval_s"] for r in reps if r["eval_s"]]
     pro=[r["prompt_s"] for r in reps]
+    # A large prompt that processes suspiciously fast means the cache was hit.
+    if reps[0]["prompt_tok"] and reps[0]["prompt_tok"] > 2000 and statistics.median(pro) < 1.0:
+        return _fail(tag,label,f"prompt cache hit: {reps[0]['prompt_tok']} tok in "
+                     f"{statistics.median(pro):.2f}s -- nonce failed to defeat caching")
     row={"config":label,"status":"ok","model":base,"num_ctx":ctx,
          "prompt_tok":reps[0]["prompt_tok"],
          "load_s":round(first["load_s"],1),
+         "warmup_prompt_s":round(first["prompt_s"],1),
          "prompt_s_median":round(statistics.median(pro),1),
          "decode_tok_s_median":round(statistics.median(dec),1),
          "decode_min":round(min(dec),1),"decode_max":round(max(dec),1),
          "vram_mib_per_card":net,"vram_mib_total":sum(net),
          "cards_used":sum(1 for x in net if x>VRAM_LOADED_MIB),
          "layers":layers(since)}
-    sh("ollama","stop",tag); sh("ollama","rm",tag)
+    ocli(host,"stop",tag); ocli(host,"rm",tag)
     return row
 
-def _fail(tag,label,why):
-    sh("ollama","stop",tag); sh("ollama","rm",tag)
+def _fail(tag,label,why,host="127.0.0.1:11434"):
+    ocli(host,"stop",tag); ocli(host,"rm",tag)
     return {"config":label,"status":"FAILED","why":why}
 
 def main():

@@ -1,0 +1,18 @@
+The requested updates have been verified in [/home/blueaz/Public/LinkedIn/fable-control/limits](file:///home/blueaz/Public/LinkedIn/fable-control/limits):
+
+1. **[src/limits.py](file:///home/blueaz/Public/LinkedIn/fable-control/limits/src/limits.py#L2)**: Contains `MAX_RETRIES = 5`.
+2. **[src/fetcher.py](file:///home/blueaz/Public/LinkedIn/fable-control/limits/src/fetcher.py#L6)**: Contains `"retrying up to 5 times before giving up"`.
+3. **[docs/retry_policy.md](file:///home/blueaz/Public/LinkedIn/fable-control/limits/docs/retry_policy.md#L3)**: Contains `"retries up to 5 times before giving up"`.
+
+### Verification
+
+Running `python3 tests/check_limits.py` from `/home/blueaz/Public/LinkedIn/fable-control/limits`:
+
+```bash
+$ python3 tests/check_limits.py
+LIMITS_OK
+```
+
+The script exited with code 0 and output `LIMITS_OK`.
+
+--- stderr ---

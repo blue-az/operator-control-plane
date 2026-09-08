@@ -1,0 +1,12 @@
+Grid: 1 tasks x 1 levels x 1 models x 3 trials = 3 cells
+Sampling pinned: {'num_ctx': 16384, 'temperature': 0.8, 'think': 'off'}
+Trace retention: ON -> /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/preswap-char-2026-09-06/wall-dual-35b/traces
+[csv-summarize-repair|L2|qwen3.6:35b|1] running...
+Pinning qwen3.6:35b -> qwen3.6-35b-e9pin-ctx16384-t0p8:latest (PARAMETER num_ctx 16384, PARAMETER temperature 0.8)
+[csv-summarize-repair|L2|qwen3.6:35b|1] PASS (13.0s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.6:35b|2] running...
+[csv-summarize-repair|L2|qwen3.6:35b|2] PASS (22.5s) -- all 2 checks passed
+[csv-summarize-repair|L2|qwen3.6:35b|3] running...
+[csv-summarize-repair|L2|qwen3.6:35b|3] PASS (31.2s) -- all 2 checks passed
+
+Wrote /home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/preswap-char-2026-09-06/wall-dual-35b/RESULTS.md

@@ -77,3 +77,28 @@ tested, so no part of it needs re-deriving.
 - Load time was not measured and is where the x4 link should hurt most.
 - `+9.3%` for `qwen3.6:35b` is unexplained. It has the fewest layers of the
   three (42), so per-layer boundary crossings may matter, but that is a guess.
+
+---
+
+## Caveat added 2026-09-08 — the solo daemon was not *enforcing* single-card
+
+This finding compared the system daemon against a second daemon started with
+`CUDA_VISIBLE_DEVICES=0`. That hides the card from **CUDA but not from Vulkan**.
+Re-examined 2026-09-08, such a daemon enumerates both:
+
+```
+library=Vulkan  name=Vulkan0  pci_id=0000:03:00.0    <- the other card
+library=CUDA    name=CUDA0    pci_id=0000:01:00.0
+```
+
+**The results here are almost certainly still valid**: every solo row recorded a
+`2 → 1` placement transition with the second card at ~0 MiB, so the models did
+land on one GPU. But that was ollama *preferring* CUDA, not the rig *enforcing*
+one card — and the preference is not reliable. On 2026-09-08 a configuration
+under the same setup failed with `ggml_gallocr_reserve_n_impl: failed to
+allocate Vulkan0 buffer`, i.e. it tried to use the card that was supposed to be
+hidden.
+
+**Any future single-card work must add `OLLAMA_LLM_LIBRARY=cuda_v13`** to bypass
+backend autodetection. The control in this finding (`gemma4:26b` at +0.1% across
+daemons) is unaffected either way, since that model was single-card on both.

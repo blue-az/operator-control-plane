@@ -1,0 +1,50 @@
+{
+  "argv": [
+    "/usr/local/bin/pi",
+    "--provider",
+    "ollama",
+    "--model",
+    "gemma3-27b-e9pin-ctx16384-t0p8:latest",
+    "--mode",
+    "json",
+    "--print",
+    "--thinking",
+    "off",
+    "--",
+    "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+  ],
+  "cell_key": "ambiguous-anchor|L2|gemma3:27b|2",
+  "git_rev": "1f4485f2c263cba41f027e6f049fafd150064957",
+  "grade_detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+  "harness": "local-lane-eval",
+  "level": "L2",
+  "machine": "desktop",
+  "model": "gemma3:27b",
+  "passed": false,
+  "prompt": "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n",
+  "recorded_utc": "2026-09-07T05:54:59.942325+00:00",
+  "returncode": 0,
+  "stderr": "Warning: Model \"gemma3-27b-e9pin-ctx16384-t0p8:latest\" not found for provider \"ollama\". Using custom model id.\n",
+  "stdout": "{\"type\":\"session\",\"version\":3,\"id\":\"01a07a6e-eb23-71ad-87f3-c004d412f307\",\"timestamp\":\"2026-09-07T05:54:44.644Z\",\"cwd\":\"/tmp/local-lane-eval-ambiguous-anchor-L2-2oxy1fzm\"}\n{\"type\":\"agent_start\"}\n{\"type\":\"turn_start\"}\n{\"type\":\"message_start\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"1. Read runbook.md and note that \\\"Run: restart the service\\\" appears three times.\\n2. In runbook.md, under the heading \\\"## Staging\\\" only, replace the single line\\n   \\\"2. Run: restart the service\\\" with \\\"2. Run: restart the service --force\\\".\\n   Do not change the identical line under \\\"## Production\\\" or under \\\"## Development\\\".\\n3. Verify the file now contains exactly one line reading\\n   \\\"2. Run: restart the service --force\\\".\\nOnly touch runbook.md.\\n\"}],\"timestamp\":1788760484825}}\n{\"type\":\"message_end\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"1. Read runbook.md and note that \\\"Run: restart the service\\\" appears three times.\\n2. In runbook.md, under the heading \\\"## Staging\\\" only, replace the single line\\n   \\\"2. Run: restart the service\\\" with \\\"2. Run: restart the service --force\\\".\\n   Do not change the identical line under \\\"## Production\\\" or under \\\"## Development\\\".\\n3. Verify the file now contains exactly one line reading\\n   \\\"2. Run: restart the service --force\\\".\\nOnly touch runbook.md.\\n\"}],\"timestamp\":1788760484825}}\n{\"type\":\"message_start\",\"message\":{\"role\":\"assistant\",\"content\":[],\"api\":\"openai-completions\",\"provider\":\"ollama\",\"model\":\"gemma3-27b-e9pin-ctx16384-t0p8:latest\",\"usage\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":0,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"error\",\"timestamp\":1788760484840,\"errorMessage\":\"400: {\\\"message\\\":\\\"registry.ollama.ai/library/gemma3-27b-e9pin-ctx16384-t0p8:latest does not support tools\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"param\\\":null,\\\"code\\\":null}\"}}\n{\"type\":\"message_end\",\"message\":{\"role\":\"assistant\",\"content\":[],\"api\":\"openai-completions\",\"provider\":\"ollama\",\"model\":\"gemma3-27b-e9pin-ctx16384-t0p8:latest\",\"usage\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":0,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"error\",\"timestamp\":1788760484840,\"errorMessage\":\"400: {\\\"message\\\":\\\"registry.ollama.ai/library/gemma3-27b-e9pin-ctx16384-t0p8:latest does not support tools\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"param\\\":null,\\\"code\\\":null}\"}}\n{\"type\":\"turn_end\",\"message\":{\"role\":\"assistant\",\"content\":[],\"api\":\"openai-completions\",\"provider\":\"ollama\",\"model\":\"gemma3-27b-e9pin-ctx16384-t0p8:latest\",\"usage\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":0,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"error\",\"timestamp\":1788760484840,\"errorMessage\":\"400: {\\\"message\\\":\\\"registry.ollama.ai/library/gemma3-27b-e9pin-ctx16384-t0p8:latest does not support tools\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"param\\\":null,\\\"code\\\":null}\"},\"toolResults\":[]}\n{\"type\":\"agent_end\",\"messages\":[{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"1. Read runbook.md and note that \\\"Run: restart the service\\\" appears three times.\\n2. In runbook.md, under the heading \\\"## Staging\\\" only, replace the single line\\n   \\\"2. Run: restart the service\\\" with \\\"2. Run: restart the service --force\\\".\\n   Do not change the identical line under \\\"## Production\\\" or under \\\"## Development\\\".\\n3. Verify the file now contains exactly one line reading\\n   \\\"2. Run: restart the service --force\\\".\\nOnly touch runbook.md.\\n\"}],\"timestamp\":1788760484825},{\"role\":\"assistant\",\"content\":[],\"api\":\"openai-completions\",\"provider\":\"ollama\",\"model\":\"gemma3-27b-e9pin-ctx16384-t0p8:latest\",\"usage\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"totalTokens\":0,\"cost\":{\"input\":0,\"output\":0,\"cacheRead\":0,\"cacheWrite\":0,\"total\":0}},\"stopReason\":\"error\",\"timestamp\":1788760484840,\"errorMessage\":\"400: {\\\"message\\\":\\\"registry.ollama.ai/library/gemma3-27b-e9pin-ctx16384-t0p8:latest does not support tools\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"param\\\":null,\\\"code\\\":null}\"}],\"willRetry\":false}\n{\"type\":\"agent_settled\"}\n",
+  "task_id": "ambiguous-anchor",
+  "timed_out": false,
+  "timeout_limit_s": 600,
+  "tok_s": 42.8,
+  "tok_s_probe": {
+    "eval_count": 128,
+    "eval_duration_s": 2.99,
+    "tok_s": 42.8
+  },
+  "trajectory": {
+    "completion_tokens": 0,
+    "distinct_tools": [],
+    "n_calls": 0,
+    "n_failed_calls": 0,
+    "no_dispatch": true,
+    "stopped_repeat": false,
+    "think_chars": 0,
+    "tool_calls": []
+  },
+  "trial": 2,
+  "wall_clock_s": 5.1
+}

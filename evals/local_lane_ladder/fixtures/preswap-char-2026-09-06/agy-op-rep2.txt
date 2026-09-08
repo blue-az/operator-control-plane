@@ -1,0 +1,14 @@
+The required updates have been completed:
+
+1. **[src/limits.py](file:///tmp/local-lane-eval-agy-cac-2-jf893s92/src/limits.py)**: Updated `MAX_RETRIES = 5`.
+2. **[src/fetcher.py](file:///tmp/local-lane-eval-agy-cac-2-jf893s92/src/fetcher.py)**: Replaced text with `"retrying up to 5 times before giving up"`.
+3. **[docs/retry_policy.md](file:///tmp/local-lane-eval-agy-cac-2-jf893s92/docs/retry_policy.md)**: Replaced text with `"retries up to 5 times before giving up"`.
+
+### Verification
+Ran `python3 tests/check_limits.py` across the fixture roots:
+```
+LIMITS_OK
+```
+All assertions passed and exited with code 0.
+
+--- stderr ---

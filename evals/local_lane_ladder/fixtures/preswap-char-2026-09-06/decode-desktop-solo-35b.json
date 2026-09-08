@@ -1,0 +1,101 @@
+{
+  "label": "desktop-solo-35b",
+  "host": "http://127.0.0.1:11435",
+  "model": "qwen3.6-35b-e9pin-ctx16384-t0p8:latest",
+  "n": 3,
+  "tok_s_mean": 137.23,
+  "tok_s_min": 134.94,
+  "tok_s_max": 140.24,
+  "reps": [
+    {
+      "tok_s": 136.51,
+      "eval_count": 128,
+      "eval_duration_s": 0.938,
+      "wall_s": 1.067,
+      "load_duration_s": 0.005,
+      "prompt_eval_count": 111,
+      "prompt_eval_duration_s": 0.058,
+      "rep": 1,
+      "smi": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3090",
+          "mem_used": 22842.0,
+          "mem_total": 24576.0,
+          "power_limit": 320.0,
+          "pcie_gen": "3",
+          "pcie_width": "16"
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 3090",
+          "mem_used": 463.0,
+          "mem_total": 24576.0,
+          "power_limit": 320.0,
+          "pcie_gen": "1",
+          "pcie_width": "4"
+        }
+      ]
+    },
+    {
+      "tok_s": 134.94,
+      "eval_count": 128,
+      "eval_duration_s": 0.949,
+      "wall_s": 1.013,
+      "load_duration_s": 0.001,
+      "prompt_eval_count": 111,
+      "prompt_eval_duration_s": 0.059,
+      "rep": 2,
+      "smi": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3090",
+          "mem_used": 22842.0,
+          "mem_total": 24576.0,
+          "power_limit": 320.0,
+          "pcie_gen": "3",
+          "pcie_width": "16"
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 3090",
+          "mem_used": 463.0,
+          "mem_total": 24576.0,
+          "power_limit": 320.0,
+          "pcie_gen": "1",
+          "pcie_width": "4"
+        }
+      ]
+    },
+    {
+      "tok_s": 140.24,
+      "eval_count": 128,
+      "eval_duration_s": 0.913,
+      "wall_s": 0.976,
+      "load_duration_s": 0.001,
+      "prompt_eval_count": 111,
+      "prompt_eval_duration_s": 0.058,
+      "rep": 3,
+      "smi": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3090",
+          "mem_used": 22842.0,
+          "mem_total": 24576.0,
+          "power_limit": 320.0,
+          "pcie_gen": "3",
+          "pcie_width": "16"
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 3090",
+          "mem_used": 463.0,
+          "mem_total": 24576.0,
+          "power_limit": 320.0,
+          "pcie_gen": "1",
+          "pcie_width": "4"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+```python
+class Node:
+    def __init__(self, key=0, value=0):
+        self.key = key
+        self.value = value
+        self.prev = None
+        self.next = None
+
+
+class LRUCache:
+    """Least Recently Used (LRU) Cache using a hash map and a doubly linked list."""
+
+    def __init__(self, capacity: int):
+        """Initialize the LRU cache with a positive capacity."""
+        self.capacity = capacity
+        self.cache = {}
+        self.head = Node()
+        self.tail = Node()
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def _remove(self, node: Node) -> None:
+        """Remove an existing node from the doubly linked list."""
+        prev_node = node.prev
+        next_node = node.next
+        prev_node.next = next_node
+        next_node.prev = prev_node
+
+    def _add(self, node: Node) -> None:
+        """Add a node right before the dummy tail (most recently used position)."""
+        prev_node = self.tail.prev
+        prev_node.next = node
+        node.prev = prev_node
+        node.next = self.tail
+        self.tail.prev = node
+
+    def get(self, key: int) -> int:
+        """Return the value of the key if it exists, otherwise return -1."""
+        if key not in self.cache:
+            return -1
+        node = self.cache[key]
+        self._remove(node)
+        self._add(node)
+        return node.value
+
+    def put(self, key: int, value: int) -> None:
+        """Update the value of the key if present, or insert key-value pair evicting LRU item if needed."""
+        if key in self.cache:
+            self._remove(self.cache[key])
+        node = Node(key, value)
+        self._add(node)
+        self.cache[key] = node
+        if len(self.cache) > self.capacity:
+            lru_node = self.head.next
+            self._remove(lru_node)
+            del self.cache[lru_node.key]
+
+
+if __name__ == "__main__":
+    cache = LRUCache(3)
+
+    # Op 1: put(1, 1) -> Cache: [1]
+    cache.put(1, 1)
+    print(f"put(1, 1) -> state: {list(cache.cache.keys())}")
+
+    # Op 2: put(2, 2) -> Cache: [1, 2]
+    cache.put(2, 2)
+    print(f"put(2, 2) -> state: {list(cache.cache.keys())}")
+
+    # Op 3: put(3, 3) -> Cache: [1, 2, 3]
+    cache.put(3, 3)
+    print(f"put(3, 3) -> state: {list(cache.cache.keys())}")
+
+    # Op 4: get(1) -> returns 1, makes 1 MRU -> Cache: [2, 3, 1]
+    val1 = cache.get(1)
+    print(f"get(1) -> {val1}, state: {list(cache.cache.keys())}")
+
+    # Op 5: put(4, 4) -> capacity exceeded, evicts LRU key 2 -> Cache: [3, 1, 4]
+    cache.put(4, 4)
+    print(f"put(4, 4) -> (evicts 2) state: {list(cache.cache.keys())}")
+
+    # Op 6: get(2) -> returns -1 (was evicted)
+    val2 = cache.get(2)
+    print(f"get(2) -> {val2} (evicted)")
+
+    # Op 7: put(5, 5) -> capacity exceeded, evicts LRU key 3 -> Cache: [1, 4, 5]
+    cache.put(5, 5)
+    print(f"put(5, 5) -> (evicts 3) state: {list(cache.cache.keys())}")
+```

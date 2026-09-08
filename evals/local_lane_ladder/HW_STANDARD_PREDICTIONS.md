@@ -65,7 +65,10 @@ reach a clean idle GPU state, rather than silently measuring a contended card.
 
 ```bash
 # second daemon pinned to GPU0 (needs sudo; shares the system model store)
-sudo -u ollama env CUDA_VISIBLE_DEVICES=0 OLLAMA_HOST=127.0.0.1:11435 ollama serve
+sudo -u ollama env CUDA_VISIBLE_DEVICES=0 OLLAMA_LLM_LIBRARY=cuda_v13 \
+     OLLAMA_HOST=127.0.0.1:11435 ollama serve
+# OLLAMA_LLM_LIBRARY is required: CUDA_VISIBLE_DEVICES does not hide the card
+# from Vulkan, so without it the "solo" daemon can still reach both GPUs.
 
 python3 hw_standard.py \
   --models qwen3.8:27b qwen3.6:35b \

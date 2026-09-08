@@ -1,0 +1,14 @@
+{
+  "gemma4:26b|constant-and-callers": 13.0,
+  "gemma4:31b|constant-and-callers": 36.4,
+  "qwen3.8:27b|constant-and-callers": 18.1,
+  "qwen3.6:35b|constant-and-callers": 8.8,
+  "qwen3-next:latest|constant-and-callers": 92.0,
+  "gpt-oss:120b|constant-and-callers": 31.1,
+  "gemma4:26b|csv-summarize-repair": 38.9,
+  "gemma4:31b|csv-summarize-repair": 128.4,
+  "qwen3.8:27b|csv-summarize-repair": 32.4,
+  "qwen3.6:35b|csv-summarize-repair": 15.6,
+  "qwen3-next:latest|csv-summarize-repair": 325.7,
+  "gpt-oss:120b|csv-summarize-repair": 53.4
+}

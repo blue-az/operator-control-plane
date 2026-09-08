@@ -1,0 +1,23 @@
+{
+  "model": "gemini-3.7-flash-low",
+  "reps": [
+    {
+      "rep": 1,
+      "returncode": 0,
+      "wall_s": 5.949,
+      "stdout_chars": 2627
+    },
+    {
+      "rep": 2,
+      "returncode": 0,
+      "wall_s": 7.025,
+      "stdout_chars": 2862
+    },
+    {
+      "rep": 3,
+      "returncode": 0,
+      "wall_s": 9.843,
+      "stdout_chars": 2843
+    }
+  ]
+}
