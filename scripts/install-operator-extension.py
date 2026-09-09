@@ -28,7 +28,7 @@ EXTENSION_RELATIVE = Path(".pi") / "extensions" / "operator"
 LEDGER_DIR_NAME = ".operator"
 OPERATOR_BIN_NAME = "operator"
 
-REQUIRED_RUNTIME_FILES = ("index.ts", "core.ts", "render.ts", "targets.json")
+REQUIRED_RUNTIME_FILES = ("index.ts", "core.ts", "client.ts", "render.ts", "targets.json")
 NEVER_COPY_NAMES = ("selftest.ts",)
 SKIP_DIR_NAMES = {".operator", "node_modules", "__pycache__"}
 

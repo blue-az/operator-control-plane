@@ -2,7 +2,7 @@
 id: pi-operator-extension-stabilization
 title: Pi Operator extension stabilization and carrier-neutral surface
 status: draft
-updated: 2026-09-08
+updated: 2026-09-09
 ---
 
 # Pi Operator extension stabilization
@@ -35,18 +35,38 @@ Stella plugin adapter.
 
 ## Stable v1 scope
 
+The draft is reconciled against the current implementation below. The extension
+is project-local (Pi does not discover it by walking parent directories), while
+ledger discovery is deliberately cross-project through `.pi/operator-ledger.json`.
+
 - read-only `/op:doctor`, `/op:status`, `/op:tasks`, `/op:next-steps`, `/op:project`, and `/op:roadmap`;
-- confirmed `/op:use` and basic task/session selection;
+- confirmed `/op:use` (session-local selection; ledger `current_task` only after confirmation) and basic task/session selection;
 - session start/end and usage receipts;
 - brief and handoff generation;
 - a carrier-neutral Operator client with fixed argv construction, explicit task scope, idempotent writes, and fail-closed errors;
 - discovery of a configured external ledger from another project cwd without copying or silently overriding ledger state.
 
+### Implementation reconciliation (2026-09-09)
+
+| Contract item | Current state | Compatibility decision |
+|---|---|---|
+| Consumer extension discovery | Installer copies/links `.pi/extensions/operator`; Pi loader requires the consumer cwd and project trust | Supported; nested cwd discovery is not implied |
+| External ledger discovery | `core.ts` `findLedger` validates the v1 contract, absolute root, sibling `.operator/` + `operator` pair, and ambiguity | Supported and fail-closed |
+| Carrier-neutral client | `.pi/extensions/operator/client.ts` exports `OperatorClient` / `CarrierNeutralOperatorClient`; it imports no Pi UI modules and delegates only fixed argv builders | Stable v1 surface |
+| Session lifecycle | Safe `session-start` and `session-end` builders/client methods exist; repeated already-running/already-closed transitions are idempotent results | Supported without status transitions |
+| Usage receipts | Created/closed by Operator session lifecycle; no direct arbitrary `usage-add` passthrough | Supported through lifecycle only |
+| `/op:use` | Session selection is display state; `task-use` writes ledger `current_task` only after confirmation | Supported |
+| Consumer-cwd load | Pi `discoverAndLoadExtensions` is cwd-local; nested default discovery is empty; explicit `loadExtensions(index.ts)` works; DefaultResourceLoader trust-gates the project extension | Supported; covered by consumer-cwd tests |
+| PBC and Stella transport | No `/pbc:*` wizard and no Stella adapter | Deferred, separate contracts |
+
+The client is intentionally a transport seam, not a second ledger implementation:
+carriers provide an `exec` function and receive Operator command results.
+
 ## Experimental scope
 
 Keep these out of the stable contract until separately accepted:
 
-- `/op:claim`, `/op:evidence`, `/op:delegate`, and `/op:supervisor-review` expansions;
+- `/op:claim`, `/op:evidence`, `/op:delegate`, `/op:supervisor-review`, and `/op:popup` expansions;
 - `/pbc:define`, `/pbc:feature`, and PBC lifecycle wizards;
 - fleet integration and automated verification;
 - Stella wrapper/plugin transport;

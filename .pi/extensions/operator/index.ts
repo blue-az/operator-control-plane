@@ -16,6 +16,7 @@
  *   /op:handoff             record closeout from an editor-first draft (step 2)
  *   /op:supervisor-review   wrap ./operator review-delegate for one named claim (step 3)
  *   /op:delegate            send bounded implementation work to another agent (step 4)
+ *   /op:popup               GUI sudo askpass for uid-isolated review launches (experimental)
  *   /op:roadmap             show ladder, recent dogfood issues, and future features
  *   /op:roadmap --project   read-only project-prefix dashboard (alias of /op:project)
  *   /op:next-steps          prioritized ledger actions; optional workflow guidance
@@ -632,7 +633,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 	};
 
 	pi.registerCommand("op:claim", {
-		description: "Operator: register a claim on the selected task (/op:claim [claim text])",
+		description: "[experimental] Operator: register a claim on the selected task (/op:claim [claim text])",
 		handler: async (args, ctx) => {
 			const wc = requireWriteContext(ctx, "/op:claim");
 			if (!wc) return;
@@ -701,7 +702,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 	});
 
 	pi.registerCommand("op:evidence", {
-		description: "Operator: attach evidence to the selected task (/op:evidence [path-or-url])",
+		description: "[experimental] Operator: attach evidence to the selected task (/op:evidence [path-or-url])",
 		handler: async (args, ctx) => {
 			const wc = requireWriteContext(ctx, "/op:evidence");
 			if (!wc) return;
@@ -854,7 +855,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 	// never attaches evidence, never emits lifecycle flags.
 
 	pi.registerCommand("op:supervisor-review", {
-		description: "Operator: request distinct-agent review of one named claim (/op:supervisor-review [claim-id])",
+		description: "[experimental] Operator: request distinct-agent review of one named claim (/op:supervisor-review [claim-id])",
 		getArgumentCompletions: (prefix) => {
 			const ledger = ledgerForCompletions();
 			if (!ledger) return null;
@@ -1151,7 +1152,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 	// paste/export is a labeled fallback. Parent routing is never mutated.
 
 	pi.registerCommand("op:delegate", {
-		description: "Operator: send bounded implementation work to another agent (/op:delegate [task-id] [target-alias])",
+		description: "[experimental] Operator: send bounded implementation work to another agent (/op:delegate [task-id] [target-alias])",
 		getArgumentCompletions: (prefix) => {
 			const ledger = ledgerForCompletions();
 			if (!ledger) return null;
@@ -1537,6 +1538,82 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 					results,
 				}),
 			);
+		},
+	});
+
+	pi.registerCommand("op:popup", {
+		description: "[experimental] Operator: GUI sudo askpass for uid-isolated review launches (/op:popup)",
+		handler: async (_args, ctx) => {
+			const ledger = requireLedger(ctx);
+			if (!ledger) return;
+			if (!ctx.hasUI) {
+				ctx.ui.notify(
+					"/op:popup needs a UI for the sudo chooser and confirmation. It never reads a password itself.",
+					"error",
+				);
+				return;
+			}
+			let askpass: string | null;
+			try {
+				askpass = core.resolveSudoAskpass();
+			} catch (err) {
+				refuse(ctx, "/op:popup", "Operator sudo askpass", err);
+				return;
+			}
+			if (!askpass) {
+				const message =
+					"/op:popup needs a GUI askpass (SUDO_ASKPASS or ksshaskpass/ssh-askpass). It will not use sudo -S.";
+				ctx.ui.notify(message, "error");
+				emit(ctx, core.buildDeclinedReport("/op:popup", "Operator sudo askpass", message, null));
+				return;
+			}
+			const wantList = /(?:^|\s)(list|--all)(?:\s|$)/.test(_args);
+			const targets = core.listSudoPopupTargets(ledger, { all: wantList });
+			let target: core.SudoPopupTarget;
+			let argv: string[];
+			try {
+				let picked = core.pickSudoPopupTarget(targets, _args);
+				if (!picked) {
+					const choice = await ctx.ui.select("Sudo command for GUI askpass", targets.map((t) => t.label));
+					if (!choice) {
+						emit(
+							ctx,
+							core.buildDeclinedReport("/op:popup", "Operator sudo askpass", "No sudo target selected.", null),
+						);
+						return;
+					}
+					picked = core.resolveSudoPopupTarget(targets, choice);
+				}
+				target = picked;
+				argv = core.sudoPopupArgv(target);
+			} catch (err) {
+				refuse(ctx, "/op:popup", "Operator sudo askpass", err);
+				return;
+			}
+			const invocation = core.formatSudoInvocation(argv);
+			const ok = await ctx.ui.confirm(
+				"Run this sudo command with GUI askpass?",
+				[
+					"A desktop askpass popup will collect the password. This extension never reads it.",
+					"Uses sudo -A (GUI askpass). sudo -S / stdin password flags are refused.",
+					"This does not verify a claim or write verification status.",
+					"",
+					invocation,
+				].join("\n"),
+			);
+			if (!ok) {
+				emit(ctx, core.buildSudoPopupReport({ target, argv, result: null, declined: true, askpass }));
+				return;
+			}
+			const previousAskpass = process.env.SUDO_ASKPASS;
+			process.env.SUDO_ASKPASS = askpass;
+			try {
+				const result = await pi.exec(argv[0], argv.slice(1), { cwd: ledger.root, timeout: 120_000 });
+				emit(ctx, core.buildSudoPopupReport({ target, argv, result, askpass }));
+			} finally {
+				if (previousAskpass === undefined) delete process.env.SUDO_ASKPASS;
+				else process.env.SUDO_ASKPASS = previousAskpass;
+			}
 		},
 	});
 }

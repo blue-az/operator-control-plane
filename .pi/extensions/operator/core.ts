@@ -77,6 +77,7 @@ export const CONFIRMED_WRITE_SUBCOMMANDS = [
 	"review-delegate",
 	"task-create",
 	"session-start",
+	"session-end",
 	"brief",
 	"export-brief",
 ] as const;
@@ -115,6 +116,7 @@ export const ALLOWED_FLAGS: Record<AllowedSubcommand, readonly string[]> = {
 	"review-delegate": ["--task", "--reviewer", "--mode", "--review-user", "--verify-cmd"],
 	"task-create": ["--id", "--objective", "--assign", "--review"],
 	"session-start": ["--task", "--harness"],
+	"session-end": ["--outcome", "--cost"],
 	brief: ["--for", "--task"],
 	"export-brief": ["--for", "--task"],
 };
@@ -1894,7 +1896,7 @@ export function buildSupervisorReviewReport(outcome: SupervisorReviewOutcome): R
 		if (outcome.opts.mode === "uid-isolated") {
 			lines.push(
 				"",
-				"Human-auth next step: run the launch script as the named Unix user. This session did not verify.",
+				"Human-auth next step: /op:popup runs the launch command with sudo -A (GUI askpass). This session did not verify.",
 			);
 		} else {
 			lines.push(
@@ -2328,6 +2330,24 @@ export function sessionStartArgv(taskId: string, harnessId: string): string[] {
 	return assertSafeArgv(["session-start", "--task", taskId, "--harness", requireHarnessId(harnessId, "session-start --harness")]);
 }
 
+const USAGE_ID_RE = /^usage-[0-9]{4,}$/;
+export function isValidUsageId(usageId: string): boolean {
+	return USAGE_ID_RE.test(usageId);
+}
+
+export const SESSION_OUTCOMES = ["useful", "partial", "no_go", "quarantined", "reverted", "unknown"] as const;
+export type SessionOutcome = (typeof SESSION_OUTCOMES)[number];
+
+/** Build the safe, non-status-mutating session close operation. */
+export function sessionEndArgv(usageId: string, outcome: string, cost: number): string[] {
+	if (!isValidUsageId(usageId)) throw new Error(`refusing session-end with usage id '${usageId}': expected usage-NNNN`);
+	if (!(SESSION_OUTCOMES as readonly string[]).includes(outcome)) {
+		throw new Error(`refusing session outcome '${outcome}': expected one of ${SESSION_OUTCOMES.join(", ")}`);
+	}
+	if (!Number.isFinite(cost) || cost < 0) throw new Error("refusing session-end with an invalid non-negative cost");
+	return assertSafeArgv(["session-end", usageId, "--outcome", outcome, "--cost", String(cost)]);
+}
+
 export function briefArgv(taskId: string, harnessId: string): string[] {
 	requireTaskId(taskId, "brief");
 	return assertSafeArgv(["brief", "--for", requireHarnessId(harnessId, "brief --for"), "--task", taskId]);
@@ -2689,5 +2709,296 @@ export function decideDispatchPath(input: {
 		return { path: "paste-fallback", reason: "no brief file was written, so adapter invoke has nothing to dispatch" };
 	}
 	return { path: "adapter", reason: "in-repo isolation and a written brief; invoking harness_adapter IMPLEMENTER" };
+}
+
+// --- /op:popup: GUI askpass for stored sudo -u review launches ---------------
+// Never uses sudo -S. Never reads, prints, or stores a password. Askpass is a
+// human GUI. This does not verify claims or emit lifecycle flags.
+
+const SUDO_FORBIDDEN_TOKENS = ["-S", "--stdin", "-p", "--prompt", "--prompt="] as const;
+
+export const SUDO_POPUP_CREDENTIALS_ID = "credentials";
+export const SUDO_POPUP_CREDENTIALS_LABEL =
+	"credentials  sudo -A -v (GUI askpass; cache sudo timestamp)";
+export const SUDO_POPUP_SAMPLE_ID = "sample";
+export const SUDO_POPUP_SAMPLE_LABEL = "sample  sudo -A true (harmless askpass test)";
+
+const DEFAULT_ASKPASS_CANDIDATES = [
+	"/usr/bin/ksshaskpass",
+	"/usr/libexec/openssh/ssh-askpass",
+	"/usr/bin/ssh-askpass",
+] as const;
+
+export type SudoPopupKind = "credentials" | "sample" | "uid-isolated-review";
+
+export interface SudoPopupTarget {
+	kind: SudoPopupKind;
+	id: string;
+	label: string;
+	reviewUser?: string;
+	runCommand?: string;
+	scriptPath?: string;
+	bundlePath?: string;
+	claimId?: string;
+}
+
+export function resolveSudoAskpass(): string | null {
+	const fromEnv = (process.env.SUDO_ASKPASS ?? "").trim();
+	if (fromEnv) {
+		if (!isAbsolute(fromEnv) || fromEnv.split(/[\\/]/).includes("..")) {
+			throw new Error("refusing SUDO_ASKPASS: path must be absolute and must not contain '..'");
+		}
+		if (!isFile(fromEnv)) {
+			throw new Error(`refusing SUDO_ASKPASS '${fromEnv}': not an existing regular file`);
+		}
+		return fromEnv;
+	}
+	for (const candidate of DEFAULT_ASKPASS_CANDIDATES) {
+		if (isFile(candidate)) return candidate;
+	}
+	return null;
+}
+
+function unquoteShlexWord(token: string): string {
+	const trimmed = token.trim();
+	if (!trimmed) throw new Error("refusing sudo -lc payload: empty");
+	if (/^[A-Za-z0-9_./:@%+=,-]+$/.test(trimmed)) return trimmed;
+	if (trimmed.startsWith("'") && trimmed.endsWith("'") && trimmed.length >= 2) {
+		return trimmed.slice(1, -1).replace(/'"'"'/g, "'");
+	}
+	throw new Error("refusing sudo -lc payload: expected a single shlex-quoted word");
+}
+
+export function parseSudoURunLine(runCommand: string): { user: string; inner: string } {
+	const line = runCommand.trim();
+	if (!line) throw new Error("refusing empty sudo run command");
+	if (/\ssudo\s+-S\b|^sudo\s+-S\b/.test(line) || /\s-S\b/.test(line)) {
+		throw new Error("refusing sudo run command: stdin password (-S) is forbidden");
+	}
+	const m = /^sudo -u ([A-Za-z_][A-Za-z0-9_.-]*) bash -lc (.+)$/.exec(line);
+	if (!m) {
+		throw new Error(
+			"refusing sudo run command: expected 'sudo -u <user> bash -lc <quoted-command>' from review-delegate",
+		);
+	}
+	const user = m[1];
+	if (!isValidUnixUser(user)) {
+		throw new Error(`refusing sudo -u '${user}': expected a Unix user name`);
+	}
+	const inner = unquoteShlexWord(m[2]);
+	if (!inner.startsWith("cd ")) {
+		throw new Error("refusing sudo -lc payload: expected a cd && launch from review-delegate");
+	}
+	return { user, inner };
+}
+
+export function assertSafeSudoArgv(argv: string[]): string[] {
+	if (argv[0] !== "sudo") throw new Error("refusing sudo popup: argv must start with sudo");
+	if (argv[1] !== "-A") throw new Error("refusing sudo popup: GUI askpass requires sudo -A (never -S)");
+	for (const arg of argv) {
+		for (const forbidden of FORBIDDEN_FLAGS) {
+			if (arg === forbidden || arg.startsWith(`${forbidden}=`)) {
+				throw new Error(`refusing to pass ${forbidden}: lifecycle authority is not an extension input`);
+			}
+		}
+		for (const token of SUDO_FORBIDDEN_TOKENS) {
+			if (arg === token || (token.endsWith("=") && arg.startsWith(token))) {
+				throw new Error(`refusing sudo token '${arg}': password collection flags are forbidden`);
+			}
+		}
+	}
+	if (argv.length === 3 && (argv[2] === "-v" || argv[2] === "true")) return argv;
+	if (argv.length === 7 && argv[2] === "-u" && argv[4] === "bash" && argv[5] === "-lc") {
+		if (!isValidUnixUser(argv[3])) {
+			throw new Error(`refusing sudo -u '${argv[3]}': expected a Unix user name`);
+		}
+		if (!argv[6] || argv[6].startsWith("-")) {
+			throw new Error("refusing sudo -lc payload that looks like a flag");
+		}
+		return argv;
+	}
+	throw new Error("refusing sudo popup: argv is not sudo -A -v, sudo -A true, or sudo -A -u <user> bash -lc <cmd>");
+}
+
+export function sudoCredentialsArgv(): string[] {
+	return assertSafeSudoArgv(["sudo", "-A", "-v"]);
+}
+
+export function sudoSampleArgv(): string[] {
+	return assertSafeSudoArgv(["sudo", "-A", "true"]);
+}
+
+export function sudoReviewLaunchArgv(runCommand: string): string[] {
+	const parsed = parseSudoURunLine(runCommand);
+	return assertSafeSudoArgv(["sudo", "-A", "-u", parsed.user, "bash", "-lc", parsed.inner]);
+}
+
+export function sudoPopupArgv(target: SudoPopupTarget): string[] {
+	if (target.kind === "credentials") return sudoCredentialsArgv();
+	if (target.kind === "sample") return sudoSampleArgv();
+	const run = (target.runCommand ?? "").trim();
+	if (!run) throw new Error("refusing uid-isolated popup without a stored run command");
+	return sudoReviewLaunchArgv(run);
+}
+
+export function formatSudoInvocation(argv: string[]): string {
+	assertSafeSudoArgv(argv);
+	if (argv.length === 7 && argv[5] === "-lc") {
+		const inner = argv[6];
+		const short = inner.length > 72 ? `${inner.slice(0, 69)}...` : inner;
+		return `sudo -A -u ${argv[3]} bash -lc ${JSON.stringify(short)}`;
+	}
+	return argv.join(" ");
+}
+
+function scrapeYamlScalar(text: string, key: string): string | null {
+	const re = new RegExp(`^\\s*${key}:\\s*(.*)$`, "m");
+	const m = re.exec(text);
+	if (!m) return null;
+	const raw = m[1].trim().replace(/^['"]|['"]$/g, "");
+	return raw && raw !== "|" && raw !== ">" ? raw : null;
+}
+
+function readScriptRunLine(scriptPath: string): string | null {
+	let text: string;
+	try {
+		text = readFileSync(scriptPath, "utf8");
+	} catch {
+		return null;
+	}
+	const lines = text.split(/\n/);
+	if (!lines[0]?.startsWith("#!")) return null;
+	const run = lines.find((line) => line.startsWith("sudo -u "));
+	return run ? run.trim() : null;
+}
+
+export function credentialsPopupTarget(): SudoPopupTarget {
+	return {
+		kind: "credentials",
+		id: SUDO_POPUP_CREDENTIALS_ID,
+		label: SUDO_POPUP_CREDENTIALS_LABEL,
+	};
+}
+
+export function samplePopupTarget(): SudoPopupTarget {
+	return {
+		kind: "sample",
+		id: SUDO_POPUP_SAMPLE_ID,
+		label: SUDO_POPUP_SAMPLE_LABEL,
+	};
+}
+
+export function listSudoPopupTargets(ledger: Ledger, opts: { all?: boolean } = {}): SudoPopupTarget[] {
+	const targets: SudoPopupTarget[] = [];
+	const dir = join(ledger.ledgerDir, "review_delegations");
+	let names: string[] = [];
+	try {
+		names = readdirSync(dir).filter((n) => n.endsWith(".yaml")).sort().reverse();
+	} catch {
+		return [credentialsPopupTarget()];
+	}
+	for (const name of names) {
+		const bundlePath = join(dir, name);
+		let text: string;
+		try {
+			text = readFileSync(bundlePath, "utf8");
+		} catch {
+			continue;
+		}
+		const mode = scrapeYamlScalar(text, "mode");
+		if (mode !== "uid-isolated") continue;
+		const id = name.slice(0, -".yaml".length);
+		const scriptPath = join(dir, `${id}.sh`);
+		const runCommand = readScriptRunLine(scriptPath) ?? scrapeYamlScalar(text, "run_command");
+		if (!runCommand) continue;
+		try {
+			parseSudoURunLine(runCommand);
+		} catch {
+			continue;
+		}
+		const reviewUser = scrapeYamlScalar(text, "review_user") ?? parseSudoURunLine(runCommand).user;
+		const claimId = scrapeYamlScalar(text, "claim_id");
+		targets.push({
+			kind: "uid-isolated-review",
+			id,
+			label: `${id}  sudo -u ${reviewUser}${claimId ? `  ${claimId}` : ""}`,
+			reviewUser,
+			runCommand,
+			scriptPath: existsSync(scriptPath) ? scriptPath : undefined,
+			bundlePath,
+			claimId: claimId ?? undefined,
+		});
+	}
+	if (targets.length === 0) return [credentialsPopupTarget()];
+	return opts.all ? targets : [targets[0]!];
+}
+
+/** Null means the caller should show a chooser (multiple launches). */
+export function pickSudoPopupTarget(targets: readonly SudoPopupTarget[], args = ""): SudoPopupTarget | null {
+	const token = args.trim().split(/\s+/)[0] ?? "";
+	if (token === SUDO_POPUP_CREDENTIALS_ID || token === "--credentials") {
+		return credentialsPopupTarget();
+	}
+	if (token === SUDO_POPUP_SAMPLE_ID || token === "--sample") {
+		return samplePopupTarget();
+	}
+	if (token === "list" || token === "--all") return null;
+	if (token) return resolveSudoPopupTarget(targets, token);
+	if (targets.length === 1) return targets[0] ?? null;
+	return null;
+}
+
+export function resolveSudoPopupTarget(targets: readonly SudoPopupTarget[], picked: string): SudoPopupTarget {
+	const token = picked.trim().split(/\s+/)[0];
+	const found = targets.find((t) => t.id === token);
+	if (!found) throw new Error(`refusing /op:popup target '${token}': not in the chooser set`);
+	return found;
+}
+
+export function buildSudoPopupReport(input: {
+	target: SudoPopupTarget;
+	argv: string[];
+	result: CommandResult | null;
+	declined?: boolean;
+	askpass: string | null;
+}): Report {
+	const invocation = formatSudoInvocation(input.argv);
+	if (input.declined || !input.result) {
+		return {
+			command: "/op:popup",
+			title: "Operator sudo askpass",
+			headline: "nothing executed",
+			level: "warning",
+			lines: [
+				"Declined: sudo was not run.",
+				"The ledger was not touched.",
+				"No password was read by this extension.",
+			],
+			invocations: [`${invocation} (not run)`],
+		};
+	}
+	const ok = input.result.code === 0;
+	const lines = [
+		`Target: ${input.target.id} (${input.target.kind})`,
+		`Askpass: ${input.askpass ?? "(none)"}`,
+		`Exit: ${input.result.code}`,
+		"sudo -A requested a GUI askpass. This extension did not read a password.",
+		"This is not verification and does not attach evidence or set --status.",
+	];
+	if (input.target.kind === "uid-isolated-review") {
+		lines.push("uid-isolated launch: the named Unix user must still attach verifier-owned evidence.");
+	}
+	if (!ok) {
+		const err = (input.result.stderr || input.result.stdout).trim();
+		if (err) lines.push("", truncate(err, 400));
+	}
+	return {
+		command: "/op:popup",
+			title: "Operator sudo askpass",
+			headline: ok ? `${input.target.id} askpass completed` : `${input.target.id} sudo failed (exit ${input.result.code})`,
+			level: ok ? "info" : "error",
+			lines,
+			invocations: [invocation],
+	};
 }
 

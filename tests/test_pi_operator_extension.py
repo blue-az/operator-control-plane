@@ -14,6 +14,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -71,7 +72,7 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
         # helper modules must stay inside the subdirectory so they are imported
         # by index.ts rather than loaded as extensions in their own right.
         names = sorted(p.name for p in EXTENSION_DIR.glob("*.ts"))
-        self.assertEqual(names, ["core.ts", "index.ts", "render.ts", "selftest.ts"])
+        self.assertEqual(names, ["client.ts", "core.ts", "index.ts", "render.ts", "selftest.ts"])
         self.assertFalse(
             list((EXTENSION_DIR.parent).glob("*.ts")),
             "loose .ts files in .pi/extensions/ would each load as an extension",
@@ -116,6 +117,7 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
             '\t"review-delegate",\n'
             '\t"task-create",\n'
             '\t"session-start",\n'
+            '\t"session-end",\n'
             '\t"brief",\n'
             '\t"export-brief",\n'
             "] as const;",
@@ -160,17 +162,30 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
             text,
         )
         self.assertIn('"session-start": ["--task", "--harness"]', text)
+        self.assertIn('"session-end": ["--outcome", "--cost"]', text)
         self.assertIn('brief: ["--for", "--task"]', text)
         self.assertIn('"export-brief": ["--for", "--task"]', text)
         session_flags = '"session-start": ["--task", "--harness"]'
         self.assertNotIn("--force", session_flags)
         self.assertNotIn("--status", session_flags)
         self.assertNotIn("--verified-by", session_flags)
+        session_end_flags = '"session-end": ["--outcome", "--cost"]'
+        self.assertNotIn("--status", session_end_flags)
+        self.assertNotIn("--force", session_end_flags)
+        self.assertNotIn("--verified-by", session_end_flags)
         create_flags = '"task-create": ["--id", "--objective", "--assign", "--review"]'
         self.assertNotIn("--status", create_flags)
         self.assertIn("ADAPTER_INVOKE_SCRIPT", text)
         self.assertIn("ha.Role.IMPLEMENTER", text)
         self.assertNotIn("ha.Role.JUDGE", text)
+
+    def test_carrier_neutral_client_has_no_pi_ui_dependency(self):
+        text = (EXTENSION_DIR / "client.ts").read_text(encoding="utf-8")
+        self.assertIn("export class OperatorClient", text)
+        self.assertIn("export { OperatorClient as CarrierNeutralOperatorClient }", text)
+        self.assertNotIn("pi-tui", text)
+        self.assertNotIn("ExtensionAPI", text)
+        self.assertIn("sessionEndArgv", text)
 
     def test_operator_commands_only(self):
         text = (EXTENSION_DIR / "index.ts").read_text(encoding="utf-8")
@@ -186,6 +201,7 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
                 "op:evidence",
                 "op:handoff",
                 "op:next-steps",
+                "op:popup",
                 "op:project",
                 "op:roadmap",
                 "op:status",
@@ -202,6 +218,29 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
         self.assertIn('pi.registerCommand("op:project"', text)
         self.assertNotIn('pi.registerCommand("pbc:define"', text)
         self.assertNotIn('pi.registerCommand("pbc:feature"', text)
+        self.assertIn(
+            '[experimental] Operator: register a claim on the selected task',
+            text,
+        )
+        self.assertIn(
+            '[experimental] Operator: attach evidence to the selected task',
+            text,
+        )
+        self.assertIn(
+            '[experimental] Operator: request distinct-agent review',
+            text,
+        )
+        self.assertIn(
+            '[experimental] Operator: send bounded implementation work',
+            text,
+        )
+        self.assertIn(
+            '[experimental] Operator: GUI sudo askpass for uid-isolated review launches',
+            text,
+        )
+        self.assertIn("sudo -A", text)
+        self.assertNotIn('[experimental] Operator: run ./operator doctor', text)
+        self.assertNotIn('[experimental] Operator: current task orientation', text)
 
     def test_delegate_targets_do_not_override_routing(self):
         text = (EXTENSION_DIR / "targets.json").read_text(encoding="utf-8")
@@ -213,6 +252,56 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
 
 class PiOperatorExtensionSelftest(unittest.TestCase):
     """Run the TypeScript selftest (loader + handler behavior)."""
+
+    def test_client_builds_fixed_argv_and_idempotent_lifecycle(self):
+        node = shutil.which("node")
+        if not node or not _node_supports_type_stripping(node):
+            self.skipTest("node with TypeScript stripping is not installed")
+        client = (EXTENSION_DIR / "client.ts").resolve().as_posix()
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            (root / ".operator" / "tasks").mkdir(parents=True)
+            (root / ".operator" / "tasks" / "t.yaml").write_text("task_id: t\n", encoding="utf-8")
+            script = root / "probe.ts"
+            script.write_text(
+                "\n".join(
+                    [
+                        f'import {{ OperatorClient }} from "{client}";',
+                        "const ledger = {",
+                        "  root: process.argv[2],",
+                        "  ledgerDir: process.argv[2] + '/.operator',",
+                        "  operatorBin: process.argv[2] + '/operator',",
+                        "  operatorYaml: '',",
+                        "  tasksDir: process.argv[2] + '/.operator/tasks',",
+                        "};",
+                        "const calls = [];",
+                        "const runner = {",
+                        "  exec: async (_c, a) => {",
+                        "    calls.push(a);",
+                        "    return { stdout: '', stderr: 'already running', code: 1 };",
+                        "  },",
+                        "};",
+                        "const c = new OperatorClient(ledger, runner);",
+                        "const r = await c.startSession('t', 'codex');",
+                        "if (!r.idempotent || r.code !== 0) throw new Error('not idempotent');",
+                        "if (calls[0].includes('--status')) throw new Error('status leaked');",
+                        "const closed = await c.endSession('usage-0001', 'useful', 0);",
+                        "if (calls[1][0] !== 'session-end') throw new Error('expected session-end');",
+                        "if (calls[1].includes('--status')) throw new Error('status leaked on end');",
+                        "console.log('ok');",
+                        "",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [node, "--experimental-strip-types", str(script), str(root)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            self.assertIn("ok", result.stdout)
 
     def test_selftest_passes(self):
         node = shutil.which("node")

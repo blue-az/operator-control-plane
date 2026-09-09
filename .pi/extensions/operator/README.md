@@ -23,15 +23,22 @@ the pinned upstream CLI has no `--profile` flag.
 | `/op:project <prefix>` | `task-list` plus per-match `task-show` / `claim-list` | no |
 | `/op:roadmap [--project <prefix>]` | ladder/issues/futures, or the project dashboard when `--project` is present | no |
 | `/op:use [task-id]` | selects a task for this pi session; `./operator task-use <id>` **only after you confirm** | only on confirmation |
-| `/op:claim [text]` | `./operator claim-add --task … --by <session>` | only on confirmation |
-| `/op:evidence [path-or-url]` | `./operator evidence-attach --task … --verify-cmd … --by <session>` | only on confirmation |
+| `/op:claim [text]` | **experimental** `./operator claim-add --task … --by <session>` | only on confirmation |
+| `/op:evidence [path-or-url]` | **experimental** `./operator evidence-attach --task … --verify-cmd … --by <session>` | only on confirmation |
 | `/op:handoff` | `./operator handoff-add --task … --by <session>` from an editor draft | only on confirmation |
-| `/op:supervisor-review [claim-id]` | `./operator review-delegate` for one named claim | only on confirmation (review bundle, never verification) |
-| `/op:delegate [task-id] [alias]` | `task-create --assign` when unrouted, then `session-start` / brief, then `harness_adapter` IMPLEMENTER | only on confirmation; parent routing is never mutated |
+| `/op:supervisor-review [claim-id]` | **experimental** `./operator review-delegate` for one named claim | only on confirmation (review bundle, never verification) |
+| `/op:delegate [task-id] [alias]` | **experimental** `task-create --assign` when unrouted, then `session-start` / brief, then `harness_adapter` IMPLEMENTER | only on confirmation; parent routing is never mutated |
+| `/op:popup` | **experimental** GUI `sudo -A` askpass for the **latest** uid-isolated launch (`/op:popup sample` → `sudo -A true`; `/op:popup credentials` → `sudo -A -v`; `/op:popup list` to choose) | no ledger write; does not verify |
 
 There is no `/op:install`, `/op:mode`, or `/pbc:*` command. Cross-project
 install is `scripts/install-operator-extension.py`. Workflow strictness is
 optional guidance on `/op:next-steps`, not a new gate.
+
+Carrier-neutral integrations may import `client.ts` (`OperatorClient` or
+`CarrierNeutralOperatorClient`) without importing Pi UI modules. Carriers provide
+an `exec` function; argv remains fixed and allowlisted. Session lifecycle retries
+report already-running/already-closed records as idempotent, while status
+transitions and arbitrary usage passthrough remain out of scope.
 
 Each command appends a report to the transcript. It renders collapsed by
 default; `ctrl+o` expands it to the full detail and the exact `./operator ...`

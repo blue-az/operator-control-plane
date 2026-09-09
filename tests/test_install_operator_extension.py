@@ -20,7 +20,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "install-operator-extension.py"
 OPERATOR_BIN = REPO_ROOT / "operator"
 EXTENSION_DIR = REPO_ROOT / ".pi" / "extensions" / "operator"
-RUNTIME_FILES = ("index.ts", "core.ts", "render.ts", "targets.json")
+RUNTIME_FILES = ("index.ts", "core.ts", "render.ts", "targets.json", "client.ts")
 
 
 def run_install(args: list[str], *, stdin: str | None = None) -> subprocess.CompletedProcess[str]:
@@ -74,7 +74,7 @@ def resolve_find_ledger(start: Path, core_ts: Path) -> dict:
     resolver = core_ts.parent / ".resolve-findledger.ts"
     resolver.write_text(
         'import { findLedger } from "./core.ts";\n'
-        "const dir = process.argv[1];\n"
+        "const dir = process.argv[2];\n"
         "try {\n"
         "  const ledger = findLedger(dir);\n"
         "  console.log(JSON.stringify({ ok: true, ledger }));\n"

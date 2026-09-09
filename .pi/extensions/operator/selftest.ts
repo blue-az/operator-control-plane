@@ -44,6 +44,7 @@ import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
 
 import * as core from "./core.ts";
+import { OperatorClient } from "./client.ts";
 import * as orientation from "./orientation/actions.ts";
 
 const REPO_ROOT = resolve(dirname(new URL(import.meta.url).pathname), "../../..");
@@ -270,6 +271,23 @@ function tierA(ledger: core.Ledger): void {
 		"--harness",
 		"claude",
 	]);
+	eq("sessionEndArgv names usage, outcome, and cost", core.sessionEndArgv("usage-0001", "useful", 0), [
+		"session-end",
+		"usage-0001",
+		"--outcome",
+		"useful",
+		"--cost",
+		"0",
+	]);
+	throws("sessionEndArgv rejects a malformed usage id", () => core.sessionEndArgv("usage-x", "useful", 0));
+	throws("sessionEndArgv rejects a negative cost", () => core.sessionEndArgv("usage-0001", "useful", -1));
+	throws("sessionEndArgv rejects an unknown outcome", () => core.sessionEndArgv("usage-0001", "verified", 0));
+	throws("rejects session-end --status (lifecycle authority)", () =>
+		core.assertSafeArgv(["session-end", "usage-0001", "--outcome", "useful", "--cost", "0", "--status", "verified"]),
+	);
+	throws("rejects session-end --force", () =>
+		core.assertSafeArgv(["session-end", "usage-0001", "--outcome", "useful", "--cost", "0", "--force"]),
+	);
 	throws("rejects session-start --force (not in the flag allowlist)", () =>
 		core.assertSafeArgv(["session-start", "--task", "selftest-alpha", "--harness", "claude", "--force"]),
 	);
@@ -1027,6 +1045,42 @@ function tierA3(ledger: core.Ledger): void {
 
 	const after = core.summarizeDoctor(op(fixture, core.doctorArgv()));
 	check("doctor still passes after review-delegate writes", after.ok, after.headline);
+
+	eq("sudo credentials argv is sudo -A -v", core.sudoCredentialsArgv(), ["sudo", "-A", "-v"]);
+	eq("sudo sample argv is sudo -A true", core.sudoSampleArgv(), ["sudo", "-A", "true"]);
+	throws("sudo popup refuses -S", () => core.assertSafeSudoArgv(["sudo", "-S", "-v"]));
+	throws("sudo popup refuses missing -A", () => core.assertSafeSudoArgv(["sudo", "-v"]));
+	throws("sudo run line refuses -S", () => core.parseSudoURunLine("sudo -S -u nobody bash -lc 'cd /tmp && true'"));
+	const sampleRun = "sudo -u nobody bash -lc 'cd /tmp/x && echo hi'";
+	eq("sudo review argv injects -A and keeps -u user", core.sudoReviewLaunchArgv(sampleRun), [
+		"sudo",
+		"-A",
+		"-u",
+		"nobody",
+		"bash",
+		"-lc",
+		"cd /tmp/x && echo hi",
+	]);
+	check("sudo review argv has no -S", !core.sudoReviewLaunchArgv(sampleRun).includes("-S"));
+	const popupTargets = core.listSudoPopupTargets(ledger);
+	check(
+		"popup targets include the uid-isolated launch",
+		popupTargets.some((t) => t.kind === "uid-isolated-review" && t.reviewUser === "nobody"),
+	);
+	check("a single launch does not add a credentials extra", !popupTargets.some((t) => t.kind === "credentials"));
+	eq("pickSudoPopupTarget skips the chooser for one launch", core.pickSudoPopupTarget(popupTargets, "")?.kind, "uid-isolated-review");
+	eq("pickSudoPopupTarget credentials arg is sudo -A -v", core.pickSudoPopupTarget(popupTargets, "credentials")?.kind, "credentials");
+	eq("pickSudoPopupTarget sample arg is sudo -A true", core.pickSudoPopupTarget(popupTargets, "sample")?.kind, "sample");
+	check(
+		"formatSudoInvocation truncates a long review payload",
+		core.formatSudoInvocation(core.sudoReviewLaunchArgv(`sudo -u nobody bash -lc 'cd /tmp && ${"pi ".repeat(80)}'`)).length < 160,
+	);
+	if (isolatedParsed.runCommand) {
+		const launchArgv = core.sudoReviewLaunchArgv(isolatedParsed.runCommand);
+		eq("live uid-isolated launch uses sudo -A", launchArgv[1], "-A");
+		eq("live uid-isolated launch keeps review user", launchArgv[3], "nobody");
+		check("live uid-isolated launch has no lifecycle flag", launchArgv.every((a) => !/^--(status|verified-by|verdict)/.test(a)));
+	}
 }
 
 // --- tier A4: step 4 /op:delegate -------------------------------------------
@@ -1693,6 +1747,93 @@ function tierA5(): void {
 	check("missing prefix is explicit", required.headline === "prefix required");
 }
 
+// --- carrier-neutral client --------------------------------------------------
+
+function stubRunner(script: Array<{ stdout?: string; stderr?: string; code: number }>): {
+	calls: string[][];
+	runner: { exec: (command: string, args: string[]) => Promise<core.CommandResult> };
+} {
+	const calls: string[][] = [];
+	let i = 0;
+	return {
+		calls,
+		runner: {
+			async exec(_command: string, args: string[]) {
+				calls.push(args);
+				const next = script[Math.min(i, script.length - 1)] ?? { code: 1 };
+				i += 1;
+				return { stdout: next.stdout ?? "", stderr: next.stderr ?? "", code: next.code };
+			},
+		},
+	};
+}
+
+async function tierAClient(ledger: core.Ledger): Promise<void> {
+	console.log("\nTier A-client: carrier-neutral OperatorClient (no Pi UI)");
+	const already = stubRunner([{ stdout: "", stderr: "Error: Task 'selftest-alpha' is already running. Use --force to override.", code: 1 }]);
+	const startClient = new OperatorClient(ledger, already.runner);
+	const started = await startClient.startSession("selftest-alpha", "claude");
+	eq("startSession already-running is idempotent", started.idempotent, true);
+	eq("startSession already-running reports success", started.code, 0);
+	eq("startSession argv is session-start --task --harness", already.calls[0], [
+		"session-start",
+		"--task",
+		"selftest-alpha",
+		"--harness",
+		"claude",
+	]);
+	check("startSession argv has no --status", !already.calls[0]?.some((a) => a === "--status" || a.startsWith("--status=")));
+
+	const closed = stubRunner([
+		{ stdout: "", stderr: "Error: Usage record 'usage-0001' is already closed (ended_at: 2026-01-01). Use --force to override.", code: 1 },
+	]);
+	const endClient = new OperatorClient(ledger, closed.runner);
+	const ended = await endClient.endSession("usage-0001", "useful", 0);
+	eq("endSession already-closed is idempotent", ended.idempotent, true);
+	eq("endSession already-closed reports success", ended.code, 0);
+	eq("endSession argv is session-end usage --outcome --cost", closed.calls[0], [
+		"session-end",
+		"usage-0001",
+		"--outcome",
+		"useful",
+		"--cost",
+		"0",
+	]);
+	check("endSession argv has no --status", !closed.calls[0]?.some((a) => a === "--status" || a.startsWith("--status=")));
+
+	try {
+		await startClient.taskShow("no-such-task");
+		check("taskShow missing task throws", false, "expected a throw");
+	} catch {
+		check("taskShow missing task throws", true);
+	}
+
+	const created = op(fixture, ["task-create", "--id", "selftest-client", "-o", "Client lifecycle", "-a", "claude"]);
+	eq("selftest-client task-create exits 0", created.code, 0);
+	const realRunner = {
+		async exec(command: string, args: string[], options?: { cwd?: string }) {
+			const r = spawnSync(command, args, { cwd: options?.cwd, encoding: "utf8" });
+			return { stdout: r.stdout ?? "", stderr: r.stderr ?? "", code: r.status ?? 1 };
+		},
+	};
+	const live = new OperatorClient(ledger, realRunner);
+	const first = await live.startSession("selftest-client", "claude");
+	check("live startSession exits 0", first.code === 0 && !first.idempotent, `${first.stderr}${first.stdout}`);
+	const usageId = core.parseSessionStart(first.stdout).usageId;
+	const second = await live.startSession("selftest-client", "claude");
+	eq("repeating live startSession is idempotent", second.idempotent, true);
+	eq("repeating live startSession does not fail", second.code, 0);
+	if (usageId) {
+		const close1 = await live.endSession(usageId, "useful", 0);
+		check("live endSession exits 0", close1.code === 0 && !close1.idempotent, `${close1.stderr}${close1.stdout}`);
+		const close2 = await live.endSession(usageId, "useful", 0);
+		eq("repeating live endSession is idempotent", close2.idempotent, true);
+		eq("repeating live endSession does not fail", close2.code, 0);
+	} else {
+		check("live startSession minted a usage id", false, first.stdout + first.stderr);
+	}
+}
+
 // --- pi discovery ------------------------------------------------------------
 
 function findPiPackage(): string | null {
@@ -1767,6 +1908,7 @@ async function tierB(piPackage: string | null): Promise<unknown[] | null> {
 		"op:evidence",
 		"op:handoff",
 		"op:next-steps",
+		"op:popup",
 		"op:project",
 		"op:roadmap",
 		"op:status",
@@ -1909,7 +2051,7 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	await commands.get("op:tasks")!.handler("", ctx);
 	report = lastReport();
 	eq("/op:tasks emits a report entry", report.command, "/op:tasks");
-	eq("/op:tasks reports the fixture tasks plus A4 children", report.headline, "4 tasks");
+	eq("/op:tasks reports the fixture tasks plus A4/client children", report.headline, "5 tasks");
 
 	await commands.get("op:tasks")!.handler("beta", ctx);
 	report = lastReport();
@@ -2401,6 +2543,15 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	report = lastReport();
 	eq("declining parent-routed /op:delegate writes no extra task", yamlNames(join(ledger.ledgerDir, "tasks")), tasksBeforeParentDecline);
 	eq("declining parent-routed /op:delegate reports nothing written", report.headline, "nothing written");
+
+	selectQueue.length = 0;
+	confirmAnswer = false;
+	await commands.get("op:popup")!.handler("credentials", ctx);
+	report = lastReport();
+	eq("/op:popup decline is /op:popup", report.command, "/op:popup");
+	eq("declining /op:popup executes nothing", report.headline, "nothing executed");
+	check("declining /op:popup marks sudo as not run", report.invocations[0]?.endsWith("(not run)") === true);
+	check("declining /op:popup does not verify", report.lines.some((l) => l.toLowerCase().includes("password") || l.includes("not touched")));
 	integrationCoverage.tierC = true;
 }
 
@@ -2428,6 +2579,7 @@ async function main(): Promise<void> {
 	tierA3(ledger);
 	tierA4(ledger);
 	tierA5();
+	await tierAClient(ledger);
 	const piPackage = findPiPackage();
 	console.log(`\npi package: ${piPackage ?? "(not found)"}`);
 	let piServerFixture: string | null = null;
