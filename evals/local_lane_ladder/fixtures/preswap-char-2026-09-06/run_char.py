@@ -51,13 +51,22 @@ def http_json(url: str, payload: dict | None = None, timeout: int = 180) -> dict
         return json.loads(resp.read().decode())
 
 
+def _num(v: str) -> float | None:
+    """nvidia-smi returns [N/A] for unsupported fields on some cards."""
+    try:
+        return float(v)
+    except ValueError:
+        return None
+
+
 def nvidia_smi() -> list[dict]:
     try:
         raw = subprocess.check_output(
             [
                 "nvidia-smi",
                 "--query-gpu=index,name,memory.used,memory.total,"
-                "power.limit,pcie.link.gen.current,pcie.link.width.current",
+                "power.limit,pcie.link.gen.current,pcie.link.width.current,"
+                "power.draw,temperature.gpu,utilization.gpu",
                 "--format=csv,noheader,nounits",
             ],
             text=True,
@@ -69,17 +78,27 @@ def nvidia_smi() -> list[dict]:
     for line in raw.strip().splitlines():
         p = [x.strip() for x in line.split(",")]
         if len(p) >= 7:
-            rows.append(
-                {
-                    "index": int(p[0]),
-                    "name": p[1],
-                    "mem_used": float(p[2]),
-                    "mem_total": float(p[3]),
-                    "power_limit": float(p[4]),
-                    "pcie_gen": p[5],
-                    "pcie_width": p[6],
-                }
-            )
+            row = {
+                "index": int(p[0]),
+                "name": p[1],
+                "mem_used": float(p[2]),
+                "mem_total": float(p[3]),
+                "power_limit": float(p[4]),
+                "pcie_gen": p[5],
+                "pcie_width": p[6],
+            }
+            # Added 2026-09-07, AFTER the preswap-char-2026-09-06 run. The JSON
+            # committed in this fixture does not carry these three fields.
+            # power_draw is the trustworthy activity signal on this box.
+            # utilization_pct is recorded beside it precisely because it is not:
+            # GPU0 was observed reporting 1% while drawing 234 W against a 27-42 W
+            # idle. Keeping both makes the disagreement visible in the row instead
+            # of forcing a re-run to detect it.
+            if len(p) >= 10:
+                row["power_draw"] = _num(p[7])
+                row["temperature_c"] = _num(p[8])
+                row["utilization_pct"] = _num(p[9])
+            rows.append(row)
     return rows
 
 

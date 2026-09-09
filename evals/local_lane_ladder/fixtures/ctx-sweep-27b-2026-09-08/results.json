@@ -1,0 +1,194 @@
+{
+  "provenance": {
+    "host": "desktop",
+    "cards": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 3090",
+        "vendor": "EVGA Corporation",
+        "pci": "00000000:01:00.0",
+        "link_width": "?",
+        "uuid": "GPU-22b9dafe-e97d-dbb2-50ba-2f1f1dea61f9"
+      },
+      {
+        "index": 1,
+        "name": "NVIDIA GeForce RTX 3090",
+        "vendor": "ZOTAC International (MCO) Ltd.",
+        "pci": "00000000:03:00.0",
+        "link_width": "?",
+        "uuid": "GPU-102e9c9e-f883-58fa-6119-8c72f81fd88e"
+      }
+    ],
+    "driver": "580.178.04",
+    "ollama": "ollama version is 0.32.12",
+    "protocol": {
+      "num_predict": 128,
+      "temperature": 0,
+      "reps": 3,
+      "corpus": "/home/blueaz/Python/project-phoenix/docs/bench_corpora/ctx_code_15k.txt",
+      "warmup": "1 discarded generate"
+    }
+  },
+  "rows": [
+    {
+      "config": "dual|qwen3.8:27b|ctx16384|x1",
+      "status": "ok",
+      "model": "qwen3.8:27b",
+      "num_ctx": 16384,
+      "prompt_tok": 12837,
+      "load_s": 11.7,
+      "warmup_prompt_s": 11.0,
+      "prompt_s_median": 11.1,
+      "decode_tok_s_median": 62.8,
+      "decode_min": 61.5,
+      "decode_max": 64.2,
+      "vram_mib_per_card": [
+        10293,
+        10131
+      ],
+      "vram_mib_total": 20424,
+      "cards_used": 2,
+      "layers": "66/66"
+    },
+    {
+      "config": "dual|qwen3.8:27b|ctx32768|x1",
+      "status": "ok",
+      "model": "qwen3.8:27b",
+      "num_ctx": 32768,
+      "prompt_tok": 12837,
+      "load_s": 10.2,
+      "warmup_prompt_s": 11.1,
+      "prompt_s_median": 11.2,
+      "decode_tok_s_median": 60.5,
+      "decode_min": 56.3,
+      "decode_max": 63.3,
+      "vram_mib_per_card": [
+        10933,
+        10963
+      ],
+      "vram_mib_total": 21896,
+      "cards_used": 2,
+      "layers": "66/66"
+    },
+    {
+      "config": "dual|qwen3.8:27b|ctx65536|x1",
+      "status": "ok",
+      "model": "qwen3.8:27b",
+      "num_ctx": 65536,
+      "prompt_tok": 12838,
+      "load_s": 9.9,
+      "warmup_prompt_s": 11.1,
+      "prompt_s_median": 11.2,
+      "decode_tok_s_median": 60.8,
+      "decode_min": 59.5,
+      "decode_max": 61.2,
+      "vram_mib_per_card": [
+        12215,
+        12629
+      ],
+      "vram_mib_total": 24844,
+      "cards_used": 2,
+      "layers": "66/66"
+    },
+    {
+      "config": "dual|qwen3.8:27b|ctx131072|x1",
+      "status": "ok",
+      "model": "qwen3.8:27b",
+      "num_ctx": 131072,
+      "prompt_tok": 12838,
+      "load_s": 12.0,
+      "warmup_prompt_s": 11.4,
+      "prompt_s_median": 11.4,
+      "decode_tok_s_median": 61.4,
+      "decode_min": 60.5,
+      "decode_max": 62.4,
+      "vram_mib_per_card": [
+        14091,
+        14553
+      ],
+      "vram_mib_total": 28644,
+      "cards_used": 2,
+      "layers": "66/66"
+    },
+    {
+      "config": "solo|qwen3.8:27b|ctx16384|x1",
+      "status": "ok",
+      "model": "qwen3.8:27b",
+      "num_ctx": 16384,
+      "prompt_tok": 12838,
+      "load_s": 7.5,
+      "warmup_prompt_s": 11.2,
+      "prompt_s_median": 11.2,
+      "decode_tok_s_median": 55.1,
+      "decode_min": 54.9,
+      "decode_max": 56.4,
+      "vram_mib_per_card": [
+        18907,
+        0
+      ],
+      "vram_mib_total": 18907,
+      "cards_used": 1,
+      "layers": null
+    },
+    {
+      "config": "solo|qwen3.8:27b|ctx32768|x1",
+      "status": "ok",
+      "model": "qwen3.8:27b",
+      "num_ctx": 32768,
+      "prompt_tok": 12838,
+      "load_s": 6.7,
+      "warmup_prompt_s": 11.2,
+      "prompt_s_median": 11.2,
+      "decode_tok_s_median": 57.8,
+      "decode_min": 57.5,
+      "decode_max": 59.3,
+      "vram_mib_per_card": [
+        20027,
+        0
+      ],
+      "vram_mib_total": 20027,
+      "cards_used": 1,
+      "layers": null
+    },
+    {
+      "config": "solo|qwen3.8:27b|ctx65536|x1",
+      "status": "ok",
+      "model": "qwen3.8:27b",
+      "num_ctx": 65536,
+      "prompt_tok": 12838,
+      "load_s": 6.5,
+      "warmup_prompt_s": 11.2,
+      "prompt_s_median": 11.2,
+      "decode_tok_s_median": 56.4,
+      "decode_min": 56.2,
+      "decode_max": 57.5,
+      "vram_mib_per_card": [
+        22237,
+        0
+      ],
+      "vram_mib_total": 22237,
+      "cards_used": 1,
+      "layers": null
+    },
+    {
+      "config": "solo|qwen3.8:27b|ctx131072|x1",
+      "status": "ok",
+      "model": "qwen3.8:27b",
+      "num_ctx": 131072,
+      "prompt_tok": 12838,
+      "load_s": 10.0,
+      "warmup_prompt_s": 20.3,
+      "prompt_s_median": 20.2,
+      "decode_tok_s_median": 11.2,
+      "decode_min": 10.9,
+      "decode_max": 11.2,
+      "vram_mib_per_card": [
+        22823,
+        0
+      ],
+      "vram_mib_total": 22823,
+      "cards_used": 1,
+      "layers": null
+    }
+  ]
+}

@@ -124,11 +124,39 @@ def generate(host, tag, prompt, uncached=True):
             "eval_s":g("eval_duration"),"total_s":g("total_duration")}
 
 def layers(since):
+    """Layer split from the systemd journal.
+
+    ONLY valid for the system daemon on :11434. A solo daemon started by hand
+    (`sudo -u ollama ... nohup ollama serve`) is not under the `ollama` unit, so
+    this returns None for it -- which is why every solo row before 2026-09-08
+    recorded `layers: None` while a config with a fifth of the model on CPU
+    still reported status ok. Use placement() for the authoritative signal.
+    """
     out=sh("journalctl","-u","ollama","--since",since,"--no-pager").stdout
     found=re.findall(r"offloaded (\d+)/(\d+) layers", out)
     if not found: return None
     a,b=max(found,key=lambda t:int(t[1]))      # the LLM, not a vision projector
     return f"{a}/{b}"
+
+def placement(host, tag):
+    """GPU-resident fraction from /api/ps on the daemon actually under test.
+
+    Added 2026-09-08. Daemon-agnostic, needs no journal access and no assumption
+    about which unit the daemon runs under. `size_vram < size` means part of the
+    model is on CPU. Must be called while the model is still loaded, before evict.
+    """
+    r=sh("curl","-s","-m","5",f"http://{host}/api/ps")
+    try: d=json.loads(r.stdout or "{}")
+    except Exception: return {"placement_err":"unparseable /api/ps"}
+    stem=tag.split(":")[0]
+    for m in d.get("models") or []:
+        if str(m.get("name","")).startswith(stem):
+            size=m.get("size") or 0
+            vram=m.get("size_vram") or 0
+            return {"size_bytes":size,"size_vram_bytes":vram,
+                    "gpu_frac":round(vram/size,4) if size else None,
+                    "fully_resident":bool(size) and vram>=size}
+    return {"placement_err":f"{stem} not in /api/ps on {host}"}
 
 def measure(host, base, ctx, depth_mult, label):
     tag=f"hwstd-{ctx}-{base.split(':')[0].replace('.','')}:latest"
@@ -168,7 +196,8 @@ def measure(host, base, ctx, depth_mult, label):
          "decode_min":round(min(dec),1),"decode_max":round(max(dec),1),
          "vram_mib_per_card":net,"vram_mib_total":sum(net),
          "cards_used":sum(1 for x in net if x>VRAM_LOADED_MIB),
-         "layers":layers(since)}
+         "layers":layers(since),
+         **placement(host,tag)}
     ocli(host,"stop",tag); ocli(host,"rm",tag)
     return row
 

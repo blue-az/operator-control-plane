@@ -1,0 +1,102 @@
+[
+  {
+    "label": "gpu99",
+    "num_gpu": 31,
+    "layers_total": 31,
+    "gpu_frac": 1.0,
+    "first_call_wall_s": 14.02,
+    "tok_s": [
+      224.6,
+      225.9,
+      223.8
+    ],
+    "tok_s_mean": 224.77,
+    "vram_mib": [
+      19678.0,
+      574.0
+    ],
+    "power_w": [
+      234.96,
+      40.83
+    ],
+    "temp_c": [
+      68.0,
+      55.0
+    ]
+  },
+  {
+    "label": "gpu30",
+    "num_gpu": 30,
+    "layers_total": 31,
+    "gpu_frac": 0.968,
+    "first_call_wall_s": 14.92,
+    "tok_s": [
+      171.7,
+      173.9,
+      172.4
+    ],
+    "tok_s_mean": 172.66,
+    "vram_mib": [
+      17994.0,
+      574.0
+    ],
+    "power_w": [
+      255.22,
+      41.18
+    ],
+    "temp_c": [
+      66.0,
+      55.0
+    ]
+  },
+  {
+    "label": "gpu20",
+    "num_gpu": 20,
+    "layers_total": 31,
+    "gpu_frac": 0.645,
+    "first_call_wall_s": 18.69,
+    "tok_s": [
+      54.4,
+      54.7,
+      55.0
+    ],
+    "tok_s_mean": 54.69,
+    "vram_mib": [
+      12816.0,
+      574.0
+    ],
+    "power_w": [
+      148.37,
+      40.11
+    ],
+    "temp_c": [
+      61.0,
+      55.0
+    ]
+  },
+  {
+    "label": "gpu12",
+    "num_gpu": 12,
+    "layers_total": 31,
+    "gpu_frac": 0.387,
+    "first_call_wall_s": 15.67,
+    "tok_s": [
+      34.9,
+      35.7,
+      35.8
+    ],
+    "tok_s_mean": 35.47,
+    "vram_mib": [
+      8480.0,
+      531.0
+    ],
+    "power_w": [
+      132.94,
+      43.54
+    ],
+    "temp_c": [
+      61.0,
+      56.0
+    ]
+  }
+]

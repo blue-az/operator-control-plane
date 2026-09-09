@@ -139,6 +139,137 @@ pre-emptively.
 
 ---
 
+## 2b. Configuration standard - as-shipped, and what that does not license
+
+**Added 2026-09-08**, directly motivated by an audit of the e9pin tags. `num_ctx` and
+`temperature` are pinned. **Every speculative-decoding and sampling parameter beyond
+those is inherited from whatever the model shipped with**, and nobody decided that.
+
+| e9pin tag | draft_num_predict |
+|---|---:|
+| `qwen3.8:27b` (the seat) | 4 |
+| `qwen3.6:35b` | 2 |
+| `gemma4:26b` | 3 |
+| `gemma4:31b` | none |
+| `qwen3-next` | none |
+| `gpt-oss:120b` | none |
+
+Two consequences, both live in already-published numbers.
+
+The seat model runs **draft depth 4 against a measured optimum of 8 on the RTX 3090**.
+Its figures on the local-lane page are a floor, not a ceiling, and have been for the
+life of the ladder.
+
+And because the inherited values differ per model, **draft depth is an uncontrolled
+variable across the roster**. A ranking taken this way partly measures how well each
+vendor's shipped default happens to suit this chip.
+
+**Rule: the standard is as-shipped (Standard A). Pinned are `num_ctx`, `temperature`,
+`think` off, the canonical prompt, and `num_predict` on the probe. Everything else is
+inherited, must be recorded with the row, and must never be assumed equal across
+models.**
+
+What Standard A supports:
+
+- "Out of the box on this hardware, model X does Y."
+- Model-to-model comparison **only** when the inherited parameters are quoted beside
+  the result.
+
+What Standard A does not support:
+
+- "Model X is faster than model Y" as a claim about the models. It is a claim about the
+  models at their shipped defaults.
+- Any claim that a model performed at its best. Three of six have no draft parameters
+  at all.
+
+### 2b.1 The measurement regime: loaded, not empty
+
+**Decided 2026-09-08.** Two decode standards were running side by side in this
+program and disagreeing by up to 21%.
+
+| model | e9pin probe, 121-token prompt | hw_standard, ~12.8k-token prompt | gap |
+|---|---:|---:|---:|
+| `qwen3.8:27b` | 78.1 / 79.0 | 62.3 | -21% |
+| `qwen3.6:35b` | 130.0 / 129.8 | 127.7 | -2% |
+| `gemma4:26b` | 226 | 170.1 | -25% |
+| `gemma4:31b` | 37.7 | 33.8 | -11% |
+
+The gap is **model-dependent, so there is no conversion factor** between the two.
+A published number must name which regime produced it.
+
+**Rule: the ranking standard is loaded decode plus wall clock, measured under a
+prompt of at least ~12.8k tokens. Empty-KV decode is not a ranking metric.**
+
+The justification is the operator's own measured distribution: median turn
+**72,113 tokens**, 65% of turns over 32,768 (`journalctl -u ollama`, 293 turns,
+recorded in `HANDOFF_2026-09-06.md`). Empty-KV decode measures a regime this
+operator never works in, and it systematically flatters models that degrade under
+load. `gemma4:26b` posts 226 empty and 170 loaded, so the empty figure overstates
+the seat experience by a third.
+
+Prior e9pin numbers are **not retracted** - they remain valid measurements of
+empty-KV decode, and the offload and placement findings built on them stand. They
+are simply not the ranking metric any more, and must not be quoted as one.
+
+**Wall clock carries a caveat:** per the second 2026-09-07 correction, the 11-12 s
+versus 15-16 s gap on the same host was **ledger overhead**, not model or daemon
+behaviour. Any wall-clock row must state whether ledger writes were inside the
+timer, or the figure is not comparable to another row.
+
+### 2b.2 Preconditions for a single-card claim
+
+**Added 2026-09-08.** Tonight produced the program's strongest single-card result
+and also showed how easily an invalid one is produced. All four conditions below
+must hold, or the number is confidently misleading rather than merely wrong.
+
+**1. Isolation must be verified, not assumed.** A solo daemon requires
+`CUDA_VISIBLE_DEVICES=0` **and** `OLLAMA_LLM_LIBRARY=cuda_v13`. The first hides a
+card from CUDA but **not from Vulkan**: without the second, the daemon enumerates
+`Vulkan0` as the other card and can allocate on it, so "solo" silently stops
+meaning one card. Observed 2026-09-08, a solo daemon listing
+`library=Vulkan pci_id=0000:03:00.0` beside `library=CUDA pci_id=0000:01:00.0`,
+with one configuration dying on "failed to allocate Vulkan0 buffer".
+
+Confirm by reading `/proc/<pid>/environ`. Do not infer isolation from the fact
+that something is listening on the solo port. This failure produces numbers, not
+errors.
+
+**2. Record which physical card.** `CUDA_VISIBLE_DEVICES=0` is the **EVGA** on
+`01:00.0`, which also drives the display and holds ~360 MiB of it. The Zotac on
+`03:00.0` is the x4 slot. Card identity, slot width and display load are
+properties of the measurement and belong in provenance. Note that `pcie.link.gen`
+is a power state and downshifts at idle, so it means nothing unless sampled under
+load. Width is topology and is stable.
+
+**3. Depth must be representative, or the claim inverts.** The same daemon and
+model at two depths:
+
+| depth | solo vs dual | conclusion it supports |
+|---|---|---|
+| ctx16384 | -8% | single card is basically fine |
+| ctx131072 | **5.5x worse** (11.2 vs 61.4 tok/s) | the second card is load-bearing |
+
+Median operator turn is **72,113 tokens**. A solo claim measured at 16384 does not
+describe the seat. Any single-card claim must state its depth, and a claim about
+the seat must be measured at a depth the operator's distribution supports.
+
+**4. Placement must be captured.** `hw_standard.py` currently reports
+`layers: None` on every solo row, so a configuration with a fifth of the model on
+CPU records as `status: ok` with nothing to distinguish it from a fully resident
+one. Only a VRAM shortfall and a 5x throughput drop revealed it. **Fix before the
+testbench work**, where placement questions are the entire point.
+
+**Standard B (per-model tuned) is deferred until after the GPU move.** The optimum is
+per-chip: depth 8 wins on the RTX 3090 and is roughly 29% *worse than no speculation*
+on the z13. Tuning against the current host would be discarded the moment the cards
+land in the testbench.
+
+**When B is run it gets its own tags and its own battery**, never an edit to the e9pin
+tags. The as-shipped column stays citable and the tuned column sits beside it. Anything
+published from either must name which standard produced it.
+
+---
+
 ## 3. Model seats (from measured work, not preference)
 
 **Rates below are chip-to-chip: RTX 3090 (320 W) vs Ryzen AI MAX 390
