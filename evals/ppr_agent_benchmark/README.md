@@ -9,6 +9,23 @@ This is separate from:
 
 PPR-Agent measures real-world data/product comprehension: can a model preserve product boundaries, reason over deterministic query/gate behavior, and report exact CRM registry facts without turning the system into a generic chatbot or clinical tool.
 
+## Isolated Lane A sweep
+
+```bash
+python3 run_grok_sweep.py --models qwen38
+python3 run_grok_sweep.py --models grok,qwen38 --grok-model grok-4.3
+python3 run_grok_sweep.py --rescore --run-dir runs/<explicit-run>
+python3 -m unittest test_grok_sweep -v
+```
+
+Grok routes through `xai`; its actual model ID must be selected explicitly (the example is in the installed registry, not a live-validation claim). Qwen routes through `ollama` as `qwen3.8:27b`. Credentials/endpoints remain pi configuration.
+
+Every sweep reserves a fresh `runs/sweep-*` directory, or accepts a new `--run-dir` and refuses any existing path. Rescore requires an explicit existing directory; only `--write` writes strict scores. Each manifest row records provider, model, process status, and output path.
+
+Sweep exit status is the first failed submission's code (timeout 124, launch error 127, signal 128+signal); later successful tasks cannot hide it. All bounded tasks are attempted. Exit 0 means submissions succeeded, **not** that gold-standard scoring passed. Rescore propagates the checker's exit status. No live model campaign was run for these repairs.
+
+Claim-0153 remains quarantined; see [independent inspection](CLAIM_0153_INDEPENDENT_REVIEW.md). Runner fixes do not release it.
+
 ## Gold standard
 
 Typed two-lane gold standard (v1). The lanes are never merged in claims:
