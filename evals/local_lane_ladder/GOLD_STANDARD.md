@@ -10,7 +10,7 @@ rebrand DocAI invoices as Phoenix fixtures.
 
 | Gold | Where it lives | What it standardizes |
 |------|----------------|----------------------|
-| **A. DocAI DocAI process** | `~/DocAI/` (Batch 4/5 guidelines, `batch4_failure_catalog.md`, live ops) | How an answer becomes **trusted gold** |
+| **A. DocAI process** | `~/docai-source/` (Batch 4/5 guidelines, `batch4_failure_catalog.md`, live ops) | How an answer becomes **trusted gold** |
 | **B. Local-lane L0 / L1 / L2** | This directory + `LOCAL_LANE_CONTRACT.md` / `LOCAL_LANE_CONTRACT_SPEC.md` | How **task shape complexity** increases |
 
 Related measured work (do not re-derive): `ANALYSIS.md`, `RESULTS.md`,
@@ -50,9 +50,9 @@ for DocAI, not the Phoenix local shape axis.
 
 ---
 
-## 2. Answer / trust axis — DocAI DocAI as process gold
+## 2. Answer / trust axis — DocAI as process gold
 
-Source: `~/DocAI/batch4_authoritative_guidelines.md`, Batch 5 Phase 2 PDF, failure catalog.
+Source: `~/docai-source/batch4_authoritative_guidelines.md`, Batch 5 Phase 2 PDF, failure catalog.
 
 Every **scoreable** local or routability cell must satisfy the spirit of:
 
@@ -75,7 +75,7 @@ unless a deliberate DocAI-local bridge project is opened. **Methodology transfer
 
 ### MuJoCo DocAI prep (parallel gold)
 
-`~/DocAI/mujoco-prep/INTERVIEW_CRIB.md`: *every answer gets a measured number.*  
+`~/docai-source/mujoco-prep/INTERVIEW_CRIB.md`: *every answer gets a measured number.*  
 Use for **hardware / tok/s / residency** claims. Same spirit: no unsourced “tests better.”
 
 ---
@@ -513,17 +513,17 @@ under this gold standard.
 | `docs/LOCAL_LANE_ROUTER_STUDY.md` | 26b router measurement |
 | `ANALYSIS.md` / `RESULTS.md` | 216-cell ladder |
 | `fixtures/e0-desktop-pack-consultant-review/FINDING.md` | Why E0 ≠ Front E evidence |
-| `~/DocAI/batch4_authoritative_guidelines.md` | DocAI process gold — **z13 only** (see below) |
-| `~/DocAI/batch4_failure_catalog.md` | Harness failure culture — **z13 only** (see below) |
-| `~/DocAI/Labeling_Instructions.pdf` | **Code-editing eval rubric** — present on desktop; see §7 |
+| `~/docai-source/batch4_authoritative_guidelines.md` | DocAI process gold — **z13 only** (see below) |
+| `~/docai-source/batch4_failure_catalog.md` | Harness failure culture — **z13 only** (see below) |
+| `~/docai-source/Labeling_Instructions.pdf` | **Code-editing eval rubric** — present on desktop; see §7 |
 
 ### Host availability of the DocAI corpus (checked 2026-08-13)
 
 `batch4_authoritative_guidelines.md`, `batch4_failure_catalog.md` and the Batch 5
 Phase 2 PDF **do not exist on desktop** — verified by name across `/` and by
 content signature. They live on **z13**, per the bridge handoff's asset table
-(*"DocAI corpus | `~/DocAI/` | only if that tree exists on desktop"*). The
-desktop `~/DocAI/` tree is a different, code-eval engagement.
+(*"DocAI corpus | `~/docai-source/` | only if that tree exists on desktop"*). The
+desktop `~/docai-source/` tree is a different, code-eval engagement.
 
 A desktop agent following the two rows above hits missing paths with no
 explanation, which is the cold-start failure the bridge doc warns about. Two
@@ -532,7 +532,7 @@ things follow:
 - **Do not invent a parallel gold** from the absence. §2's mapping table below is
   the distilled transfer and is self-contained — use it.
 - **Resolved 2026-08-13** by retrieving the methodology files from z13 into
-  desktop `~/DocAI/` (methodology only — the 260 MB Batch 5 PDF pools were
+  desktop `~/docai-source/` (methodology only — the 260 MB Batch 5 PDF pools were
   deliberately left behind, per "methodology transfers; corpus does not"):
 
 **The 15-vs-≥3 conflict was form-slots vs a validity floor, exactly as suspected.**

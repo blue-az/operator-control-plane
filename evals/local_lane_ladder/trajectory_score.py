@@ -1,6 +1,6 @@
 """DocAI-derived trajectory scoring for the local-lane ladder.
 
-GOLD_STANDARD.md composes two golds: DocAI DocAI for the *trust* axis (how an
+GOLD_STANDARD.md composes two golds: DocAI for the *trust* axis (how an
 answer becomes trusted) and L0/L1/L2 for the *complexity* axis. The complexity
 axis has been operational since the ladder existed. This makes the trust axis
 operational too, instead of aspirational.
@@ -12,7 +12,7 @@ process requires". A model can pass with a poor trajectory (lucky blind patch)
 or fail with an excellent one (did everything right, got the logic wrong), and
 both of those are worth seeing.
 
-Rules transferred from `~/DocAI/batch4_authoritative_guidelines.md`. The
+Rules transferred from `~/docai-source/batch4_authoritative_guidelines.md`. The
 source is a DocAI verification task, so each rule is mapped rather than copied:
 
 | DocAI rule (verbatim)                              | Local equivalent               |
