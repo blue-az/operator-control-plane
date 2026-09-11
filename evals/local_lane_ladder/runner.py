@@ -597,6 +597,47 @@ def _ledger_session_end(ledger_dir: Path, usage_id: str, outcome: str) -> None:
         print(f"  [ledger] session-end error (non-fatal): {exc}", file=sys.stderr)
 
 
+class GPUResidencyError(RuntimeError):
+    """The requested GPU-resident benchmark model did not fit as configured."""
+
+
+def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
+    """Load *model* briefly and fail closed unless it is resident in VRAM."""
+    payload = json.dumps({
+        "model": model,
+        "prompt": "Reply with exactly: placement gate ready",
+        "stream": False,
+        "keep_alive": "10m",
+        "options": {"num_predict": 8, "temperature": 0},
+    })
+    try:
+        subprocess.run(
+            ["curl", "-sS", "--max-time", "120", "http://localhost:11434/api/generate", "-d", payload],
+            capture_output=True, text=True, timeout=125, check=True,
+        )
+        ps = subprocess.run(
+            ["curl", "-sS", "--max-time", "5", "http://localhost:11434/api/ps"],
+            capture_output=True, text=True, timeout=10, check=True,
+        )
+        models = json.loads(ps.stdout).get("models", [])
+        row = next((item for item in models if item.get("name") == model), None)
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as exc:
+        raise GPUResidencyError(f"placement gate could not inspect {model}: {exc}") from exc
+    if row is None:
+        raise GPUResidencyError(f"placement gate found no loaded model: {model}")
+    size = int(row.get("size") or 0)
+    vram = int(row.get("size_vram") or 0)
+    ratio = vram / size if size else 0.0
+    result = {"model": model, "size": size, "size_vram": vram, "ratio": round(ratio, 4)}
+    if ratio < minimum_ratio:
+        raise GPUResidencyError(
+            f"placement gate failed for {model}: {vram} / {size} bytes in VRAM "
+            f"({ratio:.1%}, required {minimum_ratio:.0%})"
+        )
+    print(f"Placement gate passed: {model} ({vram}/{size} VRAM, {ratio:.1%})")
+    return result
+
+
 def run_trial(
     task: dict, level: str, model: str, trial_idx: int, ledger_dir: Path, use_ledger: bool,
     trace_dir: Path | None = None, sampling: dict | None = None,
@@ -617,6 +658,8 @@ def run_trial(
     dispatch_model = ensure_pinned_model(
         model, sampling.get("num_ctx"), sampling.get("temperature"), sampling.get("num_gpu")
     )
+    if sampling.get("require_gpu_residency"):
+        require_gpu_residency(dispatch_model, sampling.get("minimum_gpu_ratio", 0.9))
     argv = [
         PI_BIN,
         "--provider", "ollama",
@@ -858,6 +901,14 @@ def main() -> int:
         help="Pin the sampling seed for every cell. Pair with --temperature 0.",
     )
     parser.add_argument(
+        "--require-gpu-residency", action="store_true",
+        help="Load each pinned model before scoring and fail closed below 90%% VRAM residency.",
+    )
+    parser.add_argument(
+        "--minimum-gpu-ratio", type=float, default=0.9,
+        help="Minimum size_vram/size ratio for --require-gpu-residency (default: 0.9).",
+    )
+    parser.add_argument(
         "--num-gpu", type=int, default=None,
         help=(
             "Cap GPU-resident layer count for every cell (VRAM-envelope "
@@ -930,6 +981,8 @@ def main() -> int:
         "temperature": args.temperature,
         "think": args.think,
         "num_gpu": args.num_gpu,
+        "require_gpu_residency": args.require_gpu_residency,
+        "minimum_gpu_ratio": args.minimum_gpu_ratio,
     }
     if args.seed is not None:
         print(
@@ -980,6 +1033,10 @@ def main() -> int:
             result = run_trial(
                 task, level, model, trial, ledger_dir, use_ledger, trace_dir, sampling
             )
+        except GPUResidencyError as exc:
+            print(f"[{key}] ABORT: {exc}", file=sys.stderr)
+            save_state(state_path, state)
+            return 2
         except OSError as exc:
             # Trace write failed. Abort rather than record an untraced cell --
             # state.json cannot distinguish the two after the fact.
