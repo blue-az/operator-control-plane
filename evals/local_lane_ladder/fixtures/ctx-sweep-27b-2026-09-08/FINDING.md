@@ -1,13 +1,17 @@
-# The second card is worth 5.5x at the operator's context depth and nothing at benchmark depth
+# A 5.48x dual/solo ratio at configured capacity 131072, with approximately 12.8k prompt tokens
 
-**Run:** desktop, 2026-09-08. `hw_standard.py`, Standard A, loaded regime
-(12,838 prompt tokens), n=3, `qwen3.8:27b` across four context depths on both
-arms. Solo daemon isolation verified per `GOLD_STANDARD.md` 2b.2.
+**Run:** desktop, 2026-09-08. `hw_standard.py`, Standard A, loaded regime,
+n=3 per cell, `qwen3.8:27b`. This is a **configured-capacity sweep**, not a
+prompt-length sweep. Solo placement was not captured; causal interpretation is
+provisional. Review/protocol: `docs/REVIEW_CALL_singlecard-and-ctx-depth_2026-09-08.md`.
 
-Predictions were registered in `HANDOFF_2026-09-06.md` before the run. One of five
-hit.
+## Recorded results
 
-## Result
+Actual prompt counts are **12,837** for dual ctx16384/32768 and **12,838**
+for all other rows. Input length is approximately fixed, not capacity-sized.
+VRAM values are MiB. Nominal headroom (24576 minus recorded solo VRAM) falls
+from 5669 to **2339 MiB** at capacities 16384 to 65536; the previously reported
+1979 endpoint does not rederive from those totals.
 
 | config | decode tok/s | prefill ms/token | VRAM total |
 |---|---:|---:|---:|
@@ -18,37 +22,39 @@ hit.
 | solo ctx16384 | 55.1 | 0.872 | 18,907 |
 | solo ctx32768 | 57.8 | 0.872 | 20,027 |
 | solo ctx65536 | 56.4 | 0.872 | 22,237 |
-| **solo ctx131072** | **11.2** | **1.573** | 22,823 |
+| solo ctx131072 | 11.2 | 1.573 | 22,823 |
 
-## The headline
+## Scoped observation
 
-At **ctx131072** - the depth the operator sizing work recommends for interactive
-use, against a measured median turn of 72,113 tokens - dual runs **61.4 tok/s** and
-solo runs **11.2**. That is **5.5x**.
+At capacity 131072, dual/solo is **61.4/11.2 = 5.48x**. At capacity 16384,
+`(solo/dual - 1)*100` is **-12.3% in this sweep**, versus **-8.0% in the
+separate rank run**. These percentages use solo relative to dual, not the reverse.
 
-At ctx16384, the depth every other battery in this program uses, the same
-comparison reads **-8%**. Same daemon, same model, opposite conclusions. **Depth
-is not a parameter of this experiment, it is the experiment.**
+The observed ratio does not measure decode with a 131,072-token prompt or the
+reported 72,113-token median interactive turn. Dual decode varies from 60.5 to
+62.8 tok/s as configured capacity changes at fixed input; this is not evidence
+that increasing actual prompt length costs no speed.
 
-## What that does to the dual-card question
+Solo prefill at capacities 16384/32768/65536 is approximately 0.872 ms/token
+within the stored 0.1-second timing precision, not measured exactly identical.
+The result weakens the tested headroom prediction but is not a general causal
+falsification.
 
-It resolves the null rather than contradicting it. Splitting does nothing for
-decode while the model fits one card, and is worth 5.5x when it does not. The
-second card is not a speed upgrade. It is what keeps the seat model resident at
-the operator's real context depth.
+## Provisional residency explanation and CPU-layer cost
 
-Dual decode is flat across the whole range - 62.8 to 61.4 from 16k to 131k - while
-VRAM grows 20,424 to 28,644 MiB. **With two cards, context costs memory and not
-speed.** With one card it costs both, discontinuously.
+The solo slowdown at the highest capacity is consistent with a placement change,
+but the solo rows record `layers: None`. The historical instrument read the
+systemd journal rather than the solo daemon's log. Later instrumentation cannot
+supply missing historical placement evidence.
 
-## Spill cost does not transfer between models
+Dividing the 5,821 MiB dual/solo difference proportionally across 66 layers gives
+about 13 hypothetical CPU layers. Dividing the approximately 71.6 ms/token
+slowdown by that estimate gives about **5.5 ms/layer**. This is conditional
+arithmetic, **not a measured layer count or isolated CPU-layer cost**. VRAM
+includes KV and buffers; a memory difference need not scale with layer count.
+Comparison with the separately measured 1.34 ms/layer gemma curve is provisional.
 
-Solo at 131072 holds 22,823 MiB against the 28,644 the model needs, so roughly
-5,821 MiB (~20%, about 13 of 66 layers) is on CPU. Time per token goes 17.7 ms to
-89.3 ms: **~5.5 ms per CPU-resident layer**, four times the 1.34 ms measured on
-`gemma4:26b`. Predicted 8% per layer, actual ~31%.
-
-Caveat: the layer count is inferred from the VRAM shortfall, not measured. The
-solo arm recorded `layers: None` because `layers()` parsed the systemd journal and
-the solo daemon does not run under that unit. Fixed 2026-09-08 by adding
-`placement()`, which reads `/api/ps` on the daemon under test.
+Neither the residency mechanism nor a hardware purchase conclusion is verified.
+Placement-captured confirmation is pending and must follow the corrected review
+protocol, using daemon-specific layer logs plus per-device memory capture;
+`/api/ps` alone is insufficient. No new live measurement accompanies this correction.

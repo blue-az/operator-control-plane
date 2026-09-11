@@ -139,6 +139,52 @@ pre-emptively.
 
 ---
 
+## 2a1. Corrections must cite evidence, not other corrections
+
+**Added 2026-09-10**, directly motivated by a five-increment correction cascade in
+`HANDOFF_2026-09-06.md` on 2026-09-07, in which four of five increments were wrong
+in whole or in part and the only correct one was the only one that opened the
+fixtures first.
+
+### What happened
+
+1. **Correction #1** attributed `gemma4:26b`'s 11-12 s wall clock to the docker
+   daemon (ollama 0.32.15) and 15-16 s to the host (0.32.12), concluding the
+   version explained the gap. Written from reasoning about the arms. **No trace
+   was opened.**
+2. **Correction #2** inherited #1's premise without opening the traces either, and
+   amplified it into a standing instruction that line 77 was superseded and which
+   figures to cite instead. Wrong in the same direction, with more authority.
+3. **Correction #3** read `preswap-char-2026-09-06/wall-dual-26b/state.json` and
+   found the arms **inverted**: 11-12 s was the host arm, and the docker arm was
+   *faster* at 10.9 / 7.5 / 6.0. It withdrew #1 and #2.
+4. **Correction #4** confirmed #3 and found two defects #3 had missed - a
+   re-check run cited by #1 that exists in no fixture, and a decode band too tight
+   to hold the measured spread.
+5. **A second 2026-09-07 correction** then retracted #3's *mechanism*: the gap was
+   **ledger overhead inside the wall-clock timer**, not the ollama version at all.
+
+The measurements were never the problem. Every increment had the fixtures on
+disk. The failures were all **documents asserting attributions without reading
+the artifacts they were about**, and each one made the next reader more confident.
+
+### The rule
+
+**A correction that changes an attribution must name the artifact it re-read,
+with a path. A correction that cannot cite one must be labelled unverified
+reasoning in its own first line.**
+
+This program already refuses to record a measurement it has not verified three
+ways (`hw_standard.py` is fail-closed by design). The same standard had never been
+applied to prose, in the same repository, by the same authors. A number gets a
+gate. A sentence explaining the number got nothing.
+
+Corollary: **"Correction #N says X" is not evidence.** It is a claim with the same
+standing as the one being corrected, and inheriting it without checking is how a
+single error acquires four citations.
+
+---
+
 ## 2b. Configuration standard - as-shipped, and what that does not license
 
 **Added 2026-09-08**, directly motivated by an audit of the e9pin tags. `num_ctx` and
@@ -183,6 +229,13 @@ What Standard A does not support:
   at all.
 
 ### 2b.1 The measurement regime: loaded, not empty
+
+**Review qualification:** the existing operational policy below is not independent
+verification of its rationale. Standard A, workload regime, and single-card
+preconditions are separate review claims C6–C8 in
+`docs/REVIEW_CALL_singlecard-and-ctx-depth_2026-09-08.md`. The reported operator
+distribution needs provenance review; a ~12.8k prompt is not evidence of behavior
+at a 72k prompt merely because configured capacity is 131072.
 
 **Decided 2026-09-08.** Two decode standards were running side by side in this
 program and disagreeing by up to 21%.
@@ -241,23 +294,27 @@ properties of the measurement and belong in provenance. Note that `pcie.link.gen
 is a power state and downshifts at idle, so it means nothing unless sampled under
 load. Width is topology and is stable.
 
-**3. Depth must be representative, or the claim inverts.** The same daemon and
-model at two depths:
+**3. Report configured capacity and actual prompt length separately.** The
+capacity sweep held input approximately fixed at 12,837–12,838 tokens:
 
-| depth | solo vs dual | conclusion it supports |
+| configured capacity | observed solo vs dual | scope |
 |---|---|---|
-| ctx16384 | -8% | single card is basically fine |
-| ctx131072 | **5.5x worse** (11.2 vs 61.4 tok/s) | the second card is load-bearing |
+| 16384 | -8.0% rank; -12.3% sweep, `(solo/dual - 1)*100` | short loaded prompt, two runs |
+| 131072 | dual/solo **5.48x** (61.4/11.2 tok/s) | same ~12.8k input, not 131k input |
 
-Median operator turn is **72,113 tokens**. A solo claim measured at 16384 does not
-describe the seat. Any single-card claim must state its depth, and a claim about
-the seat must be measured at a depth the operator's distribution supports.
+The reported median operator turn is **72,113 tokens**; this sweep does not
+measure it. A representative-input claim requires actual tokenized prompts at
+that length, adequate configured capacity, and recorded truncation/cache policy.
+Capacity and input-length sweeps answer different questions.
 
-**4. Placement must be captured.** `hw_standard.py` currently reports
-`layers: None` on every solo row, so a configuration with a fifth of the model on
-CPU records as `status: ok` with nothing to distinguish it from a fully resident
-one. Only a VRAM shortfall and a 5x throughput drop revealed it. **Fix before the
-testbench work**, where placement questions are the entire point.
+**4. Placement must be captured.** Historical sweep solo rows record
+`layers: None`; a VRAM difference and slowdown suggest, but do not establish,
+CPU placement or its layer count. Capture daemon-specific offloaded N/M logs
+and timestamped per-device process/memory snapshots during every measured
+residency on both arms. `/api/ps` alone is insufficient. Missing placement
+invalidates causal confirmation even if timing completed successfully.
+**Correct and review the capture protocol before a live confirmation run**, per
+`docs/REVIEW_CALL_singlecard-and-ctx-depth_2026-09-08.md` section 4.
 
 **Standard B (per-model tuned) is deferred until after the GPU move.** The optimum is
 per-chip: depth 8 wins on the RTX 3090 and is roughly 29% *worse than no speculation*

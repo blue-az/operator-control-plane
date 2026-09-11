@@ -25,7 +25,10 @@ Use these files as structured context for coding agents, QA review, drift checks
   LID-BHV-001 remains proposed; all of them need re-ratification against the `pi` carrier
   (superseded 2026-08-28) before they bind.
 - `appendix-pi-operator-extension.pbc.md` — draft contract for a project-local Pi extension
-  wrapping the Operator CLI. Ledger task: `pi-operator-extension-pbc-review`. POE-RUL-101–113
+  wrapping the Operator CLI.
+- `appendix-pi-yank-extension.pbc.md` — draft contract for a personal `/yank` pi extension
+  that copies a slice of a session message to the clipboard (vi-style anchors,
+  fail-closed, session+clipboard APIs only). Draft; proposed rules unratified. Ledger task: `pi-operator-extension-pbc-review`. POE-RUL-101–113
   are proposed and unratified; verified block POE-RUL-001–005 records the CLI constraints they
   must respect.
 

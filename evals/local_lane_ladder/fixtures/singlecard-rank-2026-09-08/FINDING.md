@@ -25,7 +25,7 @@ Range **-8.0% to +6.7%**, against -4.7% to +9.3% measured empty in
 transfers to the loaded regime. There is no general dual-card decode advantage
 while the model fits one card.
 
-The mechanism is that decode walks layers sequentially. Split across two cards,
+A provisional explanation is that decode walks layers sequentially. Split across two cards,
 one card computes while the other waits, so two cards never contribute bandwidth
 simultaneously. What crosses the boundary is the hidden state - about 4 KB per
 token for 35b - which is negligible even at x4.
@@ -35,10 +35,14 @@ token for 35b - which is negligible even at x4.
 Two of four models prefill materially faster on two cards. **The proposed
 mechanism was wrong.** The penalty appeared to track headroom (the two models with
 under 2.5 GB free paid it, the two with over 5 GB free did not), predicting that
-`qwen3.8:27b` would develop the same penalty once its context filled the card.
+`qwen3.8:27b` would develop the same penalty as configured capacity consumed headroom.
 
-`ctx-sweep-27b-2026-09-08` falsified that: 27b solo prefill is **0.872 ms/token at
-16384, 32768 and 65536**, dead flat while headroom fell from 5,669 to 1,979 MiB.
+`ctx-sweep-27b-2026-09-08` weakened that prediction: at a fixed **12,838-token
+prompt**, solo prefill is approximately **0.872 ms/token at capacities
+16384, 32768 and 65536**, within recorded 0.1-second timing precision, while
+nominal headroom (24576 minus recorded solo VRAM) fell from 5,669 to 2,339 MiB;
+the former 1,979 endpoint does not rederive from the recorded totals. This did not vary actual prompt
+length and is not a general causal falsification.
 
 So the 31b and 35b prefill penalty is an **open finding with no mechanism**. Do
 not cite a cause for it. Candidates not yet tested: layer count (61 and 42 against
@@ -49,5 +53,6 @@ not cite a cause for it. Candidates not yet tested: layer count (61 and 42 again
 `gemma4-26b-offload-curve.json` - a forced-offload sweep on `gemma4:26b`
 (31 layers), empty-KV regime, n=3: 224.8 tok/s at 31/31 layers, **172.7 at 30/31**.
 One layer off the GPU costs 23%. All four points fit one law: 4.45 ms per token
-resident, **+1.34 ms per CPU-resident layer**. That per-layer constant does **not**
-transfer - see the 27b sweep, where it is ~5.5 ms.
+resident, **+1.34 ms per CPU-resident layer**. Transfer of that per-layer constant is **not established** for 27b: the sweep's ~5.5 ms estimate is conditional
+on an inferred CPU-layer count, not a measured cost. Placement-captured
+confirmation remains pending under the corrected review protocol.

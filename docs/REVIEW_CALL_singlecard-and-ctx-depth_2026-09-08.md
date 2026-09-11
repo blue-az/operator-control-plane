@@ -1,169 +1,97 @@
-# Supervisor review call: the single-card null, the 5.5x at depth, and whether the standard now holds
+# Review call: single-card comparison and configured context capacity
 
-- **Status:** drafted, not yet issued. Reviewer routing unresolved, see section 5.
+- **Status:** corrected draft; not issued or independently verified.
 - **Proposed ledger task:** `singlecard-ctx-depth-2026-09-08`
-- **Author:** `claude` (builder on this work. This is a request for independent
-  verification, not a self-verification.)
-- **Repo:** `~/operator-control-plane`, branch `master`, uncommitted
-- **Verify command:**
-  `python3 evals/local_lane_ladder/fixtures/ctx-sweep-27b-2026-09-08/verify.py`
-  Fail-closed, exits non-zero on any claim that does not re-derive. **It re-derives
-  from committed fixtures, it does not re-measure.** Live reproduction is ~25
-  minutes and needs the solo daemon per `GOLD_STANDARD.md` 2b.2.
+- Historical measurement author: `claude`. Route review to a distinct, registered
+  session-derived identity; do not infer verification from this document.
+- **Separate review:** `REVIEW_CALL_gptoss120b-three-host_2026-09-07.md`
+  remains pending. This packet neither verifies nor closes it.
 
-## 1. Central question for the reviewer
+## 1. Scope
 
-Two results landed today that point opposite directions, and the program has
-adopted a standard on the strength of them.
+The sweep varied **configured capacity (`num_ctx`)**, not prompt length. The
+sweep recorded **12,837–12,838 actual prompt tokens** (two dual rows have 12,837). A 131,072-token capacity is not a
+131,072-token prompt, nor evidence of throughput at the operator's reported
+72,113-token median turn. That workload distribution needs separate review.
 
-Splitting a model across two cards does **nothing** for decode while it fits one
-card (-8.0% to +6.7% across four models). The same comparison on the same model at
-a different context depth is **5.5x**. Both are real. The reconciliation offered is
-that the second card is not a throughput device but a residency device.
+Observed: dual/solo decode is 61.4/11.2 = 5.48x at capacity 131072 with that approximately fixed-length
+prompt. At capacity 16384 the solo-relative-to-dual differences are -8.0% (rank)
+and -12.3% (sweep). These screen-tier observations do not establish a universal
+null, a hardware purchase conclusion, or the cause of the large ratio.
 
-> **Is that reconciliation sound, or is it a story fitted to two measurements
-> that were taken for different reasons?**
+## 2. Claim map (local labels, not ledger IDs)
 
-The builder's position is that it holds because the mechanism is independent of
-the data: decode walks layers sequentially, so two cards never contribute
-bandwidth simultaneously, and the only thing that changes at depth is whether the
-model is resident at all. **That is the claim most worth attacking**, because
-`GOLD_STANDARD.md` 2b, 2b.1 and 2b.2 were written on the back of it and now govern
-every future measurement in this program.
-
-## 2. Claims to register
-
-| # | Type | Claim | Falsifier |
+| # | Type / status | Scoped claim | Verification route |
 |---|---|---|---|
-| C1 | `numeric_measurement` | `qwen3.8:27b` at ctx131072, loaded regime: dual 61.4 tok/s, solo 11.2, a 5.48x ratio | Ratio outside 5.3-5.7 on re-measurement |
-| C2 | `numeric_measurement` | The same comparison at ctx16384 is small and negative: -8.0% and -12.3% across two independent runs | A run outside -13% to -7% |
-| C3 | `numeric_measurement` | Solo prefill is flat at 0.872 ms/token across ctx16384, 32768 and 65536 while headroom falls 5,669 to 1,979 MiB | Any depth differing by more than 0.02 ms/token |
-| C4 | `numeric_measurement` | Spill costs 27b ~5.5 ms per CPU-resident layer against 1.34 ms measured on `gemma4:26b` | Per-layer cost outside 4.0-7.0 ms |
-| C5 | `paper_or_report_claim` | The second RTX 3090 is justified by keeping the seat model resident at the operator's context depth, not by decode throughput and not by capacity for large models | See section 3, this is the contested one |
-| C6 | `paper_or_report_claim` | Standard A, the loaded regime, and the four single-card preconditions are the correct measurement standard for this program | Any precondition shown unnecessary, or a necessary one missing |
+| C1 | numeric measurement | At `num_ctx=131072`, 12,838-token prompt, n=3: dual 61.4 and solo 11.2 tok/s; ratio 5.48x | Fixture arithmetic only; independent live confirmation pending |
+| C2 | numeric measurement | At `num_ctx=16384`, `(solo/dual - 1)*100` is -8.0% in rank and -12.3% in sweep | Both fixture pairs; not a universal equivalence claim |
+| C3 | numeric measurement | Solo prefill at capacities 16384/32768/65536 is about 0.872 ms/token within recorded 0.1-second precision; nominal headroom (24576 minus recorded VRAM) falls 5669 to 2339 MiB; the prior 1979 endpoint does not rederive | Rounded fixture values only; not exact equality or universal mechanism falsification |
+| C4 | provisional inference | A proportional-VRAM layer estimate yields about 13 CPU layers and 5.5 ms/layer for 27b | Arithmetic diagnostic only; actual CPU-layer count and causal cost unverified |
+| C5 | provisional explanation | Capacity-induced placement changes may explain the large ratio | Placement-captured controlled comparison required; no present mechanism or purchase verification |
+| C6 | proposed standard component | Standard A (as-shipped settings) is appropriate for a stated operator-comparison question | Independent review of purpose and confounds; not established by fixture arithmetic |
+| C7 | proposed standard component | A loaded-prompt regime is appropriate, with actual prompt length explicitly reported separately from capacity | Review workload provenance and representativeness; 12,838 tokens does not represent all interactive turns |
+| C8 | proposed standard component | Single-card isolation and placement preconditions are adequate | Review daemon isolation, per-trial capture, and missing-evidence handling against the protocol below |
 
-C1-C4 are mechanical and covered by the verify script. **C5 and C6 are inferences
-and are not covered by anything.** They are the reason for the review.
+C6 replaces the old bundled C6 with C6–C8. C4 must not be silently omitted when
+registering claims. Register using session-derived builder/reviewer IDs and retain
+the returned ledger-ID mapping. No registration or verification is performed by
+this document; the former executable block incorrectly attached an arithmetic
+verifier to an explanatory claim and has been removed.
 
-## 3. What the builder wants attacked
-
-In the order I think they are most likely to break.
-
-1. **C4's layer count is inferred, not measured.** The ~13 CPU-resident layers
-   come from dividing a VRAM shortfall by total VRAM. Nothing counted layers,
-   because the solo arm records `layers: None` -- `layers()` parsed
-   `journalctl -u ollama` and the solo daemon does not run under that unit. Fixed
-   after the fact by adding `placement()`, which was **not** in the instrument when
-   these numbers were taken. **This is the weakest link.**
-2. **C3 is flat within the recorded precision, not measured identical.**
-   `prompt_s_median` is stored rounded to one decimal. All three depths recorded
-   11.2 s, so "0.872 / 0.872 / 0.872" is an artifact of rounding as much as a
-   result. The falsification of the headroom hypothesis survives at that precision,
-   but the phrase "dead flat" in the fixture FINDING overstates what was captured.
-3. **C1 is n=1 configuration.** One model, one depth, one pair of arms, n=3 reps.
-   Per `GOLD_STANDARD.md` 2a this is Screen tier, and a 5.5x headline is being
-   drawn from it and used in a hardware purchase decision.
-4. **C2's two runs disagree by four points** (-8.0% and -12.3%) on the same
-   configuration hours apart. That is the honest reproducibility signal for this
-   rig and it is larger than several effects this program has reported as findings.
-5. **C5 may be unfalsifiable as stated.** "Residency device, not throughput
-   device" fits both observations, but so would "the effect is large when the model
-   does not fit and small when it does," which is a description rather than a
-   mechanism. A reviewer should ask what measurement would distinguish them.
-6. **C6 adopts a standard on one night's evidence.** 2b.1 declares the loaded
-   regime on the strength of a 293-turn context distribution measured by a
-   different session, which I did not verify beyond reading its stated source.
-   2b.2 condition 3 generalises from one model at two depths.
-7. **The builder's error record on this work.** Tonight I attributed a model to a
-   third party from a marketing page, put two scoring scales in one table, proposed
-   two pinned daemons without the `cuda_v13` requirement that would have made
-   "solo" mean two cards, and wrote a correction into `HANDOFF_2026-09-06.md` that
-   inverted the wall-clock arms and had to be withdrawn by a later session. Weight
-   the confidence in sections 1 and 2 accordingly.
-8. **The handoff is not readable top-down.** It is now ~800 lines with seven
-   correction and finding sections appended, and line 77 still states a superseded
-   comparison. A reviewer starting at the top gets the wrong instruction before
-   reaching any correction.
-
-## 4. Commands to issue the call
+## 3. Verifier scope
 
 ```bash
-cd ~/operator-control-plane
-
-./operator task-create \
-  --id singlecard-ctx-depth-2026-09-08 \
-  --objective "Verify that dual-card splitting is neutral for decode while a model fits one card and worth 5.5x when it does not, and confirm the measurement standard adopted on that basis." \
-  --assign claude \
-  --review "<REVIEWER -- see section 5>" \
-  --assumption "The ~13 CPU-resident layers in C4 are inferred from a VRAM shortfall; the instrument did not capture placement on the solo arm at measurement time." \
-  --assumption "prompt_s_median is stored rounded to 0.1s, so C3 is flat within recorded precision rather than measured identical." \
-  --assumption "C1 is one model at one depth, n=3. Screen tier per GOLD_STANDARD.md 2a."
-
-./operator claim-add -t numeric_measurement --task singlecard-ctx-depth-2026-09-08 \
-  -x "qwen3.8:27b at ctx131072 loaded: dual 61.4 tok/s vs solo 11.2, a 5.48x ratio" \
-  --gate evals/local_lane_ladder/fixtures/ctx-sweep-27b-2026-09-08/FINDING.md \
-  --verify-cmd "python3 evals/local_lane_ladder/fixtures/ctx-sweep-27b-2026-09-08/verify.py"
-
-./operator claim-add -t numeric_measurement --task singlecard-ctx-depth-2026-09-08 \
-  -x "The same comparison at ctx16384 is -8.0% and -12.3% across two independent runs" \
-  --gate evals/local_lane_ladder/fixtures/singlecard-rank-2026-09-08/FINDING.md \
-  --verify-cmd "python3 evals/local_lane_ladder/fixtures/ctx-sweep-27b-2026-09-08/verify.py"
-
-./operator claim-add -t numeric_measurement --task singlecard-ctx-depth-2026-09-08 \
-  -x "Solo prefill is flat at 0.872 ms/token from ctx16384 to ctx65536 while headroom falls from 5669 to 1979 MiB, falsifying the headroom hypothesis for the dual prefill advantage" \
-  --gate evals/local_lane_ladder/fixtures/singlecard-rank-2026-09-08/FINDING.md \
-  --verify-cmd "python3 evals/local_lane_ladder/fixtures/ctx-sweep-27b-2026-09-08/verify.py"
-
-./operator claim-add -t paper_or_report_claim --task singlecard-ctx-depth-2026-09-08 \
-  -x "The second RTX 3090 is justified by seat residency at the operator's context depth, not by decode throughput or capacity for large models" \
-  --gate evals/local_lane_ladder/fixtures/ctx-sweep-27b-2026-09-08/FINDING.md \
-  --verify-cmd "python3 evals/local_lane_ladder/fixtures/ctx-sweep-27b-2026-09-08/verify.py"
-
-./operator claim-add -t paper_or_report_claim --task singlecard-ctx-depth-2026-09-08 \
-  -x "Standard A, the loaded regime, and the four single-card preconditions in GOLD_STANDARD.md 2b/2b.1/2b.2 are the correct measurement standard for this program" \
-  --gate evals/local_lane_ladder/GOLD_STANDARD.md
-
-# Then, for each paper_or_report_claim (substitute the IDs claim-add printed):
-./operator review-delegate <CLAIM_ID> \
-  --task singlecard-ctx-depth-2026-09-08 \
-  --reviewer "<REVIEWER>" \
-  --mode advisory-agent \
-  --verify-cmd "python3 evals/local_lane_ladder/fixtures/ctx-sweep-27b-2026-09-08/verify.py"
+python3 evals/local_lane_ladder/fixtures/ctx-sweep-27b-2026-09-08/verify.py
 ```
 
-**Known blocker:** `task-transition` refuses with "only supported in enrolled
-repositories". The authority broker is running (`authority_broker.py serve`, pid
-1206) but the only registration in
-`/etc/operator-control-plane-registry.json` is a dogfood path in `/tmp` from
-2026-07-20. Whether `task-create` and `claim-add` are affected has not been
-tested. **Test with one claim before issuing the whole block.**
+This checks local fixture consistency for C1–C3, reports C4's conditional
+arithmetic, and checks the recorded solo-placement gap as **GAP1**, not C5.
+It does not remeasure, attest fixture provenance, count CPU layers, validate
+C5–C8, or produce independent ledger verification. Arithmetic tolerances are
+checks against this stored dataset, not prospective acceptance bands.
 
-## 5. Unresolved: reviewer routing
+## 4. Corrected confirmation protocol — prerequisite to a live run
 
-The reviewer must not be `claude` -- `doctor` errors when a claim is verified by an
-identity issued a builder brief for that task (`operator:5699`), and I am the
-builder.
+1. Freeze the protocol, script revision, model digest/quantization, backend build,
+   and claim-to-check mapping before launch. Review C6–C8 separately; do not use
+   a passing arithmetic script as approval of the protocol.
+2. Capacity experiment: hold the exact prompt fixed (retain text/hash and actual
+   `prompt_eval_count`, target approximately 12,838; record and investigate any count variation), vary only `num_ctx` across the original
+   four capacities and solo/dual placement arms. A prompt-length experiment is
+   separate: vary tokenized input with explicit capacity headroom, no truncation,
+   and no relabeling of capacity as prompt length.
+3. Pin device UUIDs, daemon endpoints and effective CUDA/backend visibility;
+   record parallelism, KV type, flash attention, sampling, output limit, power
+   caps and thermal state. Prevent unrelated inference and retained-model
+   contamination without interrupting another user's workload.
+4. Capture placement **during each measured model residency** on both arms:
+   daemon-specific load/offloaded N/M layer logs plus per-device `nvidia-smi`
+   process/memory snapshots, timestamps and request identity. A solo daemon may
+   not log to `journalctl -u ollama`; capture its actual log. `/api/ps` alone is
+   insufficient given known reporting defects. Missing or mismatched placement
+   invalidates causal confirmation; do not estimate layers from a VRAM ratio.
+5. Predeclare repetition count, interleaving/randomization, warmup/cache policy,
+   and uncertainty summary. Retain individual full-precision timings, prompt and
+   generated counts, failures, load times and placement; do not keep only rounded
+   medians. Use at least six measured repetitions per cell for confirmation;
+   review whether observed variance warrants more before promoting conclusions.
+6. Recompute rates and uncertainty before interpreting cause. Placement correlation
+   supports but does not isolate CPU-layer cost: a cost estimate needs a controlled
+   layer-placement sweep with other settings fixed, not division by inferred layers.
 
-Candidates:
+**Execution gate:** no live placement-captured confirmation until the corrected
+protocol and its capture implementation are reviewed and ready. This correction
+pass runs only the offline verifier. Live confirmation remains pending.
 
-- **`qwen3.6:35b` or `qwen3.8:27b` local** -- free, no quota cost, and genuinely
-  independent of the frontier lane. But both are **subjects of C2 and C3**, and
-  neither is likely to land section 3 items 5 and 6, which need judgment about
-  whether a claim is falsifiable.
-- **`gemma4:26b` local** -- also a subject, and it is the control model in the rank
-  fixture. Self-review by a measured party.
-- **A frontier seat** -- strongest on the inference claims and the error-record
-  discount. Costs quota, which is the resource this whole program exists to
-  economise.
-- **Defer** -- register C1-C4, leave C5 and C6 explicitly unverified and marked,
-  and route when a reviewer is available.
+## 5. Reviewer questions
 
-**Recommendation: route C5 and C6 to a frontier reviewer, or defer them.** C1-C4
-re-derive mechanically and anyone can run the script later. C5 and C6 are the two
-that changed how this program will measure everything from here, and a weak
-sign-off on those is worse than an open claim -- the same argument the 2026-09-05
-call made, and it applies more strongly here because C6 is a standard rather than
-a result.
+- Does the proposed residency mechanism survive direct placement evidence?
+- Does the prefill result only weaken the tested headroom hypothesis, rather than
+  establish a general mechanism?
+- Is the four-percentage-point variation between the two low-capacity runs
+  adequately reflected in confidence and future sample size?
+- Which of C6–C8 are justified for which question, and what evidence is missing?
 
-This is Erik's call: his ledger, his reviewer budget, and his hardware decision
-sitting downstream of C5.
+Historical benchmark claims and GOLD_STANDARD adoption are not retroactively
+validated here. Reviewer routing and any hardware decision remain the operator's
+call; no new GPU run or paid reviewer is launched by this packet.
