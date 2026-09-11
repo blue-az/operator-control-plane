@@ -1,0 +1,20 @@
+=== pre-swap snapshot · 2026-09-10T14:13:53-07:00 ===
+--- desktop ---
+cpu : Intel(R) Core(TM) i9-9900KF CPU @ 3.60GHz
+ram : 31 GiB
+index, name, pci.bus_id, uuid, memory.total [MiB]
+0, NVIDIA GeForce RTX 3090, 00000000:01:00.0, GPU-22b9dafe-e97d-dbb2-50ba-2f1f1dea61f9, 24576 MiB
+1, NVIDIA GeForce RTX 3090, 00000000:03:00.0, GPU-102e9c9e-f883-58fa-6119-8c72f81fd88e, 24576 MiB
+pcie:
+  0, 1, 16
+  1, 1, 4
+--- seats as configured ---
+  :11435 qwen3.6:35b    096fdbd02fe6    22 GB    5%/95% CPU/GPU    98304      Forever    
+  :11436 qwen3.8:27b    22130167c4c2    17 GB    100% GPU     98304      Forever    
+  /tmp/ol-c0.log: offloaded 42/42 -c 98304 --cache-type-k q8_0
+  /tmp/ol-c1.log: offloaded 66/66 -c 98304 --cache-type-k q8_0
+--- measured decode, this machine, 9-10 Sep ---
+  qwen3.6:35b  ctx131072 q8_0  42/42   86.9 tok/s
+  qwen3.8:27b  ctx131072 q8_0  63/66   28.9 tok/s
+  qwen3.8:27b  ctx 98304 q8_0  66/66   42.9 tok/s
+  3 CPU layers cost 27.6% == 3.2 ms per dense layer per token
