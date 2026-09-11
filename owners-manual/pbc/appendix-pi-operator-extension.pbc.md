@@ -429,6 +429,10 @@ future_features:
     name: PBC spec CLI compatibility/profile
     command: /pbc:validate or pbc validate --profile operator
     description: "Align Operator-authored PBC files with the upstream pbc-spec CLI before publishing: either upstream proposed-* lifecycle block support, avoid custom block names, or define an Operator dialect/profile that accepts proposed-rules/proposed-behavior/proposed-outcomes and local trust vocabulary while still catching real YAML/frontmatter errors."
+  - id: POE-FUT-015
+    name: Crystal capture and attach command
+    command: /op:crystal or /op:crystal-attach
+    description: "Expose a bounded Pi-extension flow for agent-crystallize session artifacts: capture or select a crystal with live session provenance, attach/import it through the existing Operator crystal path as draft session_crystal evidence, and keep crystal narration untrusted and never verification."
 ```
 
 > Factual implementation note (2026-09-05; not a ratification or lifecycle change):
