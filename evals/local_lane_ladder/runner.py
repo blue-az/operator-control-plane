@@ -738,6 +738,7 @@ def run_trial(
                 "machine": MACHINE,
                 "passed": False,
                 "detail": f"timed out after {MAX_WALL_CLOCK_SECONDS}s",
+                "failure_cause": "timeout",
                 "wall_clock_s": round(wall_clock, 1),
                 "returncode": None,
             }
@@ -765,6 +766,11 @@ def run_trial(
             "machine": MACHINE,
             "passed": grade_result.passed,
             "detail": grade_result.detail,
+            "failure_cause": (
+                None if grade_result.passed else
+                ("harness_failure" if completed.returncode != 0 else
+                 "harness_empty_output" if not completed.stdout.strip() else "grade_failure")
+            ),
             "check_score": round(grade_result.score, 3),
             "checks": [
                 {"name": c.name, "passed": c.passed, "detail": c.detail}
@@ -1023,6 +1029,7 @@ def main() -> int:
     state = load_state(state_path)
     results = list(state.get("results", []))
     done = state.get("done", {})
+    failures = state.setdefault("failures", [])
 
     for task, level, model, trial in grid:
         key = cell_key(task["task_id"], level, model, trial)
@@ -1035,6 +1042,15 @@ def main() -> int:
             )
         except GPUResidencyError as exc:
             print(f"[{key}] ABORT: {exc}", file=sys.stderr)
+            failures.append({
+                "cell_key": key,
+                "task_id": task["task_id"],
+                "level": level,
+                "model": model,
+                "trial": trial,
+                "failure_cause": "gpu_residency_failure",
+                "detail": str(exc),
+            })
             save_state(state_path, state)
             return 2
         except OSError as exc:
