@@ -1,0 +1,279 @@
+{
+  "done": {
+    "constant-and-callers|L2|gemma4-26b-e9pin-ctx16384-t0p8|1": true,
+    "constant-and-callers|L2|gemma4-26b-e9pin-ctx16384-t0p8|2": true,
+    "constant-and-callers|L2|gemma4-26b-e9pin-ctx16384-t0p8|3": true,
+    "constant-and-callers|L2|gemma4-26b-e9pin-ctx16384-t0p8|4": true,
+    "csv-summarize-repair|L2|gemma4-26b-e9pin-ctx16384-t0p8|1": true,
+    "csv-summarize-repair|L2|gemma4-26b-e9pin-ctx16384-t0p8|2": true,
+    "csv-summarize-repair|L2|gemma4-26b-e9pin-ctx16384-t0p8|3": true,
+    "csv-summarize-repair|L2|gemma4-26b-e9pin-ctx16384-t0p8|4": true
+  },
+  "failures": [],
+  "results": [
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-n3ayg8j8/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "3/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-n3ayg8j8/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5; constant updated: regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'; no stale value in code: pattern not found: 'up to 5 times'",
+      "failure_cause": "grade_failure",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4-26b-e9pin-ctx16384-t0p8",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": null,
+      "tok_s_probe": null,
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/desktop-2080-i9-e9-2026-09-11/traces/constant-and-callers__L2__gemma4-26b-e9pin-ctx16384-t0p8__t1.json",
+      "trial": 1,
+      "wall_clock_s": 0.6
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-jch7mo6q/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "3/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-jch7mo6q/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5; constant updated: regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'; no stale value in code: pattern not found: 'up to 5 times'",
+      "failure_cause": "grade_failure",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4-26b-e9pin-ctx16384-t0p8",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": null,
+      "tok_s_probe": null,
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/desktop-2080-i9-e9-2026-09-11/traces/constant-and-callers__L2__gemma4-26b-e9pin-ctx16384-t0p8__t2.json",
+      "trial": 2,
+      "wall_clock_s": 0.6
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-g7bvz33c/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "3/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-g7bvz33c/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5; constant updated: regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'; no stale value in code: pattern not found: 'up to 5 times'",
+      "failure_cause": "grade_failure",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4-26b-e9pin-ctx16384-t0p8",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": null,
+      "tok_s_probe": null,
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/desktop-2080-i9-e9-2026-09-11/traces/constant-and-callers__L2__gemma4-26b-e9pin-ctx16384-t0p8__t3.json",
+      "trial": 3,
+      "wall_clock_s": 0.6
+    },
+    {
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-bv005sc0/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "3/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-bv005sc0/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5; constant updated: regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'; no stale value in code: pattern not found: 'up to 5 times'",
+      "failure_cause": "grade_failure",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4-26b-e9pin-ctx16384-t0p8",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "constant-and-callers",
+      "tok_s": null,
+      "tok_s_probe": null,
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/desktop-2080-i9-e9-2026-09-11/traces/constant-and-callers__L2__gemma4-26b-e9pin-ctx16384-t0p8__t4.json",
+      "trial": 4,
+      "wall_clock_s": 0.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-js5yx1gc/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-js5yx1gc/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-js5yx1gc/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-js5yx1gc/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "failure_cause": "grade_failure",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4-26b-e9pin-ctx16384-t0p8",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": null,
+      "tok_s_probe": null,
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/desktop-2080-i9-e9-2026-09-11/traces/csv-summarize-repair__L2__gemma4-26b-e9pin-ctx16384-t0p8__t1.json",
+      "trial": 1,
+      "wall_clock_s": 0.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-iidqsm8j/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-iidqsm8j/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-iidqsm8j/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-iidqsm8j/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "failure_cause": "grade_failure",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4-26b-e9pin-ctx16384-t0p8",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": null,
+      "tok_s_probe": null,
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/desktop-2080-i9-e9-2026-09-11/traces/csv-summarize-repair__L2__gemma4-26b-e9pin-ctx16384-t0p8__t2.json",
+      "trial": 2,
+      "wall_clock_s": 0.5
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-pwxe_mv1/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-pwxe_mv1/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-pwxe_mv1/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-pwxe_mv1/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "failure_cause": "grade_failure",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4-26b-e9pin-ctx16384-t0p8",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": null,
+      "tok_s_probe": null,
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/desktop-2080-i9-e9-2026-09-11/traces/csv-summarize-repair__L2__gemma4-26b-e9pin-ctx16384-t0p8__t3.json",
+      "trial": 3,
+      "wall_clock_s": 0.6
+    },
+    {
+      "check_score": 0.5,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-288sisc_/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-288sisc_/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "name": "battery passes",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-288sisc_/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-288sisc_/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "failure_cause": "grade_failure",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "gemma4-26b-e9pin-ctx16384-t0p8",
+      "passed": false,
+      "returncode": 0,
+      "task_id": "csv-summarize-repair",
+      "tok_s": null,
+      "tok_s_probe": null,
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/desktop-2080-i9-e9-2026-09-11/traces/csv-summarize-repair__L2__gemma4-26b-e9pin-ctx16384-t0p8__t4.json",
+      "trial": 4,
+      "wall_clock_s": 0.6
+    }
+  ]
+}

@@ -203,7 +203,7 @@ def measure_tok_s(model: str) -> dict | None:
         data = None
         for _ in range(2):
             result = subprocess.run(
-                ["curl", "-s", "http://localhost:11434/api/generate", "-d", payload],
+                ["curl", "-s", "http://127.0.0.1:11434/api/generate", "-d", payload],
                 capture_output=True, text=True, timeout=120,
             )
             data = json.loads(result.stdout)
@@ -612,11 +612,11 @@ def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
     })
     try:
         subprocess.run(
-            ["curl", "-sS", "--max-time", "120", "http://localhost:11434/api/generate", "-d", payload],
+            ["curl", "-sS", "--max-time", "120", "http://127.0.0.1:11434/api/generate", "-d", payload],
             capture_output=True, text=True, timeout=125, check=True,
         )
         ps = subprocess.run(
-            ["curl", "-sS", "--max-time", "5", "http://localhost:11434/api/ps"],
+            ["curl", "-sS", "--max-time", "5", "http://127.0.0.1:11434/api/ps"],
             capture_output=True, text=True, timeout=10, check=True,
         )
         models = json.loads(ps.stdout).get("models", [])
@@ -662,7 +662,14 @@ def run_trial(
         require_gpu_residency(dispatch_model, sampling.get("minimum_gpu_ratio", 0.9))
     argv = [
         PI_BIN,
-        "--provider", "ollama",
+        # 127.0.0.1, not localhost. An `ssh -L 11434:127.0.0.1:11434 testbench`
+        # tunnel holds [::1]:11434 and getent resolves localhost to ::1 first,
+        # so the "ollama" provider (baseUrl localhost:11434) silently reaches
+        # the *headless machine's* daemon. gemma4:26b exists on both, so a
+        # misrouted run loads fine and reports the wrong GPU with no error.
+        # The "local" provider pins the literal IP. See fixtures/
+        # desktop-2080-i9-e9-2026-09-11/VOID.md. 2026-09-11.
+        "--provider", "local",
         "--model", dispatch_model,
         "--mode", "json",
         "--print",
