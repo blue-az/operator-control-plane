@@ -316,6 +316,42 @@ invalidates causal confirmation even if timing completed successfully.
 **Correct and review the capture protocol before a live confirmation run**, per
 `docs/REVIEW_CALL_singlecard-and-ctx-depth_2026-09-08.md` section 4.
 
+**4a. For MoE models, `offloaded N/N layers` is NOT residency evidence.**
+Added 2026-09-12 after `fixtures/moe-expert-residency-2026-09-12/FINDING.md`.
+Ollama resolves an oversized MoE by moving **every expert tensor to system RAM**
+while keeping dense weights on the device, and then logs
+`load_tensors: offloaded 31/31 layers to GPU`. Both statements are true and they
+describe different things: **the layer counter counts layers, not experts.**
+
+`gemma4:26b` (17.33 GB blob, ~16.7 GB required for full residency) did this on
+every one of ten loads on an 8 GB RTX 2080, and the program published the
+resulting row as fully GPU-resident for weeks.
+
+Neither of the two instruments previously relied on is sufficient:
+
+| source | why it fails for MoE |
+|---|---|
+| `offloaded N/N layers` | counts dense layers only; silent on experts |
+| `ollama ps` PROCESSOR, `/api/ps` `size_vram`/`size` | reported 1.22 GB and a "25%/75% CPU/GPU" split for a model `nvidia-smi` showed holding 7,202 MiB |
+
+**Required evidence for any MoE residency claim, one of:**
+
+1. the load-time fitting decision from the daemon log
+   (`common_params_fit_impl:` block, which states projected device memory,
+   free device memory, and whether MoE tensors were moved to system memory); or
+2. a per-device VRAM measurement (`nvidia-smi --query-compute-apps`) checked
+   **against the model's known full-residency requirement** — device allocation
+   materially below that requirement means experts are on the host.
+
+**No MoE "100% GPU" claim may be published from layer-count output alone.**
+A row measured with host-resident experts is still publishable and still useful,
+but it must be labelled **mixed placement**, and its rate must be understood as
+host-memory dependent: the experts are mmap'd, so the same model at identical
+placement measured 32-34 tok/s with the page cache warm and **4.0 tok/s with the
+host under pressure** (~580 major faults per token, 38% iowait, `si=0`).
+
+Dense models are unaffected: for them the layer counter means what it says.
+
 **Standard B (per-model tuned) is deferred until after the GPU move.** The optimum is
 per-chip: depth 8 wins on the RTX 3090 and is roughly 29% *worse than no speculation*
 on the z13. Tuning against the current host would be discarded the moment the cards
@@ -481,10 +517,13 @@ A pack that **may** count toward Front E must:
 2. Use **L0/L1/L2** (or a documented subset) as the complexity axis.
 3. Define **DocAI-style postconditions** per cell (R4 + golden).
 4. Grade with **deterministic checks**; retain traces (no terminal-tool false fails).
-5. Report **placement** (`ollama ps`) on every ranking row. 100% GPU is
-   preferred. A few-percent weight lip is a host-conditioned row, not a
-   reason to omit the model. KV-default overflow is still a confound —
-   pin `num_ctx`, do not hide the score.
+5. Report **placement** on every ranking row. 100% GPU is preferred. A
+   few-percent weight lip is a host-conditioned row, not a reason to omit the
+   model. KV-default overflow is still a confound — pin `num_ctx`, do not hide
+   the score. **For MoE models `ollama ps` and `offloaded N/N layers` are not
+   acceptable residency evidence** (see rule 4a): use the load-time
+   `common_params_fit_impl` decision or a per-device VRAM measurement checked
+   against the model's full-residency requirement.
 6. Keep **desktop vs z13 ledger** identity honest (Front **H** — two `.operator/` trees).
 7. Register claims only for what was measured; UID-isolated verify preferred.
 
