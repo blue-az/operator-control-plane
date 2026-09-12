@@ -14,8 +14,9 @@
 ## Why the wall clock is void
 
 **1. The comparison was invalid from registration.** The prediction asserted the
-testbench "matches at 15 GB RAM and differs only in CPU." **The testbench has
-32 GB.** Measured live: 32,032 MB with 125/975 MB swap used, against this box's
+testbench "matches at 15 GB RAM and differs only in CPU." **The testbench now has
+32 GB, but did not when it set the baseline** - the RAM moved with the cards on
+2026-09-10. The reference numbers are from a ~15 GB host that no longer exists. Measured live: 32,032 MB with 125/975 MB swap used, against this box's
 15,906 MB with 8,114/8,191 MB swap used (99%) and ~200-330 MB free RAM. The
 15 GB figure was carried from the June FINDING.md header and never re-checked.
 
