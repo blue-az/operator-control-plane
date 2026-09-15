@@ -10,7 +10,7 @@ tags:
   - research
   - evidence
   - proposed
-updated: 2026-09-12
+updated: 2026-09-14
 ---
 
 # Retoolable Research Factory — Behavior Contract
@@ -20,6 +20,10 @@ updated: 2026-09-12
 > evidence-backed factory contract. Run both pilots under the existing
 > control-plane rules first; then revise this draft from what they actually
 > required. It does not declare either work item verified.
+>
+> Ledger task: `retoolable-research-factory-pbc`. **Nothing here is implemented.**
+> Every rule and behavior is fenced `pbc:proposed-*`. Phases, exit criteria, and
+> the deviation logs this draft is revised from: `docs/RETOOLABLE_FACTORY_ROADMAP.md`.
 
 ## Why This Exists
 
@@ -28,11 +32,17 @@ is the repeatable path from an authoritative substrate to an independently
 reviewed result. Domain-specific runners and evidence instruments may change;
 the authority boundary, artifact lifecycle, and human gates must not.
 
-The initial GPU work has already demonstrated why this matters: a plausible
-`31/31 layers` signal did not prove MoE expert residency, and an apparent
-per-layer cost risked being generalized across architectures. The factory must
-be able to discover and preserve such instrument corrections rather than hide
-or average them away.
+The initial GPU work has already demonstrated why this matters, twice:
+
+- On the RTX 2080 desktop, `gemma4:26b` logged `offloaded 31/31 layers to GPU`
+  while every MoE expert tensor sat in system RAM. The layer counter did not
+  prove expert residency.
+- On the RTX 3090s behind the i9 desktop, a ~1.34 ms per CPU-resident layer cost
+  measured on `gemma4:26b` (MoE) risked being generalized to dense models. It
+  was withdrawn as a transferable constant.
+
+The factory must be able to discover and preserve such instrument corrections
+rather than hide or average them away.
 
 ## Scope
 
@@ -54,8 +64,10 @@ This contract governs:
 - Treating model prose, crystals, dashboards, or summaries as verification.
 - Replacing domain instruments with one generic metric.
 - Automatic deployment, publication, schema changes, or source-data changes.
-- Running repeated trials whose task, prompt, model, protocol, or evaluation
-  target has not changed.
+- Re-running an unchanged task, prompt, model, protocol, and evaluation target
+  in order to obtain a different verdict. Planned repeated trials (n>1),
+  dispute reruns from a frozen substrate, and versioned longitudinal
+  collection are in scope.
 
 ## Actors
 
@@ -82,9 +94,9 @@ This contract governs:
   description: Supplies substrate, tools, runner, evidence schema, acceptance checks, and stop conditions for one work purpose.
 ```
 
-## Factory Spine
+## Proposed Factory Spine
 
-```pbc:rules
+```pbc:proposed-rules
 - id: RRF-RUL-001
   name: Specification Precedes Dispatch
   rule: >
@@ -96,10 +108,11 @@ This contract governs:
   name: Control-Plane Task Is The Work Record
   rule: >
     The specification is instantiated as a control-plane task, recorded through
-    the `op` command surface, before execution. The `op` command is a ledger
-    interface, not a reviewer or an authority seat. Chat recaps do not
-    substitute for the task, and a worker result does not close the task without
-    evidence and named review.
+    the `./operator` CLI (`task-create`, `claim-add`, `evidence-attach`), before
+    execution. The CLI is a ledger interface, not a reviewer or an authority
+    seat. Chat recaps do not substitute for the task, and a worker result does
+    not close the task without attached evidence and verification by a distinct
+    identity under the ledger's existing verification rules.
   trust: proposed
 - id: RRF-RUL-003
   name: Adapter Retools The Factory
@@ -151,18 +164,22 @@ This contract governs:
 - id: RRF-RUL-009
   name: Invalid Runs Are Preserved And Excluded
   rule: >
-    Placement failure, missing telemetry, substrate drift, blocked access,
-    harness failure, and unsupported inference are recorded with structured
+    Missing, unlogged, or misreported placement evidence, missing telemetry,
+    substrate drift, blocked access, harness failure, an unmet host-state
+    precondition, and unsupported inference are recorded with structured
     causes. Invalid runs remain available for diagnosis but cannot contribute
-    to accepted scores or claims.
+    to accepted scores or claims. Mixed or partial placement that is logged is
+    not invalid: it is a condition attached to the row, and its cost is already
+    in the measured outcome.
   trust: proposed
 - id: RRF-RUL-010
   name: Retoolability Is A Pilot Question
   rule: >
     The two pilot runs are evidence about which conventions transfer and which
-    belong only to an adapter. Do not declare the spine retoolable, or freeze
+    belong only to an adapter. Do not declare the spine retoolable, or ratify
     this draft as a contract, until both pilots have completed and their
-    actual requirements have been compared.
+    actual requirements have been compared. Registering this draft as a
+    proposal claim (PROPOSAL_LIFECYCLE.md FROZEN state) is not ratification.
   trust: proposed
 - id: RRF-RUL-011
   name: Longitudinal Data Requires Provenance
@@ -173,6 +190,13 @@ This contract governs:
     including free RAM, cache pressure, major faults, and I/O where relevant.
     Rounded summaries do not replace raw records.
   trust: proposed
+- id: RRF-RUL-012
+  name: Generalize Process, Not Findings
+  rule: >
+    A result is scoped to the measured substrate, artifact, protocol, and
+    environment. Cross-model, cross-architecture, cross-host, or universal
+    claims require their own evidence and review.
+  trust: proposed
 - id: RRF-RUL-013
   name: Instrument Faults Become Checks
   rule: >
@@ -181,14 +205,28 @@ This contract governs:
     affected measurement is reused. Intent to discover faults is not evidence
     that the instrument detected them.
   trust: proposed
-- id: RRF-RUL-012
-  name: Generalize Process, Not Findings
-  rule: >
-    A result is scoped to the measured substrate, artifact, protocol, and
-    environment. Cross-model, cross-architecture, cross-host, or universal
-    claims require their own evidence and review.
-  trust: proposed
 ```
+
+## Pilot Evidence (2026-09-14)
+
+The first PPR Data Atlas pilot exercised the draft spine without deploying:
+
+- one control-plane task (`ppr-data-atlas-v1`);
+- two workers from the same frozen baseline;
+- read-only substrate checks and independent handoffs;
+- supervisor deterministic reruns and reconciliation;
+- a human-owner decision on public tool-scope wording;
+- a bounded source change committed locally but not published.
+
+The GPU pilot exercised a different shape: controlled repeated measurements on
+one host, with no second worker required. It exposed two instrument faults that
+became checks: auxiliary `5/5` placement lines must not mask the main model,
+and MoE layer counts do not prove expert residency. Host memory and page-cache
+state are measurement variables, not optional commentary.
+
+These observations are evidence for revising this draft, not ratification of
+all proposed rules. In particular, the adapter—not the spine—chooses worker
+independence, telemetry, and execution tier.
 
 ## Adapter Contract
 
@@ -200,7 +238,10 @@ objective and bounded scope
 authoritative substrate and digest method
 deterministic tools and invocation contract
 worker brief and isolated-workspace rule
-machine-readable evidence schema
+independence design (RRF-RUL-005)
+machine-readable evidence schema and status vocabulary
+known instrument faults (RRF-RUL-013)
+execution tier and escalation reason
 artifact and handoff paths
 acceptance checks and negative/unknown cases
 cost and runtime limit
@@ -215,34 +256,31 @@ Initial adapters:
 - `ppr-data-atlas`: SQLite, deterministic 15-tool registry, local JSON/HTML,
   public-page/link inspection, and stale/unsupported-claim ledger.
 
-## Lifecycle Gates
+## Proposed Lifecycle Gates
 
-```pbc:gates
-- id: RRF-GATE-A
-  name: Baseline frozen
-  check: >
-    Task, adapter, source/artifact digest, host/runtime identity, and access
-    status are recorded before worker execution.
-- id: RRF-GATE-B
-  name: Instrument admissible
-  check: >
-    Required telemetry and deterministic checks are available; missing or
-    misleading signals cause an explicit invalid result.
-- id: RRF-GATE-C
-  name: Independent outputs
-  check: >
-    Required workers started from the same baseline and returned evidence or a
-    structured failure.
-- id: RRF-GATE-D
-  name: Reconciled
-  check: >
-    Agreements, one-sided findings, conflicts, supervisor reruns, decisions,
-    and human owners are recorded.
-- id: RRF-GATE-E
-  name: Human-owner decision
-  check: >
-    The human owner reviews scope, authority, provenance, non-goals, and
-    consequence before merge, acceptance, publication, or deployment.
+```pbc:proposed-behavior
+id: RRF-BHV-001
+name: Advance A Work Item Through Lifecycle Gates
+actor: supervisor
+description: Move a factory work item from specification to human-owner decision, recording each gate in the ledger. Gates A-E are checked in order; a failed gate stops the item with a structured cause.
+trust: proposed
+```
+
+```pbc:proposed-outcomes
+- Gate A, baseline frozen: task, adapter, execution tier, source/artifact
+  digest, host/runtime identity, cost limit, stop criteria, and access status
+  are recorded before worker execution.
+- Gate B, instrument admissible: required telemetry, host-state preconditions,
+  and known-fault checks are available; missing or misleading signals cause an
+  explicit invalid result.
+- Gate C, independent outputs: the independence design the adapter declares
+  (RRF-RUL-005) is satisfied from the same baseline, and every run returned
+  evidence or a structured failure.
+- Gate D, reconciled: agreements, one-sided findings, conflicts, supervisor
+  reruns, decisions, and human owners are recorded.
+- Gate E, human-owner decision: the operator reviews scope, authority,
+  provenance, non-goals, and consequence before merge, acceptance, publication,
+  or deployment (RRF-RUL-008), recorded with `operator decide`.
 ```
 
 ## Deferred Product Question
@@ -270,9 +308,44 @@ control plane records the chosen tier and reason.
 - `ppr-data-atlas-v1`: first retooling proof using SQLite and public HTML.
 - `offload-curve-moe-residency`: determine whether the observed MoE offload
   curve is expert/page-cache behavior rather than a transferable dense-layer
-  constant.
+  constant. The original curve was measured with the RTX 3090s behind the i9
+  desktop; the cards have since moved to the i3-9100F testbench, so any rerun
+  is a new protocol version on a new host, not a continuation.
 
 Both remain subject to control-plane recording and explicit evidence capture.
 The Data Atlas pilot is a Change-tier candidate with supervisor reconciliation
 and human-owner decision. The offload pilot is a Study-tier candidate; a
 second worker is not required unless its adapter specification says so.
+
+## Provenance
+
+```pbc:provenance
+- ref: "evals/local_lane_ladder/fixtures/moe-expert-residency-2026-09-12/FINDING.md"
+  confidence: measured
+  review_status: "unverified"
+  note: "RTX 2080 desktop, ollama 0.32.12. gemma4:26b logs 31/31 layers on GPU while all MoE experts are in system RAM, on every load. Decode 32-34 tok/s cached vs 4.0-4.5 tok/s on page-cache eviction at identical placement. Source for the first Why This Exists example and for host memory state in RRF-RUL-011."
+- ref: "evals/local_lane_ladder/fixtures/singlecard-rank-2026-09-08/FINDING.md"
+  confidence: measured
+  review_status: "unverified"
+  note: "Desktop with RTX 3090s, 2026-09-08. Source of the +1.34 ms per CPU-resident layer figure for gemma4:26b."
+- ref: "docs/REVIEW_CALL_dense-offload-curve_2026-09-09.md"
+  confidence: verified
+  review_status: "unverified"
+  note: "D2 withdraws the gemma4-26b per-layer constant (~1.25-1.34 ms) as a figure transferable to dense models. Source for the second Why This Exists example."
+- ref: "evals/local_lane_ladder/fixtures/testbench-parity-gated-20260912/PROVENANCE.md"
+  confidence: verified
+  review_status: "active"
+  note: "Places an RTX 3090 on the i3-9100F testbench by 2026-09-12, and records that RESULTS.md names the runner host rather than the inference host over an SSH tunnel. Source for the host note on offload-curve-moe-residency."
+- ref: "/home/blueaz/Python/ppr-agent/deliver/ppr-data-atlas-v1-supervisor-packet.md"
+  confidence: verified
+  review_status: "active"
+  note: "Authoritative registry is static in core/tool_registry.py with 15 tools. Source for the ppr-data-atlas adapter description."
+- ref: "docs/PROPOSAL_LIFECYCLE.md"
+  confidence: verified
+  review_status: "active"
+  note: "Fencing, freeze, and operator decide semantics this draft follows. Section 5 forbids new record types, which constrains the spine."
+- ref: "docs/RETOOLABLE_FACTORY_ROADMAP.md"
+  confidence: verified
+  review_status: "draft"
+  note: "Pilot phases, exit criteria, deviation logs, and the Phase 3 extraction this draft is revised against."
+```
