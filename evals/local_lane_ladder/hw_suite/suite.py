@@ -102,6 +102,19 @@ def vram() -> list[int]:
     return [int(x) for x in out.split()]
 
 
+def host_state() -> dict[str, int]:
+    values = {}
+    for line in Path("/proc/meminfo").read_text().splitlines():
+        key, _, rest = line.partition(":")
+        if key in {"MemAvailable", "Cached", "SwapFree"}:
+            values[key] = int(rest.split()[0])
+    for line in Path("/proc/vmstat").read_text().splitlines():
+        key, _, value = line.partition(" ")
+        if key in {"pgmajfault", "pswpin", "pswpout"}:
+            values[key] = int(value)
+    return values
+
+
 def read_placement(unit: str | None, log_path: str | None, since: str) -> dict:
     """'offloaded N/M layers' from the daemon's OWN log. INVALID if unreadable."""
     if unit:
@@ -130,6 +143,29 @@ def read_placement(unit: str | None, log_path: str | None, since: str) -> dict:
     n, m = placements[-1]
     return {"valid": True, "gpu_layers": n, "total_layers": m,
             "cpu_layers": m - n}
+
+
+def read_load_memory(log_path: str | None) -> dict:
+    if not log_path or not Path(log_path).is_file():
+        return {"valid": False, "reason": "no daemon log available"}
+    lines = Path(log_path).read_text(errors="replace").splitlines()
+    starts = [i for i, line in enumerate(lines) if "load_tensors: loading model tensors" in line]
+    if not starts:
+        return {"valid": False, "reason": "no model-load block"}
+    cpu = cuda = None
+    for line in lines[starts[-1]:]:
+        m = re.search(r"CPU_Mapped model buffer size =\\s+([0-9.]+) MiB", line)
+        if m:
+            cpu = float(m.group(1))
+        m = re.search(r"CUDA\\d+ model buffer size =\\s+([0-9.]+) MiB", line)
+        if m:
+            cuda = (cuda or 0.0) + float(m.group(1))
+        if cpu is not None and cuda is not None and "llama_context:" in line:
+            break
+    if cpu is None or cuda is None:
+        return {"valid": False, "reason": "model-buffer split not found"}
+    return {"valid": True, "cpu_mapped_mib": cpu, "cuda_mib": cuda,
+            "expert_residency_proven": False}
 
 
 def run_cell(args, ctx: int, kv: str, num_gpu: int | None, prompt: str, phash: str) -> dict:
@@ -167,6 +203,7 @@ def run_cell(args, ctx: int, kv: str, num_gpu: int | None, prompt: str, phash: s
         }
     time.sleep(3)
 
+    state_before = host_state()
     options = {"num_ctx": ctx, "num_predict": 16, "temperature": 0}
     if num_gpu is not None:
         options["num_gpu"] = num_gpu
@@ -179,7 +216,9 @@ def run_cell(args, ctx: int, kv: str, num_gpu: int | None, prompt: str, phash: s
         peak = [max(a, b) for a, b in zip(peak, vram())]
         trials.append(r)
 
+    state_after = host_state()
     placement = read_placement(cfg["daemon"]["systemd_unit"], args.daemon_log, since)
+    load_memory = read_load_memory(args.daemon_log)
     sampled = watch.stop()
     quiet, why = watch.verdict(set(sampled["ollama_gpu_pids"]))
 
@@ -194,7 +233,9 @@ def run_cell(args, ctx: int, kv: str, num_gpu: int | None, prompt: str, phash: s
 
     row = {"status": status, "config": cfg, "num_ctx": ctx, "kv_cache_type": kv,
            "num_gpu": num_gpu, "prompt_sha16": phash, "repeats": args.repeats,
-           "placement": placement, "quiet": {"ok": quiet, "detail": why, **sampled},
+           "placement": placement, "load_memory": load_memory,
+           "host_state_before": state_before, "host_state_after": state_after,
+           "quiet": {"ok": quiet, "detail": why, **sampled},
            "vram_peak_mib": peak, "warm_load_s": warm.get("load_s"), "trials": trials}
     if ok:
         row["summary"] = {
