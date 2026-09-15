@@ -153,11 +153,18 @@ def read_load_memory(log_path: str | None) -> dict:
     if not starts:
         return {"valid": False, "reason": "no model-load block"}
     cpu = cuda = None
-    for line in lines[starts[-1]:]:
-        m = re.search(r"CPU_Mapped model buffer size =\\s+([0-9.]+) MiB", line)
+    load_start = starts[-1]
+    for candidate in reversed(starts):
+        if any(re.search(r"offloaded\s+\d+/(\d+)\s+layers to GPU", line)
+               and int(re.search(r"offloaded\s+\d+/(\d+)\s+layers to GPU", line).group(1)) >= 10
+               for line in lines[candidate:]):
+            load_start = candidate
+            break
+    for line in lines[load_start:]:
+        m = re.search(r"CPU_Mapped model buffer size =\s+([0-9.]+) MiB", line)
         if m:
             cpu = float(m.group(1))
-        m = re.search(r"CUDA\\d+ model buffer size =\\s+([0-9.]+) MiB", line)
+        m = re.search(r"CUDA\d+ model buffer size =\s+([0-9.]+) MiB", line)
         if m:
             cuda = (cuda or 0.0) + float(m.group(1))
         if cpu is not None and cuda is not None and "llama_context:" in line:
