@@ -31,6 +31,11 @@ Use these files as structured context for coding agents, QA review, drift checks
   fail-closed, session+clipboard APIs only). Draft; proposed rules unratified. Ledger task: `pi-operator-extension-pbc-review`. POE-RUL-101–113
   are proposed and unratified; verified block POE-RUL-001–005 records the CLI constraints they
   must respect.
+- `appendix-retoolable-research-factory.pbc.md` — draft contract for a reusable research
+  factory: one spine (ledger task, evidence rows, reconciliation, human gate) retooled by
+  domain adapters. Ledger task: `retoolable-research-factory-pbc`. RRF-RUL-001–013 and
+  RRF-BHV-001 are proposed and unratified; the spine is to be revised from two pilots
+  (`ppr-data-atlas-v1`, `offload-curve-moe-residency`) per `docs/RETOOLABLE_FACTORY_ROADMAP.md`.
 
 ## Trust Model
 

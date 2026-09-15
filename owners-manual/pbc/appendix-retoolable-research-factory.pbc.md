@@ -219,10 +219,11 @@ The first PPR Data Atlas pilot exercised the draft spine without deploying:
 - a bounded source change committed locally but not published.
 
 The GPU pilot exercised a different shape: controlled repeated measurements on
-one host, with no second worker required. It exposed two instrument faults that
-became checks: auxiliary `5/5` placement lines must not mask the main model,
-and MoE layer counts do not prove expert residency. Host memory and page-cache
-state are measurement variables, not optional commentary.
+one host, with no second worker required. It exposed one committed parser check:
+an auxiliary `5/5` placement line must not mask the main model. It also exposed a
+second documented fault that is not yet enforced: MoE layer counts do not prove
+expert residency. Host memory and page-cache state are measurement variables,
+not optional commentary.
 
 These observations are evidence for revising this draft, not ratification of
 all proposed rules. In particular, the adapter—not the spine—chooses worker

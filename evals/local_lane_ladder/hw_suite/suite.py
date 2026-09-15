@@ -37,6 +37,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import statistics
 import subprocess
 import sys
@@ -113,10 +114,22 @@ def read_placement(unit: str | None, log_path: str | None, since: str) -> dict:
     hits = [l for l in raw.splitlines() if "offloaded" in l and "layers to GPU" in l]
     if not hits:
         return {"valid": False, "reason": "no 'offloaded N/M layers' line in window"}
-    tail = hits[-1].split("offloaded", 1)[1]
-    n, m = tail.split("layers")[0].strip().split("/")
-    return {"valid": True, "gpu_layers": int(n), "total_layers": int(m.strip()),
-            "cpu_layers": int(m.strip()) - int(n)}
+    # MoE models may log a separate projector/auxiliary graph after the main
+    # transformer (e.g. 5/5 after gemma4's 31/31). The log is shared across
+    # cells, so select the latest main-model line, not the maximum from an
+    # earlier cell and not the final auxiliary line.
+    placements = []
+    for line in hits:
+        match = re.search(r"offloaded\s+(\d+)/(\d+)\s+layers to GPU", line)
+        if match:
+            n, m = int(match.group(1)), int(match.group(2))
+            if m >= 10:
+                placements.append((n, m))
+    if not placements:
+        return {"valid": False, "reason": "unparseable main-model placement line"}
+    n, m = placements[-1]
+    return {"valid": True, "gpu_layers": n, "total_layers": m,
+            "cpu_layers": m - n}
 
 
 def run_cell(args, ctx: int, kv: str, num_gpu: int | None, prompt: str, phash: str) -> dict:
@@ -131,7 +144,28 @@ def run_cell(args, ctx: int, kv: str, num_gpu: int | None, prompt: str, phash: s
     watch.start()                       # refuses if not quiet at t0
     since = time.strftime("%Y-%m-%d %H:%M:%S")
     subprocess.run(["ollama", "stop", args.model], capture_output=True)
-    time.sleep(2)
+    # Explicit API eviction is required for a non-default daemon/endpoint;
+    # `ollama stop` can address the default daemon instead.
+    eviction_error = None
+    try:
+        evict = json.dumps({"model": args.model, "prompt": "", "keep_alive": 0}).encode()
+        req = urllib.request.Request(f"http://{args.daemon}/api/generate", data=evict,
+                                     headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=30):
+            pass
+    except Exception as exc:  # eviction is an admissibility requirement
+        eviction_error = repr(exc)
+    if eviction_error:
+        sampled = watch.stop()
+        return {
+            "status": "INVALID", "reason": f"model eviction failed: {eviction_error}",
+            "config": cfg, "num_ctx": ctx, "kv_cache_type": kv, "num_gpu": num_gpu,
+            "prompt_sha16": phash, "repeats": args.repeats,
+            "placement": {"valid": False, "reason": "eviction failed; placement contaminated"},
+            "quiet": {"ok": False, "detail": "eviction failed", **sampled},
+            "trials": [], "summary": {"error": eviction_error},
+        }
+    time.sleep(3)
 
     options = {"num_ctx": ctx, "num_predict": 16, "temperature": 0}
     if num_gpu is not None:

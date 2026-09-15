@@ -621,6 +621,23 @@ def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
         )
         models = json.loads(ps.stdout).get("models", [])
         row = next((item for item in models if item.get("name") == model), None)
+        if row is None:
+            # Ollama may retain a same-digest alias when a derived Modelfile
+            # differs only in sampling parameters. Match the requested tag's
+            # digest rather than falsely declaring placement failure.
+            tags = subprocess.run(
+                ["curl", "-sS", "--max-time", "5", "http://127.0.0.1:11434/api/tags"],
+                capture_output=True, text=True, timeout=10, check=True,
+            )
+            requested = next(
+                (item for item in json.loads(tags.stdout).get("models", [])
+                 if item.get("name") == model), None
+            )
+            if requested:
+                row = next(
+                    (item for item in models if item.get("digest") == requested.get("digest")),
+                    None,
+                )
     except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as exc:
         raise GPUResidencyError(f"placement gate could not inspect {model}: {exc}") from exc
     if row is None:
