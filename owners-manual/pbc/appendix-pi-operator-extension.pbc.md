@@ -413,10 +413,6 @@ future_features:
     name: Operator next-steps command
     command: /op:next-steps
     description: "Turn the active task's ledger state into a short prioritized action list: current next_action first, then unverified claims, missing review/verification gates, recent dogfood issues, and recommended future slices."
-  - id: POE-FUT-012
-    name: Cross-project install and publish path
-    command: scripts/install-operator-extension.py
-    description: "Remaining product gap is GitHub issue #18, not a new /op:install command. Helper and ledger contract already exist (scripts/install-operator-extension.py plus .pi/operator-ledger.json). Close this future when #18 acceptance is met or explicitly scoped down: one-command install into a disposable project, /op:status and /op:roadmap against the configured Operator ledger, fail-closed missing contract, no copied .operator/ data."
   - id: POE-FUT-013
     name: Workflow strictness modes
     description: "Closed as guidance-only. Do not ship /op:mode. Support/deliverable can close on user acceptance; engineering-light expects tests plus claim/evidence/handoff; engineering-trust expects PBC/spec, review, evidence, and a distinct verifier. Optional copy in /op:next-steps is enough; this must not become another required gate."
@@ -433,7 +429,7 @@ future_features:
 > Factual implementation note (2026-09-05; amended 2026-09-16; not a ratification or lifecycle change):
 > `/op:next-steps`, `/op:project`, and `/op:roadmap --project` exist as read-only orientation commands.
 > POE-FUT-011 is implemented by those project-dashboard commands and is no longer a future candidate.
-> POE-FUT-012 remains open and tracks GitHub issue #18. Helper path is `scripts/install-operator-extension.py` plus `.pi/operator-ledger.json`; there is no `/op:install` command.
+> POE-FUT-012 is implemented by `scripts/install-operator-extension.py` plus `.pi/operator-ledger.json` (`wired_into_findLedger: true`). There is no `/op:install` command. GitHub issue #18 is the tracking issue for that helper; it is not a remaining product gap beyond live Pi trust of the consumer project.
 > POE-FUT-013 is closed as guidance-only; do not add `/op:mode`.
 > POE-FUT-014 Route C is recorded as a compatibility-route choice only. The check is local wrapper `scripts/pbc_validate_operator.py` around the pinned pbc-spec CLI. The upstream CLI has no `--profile`. `proposed-*` fences are not canonical upstream types. `/pbc:*` commands remain unimplemented.
 
