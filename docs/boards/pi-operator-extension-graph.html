@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Project map · pi-operator-extension</title>
+<style>
+  body { margin:0; background:#0f1419; color:#e8eef4; font:14px/1.4 ui-sans-serif,system-ui; }
+  nav { padding:16px 24px 0; }
+  nav a { color:#59c2ff; text-decoration:none; margin-right:12px; }
+  h1 { margin:8px 24px 4px; font-size:24px; }
+  .sub { margin:0 24px 16px; color:#9aa8b4; }
+  .cols { display:flex; gap:14px; overflow-x:auto; padding:0 24px 24px; align-items:flex-start; }
+  section { min-width:220px; background:#1a222c; border-radius:14px; padding:12px; }
+  h2 { margin:0 0 10px; font-size:13px; color:#9aa8b4; text-transform:uppercase; letter-spacing:.04em; }
+  .node { display:block; background:#10161c; border-radius:10px; padding:10px; margin:0 0 8px; color:inherit; text-decoration:none; border-left:4px solid #445; }
+  .status-verified { border-left-color:#3dd68c; }
+  .status-assigned,.status-new { border-left-color:#f5c542; }
+  .status-running { border-left-color:#59c2ff; }
+  .status-quarantined { border-left-color:#f07178; }
+  .node strong { display:block; }
+  .node em { color:#9aa8b4; font-style:normal; font-size:12px; }
+  .chip { display:inline-block; margin:6px 4px 0 0; padding:2px 6px; border-radius:999px; background:#0004; font-size:11px; }
+  .chip.ok,.chip.addressed { color:#3dd68c; }
+  .chip.no,.chip.open { color:#f07178; }
+  .issues { margin:0 24px 40px; }
+</style>
+</head>
+<body>
+<nav><a href="pi-operator-extension.html">Project</a> <a href="pi-operator-extension-issues.html">Issues</a></nav>
+<h1>pi-operator-extension</h1>
+<p class="sub">Whole-project map · click a task for its resolution ledger · not Obsidian, not floating dots</p>
+<div class="cols"><section><h2>spec</h2><a class="node status-verified" href="pi-operator-extension-pbc-profile-resolution.html"><strong>pbc-profile</strong><em>verified · 2/3</em><span class="chip no">claim-0155</span><span class="chip ok">claim-0156</span><span class="chip ok">claim-0161</span></a><a class="node status-assigned" href="pi-operator-extension-pbc-review-resolution.html"><strong>pbc-review</strong><em>assigned · 0/3</em><span class="chip no">claim-0117</span><span class="chip no">claim-0118</span><span class="chip no">claim-0119</span></a></section><section><h2>ladder step1</h2><a class="node status-verified" href="pi-operator-extension-step1-resolution.html"><strong>step1</strong><em>verified · 1/4</em><span class="chip no">claim-0120</span><span class="chip no">claim-0121</span><span class="chip no">claim-0122</span><span class="chip ok">claim-0123</span></a></section><section><h2>ladder step2</h2><a class="node status-verified" href="pi-operator-extension-step2-resolution.html"><strong>step2</strong><em>verified · 1/4</em><span class="chip no">claim-0124</span><span class="chip no">claim-0125</span><span class="chip no">claim-0126</span><span class="chip ok">claim-0127</span></a></section><section><h2>ladder step3</h2><a class="node status-verified" href="pi-operator-extension-step3-resolution.html"><strong>step3</strong><em>verified · 1/4</em><span class="chip no">claim-0128</span><span class="chip no">claim-0129</span><span class="chip no">claim-0130</span><span class="chip ok">claim-0131</span></a></section><section><h2>ladder step4</h2><a class="node status-running" href="pi-operator-extension-step4-via-claude-resolution.html"><strong>step4-via-claude</strong><em>running · 0/0</em></a><a class="node status-verified" href="pi-operator-extension-step4-resolution.html"><strong>step4</strong><em>verified · 1/3</em><span class="chip ok">claim-0132</span><span class="chip no">claim-0133</span><span class="chip no">claim-0134</span></a></section><section><h2>ladder step5</h2><a class="node status-quarantined" href="pi-operator-extension-step5-dogfood-resolution.html"><strong>step5-dogfood</strong><em>quarantined · 0/6</em><span class="chip no">claim-0135</span><span class="chip no">claim-0136</span><span class="chip no">claim-0137</span><span class="chip no">claim-0138</span><span class="chip no">claim-0139</span><span class="chip no">claim-0140</span></a></section><section><h2>follow-on</h2><a class="node status-verified" href="pi-operator-extension-next-steps-resolution.html"><strong>next-steps</strong><em>verified · 1/1</em><span class="chip ok">claim-0157</span></a><a class="node status-verified" href="pi-operator-extension-project-dashboard-resolution.html"><strong>project-dashboard</strong><em>verified · 1/1</em><span class="chip ok">claim-0158</span></a><a class="node status-quarantined" href="pi-operator-extension-target-ux-cleanup-via-grok-resolution.html"><strong>target-ux-cleanup-via-grok</strong><em>quarantined · 0/0</em></a><a class="node status-verified" href="pi-operator-extension-target-ux-cleanup-resolution.html"><strong>target-ux-cleanup</strong><em>verified · 1/1</em><span class="chip ok">claim-0141</span></a><a class="node status-verified" href="pi-operator-extension-workflow-guidance-resolution.html"><strong>workflow-guidance</strong><em>verified · 1/1</em><span class="chip ok">claim-0160</span></a></section><section><h2>cross-project</h2><a class="node status-new" href="pi-operator-extension-cross-project-delegate-resolution.html"><strong>cross-project-delegate</strong><em>new · 0/0</em></a><a class="node status-verified" href="pi-operator-extension-cross-project-install-resolution.html"><strong>cross-project-install</strong><em>verified · 1/1</em><span class="chip ok">claim-0159</span></a></section></div>
+<div class="issues"><h2>Issues</h2><span class="chip open">POE-ISS-001</span><span class="chip open">POE-ISS-002</span><span class="chip open">POE-ISS-003</span><span class="chip open">POE-ISS-004</span><span class="chip open">POE-ISS-005</span><span class="chip open">POE-ISS-006</span><span class="chip open">POE-ISS-007</span><span class="chip open">POE-ISS-008</span><span class="chip open">POE-ISS-009</span><span class="chip in-ledger">POE-ISS-010</span><span class="chip in-ledger">POE-ISS-011</span><span class="chip open">POE-ISS-012</span><span class="chip open">POE-ISS-013</span><span class="chip open">POE-ISS-014</span><span class="chip open">POE-ISS-015</span></div>
+</body></html>

@@ -21,6 +21,7 @@ the pinned upstream CLI has no `--profile` flag.
 | `/op:tasks [--all] [filter]` | `./operator task-list` | no |
 | `/op:next-steps [mode] [popup]` | `task-list`, `task-show`, `claim-list` ranked into a short action list | no |
 | `/op:project <prefix>` | `task-list` plus per-match `task-show` / `claim-list` | no |
+| HTML boards | `python3 scripts/operator_project_board.py` writes `docs/boards/` from the local ledger | no |
 | `/op:roadmap [--project <prefix>]` | ladder/issues/futures, or the project dashboard when `--project` is present | no |
 | `/op:use [task-id]` | selects a task for this pi session; `./operator task-use <id>` **only after you confirm** | only on confirmation |
 | `/op:claim [text]` | **experimental** `./operator claim-add --task … --by <session>` | only on confirmation |

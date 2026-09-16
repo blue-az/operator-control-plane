@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Operator board · pi-operator-extension</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a222c; --ink:#e8eef4; --muted:#9aa8b4; --ok:#3dd68c; --warn:#f5c542; --bad:#f07178; --run:#59c2ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header.top { padding:28px 32px 12px; }
+  .nav { color:var(--muted); margin-bottom:10px; }
+  .nav a, .card h2 a { color:var(--run); text-decoration:none; }
+  .nav a:hover, .card h2 a:hover { text-decoration:underline; }
+  h1 { margin:0 0 6px; font-size:28px; font-weight:650; }
+  .sub { color:var(--muted); }
+  .kpis { display:flex; gap:12px; flex-wrap:wrap; padding:0 32px 20px; }
+  .kpi { background:var(--card); padding:12px 16px; border-radius:12px; min-width:120px; }
+  .kpi b { display:block; font-size:22px; }
+  .ladder { display:flex; gap:8px; padding:0 32px 24px; flex-wrap:wrap; }
+  .step { flex:1; min-width:110px; background:var(--card); border-radius:12px; padding:10px 12px; }
+  .step span { display:block; color:var(--muted); font-size:12px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; padding:0 32px 32px; }
+  .card { background:var(--card); border-radius:14px; padding:14px 16px; border-left:4px solid #445; }
+  .status-verified { border-left-color:var(--ok); }
+  .status-assigned, .status-new { border-left-color:var(--warn); }
+  .status-running { border-left-color:var(--run); }
+  .status-quarantined { border-left-color:var(--bad); }
+  .card.stale { outline:1px dashed var(--warn); }
+  .card header { display:flex; justify-content:space-between; gap:8px; align-items:start; }
+  .card h2 { margin:0; font-size:14px; font-weight:650; word-break:break-all; }
+  .pill { font-size:11px; text-transform:uppercase; letter-spacing:.04em; background:#0003; padding:3px 8px; border-radius:999px; }
+  .bar { height:6px; background:#0004; border-radius:99px; margin:10px 0 8px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--ok); }
+  .meta { color:var(--muted); font-size:12px; margin:0 0 8px; }
+  .next { margin:0 0 8px; font-size:13px; }
+  section.lists { display:grid; grid-template-columns:1fr 1fr; gap:20px; padding:0 32px 48px; }
+  @media (max-width:800px) { section.lists { grid-template-columns:1fr; } }
+  ul { margin:8px 0 0; padding-left:18px; color:var(--muted); }
+  li { margin:0 0 8px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <h1>pi-operator-extension</h1>
+  <p class="sub">Simple Operator board · snapshot 2026-09-16 21:35 UTC · not Graphify, not a knowledge graph</p>
+</header>
+<div class="kpis">
+  <div class="kpi"><b>15</b>tasks</div>
+  <div class="kpi"><b>10</b>verified tasks</div>
+  <div class="kpi"><b>11/32</b>claims verified</div>
+  <div class="kpi"><b>3</b>stale next_action</div>
+</div>
+<div class="ladder">
+  <div class="step"><span>Step 0</span>PBC lifecycle shape</div><div class="step"><span>Step 1</span>Read-only orientation</div><div class="step"><span>Step 2</span>Claim / evidence / handoff</div><div class="step"><span>Step 3</span>Supervisor-review</div><div class="step"><span>Step 4</span>Delegate chooser</div><div class="step"><span>Step 5</span>Falsifiable dogfood</div>
+</div>
+<div class="grid">
+
+<article class="card status-new">
+  <header>
+    <h2><a href="pi-operator-extension-cross-project-delegate-resolution.html">pi-operator-extension-cross-project-delegate</a></h2>
+    <span class="pill">new</span>
+  </header>
+  <div class="bar"><i style="width:0%"></i></div>
+  <p class="meta">0/0 claims verified · 0 evidence · 4 handoffs</p>
+  <p class="next">Do not recreate the FUT slices from this task. Remaining work is owner publishing/commit and any new UX issues (POE-ISS-011..013), not another backlog stub.</p>
+  <p class="meta">latest verified: none · updated 2026-09-06T01:49:12</p>
+</article>
+<article class="card status-verified">
+  <header>
+    <h2><a href="pi-operator-extension-cross-project-install-resolution.html">pi-operator-extension-cross-project-install</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:100%"></i></div>
+  <p class="meta">1/1 claims verified · 4 evidence · 2 handoffs</p>
+  <p class="next">Cross-project install helper and disposable consumer smoke are verified; publishing and live non-temp consumer trust remain out of scope.</p>
+  <p class="meta">latest verified: claim-0159 · updated 2026-09-06T01:42:00</p>
+</article>
+<article class="card status-verified">
+  <header>
+    <h2><a href="pi-operator-extension-next-steps-resolution.html">pi-operator-extension-next-steps</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:100%"></i></div>
+  <p class="meta">1/1 claims verified · 2 evidence · 2 handoffs</p>
+  <p class="next">/op:next-steps implementation is verified; no further implementation or verification action is pending on this task.</p>
+  <p class="meta">latest verified: claim-0157 · updated 2026-09-06T01:41:59</p>
+</article>
+<article class="card status-verified">
+  <header>
+    <h2><a href="pi-operator-extension-pbc-profile-resolution.html">pi-operator-extension-pbc-profile</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:66%"></i></div>
+  <p class="meta">2/3 claims verified · 8 evidence · 3 handoffs</p>
+  <p class="next">Implementation claims 0156 and 0161 are verified. Remaining on this task is claim-0155 (Route C compatibility-route record, not proposed-rule ratification) and any later owner-authorized publish/profile work.</p>
+  <p class="meta">latest verified: claim-0161 · updated 2026-09-06T01:42:00</p>
+</article>
+<article class="card status-assigned">
+  <header>
+    <h2><a href="pi-operator-extension-pbc-review-resolution.html">pi-operator-extension-pbc-review</a></h2>
+    <span class="pill">assigned</span>
+  </header>
+  <div class="bar"><i style="width:0%"></i></div>
+  <p class="meta">0/3 claims verified · 4 evidence · 5 handoffs</p>
+  <p class="next">Do not start Step 1 from this review task. Use the existing step/FUT task IDs. claim-0119 remains historical on this task.</p>
+  <p class="meta">latest verified: none · updated 2026-09-06T01:49:12</p>
+</article>
+<article class="card status-verified">
+  <header>
+    <h2><a href="pi-operator-extension-project-dashboard-resolution.html">pi-operator-extension-project-dashboard</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:100%"></i></div>
+  <p class="meta">1/1 claims verified · 2 evidence · 2 handoffs</p>
+  <p class="next">/op:project dashboard implementation is verified; no further implementation or verification action is pending on this task.</p>
+  <p class="meta">latest verified: claim-0158 · updated 2026-09-06T01:41:59</p>
+</article>
+<article class="card status-verified stale">
+  <header>
+    <h2><a href="pi-operator-extension-step1-resolution.html">pi-operator-extension-step1</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:25%"></i></div>
+  <p class="meta">1/4 claims verified · 7 evidence · 7 handoffs</p>
+  <p class="next">STALE · Owner decision: proceed to Step 2 (/op:claim, /op:evidence, /op:handoff) or request additional verification of claims 0120-0122 before continuing.</p>
+  <p class="meta">latest verified: claim-0123 · updated 2026-09-01T23:28:39</p>
+</article>
+<article class="card status-verified stale">
+  <header>
+    <h2><a href="pi-operator-extension-step2-resolution.html">pi-operator-extension-step2</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:25%"></i></div>
+  <p class="meta">1/4 claims verified · 11 evidence · 6 handoffs</p>
+  <p class="next">STALE · Proceed to Step 3 decision: implement /op:supervisor-review, or first capture the verifier-only draft-evidence limitation in the PBC backlog.</p>
+  <p class="meta">latest verified: claim-0127 · updated 2026-09-02T00:37:26</p>
+</article>
+<article class="card status-verified">
+  <header>
+    <h2><a href="pi-operator-extension-step3-resolution.html">pi-operator-extension-step3</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:25%"></i></div>
+  <p class="meta">1/4 claims verified · 8 evidence · 3 handoffs</p>
+  <p class="next">Recommended: accept verified claim-0131 as sufficient for Step 3 and move to Step 4 /op:delegate design/implementation, unless owner wants live TUI dogfood first.</p>
+  <p class="meta">latest verified: claim-0131 · updated 2026-09-02T01:34:36</p>
+</article>
+<article class="card status-running">
+  <header>
+    <h2><a href="pi-operator-extension-step4-via-claude-resolution.html">pi-operator-extension-step4-via-claude</a></h2>
+    <span class="pill">running</span>
+  </header>
+  <div class="bar"><i style="width:0%"></i></div>
+  <p class="meta">0/0 claims verified · 0 evidence · 1 handoffs</p>
+  <p class="next">Do not resume this child loop. Parent step4 is verified; later dogfood is on step5 (currently quarantined for source drift).</p>
+  <p class="meta">latest verified: none · updated 2026-09-06T01:49:12</p>
+</article>
+<article class="card status-verified stale">
+  <header>
+    <h2><a href="pi-operator-extension-step4-resolution.html">pi-operator-extension-step4</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:33%"></i></div>
+  <p class="meta">1/3 claims verified · 9 evidence · 8 handoffs</p>
+  <p class="next">STALE · Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.</p>
+  <p class="meta">latest verified: claim-0132 · updated 2026-09-02T06:08:56</p>
+</article>
+<article class="card status-quarantined">
+  <header>
+    <h2><a href="pi-operator-extension-step5-dogfood-resolution.html">pi-operator-extension-step5-dogfood</a></h2>
+    <span class="pill">quarantined</span>
+  </header>
+  <div class="bar"><i style="width:0%"></i></div>
+  <p class="meta">0/6 claims verified · 15 evidence · 12 handoffs</p>
+  <p class="next">Do not restore trust on pi-operator-extension-step5-dogfood until an independent uid-966 verifier reruns against a coherent tree; current dirty test file is not that target.</p>
+  <p class="meta">latest verified: none · updated 2026-09-06T00:21:26</p>
+</article>
+<article class="card status-quarantined">
+  <header>
+    <h2><a href="pi-operator-extension-target-ux-cleanup-via-grok-resolution.html">pi-operator-extension-target-ux-cleanup-via-grok</a></h2>
+    <span class="pill">quarantined</span>
+  </header>
+  <div class="bar"><i style="width:0%"></i></div>
+  <p class="meta">0/0 claims verified · 0 evidence · 1 handoffs</p>
+  <p class="next">Use the separately scoped Project Phoenix task; do not resume this accidental child task.</p>
+  <p class="meta">latest verified: none · updated 2026-09-03T01:23:00</p>
+</article>
+<article class="card status-verified">
+  <header>
+    <h2><a href="pi-operator-extension-target-ux-cleanup-resolution.html">pi-operator-extension-target-ux-cleanup</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:100%"></i></div>
+  <p class="meta">1/1 claims verified · 2 evidence · 7 handoffs</p>
+  <p class="next">Leave for publish hardening; continue cross-project trials or commit PBC backlog updates.</p>
+  <p class="meta">latest verified: claim-0141 · updated 2026-09-02T23:06:03</p>
+</article>
+<article class="card status-verified">
+  <header>
+    <h2><a href="pi-operator-extension-workflow-guidance-resolution.html">pi-operator-extension-workflow-guidance</a></h2>
+    <span class="pill">verified</span>
+  </header>
+  <div class="bar"><i style="width:100%"></i></div>
+  <p class="meta">1/1 claims verified · 2 evidence · 2 handoffs</p>
+  <p class="next">Workflow-guidance tokens on /op:next-steps are verified; no /op:mode command and no further verification action pending on this task.</p>
+  <p class="meta">latest verified: claim-0160 · updated 2026-09-06T01:42:00</p>
+</article>
+</div>
+<section class="lists">
+  <div>
+    <h3>Recent PBC issues</h3>
+    <ul><li><strong>POE-ISS-008</strong> Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.</li><li><strong>POE-ISS-009</strong> /op:handoff treated a one-word user input &quot;go&quot; as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.</li><li><strong>POE-ISS-010</strong> /op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.</li><li><strong>POE-ISS-011</strong> /op:doctor and /op:status are slow on large ledgers and previously showed no visible progress while running.</li><li><strong>POE-ISS-012</strong> Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.</li><li><strong>POE-ISS-013</strong> Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.</li><li><strong>POE-ISS-014</strong> review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat&#x27;s cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task&#x27;s grok review_harness).</li><li><strong>POE-ISS-015</strong> Review routing was blocked by a &#x27;cross-family review&#x27; requirement that is not a rule: operator enforces only a distinct agent - doctor checks that the verifier UID differs from the author UID and never checks the reviewer&#x27;s model family. The constraint keeps resurfacing in review-call section-5 blocks and wrongly marks a routable call as unrouteable.</li></ul>
+  </div>
+  <div>
+    <h3>Recent future features</h3>
+    <ul><li><strong>POE-FUT-004</strong>  — Multi-claim supervisor review</li><li><strong>POE-FUT-005</strong>  — Shared adapter export</li><li><strong>POE-FUT-006</strong>  — Delegation target registry UI</li><li><strong>POE-FUT-007</strong>  — Verifier authorization prompt</li><li><strong>POE-FUT-008</strong> /op:roadmap — Operator roadmap command</li><li><strong>POE-FUT-009</strong> /op:verify-run — Trusted verifier run command</li><li><strong>POE-FUT-010</strong> /op:next-steps — Operator next-steps command</li><li><strong>POE-FUT-013</strong>  — Workflow strictness modes</li><li><strong>POE-FUT-014</strong> /pbc:validate or pbc validate --profile operator — PBC spec CLI compatibility/profile</li><li><strong>POE-FUT-015</strong> /op:crystal or /op:crystal-attach — Crystal capture and attach command</li></ul>
+  </div>
+</section>
+<script type="application/json" id="board-data">{
+  "prefix": "pi-operator-extension",
+  "generated_at": "2026-09-16 21:35 UTC",
+  "tasks": [
+    {
+      "id": "pi-operator-extension-cross-project-delegate",
+      "status": "new",
+      "next": "Do not recreate the FUT slices from this task. Remaining work is owner publishing/commit and any new UX issues (POE-ISS-011..013), not another backlog stub.",
+      "updated": "2026-09-06T01:49:12+00:00",
+      "assigned": "",
+      "review": "",
+      "claims": [],
+      "verified": 0,
+      "total": 0,
+      "evidence": 0,
+      "handoffs": 4,
+      "stale": false,
+      "latest_verified": null
+    },
+    {
+      "id": "pi-operator-extension-cross-project-install",
+      "status": "verified",
+      "next": "Cross-project install helper and disposable consumer smoke are verified; publishing and live non-temp consumer trust remain out of scope.",
+      "updated": "2026-09-06T01:42:00+00:00",
+      "assigned": "",
+      "review": "",
+      "claims": [
+        {
+          "id": "claim-0159",
+          "verified": true,
+          "text": "Implemented smallest cross-project install path (scripts/install-operator-extension.py + v1 ledger contract wired into findLedger). Never copies runtime .operator data; fail-closes"
+        }
+      ],
+      "verified": 1,
+      "total": 1,
+      "evidence": 4,
+      "handoffs": 2,
+      "stale": false,
+      "latest_verified": "claim-0159"
+    },
+    {
+      "id": "pi-operator-extension-next-steps",
+      "status": "verified",
+      "next": "/op:next-steps implementation is verified; no further implementation or verification action is pending on this task.",
+      "updated": "2026-09-06T01:41:59+00:00",
+      "assigned": "",
+      "review": "",
+      "claims": [
+        {
+          "id": "claim-0157",
+          "verified": true,
+          "text": "Implemented read-only /op:next-steps with deterministic priority (empty ledger, no active task, next_action, unverified claims, missing gates, last-3 dogfood issues, PBC-id future "
+        }
+      ],
+      "verified": 1,
+      "total": 1,
+      "evidence": 2,
+      "handoffs": 2,
+      "stale": false,
+      "latest_verified": "claim-0157"
+    },
+    {
+      "id": "pi-operator-extension-pbc-profile",
+      "status": "verified",
+      "next": "Implementation claims 0156 and 0161 are verified. Remaining on this task is claim-0155 (Route C compatibility-route record, not proposed-rule ratification) and any later owner-authorized publish/profile work.",
+      "updated": "2026-09-06T01:42:00+00:00",
+      "assigned": "",
+      "review": "",
+      "claims": [
+        {
+          "id": "claim-0155",
+          "verified": false,
+          "text": "Human recorded POE-FUT-014 Route C as a compatibility-route choice (local wrapper scripts/pbc_validate_operator.py around pinned pbc-spec ca97caf63329cee5ecf2b92dfe1120374ab90a81)."
+        },
+        {
+          "id": "claim-0156",
+          "verified": true,
+          "text": "Implemented local Operator PBC wrapper scripts/pbc_validate_operator.py (Route C). Allowlists E004 only for proposed-rules/proposed-behavior/proposed-outcomes and E011 only for con"
+        },
+        {
+          "id": "claim-0161",
+          "verified": true,
+          "text": "Repair of Route C provenance lookup after UID 966 claim-0156 gate failure. Established cause: Git 2.55 dubious-ownership on uid-1000-owned /home/blueaz/Python/Evaluation/pbc-spec ("
+        }
+      ],
+      "verified": 2,
+      "total": 3,
+      "evidence": 8,
+      "handoffs": 3,
+      "stale": false,
+      "latest_verified": "claim-0161"
+    },
+    {
+      "id": "pi-operator-extension-pbc-review",
+      "status": "assigned",
+      "next": "Do not start Step 1 from this review task. Use the existing step/FUT task IDs. claim-0119 remains historical on this task.",
+      "updated": "2026-09-06T01:49:12+00:00",
+      "assigned": "claude",
+      "review": "pi-01a05bf2",
+      "claims": [
+        {
+          "id": "claim-0117",
+          "verified": false,
+          "text": "Supervisor review of appendix-pi-operator-extension.pbc.md returns 14 findings (F1-F14) in docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md. Verdict: the /op:delegate vs /op:sup"
+        },
+        {
+          "id": "claim-0118",
+          "verified": false,
+          "text": "Design-layer supervision of the Pi Operator extension contract before implementation: reviewed the command taxonomy, chooser scoping, session-derived identity defaults, and dogfood"
+        },
+        {
+          "id": "claim-0119",
+          "verified": false,
+          "text": "Applied Step 0 PBC lifecycle cleanup for appendix-pi-operator-extension.pbc.md after Claude supervisor review: added verified CLI constraint rules POE-RUL-001..005, moved proposed "
+        }
+      ],
+      "verified": 0,
+      "total": 3,
+      "evidence": 4,
+      "handoffs": 5,
+      "stale": false,
+      "latest_verified": null
+    },
+    {
+      "id": "pi-operator-extension-project-dashboard",
+      "status": "verified",
+      "next": "/op:project dashboard implementation is verified; no further implementation or verification action is pending on this task.",
+      "updated": "2026-09-06T01:41:59+00:00",
+      "assigned": "",
+      "review": "",
+      "claims": [
+        {
+          "id": "claim-0158",
+          "verified": true,
+          "text": "Implemented read-only /op:project <prefix> and /op:roadmap --project <prefix> with lexicographic prefix match, no invented phase order, and fail-closed empty/ambiguous prefixes. Se"
+        }
+      ],
+      "verified": 1,
+      "total": 1,
+      "evidence": 2,
+      "handoffs": 2,
+      "stale": false,
+      "latest_verified": "claim-0158"
+    },
+    {
+      "id": "pi-operator-extension-step1",
+      "status": "verified",
+      "next": "Owner decision: proceed to Step 2 (/op:claim, /op:evidence, /op:handoff) or request additional verification of claims 0120-0122 before continuing.",
+      "updated": "2026-09-01T23:28:39+00:00",
+      "assigned": "claude",
+      "review": "pi-01a05bf2",
+      "claims": [
+        {
+          "id": "claim-0120",
+          "verified": false,
+          "text": "Step 1 of the Pi Operator extension exists as a project-local pi extension at .pi/extensions/operator/ (index.ts, core.ts, render.ts, selftest.ts, README.md), discoverable by pi's "
+        },
+        {
+          "id": "claim-0121",
+          "verified": false,
+          "text": "The extension selftest passes 87/87 with 0 failed and 0 skipped: tier A pins core.ts argv builders and output parsers against a throwaway ledger built by the real ./operator; tier "
+        },
+        {
+          "id": "claim-0122",
+          "verified": false,
+          "text": "Adding the extension leaves the repo suite green: python3 -m pytest tests/ -q reports 542 passed, 10 skipped, including the 5 new tests in tests/test_pi_operator_extension.py. The "
+        },
+        {
+          "id": "claim-0123",
+          "verified": true,
+          "text": "The extension holds the Operator authority boundary at step 1: it registers exactly op:doctor, op:status, op:tasks and op:use and zero model-callable tools; core.ts assertSafeArgv "
+        }
+      ],
+      "verified": 1,
+      "total": 4,
+      "evidence": 7,
+      "handoffs": 7,
+      "stale": true,
+      "latest_verified": "claim-0123"
+    },
+    {
+      "id": "pi-operator-extension-step2",
+      "status": "verified",
+      "next": "Proceed to Step 3 decision: implement /op:supervisor-review, or first capture the verifier-only draft-evidence limitation in the PBC backlog.",
+      "updated": "2026-09-02T00:37:26+00:00",
+      "assigned": "claude",
+      "review": "pi-01a05bf2",
+      "claims": [
+        {
+          "id": "claim-0124",
+          "verified": false,
+          "text": "Step 2 of the Pi Operator extension exists as /op:claim, /op:evidence, and /op:handoff on .pi/extensions/operator/, preserving /op:doctor, /op:status, /op:tasks, and /op:use. /op:d"
+        },
+        {
+          "id": "claim-0125",
+          "verified": false,
+          "text": "The extension selftest passes 223/223 with 0 failed and 0 skipped: tier A pins step-1 argv builders; tier A2 pins claim/evidence/handoff builders against a throwaway ledger built b"
+        },
+        {
+          "id": "claim-0126",
+          "verified": false,
+          "text": "Focused pytest for the extension is green: python3 -m pytest tests/test_pi_operator_extension.py -q reports 5 passed. tests/test_pi_operator_extension.py is clean under ruff, black"
+        },
+        {
+          "id": "claim-0127",
+          "verified": true,
+          "text": "The extension holds the Operator authority boundary at step 2: /op:claim, /op:evidence, and /op:handoff emit session-derived --by and explicit --task; /op:evidence requires a rerun"
+        }
+      ],
+      "verified": 1,
+      "total": 4,
+      "evidence": 11,
+      "handoffs": 6,
+      "stale": true,
+      "latest_verified": "claim-0127"
+    },
+    {
+      "id": "pi-operator-extension-step3",
+      "status": "verified",
+      "next": "Recommended: accept verified claim-0131 as sufficient for Step 3 and move to Step 4 /op:delegate design/implementation, unless owner wants live TUI dogfood first.",
+      "updated": "2026-09-02T01:34:36+00:00",
+      "assigned": "grok",
+      "review": "pi-01a05bf2",
+      "claims": [
+        {
+          "id": "claim-0128",
+          "verified": false,
+          "text": "Step 3 of the Pi Operator extension exists as /op:supervisor-review on .pi/extensions/operator/, preserving /op:doctor, /op:status, /op:tasks, /op:use, /op:claim, /op:evidence, and"
+        },
+        {
+          "id": "claim-0129",
+          "verified": false,
+          "text": "The extension selftest passes 328/328 with 0 failed and 0 skipped: tier A pins step-1 argv builders; tier A2 pins claim/evidence/handoff builders; tier A3 pins review-delegate buil"
+        },
+        {
+          "id": "claim-0130",
+          "verified": false,
+          "text": "Focused pytest for the extension is green: python3 -m pytest tests/test_pi_operator_extension.py -q reports 5 passed. tests/test_pi_operator_extension.py is clean under ruff, black"
+        },
+        {
+          "id": "claim-0131",
+          "verified": true,
+          "text": "The extension holds the Operator authority boundary at step 3: /op:supervisor-review wraps review-delegate for one named claim with explicit --reviewer (never from the session or r"
+        }
+      ],
+      "verified": 1,
+      "total": 4,
+      "evidence": 8,
+      "handoffs": 3,
+      "stale": false,
+      "latest_verified": "claim-0131"
+    },
+    {
+      "id": "pi-operator-extension-step4-via-claude",
+      "status": "running",
+      "next": "Do not resume this child loop. Parent step4 is verified; later dogfood is on step5 (currently quarantined for source drift).",
+      "updated": "2026-09-06T01:49:12+00:00",
+      "assigned": "claude",
+      "review": "",
+      "claims": [],
+      "verified": 0,
+      "total": 0,
+      "evidence": 0,
+      "handoffs": 1,
+      "stale": false,
+      "latest_verified": null
+    },
+    {
+      "id": "pi-operator-extension-step4",
+      "status": "verified",
+      "next": "Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.",
+      "updated": "2026-09-02T06:08:56+00:00",
+      "assigned": "grok",
+      "review": "pi-01a05bf2",
+      "claims": [
+        {
+          "id": "claim-0132",
+          "verified": true,
+          "text": "The extension holds the Operator authority boundary at step 4: /op:delegate is chooser-first over configured targets that distinguish ledger harness id, carrier/adapter id, model, "
+        },
+        {
+          "id": "claim-0133",
+          "verified": false,
+          "text": "Step 4 /op:delegate files exist: .pi/extensions/operator/index.ts registers op:delegate; core.ts exports classifyDelegateTarget, taskCreateArgv, sessionStartArgv, and adapterInvoke"
+        },
+        {
+          "id": "claim-0134",
+          "verified": false,
+          "text": "/op:handoff now supports generated closeout semantics for live dogfood: the template is prefilled with deterministic task-context sections, typing 'go' as the whole editor content "
+        }
+      ],
+      "verified": 1,
+      "total": 3,
+      "evidence": 9,
+      "handoffs": 8,
+      "stale": true,
+      "latest_verified": "claim-0132"
+    },
+    {
+      "id": "pi-operator-extension-step5-dogfood",
+      "status": "quarantined",
+      "next": "Do not restore trust on pi-operator-extension-step5-dogfood until an independent uid-966 verifier reruns against a coherent tree; current dirty test file is not that target.",
+      "updated": "2026-09-06T00:21:26+00:00",
+      "assigned": "pi-01a05bf2",
+      "review": "grok",
+      "claims": [
+        {
+          "id": "claim-0135",
+          "verified": false,
+          "text": "Step 5 dogfood found and fixed /op:handoff default UX: /op:handoff now generates a closeout by default without requiring 'go'; /op:handoff edit opens the manual draft. Claim/eviden"
+        },
+        {
+          "id": "claim-0136",
+          "verified": false,
+          "text": "Step 5 dogfood added visible progress for slow /op:doctor and /op:status: both now set an Operator status line and notify before running long ledger reads, then clear status when d"
+        },
+        {
+          "id": "claim-0137",
+          "verified": false,
+          "text": "Step 5 dogfood simplified /op:supervisor-review defaults: if there is one unverified claim it is selected automatically; if the task has a safe review_harness it is used automatica"
+        },
+        {
+          "id": "claim-0138",
+          "verified": false,
+          "text": "Step 5 dogfood clarified /op:supervisor-review verifier-user selection: when uid-isolated review is chosen and operator-verifier is registered, the extension now defaults to operat"
+        },
+        {
+          "id": "claim-0139",
+          "verified": false,
+          "text": "Implemented /op:roadmap as a read-only Operator extension command. It reads the Pi Operator extension PBC, shows the implementation ladder, current active task context, recent dogf"
+        },
+        {
+          "id": "claim-0140",
+          "verified": false,
+          "text": "Implemented /op:next-steps as a read-only Operator extension command. It reads the active task and Pi Operator extension PBC, then reports the current ledger next_action, unverifie"
+        }
+      ],
+      "verified": 0,
+      "total": 6,
+      "evidence": 15,
+      "handoffs": 12,
+      "stale": false,
+      "latest_verified": null
+    },
+    {
+      "id": "pi-operator-extension-target-ux-cleanup-via-grok",
+      "status": "quarantined",
+      "next": "Use the separately scoped Project Phoenix task; do not resume this accidental child task.",
+      "updated": "2026-09-03T01:23:00+00:00",
+      "assigned": "grok",
+      "review": "",
+      "claims": [],
+      "verified": 0,
+      "total": 0,
+      "evidence": 0,
+      "handoffs": 1,
+      "stale": false,
+      "latest_verified": null
+    },
+    {
+      "id": "pi-operator-extension-target-ux-cleanup",
+      "status": "verified",
+      "next": "Leave for publish hardening; continue cross-project trials or commit PBC backlog updates.",
+      "updated": "2026-09-02T23:06:03+00:00",
+      "assigned": "pi-01a05bf2",
+      "review": "grok",
+      "claims": [
+        {
+          "id": "claim-0141",
+          "verified": true,
+          "text": "Started target/model UX cleanup: /op:supervisor-review prompts and plan copy now present the reviewer as a model/persona target, separate from the Unix verifier identity; targets.j"
+        }
+      ],
+      "verified": 1,
+      "total": 1,
+      "evidence": 2,
+      "handoffs": 7,
+      "stale": false,
+      "latest_verified": "claim-0141"
+    },
+    {
+      "id": "pi-operator-extension-workflow-guidance",
+      "status": "verified",
+      "next": "Workflow-guidance tokens on /op:next-steps are verified; no /op:mode command and no further verification action pending on this task.",
+      "updated": "2026-09-06T01:42:00+00:00",
+      "assigned": "",
+      "review": "",
+      "claims": [
+        {
+          "id": "claim-0160",
+          "verified": true,
+          "text": "Workflow strictness is optional guidance inside /op:next-steps only (support / engineering-light / engineering-trust). No /op:mode command. Guidance cannot downgrade enforced UID p"
+        }
+      ],
+      "verified": 1,
+      "total": 1,
+      "evidence": 2,
+      "handoffs": 2,
+      "stale": false,
+      "latest_verified": "claim-0160"
+    }
+  ],
+  "issues": [
+    {
+      "id": "POE-ISS-008",
+      "summary": "Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.",
+      "next_step": "Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path."
+    },
+    {
+      "id": "POE-ISS-009",
+      "summary": "/op:handoff treated a one-word user input \"go\" as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.",
+      "next_step": "Change /op:handoff UX so it generates a deterministic draft from task/status/recent handoffs first, defaults to generated closeout without requiring \"go\", and refuses near-empty handoffs unless the user explicitly uses manual edit mode."
+    },
+    {
+      "id": "POE-ISS-010",
+      "summary": "/op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.",
+      "next_step": "Add a defaults pass for authoring flows: infer current task and session author, suggest claim type and gate from recent context, prefer the active/recent claim for evidence, and keep advanced fields behind an edit/details path."
+    },
+    {
+      "id": "POE-ISS-011",
+      "summary": "/op:doctor and /op:status are slow on large ledgers and previously showed no visible progress while running.",
+      "next_step": "Add visible working/status notifications before long Operator reads and clear them when the command finishes."
+    },
+    {
+      "id": "POE-ISS-012",
+      "summary": "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.",
+      "next_step": "Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity."
+    },
+    {
+      "id": "POE-ISS-013",
+      "summary": "Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.",
+      "next_step": "Rename prompts/docs around model/persona targets, remove Pi as a default delegation target, and keep reviewer labels distinct from verifier Unix users in generated review instructions."
+    },
+    {
+      "id": "POE-ISS-014",
+      "summary": "review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat's cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task's grok review_harness).",
+      "next_step": "Make review-delegate persona\u2192provider resolution bind Grok to the configured xai provider/grok model (never a different seat's cloud command), keep review_harness and the generated run_command consistent, and have doctor flag any run_command whose provider/model does not match the task's declared review_harness."
+    },
+    {
+      "id": "POE-ISS-015",
+      "summary": "Review routing was blocked by a 'cross-family review' requirement that is not a rule: operator enforces only a distinct agent - doctor checks that the verifier UID differs from the author UID and never checks the reviewer's model family. The constraint keeps resurfacing in review-call section-5 blocks and wrongly marks a routable call as unrouteable.",
+      "next_step": "Treat the review requirement as distinct-agent only (a separate uid-isolated verifier, or an advisory pass). Remove 'cross-family' from review-call routing language and any doctor-side guidance so a claim is never gated on the reviewer's model family."
+    }
+  ],
+  "features": [
+    {
+      "id": "POE-FUT-004",
+      "name": "Multi-claim supervisor review",
+      "description": "First-class claim-set/session review if Operator later gains a review unit broader than one claim."
+    },
+    {
+      "id": "POE-FUT-005",
+      "name": "Shared adapter export",
+      "description": "Extract stable Operator integration logic for Claude/OpenCode/MCP after the Pi extension reveals the minimum useful surface."
+    },
+    {
+      "id": "POE-FUT-006",
+      "name": "Delegation target registry UI",
+      "description": "Manage aliases, harness ids, carrier commands, models, isolation modes, and brief formats through a chooser/editor."
+    },
+    {
+      "id": "POE-FUT-007",
+      "name": "Verifier authorization prompt",
+      "description": "Use a user-visible authorization prompt for distinct-UID verification instead of requiring agents to improvise sudo commands or silently fall back to same-UID advisory review."
+    },
+    {
+      "id": "POE-FUT-008",
+      "name": "Operator roadmap command",
+      "command": "/op:roadmap",
+      "description": "Show the current implementation ladder, verified steps, active blockers/decisions, next recommended action, and future feature candidates without mixing future scope into the current acceptance gate."
+    },
+    {
+      "id": "POE-FUT-009",
+      "name": "Trusted verifier run command",
+      "command": "/op:verify-run",
+      "description": "Launch a generated review_delegations verifier script through a visible human authorization prompt, stream/report failures, and attach verifier run logs when possible, so users do not copy/paste sudo bash while still preserving the no-silent-cross-UID boundary."
+    },
+    {
+      "id": "POE-FUT-010",
+      "name": "Operator next-steps command",
+      "command": "/op:next-steps",
+      "description": "Turn the active task's ledger state into a short prioritized action list: current next_action first, then unverified claims, missing review/verification gates, recent dogfood issues, and recommended future slices."
+    },
+    {
+      "id": "POE-FUT-013",
+      "name": "Workflow strictness modes",
+      "description": "Closed as guidance-only. Do not ship /op:mode. Support/deliverable can close on user acceptance; engineering-light expects tests plus claim/evidence/handoff; engineering-trust expects PBC/spec, review, evidence, and a distinct verifier. Optional copy in /op:next-steps is enough; this must not become another required gate."
+    },
+    {
+      "id": "POE-FUT-014",
+      "name": "PBC spec CLI compatibility/profile",
+      "command": "/pbc:validate or pbc validate --profile operator",
+      "description": "Align Operator-authored PBC files with the upstream pbc-spec CLI before publishing: either upstream proposed-* lifecycle block support, avoid custom block names, or define an Operator dialect/profile that accepts proposed-rules/proposed-behavior/proposed-outcomes and local trust vocabulary while still catching real YAML/frontmatter errors."
+    },
+    {
+      "id": "POE-FUT-015",
+      "name": "Crystal capture and attach command",
+      "command": "/op:crystal or /op:crystal-attach",
+      "description": "Expose a bounded Pi-extension flow for agent-crystallize session artifacts: capture or select a crystal with live session provenance, attach/import it through the existing Operator crystal path as draft session_crystal evidence, and keep crystal narration untrusted and never verification."
+    }
+  ]
+}</script>
+</body>
+</html>

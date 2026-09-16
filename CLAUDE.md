@@ -120,6 +120,9 @@ session-derived provenance only -- and writes only after a confirmation dialog.
 It registers no model-callable tools. Verify with
 `node --experimental-strip-types .pi/extensions/operator/selftest.ts` or
 `tests/test_pi_operator_extension.py`. See `.pi/extensions/operator/README.md`.
+Static HTML boards for a task prefix live in `docs/boards/` and are regenerated with
+`python3 scripts/operator_project_board.py` (`--view issues`, `--view graph`,
+`--view resolution --task <id>`).
 
 **Git is not a local-seat default.** `pi` is the carrier and can run many
 models. Local *seats* (e.g. `gemma4:31b`) do not run `git commit` / rebase /

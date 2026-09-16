@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Resolution ledger · pi-operator-extension-pbc-profile</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a222c; --ink:#e8eef4; --muted:#9aa8b4; --ok:#3dd68c; --warn:#f5c542; --bad:#f07178; --run:#59c2ff; --hand:#c3a6ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header.top { padding:28px 32px 8px; }
+  .nav { color:var(--muted); margin-bottom:10px; }
+  .nav a { color:var(--run); text-decoration:none; }
+  .nav a:hover { text-decoration:underline; }
+  h1 { margin:0 0 6px; font-size:24px; font-weight:650; word-break:break-all; }
+  .sub,.obj { color:var(--muted); max-width:80ch; }
+  .flow { display:flex; gap:8px; flex-wrap:wrap; padding:16px 32px; }
+  .flow span { background:var(--card); padding:8px 12px; border-radius:999px; font-size:13px; }
+  .kpis { display:flex; gap:12px; flex-wrap:wrap; padding:0 32px 16px; }
+  .kpi { background:var(--card); padding:12px 16px; border-radius:12px; min-width:110px; }
+  .kpi b { display:block; font-size:22px; }
+  .timeline { padding:0 32px 48px; display:flex; flex-direction:column; gap:8px; }
+  .ev { display:grid; grid-template-columns:150px 90px 1fr; gap:12px; background:var(--card); border-radius:12px; padding:10px 14px; border-left:4px solid #445; }
+  .kind-claim { border-left-color:var(--warn); }
+  .kind-evidence { border-left-color:var(--run); }
+  .kind-review { border-left-color:#ffa657; }
+  .kind-verify { border-left-color:var(--ok); }
+  .kind-handoff { border-left-color:var(--hand); }
+  .when,.kind { color:var(--muted); font-size:12px; padding-top:3px; }
+  .kind { text-transform:uppercase; letter-spacing:.04em; font-weight:650; }
+  .actor { color:var(--muted); font-size:12px; margin-left:8px; }
+  .body p { margin:4px 0 0; font-size:13px; color:var(--muted); }
+  @media (max-width:800px) { .ev { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <h1>pi-operator-extension-pbc-profile</h1>
+  <p class="sub">Issue-resolution ledger · verified · snapshot 2026-09-16 21:35 UTC</p>
+  <p class="obj">POE-FUT-014: Audit Operator PBC dialect against upstream pbc-spec CLI and choose a documented compatibility route: upstream lifecycle support, portable block names, or explicit Operator profile. Acceptance: pinned upstream version; fixtures for proposed lifecycle blocks/local trust values; invalid YAML/frontmatter rejected; no silent dropping of unsupported blocks; no automatic ratification. Add i</p>
+</header>
+<div class="flow">
+  <span>1 task</span><span>2 claim</span><span>3 evidence</span><span>4 review bundle</span><span>5 verifier UID evidence</span><span>6 handoff</span>
+</div>
+<div class="kpis">
+  <div class="kpi"><b>3</b>claims</div>
+  <div class="kpi"><b>6</b>builder evidence</div>
+  <div class="kpi"><b>3</b>reviews</div>
+  <div class="kpi"><b>2</b>verifier evidence</div>
+  <div class="kpi"><b>3</b>handoffs</div>
+</div>
+<div class="timeline">
+
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-05 19:41:23</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0155</strong>
+    <span class="actor">grok-d7b2c574</span>
+    <p>Human recorded POE-FUT-014 Route C as a compatibility-route choice (local wrapper scripts/pbc_validate_operator.py around pinned pbc-spec ca97caf63329cee5ecf2b92dfe1120374ab90a81). This is not ratification of proposed-* rules, not an upstre</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-05 19:41:23</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0156</strong>
+    <span class="actor">grok-d7b2c574</span>
+    <p>Implemented local Operator PBC wrapper scripts/pbc_validate_operator.py (Route C). Allowlists E004 only for proposed-rules/proposed-behavior/proposed-outcomes and E011 only for confidence measured; keeps those rows in the report; still fail</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-05 19:41:48</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0001</strong>
+    <span class="actor">grok-d7b2c574</span>
+    <p>paper_section for claim-0155</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-05 19:41:49</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0002</strong>
+    <span class="actor">grok-d7b2c574</span>
+    <p>external_doc for claim-0155</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-05 19:41:49</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0003</strong>
+    <span class="actor">grok-d7b2c574</span>
+    <p>test_output for claim-0156</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-05 19:41:49</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0004</strong>
+    <span class="actor">grok-d7b2c574</span>
+    <p>run_log for claim-0156</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-05 19:42:14</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0001</strong>
+    <span class="actor">grok-d7b2c574</span>
+    <p>Human authorizes a distinct-UID verifier to rerun the claim-0156 verify-cmd and attach --status verified --verified-by operator-verifier. Do not treat this session as verifier.</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-05 19:42:28</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0156-2026-09-05T194228Z0000</strong>
+    <span class="actor">operator-verifier</span>
+    <p>uid-isolated review of claim-0156 as operator-verifier</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-05 20:51:22</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0161</strong>
+    <span class="actor">grok-f01c272f</span>
+    <p>Repair of Route C provenance lookup after UID 966 claim-0156 gate failure. Established cause: Git 2.55 dubious-ownership on uid-1000-owned /home/blueaz/Python/Evaluation/pbc-spec (mode 755, files readable; node CLI still ran) plus _git() sw</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-05 20:51:41</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0005</strong>
+    <span class="actor">grok-f01c272f</span>
+    <p>test_output for claim-0161</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-05 20:51:41</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0006</strong>
+    <span class="actor">grok-f01c272f</span>
+    <p>run_log for claim-0161</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-05 20:51:41</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0002</strong>
+    <span class="actor">grok-f01c272f</span>
+    <p>Independent uid 966 verifier reruns the new claim-0161 bundle and the existing claim-0157..0160 bundles via operator-verify-rerun; do not treat grok-f01c272f as verifier.</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-05 20:51:42</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0156-2026-09-05T205142Z0000</strong>
+    <span class="actor">operator-verifier</span>
+    <p>uid-isolated review of claim-0156 as operator-verifier</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-05 20:51:42</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0161-2026-09-05T205142Z0000</strong>
+    <span class="actor">operator-verifier</span>
+    <p>uid-isolated review of claim-0161 as operator-verifier</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-05 21:09:00</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0007</strong>
+    <span class="actor">operator-verifier</span>
+    <p>test_output for claim-0161</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-05 21:09:23</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0008</strong>
+    <span class="actor">operator-verifier</span>
+    <p>test_output for claim-0156</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-06 01:42:00</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0003</strong>
+    <span class="actor">pi-01a06498</span>
+    <p>Implementation claims 0156 and 0161 are verified. Remaining on this task is claim-0155 (Route C compatibility-route record, not proposed-rule ratification) and any later owner-authorized publish/profile work.</p>
+  </div>
+</div>
+</div>
+<script type="application/json" id="board-data">{
+  "task_id": "pi-operator-extension-pbc-profile",
+  "status": "verified",
+  "objective": "POE-FUT-014: Audit Operator PBC dialect against upstream pbc-spec CLI and choose a documented compatibility route: upstream lifecycle support, portable block names, or explicit Operator profile. Acceptance: pinned upstream version; fixtures for proposed lifecycle blocks/local trust values; invalid YAML/frontmatter rejected; no silent dropping of unsupported blocks; no automatic ratification. Add implementation only after compatibility choice is recorded.",
+  "next": "Implementation claims 0156 and 0161 are verified. Remaining on this task is claim-0155 (Route C compatibility-route record, not proposed-rule ratification) and any later owner-authorized publish/profile work.",
+  "generated_at": "2026-09-16 21:35 UTC",
+  "events": [
+    {
+      "kind": "claim",
+      "id": "claim-0155",
+      "at": "2026-09-05T19:41:23+00:00",
+      "actor": "grok-d7b2c574",
+      "text": "Human recorded POE-FUT-014 Route C as a compatibility-route choice (local wrapper scripts/pbc_validate_operator.py around pinned pbc-spec ca97caf63329cee5ecf2b92dfe1120374ab90a81). This is not ratification of proposed-* rules, not an upstre",
+      "status": "unverified",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0156",
+      "at": "2026-09-05T19:41:23+00:00",
+      "actor": "grok-d7b2c574",
+      "text": "Implemented local Operator PBC wrapper scripts/pbc_validate_operator.py (Route C). Allowlists E004 only for proposed-rules/proposed-behavior/proposed-outcomes and E011 only for confidence measured; keeps those rows in the report; still fail",
+      "status": "verified",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0001",
+      "at": "2026-09-05T19:41:48+00:00",
+      "actor": "grok-d7b2c574",
+      "text": "paper_section for claim-0155",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0155"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0002",
+      "at": "2026-09-05T19:41:49+00:00",
+      "actor": "grok-d7b2c574",
+      "text": "external_doc for claim-0155",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0155"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0003",
+      "at": "2026-09-05T19:41:49+00:00",
+      "actor": "grok-d7b2c574",
+      "text": "test_output for claim-0156",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0156"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0004",
+      "at": "2026-09-05T19:41:49+00:00",
+      "actor": "grok-d7b2c574",
+      "text": "run_log for claim-0156",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0156"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0001",
+      "at": "2026-09-05T19:42:14+00:00",
+      "actor": "grok-d7b2c574",
+      "text": "Human authorizes a distinct-UID verifier to rerun the claim-0156 verify-cmd and attach --status verified --verified-by operator-verifier. Do not treat this session as verifier.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0156-2026-09-05T194228Z0000",
+      "at": "2026-09-05T19:42:28+00:00",
+      "actor": "operator-verifier",
+      "text": "uid-isolated review of claim-0156 as operator-verifier",
+      "status": "uid-isolated",
+      "lane": "reviewer",
+      "claim": "claim-0156"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0161",
+      "at": "2026-09-05T20:51:22+00:00",
+      "actor": "grok-f01c272f",
+      "text": "Repair of Route C provenance lookup after UID 966 claim-0156 gate failure. Established cause: Git 2.55 dubious-ownership on uid-1000-owned /home/blueaz/Python/Evaluation/pbc-spec (mode 755, files readable; node CLI still ran) plus _git() sw",
+      "status": "verified",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0005",
+      "at": "2026-09-05T20:51:41+00:00",
+      "actor": "grok-f01c272f",
+      "text": "test_output for claim-0161",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0161"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0006",
+      "at": "2026-09-05T20:51:41+00:00",
+      "actor": "grok-f01c272f",
+      "text": "run_log for claim-0161",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0161"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0002",
+      "at": "2026-09-05T20:51:41+00:00",
+      "actor": "grok-f01c272f",
+      "text": "Independent uid 966 verifier reruns the new claim-0161 bundle and the existing claim-0157..0160 bundles via operator-verify-rerun; do not treat grok-f01c272f as verifier.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0156-2026-09-05T205142Z0000",
+      "at": "2026-09-05T20:51:42+00:00",
+      "actor": "operator-verifier",
+      "text": "uid-isolated review of claim-0156 as operator-verifier",
+      "status": "uid-isolated",
+      "lane": "reviewer",
+      "claim": "claim-0156"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0161-2026-09-05T205142Z0000",
+      "at": "2026-09-05T20:51:42+00:00",
+      "actor": "operator-verifier",
+      "text": "uid-isolated review of claim-0161 as operator-verifier",
+      "status": "uid-isolated",
+      "lane": "reviewer",
+      "claim": "claim-0161"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0007",
+      "at": "2026-09-05T21:09:00+00:00",
+      "actor": "operator-verifier",
+      "text": "test_output for claim-0161",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0161"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0008",
+      "at": "2026-09-05T21:09:23+00:00",
+      "actor": "operator-verifier",
+      "text": "test_output for claim-0156",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0156"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0003",
+      "at": "2026-09-06T01:42:00+00:00",
+      "actor": "pi-01a06498",
+      "text": "Implementation claims 0156 and 0161 are verified. Remaining on this task is claim-0155 (Route C compatibility-route record, not proposed-rule ratification) and any later owner-authorized publish/profile work.",
+      "status": "continuity",
+      "lane": "builder"
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-0155",
+      "verified": false,
+      "verdict": ""
+    },
+    {
+      "id": "claim-0156",
+      "verified": true,
+      "verdict": "Deterministic re-run of the pinned gate by uid 966 (operator-verifier), distinct from claim author uid 1000. Command exited 0."
+    },
+    {
+      "id": "claim-0161",
+      "verified": true,
+      "verdict": "Deterministic re-run of the pinned gate by uid 966 (operator-verifier), distinct from claim author uid 1000. Command exited 0."
+    }
+  ]
+}</script>
+</body>
+</html>

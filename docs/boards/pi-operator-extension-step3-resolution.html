@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Resolution ledger · pi-operator-extension-step3</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a222c; --ink:#e8eef4; --muted:#9aa8b4; --ok:#3dd68c; --warn:#f5c542; --bad:#f07178; --run:#59c2ff; --hand:#c3a6ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header.top { padding:28px 32px 8px; }
+  .nav { color:var(--muted); margin-bottom:10px; }
+  .nav a { color:var(--run); text-decoration:none; }
+  .nav a:hover { text-decoration:underline; }
+  h1 { margin:0 0 6px; font-size:24px; font-weight:650; word-break:break-all; }
+  .sub,.obj { color:var(--muted); max-width:80ch; }
+  .flow { display:flex; gap:8px; flex-wrap:wrap; padding:16px 32px; }
+  .flow span { background:var(--card); padding:8px 12px; border-radius:999px; font-size:13px; }
+  .kpis { display:flex; gap:12px; flex-wrap:wrap; padding:0 32px 16px; }
+  .kpi { background:var(--card); padding:12px 16px; border-radius:12px; min-width:110px; }
+  .kpi b { display:block; font-size:22px; }
+  .timeline { padding:0 32px 48px; display:flex; flex-direction:column; gap:8px; }
+  .ev { display:grid; grid-template-columns:150px 90px 1fr; gap:12px; background:var(--card); border-radius:12px; padding:10px 14px; border-left:4px solid #445; }
+  .kind-claim { border-left-color:var(--warn); }
+  .kind-evidence { border-left-color:var(--run); }
+  .kind-review { border-left-color:#ffa657; }
+  .kind-verify { border-left-color:var(--ok); }
+  .kind-handoff { border-left-color:var(--hand); }
+  .when,.kind { color:var(--muted); font-size:12px; padding-top:3px; }
+  .kind { text-transform:uppercase; letter-spacing:.04em; font-weight:650; }
+  .actor { color:var(--muted); font-size:12px; margin-left:8px; }
+  .body p { margin:4px 0 0; font-size:13px; color:var(--muted); }
+  @media (max-width:800px) { .ev { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <h1>pi-operator-extension-step3</h1>
+  <p class="sub">Issue-resolution ledger · verified · snapshot 2026-09-16 21:35 UTC</p>
+  <p class="obj">Implement Step 3 of the Pi Operator extension roadmap from owners-manual/pbc/appendix-pi-operator-extension.pbc.md: add /op:supervisor-review only. It must wrap the existing claim-scoped review-delegate semantics safely: one named claim, explicit reviewer, verify_cmd must exist or be supplied, unavailable/clear failure under broker enrollment, no raw arbitrary operator execution, no self-verificat</p>
+</header>
+<div class="flow">
+  <span>1 task</span><span>2 claim</span><span>3 evidence</span><span>4 review bundle</span><span>5 verifier UID evidence</span><span>6 handoff</span>
+</div>
+<div class="kpis">
+  <div class="kpi"><b>4</b>claims</div>
+  <div class="kpi"><b>7</b>builder evidence</div>
+  <div class="kpi"><b>1</b>reviews</div>
+  <div class="kpi"><b>1</b>verifier evidence</div>
+  <div class="kpi"><b>3</b>handoffs</div>
+</div>
+<div class="timeline">
+
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 01:10:25</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0128</strong>
+    <span class="actor">grok</span>
+    <p>Step 3 of the Pi Operator extension exists as /op:supervisor-review on .pi/extensions/operator/, preserving /op:doctor, /op:status, /op:tasks, /op:use, /op:claim, /op:evidence, and /op:handoff. /op:delegate and /pbc:* are not registered, an</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 01:10:25</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0129</strong>
+    <span class="actor">grok</span>
+    <p>The extension selftest passes 328/328 with 0 failed and 0 skipped: tier A pins step-1 argv builders; tier A2 pins claim/evidence/handoff builders; tier A3 pins review-delegate builders including required reviewer/verify-cmd, uid-isolated --</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 01:10:25</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0130</strong>
+    <span class="actor">grok</span>
+    <p>Focused pytest for the extension is green: python3 -m pytest tests/test_pi_operator_extension.py -q reports 5 passed. tests/test_pi_operator_extension.py is clean under ruff, black, and isort.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 01:10:25</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0131</strong>
+    <span class="actor">grok</span>
+    <p>The extension holds the Operator authority boundary at step 3: /op:supervisor-review wraps review-delegate for one named claim with explicit --reviewer (never from the session or review_harness), a recorded or supplied verify-cmd, and fail-</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:10:44</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0001</strong>
+    <span class="actor">grok</span>
+    <p>run_log for claim-0128</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:10:45</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0002</strong>
+    <span class="actor">grok</span>
+    <p>test_output for claim-0129</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:10:45</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0003</strong>
+    <span class="actor">grok</span>
+    <p>test_output for claim-0130</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:10:45</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0004</strong>
+    <span class="actor">grok</span>
+    <p>test_output for claim-0131</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:10:46</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0005</strong>
+    <span class="actor">grok</span>
+    <p>test_output for claim-0131</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 01:11:05</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0001</strong>
+    <span class="actor">grok</span>
+    <p>Current Pi session (review_harness pi-01a05bf2) should call for supervisor review of claim-0131 (and optionally 0128-0130). Use /op:supervisor-review with an explicit reviewer distinct from grok, a recorded verify-cmd, and the trusted uid-i</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-02 01:14:08</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0131-2026-09-02T011408Z0000</strong>
+    <span class="actor">grok</span>
+    <p>advisory-agent review of claim-0131 as n/a</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:18:17</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0006</strong>
+    <span class="actor">grok</span>
+    <p>test_output for claim-0131</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:18:17</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0007</strong>
+    <span class="actor">grok</span>
+    <p>paper_section for claim-0131</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 01:18:32</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0002</strong>
+    <span class="actor">grok</span>
+    <p>Run /op:supervisor-review on claim-0131 in uid-isolated mode with an explicit reviewer other than grok and --review-user for operator-verifier or uid-971. Authorize the sudo -u script as that user. Attach status-setting evidence as the regi</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-02 01:34:26</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0008</strong>
+    <span class="actor">operator-verifier</span>
+    <p>run_log for claim-0131</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 01:34:36</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0003</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Recommended: accept verified claim-0131 as sufficient for Step 3 and move to Step 4 /op:delegate design/implementation, unless owner wants live TUI dogfood first.</p>
+  </div>
+</div>
+</div>
+<script type="application/json" id="board-data">{
+  "task_id": "pi-operator-extension-step3",
+  "status": "verified",
+  "objective": "Implement Step 3 of the Pi Operator extension roadmap from owners-manual/pbc/appendix-pi-operator-extension.pbc.md: add /op:supervisor-review only. It must wrap the existing claim-scoped review-delegate semantics safely: one named claim, explicit reviewer, verify_cmd must exist or be supplied, unavailable/clear failure under broker enrollment, no raw arbitrary operator execution, no self-verification, and no lifecycle status writes from the current agent. Preserve Step 1 and Step 2 commands and boundaries. Do not implement /op:delegate, /pbc:define, /pbc:feature, or model-callable tools. Incorporate dogfood lessons: use a visible/human-auth path for trusted verifier UID runs; distinguish same-UID advisory review notes from verifier-owned status-setting evidence; do not offer impossible verifier-only draft evidence attach. Add/update selftests and focused pytest coverage. Return claims/evidence/handoff; do not mark your own work verified.",
+  "next": "Recommended: accept verified claim-0131 as sufficient for Step 3 and move to Step 4 /op:delegate design/implementation, unless owner wants live TUI dogfood first.",
+  "generated_at": "2026-09-16 21:35 UTC",
+  "events": [
+    {
+      "kind": "claim",
+      "id": "claim-0128",
+      "at": "2026-09-02T01:10:25+00:00",
+      "actor": "grok",
+      "text": "Step 3 of the Pi Operator extension exists as /op:supervisor-review on .pi/extensions/operator/, preserving /op:doctor, /op:status, /op:tasks, /op:use, /op:claim, /op:evidence, and /op:handoff. /op:delegate and /pbc:* are not registered, an",
+      "status": "unverified",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0129",
+      "at": "2026-09-02T01:10:25+00:00",
+      "actor": "grok",
+      "text": "The extension selftest passes 328/328 with 0 failed and 0 skipped: tier A pins step-1 argv builders; tier A2 pins claim/evidence/handoff builders; tier A3 pins review-delegate builders including required reviewer/verify-cmd, uid-isolated --",
+      "status": "unverified",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0130",
+      "at": "2026-09-02T01:10:25+00:00",
+      "actor": "grok",
+      "text": "Focused pytest for the extension is green: python3 -m pytest tests/test_pi_operator_extension.py -q reports 5 passed. tests/test_pi_operator_extension.py is clean under ruff, black, and isort.",
+      "status": "unverified",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0131",
+      "at": "2026-09-02T01:10:25+00:00",
+      "actor": "grok",
+      "text": "The extension holds the Operator authority boundary at step 3: /op:supervisor-review wraps review-delegate for one named claim with explicit --reviewer (never from the session or review_harness), a recorded or supplied verify-cmd, and fail-",
+      "status": "verified",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0001",
+      "at": "2026-09-02T01:10:44+00:00",
+      "actor": "grok",
+      "text": "run_log for claim-0128",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0128"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0002",
+      "at": "2026-09-02T01:10:45+00:00",
+      "actor": "grok",
+      "text": "test_output for claim-0129",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0129"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0003",
+      "at": "2026-09-02T01:10:45+00:00",
+      "actor": "grok",
+      "text": "test_output for claim-0130",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0130"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0004",
+      "at": "2026-09-02T01:10:45+00:00",
+      "actor": "grok",
+      "text": "test_output for claim-0131",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0131"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0005",
+      "at": "2026-09-02T01:10:46+00:00",
+      "actor": "grok",
+      "text": "test_output for claim-0131",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0131"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0001",
+      "at": "2026-09-02T01:11:05+00:00",
+      "actor": "grok",
+      "text": "Current Pi session (review_harness pi-01a05bf2) should call for supervisor review of claim-0131 (and optionally 0128-0130). Use /op:supervisor-review with an explicit reviewer distinct from grok, a recorded verify-cmd, and the trusted uid-i",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0131-2026-09-02T011408Z0000",
+      "at": "2026-09-02T01:14:08+00:00",
+      "actor": "grok",
+      "text": "advisory-agent review of claim-0131 as n/a",
+      "status": "advisory-agent",
+      "lane": "reviewer",
+      "claim": "claim-0131"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0006",
+      "at": "2026-09-02T01:18:17+00:00",
+      "actor": "grok",
+      "text": "test_output for claim-0131",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0131"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0007",
+      "at": "2026-09-02T01:18:17+00:00",
+      "actor": "grok",
+      "text": "paper_section for claim-0131",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0131"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0002",
+      "at": "2026-09-02T01:18:32+00:00",
+      "actor": "grok",
+      "text": "Run /op:supervisor-review on claim-0131 in uid-isolated mode with an explicit reviewer other than grok and --review-user for operator-verifier or uid-971. Authorize the sudo -u script as that user. Attach status-setting evidence as the regi",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0008",
+      "at": "2026-09-02T01:34:26+00:00",
+      "actor": "operator-verifier",
+      "text": "run_log for claim-0131",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0131"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0003",
+      "at": "2026-09-02T01:34:36+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Recommended: accept verified claim-0131 as sufficient for Step 3 and move to Step 4 /op:delegate design/implementation, unless owner wants live TUI dogfood first.",
+      "status": "continuity",
+      "lane": "builder"
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-0128",
+      "verified": false,
+      "verdict": ""
+    },
+    {
+      "id": "claim-0129",
+      "verified": false,
+      "verdict": ""
+    },
+    {
+      "id": "claim-0130",
+      "verified": false,
+      "verdict": ""
+    },
+    {
+      "id": "claim-0131",
+      "verified": true,
+      "verdict": "Verifier reran Step 3 extension selftest and focused pytest; claim-0131 supervisor-review authority boundary supported."
+    }
+  ]
+}</script>
+</body>
+</html>

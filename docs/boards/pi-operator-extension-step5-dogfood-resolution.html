@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Resolution ledger · pi-operator-extension-step5-dogfood</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a222c; --ink:#e8eef4; --muted:#9aa8b4; --ok:#3dd68c; --warn:#f5c542; --bad:#f07178; --run:#59c2ff; --hand:#c3a6ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header.top { padding:28px 32px 8px; }
+  .nav { color:var(--muted); margin-bottom:10px; }
+  .nav a { color:var(--run); text-decoration:none; }
+  .nav a:hover { text-decoration:underline; }
+  h1 { margin:0 0 6px; font-size:24px; font-weight:650; word-break:break-all; }
+  .sub,.obj { color:var(--muted); max-width:80ch; }
+  .flow { display:flex; gap:8px; flex-wrap:wrap; padding:16px 32px; }
+  .flow span { background:var(--card); padding:8px 12px; border-radius:999px; font-size:13px; }
+  .kpis { display:flex; gap:12px; flex-wrap:wrap; padding:0 32px 16px; }
+  .kpi { background:var(--card); padding:12px 16px; border-radius:12px; min-width:110px; }
+  .kpi b { display:block; font-size:22px; }
+  .timeline { padding:0 32px 48px; display:flex; flex-direction:column; gap:8px; }
+  .ev { display:grid; grid-template-columns:150px 90px 1fr; gap:12px; background:var(--card); border-radius:12px; padding:10px 14px; border-left:4px solid #445; }
+  .kind-claim { border-left-color:var(--warn); }
+  .kind-evidence { border-left-color:var(--run); }
+  .kind-review { border-left-color:#ffa657; }
+  .kind-verify { border-left-color:var(--ok); }
+  .kind-handoff { border-left-color:var(--hand); }
+  .when,.kind { color:var(--muted); font-size:12px; padding-top:3px; }
+  .kind { text-transform:uppercase; letter-spacing:.04em; font-weight:650; }
+  .actor { color:var(--muted); font-size:12px; margin-left:8px; }
+  .body p { margin:4px 0 0; font-size:13px; color:var(--muted); }
+  @media (max-width:800px) { .ev { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <h1>pi-operator-extension-step5-dogfood</h1>
+  <p class="sub">Issue-resolution ledger · quarantined · snapshot 2026-09-16 21:35 UTC</p>
+  <p class="obj">Run Step 5 falsifiable dogfood for the Pi Operator extension using the extension itself in live Pi TUI where possible. Required artifact set from POE-RUL-109: one task id; at least one claim with --verify-cmd; ./operator doctor output attached as run_log evidence; one review_delegations bundle or supervisor-review loop; one handoff; and either uid-isolated verifier status or an explicitly advisory</p>
+</header>
+<div class="flow">
+  <span>1 task</span><span>2 claim</span><span>3 evidence</span><span>4 review bundle</span><span>5 verifier UID evidence</span><span>6 handoff</span>
+</div>
+<div class="kpis">
+  <div class="kpi"><b>6</b>claims</div>
+  <div class="kpi"><b>9</b>builder evidence</div>
+  <div class="kpi"><b>4</b>reviews</div>
+  <div class="kpi"><b>6</b>verifier evidence</div>
+  <div class="kpi"><b>12</b>handoffs</div>
+</div>
+<div class="timeline">
+
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 06:29:54</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0001</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>In live Pi TUI, run /op:status, /op:claim, /op:evidence, /op:supervisor-review or /op:delegate, and /op:handoff go against pi-operator-extension-step5-dogfood; then verify with popup if appropriate.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 06:45:05</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0135</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Step 5 dogfood found and fixed /op:handoff default UX: /op:handoff now generates a closeout by default without requiring &#x27;go&#x27;; /op:handoff edit opens the manual draft. Claim/evidence complexity is recorded as POE-ISS-010 for a defaults pass</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 06:45:05</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0001</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>test_output for claim-0135</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 06:45:06</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0002</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>manifest for claim-0135</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 06:45:06</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0002</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi; run /op:handoff with no args; then decide whether to fix /op:claim and /op:evidence defaults now or keep as next dogfood issue.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 06:51:06</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0003</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi; run /op:handoff with no args; then decide whether to fix /op:claim and /op:evidence defaults now or keep as next dogfood issue.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 06:56:27</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0136</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Step 5 dogfood added visible progress for slow /op:doctor and /op:status: both now set an Operator status line and notify before running long ledger reads, then clear status when done. Selftest passes 446/446 and focused pytest passes 6/6. </p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 06:56:28</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0003</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>test_output for claim-0136</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 06:56:28</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0004</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi to pick up the progress-message fix, rerun /op:status or /op:doctor to confirm visible working message, then rerun /op:supervisor-review for claim-0135 if no bundle appears.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 08:15:30</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0137</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Step 5 dogfood simplified /op:supervisor-review defaults: if there is one unverified claim it is selected automatically; if the task has a safe review_harness it is used automatically as reviewer; if a claim lacks verify_cmd the review defa</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 08:15:30</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0004</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>test_output for claim-0137</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 08:15:30</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0005</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi, run /op:supervisor-review on pi-operator-extension-step5-dogfood, and confirm it no longer asks for free-text defaults in the common path.</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-02 08:17:05</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0137-2026-09-02T081705Z0000</strong>
+    <span class="actor">grok</span>
+    <p>uid-isolated review of claim-0137 as luna-review-ffsi001-rowa</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 08:19:22</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0138</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Step 5 dogfood clarified /op:supervisor-review verifier-user selection: when uid-isolated review is chosen and operator-verifier is registered, the extension now defaults to operator-verifier rather than prompting among verifier identity na</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 08:19:22</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0005</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>test_output for claim-0138</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 08:19:22</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0006</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi, rerun /op:supervisor-review for the desired claim, select uid-isolated if wanted, and confirm the generated bundle uses --review-user operator-verifier with no missing-user warning.</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-02 08:30:28</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0138-2026-09-02T083028Z0000</strong>
+    <span class="actor">grok</span>
+    <p>uid-isolated review of claim-0138 as operator-verifier</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-02 09:03:11</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0006</strong>
+    <span class="actor">operator-verifier</span>
+    <p>run_log for claim-0138</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 09:03:37</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0007</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>run_log for task</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 09:03:37</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0007</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Treat Step 5 as complete; decide whether to implement future /op:roadmap or /op:verify-run next.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 09:05:00</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0008</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Decide next feature slice: /op:roadmap, /op:verify-run, or defaults pass for /op:claim and /op:evidence.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 09:45:58</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0139</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Implemented /op:roadmap as a read-only Operator extension command. It reads the Pi Operator extension PBC, shows the implementation ladder, current active task context, recent dogfood issues, and future feature slices including /op:verify-r</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 09:45:58</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0008</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>test_output for claim-0139</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 09:45:58</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0009</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>manifest for claim-0139</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 09:45:59</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0009</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi and run /op:roadmap; if output is useful, decide whether to verify claim-0139 or move to /op:verify-run.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 18:47:00</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0140</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Implemented /op:next-steps as a read-only Operator extension command. It reads the active task and Pi Operator extension PBC, then reports the current ledger next_action, unverified claims with a suggested /op:supervisor-review command, lat</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 18:47:00</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0010</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>test_output for claim-0140</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 18:47:00</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0010</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi and run /op:next-steps; expected output should start with the current ledger next_action and suggest review for unverified claims.</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-02 18:50:10</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0140-2026-09-02T185010Z0000</strong>
+    <span class="actor">grok</span>
+    <p>uid-isolated review of claim-0140 as operator-verifier</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-02 18:59:29</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0135-2026-09-02T185929Z0000</strong>
+    <span class="actor">grok</span>
+    <p>uid-isolated review of claim-0135 as operator-verifier</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-02 19:02:25</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0011</strong>
+    <span class="actor">operator-verifier</span>
+    <p>run_log for claim-0135</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 19:07:10</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0011</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi and run /op:next-steps; expected output should start with the current ledger next_action and suggest review for unverified claims.</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-02 19:20:28</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0012</strong>
+    <span class="actor">operator-verifier</span>
+    <p>run_log for claim-0140</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-06 00:20:06</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0013</strong>
+    <span class="actor">operator-verifier</span>
+    <p>external_doc for claim-0135</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-06 00:20:07</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0014</strong>
+    <span class="actor">operator-verifier</span>
+    <p>external_doc for claim-0138</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-06 00:20:07</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0015</strong>
+    <span class="actor">operator-verifier</span>
+    <p>external_doc for claim-0140</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-06 00:21:26</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0012</strong>
+    <span class="actor">grok-95d20306</span>
+    <p>Do not restore trust on pi-operator-extension-step5-dogfood until an independent uid-966 verifier reruns against a coherent tree; current dirty test file is not that target.</p>
+  </div>
+</div>
+</div>
+<script type="application/json" id="board-data">{
+  "task_id": "pi-operator-extension-step5-dogfood",
+  "status": "quarantined",
+  "objective": "Run Step 5 falsifiable dogfood for the Pi Operator extension using the extension itself in live Pi TUI where possible. Required artifact set from POE-RUL-109: one task id; at least one claim with --verify-cmd; ./operator doctor output attached as run_log evidence; one review_delegations bundle or supervisor-review loop; one handoff; and either uid-isolated verifier status or an explicitly advisory outcome. Include live observations from /op:delegate, /op:status, and /op:handoff go. Do not implement new features except small dogfood fixes needed to complete the run; record those as claims/issues.",
+  "next": "Do not restore trust on pi-operator-extension-step5-dogfood until an independent uid-966 verifier reruns against a coherent tree; current dirty test file is not that target.",
+  "generated_at": "2026-09-16 21:35 UTC",
+  "events": [
+    {
+      "kind": "handoff",
+      "id": "handoff-0001",
+      "at": "2026-09-02T06:29:54+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "In live Pi TUI, run /op:status, /op:claim, /op:evidence, /op:supervisor-review or /op:delegate, and /op:handoff go against pi-operator-extension-step5-dogfood; then verify with popup if appropriate.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0135",
+      "at": "2026-09-02T06:45:05+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Step 5 dogfood found and fixed /op:handoff default UX: /op:handoff now generates a closeout by default without requiring 'go'; /op:handoff edit opens the manual draft. Claim/evidence complexity is recorded as POE-ISS-010 for a defaults pass",
+      "status": "withdrawn",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0001",
+      "at": "2026-09-02T06:45:05+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "test_output for claim-0135",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0135"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0002",
+      "at": "2026-09-02T06:45:06+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "manifest for claim-0135",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0135"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0002",
+      "at": "2026-09-02T06:45:06+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi; run /op:handoff with no args; then decide whether to fix /op:claim and /op:evidence defaults now or keep as next dogfood issue.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0003",
+      "at": "2026-09-02T06:51:06+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi; run /op:handoff with no args; then decide whether to fix /op:claim and /op:evidence defaults now or keep as next dogfood issue.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0136",
+      "at": "2026-09-02T06:56:27+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Step 5 dogfood added visible progress for slow /op:doctor and /op:status: both now set an Operator status line and notify before running long ledger reads, then clear status when done. Selftest passes 446/446 and focused pytest passes 6/6. ",
+      "status": "unverified",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0003",
+      "at": "2026-09-02T06:56:28+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "test_output for claim-0136",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0136"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0004",
+      "at": "2026-09-02T06:56:28+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi to pick up the progress-message fix, rerun /op:status or /op:doctor to confirm visible working message, then rerun /op:supervisor-review for claim-0135 if no bundle appears.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0137",
+      "at": "2026-09-02T08:15:30+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Step 5 dogfood simplified /op:supervisor-review defaults: if there is one unverified claim it is selected automatically; if the task has a safe review_harness it is used automatically as reviewer; if a claim lacks verify_cmd the review defa",
+      "status": "unverified",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0004",
+      "at": "2026-09-02T08:15:30+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "test_output for claim-0137",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0137"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0005",
+      "at": "2026-09-02T08:15:30+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi, run /op:supervisor-review on pi-operator-extension-step5-dogfood, and confirm it no longer asks for free-text defaults in the common path.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0137-2026-09-02T081705Z0000",
+      "at": "2026-09-02T08:17:05+00:00",
+      "actor": "grok",
+      "text": "uid-isolated review of claim-0137 as luna-review-ffsi001-rowa",
+      "status": "uid-isolated",
+      "lane": "reviewer",
+      "claim": "claim-0137"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0138",
+      "at": "2026-09-02T08:19:22+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Step 5 dogfood clarified /op:supervisor-review verifier-user selection: when uid-isolated review is chosen and operator-verifier is registered, the extension now defaults to operator-verifier rather than prompting among verifier identity na",
+      "status": "withdrawn",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0005",
+      "at": "2026-09-02T08:19:22+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "test_output for claim-0138",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0138"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0006",
+      "at": "2026-09-02T08:19:22+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi, rerun /op:supervisor-review for the desired claim, select uid-isolated if wanted, and confirm the generated bundle uses --review-user operator-verifier with no missing-user warning.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0138-2026-09-02T083028Z0000",
+      "at": "2026-09-02T08:30:28+00:00",
+      "actor": "grok",
+      "text": "uid-isolated review of claim-0138 as operator-verifier",
+      "status": "uid-isolated",
+      "lane": "reviewer",
+      "claim": "claim-0138"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0006",
+      "at": "2026-09-02T09:03:11+00:00",
+      "actor": "operator-verifier",
+      "text": "run_log for claim-0138",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0138"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0007",
+      "at": "2026-09-02T09:03:37+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "run_log for task",
+      "status": "builder",
+      "lane": "builder",
+      "claim": null
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0007",
+      "at": "2026-09-02T09:03:37+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Treat Step 5 as complete; decide whether to implement future /op:roadmap or /op:verify-run next.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0008",
+      "at": "2026-09-02T09:05:00+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Decide next feature slice: /op:roadmap, /op:verify-run, or defaults pass for /op:claim and /op:evidence.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0139",
+      "at": "2026-09-02T09:45:58+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Implemented /op:roadmap as a read-only Operator extension command. It reads the Pi Operator extension PBC, shows the implementation ladder, current active task context, recent dogfood issues, and future feature slices including /op:verify-r",
+      "status": "unverified",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0008",
+      "at": "2026-09-02T09:45:58+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "test_output for claim-0139",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0139"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0009",
+      "at": "2026-09-02T09:45:58+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "manifest for claim-0139",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0139"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0009",
+      "at": "2026-09-02T09:45:59+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi and run /op:roadmap; if output is useful, decide whether to verify claim-0139 or move to /op:verify-run.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0140",
+      "at": "2026-09-02T18:47:00+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Implemented /op:next-steps as a read-only Operator extension command. It reads the active task and Pi Operator extension PBC, then reports the current ledger next_action, unverified claims with a suggested /op:supervisor-review command, lat",
+      "status": "withdrawn",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0010",
+      "at": "2026-09-02T18:47:00+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "test_output for claim-0140",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0140"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0010",
+      "at": "2026-09-02T18:47:00+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi and run /op:next-steps; expected output should start with the current ledger next_action and suggest review for unverified claims.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0140-2026-09-02T185010Z0000",
+      "at": "2026-09-02T18:50:10+00:00",
+      "actor": "grok",
+      "text": "uid-isolated review of claim-0140 as operator-verifier",
+      "status": "uid-isolated",
+      "lane": "reviewer",
+      "claim": "claim-0140"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0135-2026-09-02T185929Z0000",
+      "at": "2026-09-02T18:59:29+00:00",
+      "actor": "grok",
+      "text": "uid-isolated review of claim-0135 as operator-verifier",
+      "status": "uid-isolated",
+      "lane": "reviewer",
+      "claim": "claim-0135"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0011",
+      "at": "2026-09-02T19:02:25+00:00",
+      "actor": "operator-verifier",
+      "text": "run_log for claim-0135",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0135"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0011",
+      "at": "2026-09-02T19:07:10+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi and run /op:next-steps; expected output should start with the current ledger next_action and suggest review for unverified claims.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0012",
+      "at": "2026-09-02T19:20:28+00:00",
+      "actor": "operator-verifier",
+      "text": "run_log for claim-0140",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0140"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0013",
+      "at": "2026-09-06T00:20:06+00:00",
+      "actor": "operator-verifier",
+      "text": "external_doc for claim-0135",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0135"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0014",
+      "at": "2026-09-06T00:20:07+00:00",
+      "actor": "operator-verifier",
+      "text": "external_doc for claim-0138",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0138"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0015",
+      "at": "2026-09-06T00:20:07+00:00",
+      "actor": "operator-verifier",
+      "text": "external_doc for claim-0140",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0140"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0012",
+      "at": "2026-09-06T00:21:26+00:00",
+      "actor": "grok-95d20306",
+      "text": "Do not restore trust on pi-operator-extension-step5-dogfood until an independent uid-966 verifier reruns against a coherent tree; current dirty test file is not that target.",
+      "status": "continuity",
+      "lane": "builder"
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-0135",
+      "verified": false,
+      "verdict": "Verification withdrawn by uid 966 (operator-verifier). Quarantined, not refuted: the claim is unproven, not shown false. See attached reason."
+    },
+    {
+      "id": "claim-0136",
+      "verified": false,
+      "verdict": ""
+    },
+    {
+      "id": "claim-0137",
+      "verified": false,
+      "verdict": ""
+    },
+    {
+      "id": "claim-0138",
+      "verified": false,
+      "verdict": "Verification withdrawn by uid 966 (operator-verifier). Quarantined, not refuted: the claim is unproven, not shown false. See attached reason."
+    },
+    {
+      "id": "claim-0139",
+      "verified": false,
+      "verdict": ""
+    },
+    {
+      "id": "claim-0140",
+      "verified": false,
+      "verdict": "Verification withdrawn by uid 966 (operator-verifier). Quarantined, not refuted: the claim is unproven, not shown false. See attached reason."
+    }
+  ]
+}</script>
+</body>
+</html>

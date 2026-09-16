@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Issue board · pi-operator-extension</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a222c; --ink:#e8eef4; --muted:#9aa8b4; --ok:#3dd68c; --warn:#f5c542; --bad:#f07178; --run:#59c2ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header.top { padding:28px 32px 12px; }
+  .nav { color:var(--muted); margin-bottom:10px; }
+  .nav a { color:var(--run); text-decoration:none; }
+  .nav a:hover { text-decoration:underline; }
+  h1 { margin:0 0 6px; font-size:28px; font-weight:650; }
+  .sub { color:var(--muted); }
+  .kpis { display:flex; gap:12px; flex-wrap:wrap; padding:0 32px 20px; }
+  .kpi { background:var(--card); padding:12px 16px; border-radius:12px; min-width:120px; }
+  .kpi b { display:block; font-size:22px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; padding:0 32px 48px; }
+  .card { background:var(--card); border-radius:14px; padding:14px 16px; border-left:4px solid #445; }
+  .state-open { border-left-color:var(--bad); }
+  .state-in-ledger { border-left-color:var(--warn); }
+  .state-addressed { border-left-color:var(--ok); }
+  .card header { display:flex; justify-content:space-between; gap:8px; align-items:start; }
+  .card h2 { margin:0; font-size:14px; font-weight:650; }
+  .pill { font-size:11px; text-transform:uppercase; letter-spacing:.04em; background:#0003; padding:3px 8px; border-radius:999px; }
+  .meta { color:var(--muted); font-size:12px; margin:0 0 8px; }
+  .next { margin:0 0 8px; font-size:13px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <h1>pi-operator-extension issues</h1>
+  <p class="sub">Issue backlog catalog · snapshot 2026-09-16 21:35 UTC · PBC dogfood backlog + ledger mentions</p>
+</header>
+<div class="kpis">
+  <div class="kpi"><b>15</b>issues</div>
+  <div class="kpi"><b>13</b>open (no claim mention)</div>
+  <div class="kpi"><b>2</b>in ledger, unverified</div>
+  <div class="kpi"><b>0</b>addressed (verified claim)</div>
+</div>
+<div class="grid">
+
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-001</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">POE rules are currently in a ratified pbc:rules fence even though they have not gone through proposal lifecycle.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Re-fence proposed material before relying on the PBC as a gate.</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-002</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">/op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Narrow wave-1 supervisor-review to one claim, or explicitly model claim-set review as repeated single-claim bundles.</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-003</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">/op:delegate has no general CLI route to an implementer that is not already assigned or reviewing the task.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Restrict chooser targets to routable harnesses or make new implementer delegation create a scoped child task.</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-004</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Decide the minimum identity/target config before implementing delegate launch.</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-005</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Open a separate Operator task for the review-delegate approval/isolation defect.</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-006</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Define a binary dogfood gate such as non-self-verification plus required ledger artifacts.</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-007</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Add a supervisor-review/verifier-auth design slice that prompts the user explicitly when a verifier UID run is needed and records advisory vs trusted outcome distinctly.</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-008</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-009</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">/op:handoff treated a one-word user input &quot;go&quot; as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Change /op:handoff UX so it generates a deterministic draft from task/status/recent handoffs first, defaults to generated closeout without requiring &quot;go&quot;, and refuses near-empty handoffs unless the user explicitly uses m</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-in-ledger">
+  <header>
+    <h2>POE-ISS-010</h2>
+    <span class="pill">in-ledger</span>
+  </header>
+  <p class="next">/op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Add a defaults pass for authoring flows: infer current task and session author, suggest claim type and gate from recent context, prefer the active/recent claim for evidence, and keep advanced fields behind an edit/detail</p>
+  <p class="meta">task hint: none · claims: claim-0135</p>
+</article>
+<article class="card state-in-ledger">
+  <header>
+    <h2>POE-ISS-011</h2>
+    <span class="pill">in-ledger</span>
+  </header>
+  <p class="next">/op:doctor and /op:status are slow on large ledgers and previously showed no visible progress while running.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Add visible working/status notifications before long Operator reads and clear them when the command finishes.</p>
+  <p class="meta">task hint: none · claims: claim-0136</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-012</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-013</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Rename prompts/docs around model/persona targets, remove Pi as a default delegation target, and keep reviewer labels distinct from verifier Unix users in generated review instructions.</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-014</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat&#x27;s cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Make review-delegate persona→provider resolution bind Grok to the configured xai provider/grok model (never a different seat&#x27;s cloud command), keep review_harness and the generated run_command consistent, and have doctor</p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+<article class="card state-open">
+  <header>
+    <h2>POE-ISS-015</h2>
+    <span class="pill">open</span>
+  </header>
+  <p class="next">Review routing was blocked by a &#x27;cross-family review&#x27; requirement that is not a rule: operator enforces only a distinct agent - doctor checks that the verifier UID differs from the author UID and never checks the reviewer&#x27;s model family. The constraint keeps resurfacing in review</p>
+  <p class="meta">source: </p>
+  <p class="meta">next: Treat the review requirement as distinct-agent only (a separate uid-isolated verifier, or an advisory pass). Remove &#x27;cross-family&#x27; from review-call routing language and any doctor-side guidance so a claim is never gated </p>
+  <p class="meta">task hint: none · claims: no matching claims</p>
+</article>
+</div>
+<script type="application/json" id="board-data">{
+  "prefix": "pi-operator-extension",
+  "generated_at": "2026-09-16 21:35 UTC",
+  "issues": [
+    {
+      "id": "POE-ISS-001",
+      "state": "open",
+      "source": "",
+      "summary": "POE rules are currently in a ratified pbc:rules fence even though they have not gone through proposal lifecycle.",
+      "next_step": "Re-fence proposed material before relying on the PBC as a gate.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-002",
+      "state": "open",
+      "source": "",
+      "summary": "/op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.",
+      "next_step": "Narrow wave-1 supervisor-review to one claim, or explicitly model claim-set review as repeated single-claim bundles.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-003",
+      "state": "open",
+      "source": "",
+      "summary": "/op:delegate has no general CLI route to an implementer that is not already assigned or reviewing the task.",
+      "next_step": "Restrict chooser targets to routable harnesses or make new implementer delegation create a scoped child task.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-004",
+      "state": "open",
+      "source": "",
+      "summary": "Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.",
+      "next_step": "Decide the minimum identity/target config before implementing delegate launch.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-005",
+      "state": "open",
+      "source": "",
+      "summary": "review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.",
+      "next_step": "Open a separate Operator task for the review-delegate approval/isolation defect.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-006",
+      "state": "open",
+      "source": "",
+      "summary": "Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.",
+      "next_step": "Define a binary dogfood gate such as non-self-verification plus required ledger artifacts.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-007",
+      "state": "open",
+      "source": "",
+      "summary": "Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.",
+      "next_step": "Add a supervisor-review/verifier-auth design slice that prompts the user explicitly when a verifier UID run is needed and records advisory vs trusted outcome distinctly.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-008",
+      "state": "open",
+      "source": "",
+      "summary": "Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.",
+      "next_step": "Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-009",
+      "state": "open",
+      "source": "",
+      "summary": "/op:handoff treated a one-word user input \"go\" as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.",
+      "next_step": "Change /op:handoff UX so it generates a deterministic draft from task/status/recent handoffs first, defaults to generated closeout without requiring \"go\", and refuses near-empty handoffs unless the user explicitly uses manual edit mode.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-010",
+      "state": "in-ledger",
+      "source": "",
+      "summary": "/op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.",
+      "next_step": "Add a defaults pass for authoring flows: infer current task and session author, suggest claim type and gate from recent context, prefer the active/recent claim for evidence, and keep advanced fields behind an edit/details path.",
+      "task_hint": null,
+      "claims": [
+        {
+          "id": "claim-0135",
+          "task": "pi-operator-extension-step5-dogfood",
+          "verified": false
+        }
+      ]
+    },
+    {
+      "id": "POE-ISS-011",
+      "state": "in-ledger",
+      "source": "",
+      "summary": "/op:doctor and /op:status are slow on large ledgers and previously showed no visible progress while running.",
+      "next_step": "Add visible working/status notifications before long Operator reads and clear them when the command finishes.",
+      "task_hint": null,
+      "claims": [
+        {
+          "id": "claim-0136",
+          "task": "pi-operator-extension-step5-dogfood",
+          "verified": false
+        }
+      ]
+    },
+    {
+      "id": "POE-ISS-012",
+      "state": "open",
+      "source": "",
+      "summary": "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.",
+      "next_step": "Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-013",
+      "state": "open",
+      "source": "",
+      "summary": "Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.",
+      "next_step": "Rename prompts/docs around model/persona targets, remove Pi as a default delegation target, and keep reviewer labels distinct from verifier Unix users in generated review instructions.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-014",
+      "state": "open",
+      "source": "",
+      "summary": "review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat's cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task's grok review_harness).",
+      "next_step": "Make review-delegate persona\u2192provider resolution bind Grok to the configured xai provider/grok model (never a different seat's cloud command), keep review_harness and the generated run_command consistent, and have doctor flag any run_command whose provider/model does not match the task's declared review_harness.",
+      "task_hint": null,
+      "claims": []
+    },
+    {
+      "id": "POE-ISS-015",
+      "state": "open",
+      "source": "",
+      "summary": "Review routing was blocked by a 'cross-family review' requirement that is not a rule: operator enforces only a distinct agent - doctor checks that the verifier UID differs from the author UID and never checks the reviewer's model family. The constraint keeps resurfacing in review-call section-5 blocks and wrongly marks a routable call as unrouteable.",
+      "next_step": "Treat the review requirement as distinct-agent only (a separate uid-isolated verifier, or an advisory pass). Remove 'cross-family' from review-call routing language and any doctor-side guidance so a claim is never gated on the reviewer's model family.",
+      "task_hint": null,
+      "claims": []
+    }
+  ]
+}</script>
+</body>
+</html>

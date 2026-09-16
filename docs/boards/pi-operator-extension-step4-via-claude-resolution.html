@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Resolution ledger · pi-operator-extension-step4-via-claude</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a222c; --ink:#e8eef4; --muted:#9aa8b4; --ok:#3dd68c; --warn:#f5c542; --bad:#f07178; --run:#59c2ff; --hand:#c3a6ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header.top { padding:28px 32px 8px; }
+  .nav { color:var(--muted); margin-bottom:10px; }
+  .nav a { color:var(--run); text-decoration:none; }
+  .nav a:hover { text-decoration:underline; }
+  h1 { margin:0 0 6px; font-size:24px; font-weight:650; word-break:break-all; }
+  .sub,.obj { color:var(--muted); max-width:80ch; }
+  .flow { display:flex; gap:8px; flex-wrap:wrap; padding:16px 32px; }
+  .flow span { background:var(--card); padding:8px 12px; border-radius:999px; font-size:13px; }
+  .kpis { display:flex; gap:12px; flex-wrap:wrap; padding:0 32px 16px; }
+  .kpi { background:var(--card); padding:12px 16px; border-radius:12px; min-width:110px; }
+  .kpi b { display:block; font-size:22px; }
+  .timeline { padding:0 32px 48px; display:flex; flex-direction:column; gap:8px; }
+  .ev { display:grid; grid-template-columns:150px 90px 1fr; gap:12px; background:var(--card); border-radius:12px; padding:10px 14px; border-left:4px solid #445; }
+  .kind-claim { border-left-color:var(--warn); }
+  .kind-evidence { border-left-color:var(--run); }
+  .kind-review { border-left-color:#ffa657; }
+  .kind-verify { border-left-color:var(--ok); }
+  .kind-handoff { border-left-color:var(--hand); }
+  .when,.kind { color:var(--muted); font-size:12px; padding-top:3px; }
+  .kind { text-transform:uppercase; letter-spacing:.04em; font-weight:650; }
+  .actor { color:var(--muted); font-size:12px; margin-left:8px; }
+  .body p { margin:4px 0 0; font-size:13px; color:var(--muted); }
+  @media (max-width:800px) { .ev { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <h1>pi-operator-extension-step4-via-claude</h1>
+  <p class="sub">Issue-resolution ledger · running · snapshot 2026-09-16 21:35 UTC</p>
+  <p class="obj">Bounded implementation delegated from pi-operator-extension-step4 to claude while the current Pi agent remains in the loop. Parent objective: Implement Step 4 of the Pi Operator extension roadmap from owners-manual/pbc/appendix-pi-operator-extension.pbc.md: add /op:delegate only. It must use a chooser-first surface and preserve the verified Step 1-3 boundaries. /op:delegate sends bounded implement</p>
+</header>
+<div class="flow">
+  <span>1 task</span><span>2 claim</span><span>3 evidence</span><span>4 review bundle</span><span>5 verifier UID evidence</span><span>6 handoff</span>
+</div>
+<div class="kpis">
+  <div class="kpi"><b>0</b>claims</div>
+  <div class="kpi"><b>0</b>builder evidence</div>
+  <div class="kpi"><b>0</b>reviews</div>
+  <div class="kpi"><b>0</b>verifier evidence</div>
+  <div class="kpi"><b>1</b>handoffs</div>
+</div>
+<div class="timeline">
+
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-06 01:49:12</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0001</strong>
+    <span class="actor">pi-01a06498</span>
+    <p>Do not resume this child loop. Parent step4 is verified; later dogfood is on step5 (currently quarantined for source drift).</p>
+  </div>
+</div>
+</div>
+<script type="application/json" id="board-data">{
+  "task_id": "pi-operator-extension-step4-via-claude",
+  "status": "running",
+  "objective": "Bounded implementation delegated from pi-operator-extension-step4 to claude while the current Pi agent remains in the loop. Parent objective: Implement Step 4 of the Pi Operator extension roadmap from owners-manual/pbc/appendix-pi-operator-extension.pbc.md: add /op:delegate only. It must use a chooser-first surface and preserve the verified Step 1-3 boundaries. /op:delegate sends bounded implementation work to another agent while the current Pi agent remains in the loop. It must not offer unroutable targets silently: if target is already routable for the current task, generate/start an appropriate brief/invocation path; if target is not routed, make the user create/confirm a scoped child task with explicit --assign rather than mutating the parent routing implicitly. It must distinguish ledger harness id, carrier/adapter id, model, isolation, and brief format. It must fail closed on targets that would make one harness both implementer and reviewer. Primary path should invoke through an existing safe adapter where feasible; paste/export-only must be labeled fallback. Do not implement /pbc:define, /pbc:feature, raw arbitrary operator execution, or model-callable tools. Add/update selftests and focused pytest coverage. Return claims/evidence/handoff; do not mark your own work verified.",
+  "next": "Do not resume this child loop. Parent step4 is verified; later dogfood is on step5 (currently quarantined for source drift).",
+  "generated_at": "2026-09-16 21:35 UTC",
+  "events": [
+    {
+      "kind": "handoff",
+      "id": "handoff-0001",
+      "at": "2026-09-06T01:49:12+00:00",
+      "actor": "pi-01a06498",
+      "text": "Do not resume this child loop. Parent step4 is verified; later dogfood is on step5 (currently quarantined for source drift).",
+      "status": "continuity",
+      "lane": "builder"
+    }
+  ],
+  "claims": []
+}</script>
+</body>
+</html>

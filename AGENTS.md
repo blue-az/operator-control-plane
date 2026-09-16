@@ -26,6 +26,7 @@ Compact Python CLI (Python ≥ 3.12).
 | `authority_client.py` / `authority_projection.py` | CLI ↔ broker integration |
 | `dogfood_runner.py` | Resumable dogfood plan engine |
 | `.pi/extensions/operator/` | Project-local pi extension: orientation plus claim/evidence/handoff commands |
+| `scripts/operator_project_board.py` / `docs/boards/` | Static HTML project/issue/resolution boards generated from the local ledger |
 | `tests/test_operator.py` | Main CLI integration suite |
 | `tests/test_authority_*.py` | Broker, admin, and integration suites |
 | `*_SPEC.md` | Source of truth for semantics/contracts |
@@ -34,6 +35,7 @@ Compact Python CLI (Python ≥ 3.12).
 ## Build, Test, and Development Commands
 - `pip install -r requirements.txt` (Only dependency: PyYAML)
 - `./operator doctor` (Consistency check of local `.operator/` ledger)
+- `python3 scripts/operator_project_board.py` (HTML project board; `--view issues` / `--view graph` / `--view resolution --task <id>`)
 - `pytest tests/` (Full suite)
 - `pytest tests/test_operator.py -q` (Focused CLI tests)
 - `pytest tests/test_operator.py -q -k doctor` (Targeted doctor tests)

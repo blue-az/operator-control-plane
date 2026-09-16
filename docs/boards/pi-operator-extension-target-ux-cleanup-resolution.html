@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Resolution ledger · pi-operator-extension-target-ux-cleanup</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a222c; --ink:#e8eef4; --muted:#9aa8b4; --ok:#3dd68c; --warn:#f5c542; --bad:#f07178; --run:#59c2ff; --hand:#c3a6ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header.top { padding:28px 32px 8px; }
+  .nav { color:var(--muted); margin-bottom:10px; }
+  .nav a { color:var(--run); text-decoration:none; }
+  .nav a:hover { text-decoration:underline; }
+  h1 { margin:0 0 6px; font-size:24px; font-weight:650; word-break:break-all; }
+  .sub,.obj { color:var(--muted); max-width:80ch; }
+  .flow { display:flex; gap:8px; flex-wrap:wrap; padding:16px 32px; }
+  .flow span { background:var(--card); padding:8px 12px; border-radius:999px; font-size:13px; }
+  .kpis { display:flex; gap:12px; flex-wrap:wrap; padding:0 32px 16px; }
+  .kpi { background:var(--card); padding:12px 16px; border-radius:12px; min-width:110px; }
+  .kpi b { display:block; font-size:22px; }
+  .timeline { padding:0 32px 48px; display:flex; flex-direction:column; gap:8px; }
+  .ev { display:grid; grid-template-columns:150px 90px 1fr; gap:12px; background:var(--card); border-radius:12px; padding:10px 14px; border-left:4px solid #445; }
+  .kind-claim { border-left-color:var(--warn); }
+  .kind-evidence { border-left-color:var(--run); }
+  .kind-review { border-left-color:#ffa657; }
+  .kind-verify { border-left-color:var(--ok); }
+  .kind-handoff { border-left-color:var(--hand); }
+  .when,.kind { color:var(--muted); font-size:12px; padding-top:3px; }
+  .kind { text-transform:uppercase; letter-spacing:.04em; font-weight:650; }
+  .actor { color:var(--muted); font-size:12px; margin-left:8px; }
+  .body p { margin:4px 0 0; font-size:13px; color:var(--muted); }
+  @media (max-width:800px) { .ev { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <h1>pi-operator-extension-target-ux-cleanup</h1>
+  <p class="sub">Issue-resolution ledger · verified · snapshot 2026-09-16 21:35 UTC</p>
+  <p class="obj">Clean up Pi Operator extension target/reviewer UX so users choose model/persona targets (Claude/Luna/Grok/etc.) while Operator keeps carrier runtime, ledger reviewer labels, and Unix verifier identities distinct. Scope: rename confusing supervisor-review prompts; document/normalize target registry semantics; repair review-delegate verifier prompt/script assumptions where feasible; preserve no-sile</p>
+</header>
+<div class="flow">
+  <span>1 task</span><span>2 claim</span><span>3 evidence</span><span>4 review bundle</span><span>5 verifier UID evidence</span><span>6 handoff</span>
+</div>
+<div class="kpis">
+  <div class="kpi"><b>1</b>claims</div>
+  <div class="kpi"><b>1</b>builder evidence</div>
+  <div class="kpi"><b>1</b>reviews</div>
+  <div class="kpi"><b>1</b>verifier evidence</div>
+  <div class="kpi"><b>7</b>handoffs</div>
+</div>
+<div class="timeline">
+
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 19:08:00</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0001</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Inspect target registry and supervisor-review wording, then patch prompts/tests to use model/persona language while preserving ledger identity fields.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 19:10:40</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0141</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Started target/model UX cleanup: /op:supervisor-review prompts and plan copy now present the reviewer as a model/persona target, separate from the Unix verifier identity; targets.json and default targets no longer expose &#x27;pi&#x27; as a normal de</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 19:10:41</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0001</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>test_output for claim-0141</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 19:10:41</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0002</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi, inspect /op:delegate choices and /op:supervisor-review copy, then verify/commit if acceptable.</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-02 19:15:53</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0141-2026-09-02T191553Z0000</strong>
+    <span class="actor">grok</span>
+    <p>uid-isolated review of claim-0141 as operator-verifier</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-02 19:17:19</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0002</strong>
+    <span class="actor">operator-verifier</span>
+    <p>run_log for claim-0141</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 19:20:28</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0003</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Run final checks, commit selected source/PBC/test changes, push.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 20:42:10</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0004</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Commit/push this small PBC update if desired, then test extension on another project.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 21:58:10</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0005</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Commit the PBC update if desired; otherwise continue cross-project dogfood and collect install/discovery pain points.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 22:25:37</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0006</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Leave as future feature unless repeated cross-project dogfood shows users need explicit mode selection.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 23:06:03</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0007</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Leave for publish hardening; continue cross-project trials or commit PBC backlog updates.</p>
+  </div>
+</div>
+</div>
+<script type="application/json" id="board-data">{
+  "task_id": "pi-operator-extension-target-ux-cleanup",
+  "status": "verified",
+  "objective": "Clean up Pi Operator extension target/reviewer UX so users choose model/persona targets (Claude/Luna/Grok/etc.) while Operator keeps carrier runtime, ledger reviewer labels, and Unix verifier identities distinct. Scope: rename confusing supervisor-review prompts; document/normalize target registry semantics; repair review-delegate verifier prompt/script assumptions where feasible; preserve no-silent-cross-UID verification boundary; do not broaden into PBC commands.",
+  "next": "Leave for publish hardening; continue cross-project trials or commit PBC backlog updates.",
+  "generated_at": "2026-09-16 21:35 UTC",
+  "events": [
+    {
+      "kind": "handoff",
+      "id": "handoff-0001",
+      "at": "2026-09-02T19:08:00+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Inspect target registry and supervisor-review wording, then patch prompts/tests to use model/persona language while preserving ledger identity fields.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0141",
+      "at": "2026-09-02T19:10:40+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Started target/model UX cleanup: /op:supervisor-review prompts and plan copy now present the reviewer as a model/persona target, separate from the Unix verifier identity; targets.json and default targets no longer expose 'pi' as a normal de",
+      "status": "verified",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0001",
+      "at": "2026-09-02T19:10:41+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "test_output for claim-0141",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0141"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0002",
+      "at": "2026-09-02T19:10:41+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi, inspect /op:delegate choices and /op:supervisor-review copy, then verify/commit if acceptable.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0141-2026-09-02T191553Z0000",
+      "at": "2026-09-02T19:15:53+00:00",
+      "actor": "grok",
+      "text": "uid-isolated review of claim-0141 as operator-verifier",
+      "status": "uid-isolated",
+      "lane": "reviewer",
+      "claim": "claim-0141"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0002",
+      "at": "2026-09-02T19:17:19+00:00",
+      "actor": "operator-verifier",
+      "text": "run_log for claim-0141",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0141"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0003",
+      "at": "2026-09-02T19:20:28+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Run final checks, commit selected source/PBC/test changes, push.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0004",
+      "at": "2026-09-02T20:42:10+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Commit/push this small PBC update if desired, then test extension on another project.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0005",
+      "at": "2026-09-02T21:58:10+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Commit the PBC update if desired; otherwise continue cross-project dogfood and collect install/discovery pain points.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0006",
+      "at": "2026-09-02T22:25:37+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Leave as future feature unless repeated cross-project dogfood shows users need explicit mode selection.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0007",
+      "at": "2026-09-02T23:06:03+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Leave for publish hardening; continue cross-project trials or commit PBC backlog updates.",
+      "status": "continuity",
+      "lane": "builder"
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-0141",
+      "verified": true,
+      "verdict": "uid-isolated operator-verifier reran the claim verify command with PATH including the existing pytest venv because sudo reset PATH; selftest passed 455/455 and "
+    }
+  ]
+}</script>
+</body>
+</html>

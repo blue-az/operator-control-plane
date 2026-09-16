@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Resolution ledger · pi-operator-extension-step4</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a222c; --ink:#e8eef4; --muted:#9aa8b4; --ok:#3dd68c; --warn:#f5c542; --bad:#f07178; --run:#59c2ff; --hand:#c3a6ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header.top { padding:28px 32px 8px; }
+  .nav { color:var(--muted); margin-bottom:10px; }
+  .nav a { color:var(--run); text-decoration:none; }
+  .nav a:hover { text-decoration:underline; }
+  h1 { margin:0 0 6px; font-size:24px; font-weight:650; word-break:break-all; }
+  .sub,.obj { color:var(--muted); max-width:80ch; }
+  .flow { display:flex; gap:8px; flex-wrap:wrap; padding:16px 32px; }
+  .flow span { background:var(--card); padding:8px 12px; border-radius:999px; font-size:13px; }
+  .kpis { display:flex; gap:12px; flex-wrap:wrap; padding:0 32px 16px; }
+  .kpi { background:var(--card); padding:12px 16px; border-radius:12px; min-width:110px; }
+  .kpi b { display:block; font-size:22px; }
+  .timeline { padding:0 32px 48px; display:flex; flex-direction:column; gap:8px; }
+  .ev { display:grid; grid-template-columns:150px 90px 1fr; gap:12px; background:var(--card); border-radius:12px; padding:10px 14px; border-left:4px solid #445; }
+  .kind-claim { border-left-color:var(--warn); }
+  .kind-evidence { border-left-color:var(--run); }
+  .kind-review { border-left-color:#ffa657; }
+  .kind-verify { border-left-color:var(--ok); }
+  .kind-handoff { border-left-color:var(--hand); }
+  .when,.kind { color:var(--muted); font-size:12px; padding-top:3px; }
+  .kind { text-transform:uppercase; letter-spacing:.04em; font-weight:650; }
+  .actor { color:var(--muted); font-size:12px; margin-left:8px; }
+  .body p { margin:4px 0 0; font-size:13px; color:var(--muted); }
+  @media (max-width:800px) { .ev { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <h1>pi-operator-extension-step4</h1>
+  <p class="sub">Issue-resolution ledger · verified · snapshot 2026-09-16 21:35 UTC</p>
+  <p class="obj">Implement Step 4 of the Pi Operator extension roadmap from owners-manual/pbc/appendix-pi-operator-extension.pbc.md: add /op:delegate only. It must use a chooser-first surface and preserve the verified Step 1-3 boundaries. /op:delegate sends bounded implementation work to another agent while the current Pi agent remains in the loop. It must not offer unroutable targets silently: if target is alread</p>
+</header>
+<div class="flow">
+  <span>1 task</span><span>2 claim</span><span>3 evidence</span><span>4 review bundle</span><span>5 verifier UID evidence</span><span>6 handoff</span>
+</div>
+<div class="kpis">
+  <div class="kpi"><b>3</b>claims</div>
+  <div class="kpi"><b>8</b>builder evidence</div>
+  <div class="kpi"><b>1</b>reviews</div>
+  <div class="kpi"><b>1</b>verifier evidence</div>
+  <div class="kpi"><b>8</b>handoffs</div>
+</div>
+<div class="timeline">
+
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 01:55:18</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0132</strong>
+    <span class="actor">grok</span>
+    <p>The extension holds the Operator authority boundary at step 4: /op:delegate is chooser-first over configured targets that distinguish ledger harness id, carrier/adapter id, model, isolation, and brief format. A parent-routed assigned_harnes</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 01:55:18</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0133</strong>
+    <span class="actor">grok</span>
+    <p>Step 4 /op:delegate files exist: .pi/extensions/operator/index.ts registers op:delegate; core.ts exports classifyDelegateTarget, taskCreateArgv, sessionStartArgv, and adapterInvokeArgv; targets.json lists harness_id plus carrier_id without </p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:55:31</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0001</strong>
+    <span class="actor">grok</span>
+    <p>test_output for claim-0132</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:55:31</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0002</strong>
+    <span class="actor">grok</span>
+    <p>test_output for claim-0132</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:55:31</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0003</strong>
+    <span class="actor">grok</span>
+    <p>manifest for claim-0133</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 01:55:32</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0004</strong>
+    <span class="actor">grok</span>
+    <p>manifest for claim-0133</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 01:55:50</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0001</strong>
+    <span class="actor">grok</span>
+    <p>Supervisor reviewer (review_harness pi-01a05bf2, then a distinct verifier UID) should rerun the selftest and focused pytest, inspect that parent routing is not mutated and dual-role targets are refused, and only then attach status-setting e</p>
+  </div>
+</div>
+<div class="ev lane-reviewer kind-review">
+  <div class="when">2026-09-02 03:00:47</div>
+  <div class="kind">review</div>
+  <div class="body">
+    <strong>review-claim-0132-2026-09-02T030047Z0000</strong>
+    <span class="actor">grok</span>
+    <p>advisory-agent review of claim-0132 as n/a</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 03:06:37</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0005</strong>
+    <span class="actor">grok</span>
+    <p>test_output for claim-0132</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 03:06:37</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0006</strong>
+    <span class="actor">grok</span>
+    <p>paper_section for claim-0132</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 03:06:37</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0002</strong>
+    <span class="actor">grok</span>
+    <p>Run /op:supervisor-review on claim-0132 in uid-isolated mode with an explicit reviewer other than grok and --review-user for operator-verifier or uid-971. Authorize the sudo -u script as that user. Attach status-setting evidence as the regi</p>
+  </div>
+</div>
+<div class="ev lane-verifier kind-verify">
+  <div class="when">2026-09-02 03:14:57</div>
+  <div class="kind">verify</div>
+  <div class="body">
+    <strong>evidence-0007</strong>
+    <span class="actor">operator-verifier</span>
+    <p>run_log for claim-0132</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 03:15:06</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0003</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Recommended: run Step 5 dogfood using the extension itself in Pi TUI, including at least one /op:delegate or /op:supervisor-review loop plus /op:handoff, then decide whether PBC commands are next.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 05:43:20</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0004</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>go</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 05:44:47</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0005</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Implement /op:handoff generated-draft/minimal-closeout fix, then rerun live TUI dogfood.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-claim">
+  <div class="when">2026-09-02 06:05:04</div>
+  <div class="kind">claim</div>
+  <div class="body">
+    <strong>claim-0134</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>/op:handoff now supports generated closeout semantics for live dogfood: the template is prefilled with deterministic task-context sections, typing &#x27;go&#x27; as the whole editor content or as /op:handoff go accepts the generated draft rather than</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 06:05:04</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0008</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>test_output for claim-0134</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-evidence">
+  <div class="when">2026-09-02 06:05:05</div>
+  <div class="kind">evidence</div>
+  <div class="body">
+    <strong>evidence-0009</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>manifest for claim-0134</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 06:05:05</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0006</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 06:07:43</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0007</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.</p>
+  </div>
+</div>
+<div class="ev lane-builder kind-handoff">
+  <div class="when">2026-09-02 06:08:56</div>
+  <div class="kind">handoff</div>
+  <div class="body">
+    <strong>handoff-0008</strong>
+    <span class="actor">pi-01a05bf2</span>
+    <p>Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.</p>
+  </div>
+</div>
+</div>
+<script type="application/json" id="board-data">{
+  "task_id": "pi-operator-extension-step4",
+  "status": "verified",
+  "objective": "Implement Step 4 of the Pi Operator extension roadmap from owners-manual/pbc/appendix-pi-operator-extension.pbc.md: add /op:delegate only. It must use a chooser-first surface and preserve the verified Step 1-3 boundaries. /op:delegate sends bounded implementation work to another agent while the current Pi agent remains in the loop. It must not offer unroutable targets silently: if target is already routable for the current task, generate/start an appropriate brief/invocation path; if target is not routed, make the user create/confirm a scoped child task with explicit --assign rather than mutating the parent routing implicitly. It must distinguish ledger harness id, carrier/adapter id, model, isolation, and brief format. It must fail closed on targets that would make one harness both implementer and reviewer. Primary path should invoke through an existing safe adapter where feasible; paste/export-only must be labeled fallback. Do not implement /pbc:define, /pbc:feature, raw arbitrary operator execution, or model-callable tools. Add/update selftests and focused pytest coverage. Return claims/evidence/handoff; do not mark your own work verified.",
+  "next": "Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.",
+  "generated_at": "2026-09-16 21:35 UTC",
+  "events": [
+    {
+      "kind": "claim",
+      "id": "claim-0132",
+      "at": "2026-09-02T01:55:18+00:00",
+      "actor": "grok",
+      "text": "The extension holds the Operator authority boundary at step 4: /op:delegate is chooser-first over configured targets that distinguish ledger harness id, carrier/adapter id, model, isolation, and brief format. A parent-routed assigned_harnes",
+      "status": "verified",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0133",
+      "at": "2026-09-02T01:55:18+00:00",
+      "actor": "grok",
+      "text": "Step 4 /op:delegate files exist: .pi/extensions/operator/index.ts registers op:delegate; core.ts exports classifyDelegateTarget, taskCreateArgv, sessionStartArgv, and adapterInvokeArgv; targets.json lists harness_id plus carrier_id without ",
+      "status": "unverified",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0001",
+      "at": "2026-09-02T01:55:31+00:00",
+      "actor": "grok",
+      "text": "test_output for claim-0132",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0132"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0002",
+      "at": "2026-09-02T01:55:31+00:00",
+      "actor": "grok",
+      "text": "test_output for claim-0132",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0132"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0003",
+      "at": "2026-09-02T01:55:31+00:00",
+      "actor": "grok",
+      "text": "manifest for claim-0133",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0133"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0004",
+      "at": "2026-09-02T01:55:32+00:00",
+      "actor": "grok",
+      "text": "manifest for claim-0133",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0133"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0001",
+      "at": "2026-09-02T01:55:50+00:00",
+      "actor": "grok",
+      "text": "Supervisor reviewer (review_harness pi-01a05bf2, then a distinct verifier UID) should rerun the selftest and focused pytest, inspect that parent routing is not mutated and dual-role targets are refused, and only then attach status-setting e",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "review",
+      "id": "review-claim-0132-2026-09-02T030047Z0000",
+      "at": "2026-09-02T03:00:47+00:00",
+      "actor": "grok",
+      "text": "advisory-agent review of claim-0132 as n/a",
+      "status": "advisory-agent",
+      "lane": "reviewer",
+      "claim": "claim-0132"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0005",
+      "at": "2026-09-02T03:06:37+00:00",
+      "actor": "grok",
+      "text": "test_output for claim-0132",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0132"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0006",
+      "at": "2026-09-02T03:06:37+00:00",
+      "actor": "grok",
+      "text": "paper_section for claim-0132",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0132"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0002",
+      "at": "2026-09-02T03:06:37+00:00",
+      "actor": "grok",
+      "text": "Run /op:supervisor-review on claim-0132 in uid-isolated mode with an explicit reviewer other than grok and --review-user for operator-verifier or uid-971. Authorize the sudo -u script as that user. Attach status-setting evidence as the regi",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "verify",
+      "id": "evidence-0007",
+      "at": "2026-09-02T03:14:57+00:00",
+      "actor": "operator-verifier",
+      "text": "run_log for claim-0132",
+      "status": "verifier",
+      "lane": "verifier",
+      "claim": "claim-0132"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0003",
+      "at": "2026-09-02T03:15:06+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Recommended: run Step 5 dogfood using the extension itself in Pi TUI, including at least one /op:delegate or /op:supervisor-review loop plus /op:handoff, then decide whether PBC commands are next.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0004",
+      "at": "2026-09-02T05:43:20+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "go",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0005",
+      "at": "2026-09-02T05:44:47+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Implement /op:handoff generated-draft/minimal-closeout fix, then rerun live TUI dogfood.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "claim",
+      "id": "claim-0134",
+      "at": "2026-09-02T06:05:04+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "/op:handoff now supports generated closeout semantics for live dogfood: the template is prefilled with deterministic task-context sections, typing 'go' as the whole editor content or as /op:handoff go accepts the generated draft rather than",
+      "status": "unverified",
+      "lane": "builder"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0008",
+      "at": "2026-09-02T06:05:04+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "test_output for claim-0134",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0134"
+    },
+    {
+      "kind": "evidence",
+      "id": "evidence-0009",
+      "at": "2026-09-02T06:05:05+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "manifest for claim-0134",
+      "status": "builder",
+      "lane": "builder",
+      "claim": "claim-0134"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0006",
+      "at": "2026-09-02T06:05:05+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0007",
+      "at": "2026-09-02T06:07:43+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.",
+      "status": "continuity",
+      "lane": "builder"
+    },
+    {
+      "kind": "handoff",
+      "id": "handoff-0008",
+      "at": "2026-09-02T06:08:56+00:00",
+      "actor": "pi-01a05bf2",
+      "text": "Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.",
+      "status": "continuity",
+      "lane": "builder"
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-0132",
+      "verified": true,
+      "verdict": "Verifier reran Step 4 extension selftest and focused pytest; claim-0132 delegate authority boundary supported."
+    },
+    {
+      "id": "claim-0133",
+      "verified": false,
+      "verdict": ""
+    },
+    {
+      "id": "claim-0134",
+      "verified": false,
+      "verdict": ""
+    }
+  ]
+}</script>
+</body>
+</html>
