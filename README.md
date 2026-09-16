@@ -63,6 +63,27 @@ python3 -m pytest tests/ -q                   # everything (some suites need a L
 The ledger (`.operator/`) is gitignored — it's your work history, not the tool. Its durable local event
 history is stored in `.operator/ledger.sqlite3`.
 
+## Orientation boards
+
+When a prefix of tasks is hard to follow from `task-show` alone, generate static HTML boards from the
+local ledger:
+
+```bash
+python3 scripts/operator_project_board.py
+python3 scripts/operator_project_board.py --view issues
+python3 scripts/operator_project_board.py --view graph
+python3 scripts/operator_project_board.py --view resolution --task <task-id>
+```
+
+Checked-in snapshots for this repo's Pi extension work live in [`docs/boards/`](docs/boards/):
+
+- [Project board](docs/boards/pi-operator-extension.html) — tasks, claim ratios, stale `next_action`
+- [Issue backlog](docs/boards/pi-operator-extension-issues.html) — PBC dogfood issues
+- [Project map](docs/boards/pi-operator-extension-graph.html) — labeled columns for the whole prefix
+- Per-task **resolution** pages — the ledger timeline used during issue resolution (claim → evidence → review → verifier → handoff)
+
+`/op:project <prefix>` remains the in-Pi text dashboard. The HTML boards are the inspectable map.
+
 ## P3 broker component (not installed)
 
 Issue #4 adds a standalone `operator-broker` process, external authority store, evidence CAS, receipts,

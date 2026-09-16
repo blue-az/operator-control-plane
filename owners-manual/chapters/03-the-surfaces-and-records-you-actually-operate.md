@@ -55,6 +55,26 @@ sequenceDiagram
 
 An assigned harness writes handoff details into the local ledger, the ledger builds the brief and passes it to the review harness, and the session marks the task running while opening usage. Usage is recorded through its own intake path.
 
+### Orientation boards
+
+The CLI and Pi commands (`task-show`, `/op:status`, `/op:project`) are the live surfaces. For a prefix of related tasks they are easy to lose in. Static HTML boards in `docs/boards/` are a third inspection surface, generated from the same local ledger:
+
+- **Project board** — one card per task: status, verified claims / total, evidence, handoffs, `next_action`.
+- **Issue catalog** — PBC dogfood issues (`POE-ISS-*`), not the live resolution log.
+- **Project map** — labeled columns for the whole prefix (spec, ladder, follow-on, cross-project).
+- **Resolution ledger** — time-ordered events for one task: claim, builder evidence, review bundle, verifier evidence, handoff.
+
+Regenerate after ledger changes:
+
+```bash
+python3 scripts/operator_project_board.py
+python3 scripts/operator_project_board.py --view issues
+python3 scripts/operator_project_board.py --view graph
+python3 scripts/operator_project_board.py --view resolution --task <task-id>
+```
+
+These boards do not write the ledger. They are orientation only. Start at `docs/boards/pi-operator-extension.html` for this repository's Pi extension prefix.
+
 ### What the Reviewed Evidence Supports
 
 A task is the parent record; a claim is a tracked assertion attached to that task; a fresh claim starts unverified, with no verifier and no evidence links. Evidence can be attached to a claim, but verification is not the same thing as simply adding a record. The record families around the core lifecycle are distinct enough to matter: sessions frame activity, usage records account for it, and briefs and handoffs carry context forward. The command surface and the README use the same lifecycle vocabulary, which reduces the chance that the manual invents terms the product itself does not use.
