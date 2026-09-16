@@ -104,20 +104,21 @@ def ollama_base_url() -> str:
 # temperature are pinned by creating a derived Ollama model via a temp
 # Modelfile instead, and pi is pointed at that tag. Cached per (base model,
 # ctx, temperature, num_gpu) so a multi-cell run creates each derived model once.
-_PINNED_MODEL_CACHE: dict[tuple[str, int | None, float | None, int | None], str] = {}
+_PINNED_MODEL_CACHE: dict[tuple[str, int | None, float | None, int | None, int | None], str] = {}
 
 
 def ensure_pinned_model(
     base_model: str, num_ctx: int | None, temperature: float | None, num_gpu: int | None = None,
+    max_output: int | None = None,
 ) -> str:
     # num_gpu added 2026-08-30 for the VRAM-envelope accuracy ablation --
     # same rationale as num_ctx/temperature: pi has no CLI flag for it, so
     # forcing a layer-count cap (the mechanism gemma4-26b-16gb-cap/FINDING.md
     # validated as actually effective, unlike OLLAMA_GPU_OVERHEAD) requires
     # baking it into a derived Modelfile.
-    if num_ctx is None and temperature is None and num_gpu is None:
+    if num_ctx is None and temperature is None and num_gpu is None and max_output is None:
         return base_model
-    key = (base_model, num_ctx, temperature, num_gpu)
+    key = (base_model, num_ctx, temperature, num_gpu, max_output)
     if key in _PINNED_MODEL_CACHE:
         return _PINNED_MODEL_CACHE[key]
     suffix_parts = []
@@ -127,6 +128,8 @@ def ensure_pinned_model(
         suffix_parts.append(f"t{str(temperature).replace('.', 'p')}")
     if num_gpu is not None:
         suffix_parts.append(f"gpu{num_gpu}")
+    if max_output is not None:
+        suffix_parts.append(f"out{max_output}")
     # Bug fix 2026-08-28: this used to be base_model.split(":")[0], which
     # collapses e.g. gemma4:26b and gemma4:31b to the identical "gemma4"
     # prefix -- both derived to the SAME tag, so whichever model's
@@ -144,6 +147,8 @@ def ensure_pinned_model(
         lines.append(f"PARAMETER temperature {temperature}")
     if num_gpu is not None:
         lines.append(f"PARAMETER num_gpu {num_gpu}")
+    if max_output is not None:
+        lines.append(f"PARAMETER num_predict {max_output}")
     fd, modelfile_path = tempfile.mkstemp(suffix=".Modelfile")
     try:
         with os.fdopen(fd, "w") as f:
@@ -677,7 +682,8 @@ def run_trial(
     # ensure_pinned_model. --seed has no pi equivalent (dropped, not silently
     # ignored -- see the warning main() prints once if --seed is passed).
     dispatch_model = ensure_pinned_model(
-        model, sampling.get("num_ctx"), sampling.get("temperature"), sampling.get("num_gpu")
+        model, sampling.get("num_ctx"), sampling.get("temperature"), sampling.get("num_gpu"),
+        sampling.get("max_output")
     )
     if sampling.get("require_gpu_residency"):
         require_gpu_residency(dispatch_model, sampling.get("minimum_gpu_ratio", 0.9))
@@ -944,6 +950,10 @@ def main() -> int:
         help="Minimum size_vram/size ratio for --require-gpu-residency (default: 0.9).",
     )
     parser.add_argument(
+        "--max-output", type=int, default=None,
+        help="Cap model completion tokens via the derived Ollama model; truncation is invalid.",
+    )
+    parser.add_argument(
         "--num-gpu", type=int, default=None,
         help=(
             "Cap GPU-resident layer count for every cell (VRAM-envelope "
@@ -1016,6 +1026,7 @@ def main() -> int:
         "temperature": args.temperature,
         "think": args.think,
         "num_gpu": args.num_gpu,
+        "max_output": args.max_output,
         "require_gpu_residency": args.require_gpu_residency,
         "minimum_gpu_ratio": args.minimum_gpu_ratio,
     }
