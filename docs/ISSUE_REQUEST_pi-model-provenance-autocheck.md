@@ -1,6 +1,6 @@
 # Feature/bug request: model provenance check at documentation boundaries
 
-**Status:** requested; not implemented  
+**Status:** implemented on `crystal-attach` (warn/fail modes); not a full `/op:crystal` command  
 **Repository:** `operator-control-plane`  
 **Reported:** 2026-09-11
 

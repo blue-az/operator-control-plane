@@ -33,6 +33,7 @@ import authority_projection
 import crystal_parse
 import ab_local
 import study_runner
+import pi_model_provenance
 
 LEDGER_DB_NAME = "ledger.sqlite3"
 LEDGER_HASH_FORMAT = "operator-ledger-event-v1"
@@ -2886,6 +2887,20 @@ def crystal_attach_cmd(args) -> int:
         "crystal_test_bullet_count": parsed.test_bullet_count,
         "crystal_upstream_pin": crystal_parse.CRYSTAL_UPSTREAM_PIN,
     }
+    identity = pi_model_provenance.capture_live_pi_identity(
+        claimed_provider=getattr(args, "claimed_provider", None),
+        claimed_model=getattr(args, "claimed_model", None),
+    )
+    mismatch = pi_model_provenance.format_mismatch_warning(identity)
+    if mismatch:
+        print(f"[Warning] {mismatch}", file=sys.stderr)
+        if getattr(args, "provenance_mode", "warn") == "fail":
+            print(
+                "Error: provenance mismatch (--provenance-mode fail); crystal not attached.",
+                file=sys.stderr,
+            )
+            return 1
+    crystal_metadata["live_pi_identity"] = identity
 
     attach_args = argparse.Namespace(
         path_or_url=original_locator,
@@ -7911,6 +7926,22 @@ def main() -> None:
         "-n",
         default=None,
         help="Optional notes about the crystal attach.",
+    )
+    crystal_parser.add_argument(
+        "--claimed-provider",
+        default=None,
+        help="Documented/narrated provider label to compare with live PI_PROVIDER.",
+    )
+    crystal_parser.add_argument(
+        "--claimed-model",
+        default=None,
+        help="Documented/narrated model label to compare with live PI_MODEL.",
+    )
+    crystal_parser.add_argument(
+        "--provenance-mode",
+        choices=("warn", "fail"),
+        default="warn",
+        help="On claimed vs live identity mismatch: warn (default) or refuse the attach.",
     )
 
     # operator crystal import (Crystal↔Ledger Phase 2)
