@@ -9,7 +9,7 @@ tags:
   - pi
   - extension
   - harness
-updated: 2026-09-01
+updated: 2026-09-16
 ---
 
 # Pi Operator Extension — Behavior Contract Draft
@@ -432,16 +432,18 @@ future_features:
 > POE-FUT-012 is implemented by `scripts/install-operator-extension.py` plus `.pi/operator-ledger.json` (`wired_into_findLedger: true`). There is no `/op:install` command. GitHub issue #18 is the tracking issue for that helper; it is not a remaining product gap beyond live Pi trust of the consumer project.
 > POE-FUT-013 is closed as guidance-only; do not add `/op:mode`.
 > POE-FUT-014 Route C is recorded as a compatibility-route choice only. The check is local wrapper `scripts/pbc_validate_operator.py` around the pinned pbc-spec CLI. The upstream CLI has no `--profile`. `proposed-*` fences are not canonical upstream types. `/pbc:*` commands remain unimplemented.
+>
+> POE-ISS-001 closed 2026-09-16 (F1 re-fence already on disk; not a ratification of the extension).
+> `pbc:rules` holds verified CLI facts POE-RUL-001–005 (`trust: verified`). Proposed extension
+> material is `pbc:proposed-rules` POE-RUL-101–113, `pbc:proposed-behavior`, and `pbc:proposed-outcomes`.
+> `python3 pbc_lint.py owners-manual/pbc/appendix-pi-operator-extension.pbc.md --ledger .operator` exits 0.
+> This file remains `status: draft`. Do not treat the PBC as an acceptance gate for unratified `/op:*` behavior.
 
 ## Dogfood Issue Backlog
 
 ```pbc:grounding
 status: draft
 issues:
-  - id: POE-ISS-001
-    source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F1
-    summary: POE rules are currently in a ratified pbc:rules fence even though they have not gone through proposal lifecycle.
-    next_step: Re-fence proposed material before relying on the PBC as a gate.
   - id: POE-ISS-002
     source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F2
     summary: /op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.
