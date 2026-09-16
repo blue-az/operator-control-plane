@@ -13,7 +13,7 @@ Source: blue-az/operator-control-plane:main@9b9e3e63a7f0f54ccde541c6c10570c8fdbe
 
 1. [What operator Is For](chapters/01-what-operator-is-for.md)
 2. [How Work Moves Through the Ledger](chapters/02-how-work-moves-through-the-ledger.md)
-3. [The Surfaces and Records You Actually Operate](chapters/03-the-surfaces-and-records-you-actually-operate.md) — includes [orientation boards](chapters/03-the-surfaces-and-records-you-actually-operate.md#orientation-boards)
+3. [The Surfaces and Records You Actually Operate](chapters/03-the-surfaces-and-records-you-actually-operate.md) — includes [orientation boards](../docs/boards/pi-operator-extension.html)
 4. [Trust, Identity, and Verification](chapters/04-trust-identity-and-verification.md)
 5. [Sessions, Usage, and Accountability](chapters/05-sessions-usage-and-accountability.md)
 6. [Running a Multi-Harness Workflow](chapters/06-running-a-multi-harness-workflow.md)

@@ -59,10 +59,10 @@ An assigned harness writes handoff details into the local ledger, the ledger bui
 
 The CLI and Pi commands (`task-show`, `/op:status`, `/op:project`) are the live surfaces. For a prefix of related tasks they are easy to lose in. Static HTML boards in `docs/boards/` are a third inspection surface, generated from the same local ledger:
 
-- **Project board** — one card per task: status, verified claims / total, evidence, handoffs, `next_action`.
-- **Issue catalog** — PBC dogfood issues (`POE-ISS-*`), not the live resolution log.
-- **Project map** — labeled columns for the whole prefix (spec, ladder, follow-on, cross-project).
-- **Resolution ledger** — time-ordered events for one task: claim, builder evidence, review bundle, verifier evidence, handoff.
+- **[Project board](../../docs/boards/pi-operator-extension.html)** — one card per task: status, verified claims / total, evidence, handoffs, `next_action`.
+- **[Issue catalog](../../docs/boards/pi-operator-extension-issues.html)** — PBC dogfood issues (`POE-ISS-*`), not the live resolution log.
+- **[Project map](../../docs/boards/pi-operator-extension-graph.html)** — labeled columns for the whole prefix (spec, ladder, follow-on, cross-project).
+- **Resolution ledger** — time-ordered events for one task, e.g. [step 5 dogfood](../../docs/boards/pi-operator-extension-step5-dogfood-resolution.html): claim, builder evidence, review bundle, verifier evidence, handoff.
 
 Regenerate after ledger changes:
 
@@ -73,7 +73,7 @@ python3 scripts/operator_project_board.py --view graph
 python3 scripts/operator_project_board.py --view resolution --task <task-id>
 ```
 
-These boards do not write the ledger. They are orientation only. Start at `docs/boards/pi-operator-extension.html` for this repository's Pi extension prefix.
+These boards do not write the ledger. They are orientation only. Start at the [project board](../../docs/boards/pi-operator-extension.html) for this repository's Pi extension prefix.
 
 ### What the Reviewed Evidence Supports
 
