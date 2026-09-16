@@ -667,6 +667,7 @@ def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
 def run_trial(
     task: dict, level: str, model: str, trial_idx: int, ledger_dir: Path, use_ledger: bool,
     trace_dir: Path | None = None, sampling: dict | None = None, provider: str = "local",
+    append_system_prompt: str | None = None,
 ) -> dict:
     prompt = task["prompts"][level]
     fixture_root = build_fixture(
@@ -715,6 +716,8 @@ def run_trial(
     # kills it, same as the multi-call sequence in the pi migration smoke test
     # (bash -> edit -> bash -> stop). task.get("state_changes") is therefore
     # unused under this backend; left in task defs for opr-era provenance.
+    if append_system_prompt:
+        argv += ["--append-system-prompt", append_system_prompt]
     argv += ["--", prompt]
     # Fallback only -- overwritten below. Kept assigned so the TimeoutExpired
     # handler cannot hit an unbound `start` if the ledger call itself raises.
@@ -902,6 +905,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Local lane eval ladder runner")
     parser.add_argument("--models", nargs="+", required=True, help="Ollama model tags, e.g. gemma4:26b")
     parser.add_argument("--provider", default="local", help="Pi provider name from models.json")
+    parser.add_argument("--append-system-prompt", default=None,
+                        help="Append a behavioral instruction to the Pi system prompt.")
     parser.add_argument("--tasks", nargs="+", default=None, help="Task ids to run (default: all)")
     parser.add_argument(
         "--levels", nargs="+", default=list(DEFAULT_LEVELS), choices=list(DEFAULT_LEVELS)
@@ -1079,7 +1084,7 @@ def main() -> int:
         try:
             result = run_trial(
                 task, level, model, trial, ledger_dir, use_ledger, trace_dir, sampling,
-                args.provider
+                args.provider, args.append_system_prompt
             )
         except GPUResidencyError as exc:
             print(f"[{key}] ABORT: {exc}", file=sys.stderr)
