@@ -95,6 +95,10 @@ TASKS_DIR = Path(__file__).resolve().parent / "tasks"
 PI_BIN = shutil.which("pi") or "pi"
 OPERATOR_BIN = REPO_ROOT / "operator"
 
+
+def ollama_base_url() -> str:
+    return os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
+
 # pi has no --num-ctx/--temperature CLI flags (checked --help and the
 # coding-agent/ai package sources directly, 2026-08-28) -- num_ctx and
 # temperature are pinned by creating a derived Ollama model via a temp
@@ -203,7 +207,7 @@ def measure_tok_s(model: str) -> dict | None:
         data = None
         for _ in range(2):
             result = subprocess.run(
-                ["curl", "-s", "http://127.0.0.1:11434/api/generate", "-d", payload],
+                ["curl", "-s", f"{ollama_base_url()}/api/generate", "-d", payload],
                 capture_output=True, text=True, timeout=120,
             )
             data = json.loads(result.stdout)
@@ -612,11 +616,11 @@ def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
     })
     try:
         subprocess.run(
-            ["curl", "-sS", "--max-time", "120", "http://127.0.0.1:11434/api/generate", "-d", payload],
+            ["curl", "-sS", "--max-time", "120", f"{ollama_base_url()}/api/generate", "-d", payload],
             capture_output=True, text=True, timeout=125, check=True,
         )
         ps = subprocess.run(
-            ["curl", "-sS", "--max-time", "5", "http://127.0.0.1:11434/api/ps"],
+            ["curl", "-sS", "--max-time", "5", f"{ollama_base_url()}/api/ps"],
             capture_output=True, text=True, timeout=10, check=True,
         )
         models = json.loads(ps.stdout).get("models", [])
@@ -626,7 +630,7 @@ def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
             # differs only in sampling parameters. Match the requested tag's
             # digest rather than falsely declaring placement failure.
             tags = subprocess.run(
-                ["curl", "-sS", "--max-time", "5", "http://127.0.0.1:11434/api/tags"],
+                ["curl", "-sS", "--max-time", "5", f"{ollama_base_url()}/api/tags"],
                 capture_output=True, text=True, timeout=10, check=True,
             )
             requested = next(
