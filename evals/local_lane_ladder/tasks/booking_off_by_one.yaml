@@ -22,7 +22,7 @@ files:
         free again on that day, so a booking ending 2026-03-10 does not conflict
         with one starting 2026-03-10.
         """
-        return start1 <= end2 and start2 <= end1
+        return start1 < end2 and start2 < end1
 
   tests/check_bookings.py: |
     import sys
