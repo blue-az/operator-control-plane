@@ -33,26 +33,16 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension issues</h1>
-  <p class="sub">Issue backlog catalog · snapshot 2026-09-16 21:35 UTC · PBC dogfood backlog + ledger mentions</p>
+  <p class="sub">Issue backlog catalog · snapshot 2026-09-16 23:19 UTC · PBC dogfood backlog + ledger mentions</p>
 </header>
 <div class="kpis">
-  <div class="kpi"><b>15</b>issues</div>
-  <div class="kpi"><b>13</b>open (no claim mention)</div>
+  <div class="kpi"><b>13</b>issues</div>
+  <div class="kpi"><b>11</b>open (no claim mention)</div>
   <div class="kpi"><b>2</b>in ledger, unverified</div>
   <div class="kpi"><b>0</b>addressed (verified claim)</div>
 </div>
 <div class="grid">
 
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-001</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">POE rules are currently in a ratified pbc:rules fence even though they have not gone through proposal lifecycle.</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Re-fence proposed material before relying on the PBC as a gate.</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
 <article class="card state-open">
   <header>
     <h2>POE-ISS-002</h2>
@@ -183,30 +173,11 @@
   <p class="meta">next: Make review-delegate persona→provider resolution bind Grok to the configured xai provider/grok model (never a different seat&#x27;s cloud command), keep review_harness and the generated run_command consistent, and have doctor</p>
   <p class="meta">task hint: none · claims: no matching claims</p>
 </article>
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-015</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">Review routing was blocked by a &#x27;cross-family review&#x27; requirement that is not a rule: operator enforces only a distinct agent - doctor checks that the verifier UID differs from the author UID and never checks the reviewer&#x27;s model family. The constraint keeps resurfacing in review</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Treat the review requirement as distinct-agent only (a separate uid-isolated verifier, or an advisory pass). Remove &#x27;cross-family&#x27; from review-call routing language and any doctor-side guidance so a claim is never gated </p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
 </div>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-16 21:35 UTC",
+  "generated_at": "2026-09-16 23:19 UTC",
   "issues": [
-    {
-      "id": "POE-ISS-001",
-      "state": "open",
-      "source": "",
-      "summary": "POE rules are currently in a ratified pbc:rules fence even though they have not gone through proposal lifecycle.",
-      "next_step": "Re-fence proposed material before relying on the PBC as a gate.",
-      "task_hint": null,
-      "claims": []
-    },
     {
       "id": "POE-ISS-002",
       "state": "open",
@@ -333,15 +304,6 @@
       "source": "",
       "summary": "review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat's cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task's grok review_harness).",
       "next_step": "Make review-delegate persona\u2192provider resolution bind Grok to the configured xai provider/grok model (never a different seat's cloud command), keep review_harness and the generated run_command consistent, and have doctor flag any run_command whose provider/model does not match the task's declared review_harness.",
-      "task_hint": null,
-      "claims": []
-    },
-    {
-      "id": "POE-ISS-015",
-      "state": "open",
-      "source": "",
-      "summary": "Review routing was blocked by a 'cross-family review' requirement that is not a rule: operator enforces only a distinct agent - doctor checks that the verifier UID differs from the author UID and never checks the reviewer's model family. The constraint keeps resurfacing in review-call section-5 blocks and wrongly marks a routable call as unrouteable.",
-      "next_step": "Treat the review requirement as distinct-agent only (a separate uid-isolated verifier, or an advisory pass). Remove 'cross-family' from review-call routing language and any doctor-side guidance so a claim is never gated on the reviewer's model family.",
       "task_hint": null,
       "claims": []
     }

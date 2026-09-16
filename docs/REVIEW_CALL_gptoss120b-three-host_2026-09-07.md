@@ -125,14 +125,20 @@ cd ~/operator-control-plane
 
 ## 5. Unresolved: reviewer routing
 
-The subject is `gpt-oss:120b`, so it cannot review itself. Antigravity is one of
-the three hosts under test, which makes any Agy-routed reviewer a participant
-rather than an observer.
+Operator review is **distinct-agent only** (a separate uid-isolated verifier, or
+an advisory pass). `doctor` never checks the reviewer's model family. Do not
+mark a call unrouteable because the reviewer shares a vendor/family with the
+builder or the subject.
+
+The subject is `gpt-oss:120b`, so that *model* cannot review itself. Antigravity
+is one of the three hosts under test, which makes any Agy-routed reviewer a
+participant rather than an observer. Those are conflict-of-interest constraints,
+not a family gate.
 
 Candidates:
 
 - **`qwen3.6:35b` local** - free, currently being trialled in the interactive
-  seat, cross-family from the subject, and not on any host under test. Cheapest
+  seat, not the subject model, and not on any host under test. Cheapest
   credible option and newly available since the 2026-09-05 call.
 - **`gemma4:26b` local** - same properties, faster, but weaker at the kind of
   reasoning §3 requires, and it is also the model with a documented habit of

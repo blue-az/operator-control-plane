@@ -438,6 +438,11 @@ future_features:
 > material is `pbc:proposed-rules` POE-RUL-101–113, `pbc:proposed-behavior`, and `pbc:proposed-outcomes`.
 > `python3 pbc_lint.py owners-manual/pbc/appendix-pi-operator-extension.pbc.md --ledger .operator` exits 0.
 > This file remains `status: draft`. Do not treat the PBC as an acceptance gate for unratified `/op:*` behavior.
+>
+> POE-ISS-015 closed 2026-09-16. Review routing is distinct-agent only (`doctor` checks
+> verifier UID vs author UID). Review-call packets must not use "cross-family" as a
+> route/unrouteable gate. Remaining live wording is in `docs/REVIEW_CALL_*` section-5/7
+> (decode packet already stated this; gptoss and dense-offload packets corrected).
 
 ## Dogfood Issue Backlog
 
@@ -496,10 +501,6 @@ issues:
     source: yoda-lookalike-2026-09-07 claim-0162 verify-run dogfood (2026-09-07)
     summary: "review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat's cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task's grok review_harness)."
     next_step: "Make review-delegate persona→provider resolution bind Grok to the configured xai provider/grok model (never a different seat's cloud command), keep review_harness and the generated run_command consistent, and have doctor flag any run_command whose provider/model does not match the task's declared review_harness."
-  - id: POE-ISS-015
-    source: operator owner (Erik) routing correction; recurring 'cross-family review' constraint in review-call section-5 blocks (docs/REVIEW_CALL_decode-vs-wallclock_2026-09-05.md); related to POE-ISS-013 and POE-ISS-014
-    summary: "Review routing was blocked by a 'cross-family review' requirement that is not a rule: operator enforces only a distinct agent - doctor checks that the verifier UID differs from the author UID and never checks the reviewer's model family. The constraint keeps resurfacing in review-call section-5 blocks and wrongly marks a routable call as unrouteable."
-    next_step: "Treat the review requirement as distinct-agent only (a separate uid-isolated verifier, or an advisory pass). Remove 'cross-family' from review-call routing language and any doctor-side guidance so a claim is never gated on the reviewer's model family."
 ```
 
 ## Implementation Ladder
