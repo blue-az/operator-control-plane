@@ -35,10 +35,13 @@ pi's normal `Ctrl+V`.
 
 ## Scope
 
-Covers a single-file personal extension at
-`~/.pi/agent/extensions/pi-yank.ts`, exposing one registered pi command,
-`/yank`, that reads the active session's stored message text and writes
-one string to the clipboard via pi's clipboard path (the same mechanism
+Covers the personal Pi extension whose **canonical source** is
+`extensions/pi-yank/` in this repository (entry `index.ts`, pure logic
+`core.ts`). The live install path `~/.pi/agent/extensions/pi-yank/` is a
+deployed copy or symlink, not the source of truth. It exposes one
+registered pi command, `/yank`, that reads the active session's stored
+message text and writes one string to the clipboard via pi's clipboard path
+(the same mechanism
 pi-copy-message uses, including its OSC 52 fallback).
 
 It governs:
