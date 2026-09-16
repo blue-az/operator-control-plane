@@ -106,7 +106,7 @@ def host_state() -> dict[str, int]:
     values = {}
     for line in Path("/proc/meminfo").read_text().splitlines():
         key, _, rest = line.partition(":")
-        if key in {"MemAvailable", "Cached", "SwapFree"}:
+        if key in {"MemAvailable", "Cached", "SwapFree", "SwapTotal"}:
             values[key] = int(rest.split()[0])
     for line in Path("/proc/vmstat").read_text().splitlines():
         key, _, value = line.partition(" ")
@@ -211,6 +211,19 @@ def run_cell(args, ctx: int, kv: str, num_gpu: int | None, prompt: str, phash: s
     time.sleep(3)
 
     state_before = host_state()
+    min_available_kib = 8 * 1024 * 1024
+    swap_used_kib = state_before.get("SwapTotal", 0) - state_before.get("SwapFree", 0)
+    if state_before.get("MemAvailable", 0) < min_available_kib or swap_used_kib > 0:
+        sampled = watch.stop()
+        return {
+            "status": "INVALID", "reason": "host-state precondition failed",
+            "config": cfg, "num_ctx": ctx, "kv_cache_type": kv, "num_gpu": num_gpu,
+            "prompt_sha16": phash, "repeats": args.repeats,
+            "host_state_before": state_before, "placement": {"valid": False, "reason": "host state invalid"},
+            "quiet": {"ok": True, "detail": "host gate rejected before load", **sampled},
+            "trials": [], "summary": {"mem_available_kib": state_before.get("MemAvailable", 0),
+                                       "swap_used_kib": swap_used_kib},
+        }
     options = {"num_ctx": ctx, "num_predict": 16, "temperature": 0}
     if num_gpu is not None:
         options["num_gpu"] = num_gpu
