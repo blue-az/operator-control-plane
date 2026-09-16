@@ -661,7 +661,7 @@ def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
 
 def run_trial(
     task: dict, level: str, model: str, trial_idx: int, ledger_dir: Path, use_ledger: bool,
-    trace_dir: Path | None = None, sampling: dict | None = None,
+    trace_dir: Path | None = None, sampling: dict | None = None, provider: str = "local",
 ) -> dict:
     prompt = task["prompts"][level]
     fixture_root = build_fixture(
@@ -690,7 +690,7 @@ def run_trial(
         # misrouted run loads fine and reports the wrong GPU with no error.
         # The "local" provider pins the literal IP. See fixtures/
         # desktop-2080-i9-e9-2026-09-11/VOID.md. 2026-09-11.
-        "--provider", "local",
+        "--provider", provider,
         "--model", dispatch_model,
         "--mode", "json",
         "--print",
@@ -895,6 +895,7 @@ def write_results_md(results: list[dict], output_path: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Local lane eval ladder runner")
     parser.add_argument("--models", nargs="+", required=True, help="Ollama model tags, e.g. gemma4:26b")
+    parser.add_argument("--provider", default="local", help="Pi provider name from models.json")
     parser.add_argument("--tasks", nargs="+", default=None, help="Task ids to run (default: all)")
     parser.add_argument(
         "--levels", nargs="+", default=list(DEFAULT_LEVELS), choices=list(DEFAULT_LEVELS)
@@ -1066,7 +1067,8 @@ def main() -> int:
         print(f"[{key}] running...")
         try:
             result = run_trial(
-                task, level, model, trial, ledger_dir, use_ledger, trace_dir, sampling
+                task, level, model, trial, ledger_dir, use_ledger, trace_dir, sampling,
+                args.provider
             )
         except GPUResidencyError as exc:
             print(f"[{key}] ABORT: {exc}", file=sys.stderr)
