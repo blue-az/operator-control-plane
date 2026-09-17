@@ -44,12 +44,12 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension</h1>
-  <p class="sub">Simple Operator board · snapshot 2026-09-17 03:46 UTC · not Graphify, not a knowledge graph</p>
+  <p class="sub">Simple Operator board · snapshot 2026-09-17 05:16 UTC · not Graphify, not a knowledge graph</p>
 </header>
 <div class="kpis">
   <div class="kpi"><b>15</b>tasks</div>
-  <div class="kpi"><b>10</b>verified tasks</div>
-  <div class="kpi"><b>11/32</b>claims verified</div>
+  <div class="kpi"><b>11</b>verified tasks</div>
+  <div class="kpi"><b>14/32</b>claims verified</div>
   <div class="kpi"><b>3</b>stale next_action</div>
 </div>
 <div class="ladder">
@@ -167,15 +167,15 @@
   <p class="next">STALE · Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.</p>
   <p class="meta">latest verified: claim-0132 · updated 2026-09-02T06:08:56</p>
 </article>
-<article class="card status-quarantined">
+<article class="card status-verified">
   <header>
     <h2><a href="pi-operator-extension-step5-dogfood-resolution.html">pi-operator-extension-step5-dogfood</a></h2>
-    <span class="pill">quarantined</span>
+    <span class="pill">verified</span>
   </header>
-  <div class="bar"><i style="width:0%"></i></div>
-  <p class="meta">0/6 claims verified · 15 evidence · 12 handoffs</p>
+  <div class="bar"><i style="width:50%"></i></div>
+  <p class="meta">3/6 claims verified · 18 evidence · 12 handoffs</p>
   <p class="next">Do not restore trust on pi-operator-extension-step5-dogfood until an independent uid-966 verifier reruns against a coherent tree; current dirty test file is not that target.</p>
-  <p class="meta">latest verified: none · updated 2026-09-06T00:21:26</p>
+  <p class="meta">latest verified: claim-0140 · updated 2026-09-17T05:15:08</p>
 </article>
 <article class="card status-quarantined">
   <header>
@@ -211,7 +211,7 @@
 <section class="lists">
   <div>
     <h3>Recent PBC issues</h3>
-    <ul><li><strong>POE-ISS-002</strong> /op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.</li><li><strong>POE-ISS-003</strong> /op:delegate has no general CLI route to an implementer that is not already assigned or reviewing the task.</li><li><strong>POE-ISS-004</strong> Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.</li><li><strong>POE-ISS-005</strong> review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.</li><li><strong>POE-ISS-006</strong> Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.</li><li><strong>POE-ISS-007</strong> Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.</li><li><strong>POE-ISS-008</strong> Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.</li><li><strong>POE-ISS-012</strong> Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.</li></ul>
+    <ul><li><strong>POE-ISS-005</strong> review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.</li><li><strong>POE-ISS-006</strong> Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.</li><li><strong>POE-ISS-012</strong> Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.</li></ul>
   </div>
   <div>
     <h3>Recent future features</h3>
@@ -220,7 +220,7 @@
 </section>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-17 03:46 UTC",
+  "generated_at": "2026-09-17 05:16 UTC",
   "tasks": [
     {
       "id": "pi-operator-extension-cross-project-delegate",
@@ -518,15 +518,15 @@
     },
     {
       "id": "pi-operator-extension-step5-dogfood",
-      "status": "quarantined",
+      "status": "verified",
       "next": "Do not restore trust on pi-operator-extension-step5-dogfood until an independent uid-966 verifier reruns against a coherent tree; current dirty test file is not that target.",
-      "updated": "2026-09-06T00:21:26+00:00",
+      "updated": "2026-09-17T05:15:08+00:00",
       "assigned": "pi-01a05bf2",
       "review": "grok",
       "claims": [
         {
           "id": "claim-0135",
-          "verified": false,
+          "verified": true,
           "text": "Step 5 dogfood found and fixed /op:handoff default UX: /op:handoff now generates a closeout by default without requiring 'go'; /op:handoff edit opens the manual draft. Claim/eviden"
         },
         {
@@ -541,7 +541,7 @@
         },
         {
           "id": "claim-0138",
-          "verified": false,
+          "verified": true,
           "text": "Step 5 dogfood clarified /op:supervisor-review verifier-user selection: when uid-isolated review is chosen and operator-verifier is registered, the extension now defaults to operat"
         },
         {
@@ -551,16 +551,16 @@
         },
         {
           "id": "claim-0140",
-          "verified": false,
+          "verified": true,
           "text": "Implemented /op:next-steps as a read-only Operator extension command. It reads the active task and Pi Operator extension PBC, then reports the current ledger next_action, unverifie"
         }
       ],
-      "verified": 0,
+      "verified": 3,
       "total": 6,
-      "evidence": 15,
+      "evidence": 18,
       "handoffs": 12,
       "stale": false,
-      "latest_verified": null
+      "latest_verified": "claim-0140"
     },
     {
       "id": "pi-operator-extension-target-ux-cleanup-via-grok",
@@ -622,21 +622,6 @@
   ],
   "issues": [
     {
-      "id": "POE-ISS-002",
-      "summary": "/op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.",
-      "next_step": "Narrow wave-1 supervisor-review to one claim, or explicitly model claim-set review as repeated single-claim bundles."
-    },
-    {
-      "id": "POE-ISS-003",
-      "summary": "/op:delegate has no general CLI route to an implementer that is not already assigned or reviewing the task.",
-      "next_step": "Restrict chooser targets to routable harnesses or make new implementer delegation create a scoped child task."
-    },
-    {
-      "id": "POE-ISS-004",
-      "summary": "Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.",
-      "next_step": "Decide the minimum identity/target config before implementing delegate launch."
-    },
-    {
       "id": "POE-ISS-005",
       "summary": "review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.",
       "next_step": "Open a separate Operator task for the review-delegate approval/isolation defect."
@@ -645,16 +630,6 @@
       "id": "POE-ISS-006",
       "summary": "Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.",
       "next_step": "Define a binary dogfood gate such as non-self-verification plus required ledger artifacts."
-    },
-    {
-      "id": "POE-ISS-007",
-      "summary": "Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.",
-      "next_step": "Add a supervisor-review/verifier-auth design slice that prompts the user explicitly when a verifier UID run is needed and records advisory vs trusted outcome distinctly."
-    },
-    {
-      "id": "POE-ISS-008",
-      "summary": "Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.",
-      "next_step": "Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path."
     },
     {
       "id": "POE-ISS-012",

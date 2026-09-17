@@ -33,46 +33,16 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension issues</h1>
-  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 03:46 UTC · PBC dogfood backlog + ledger mentions</p>
+  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 05:16 UTC · PBC dogfood backlog + ledger mentions</p>
 </header>
 <div class="kpis">
-  <div class="kpi"><b>8</b>issues</div>
-  <div class="kpi"><b>8</b>open (no claim mention)</div>
+  <div class="kpi"><b>3</b>issues</div>
+  <div class="kpi"><b>3</b>open (no claim mention)</div>
   <div class="kpi"><b>0</b>in ledger, unverified</div>
   <div class="kpi"><b>0</b>addressed (verified claim)</div>
 </div>
 <div class="grid">
 
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-002</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">/op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Narrow wave-1 supervisor-review to one claim, or explicitly model claim-set review as repeated single-claim bundles.</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-003</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">/op:delegate has no general CLI route to an implementer that is not already assigned or reviewing the task.</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Restrict chooser targets to routable harnesses or make new implementer delegation create a scoped child task.</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-004</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Decide the minimum identity/target config before implementing delegate launch.</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
 <article class="card state-open">
   <header>
     <h2>POE-ISS-005</h2>
@@ -95,26 +65,6 @@
 </article>
 <article class="card state-open">
   <header>
-    <h2>POE-ISS-007</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Add a supervisor-review/verifier-auth design slice that prompts the user explicitly when a verifier UID run is needed and records advisory vs trusted outcome distinctly.</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-008</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
-<article class="card state-open">
-  <header>
     <h2>POE-ISS-012</h2>
     <span class="pill">open</span>
   </header>
@@ -126,35 +76,8 @@
 </div>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-17 03:46 UTC",
+  "generated_at": "2026-09-17 05:16 UTC",
   "issues": [
-    {
-      "id": "POE-ISS-002",
-      "state": "open",
-      "source": "",
-      "summary": "/op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.",
-      "next_step": "Narrow wave-1 supervisor-review to one claim, or explicitly model claim-set review as repeated single-claim bundles.",
-      "task_hint": null,
-      "claims": []
-    },
-    {
-      "id": "POE-ISS-003",
-      "state": "open",
-      "source": "",
-      "summary": "/op:delegate has no general CLI route to an implementer that is not already assigned or reviewing the task.",
-      "next_step": "Restrict chooser targets to routable harnesses or make new implementer delegation create a scoped child task.",
-      "task_hint": null,
-      "claims": []
-    },
-    {
-      "id": "POE-ISS-004",
-      "state": "open",
-      "source": "",
-      "summary": "Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.",
-      "next_step": "Decide the minimum identity/target config before implementing delegate launch.",
-      "task_hint": null,
-      "claims": []
-    },
     {
       "id": "POE-ISS-005",
       "state": "open",
@@ -170,24 +93,6 @@
       "source": "",
       "summary": "Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.",
       "next_step": "Define a binary dogfood gate such as non-self-verification plus required ledger artifacts.",
-      "task_hint": null,
-      "claims": []
-    },
-    {
-      "id": "POE-ISS-007",
-      "state": "open",
-      "source": "",
-      "summary": "Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.",
-      "next_step": "Add a supervisor-review/verifier-auth design slice that prompts the user explicitly when a verifier UID run is needed and records advisory vs trusted outcome distinctly.",
-      "task_hint": null,
-      "claims": []
-    },
-    {
-      "id": "POE-ISS-008",
-      "state": "open",
-      "source": "",
-      "summary": "Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.",
-      "next_step": "Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.",
       "task_hint": null,
       "claims": []
     },

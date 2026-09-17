@@ -461,24 +461,18 @@ future_features:
 > targets separately from Pi carrier and verifier UID; Pi session harnesses are not offered
 > as personas. `review-delegate` resolves Grok to `xai/grok-4.6` (unless explicitly overridden),
 > records that command in the bundle, and doctor reports Grok delegations routed to another provider.
+>
+> POE-ISS-002, POE-ISS-003, POE-ISS-004, POE-ISS-007, and POE-ISS-008 closed 2026-09-17
+> after reconciliation against the live extension and 604-pass selftest. Supervisor review is
+> claim-scoped; unrouted delegation creates a scoped child task; harness/carrier/persona and
+> verifier-UID axes are explicit; trusted sudo authorization is visible; and verifier-only
+> evidence paths are fail-closed and labeled separately from builder drafts.
 
 ## Dogfood Issue Backlog
 
 ```pbc:grounding
 status: draft
 issues:
-  - id: POE-ISS-002
-    source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F2
-    summary: /op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.
-    next_step: Narrow wave-1 supervisor-review to one claim, or explicitly model claim-set review as repeated single-claim bundles.
-  - id: POE-ISS-003
-    source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F3
-    summary: /op:delegate has no general CLI route to an implementer that is not already assigned or reviewing the task.
-    next_step: Restrict chooser targets to routable harnesses or make new implementer delegation create a scoped child task.
-  - id: POE-ISS-004
-    source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F5/F7
-    summary: Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.
-    next_step: Decide the minimum identity/target config before implementing delegate launch.
   - id: POE-ISS-005
     source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F10
     summary: review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.
@@ -487,14 +481,6 @@ issues:
     source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F11
     summary: Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.
     next_step: Define a binary dogfood gate such as non-self-verification plus required ledger artifacts.
-  - id: POE-ISS-007
-    source: pi-operator-extension-step1 dogfood handoff-0005
-    summary: Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.
-    next_step: Add a supervisor-review/verifier-auth design slice that prompts the user explicitly when a verifier UID run is needed and records advisory vs trusted outcome distinctly.
-  - id: POE-ISS-008
-    source: pi-operator-extension-step2 dogfood handoff-0006
-    summary: Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.
-    next_step: Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.
   - id: POE-ISS-012
     source: pi-operator-extension-step5 verifier run dogfood
     summary: "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity."
