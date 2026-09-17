@@ -1864,6 +1864,62 @@ def task_use_cmd(args) -> int:
     return 0
 
 
+PLAIN_TASK_STATE = {
+    "verified": "DONE",
+    "complete": "DONE",
+    "quarantined": "ON HOLD",
+}
+
+
+def print_plain_task_summary(op_dir: str, task: dict) -> None:
+    """Answer "is it done, and who checked it" before the detailed record.
+
+    Reads only the task and its claims. The problems line is the cheap
+    task-vs-claim consistency check, not a substitute for doctor.
+    """
+    status = task.get("status")
+    checked, withdrawn, unchecked, missing = [], [], [], []
+    checkers = set()
+    for cid in task.get("claims") or []:
+        resolved = resolve_claim_record(op_dir, cid)
+        if not resolved:
+            missing.append(cid)
+            continue
+        claim = resolved[1]
+        outcome = claim.get("verification_outcome")
+        if claim.get("verified_by") and (outcome or claim.get("verification_status") is True):
+            who = claim["verified_by"]
+            if claim.get("verification_authority") == "uid_isolated":
+                checkers.add(f"{who} (separate account)")
+            else:
+                checkers.add(f"{who} (same account, honor system)")
+        if claim.get("verification_status") is True:
+            checked.append(cid)
+        elif outcome in ("quarantined", "false"):
+            withdrawn.append(cid)
+        else:
+            unchecked.append(cid)
+
+    problems = []
+    if status in ("verified", "complete") and withdrawn:
+        problems.append(f"marked done but {', '.join(withdrawn)} failed or were withdrawn")
+    if status == "quarantined" and checked:
+        problems.append(f"on hold but {', '.join(checked)} are marked checked")
+    if missing:
+        problems.append(f"claim records missing: {', '.join(missing)}")
+
+    total = len(checked) + len(withdrawn) + len(unchecked) + len(missing)
+    print(f"{task.get('task_id')}: {PLAIN_TASK_STATE.get(status, 'IN PROGRESS')}")
+    print(f"  checked by: {', '.join(sorted(checkers)) if checkers else 'nobody yet'}")
+    parts = [f"{len(checked)} of {total} claims checked"]
+    if withdrawn:
+        parts.append(f"{len(withdrawn)} failed or withdrawn")
+    if unchecked:
+        parts.append(f"{len(unchecked)} never checked")
+    print(f"  {'; '.join(parts)}")
+    print(f"  problems: {'; '.join(problems) if problems else 'none found (quick check; run doctor for the full one)'}")
+
+
 def task_show_cmd(args) -> int:
     op_dir = find_operator_dir()
     if not op_dir:
@@ -1878,6 +1934,7 @@ def task_show_cmd(args) -> int:
         return 1
     task_id, task_path, task = resolved_task
 
+    print_plain_task_summary(op_dir, task)
     print("=" * 80)
     print(f"Task ID:          {task.get('task_id')}")
     print(f"Objective:        {task.get('objective')}")

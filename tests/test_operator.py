@@ -2008,6 +2008,32 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertEqual(yaml.safe_load(task_file.read_text())["status"], "verified")
 
+    def test_task_show_plain_summary_tracks_who_checked(self) -> None:
+        _, evidence = self.setup_p2_enforced_claim()
+        builder = {"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"}
+        verifier = {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"}
+
+        res = self.run_operator("task-show", "--id", "p2-task", env=builder)
+        self.assertEqual(res.returncode, 0, res.stderr)
+        head = res.stdout.split("=" * 80)[0]
+        self.assertIn("p2-task: IN PROGRESS", head)
+        self.assertIn("checked by: nobody yet", head)
+        self.assertIn("0 of 1 claims checked; 1 never checked", head)
+        self.assertIn("problems: none found", head)
+        # the Pi extension parses the detailed block by label; it must be unchanged
+        self.assertIn("\nTask ID:          p2-task\n", res.stdout)
+        self.assertIn("\nStatus:           ", res.stdout)
+
+        attach = self.run_operator(
+            "evidence-attach", str(evidence), "--claim", "claim-0001", "--type", "test_output",
+            "--status", "verified", "--verified-by", "claude", env=verifier,
+        )
+        self.assertEqual(attach.returncode, 0, attach.stderr)
+        head = self.run_operator("task-show", "--id", "p2-task", env=builder).stdout.split("=" * 80)[0]
+        self.assertIn("p2-task: DONE", head)
+        self.assertIn("checked by: claude (separate account)", head)
+        self.assertIn("1 of 1 claims checked", head)
+
     def test_session_lifecycle(self) -> None:
         import datetime
 
