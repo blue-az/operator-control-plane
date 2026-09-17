@@ -443,6 +443,10 @@ future_features:
 > verifier UID vs author UID). Review-call packets must not use "cross-family" as a
 > route/unrouteable gate. Remaining live wording is in `docs/REVIEW_CALL_*` section-5/7
 > (decode packet already stated this; gptoss and dense-offload packets corrected).
+>
+> POE-ISS-011 closed 2026-09-16. `/op:doctor` and `/op:status` notify before the Operator
+> read and `setStatus` then clear it in `finally`. Selftest covers that sequence. This does
+> not make doctor faster; it makes the wait visible.
 
 ## Dogfood Issue Backlog
 
@@ -485,10 +489,6 @@ issues:
     source: pi-operator-extension-step5 live TUI dogfood
     summary: /op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.
     next_step: "Add a defaults pass for authoring flows: infer current task and session author, suggest claim type and gate from recent context, prefer the active/recent claim for evidence, and keep advanced fields behind an edit/details path."
-  - id: POE-ISS-011
-    source: pi-operator-extension-step5 live TUI dogfood
-    summary: /op:doctor and /op:status are slow on large ledgers and previously showed no visible progress while running.
-    next_step: Add visible working/status notifications before long Operator reads and clear them when the command finishes.
   - id: POE-ISS-012
     source: pi-operator-extension-step5 verifier run dogfood
     summary: "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity."

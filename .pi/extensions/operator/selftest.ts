@@ -2007,6 +2007,7 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	let editorFn: (prefill: string) => string | undefined = () => undefined;
 	let sessionIdValue: string | null = "01a05bf2-9c1e-7a2b-8000-0123456789ab";
 	const notifications: Array<[string, string]> = [];
+	const statusCalls: Array<[string, string | undefined]> = [];
 	const ctx = {
 		cwd: ledger.root,
 		hasUI: true,
@@ -2025,7 +2026,9 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 				selectQueue.length > 0 ? selectQueue.shift() : selectAnswer,
 			input: async () => (inputQueue.length > 0 ? inputQueue.shift() : undefined),
 			editor: async (_title: string, prefill = "") => editorFn(prefill),
-			setStatus: () => {},
+			setStatus: (key: string, text?: string) => {
+				statusCalls.push([key, text]);
+			},
 			setWidget: () => {},
 		},
 	};
@@ -2042,11 +2045,25 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 
 	const lastReport = (): core.Report => entries[entries.length - 1].data as core.Report;
 
+	notifications.length = 0;
+	statusCalls.length = 0;
 	await commands.get("op:doctor")!.handler("", ctx);
 	let report = lastReport();
 	eq("/op:doctor emits a report entry", report.command, "/op:doctor");
 	eq("/op:doctor names its invocation", report.invocations, ["./operator doctor"]);
 	check("/op:doctor passes on the clean fixture ledger", report.level !== "error", report.headline);
+	check(
+		"/op:doctor notifies before the long read",
+		notifications.some(([, message]) => /doctor/i.test(message) && /moment|large|slow/i.test(message)),
+		notifications.map(([, message]) => message).join(" | ") || "(none)",
+	);
+	check(
+		"/op:doctor setStatus then clears",
+		statusCalls[0]?.[0] === "operator" &&
+			!!statusCalls[0]?.[1] &&
+			statusCalls.some(([, text]) => text === undefined),
+		JSON.stringify(statusCalls),
+	);
 
 	await commands.get("op:tasks")!.handler("", ctx);
 	report = lastReport();
@@ -2059,6 +2076,8 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	check("/op:tasks records the filtered invocation", report.invocations[0].includes("--filter beta"), report.invocations[0]);
 
 	// current_task is selftest-alpha at this point (tier A set it).
+	notifications.length = 0;
+	statusCalls.length = 0;
 	await commands.get("op:status")!.handler("", ctx);
 	report = lastReport();
 	eq("/op:status emits a report entry", report.command, "/op:status");
@@ -2071,6 +2090,18 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	check(
 		"/op:status never emits a lifecycle flag",
 		report.invocations.every((i) => !i.includes("--status") && !i.includes("--verified-by")),
+	);
+	check(
+		"/op:status notifies before the long read",
+		notifications.some(([, message]) => /status/i.test(message) && /slow|moment|large/i.test(message)),
+		notifications.map(([, message]) => message).join(" | ") || "(none)",
+	);
+	check(
+		"/op:status setStatus then clears",
+		statusCalls[0]?.[0] === "operator" &&
+			!!statusCalls[0]?.[1] &&
+			statusCalls.some(([, text]) => text === undefined),
+		JSON.stringify(statusCalls),
 	);
 
 	await commands.get("op:roadmap")!.handler("", ctx);
