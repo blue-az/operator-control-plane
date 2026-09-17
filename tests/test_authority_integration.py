@@ -4,6 +4,7 @@ import array
 import hashlib
 import json
 import os
+import re
 import select
 import shutil
 import socket
@@ -99,17 +100,18 @@ class TestAuthorityIntegration(unittest.TestCase):
         # code has no environment-variable registry selector.
         self.cli_dir = self.temp_dir / "cli"
         self.cli_dir.mkdir()
-        # `operator` imports these at module scope; a staged copy that omits any
-        # of them dies with ModuleNotFoundError before argv is even parsed.
-        for filename in (
-            "operator",
-            "authority_client.py",
-            "authority_projection.py",
-            "crystal_parse.py",
-            "ab_local.py",
-            "study_runner.py",
-            "harness_adapter.py",
-        ):
+        # `operator` imports sibling modules at module scope; a staged copy that
+        # omits any of them dies with ModuleNotFoundError before argv is even
+        # parsed. Derive the set from the source so a new import can't be missed
+        # (a hand-kept list lost pi_model_provenance.py and failed 20 tests).
+        local_modules = {
+            f"{name}.py"
+            for name in re.findall(
+                r"^import (\w+)$", (REPO_ROOT / "operator").read_text(), re.MULTILINE
+            )
+            if (REPO_ROOT / f"{name}.py").is_file()
+        }
+        for filename in ("operator", "harness_adapter.py", *sorted(local_modules)):
             shutil.copy2(REPO_ROOT / filename, self.cli_dir / filename)
         client_path = self.cli_dir / "authority_client.py"
         client_source = client_path.read_text()
