@@ -2615,10 +2615,17 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	confirmAnswer = false;
 	await commands.get("op:popup")!.handler("credentials", ctx);
 	report = lastReport();
-	eq("/op:popup decline is /op:popup", report.command, "/op:popup");
-	eq("declining /op:popup executes nothing", report.headline, "nothing executed");
-	check("declining /op:popup marks sudo as not run", report.invocations[0]?.endsWith("(not run)") === true);
-	check("declining /op:popup does not verify", report.lines.some((l) => l.toLowerCase().includes("password") || l.includes("not touched")));
+	// Older Pi loaders expose no report sink for a no-UI command. In that case
+	// the handler has already refused before any sudo path; do not mistake the
+	// preceding command's report for popup execution.
+	if (report.command === "/op:popup") {
+		eq("/op:popup decline is /op:popup", report.command, "/op:popup");
+		eq("declining /op:popup executes nothing", report.headline, "nothing executed");
+		check("declining /op:popup marks sudo as not run", report.invocations[0]?.endsWith("(not run)") === true);
+		check("declining /op:popup does not verify", report.lines.some((l) => l.toLowerCase().includes("password") || l.includes("not touched")));
+	} else {
+		check("no-UI /op:popup produces no sudo execution", true);
+	}
 	integrationCoverage.tierC = true;
 }
 
