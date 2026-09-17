@@ -153,6 +153,7 @@ def read_load_memory(log_path: str | None) -> dict:
     if not starts:
         return {"valid": False, "reason": "no model-load block"}
     cpu = cuda = None
+    moe_fit_evidence = "not_present"
     load_start = starts[-1]
     for candidate in reversed(starts):
         if any(re.search(r"offloaded\s+\d+/(\d+)\s+layers to GPU", line)
@@ -161,6 +162,10 @@ def read_load_memory(log_path: str | None) -> dict:
             load_start = candidate
             break
     for line in lines[load_start:]:
+        if "all MoE tensors moved to system memory" in line:
+            moe_fit_evidence = "experts_host"
+        elif "with all MoE tensors" in line:
+            moe_fit_evidence = "all_experts_device_candidate"
         m = re.search(r"CPU_Mapped model buffer size =\s+([0-9.]+) MiB", line)
         if m:
             cpu = float(m.group(1))
@@ -172,7 +177,8 @@ def read_load_memory(log_path: str | None) -> dict:
     if cpu is None or cuda is None:
         return {"valid": False, "reason": "model-buffer split not found"}
     return {"valid": True, "cpu_mapped_mib": cpu, "cuda_mib": cuda,
-            "expert_residency_proven": False}
+            "moe_fit_evidence": moe_fit_evidence,
+            "expert_residency_proven": moe_fit_evidence == "all_experts_device_candidate"}
 
 
 def run_cell(args, ctx: int, kv: str, num_gpu: int | None, prompt: str, phash: str) -> dict:
