@@ -1582,10 +1582,9 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 			const ledger = requireLedger(ctx);
 			if (!ledger) return;
 			if (!ctx.hasUI) {
-				ctx.ui.notify(
-					"/op:popup needs a UI for the sudo chooser and confirmation. It never reads a password itself.",
-					"error",
-				);
+				const message = "/op:popup needs a UI for the sudo chooser and confirmation. It never reads a password itself.";
+				ctx.ui.notify(message, "error");
+				emit(ctx, core.buildSudoPopupReport({ target: null, argv: null, result: null, declined: true, askpass: null }));
 				return;
 			}
 			let askpass: string | null;

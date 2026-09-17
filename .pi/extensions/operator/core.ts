@@ -2991,13 +2991,13 @@ export function resolveSudoPopupTarget(targets: readonly SudoPopupTarget[], pick
 }
 
 export function buildSudoPopupReport(input: {
-	target: SudoPopupTarget;
-	argv: string[];
+	target: SudoPopupTarget | null;
+	argv: string[] | null;
 	result: CommandResult | null;
 	declined?: boolean;
 	askpass: string | null;
 }): Report {
-	const invocation = formatSudoInvocation(input.argv);
+	const invocation = input.argv ? formatSudoInvocation(input.argv) : "(no sudo command selected)";
 	if (input.declined || !input.result) {
 		return {
 			command: "/op:popup",
