@@ -33,12 +33,12 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension issues</h1>
-  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 01:25 UTC · PBC dogfood backlog + ledger mentions</p>
+  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 02:50 UTC · PBC dogfood backlog + ledger mentions</p>
 </header>
 <div class="kpis">
-  <div class="kpi"><b>11</b>issues</div>
+  <div class="kpi"><b>10</b>issues</div>
   <div class="kpi"><b>10</b>open (no claim mention)</div>
-  <div class="kpi"><b>1</b>in ledger, unverified</div>
+  <div class="kpi"><b>0</b>in ledger, unverified</div>
   <div class="kpi"><b>0</b>addressed (verified claim)</div>
 </div>
 <div class="grid">
@@ -113,16 +113,6 @@
   <p class="meta">next: Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.</p>
   <p class="meta">task hint: none · claims: no matching claims</p>
 </article>
-<article class="card state-in-ledger">
-  <header>
-    <h2>POE-ISS-010</h2>
-    <span class="pill">in-ledger</span>
-  </header>
-  <p class="next">/op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Add a defaults pass for authoring flows: infer current task and session author, suggest claim type and gate from recent context, prefer the active/recent claim for evidence, and keep advanced fields behind an edit/detail</p>
-  <p class="meta">task hint: none · claims: claim-0135</p>
-</article>
 <article class="card state-open">
   <header>
     <h2>POE-ISS-012</h2>
@@ -156,7 +146,7 @@
 </div>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-17 01:25 UTC",
+  "generated_at": "2026-09-17 02:50 UTC",
   "issues": [
     {
       "id": "POE-ISS-002",
@@ -220,21 +210,6 @@
       "next_step": "Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.",
       "task_hint": null,
       "claims": []
-    },
-    {
-      "id": "POE-ISS-010",
-      "state": "in-ledger",
-      "source": "",
-      "summary": "/op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.",
-      "next_step": "Add a defaults pass for authoring flows: infer current task and session author, suggest claim type and gate from recent context, prefer the active/recent claim for evidence, and keep advanced fields behind an edit/details path.",
-      "task_hint": null,
-      "claims": [
-        {
-          "id": "claim-0135",
-          "task": "pi-operator-extension-step5-dogfood",
-          "verified": false
-        }
-      ]
     },
     {
       "id": "POE-ISS-012",

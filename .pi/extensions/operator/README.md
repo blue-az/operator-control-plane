@@ -24,8 +24,8 @@ the pinned upstream CLI has no `--profile` flag.
 | HTML boards | `python3 scripts/operator_project_board.py` writes `docs/boards/` from the local ledger | no |
 | `/op:roadmap [--project <prefix>]` | ladder/issues/futures, or the project dashboard when `--project` is present | no |
 | `/op:use [task-id]` | selects a task for this pi session; `./operator task-use <id>` **only after you confirm** | only on confirmation |
-| `/op:claim [text]` | **experimental** `./operator claim-add --task … --by <session>` | only on confirmation |
-| `/op:evidence [path-or-url]` | **experimental** `./operator evidence-attach --task … --verify-cmd … --by <session>` | only on confirmation |
+| `/op:claim [text]` | **experimental** `./operator claim-add --task … --by <session>` (defaults: `file_exists`, gate `tests/test_operator.py`, pytest verify; `/op:claim edit` for the full form) | only on confirmation |
+| `/op:evidence [path-or-url]` | **experimental** `./operator evidence-attach --task … --verify-cmd … --by <session>` (defaults: latest unverified claim, `run_log`, `./operator doctor`; `/op:evidence edit` for the full form) | only on confirmation |
 | `/op:handoff` | `./operator handoff-add --task … --by <session>` from an editor draft | only on confirmation |
 | `/op:supervisor-review [claim-id]` | **experimental** `./operator review-delegate` for one named claim | only on confirmation (review bundle, never verification) |
 | `/op:delegate [task-id] [alias]` | **experimental** `task-create --assign` when unrouted, then `session-start` / brief, then `harness_adapter` IMPLEMENTER | only on confirmation; parent routing is never mutated |

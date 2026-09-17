@@ -162,6 +162,41 @@ export type ClaimType = (typeof CLAIM_TYPES)[number];
 export type SupervisionLayer = (typeof SUPERVISION_LAYERS)[number];
 export type EvidenceType = (typeof EVIDENCE_TYPES)[number];
 
+export const DEFAULT_CLAIM_TYPE: ClaimType = "file_exists";
+export const DEFAULT_CLAIM_GATE = "tests/test_operator.py";
+export const DEFAULT_CLAIM_VERIFY_CMD = "python3 -m pytest tests/ -q";
+export const DEFAULT_EVIDENCE_VERIFY_CMD = "./operator doctor";
+
+/** Common-path vs full-form authoring. `/op:claim edit …` keeps the extra prompts. */
+export function parseAuthoringArgs(args: string): { edit: boolean; rest: string } {
+	const trimmed = (args ?? "").trim();
+	const match = /^(edit|draft)\b\s*(.*)$/i.exec(trimmed);
+	if (match) return { edit: true, rest: match[2].trim() };
+	return { edit: false, rest: trimmed };
+}
+
+export function suggestClaimType(text: string): ClaimType {
+	const t = text.toLowerCase();
+	if (/\b(pytest|test_passes|tests?\/)/.test(t)) return "test_passes";
+	return DEFAULT_CLAIM_TYPE;
+}
+
+export function suggestEvidenceType(locator: string, remote: boolean): EvidenceType {
+	if (remote) return "external_doc";
+	if (/\.(png|jpe?g|webp|gif)$/i.test(locator) || /screenshot/i.test(locator)) return "screenshot";
+	return "run_log";
+}
+
+export function preferEvidenceClaim(claims: ClaimRow[]): ClaimRow | undefined {
+	const unverified = claims.filter((c) => {
+		const status = c.status.trim().toLowerCase();
+		return status !== "verified" && !status.includes("quarantine");
+	});
+	const pool = unverified.length > 0 ? unverified : claims;
+	if (pool.length === 0) return undefined;
+	return [...pool].sort((a, b) => a.id.localeCompare(b.id)).at(-1);
+}
+
 /** review-delegate --mode values. The extension never infers one. */
 export const REVIEW_MODES = ["uid-isolated", "advisory-agent"] as const;
 export type ReviewMode = (typeof REVIEW_MODES)[number];

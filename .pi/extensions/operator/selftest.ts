@@ -540,6 +540,22 @@ function tierA2(ledger: core.Ledger): void {
 	eq("deriveAuthorLabel honors a non-pi carrier", core.deriveAuthorLabel("e5502c31-aaaa", "claude"), "claude-e5502c31");
 
 	const by = core.deriveAuthorLabel("01a05bf2-9c1e-7a2b-8000-0123456789ab")!;
+	eq("parseAuthoringArgs empty is common path", core.parseAuthoringArgs(""), { edit: false, rest: "" });
+	eq("parseAuthoringArgs text is common path", core.parseAuthoringArgs("the file exists"), { edit: false, rest: "the file exists" });
+	eq("parseAuthoringArgs edit with rest", core.parseAuthoringArgs("edit the file exists"), { edit: true, rest: "the file exists" });
+	eq("suggestClaimType defaults to file_exists", core.suggestClaimType("the wrapper landed"), "file_exists");
+	eq("suggestClaimType notices pytest", core.suggestClaimType("pytest tests/test_operator.py -q"), "test_passes");
+	eq("suggestEvidenceType local log", core.suggestEvidenceType("/tmp/run.log", false), "run_log");
+	eq("suggestEvidenceType remote", core.suggestEvidenceType("https://example.com/a", true), "external_doc");
+	eq(
+		"preferEvidenceClaim picks the latest unverified",
+		core.preferEvidenceClaim([
+			{ id: "claim-0001", taskId: "t", type: "file_exists", status: "UNVERIFIED", text: "a" },
+			{ id: "claim-0002", taskId: "t", type: "file_exists", status: "VERIFIED", text: "b" },
+			{ id: "claim-0003", taskId: "t", type: "file_exists", status: "UNVERIFIED", text: "c" },
+		])?.id,
+		"claim-0003",
+	);
 
 	// claim-add argv
 	const claimArgv = core.claimAddArgv({
@@ -2231,9 +2247,7 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	);
 	sessionIdValue = "01a05bf2-9c1e-7a2b-8000-0123456789ab";
 
-	selectQueue.push("file_exists");
 	editorFn = () => "Step 2 claim/evidence/handoff commands exist";
-	inputQueue.push(".pi/extensions/operator/index.ts", "ls .pi/extensions/operator/");
 	confirmAnswer = false;
 	const claimsBeforeDecline = yamlNames(claimsDir);
 	await commands.get("op:claim")!.handler("", ctx);
@@ -2242,9 +2256,7 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	eq("declining /op:claim reports nothing written", report.headline, "nothing written");
 	check("declining /op:claim marks the invocation as not run", report.invocations[0]?.endsWith("(not run)") === true);
 
-	selectQueue.push("file_exists");
 	editorFn = () => "Step 2 claim/evidence/handoff commands exist";
-	inputQueue.push(".pi/extensions/operator/index.ts", "ls .pi/extensions/operator/");
 	confirmAnswer = true;
 	await commands.get("op:claim")!.handler("", ctx);
 	report = lastReport();
@@ -2261,6 +2273,7 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 		report.invocations.join(" | "),
 	);
 	check("/op:claim says nothing was verified", report.lines.some((l) => l.includes("Nothing here verifies anything")));
+	check("/op:claim common path used file_exists", /type:\s*file_exists/.test(claimYaml), claimYaml);
 
 	const betaLog = join(ledger.root, "beta.log");
 	writeFileSync(betaLog, "step 2 evidence\n");
@@ -2268,8 +2281,6 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	editorFn = () => undefined;
 	selectQueue.length = 0;
 	inputQueue.length = 0;
-	selectQueue.push(writtenClaimId, "run_log");
-	inputQueue.push("./operator doctor", "fixture run");
 	confirmAnswer = false;
 	eq("no evidence dir exists on selftest-beta yet", yamlNames(evidenceDir), []);
 	await commands.get("op:evidence")!.handler(betaLog, ctx);
@@ -2277,8 +2288,6 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	eq("declining /op:evidence writes no evidence", yamlNames(evidenceDir), []);
 	eq("declining /op:evidence reports nothing written", report.headline, "nothing written");
 
-	selectQueue.push(writtenClaimId, "run_log");
-	inputQueue.push("./operator doctor", "fixture run");
 	confirmAnswer = true;
 	await commands.get("op:evidence")!.handler(betaLog, ctx);
 	report = lastReport();
@@ -2302,12 +2311,20 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	inputQueue.push("");
 	confirmAnswer = true;
 	const evidenceBeforeEmptyVerify = yamlNames(evidenceDir);
-	await commands.get("op:evidence")!.handler(betaLog, ctx);
+	await commands.get("op:evidence")!.handler(`edit ${betaLog}`, ctx);
 	eq("empty verify-cmd writes no evidence", yamlNames(evidenceDir), evidenceBeforeEmptyVerify);
 	check(
 		"empty verify-cmd is refused",
 		notifications.some(([, m]) => m.includes("without a rerunnable --verify-cmd")),
 	);
+
+	editorFn = () => {
+		throw new Error("/op:claim with text should not open an editor");
+	};
+	confirmAnswer = true;
+	await commands.get("op:claim")!.handler("inline claim text without extra prompts", ctx);
+	report = lastReport();
+	check("/op:claim with text skips the editor", report.command === "/op:claim" && report.headline.startsWith("claim-"), report.headline);
 
 	editorFn = () => {
 		throw new Error("default /op:handoff should not open an editor");

@@ -633,32 +633,52 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 	};
 
 	pi.registerCommand("op:claim", {
-		description: "[experimental] Operator: register a claim on the selected task (/op:claim [claim text])",
+		description: "[experimental] Operator: register a claim (/op:claim [text]; /op:claim edit for type/gate/verify)",
 		handler: async (args, ctx) => {
 			const wc = requireWriteContext(ctx, "/op:claim");
 			if (!wc) return;
+			const authoring = core.parseAuthoringArgs(args);
 
-			const type = await ctx.ui.select(`Claim type for ${wc.taskId}`, [...core.CLAIM_TYPES]);
-			if (!type) {
-				emit(ctx, core.buildDeclinedReport("/op:claim", "Operator claim", "No claim type chosen.", null));
-				return;
+			let type: string = core.suggestClaimType(authoring.rest);
+			if (authoring.edit) {
+				const picked = await ctx.ui.select(`Claim type for ${wc.taskId}`, [...core.CLAIM_TYPES]);
+				if (!picked) {
+					emit(ctx, core.buildDeclinedReport("/op:claim", "Operator claim", "No claim type chosen.", null));
+					return;
+				}
+				type = picked;
 			}
 
-			const text = await ctx.ui.editor(`Claim text for ${wc.taskId} (--by=${wc.by})`, args.trim());
-			if (text === undefined || !text.trim()) {
-				emit(ctx, core.buildDeclinedReport("/op:claim", "Operator claim", "No claim text entered.", null));
-				return;
+			let text = authoring.rest;
+			if (authoring.edit || !text) {
+				const edited = await ctx.ui.editor(`Claim text for ${wc.taskId} (--by=${wc.by})`, text);
+				if (edited === undefined || !edited.trim()) {
+					emit(ctx, core.buildDeclinedReport("/op:claim", "Operator claim", "No claim text entered.", null));
+					return;
+				}
+				text = edited.trim();
 			}
 
-			const gate = await askOptional(ctx, "Required gate artifact path", "tests/test_operator.py");
-			if (gate === null) {
-				emit(ctx, core.buildDeclinedReport("/op:claim", "Operator claim", "Cancelled at the gate prompt.", null));
-				return;
-			}
-			const verifyCmd = await askOptional(ctx, "Rerunnable verify command", "python3 -m pytest tests/ -q");
-			if (verifyCmd === null) {
-				emit(ctx, core.buildDeclinedReport("/op:claim", "Operator claim", "Cancelled at the verify-command prompt.", null));
-				return;
+			let gate = core.DEFAULT_CLAIM_GATE;
+			let verifyCmd = core.DEFAULT_CLAIM_VERIFY_CMD;
+			if (authoring.edit) {
+				const gateAnswer = await askOptional(ctx, "Required gate artifact path", core.DEFAULT_CLAIM_GATE);
+				if (gateAnswer === null) {
+					emit(ctx, core.buildDeclinedReport("/op:claim", "Operator claim", "Cancelled at the gate prompt.", null));
+					return;
+				}
+				gate = gateAnswer;
+				const verifyAnswer = await askOptional(ctx, "Rerunnable verify command", core.DEFAULT_CLAIM_VERIFY_CMD);
+				if (verifyAnswer === null) {
+					emit(ctx, core.buildDeclinedReport("/op:claim", "Operator claim", "Cancelled at the verify-command prompt.", null));
+					return;
+				}
+				verifyCmd = verifyAnswer;
+			} else {
+				ctx.ui.notify(
+					`Claim defaults: type ${type}, gate ${gate || "(none)"}, verify ${verifyCmd || "(none)"}. /op:claim edit for the full form.`,
+					"info",
+				);
 			}
 
 			let layer: string | undefined;
@@ -702,12 +722,13 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 	});
 
 	pi.registerCommand("op:evidence", {
-		description: "[experimental] Operator: attach evidence to the selected task (/op:evidence [path-or-url])",
+		description: "[experimental] Operator: attach evidence (/op:evidence [path]; /op:evidence edit for claim/type/notes)",
 		handler: async (args, ctx) => {
 			const wc = requireWriteContext(ctx, "/op:evidence");
 			if (!wc) return;
+			const authoring = core.parseAuthoringArgs(args);
 
-			let raw = args.trim();
+			let raw = authoring.rest;
 			if (!raw) {
 				const answer = await ctx.ui.input("Evidence path or http(s) URL", ".operator/... or /tmp/run.log");
 				if (answer === undefined || !answer.trim()) {
@@ -730,37 +751,51 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 			const claimArgv = core.claimListArgv(wc.taskId);
 			const claims = core.parseClaimList((await runOperator(pi, wc.ledger, claimArgv)).stdout);
 			const NO_CLAIM = "(no claim - attach to the task only)";
-			const claimOptions = [...claims.map((c) => `${c.id}  [${c.status}]  ${core.truncate(c.text, 90)}`), NO_CLAIM];
-			const pickedClaim = await ctx.ui.select(`Attach to which claim on ${wc.taskId}?`, claimOptions);
-			if (!pickedClaim) {
-				emit(ctx, core.buildDeclinedReport("/op:evidence", "Operator evidence", "No claim selection made.", null));
-				return;
-			}
-			const claimId = pickedClaim === NO_CLAIM ? undefined : pickedClaim.split(/\s+/)[0];
+			let claimId: string | undefined;
+			let type: string = core.suggestEvidenceType(locator, remote);
+			let verifyCmd = core.DEFAULT_EVIDENCE_VERIFY_CMD;
+			let notes: string | undefined;
+			if (authoring.edit) {
+				const claimOptions = [...claims.map((c) => `${c.id}  [${c.status}]  ${core.truncate(c.text, 90)}`), NO_CLAIM];
+				const pickedClaim = await ctx.ui.select(`Attach to which claim on ${wc.taskId}?`, claimOptions);
+				if (!pickedClaim) {
+					emit(ctx, core.buildDeclinedReport("/op:evidence", "Operator evidence", "No claim selection made.", null));
+					return;
+				}
+				claimId = pickedClaim === NO_CLAIM ? undefined : pickedClaim.split(/\s+/)[0];
 
-			const type = await ctx.ui.select("Evidence type", [...core.EVIDENCE_TYPES]);
-			if (!type) {
-				emit(ctx, core.buildDeclinedReport("/op:evidence", "Operator evidence", "No evidence type chosen.", null));
-				return;
-			}
+				const pickedType = await ctx.ui.select("Evidence type", [...core.EVIDENCE_TYPES]);
+				if (!pickedType) {
+					emit(ctx, core.buildDeclinedReport("/op:evidence", "Operator evidence", "No evidence type chosen.", null));
+					return;
+				}
+				type = pickedType;
 
-			const verifyCmdRaw = await ctx.ui.input(
-				"Rerunnable verify command for this evidence (required, escape = cancel)",
-				"./operator doctor",
-			);
-			if (verifyCmdRaw === undefined) {
-				emit(ctx, core.buildDeclinedReport("/op:evidence", "Operator evidence", "Cancelled at the verify-command prompt.", null));
-				return;
-			}
-			const verifyCmd = verifyCmdRaw.trim();
-			if (!verifyCmd) {
-				refuse(ctx, "/op:evidence", "Operator evidence", "refusing evidence-attach without a rerunnable --verify-cmd");
-				return;
-			}
-			const notes = await askOptional(ctx, "Notes about this artifact");
-			if (notes === null) {
-				emit(ctx, core.buildDeclinedReport("/op:evidence", "Operator evidence", "Cancelled at the notes prompt.", null));
-				return;
+				const verifyCmdRaw = await ctx.ui.input(
+					"Rerunnable verify command for this evidence (required, escape = cancel)",
+					core.DEFAULT_EVIDENCE_VERIFY_CMD,
+				);
+				if (verifyCmdRaw === undefined) {
+					emit(ctx, core.buildDeclinedReport("/op:evidence", "Operator evidence", "Cancelled at the verify-command prompt.", null));
+					return;
+				}
+				verifyCmd = verifyCmdRaw.trim();
+				if (!verifyCmd) {
+					refuse(ctx, "/op:evidence", "Operator evidence", "refusing evidence-attach without a rerunnable --verify-cmd");
+					return;
+				}
+				const notesAnswer = await askOptional(ctx, "Notes about this artifact");
+				if (notesAnswer === null) {
+					emit(ctx, core.buildDeclinedReport("/op:evidence", "Operator evidence", "Cancelled at the notes prompt.", null));
+					return;
+				}
+				notes = notesAnswer || undefined;
+			} else {
+				claimId = core.preferEvidenceClaim(claims)?.id;
+				ctx.ui.notify(
+					`Evidence defaults: ${claimId ? `claim ${claimId}` : "task only"}, type ${type}, verify ${verifyCmd}. /op:evidence edit for the full form.`,
+					"info",
+				);
 			}
 			// Only remote evidence needs an asserted digest: operator fingerprints
 			// local bytes itself, and a mismatch there is already fatal.
