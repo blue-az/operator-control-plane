@@ -219,11 +219,11 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
         self.assertNotIn('pi.registerCommand("pbc:define"', text)
         self.assertNotIn('pi.registerCommand("pbc:feature"', text)
         self.assertIn(
-            '[experimental] Operator: register a claim on the selected task',
+            '[experimental] Operator: register a claim (/op:claim [text]; /op:claim edit for type/gate/verify)',
             text,
         )
         self.assertIn(
-            '[experimental] Operator: attach evidence to the selected task',
+            '[experimental] Operator: attach evidence (/op:evidence [path]; /op:evidence edit for claim/type/notes)',
             text,
         )
         self.assertIn(
