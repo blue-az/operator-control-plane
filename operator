@@ -7299,6 +7299,21 @@ def session_end_cmd(args) -> int:
             )
             return 1
 
+    # Outside the broker, --status is the other road to a trusted task state, so it
+    # needs the same verifier gate evidence-attach --status has. Lowering trust
+    # (assigned, quarantined) stays open to any executor.
+    if args.status in ("verified", "complete"):
+        identity_policy = identity_policy_for_write(op_dir)
+        if identity_policy is None:
+            return 1
+        if identity_policy["mode"] == "enforced" and not require_executor_role(
+            identity_policy,
+            get_executor_identity(),
+            "verifier",
+            f"set task status '{args.status}' from session-end",
+        ):
+            return 1
+
     usage_id = args.usage_id
     if not usage_id:
         print("Error: Specify a usage ID (e.g. usage-0001).", file=sys.stderr)

@@ -1974,6 +1974,40 @@ class TestOperatorCLI(unittest.TestCase):
         task_data = yaml.safe_load(task_file.read_text())
         self.assertEqual(task_data.get("status"), "running")
 
+    def test_session_end_trusted_status_requires_verifier_when_enforced(self) -> None:
+        self.setup_p2_enforced_claim()
+        builder = {"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"}
+        verifier = {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"}
+        task_file = Path(self.temp_dir) / ".operator" / "tasks" / "p2-task.yaml"
+
+        start = self.run_operator("session-start", "--harness", "codex", env=builder)
+        self.assertEqual(start.returncode, 0, start.stderr)
+        before = yaml.safe_load(task_file.read_text())["status"]
+
+        for status in ("verified", "complete"):
+            res = self.run_operator(
+                "session-end", "usage-0001", "--outcome", "useful", "--cost", "0",
+                "--status", status, env=builder,
+            )
+            self.assertEqual(res.returncode, 1, res.stdout + res.stderr)
+            self.assertIn("does not have the verifier role", res.stderr)
+            self.assertEqual(yaml.safe_load(task_file.read_text())["status"], before)
+
+        # lowering trust stays open to the builder
+        res = self.run_operator(
+            "session-end", "usage-0001", "--outcome", "partial", "--cost", "0",
+            "--status", "quarantined", env=builder,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(yaml.safe_load(task_file.read_text())["status"], "quarantined")
+
+        res = self.run_operator(
+            "session-end", "usage-0001", "--outcome", "useful", "--cost", "0",
+            "--status", "verified", "--force", env=verifier,
+        )
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(yaml.safe_load(task_file.read_text())["status"], "verified")
+
     def test_session_lifecycle(self) -> None:
         import datetime
 
