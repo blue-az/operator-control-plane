@@ -2684,6 +2684,44 @@ def _evidence_attach_cmd_impl(
     return 0
 
 
+def _review_model_for_harness(op_dir: str, reviewer: str, explicit_model: str | None) -> str:
+    """Resolve a review model from the named persona, never from the Pi carrier."""
+    if explicit_model:
+        return explicit_model
+    harness_path = os.path.join(op_dir, "harnesses", f"{reviewer}.yaml")
+    record = load_yaml(harness_path) if os.path.exists(harness_path) else {}
+    configured = record.get("model") if isinstance(record, dict) else None
+    if isinstance(configured, str) and configured.strip() and not configured.startswith("configured-"):
+        return configured.strip()
+    # These are persona/provider defaults, not the model of the invoking Pi seat.
+    persona_defaults = {
+        "grok": "xai/grok-4.6",
+        "luna": "openai-codex/gpt-5.6-luna",
+    }
+    if reviewer in persona_defaults:
+        return persona_defaults[reviewer]
+    # Legacy harness records may only carry a configured-* placeholder. Preserve
+    # their existing launch behavior; Grok is deliberately handled above because
+    # it must never inherit the Luna seat.
+    return "openai-codex/gpt-5.6-luna"
+
+
+def _audit_review_delegation_models(op_dir: str, issues: list[str]) -> None:
+    delegation_dir = os.path.join(op_dir, "review_delegations")
+    if not os.path.isdir(delegation_dir):
+        return
+    for path in sorted(glob.glob(os.path.join(delegation_dir, "*.yaml"))):
+        bundle = load_yaml(path)
+        if not isinstance(bundle, dict):
+            continue
+        reviewer = str(bundle.get("reviewer") or "")
+        model = str(bundle.get("model") or "")
+        if reviewer == "grok" and not model.startswith("xai/"):
+            issues.append(
+                f"[Error] review delegation {os.path.basename(path)} routes Grok to {model!r}; expected xai/grok-*"
+            )
+
+
 def review_delegate_cmd(args) -> int:
     """Create a fail-closed review delegation bundle for advisory or UID-isolated review.
 
@@ -2787,7 +2825,11 @@ def review_delegate_cmd(args) -> int:
         "If unsupported, do not verify; explain why. Do not modify product code or tests."
     )
 
-    model = args.model or "openai-codex/gpt-5.6-luna"
+    try:
+        model = _review_model_for_harness(op_dir, reviewer, args.model)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
     if "/" in model:
         provider, model_id = model.split("/", 1)
     else:
@@ -6218,6 +6260,7 @@ def doctor_cmd(args) -> int:
 
     print("=" * 80)
     print("OPERATOR DOCTOR - LEDGER CONSISTENCY REPORT")
+    _audit_review_delegation_models(op_dir, issues)
     print("=" * 80)
     all_msgs = infos + issues
     if all_msgs:
@@ -8110,8 +8153,8 @@ def main() -> None:
     )
     review_delegate_parser.add_argument(
         "--model",
-        default="openai-codex/gpt-5.6-luna",
-        help="Pi model as provider/model or model id (default: openai-codex/gpt-5.6-luna).",
+        default=None,
+        help="Pi model as provider/model or model id (defaults from the named reviewer persona).",
     )
     review_delegate_parser.add_argument(
         "--verify-cmd",

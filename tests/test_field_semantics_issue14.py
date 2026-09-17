@@ -52,6 +52,7 @@ def test_create_route_delegate_and_doctor_use_distinct_fields(tmp_path: Path) ->
 
     assert run("init").returncode == 0
     (tmp_path / ".operator" / "harnesses" / "claude.yaml").write_text("name: claude\n")
+    (tmp_path / ".operator" / "harnesses" / "grok.yaml").write_text("name: grok\nmodel: configured-grok-model\n")
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests" / "test_operator.py").write_text("# gate artifact\n")
     assert run("task-create", "--id", "field-test", "--objective", "field test", "--review", "claude").returncode == 0
@@ -94,10 +95,22 @@ def test_create_route_delegate_and_doctor_use_distinct_fields(tmp_path: Path) ->
         "claim-0001",
         "--reviewer",
         "claude",
+        "--model",
+        "openai-codex/gpt-5.6-luna",
         "--mode",
         "advisory-agent",
     )
     assert delegated.returncode == 0, delegated.stderr
+    grok_delegated = run(
+        "review-delegate",
+        "claim-0001",
+        "--reviewer",
+        "grok",
+        "--mode",
+        "advisory-agent",
+    )
+    assert grok_delegated.returncode == 0, grok_delegated.stderr
+    assert "--provider xai --model grok-4.6" in grok_delegated.stdout
     before_negative = set((tmp_path / ".operator" / "review_delegations").glob("*.yaml"))
     negative = run("review-delegate", "claim-0001", "--mode", "advisory-agent")
     assert negative.returncode != 0

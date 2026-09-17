@@ -44,7 +44,7 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension</h1>
-  <p class="sub">Simple Operator board · snapshot 2026-09-17 02:50 UTC · not Graphify, not a knowledge graph</p>
+  <p class="sub">Simple Operator board · snapshot 2026-09-17 03:46 UTC · not Graphify, not a knowledge graph</p>
 </header>
 <div class="kpis">
   <div class="kpi"><b>15</b>tasks</div>
@@ -211,7 +211,7 @@
 <section class="lists">
   <div>
     <h3>Recent PBC issues</h3>
-    <ul><li><strong>POE-ISS-004</strong> Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.</li><li><strong>POE-ISS-005</strong> review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.</li><li><strong>POE-ISS-006</strong> Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.</li><li><strong>POE-ISS-007</strong> Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.</li><li><strong>POE-ISS-008</strong> Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.</li><li><strong>POE-ISS-012</strong> Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.</li><li><strong>POE-ISS-013</strong> Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.</li><li><strong>POE-ISS-014</strong> review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat&#x27;s cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task&#x27;s grok review_harness).</li></ul>
+    <ul><li><strong>POE-ISS-002</strong> /op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.</li><li><strong>POE-ISS-003</strong> /op:delegate has no general CLI route to an implementer that is not already assigned or reviewing the task.</li><li><strong>POE-ISS-004</strong> Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.</li><li><strong>POE-ISS-005</strong> review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.</li><li><strong>POE-ISS-006</strong> Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.</li><li><strong>POE-ISS-007</strong> Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.</li><li><strong>POE-ISS-008</strong> Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.</li><li><strong>POE-ISS-012</strong> Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.</li></ul>
   </div>
   <div>
     <h3>Recent future features</h3>
@@ -220,7 +220,7 @@
 </section>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-17 02:50 UTC",
+  "generated_at": "2026-09-17 03:46 UTC",
   "tasks": [
     {
       "id": "pi-operator-extension-cross-project-delegate",
@@ -622,6 +622,16 @@
   ],
   "issues": [
     {
+      "id": "POE-ISS-002",
+      "summary": "/op:supervisor-review promises session or claim-set review, while review-delegate currently accepts one claim and needs a verify command.",
+      "next_step": "Narrow wave-1 supervisor-review to one claim, or explicitly model claim-set review as repeated single-claim bundles."
+    },
+    {
+      "id": "POE-ISS-003",
+      "summary": "/op:delegate has no general CLI route to an implementer that is not already assigned or reviewing the task.",
+      "next_step": "Restrict chooser targets to routable harnesses or make new implementer delegation create a scoped child task."
+    },
+    {
       "id": "POE-ISS-004",
       "summary": "Session-derived harness ids, carrier ids, and authority identities are separate axes and current adapters do not map all of them cleanly.",
       "next_step": "Decide the minimum identity/target config before implementing delegate launch."
@@ -650,16 +660,6 @@
       "id": "POE-ISS-012",
       "summary": "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.",
       "next_step": "Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity."
-    },
-    {
-      "id": "POE-ISS-013",
-      "summary": "Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.",
-      "next_step": "Rename prompts/docs around model/persona targets, remove Pi as a default delegation target, and keep reviewer labels distinct from verifier Unix users in generated review instructions."
-    },
-    {
-      "id": "POE-ISS-014",
-      "summary": "review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat's cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task's grok review_harness).",
-      "next_step": "Make review-delegate persona\u2192provider resolution bind Grok to the configured xai provider/grok model (never a different seat's cloud command), keep review_harness and the generated run_command consistent, and have doctor flag any run_command whose provider/model does not match the task's declared review_harness."
     }
   ],
   "features": [

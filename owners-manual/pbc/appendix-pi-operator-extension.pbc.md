@@ -456,6 +456,11 @@ future_features:
 > default task/author from the session, type/gate/verify from opinionated defaults, and
 > bind evidence to the latest unverified claim. `/op:claim edit` and `/op:evidence edit`
 > keep the extra prompts.
+>
+> POE-ISS-013 and POE-ISS-014 closed 2026-09-17. Review prompts now describe model/persona
+> targets separately from Pi carrier and verifier UID; Pi session harnesses are not offered
+> as personas. `review-delegate` resolves Grok to `xai/grok-4.6` (unless explicitly overridden),
+> records that command in the bundle, and doctor reports Grok delegations routed to another provider.
 
 ## Dogfood Issue Backlog
 
@@ -494,14 +499,6 @@ issues:
     source: pi-operator-extension-step5 verifier run dogfood
     summary: "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity."
     next_step: Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity.
-  - id: POE-ISS-013
-    source: pi-operator-extension-target-ux-cleanup
-    summary: "Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity."
-    next_step: Rename prompts/docs around model/persona targets, remove Pi as a default delegation target, and keep reviewer labels distinct from verifier Unix users in generated review instructions.
-  - id: POE-ISS-014
-    source: yoda-lookalike-2026-09-07 claim-0162 verify-run dogfood (2026-09-07)
-    summary: "review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat's cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task's grok review_harness)."
-    next_step: "Make review-delegate persona→provider resolution bind Grok to the configured xai provider/grok model (never a different seat's cloud command), keep review_harness and the generated run_command consistent, and have doctor flag any run_command whose provider/model does not match the task's declared review_harness."
 ```
 
 ## Implementation Ladder

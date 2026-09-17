@@ -994,7 +994,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 				return;
 			}
 
-			const harnesses = core.listHarnessIds(ledger);
+			const harnesses = core.listHarnessIds(ledger).filter((id) => id !== "pi" && !/^pi-[0-9a-f]{6,}$/i.test(id));
 			if (harnesses.length === 0) {
 				const message = "No harness records under .operator/harnesses/; --reviewer cannot be chosen.";
 				ctx.ui.notify(message, "error");
@@ -1017,7 +1017,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 					return notes.length > 0 ? `${id}  (${notes.join("; ")})` : id;
 				});
 				const pickedReviewer = await ctx.ui.select(
-					`Review model/persona for ${claimId}${reviewHarness ? ` (task review_harness ${reviewHarness} was not safe to auto-use)` : ""}`,
+					`Review model/persona for ${claimId}${reviewHarness ? ` (task review_harness ${reviewHarness} was not a selectable persona)` : ""}`,
 					reviewerLabels,
 				);
 				if (!pickedReviewer) {

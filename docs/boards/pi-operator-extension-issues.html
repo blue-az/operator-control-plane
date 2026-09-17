@@ -33,11 +33,11 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension issues</h1>
-  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 02:50 UTC · PBC dogfood backlog + ledger mentions</p>
+  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 03:46 UTC · PBC dogfood backlog + ledger mentions</p>
 </header>
 <div class="kpis">
-  <div class="kpi"><b>10</b>issues</div>
-  <div class="kpi"><b>10</b>open (no claim mention)</div>
+  <div class="kpi"><b>8</b>issues</div>
+  <div class="kpi"><b>8</b>open (no claim mention)</div>
   <div class="kpi"><b>0</b>in ledger, unverified</div>
   <div class="kpi"><b>0</b>addressed (verified claim)</div>
 </div>
@@ -123,30 +123,10 @@
   <p class="meta">next: Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the</p>
   <p class="meta">task hint: none · claims: no matching claims</p>
 </article>
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-013</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Rename prompts/docs around model/persona targets, remove Pi as a default delegation target, and keep reviewer labels distinct from verifier Unix users in generated review instructions.</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-014</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat&#x27;s cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Make review-delegate persona→provider resolution bind Grok to the configured xai provider/grok model (never a different seat&#x27;s cloud command), keep review_harness and the generated run_command consistent, and have doctor</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
 </div>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-17 02:50 UTC",
+  "generated_at": "2026-09-17 03:46 UTC",
   "issues": [
     {
       "id": "POE-ISS-002",
@@ -217,24 +197,6 @@
       "source": "",
       "summary": "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.",
       "next_step": "Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity.",
-      "task_hint": null,
-      "claims": []
-    },
-    {
-      "id": "POE-ISS-013",
-      "state": "open",
-      "source": "",
-      "summary": "Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.",
-      "next_step": "Rename prompts/docs around model/persona targets, remove Pi as a default delegation target, and keep reviewer labels distinct from verifier Unix users in generated review instructions.",
-      "task_hint": null,
-      "claims": []
-    },
-    {
-      "id": "POE-ISS-014",
-      "state": "open",
-      "source": "",
-      "summary": "review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat's cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task's grok review_harness).",
-      "next_step": "Make review-delegate persona\u2192provider resolution bind Grok to the configured xai provider/grok model (never a different seat's cloud command), keep review_harness and the generated run_command consistent, and have doctor flag any run_command whose provider/model does not match the task's declared review_harness.",
       "task_hint": null,
       "claims": []
     }
