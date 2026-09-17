@@ -1598,7 +1598,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 				const message =
 					"/op:popup needs a GUI askpass (SUDO_ASKPASS or ksshaskpass/ssh-askpass). It will not use sudo -S.";
 				ctx.ui.notify(message, "error");
-				emit(ctx, core.buildDeclinedReport("/op:popup", "Operator sudo askpass", message, null));
+				emit(ctx, core.buildSudoPopupReport({ target: null, argv: null, result: null, declined: true, askpass: null }));
 				return;
 			}
 			const wantList = /(?:^|\s)(list|--all)(?:\s|$)/.test(_args);
