@@ -610,6 +610,19 @@ class GPUResidencyError(RuntimeError):
     """The requested GPU-resident benchmark model did not fit as configured."""
 
 
+class HostStateError(RuntimeError):
+    """The inference host failed its declared precondition."""
+
+
+def run_host_gate(command: str | None) -> None:
+    if not command:
+        return
+    result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)
+    if result.returncode:
+        detail = (result.stderr or result.stdout).strip()[:300]
+        raise HostStateError(f"host gate failed ({result.returncode}): {detail}")
+
+
 def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
     """Load *model* briefly and fail closed unless it is resident in VRAM."""
     payload = json.dumps({
@@ -905,6 +918,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Local lane eval ladder runner")
     parser.add_argument("--models", nargs="+", required=True, help="Ollama model tags, e.g. gemma4:26b")
     parser.add_argument("--provider", default="local", help="Pi provider name from models.json")
+    parser.add_argument("--host-gate-command", default=None,
+                        help="Command to run before each cell; nonzero makes the cell invalid.")
     parser.add_argument("--append-system-prompt", default=None,
                         help="Append a behavioral instruction to the Pi system prompt.")
     parser.add_argument("--tasks", nargs="+", default=None, help="Task ids to run (default: all)")
@@ -1082,10 +1097,17 @@ def main() -> int:
             continue
         print(f"[{key}] running...")
         try:
+            run_host_gate(args.host_gate_command)
             result = run_trial(
                 task, level, model, trial, ledger_dir, use_ledger, trace_dir, sampling,
                 args.provider, args.append_system_prompt
             )
+        except HostStateError as exc:
+            print(f"[{key}] INVALID: {exc}", file=sys.stderr)
+            failures.append({"cell_key": key, "task_id": task["task_id"], "level": level,
+                             "model": model, "trial": trial, "failure_cause": "host_state",
+                             "detail": str(exc)})
+            continue
         except GPUResidencyError as exc:
             print(f"[{key}] ABORT: {exc}", file=sys.stderr)
             failures.append({
