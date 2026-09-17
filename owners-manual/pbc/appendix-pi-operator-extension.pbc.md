@@ -476,16 +476,17 @@ future_features:
 > POE-ISS-005 closed 2026-09-17. Reviewer launches use Pi's `--no-approve` JUDGE posture,
 > preventing the project under review from steering its own reviewer through trusted local
 > configuration or extensions. Regression coverage confirms `--approve` is absent.
+>
+> POE-ISS-006 closed 2026-09-17. `scripts/check_poe_dogfood_gate.py` evaluates the required
+> artifact set as a binary result: task, claim with verify command, run-log evidence, review
+> bundle, handoff, and distinct-UID verification or explicit advisory outcome. The live Step 5
+> task reports `DOGFOOD GATE: PASS`; lifecycle status remains separately governed by broker policy.
 
 ## Dogfood Issue Backlog
 
 ```pbc:grounding
 status: draft
 issues:
-  - id: POE-ISS-006
-    source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F11
-    summary: Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.
-    next_step: Define a binary dogfood gate such as non-self-verification plus required ledger artifacts.
 ```
 
 ## Implementation Ladder
