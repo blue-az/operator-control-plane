@@ -33,11 +33,11 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension issues</h1>
-  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 01:09 UTC · PBC dogfood backlog + ledger mentions</p>
+  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 01:25 UTC · PBC dogfood backlog + ledger mentions</p>
 </header>
 <div class="kpis">
-  <div class="kpi"><b>12</b>issues</div>
-  <div class="kpi"><b>11</b>open (no claim mention)</div>
+  <div class="kpi"><b>11</b>issues</div>
+  <div class="kpi"><b>10</b>open (no claim mention)</div>
   <div class="kpi"><b>1</b>in ledger, unverified</div>
   <div class="kpi"><b>0</b>addressed (verified claim)</div>
 </div>
@@ -113,16 +113,6 @@
   <p class="meta">next: Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.</p>
   <p class="meta">task hint: none · claims: no matching claims</p>
 </article>
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-009</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">/op:handoff treated a one-word user input &quot;go&quot; as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Change /op:handoff UX so it generates a deterministic draft from task/status/recent handoffs first, defaults to generated closeout without requiring &quot;go&quot;, and refuses near-empty handoffs unless the user explicitly uses m</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
 <article class="card state-in-ledger">
   <header>
     <h2>POE-ISS-010</h2>
@@ -166,7 +156,7 @@
 </div>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-17 01:09 UTC",
+  "generated_at": "2026-09-17 01:25 UTC",
   "issues": [
     {
       "id": "POE-ISS-002",
@@ -228,15 +218,6 @@
       "source": "",
       "summary": "Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.",
       "next_step": "Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.",
-      "task_hint": null,
-      "claims": []
-    },
-    {
-      "id": "POE-ISS-009",
-      "state": "open",
-      "source": "",
-      "summary": "/op:handoff treated a one-word user input \"go\" as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.",
-      "next_step": "Change /op:handoff UX so it generates a deterministic draft from task/status/recent handoffs first, defaults to generated closeout without requiring \"go\", and refuses near-empty handoffs unless the user explicitly uses manual edit mode.",
       "task_hint": null,
       "claims": []
     },

@@ -44,7 +44,7 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension</h1>
-  <p class="sub">Simple Operator board · snapshot 2026-09-17 01:09 UTC · not Graphify, not a knowledge graph</p>
+  <p class="sub">Simple Operator board · snapshot 2026-09-17 01:25 UTC · not Graphify, not a knowledge graph</p>
 </header>
 <div class="kpis">
   <div class="kpi"><b>15</b>tasks</div>
@@ -211,7 +211,7 @@
 <section class="lists">
   <div>
     <h3>Recent PBC issues</h3>
-    <ul><li><strong>POE-ISS-006</strong> Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.</li><li><strong>POE-ISS-007</strong> Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.</li><li><strong>POE-ISS-008</strong> Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.</li><li><strong>POE-ISS-009</strong> /op:handoff treated a one-word user input &quot;go&quot; as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.</li><li><strong>POE-ISS-010</strong> /op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.</li><li><strong>POE-ISS-012</strong> Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.</li><li><strong>POE-ISS-013</strong> Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.</li><li><strong>POE-ISS-014</strong> review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat&#x27;s cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task&#x27;s grok review_harness).</li></ul>
+    <ul><li><strong>POE-ISS-005</strong> review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.</li><li><strong>POE-ISS-006</strong> Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.</li><li><strong>POE-ISS-007</strong> Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.</li><li><strong>POE-ISS-008</strong> Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.</li><li><strong>POE-ISS-010</strong> /op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.</li><li><strong>POE-ISS-012</strong> Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.</li><li><strong>POE-ISS-013</strong> Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.</li><li><strong>POE-ISS-014</strong> review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat&#x27;s cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task&#x27;s grok review_harness).</li></ul>
   </div>
   <div>
     <h3>Recent future features</h3>
@@ -220,7 +220,7 @@
 </section>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-17 01:09 UTC",
+  "generated_at": "2026-09-17 01:25 UTC",
   "tasks": [
     {
       "id": "pi-operator-extension-cross-project-delegate",
@@ -622,6 +622,11 @@
   ],
   "issues": [
     {
+      "id": "POE-ISS-005",
+      "summary": "review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.",
+      "next_step": "Open a separate Operator task for the review-delegate approval/isolation defect."
+    },
+    {
       "id": "POE-ISS-006",
       "summary": "Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.",
       "next_step": "Define a binary dogfood gate such as non-self-verification plus required ledger artifacts."
@@ -635,11 +640,6 @@
       "id": "POE-ISS-008",
       "summary": "Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.",
       "next_step": "Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path."
-    },
-    {
-      "id": "POE-ISS-009",
-      "summary": "/op:handoff treated a one-word user input \"go\" as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.",
-      "next_step": "Change /op:handoff UX so it generates a deterministic draft from task/status/recent handoffs first, defaults to generated closeout without requiring \"go\", and refuses near-empty handoffs unless the user explicitly uses manual edit mode."
     },
     {
       "id": "POE-ISS-010",

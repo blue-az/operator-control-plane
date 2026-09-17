@@ -694,6 +694,16 @@ function tierA2(ledger: core.Ledger): void {
 	const generated = core.buildGeneratedHandoffDraft("selftest-alpha", by);
 	eq("an untouched generated template parses to the generated draft", core.parseHandoffDraft(template), generated);
 	throws("an empty handoff is refused before spawning", () => core.handoffAddArgv({ taskId: "selftest-alpha", by, draft: {} }));
+	const fromGoNext = core.buildGeneratedHandoffDraft(
+		"selftest-alpha",
+		by,
+		sampleTaskShow({ Status: "assigned", "Next Action": "/op:handoff go" }),
+	);
+	check(
+		"generated closeout does not carry a completed /op:handoff go as next_action",
+		fromGoNext["--next-action"] !== "/op:handoff go" && fromGoNext["--next-action"] !== "go",
+		fromGoNext["--next-action"],
+	);
 
 	const filled = core.buildHandoffTemplate("selftest-alpha", by, {
 		"--changed": "Added the step 2 commands.",
@@ -2308,6 +2318,15 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 	report = lastReport();
 	check("default /op:handoff writes a generated handoff", yamlNames(handoffsDir).length === 1, yamlNames(handoffsDir).join(","));
 	check("default /op:handoff is not recorded as literal next_action", !readFileSync(join(handoffsDir, yamlNames(handoffsDir)[0]!), "utf8").includes("next_action: go"));
+	const handoffsAfterDefault = yamlNames(handoffsDir);
+	await commands.get("op:handoff")!.handler("go", ctx);
+	check(
+		"/op:handoff go writes another generated closeout, not the word go",
+		yamlNames(handoffsDir).length === handoffsAfterDefault.length + 1,
+		yamlNames(handoffsDir).join(","),
+	);
+	const goYaml = readFileSync(join(handoffsDir, yamlNames(handoffsDir).at(-1)!), "utf8");
+	check("/op:handoff go is not recorded as literal next_action", !/next_action:\s*go\s*$/m.test(goYaml), goYaml);
 
 	editorFn = () => "## Something Else\ntext\n";
 	const handoffsBeforeEmpty = yamlNames(handoffsDir);

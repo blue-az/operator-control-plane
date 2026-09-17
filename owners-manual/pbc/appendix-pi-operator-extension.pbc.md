@@ -447,6 +447,10 @@ future_features:
 > POE-ISS-011 closed 2026-09-16. `/op:doctor` and `/op:status` notify before the Operator
 > read and `setStatus` then clear it in `finally`. Selftest covers that sequence. This does
 > not make doctor faster; it makes the wait visible.
+>
+> POE-ISS-009 closed 2026-09-16. `/op:handoff` defaults to a generated closeout from
+> task context (no editor). `/op:handoff go` is an alias for that draft, not a literal
+> next_action. Empty editor drafts are refused; `/op:handoff edit` is the manual path.
 
 ## Dogfood Issue Backlog
 
@@ -481,10 +485,6 @@ issues:
     source: pi-operator-extension-step2 dogfood handoff-0006
     summary: Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.
     next_step: Make /op:supervisor-review distinguish advisory review notes, builder-owned draft artifacts, and verifier-owned status-setting evidence so the UI does not offer an impossible no-status verifier attach path.
-  - id: POE-ISS-009
-    source: pi-operator-extension-step5 live TUI dogfood handoff-0004
-    summary: /op:handoff treated a one-word user input "go" as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.
-    next_step: Change /op:handoff UX so it generates a deterministic draft from task/status/recent handoffs first, defaults to generated closeout without requiring "go", and refuses near-empty handoffs unless the user explicitly uses manual edit mode.
   - id: POE-ISS-010
     source: pi-operator-extension-step5 live TUI dogfood
     summary: /op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.
