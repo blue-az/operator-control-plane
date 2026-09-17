@@ -111,6 +111,8 @@ def test_create_route_delegate_and_doctor_use_distinct_fields(tmp_path: Path) ->
     )
     assert grok_delegated.returncode == 0, grok_delegated.stderr
     assert "--provider xai --model grok-4.6" in grok_delegated.stdout
+    assert "--no-approve" in grok_delegated.stdout
+    assert " --approve " not in grok_delegated.stdout
     assert 'test -d "$HOME"' in grok_delegated.stdout
     assert "command -v pi" in grok_delegated.stdout
     assert "PYTEST_ADDOPTS" in grok_delegated.stdout

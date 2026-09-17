@@ -472,16 +472,16 @@ future_features:
 > seat has a home directory, `pi` on PATH, and provider auth via the target auth file or
 > provider environment. They disable pytest's cache provider to avoid verifier-owned cache
 > writes and instruct evidence attachment with the executing `$(whoami)` identity.
+>
+> POE-ISS-005 closed 2026-09-17. Reviewer launches use Pi's `--no-approve` JUDGE posture,
+> preventing the project under review from steering its own reviewer through trusted local
+> configuration or extensions. Regression coverage confirms `--approve` is absent.
 
 ## Dogfood Issue Backlog
 
 ```pbc:grounding
 status: draft
 issues:
-  - id: POE-ISS-005
-    source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F10
-    summary: review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.
-    next_step: Open a separate Operator task for the review-delegate approval/isolation defect.
   - id: POE-ISS-006
     source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F11
     summary: Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.

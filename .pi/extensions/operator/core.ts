@@ -1871,7 +1871,7 @@ export function describeSupervisorReviewPlan(opts: SupervisorReviewPlanInput): s
 		lines.push("This is not trusted verification and does not attach verifier-owned status-setting evidence.");
 	}
 	lines.push(
-		"The generated reviewer script currently includes --approve (operator-side POE-ISS-005); this extension does not rewrite it.",
+		"The generated reviewer script uses --no-approve so the reviewed project cannot steer its own reviewer (POE-ISS-005).",
 	);
 	lines.push("", ...EVIDENCE_KIND_NOTES);
 	return lines;

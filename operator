@@ -2894,7 +2894,7 @@ def review_delegate_cmd(args) -> int:
     pi_cmd = (
         f"pi --provider {shlex.quote(provider)} --model {shlex.quote(model_id)} "
         f"--thinking medium --session-id {shlex.quote(reviewer + '-' + args.claim)} "
-        f"--name {shlex.quote(reviewer)} --approve --print -- {shlex.quote(prompt)}"
+        f"--name {shlex.quote(reviewer)} --no-approve --print -- {shlex.quote(prompt)}"
     )
     # The verifier seat must prove its launch environment before Pi or pytest
     # runs. Do not inspect or print credential values; auth.json or the provider
