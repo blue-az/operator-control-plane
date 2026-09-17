@@ -33,11 +33,11 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension issues</h1>
-  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 05:16 UTC · PBC dogfood backlog + ledger mentions</p>
+  <p class="sub">Issue backlog catalog · snapshot 2026-09-17 06:38 UTC · PBC dogfood backlog + ledger mentions</p>
 </header>
 <div class="kpis">
-  <div class="kpi"><b>3</b>issues</div>
-  <div class="kpi"><b>3</b>open (no claim mention)</div>
+  <div class="kpi"><b>2</b>issues</div>
+  <div class="kpi"><b>2</b>open (no claim mention)</div>
   <div class="kpi"><b>0</b>in ledger, unverified</div>
   <div class="kpi"><b>0</b>addressed (verified claim)</div>
 </div>
@@ -63,20 +63,10 @@
   <p class="meta">next: Define a binary dogfood gate such as non-self-verification plus required ledger artifacts.</p>
   <p class="meta">task hint: none · claims: no matching claims</p>
 </article>
-<article class="card state-open">
-  <header>
-    <h2>POE-ISS-012</h2>
-    <span class="pill">open</span>
-  </header>
-  <p class="next">Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-</p>
-  <p class="meta">source: </p>
-  <p class="meta">next: Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the</p>
-  <p class="meta">task hint: none · claims: no matching claims</p>
-</article>
 </div>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-17 05:16 UTC",
+  "generated_at": "2026-09-17 06:38 UTC",
   "issues": [
     {
       "id": "POE-ISS-005",
@@ -93,15 +83,6 @@
       "source": "",
       "summary": "Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.",
       "next_step": "Define a binary dogfood gate such as non-self-verification plus required ledger artifacts.",
-      "task_hint": null,
-      "claims": []
-    },
-    {
-      "id": "POE-ISS-012",
-      "state": "open",
-      "source": "",
-      "summary": "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.",
-      "next_step": "Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity.",
       "task_hint": null,
       "claims": []
     }

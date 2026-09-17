@@ -2896,11 +2896,25 @@ def review_delegate_cmd(args) -> int:
         f"--thinking medium --session-id {shlex.quote(reviewer + '-' + args.claim)} "
         f"--name {shlex.quote(reviewer)} --approve --print -- {shlex.quote(prompt)}"
     )
+    # The verifier seat must prove its launch environment before Pi or pytest
+    # runs. Do not inspect or print credential values; auth.json or the provider
+    # environment is sufficient evidence that the seat is configured.
+    provider_env = {
+        "xai": "XAI_API_KEY",
+        "openai": "OPENAI_API_KEY",
+        "openai-codex": "OPENAI_API_KEY",
+    }.get(provider)
+    auth_check = f'test -r "$HOME/.pi/agent/auth.json" || test -n "${{{provider_env}:-}}"' if provider_env else 'test -r "$HOME/.pi/agent/auth.json"'
+    preflight = (
+        'set -e; test -n "${HOME:-}"; test -d "$HOME"; command -v pi >/dev/null; '
+        + auth_check
+        + '; export PYTEST_ADDOPTS="${PYTEST_ADDOPTS:-} -p no:cacheprovider"; '
+    )
 
     if args.mode == "uid-isolated":
-        run_line = f"sudo -u {shlex.quote(args.review_user or '<review-unix-user>')} bash -lc {shlex.quote('cd ' + shlex.quote(repo_root) + ' && ' + pi_cmd)}"
+        run_line = f"sudo -u {shlex.quote(args.review_user or '<review-unix-user>')} bash -lc {shlex.quote('cd ' + shlex.quote(repo_root) + ' && ' + preflight + pi_cmd)}"
     else:
-        run_line = f"cd {shlex.quote(repo_root)} && {pi_cmd}"
+        run_line = f"cd {shlex.quote(repo_root)} && {preflight}{pi_cmd}"
 
     bundle = {
         "delegation_id": delegation_id,

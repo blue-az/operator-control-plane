@@ -111,6 +111,10 @@ def test_create_route_delegate_and_doctor_use_distinct_fields(tmp_path: Path) ->
     )
     assert grok_delegated.returncode == 0, grok_delegated.stderr
     assert "--provider xai --model grok-4.6" in grok_delegated.stdout
+    assert 'test -d "$HOME"' in grok_delegated.stdout
+    assert "command -v pi" in grok_delegated.stdout
+    assert "PYTEST_ADDOPTS" in grok_delegated.stdout
+    assert "--verified-by $(whoami)" in grok_delegated.stdout
     before_negative = set((tmp_path / ".operator" / "review_delegations").glob("*.yaml"))
     negative = run("review-delegate", "claim-0001", "--mode", "advisory-agent")
     assert negative.returncode != 0

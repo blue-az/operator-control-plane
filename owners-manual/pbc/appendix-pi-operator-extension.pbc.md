@@ -467,6 +467,11 @@ future_features:
 > claim-scoped; unrouted delegation creates a scoped child task; harness/carrier/persona and
 > verifier-UID axes are explicit; trusted sudo authorization is visible; and verifier-only
 > evidence paths are fail-closed and labeled separately from builder drafts.
+>
+> POE-ISS-012 closed 2026-09-17. Generated review launches now fail closed unless the target
+> seat has a home directory, `pi` on PATH, and provider auth via the target auth file or
+> provider environment. They disable pytest's cache provider to avoid verifier-owned cache
+> writes and instruct evidence attachment with the executing `$(whoami)` identity.
 
 ## Dogfood Issue Backlog
 
@@ -481,10 +486,6 @@ issues:
     source: docs/REVIEW_pi-operator-extension-pbc_2026-09-01.md F11
     summary: Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.
     next_step: Define a binary dogfood gate such as non-self-verification plus required ledger artifacts.
-  - id: POE-ISS-012
-    source: pi-operator-extension-step5 verifier run dogfood
-    summary: "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity."
-    next_step: Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity.
 ```
 
 ## Implementation Ladder

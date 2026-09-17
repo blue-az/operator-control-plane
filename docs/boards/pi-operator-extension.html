@@ -44,7 +44,7 @@
 <header class="top">
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>pi-operator-extension</h1>
-  <p class="sub">Simple Operator board · snapshot 2026-09-17 05:16 UTC · not Graphify, not a knowledge graph</p>
+  <p class="sub">Simple Operator board · snapshot 2026-09-17 06:38 UTC · not Graphify, not a knowledge graph</p>
 </header>
 <div class="kpis">
   <div class="kpi"><b>15</b>tasks</div>
@@ -211,7 +211,7 @@
 <section class="lists">
   <div>
     <h3>Recent PBC issues</h3>
-    <ul><li><strong>POE-ISS-005</strong> review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.</li><li><strong>POE-ISS-006</strong> Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.</li><li><strong>POE-ISS-012</strong> Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.</li></ul>
+    <ul><li><strong>POE-ISS-005</strong> review-delegate may launch reviewing Pi with --approve, which can trust the project-local extension being reviewed.</li><li><strong>POE-ISS-006</strong> Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.</li></ul>
   </div>
   <div>
     <h3>Recent future features</h3>
@@ -220,7 +220,7 @@
 </section>
 <script type="application/json" id="board-data">{
   "prefix": "pi-operator-extension",
-  "generated_at": "2026-09-17 05:16 UTC",
+  "generated_at": "2026-09-17 06:38 UTC",
   "tasks": [
     {
       "id": "pi-operator-extension-cross-project-delegate",
@@ -630,11 +630,6 @@
       "id": "POE-ISS-006",
       "summary": "Dogfood acceptance must be falsifiable, not just a prose judgment that the ledger is clearer.",
       "next_step": "Define a binary dogfood gate such as non-self-verification plus required ledger artifacts."
-    },
-    {
-      "id": "POE-ISS-012",
-      "summary": "Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.",
-      "next_step": "Implement /op:verify-run or repair review-delegate generation so the verifier launch validates home/provider/PATH first, uses a writable cache or disables pytest cache, and instructs verifier evidence attachment with the executing verifier identity."
     }
   ],
   "features": [
