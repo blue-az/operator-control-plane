@@ -197,6 +197,60 @@ export function preferEvidenceClaim(claims: ClaimRow[]): ClaimRow | undefined {
 	return [...pool].sort((a, b) => a.id.localeCompare(b.id)).at(-1);
 }
 
+export interface ReviewClaimChoice {
+	/** Set when a default applies; undefined means the caller must ask. */
+	claimId?: string;
+	/** Why the default applied, for the notify line; empty when the caller must ask. */
+	reason: string;
+}
+
+/**
+ * /op:supervisor-review claim default (step 5 dogfood, claim-0137): an explicit
+ * argument wins; otherwise the single unverified claim, else the single claim on
+ * the task. Anything ambiguous goes back to the chooser.
+ */
+export function selectReviewClaim(claims: ClaimRow[], explicit = ""): ReviewClaimChoice {
+	const named = explicit.trim();
+	if (named) return { claimId: named, reason: "named" };
+	const unverified = claims.filter((c) => c.status.trim().toUpperCase() !== "VERIFIED");
+	if (unverified.length === 1) {
+		return { claimId: unverified[0].id, reason: "the only unverified claim" };
+	}
+	if (claims.length === 1) return { claimId: claims[0].id, reason: "the only claim" };
+	return { reason: "" };
+}
+
+/**
+ * /op:supervisor-review reviewer default (claim-0137): the task's review_harness
+ * is used only when it is a registered harness, is not this session, and is not
+ * the implementer. Otherwise the caller asks, because a reviewer that is the
+ * author or the builder is the self-review the ledger refuses later.
+ */
+export function selectReviewer(
+	reviewHarness: string | null,
+	assignedHarness: string | null,
+	sessionAuthor: string | null,
+	harnesses: string[],
+): string | undefined {
+	if (!reviewHarness) return undefined;
+	if (!harnesses.includes(reviewHarness)) return undefined;
+	if (sessionAuthor && reviewHarness === sessionAuthor) return undefined;
+	if (assignedHarness && reviewHarness === assignedHarness) return undefined;
+	return reviewHarness;
+}
+
+/**
+ * uid-isolated verifier default (claim-0138): prefer the registered
+ * operator-verifier user, and never the claim's own author uid.
+ */
+export function selectVerifierUser(
+	verifiers: { name: string; uid: number }[],
+	authorUid: number | null,
+): { name: string; uid: number } | undefined {
+	const eligible = verifiers.filter((v) => authorUid === null || v.uid !== authorUid);
+	return eligible.find((v) => v.name === "operator-verifier");
+}
+
 /** review-delegate --mode values. The extension never infers one. */
 export const REVIEW_MODES = ["uid-isolated", "advisory-agent"] as const;
 export type ReviewMode = (typeof REVIEW_MODES)[number];

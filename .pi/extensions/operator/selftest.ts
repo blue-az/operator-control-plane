@@ -557,6 +557,85 @@ function tierA2(ledger: core.Ledger): void {
 		"claim-0003",
 	);
 
+	// supervisor-review defaults (claim-0137 / claim-0138): these decide what gets
+	// reviewed and under which verifier, so they are unit-tested rather than left
+	// inline in the handler.
+	const row = (id: string, status: string): core.ClaimRow => ({
+		id,
+		taskId: "t",
+		type: "test_passes",
+		status,
+		text: id,
+	});
+	eq(
+		"selectReviewClaim prefers an explicit argument",
+		core.selectReviewClaim([row("claim-0001", "UNVERIFIED")], " claim-0009 ").claimId,
+		"claim-0009",
+	);
+	eq(
+		"selectReviewClaim takes the only unverified claim",
+		core.selectReviewClaim([row("claim-0001", "VERIFIED"), row("claim-0002", "UNVERIFIED")]).claimId,
+		"claim-0002",
+	);
+	eq(
+		"selectReviewClaim says why it defaulted",
+		core.selectReviewClaim([row("claim-0001", "VERIFIED"), row("claim-0002", "UNVERIFIED")]).reason,
+		"the only unverified claim",
+	);
+	eq(
+		"selectReviewClaim falls back to the only claim when it is verified",
+		core.selectReviewClaim([row("claim-0001", "VERIFIED")]).claimId,
+		"claim-0001",
+	);
+	eq(
+		"selectReviewClaim treats a quarantined claim as reviewable",
+		core.selectReviewClaim([row("claim-0001", "VERIFIED"), row("claim-0002", "QUARANTINED")]).claimId,
+		"claim-0002",
+	);
+	eq(
+		"selectReviewClaim asks when two claims are unverified",
+		core.selectReviewClaim([row("claim-0001", "UNVERIFIED"), row("claim-0002", "UNVERIFIED")]).claimId,
+		undefined,
+	);
+	eq("selectReviewClaim asks when the task has no claims", core.selectReviewClaim([]).claimId, undefined);
+
+	eq(
+		"selectReviewer uses a registered review_harness",
+		core.selectReviewer("grok", "codex", "pi-01a0", ["grok", "codex"]),
+		"grok",
+	);
+	eq(
+		"selectReviewer refuses an unregistered review_harness",
+		core.selectReviewer("ghost", "codex", "pi-01a0", ["grok", "codex"]),
+		undefined,
+	);
+	eq(
+		"selectReviewer refuses this session as its own reviewer",
+		core.selectReviewer("pi-01a0", "codex", "pi-01a0", ["pi-01a0", "codex"]),
+		undefined,
+	);
+	eq(
+		"selectReviewer refuses the implementer as reviewer",
+		core.selectReviewer("codex", "codex", "pi-01a0", ["codex"]),
+		undefined,
+	);
+	eq("selectReviewer asks when the task names no reviewer", core.selectReviewer(null, "codex", "pi-01a0", ["codex"]), undefined);
+
+	const verifiers = [
+		{ name: "luna-review-ffsi001-rowa", uid: 971 },
+		{ name: "operator-verifier", uid: 966 },
+	];
+	eq(
+		"selectVerifierUser prefers operator-verifier",
+		core.selectVerifierUser(verifiers, 1000)?.name,
+		"operator-verifier",
+	);
+	eq(
+		"selectVerifierUser never returns the claim author",
+		core.selectVerifierUser(verifiers, 966)?.name,
+		undefined,
+	);
+
 	// claim-add argv
 	const claimArgv = core.claimAddArgv({
 		taskId: "selftest-alpha",

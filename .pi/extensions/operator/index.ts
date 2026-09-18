@@ -930,16 +930,17 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 				return;
 			}
 
-			let claimId = args.trim();
-			if (!claimId) {
-				const unverified = claims.filter((c) => c.status.toUpperCase() !== "VERIFIED");
-				if (unverified.length === 1) {
-					claimId = unverified[0].id;
-					ctx.ui.notify(`Defaulting supervisor-review to the only unverified claim on ${taskId}: ${claimId}.`, "info");
-				} else if (claims.length === 1) {
-					claimId = claims[0].id;
-					ctx.ui.notify(`Defaulting supervisor-review to the only claim on ${taskId}: ${claimId}.`, "info");
-				} else {
+			const claimChoice = core.selectReviewClaim(claims, args);
+			let claimId = claimChoice.claimId ?? "";
+			if (claimChoice.claimId) {
+				if (claimChoice.reason !== "named") {
+					ctx.ui.notify(
+						`Defaulting supervisor-review to ${claimChoice.reason} on ${taskId}: ${claimId}.`,
+						"info",
+					);
+				}
+			} else {
+				{
 					const labels = claims.map((c) => `${c.id}  [${c.status}]  ${core.truncate(c.text, 90)}`);
 					const picked = await ctx.ui.select(`Which claim on ${taskId} should be reviewed?`, labels);
 					if (!picked) {
@@ -1004,9 +1005,9 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 			const taskShow = core.parseTaskShow((await runOperator(pi, ledger, core.taskShowArgv(taskId))).stdout);
 			const assignedHarness = taskShow.fields["Assigned Harness"] || null;
 			const reviewHarness = taskShow.fields["Review Harness"] || null;
-			let reviewer = "";
-			if (reviewHarness && harnesses.includes(reviewHarness) && reviewHarness !== sessionAuthor && reviewHarness !== assignedHarness) {
-				reviewer = reviewHarness;
+			const defaultReviewer = core.selectReviewer(reviewHarness, assignedHarness, sessionAuthor, harnesses);
+			let reviewer = defaultReviewer ?? "";
+			if (defaultReviewer) {
 				ctx.ui.notify(`Defaulting supervisor-review target to task review_harness model/persona: ${reviewer}.`, "info");
 			} else {
 				const reviewerLabels = harnesses.map((id) => {
@@ -1074,7 +1075,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 				const verifierUsers = identity
 					? core.verifierIdentities(identity).filter((v) => shown.authorUid === null || v.uid !== shown.authorUid)
 					: [];
-				const preferredVerifier = verifierUsers.find((v) => v.name === "operator-verifier");
+				const preferredVerifier = core.selectVerifierUser(verifierUsers, shown.authorUid);
 				if (preferredVerifier) {
 					reviewUser = preferredVerifier.name;
 					ctx.ui.notify(`Defaulting trusted verifier Unix user to ${reviewUser} (uid ${preferredVerifier.uid}).`, "info");
