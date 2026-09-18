@@ -2008,6 +2008,52 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertEqual(yaml.safe_load(task_file.read_text())["status"], "verified")
 
+    def test_task_route_reassigns_builder_and_refuses_self_review(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        created = self.run_operator(
+            "task-create", "--objective", "Route a builder", "--id", "route-task",
+            "--assign", "grok", "--review", "claude",
+        )
+        self.assertEqual(created.returncode, 0, created.stderr)
+        task_file = Path(self.temp_dir) / ".operator" / "tasks" / "route-task.yaml"
+
+        missing = self.run_operator(
+            "task-route", "--task", "route-task", "--assign", "nope", "--rationale", "r",
+        )
+        self.assertEqual(missing.returncode, 1, missing.stdout)
+        self.assertIn("--assign harness 'nope' does not exist", missing.stderr)
+
+        clash = self.run_operator(
+            "task-route", "--task", "route-task", "--assign", "claude", "--rationale", "r",
+        )
+        self.assertEqual(clash.returncode, 1, clash.stdout)
+        self.assertIn("same harness", clash.stderr)
+        self.assertEqual(yaml.safe_load(task_file.read_text())["assigned_harness"], "grok")
+
+        routed = self.run_operator(
+            "task-route", "--task", "route-task", "--assign", "codex",
+            "--rationale", "grok unavailable",
+        )
+        self.assertEqual(routed.returncode, 0, routed.stderr)
+        data = yaml.safe_load(task_file.read_text())
+        self.assertEqual(data["assigned_harness"], "codex")
+        self.assertEqual(data["review_harness"], "claude")
+        self.assertEqual(data["assigned_harness_history"][-1]["previous"], "grok")
+        self.assertEqual(
+            data["operator_decision"]["assigned_harness"]["rationale"], "grok unavailable"
+        )
+        correction = yaml.safe_load(
+            (Path(self.temp_dir) / ".operator" / data["route_corrections"][-1]).read_text()
+        )
+        self.assertEqual(correction["previous_assigned_harness"], "grok")
+        self.assertEqual(correction["assigned_harness"], "codex")
+
+        repeat = self.run_operator(
+            "task-route", "--task", "route-task", "--assign", "codex", "--rationale", "r",
+        )
+        self.assertEqual(repeat.returncode, 0, repeat.stderr)
+        self.assertIn("already has assigned harness 'codex'", repeat.stdout)
+
     def test_task_show_plain_summary_tracks_who_checked(self) -> None:
         _, evidence = self.setup_p2_enforced_claim()
         builder = {"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"}

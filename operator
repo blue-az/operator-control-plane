@@ -1674,7 +1674,7 @@ def init_cmd(args) -> int:
 
 
 def task_route_cmd(args) -> int:
-    """Correct reviewer routing while retaining the prior route in history."""
+    """Correct builder/reviewer routing while retaining the prior route in history."""
     enrollment, op_dir = resolve_operator_context()
     if enrollment:
         print(
@@ -1685,8 +1685,9 @@ def task_route_cmd(args) -> int:
     if not op_dir:
         print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
         return 1
-    if args.review is None and not args.clear_review:
-        print("Error: provide --review or --clear-review.", file=sys.stderr)
+    assign = getattr(args, "assign", None)
+    if args.review is None and not args.clear_review and assign is None:
+        print("Error: provide --assign, --review or --clear-review.", file=sys.stderr)
         return 1
     if args.review is not None and args.clear_review:
         print("Error: --review and --clear-review are mutually exclusive.", file=sys.stderr)
@@ -1695,11 +1696,23 @@ def task_route_cmd(args) -> int:
     if not resolved_task:
         return 1
     task_id, task_path, task = resolved_task
-    if args.review:
-        harness_path = os.path.join(op_dir, "harnesses", f"{args.review}.yaml")
-        if not os.path.exists(harness_path):
-            print(f"Error: Review harness '{args.review}' does not exist in registry.", file=sys.stderr)
+    for flag, name in (("--review", args.review), ("--assign", assign)):
+        if name and not os.path.exists(os.path.join(op_dir, "harnesses", f"{name}.yaml")):
+            print(f"Error: {flag} harness '{name}' does not exist in registry.", file=sys.stderr)
             return 1
+    # Producer must not be the reviewer: routing both sides to one harness sets up
+    # the self-review that doctor reports as an error later.
+    new_assign = assign if assign is not None else task.get("assigned_harness")
+    new_review = None if args.clear_review else (
+        args.review if args.review is not None else task.get("review_harness")
+    )
+    if new_assign and new_assign == new_review:
+        print(
+            f"Error: refusing to route builder and reviewer to the same harness "
+            f"('{new_assign}'); the reviewer must be a distinct identity.",
+            file=sys.stderr,
+        )
+        return 1
     identity_policy = identity_policy_for_write(op_dir)
     if identity_policy is None:
         return 1
@@ -1710,9 +1723,13 @@ def task_route_cmd(args) -> int:
         return 1
     preflight_projection(op_dir, task_path, task)
     previous = task.get("review_harness")
-    current = None if args.clear_review else args.review
-    if previous == current:
-        print(f"Task '{task_id}' already has review harness '{current or 'None'}'.")
+    current = new_review
+    previous_assign = task.get("assigned_harness")
+    if previous == current and new_assign == previous_assign:
+        print(
+            f"Task '{task_id}' already has assigned harness '{previous_assign or 'None'}' "
+            f"and review harness '{current or 'None'}'."
+        )
         return 0
     correction_id = get_next_route_correction_id(op_dir, task_id)
     correction = {
@@ -1720,6 +1737,8 @@ def task_route_cmd(args) -> int:
         "task_id": task_id,
         "previous_review_harness": previous,
         "review_harness": current,
+        "previous_assigned_harness": previous_assign,
+        "assigned_harness": new_assign,
         "rationale": args.rationale,
         "corrected_at": get_current_utc_iso(),
         "executor": dict(exec_identity),
@@ -1729,29 +1748,40 @@ def task_route_cmd(args) -> int:
     )
     save_yaml(correction, correction_path)
 
-    history = task.get("review_harness_history") or []
-    history.append({
-        "previous": previous,
-        "current": current,
-        "corrected_at": get_current_utc_iso(),
-        "executor": dict(exec_identity),
-    })
-    task["review_harness_history"] = history
-    task["review_harness"] = current
     decisions = task.get("operator_decision") or {}
-    decisions["review_harness"] = {
-        "decision": "route-correction",
-        "rationale": args.rationale,
-        "decided_at": get_current_utc_iso(),
-        "executor": dict(exec_identity),
-    }
+    for field, prev, cur in (
+        ("review_harness", previous, current),
+        ("assigned_harness", previous_assign, new_assign),
+    ):
+        if prev == cur:
+            continue
+        history = task.get(f"{field}_history") or []
+        history.append({
+            "previous": prev,
+            "current": cur,
+            "corrected_at": get_current_utc_iso(),
+            "executor": dict(exec_identity),
+        })
+        task[f"{field}_history"] = history
+        task[field] = cur
+        decisions[field] = {
+            "decision": "route-correction",
+            "rationale": args.rationale,
+            "decided_at": get_current_utc_iso(),
+            "executor": dict(exec_identity),
+        }
     task["operator_decision"] = decisions
     corrections = task.get("route_corrections") or []
     corrections.append(f"route_corrections/{task_id}/{correction_id}.yaml")
     task["route_corrections"] = corrections
     task["updated_at"] = get_current_utc_iso()
     save_yaml(task, task_path)
-    print(f"Corrected review routing for task '{task_id}': {previous or 'None'} -> {current or 'None'}.")
+    moves = []
+    if previous_assign != new_assign:
+        moves.append(f"builder {previous_assign or 'None'} -> {new_assign or 'None'}")
+    if previous != current:
+        moves.append(f"reviewer {previous or 'None'} -> {current or 'None'}")
+    print(f"Corrected routing for task '{task_id}': {'; '.join(moves)}.")
     return 0
 
 
@@ -7876,10 +7906,13 @@ def main() -> None:
     )
 
     route_parser = subparsers.add_parser(
-        "task-route", help="Correct reviewer routing while retaining its history."
+        "task-route", help="Correct builder or reviewer routing while retaining its history."
     )
     route_parser.add_argument("--task", dest="task_id", required=True, help="Task ID.")
     route_parser.add_argument("--review", default=None, help="Replacement reviewer harness ID.")
+    route_parser.add_argument(
+        "--assign", default=None, help="Replacement assigned (builder) harness ID."
+    )
     route_parser.add_argument(
         "--clear-review", action="store_true", help="Clear the reviewer routing field."
     )
