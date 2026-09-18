@@ -2793,10 +2793,17 @@ def _review_model_for_harness(op_dir: str, reviewer: str, explicit_model: str | 
     return "openai-codex/gpt-5.6-luna"
 
 
-def _audit_review_delegation_models(op_dir: str, issues: list[str]) -> None:
+def _audit_review_delegation_models(op_dir: str, issues: list[str], audit: bool = False) -> None:
+    """Report bundles whose reviewer and model disagree.
+
+    A misrouted bundle is a past fact, not a repairable record, so many of them
+    say one thing many times. Without --audit they collapse to a single counted
+    line; the per-bundle detail stays one flag away.
+    """
     delegation_dir = os.path.join(op_dir, "review_delegations")
     if not os.path.isdir(delegation_dir):
         return
+    misrouted = []
     for path in sorted(glob.glob(os.path.join(delegation_dir, "*.yaml"))):
         bundle = load_yaml(path)
         if not isinstance(bundle, dict):
@@ -2804,9 +2811,18 @@ def _audit_review_delegation_models(op_dir: str, issues: list[str]) -> None:
         reviewer = str(bundle.get("reviewer") or "")
         model = str(bundle.get("model") or "")
         if reviewer == "grok" and not model.startswith("xai/"):
-            issues.append(
+            misrouted.append(
                 f"[Error] review delegation {os.path.basename(path)} routes Grok to {model!r}; expected xai/grok-*"
             )
+    if not misrouted:
+        return
+    if audit or len(misrouted) == 1:
+        issues.extend(misrouted)
+        return
+    issues.append(
+        f"[Error] {len(misrouted)} review delegations route Grok to a non-xai model "
+        f"(historical misrouting; rerun with --audit to list them)"
+    )
 
 
 def review_delegate_cmd(args) -> int:
@@ -5539,6 +5555,10 @@ def doctor_cmd(args) -> int:
 
     issues = []
     infos = []
+    # Claims written before --gate was expected cannot gain one honestly, so they
+    # repeat the same line dozens of times. Collected here and reported as one
+    # counted line unless --audit asks for the roll call.
+    gateless_claims: list[str] = []
 
     # MACHINE_ROLE_ENFORCEMENT_SPEC: this is deliberately a structural,
     # read-only check.  It only reads operator.yaml and counts projections.
@@ -5725,7 +5745,7 @@ def doctor_cmd(args) -> int:
             verified = (outcome == "verified") or bool(c_data.get("verification_status"))
 
             if not c_data.get("required_gate"):
-                issues.append(
+                gateless_claims.append(
                     f"[Warning] Claim {cid} ('{c_data.get('text')}') has no required_gate defined."
                 )
 
@@ -6269,7 +6289,19 @@ def doctor_cmd(args) -> int:
 
                 if metering == "tokens" and rec.get("cost_estimate_usd") is None:
                     model = rec.get("model")
-                    if model not in pricing_table:
+                    # A record with no tokens has nothing to price: warning here
+                    # only says the import found no usage, which is not a ledger
+                    # inconsistency (6 such records from the 2026-07 backfill).
+                    billable = any(
+                        (rec.get(field) or 0) > 0
+                        for field in (
+                            "tokens_in",
+                            "tokens_out",
+                            "tokens_cache_read",
+                            "tokens_cache_write",
+                        )
+                    )
+                    if model not in pricing_table and billable:
                         issues.append(f"[Warning] price table missing model {model}")
 
                 source_ref = rec.get("source_session_ref")
@@ -6359,9 +6391,19 @@ def doctor_cmd(args) -> int:
                 f"[Warning] Task {task_id} has multiple open usage sessions: {', '.join(open_usage_ids)}"
             )
 
+    audit = bool(getattr(args, "audit", False))
+    if gateless_claims:
+        if audit or len(gateless_claims) == 1:
+            issues.extend(gateless_claims)
+        else:
+            issues.append(
+                f"[Warning] {len(gateless_claims)} claims have no required_gate defined "
+                f"(nothing to re-run them against; rerun with --audit to list them)"
+            )
+
     print("=" * 80)
     print("OPERATOR DOCTOR - LEDGER CONSISTENCY REPORT")
-    _audit_review_delegation_models(op_dir, issues)
+    _audit_review_delegation_models(op_dir, issues, audit)
     print("=" * 80)
     all_msgs = infos + issues
     if all_msgs:

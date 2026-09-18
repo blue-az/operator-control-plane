@@ -2008,6 +2008,49 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertEqual(yaml.safe_load(task_file.read_text())["status"], "verified")
 
+    def test_doctor_collapses_repeated_legacy_warnings(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        created = self.run_operator(
+            "task-create", "--objective", "Legacy claims", "--id", "legacy-task", "--assign", "codex",
+        )
+        self.assertEqual(created.returncode, 0, created.stderr)
+        for n in range(3):
+            added = self.run_operator(
+                "claim-add", "--task", "legacy-task", "--type", "file_exists",
+                "--text", f"gateless claim {n}",
+            )
+            self.assertEqual(added.returncode, 0, added.stderr)
+
+        plain = self.run_operator("doctor")
+        self.assertIn("3 claims have no required_gate defined", plain.stdout)
+        self.assertIn("--audit to list them", plain.stdout)
+        self.assertNotIn("gateless claim 0", plain.stdout)
+
+        audited = self.run_operator("doctor", "--audit")
+        self.assertIn("gateless claim 0", audited.stdout)
+        self.assertIn("gateless claim 2", audited.stdout)
+        self.assertNotIn("3 claims have no required_gate", audited.stdout)
+
+    def test_doctor_skips_price_warning_when_no_tokens_were_recorded(self) -> None:
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        created = self.run_operator(
+            "task-create", "--objective", "Usage import", "--id", "usage-task", "--assign", "claude",
+        )
+        self.assertEqual(created.returncode, 0, created.stderr)
+        usage_path = Path(self.temp_dir) / ".operator" / "usage" / "2026-07-13.yaml"
+        base = {
+            "task_id": "usage-task", "harness_id": "claude", "model": "unknown",
+            "metering": "tokens", "outcome": "unknown", "cost_estimate_usd": None,
+            "started_at": "2026-07-13T07:45:16+00:00", "ended_at": "2026-07-13T07:45:16+00:00",
+        }
+        usage_path.write_text(yaml.safe_dump([
+            {**base, "usage_id": "usage-0001", "tokens_in": 0, "tokens_out": 0},
+            {**base, "usage_id": "usage-0002", "tokens_in": 1200, "tokens_out": 300},
+        ], sort_keys=False))
+
+        res = self.run_operator("doctor")
+        self.assertEqual(res.stdout.count("price table missing model unknown"), 1, res.stdout)
+
     def test_task_route_reassigns_builder_and_refuses_self_review(self) -> None:
         self.assertEqual(self.run_operator("init").returncode, 0)
         created = self.run_operator(
