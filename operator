@@ -1207,6 +1207,28 @@ def calculate_file_hash(filepath: str) -> str | None:
 
 
 def evidence_freshness_diagnostics(evidence: dict, verified: bool) -> tuple[list[str], list[str]]:
+    """Freshness of one evidence record, with superseded records demoted.
+
+    A superseded record was replaced by a later verified run on the same claim
+    (evidence-attach --supersedes writes the pointer and validates it). Its own
+    bytes and fingerprint are never touched, so a drifted source on it is
+    history, not an open inconsistency: it is reported as [Info] rather than
+    counted. Anything that is still load-bearing keeps its [Error].
+    """
+    issues, infos = _evidence_freshness_raw(evidence, verified)
+    superseded = evidence.get("superseded_by")
+    replacement = superseded.get("evidence_id") if isinstance(superseded, dict) else superseded
+    if not replacement or not issues:
+        return issues, infos
+    evidence_id = evidence.get("evidence_id", "unknown")
+    demoted = [
+        f"[Info] {msg.split('] ', 1)[-1]} (superseded by {replacement}; not counted)"
+        for msg in issues
+    ]
+    return [], infos + demoted
+
+
+def _evidence_freshness_raw(evidence: dict, verified: bool) -> tuple[list[str], list[str]]:
     issues = []
     infos = []
     evidence_id = evidence.get("evidence_id", "unknown")
@@ -2633,6 +2655,37 @@ def _evidence_attach_cmd_impl(
     if claim:
         preflight_projection(op_dir, claim_path, claim)
 
+    # --supersedes marks an earlier record as replaced by this one. It never
+    # edits that record's bytes or fingerprint; it only adds a pointer, and only
+    # when this attach is itself a verification of the same claim. Otherwise an
+    # unverified write could retire a drifted record and silence doctor.
+    supersedes_id = getattr(args, "supersedes", None)
+    superseded_path = None
+    superseded_record = None
+    if supersedes_id:
+        if args.status != "verified":
+            print(
+                "Error: --supersedes requires --status verified; only a fresh verified run "
+                "may retire an earlier record.",
+                file=sys.stderr,
+            )
+            return 1
+        superseded_path = os.path.join(op_dir, "evidence", task_id, f"{supersedes_id}.yaml")
+        superseded_record = load_yaml(superseded_path)
+        if not isinstance(superseded_record, dict):
+            print(
+                f"Error: --supersedes '{supersedes_id}' is not an evidence record on task '{task_id}'.",
+                file=sys.stderr,
+            )
+            return 1
+        if superseded_record.get("claim_id") != claim_id:
+            print(
+                f"Error: --supersedes '{supersedes_id}' belongs to claim "
+                f"{superseded_record.get('claim_id')}, not {claim_id}.",
+                file=sys.stderr,
+            )
+            return 1
+
     evidence_id = get_next_evidence_id(op_dir, task_id)
 
     if source_path:
@@ -2714,6 +2767,8 @@ def _evidence_attach_cmd_impl(
         evidence_data["diff_base"] = diff_base
     if diff_stat:
         evidence_data["diff_stat"] = diff_stat
+    if supersedes_id:
+        evidence_data["supersedes"] = supersedes_id
     crystal_metadata = getattr(args, "crystal_metadata", None)
     if isinstance(crystal_metadata, dict):
         for key, value in crystal_metadata.items():
@@ -2722,6 +2777,15 @@ def _evidence_attach_cmd_impl(
 
     ev_path = os.path.join(op_dir, "evidence", task_id, f"{evidence_id}.yaml")
     save_yaml(evidence_data, ev_path)
+
+    if superseded_record is not None:
+        superseded_record["superseded_by"] = {
+            "evidence_id": evidence_id,
+            "superseded_at": utc_now,
+            "executor": dict(exec_identity),
+        }
+        save_yaml(superseded_record, superseded_path)
+        print(f"Marked evidence '{supersedes_id}' superseded by '{evidence_id}'.")
 
     task["evidence"] = task.get("evidence") or []
     if path_or_url not in task["evidence"]:
@@ -8276,6 +8340,13 @@ def main() -> None:
         choices=["verified", "false", "quarantined"],
         default=None,
         help="Update associated claim status.",
+    )
+    evidence_parser.add_argument(
+        "--supersedes",
+        default=None,
+        help="Evidence ID on the same claim that this verified run replaces. The earlier "
+        "record keeps its bytes and fingerprint and gains a superseded_by pointer; doctor "
+        "stops counting its drifted source. Requires --status verified.",
     )
     evidence_parser.add_argument(
         "--verdict", "-v", default=None, help="Verification verdict text for the claim."

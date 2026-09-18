@@ -2008,6 +2008,48 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertEqual(yaml.safe_load(task_file.read_text())["status"], "verified")
 
+    def test_evidence_supersede_retires_a_drifted_record(self) -> None:
+        gate, evidence = self.setup_p2_enforced_claim()
+        builder = {"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"}
+        verifier = {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"}
+        op_path = Path(self.temp_dir) / ".operator"
+
+        first = self.run_operator(
+            "evidence-attach", str(evidence), "--claim", "claim-0001", "--type", "test_output",
+            "--status", "verified", "--verified-by", "claude", env=verifier,
+        )
+        self.assertEqual(first.returncode, 0, first.stderr)
+        evidence.write_text("the source moved on after that run")
+        drifted = self.run_operator("doctor", env=builder)
+        self.assertIn("local source content changed since attachment", drifted.stdout)
+        self.assertIn("Total consistency issues found", drifted.stdout)
+
+        # an unverified attach may not retire a record
+        refused = self.run_operator(
+            "evidence-attach", str(evidence), "--claim", "claim-0001", "--type", "test_output",
+            "--supersedes", "evidence-0001", env=builder,
+        )
+        self.assertEqual(refused.returncode, 1, refused.stdout)
+        self.assertIn("--supersedes requires --status verified", refused.stderr)
+
+        second = self.run_operator(
+            "evidence-attach", str(evidence), "--claim", "claim-0001", "--type", "test_output",
+            "--status", "verified", "--verified-by", "claude", "--supersedes", "evidence-0001",
+            env=verifier,
+        )
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertIn("superseded by 'evidence-0002'", second.stdout)
+
+        old = yaml.safe_load((op_path / "evidence" / "p2-task" / "evidence-0001.yaml").read_text())
+        self.assertEqual(old["superseded_by"]["evidence_id"], "evidence-0002")
+        # the retired record keeps the fingerprint it was verified against
+        self.assertEqual(old["executor"]["uid"], 1002)
+        self.assertIsNotNone(old["hash"])
+
+        after = self.run_operator("doctor", env=builder)
+        self.assertIn("superseded by evidence-0002; not counted", after.stdout)
+        self.assertNotIn("[Error] Evidence evidence-0001 local source", after.stdout)
+
     def test_doctor_collapses_repeated_legacy_warnings(self) -> None:
         self.assertEqual(self.run_operator("init").returncode, 0)
         created = self.run_operator(
