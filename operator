@@ -55,6 +55,7 @@ MUTATING_COMMANDS = {
     "task-route",
     "claim-add",
     "evidence-attach",
+    "evidence-discard",
     "crystal-attach",
     "crystal-import",
     "crystal-bridge",
@@ -1216,16 +1217,18 @@ def evidence_freshness_diagnostics(evidence: dict, verified: bool) -> tuple[list
     counted. Anything that is still load-bearing keeps its [Error].
     """
     issues, infos = _evidence_freshness_raw(evidence, verified)
+    if not issues:
+        return issues, infos
     superseded = evidence.get("superseded_by")
     replacement = superseded.get("evidence_id") if isinstance(superseded, dict) else superseded
-    if not replacement or not issues:
+    discarded = evidence.get("discarded")
+    if replacement:
+        note = f"superseded by {replacement}"
+    elif isinstance(discarded, dict):
+        note = f"artifact discarded {str(discarded.get('discarded_at'))[:10]}"
+    else:
         return issues, infos
-    evidence_id = evidence.get("evidence_id", "unknown")
-    demoted = [
-        f"[Info] {msg.split('] ', 1)[-1]} (superseded by {replacement}; not counted)"
-        for msg in issues
-    ]
-    return [], infos + demoted
+    return [], infos + [f"[Info] {msg.split('] ', 1)[-1]} ({note}; not counted)" for msg in issues]
 
 
 def _evidence_freshness_raw(evidence: dict, verified: bool) -> tuple[list[str], list[str]]:
@@ -2062,6 +2065,72 @@ def task_show_cmd(args) -> int:
     else:
         print("  (None captured)")
     print("=" * 80)
+    return 0
+
+
+def evidence_discard_cmd(args) -> int:
+    """Record that an evidence artifact was intentionally thrown away.
+
+    The ledger otherwise treats every attached file as permanent, so deleting an
+    experiment leaves a missing-snapshot error no one can clear. Discarding keeps
+    the record and its fingerprint and says who discarded it and why; doctor then
+    reports it as history instead of counting it. It is an owner act, not a
+    verification, and it refuses to strip the only evidence off a verified claim.
+    """
+    op_dir = find_operator_dir()
+    if not op_dir:
+        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        return 1
+
+    resolved_task = resolve_task_record(op_dir, args.task_id)
+    if not resolved_task:
+        return 1
+    task_id, _, _ = resolved_task
+
+    ev_path = os.path.join(op_dir, "evidence", task_id, f"{args.evidence_id}.yaml")
+    record = load_yaml(ev_path)
+    if not isinstance(record, dict):
+        print(
+            f"Error: '{args.evidence_id}' is not an evidence record on task '{task_id}'.",
+            file=sys.stderr,
+        )
+        return 1
+    if isinstance(record.get("discarded"), dict):
+        print(f"Evidence '{args.evidence_id}' is already recorded as discarded.")
+        return 0
+
+    identity_policy = identity_policy_for_write(op_dir)
+    if identity_policy is None:
+        return 1
+    exec_identity = get_executor_identity()
+    if identity_policy["mode"] == "enforced" and not require_executor_role(
+        identity_policy, exec_identity, "operator", "discard evidence"
+    ):
+        return 1
+
+    claim_id = record.get("claim_id")
+    if claim_id:
+        resolved_claim = resolve_claim_record(op_dir, claim_id)
+        if resolved_claim:
+            _, claim = resolved_claim
+            refs = [r for r in (claim.get("evidence_refs") or []) if r]
+            this_ref = f"evidence/{task_id}/{args.evidence_id}.yaml"
+            remaining = [r for r in refs if r != this_ref]
+            if claim.get("verification_status") is True and not remaining:
+                print(
+                    f"Error: refusing to discard the only evidence on verified claim {claim_id}; "
+                    "withdraw the verification first (evidence-attach --status quarantined).",
+                    file=sys.stderr,
+                )
+                return 1
+
+    record["discarded"] = {
+        "discarded_at": get_current_utc_iso(),
+        "reason": args.reason,
+        "executor": dict(exec_identity),
+    }
+    save_yaml(record, ev_path)
+    print(f"Recorded evidence '{args.evidence_id}' as discarded: {args.reason}")
     return 0
 
 
@@ -8355,6 +8424,16 @@ def main() -> None:
         "--verified-by", default=None, help="Actor who verified the claim."
     )
 
+    discard_parser = subparsers.add_parser(
+        "evidence-discard",
+        help="Record that an evidence artifact was intentionally thrown away.",
+    )
+    discard_parser.add_argument("evidence_id", help="Evidence ID to mark discarded.")
+    discard_parser.add_argument("--task", dest="task_id", required=True, help="Task ID.")
+    discard_parser.add_argument(
+        "--reason", required=True, help="Why the artifact was discarded (recorded verbatim)."
+    )
+
     # operator review delegate
     review_delegate_parser = subparsers.add_parser(
         "review-delegate",
@@ -8911,6 +8990,7 @@ def main() -> None:
         "claim-show": claim_show_cmd,
         "claim-list": claim_list_cmd,
         "evidence-attach": evidence_attach_cmd,
+        "evidence-discard": evidence_discard_cmd,
         "review-delegate": review_delegate_cmd,
         "crystal-attach": crystal_attach_cmd,
         "crystal-import": crystal_import_cmd,

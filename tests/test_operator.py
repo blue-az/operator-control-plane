@@ -2050,6 +2050,83 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertIn("superseded by evidence-0002; not counted", after.stdout)
         self.assertNotIn("[Error] Evidence evidence-0001 local source", after.stdout)
 
+    def test_evidence_discard_records_a_thrown_away_artifact(self) -> None:
+        _, evidence = self.setup_p2_enforced_claim()
+        operator_uid = {"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"}
+        verifier = {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"}
+        self.write_identity_registry(
+            "enforced",
+            {
+                1001: {"name": "codex", "roles": ["builder", "operator"]},
+                1002: {"name": "claude", "roles": ["verifier"]},
+            },
+        )
+        op_path = Path(self.temp_dir) / ".operator"
+        experiment = Path(self.temp_dir) / "experiment.txt"
+        experiment.write_text("an experiment worth keeping for now")
+
+        for path in (evidence, experiment):
+            res = self.run_operator(
+                "evidence-attach", str(path), "--claim", "claim-0001", "--type", "test_output",
+                "--status", "verified", "--verified-by", "claude", env=verifier,
+            )
+            self.assertEqual(res.returncode, 0, res.stderr)
+
+        # the retained snapshot is what goes missing when the experiment is dropped
+        snapshot = Path(
+            yaml.safe_load((op_path / "evidence" / "p2-task" / "evidence-0002.yaml").read_text())[
+                "path_or_url"
+            ]
+        )
+        snapshot.unlink()
+        missing = self.run_operator("doctor", env=operator_uid)
+        self.assertIn("[Error] Evidence evidence-0002 retained snapshot is missing", missing.stdout)
+
+        refused = self.run_operator(
+            "evidence-discard", "evidence-0002", "--task", "p2-task",
+            "--reason", "nope", env=verifier,
+        )
+        self.assertEqual(refused.returncode, 1, refused.stdout)
+        self.assertIn("does not have the operator role", refused.stderr)
+
+        done = self.run_operator(
+            "evidence-discard", "evidence-0002", "--task", "p2-task",
+            "--reason", "experiment thrown away; not what I wanted", env=operator_uid,
+        )
+        self.assertEqual(done.returncode, 0, done.stderr)
+        record = yaml.safe_load((op_path / "evidence" / "p2-task" / "evidence-0002.yaml").read_text())
+        self.assertEqual(record["discarded"]["reason"], "experiment thrown away; not what I wanted")
+        self.assertEqual(record["discarded"]["executor"]["uid"], 1001)
+        self.assertIsNotNone(record["hash"])
+
+        after = self.run_operator("doctor", env=operator_uid)
+        self.assertIn("artifact discarded", after.stdout)
+        self.assertNotIn("[Error] Evidence evidence-0002 retained snapshot is missing", after.stdout)
+
+    def test_evidence_discard_refuses_to_empty_a_verified_claim(self) -> None:
+        _, evidence = self.setup_p2_enforced_claim()
+        operator_uid = {"OPERATOR_TEST_UID": "1001", "OPERATOR_TEST_SENTINEL": "1"}
+        verifier = {"OPERATOR_TEST_UID": "1002", "OPERATOR_TEST_SENTINEL": "1"}
+        self.write_identity_registry(
+            "enforced",
+            {
+                1001: {"name": "codex", "roles": ["builder", "operator"]},
+                1002: {"name": "claude", "roles": ["verifier"]},
+            },
+        )
+        attached = self.run_operator(
+            "evidence-attach", str(evidence), "--claim", "claim-0001", "--type", "test_output",
+            "--status", "verified", "--verified-by", "claude", env=verifier,
+        )
+        self.assertEqual(attached.returncode, 0, attached.stderr)
+
+        res = self.run_operator(
+            "evidence-discard", "evidence-0001", "--task", "p2-task",
+            "--reason", "cleaning up", env=operator_uid,
+        )
+        self.assertEqual(res.returncode, 1, res.stdout)
+        self.assertIn("only evidence on verified claim claim-0001", res.stderr)
+
     def test_doctor_collapses_repeated_legacy_warnings(self) -> None:
         self.assertEqual(self.run_operator("init").returncode, 0)
         created = self.run_operator(
