@@ -1,0 +1,2 @@
+{"event":"luna-staged-repeat","reason":"operator-directed repeat after first-attempt variability","prior":"4/6","protocol":"planner-executor-compact-synthesis","trials":3}
+{"event":"grader-correction","detail":"Luna correctly stated no synchronized evidence; broadened missing-state semantic acceptance","old":"explicit keywords","new":"no synchronized evidence/no linked data accepted"}

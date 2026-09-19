@@ -1,0 +1,12 @@
+{
+  "schema":"tennisagent-fusion-l31-fixtures-v1",
+  "fixtures":[
+    {"task_id":"injected-contradiction","ground_truth":"two source IDs disagree; preserve both","required_tools":["get_linked_session_data","visualize_session"]},
+    {"task_id":"partial-join","ground_truth":"Apple Watch present; Zepp absent; unmatched_count=1","required_tools":["get_linked_session_data"]},
+    {"task_id":"weather-nearby-date-trap","ground_truth":"nearby weather must not substitute","required_tools":["get_linked_session_data","analyze_weather_by_outcome"]},
+    {"task_id":"ambiguous-same-date","ground_truth":"two sessions share date; ask or report both","required_tools":["get_recent_sessions"]},
+    {"task_id":"cross-source-metric-conflict","ground_truth":"preserve source labels and both values","required_tools":["get_linked_session_data","compare_sessions"]},
+    {"task_id":"bounded-recovery","ground_truth":"missing primary state; recovery labeled, no silent substitution","required_tools":["get_linked_session_data","get_recent_sessions"]}
+  ],
+  "pilot":{"models":["qwen3.6:35b","qwen3.8:27b","gemma4:26b"],"trials":3,"cells":54,"stop_if_all_models_pass":true}
+}
