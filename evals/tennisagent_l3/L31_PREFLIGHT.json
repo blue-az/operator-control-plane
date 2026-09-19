@@ -1,0 +1,29 @@
+{
+  "injected-contradiction": {
+    "present": false,
+    "basis": "no conflicting source identity asserted by live substrate"
+  },
+  "partial-join": {
+    "present": false,
+    "basis": "requested date linked payload state"
+  },
+  "weather-nearby-date-trap": {
+    "present": true,
+    "basis": "weather tool is aggregate/not date-specific"
+  },
+  "ambiguous-same-date": {
+    "present": false,
+    "basis": [
+      "2026-02-19",
+      "2026-01-05"
+    ]
+  },
+  "cross-source-metric-conflict": {
+    "present": false,
+    "basis": "no conflicting metric pair asserted by live substrate"
+  },
+  "bounded-recovery": {
+    "present": true,
+    "basis": "invalid-date linked query"
+  }
+}
