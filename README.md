@@ -8,8 +8,9 @@ Multi-agent and autonomous coding workflows run on trust: an agent claims it fin
 that claim gets merged, handed off, or billed as if it were fact. `operator` is a small, local
 ledger that makes those claims checkable instead of assumed. It enforces a
 **narration-vs-execution partition**: an agent's *claim* ("I did X, it passes") only counts once it
-has *evidence* attached and is *verified by a different identity* — not the identity that made the
-claim.
+has *evidence* attached and a *verification* recorded against it. In enforced mode that verification
+must come from a different OS identity than the one that made the claim. In the default `single_user`
+mode it is recorded as advisory, because one OS user can enter any reviewer's name.
 
 The `operator` CLI records tasks → claims → evidence → verifications as YAML projections under
 `.operator/`, preserves every trust-relevant write in an append-only SQLite event history, binds
@@ -18,7 +19,8 @@ ships a `doctor` consistency checker that fails closed.
 
 Only an enforced verification by a registered verifier OS UID distinct from the claim author's UID is
 recorded as `uid_isolated`. Same-UID and default `single_user` verification still work but are
-explicitly advisory — no self-grading.
+recorded as `advisory`, never `uid_isolated` — treat an advisory verification as the builder's own
+assertion, not an independent check.
 
 ## Is this a fleet harness?
 
@@ -84,12 +86,13 @@ Checked-in snapshots for this repo's Pi extension work live in [`docs/boards/`](
 
 `/op:project <prefix>` remains the in-Pi text dashboard. The HTML boards are the inspectable map.
 
-## P3 broker component (not installed)
+## P3 broker component
 
 Issue #4 adds a standalone `operator-broker` process, external authority store, evidence CAS, receipts,
 and projection snapshots. It is isolated from the existing `operator` CLI: it does not read or promote
-`.operator` state, and development-fixture receipts confer no P3 authority on repo ledgers. Protected
-policy/service installation, CLI integration, and enrollment remain separate work.
+`.operator` state, and development-fixture receipts confer no P3 authority on repo ledgers. The broker has
+since been installed as a root-managed service (P3b, below), and the CLI now resolves enrollment
+against it; see that section for what enrollment does and does not change.
 
 ```bash
 # Test/development fixture only; use throwaway absolute paths.
@@ -106,8 +109,8 @@ and issue-boundary contracts.
 
 ## Commands
 
-The `operator` CLI exposes 23 subcommands across the task → claim → evidence → verification →
-session → usage lifecycle. Run `./operator <command> --help` for full flags.
+The `operator` CLI covers the task → claim → evidence → verification → session → usage
+lifecycle. Run `./operator --help` for the command list and `./operator <command> --help` for flags.
 
 **Setup** — `init` creates the `.operator/` ledger in the current repo. Re-running it on an existing
 YAML-only ledger baselines those records into SQLite without changing their visible IDs or files.
@@ -267,9 +270,12 @@ root-controlled paths, creates SQLite only after dropping to the broker UID, and
 generation-one install, append-only rotation, terminal revocation, audit, and conservative privilege
 preflight.
 
-This is still not repo CLI integration. `operator` and existing `.operator` ledgers do not consult
-the external authority yet. The service is installed but not started or enabled, and real-host privilege
-proof remains issue #7. Initial installation must execute a root-owned staged copy of
+The `operator` CLI resolves enrollment against this authority through a fixed, root-owned registry.
+In an enrolled repository the broker is the authority: `task-transition` and `authority-reconcile` run
+only there, `task-route` is refused in favour of the broker, and `evidence-attach` requires `--claim`.
+In an unenrolled repository the CLI keeps using local `.operator` state and none of this changes its
+trust properties. As of September 2026 the boundary has been exercised against a dogfood ledger only;
+no production ledger is enrolled. Initial installation must execute a root-owned staged copy of
 `operator-admin`; its privileged wrapper intentionally refuses a user-writable checkout.
 
 ## Local-lane task contract
@@ -332,8 +338,9 @@ unverified claims are worthless):
   is damaged or removed, but `.operator/` remains gitignored and has no off-machine backup. A disk
   loss can still remove both the event history and copied evidence.
 - **The repo CLI policy gate is self-amendable.** Any agent with write access to the local config can
-  weaken the gate it is supposed to be bound by. The standalone P3 broker component is not yet installed
-  or integrated, so it does not remove this limitation from current `.operator` ledgers.
+  weaken the gate it is supposed to be bound by. The P3 broker removes this limitation only for enrolled
+  repositories, and no production ledger is enrolled yet, so it still applies to current `.operator`
+  ledgers.
 - **Evidence binding.** Local attachment preserves both the original source fingerprint and a retained
   snapshot fingerprint, so later byte drift is visible. Remote evidence has no bytes to recompute and is
   reported as uncheckable. Prefer binding a *re-runnable structural test* over a captured blob or a
