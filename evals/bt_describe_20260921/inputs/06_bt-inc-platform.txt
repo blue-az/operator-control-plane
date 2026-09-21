@@ -1,0 +1,2486 @@
+# SOURCE: https://bulkheadtau.com/bulkhead-tau/reflect/bt-inc-platform.html
+# captured 2026-09-21, text extracted from the live page
+
+BT Inc Platform Owner Manual 
+
+ BT Inc Platform Owner Manual
+
+ Owner’s Manual for
+blue-az/bt-inc-platform
+
+ 6 generated chapters from the reviewed repository
+snapshot 
+
+ Source:
+blue-az/bt-inc-platform:main@9950f2185f82384943803e8fc489193ae300ac5e
+
+ Synthetic / Safe Mode
+Boundary
+
+ bt-inc-platform is a synthetic multi-domain conglomerate
+used to probe Reflect’s product-fit bar. BT Inc. is a
+fictional cross-sector investment and equity research firm. The manual
+should be read as a truthful map of a synthetic platform, not as
+evidence that a real operating company or unified production cockpit
+exists.
+
+ The generated manual passes the primary honesty check: it does not
+present the fiction as operational reality. It repeatedly keeps the
+workspace desk-first, says the shared shell/router is unverified, and
+marks the portfolio desk as Safe Mode with sanitized/mock data rather
+than live holdings.
+
+ Owner Quickstart
+
+ Useful local checks:
+
+ python3 -m pytest desks/osat_semiconductors/tests/test_variation4_hitl.py -q
+python3 desks/medtech_intelligence/p0_generate_minimal_workflows.py
+python3 desks/portfolio_mgmt/p0_generate_minimal_workflows.py 
+
+ Repository boundaries:
+
+ Large SQLite databases are intentionally excluded.
+
+ Portfolio data is sanitized Safe Mode: no live holdings, account
+numbers, transactions, or balances.
+
+ Medtech, semiconductor, OSAT, industrials, trading, and portfolio
+desks are separate desk families.
+
+ Shared cockpit/router language is aspirational until verified in
+live code.
+
+ Recent Additions Since
+The Reflect Scan
+
+ OSAT advisory score history now fails closed when the JSON file is
+corrupt or not a list.
+
+ generate_advisory_hypotheses returns
+ status=blocked with
+ reason=score_history_unreadable when score history cannot
+be trusted.
+
+ list_advisory_hypothesis_scores also reports a blocked
+gate state for unreadable score history.
+
+ desks/osat_semiconductors/tests/test_variation4_hitl.py 
+now loads the local BT Inc. OSAT tool module by file path rather than
+accidentally importing Project Phoenix’s external
+ domains.xAmkor copy.
+
+ What This Repository
+Actually Owns
+
+ This repository does not read like one neat app shell. The
+reviewed evidence shows separate desk families: medtech with a
+deterministic analyst route, semiconductors with tiered variations, OSAT
+as a later desk chapter, and portfolio in Safe Mode on sanitized
+snapshot data. This chapter gives you the first trustworthy map of those
+parts, not a promise that they all sit behind one verified shared
+cockpit. 
+
+ One-Minute Snapshot
+
+ This repository does not read like one neat app shell. The reviewed
+evidence shows separate desk families: medtech with a deterministic
+analyst route, semiconductors with tiered variations, OSAT as a later
+desk chapter, and portfolio in Safe Mode on sanitized snapshot data.
+This chapter gives you the first trustworthy map of those parts, not a
+promise that they all sit behind one verified shared cockpit.
+
+ That matters because the live runtime evidence is narrower than the
+top-level docs suggest. The shared router idea was not verified in the
+reviewed runtime, so this book starts from what the code-backed work
+does today and keeps the unproven parts clearly marked for you to
+confirm.
+
+ What You Should Be Able To
+Explain
+
+ Explain why the manual is organized around separate desk families
+instead of one verified shared shell.
+
+ Name the main desk families and know which later chapters own the
+deeper workflow detail.
+
+ Separate analyst question-answering from operator refresh and
+maintenance work.
+
+ Recognize where capability changes by variation tier and where Safe
+Mode changes the meaning of outputs.
+
+ State the biggest evidence gaps before treating the repository as
+complete product truth.
+
+ Read the Product as Separate
+Desks
+
+ Start with desks, not a shell
+
+ Treat the workspace as a set of desk families with their own
+boundaries. The reviewed runtime evidence supports desk-local
+SQLite-backed surfaces, but it does not verify the single shared shell
+or router that the top-level documents imply. For the owner, that
+changes the default question: do not ask, “What does the whole app do?”
+first. Ask, “What does this desk prove on its own?” That is the safer
+way to read the repository until a common front door is confirmed in
+live behavior.
+
+ This matters because a unified shell would suggest one product
+contract, one navigation model, and one shared tool bundle. The evidence
+does not support that assumption. What it supports is a collection of
+desks that can be reviewed, explained, and bounded separately. The
+manual should therefore organize around desk families, and later
+chapters should be read as desk-specific evidence rather than as
+interchangeable slices of one platform.
+
+ Use variation as the second
+axis
+
+ Once the desk is fixed, variation becomes the next comparison unit.
+Some desks do not change by a single flat bundle of tools; they change
+by tier or variation, and that variation can materially alter what the
+desk can do. Semiconductors is the clearest example of that pattern: it
+is organized into eight variation families, so the owner should think in
+terms of desk plus variation, not desk alone. A variation is not just a
+cosmetic label. It is part of the product shape.
+
+ The consequence for the owner is practical. If you compare two
+semiconductors variations as if they were the same package, you will
+miss real capability differences. The same is true of portfolio, where
+the tool set grows cumulatively rather than being replaced wholesale.
+That means later variations add to earlier ones instead of resetting the
+desk into a new identity. The mental model to carry forward is simple:
+some desks have one stable role, while others expose that role through
+staged capability layers.
+
+ Keep Portfolio separate
+
+ Portfolio should stay mentally separate as a sanitized Safe Mode
+desk. The reviewed evidence marks it as Safe Mode and snapshot-bounded,
+so its outputs are best read as mock portfolio logic, not live holdings
+truth. That boundary is important because it prevents the owner from
+overreading portfolio results as if they were current account state. The
+desk can still be useful for bounded research and comparison, but it
+does so inside a controlled frame.
+
+ Medtech and semiconductors are the best first exemplars because they
+make the desk model visible from two different angles. Medtech is the
+clean anchor for a desk whose analyst path is distinct from maintenance
+work, while semiconductors is the clearest anchor for tiered variation.
+Portfolio then supplies the cautionary case: a desk can be real, useful,
+and deliberately bounded at the same time. Read those three together and
+the repository becomes easier to hold in one head: separate desks,
+variation where capability changes, and Safe Mode where the evidence
+says outputs are intentionally constrained.
+
+ Figure: The evidence supports a desk-first map, not
+one verified shared front door. That keeps the owner from treating the
+repository like a single cockpit before the shared shell is actually
+proven in live behavior.
+
+flowchart TD
+ A[Reviewed runtime] --> B[Separate desk families]
+ B --> C[Medtech desk]
+ B --> D[Semiconductor desk]
+ B --> E[Portfolio desk]
+ A -.-> F[Shared shell and router not yet proved]
+ B -.-> F
+
+ The reviewed runtime points to separate desk families rather than one
+confirmed shared shell. Medtech, semiconductors, and portfolio sit under
+a desk-first map, while the shared shell and router remain unproven. The
+consequence for the owner is that navigation should be read desk by desk
+until a common front door is verified.
+
+ How the Main Desks Behave
+
+ Analyst work stays read-only
+
+ The medtech desk draws a hard line between answering questions and
+changing data. In the analyst route, prompts are deterministically sent
+into one of six analytical tools, and those tools only read from the
+local database. That means a request such as “show the device mix by
+segment” can be answered without opening any write path at all.
+
+ For the owner, the consequence is practical: analyst research is safe
+to treat as read-only behavior, while maintenance work belongs to a
+separate path that can still write device records. The boundary matters.
+The evidence supports the split inside this desk package, not a blanket
+promise that every medtech-related operation is read-only in every
+context. If a separate import job updates the device list, that is
+maintenance work, not analyst answering.
+
+ Refreshes can leave
+partial snapshots
+
+ The refresh paths in semiconductors and xAmkor are ordered, but they
+are not atomic. They normalize first, then pull from upstream sources,
+and only after that do they rebuild the local database from snapshot
+files. Individual failures do not stop the whole chain, and a warning
+during one source pull does not necessarily cancel the later
+rebuild.
+
+ That changes what a completed run means for the owner. A finished
+refresh can still leave a partial snapshot: some sources may have
+updated while others did not. That is better than pretending the whole
+workspace either fully succeeded or fully failed, because the output
+tells you how far the run got. The limit is equally important: the
+evidence shows best-effort behavior, not a guarantee that every run
+leaves a complete, current, all-or-nothing result. In practice, a
+morning refresh might update most tickers, skip one failing source, and
+still rebuild the desk so analysts can keep working from a usable
+partial snapshot instead of waiting for perfection.
+
+ Safe Mode bounds portfolio
+outputs
+
+ Portfolio is deliberately not presented as live holdings truth. It
+runs in Safe Mode on sanitized snapshot data, with a local portfolio
+database underneath. Mechanically, that means the desk is designed to
+produce bounded research outputs from a controlled snapshot, not to
+mirror a real account in real time.
+
+ The owner consequence is straightforward: portfolio outputs can
+support mock portfolio logic and research workflows, but they should not
+be used as if they were live positions, balances, or account state. The
+boundary is the whole point of the mode. The evidence establishes the
+safe, sanitized snapshot frame; it does not establish freshness,
+completeness, or live market or account parity. If a report shows a
+holding count after the market has moved, that number belongs to the
+snapshot the desk was built from, not to a live trading account.
+
+ Capability
+changes with the desk and the tier
+
+ The repository does not behave like one flat tool bundle. Capability
+changes by desk, and within some desks by variation tier. Semiconductors
+is explicitly tiered, with later variations adding more specialized work
+instead of just repeating the same base package, and portfolio’s tool
+set grows cumulatively as the variation number rises.
+
+ That matters because the owner cannot assume a tool seen in one desk
+or one variation is available everywhere else. A plain research view
+might exist in one tier while another tier adds comparison,
+write-and-verify, or export-oriented capabilities. The boundary is that
+these differences are desk-local and tier-local; the evidence does not
+support a single universal capability ladder across the whole workspace.
+In practice, if an analyst asks for a specialized output in a lower tier
+and it is missing, that is not necessarily a platform failure. It may
+simply be a capability that only exists in a later variation of that
+desk.
+
+ Figure: The read-only promise belongs to the analyst
+route, not the whole desk package. That means research can be trusted as
+non-destructive while separate maintenance work still has write power
+over device records.
+
+flowchart TD
+ subgraph R[Read-only analyst path]
+ A[Analyst prompt] --> B[Six analytical tools]
+ B --> C[Read-only answers]
+ end
+ subgraph W[Separate maintenance path]
+ D[Import job] --> E[Writes device records]
+ end
+ C --> F[Device data]
+ E --> F
+
+ Medtech has two separate paths. The analyst prompt goes through six
+analytical tools and returns read-only answers from device data. A
+separate import job can write device records outside that analyst route.
+The consequence is that only the analyst path should be treated as
+read-only.
+
+ Figure: Refresh is ordered but best-effort, so
+completion does not guarantee completeness. The owner should expect a
+usable result that can still be partial when one source pull fails along
+the way.
+
+flowchart LR
+ A[Start refresh] --> B[Normalize first]
+ B --> C[Pull one source]
+ C --> D[Pull another source]
+ C -.-> E[One source can fail]
+ D -.-> E
+ D --> F[Rebuild from snapshots]
+ E --> F
+ F --> G[Usable but possibly partial snapshot]
+
+ A refresh starts by normalizing, then pulls sources one by one, and
+finishes by rebuilding from snapshots. If one source fails, the chain
+can still continue instead of stopping immediately. The consequence is
+that a finished refresh can still leave a partial but usable
+snapshot.
+
+ What the Reviewed
+Evidence Locks Down
+
+ The reviewed runtime sets a narrower ceiling than the top-level docs
+suggest. What is actually verified is a desk-first workspace with
+desk-local SQLite services, not a proved single shared shell or router.
+That matters because this section is about evidence, not aspiration: the
+owner can trust the live surface only where the runtime itself was
+observed, and should keep any presumed common front door in the
+unverified bucket until it is seen in live code.
+
+ Verified Boundary Map
+
+ Read the table as a boundary map, not a feature list. It separates
+what the reviewed evidence proves from what it does not, so the owner
+can tell which parts of the repository are safe to treat as live truth
+and which parts remain provisional.
+
+ Evidence area 
+ Verified live shape 
+ What is not verified 
+ Owner takeaway 
+
+ Navigation surface 
+ Desk-local SQLite services are the live surface the evidence
+supports. 
+ A single shared shell or router has not been proved in the reviewed
+runtime. 
+ Treat the repository as desk-first until a common front door is
+demonstrated. 
+
+ Medtech analyst route 
+ The analyst path is deterministic and read-only, using six
+analytical tools and read-only database queries; separate maintenance
+jobs can still write device records. 
+ The analyst route is not a general write path, and write support
+outside it is not the same thing as analyst research. 
+ Trust medtech research outputs as read-only, while keeping imports
+and maintenance separate. 
+
+ Semiconductors 
+ The desk is explicitly organized into eight variation families. 
+ It is not verified that all variations expose the same tools or that
+tiering is cosmetic. 
+ Expect capability to change by variation, not by one flat
+bundle. 
+
+ Portfolio 
+ Variation tiers are cumulative at 33, 42, 53, and 60 tools, and the
+desk runs in Safe Mode with sanitized data. 
+ This is not verified as live holdings data or as a flat tool
+registry across tiers. 
+ Use the counts to compare tier growth, but keep the desk bounded as
+sanitized snapshot work. 
+
+ What Each Boundary Means
+
+ Medtech is the clearest proof of how a desk-local path behaves when
+the evidence is tight. The analyst route is deterministic: when a prompt
+is recognized, the system routes it through one of six analytical tools,
+and those tools issue read-only queries rather than changing the
+underlying data. The consequence for the owner is practical: research
+answers are meant to be stable and non-destructive, so the analyst can
+ask questions without risking accidental mutation through the research
+path. The boundary is just as important. The evidence does not say the
+medtech desk has no write capability at all; it says write-oriented
+maintenance jobs sit outside the analyst route. A concrete example is an
+import job that updates device records while the analyst experience
+remains read-only. If the database is missing or a prompt is not
+recognized, the analyst path fails instead of improvising, which is
+exactly the kind of bounded behavior an owner can plan around.
+
+ Semiconductors is the opposite of a flat bundle. The evidence says
+the desk is explicitly grouped into eight variation families, which
+means capability is packaged by variation rather than released as one
+uniform set. The mechanism here is simple: the desk presents a
+progression of variants, and the reviewed modules line up with that
+progression. For the owner, that changes how capability should be read.
+A baseline variation and a later variation are not just different labels
+on the same surface; they can carry different tool sets and different
+levels of depth. The boundary is that the evidence proves the tiering
+structure, not a promise that every variation exposes identical tools or
+that the structure never changes. A useful way to picture it is that one
+variation may be suited to basic analysis while a later one carries more
+specialized research outputs; the important part is that the difference
+belongs to the desk and the tier, not to a one-size-fits-all platform
+rule.
+
+ Portfolio proves a different kind of fact: the capability count grows
+cumulatively across tiers, and the desk is explicitly marked Safe Mode
+with sanitized data. The mechanism is additive. Later tiers append to
+earlier tool registries rather than replacing them, and the reviewed
+counts rise through 33, 42, 53, and 60 tools. For the owner, this is
+useful because it turns portfolio capability into something measurable
+by tier instead of a vague impression of expansion. It also keeps the
+meaning of the desk honest. Safe Mode and sanitized data mean the desk
+is bounded to a mock or snapshot context, so its outputs should not be
+mistaken for live holdings truth. A concrete example is a portfolio
+research flow that is good enough to exercise workflow and compare
+tiered tooling, but not something to use for account reconciliation or
+live position checks. The verified fact is that the desk is designed to
+stay inside that boundary.
+
+ Taken together, these facts give the owner a reliable opening map:
+the live identity is desk-local, medtech is read-only on its analyst
+path, semiconductors is explicitly tiered, and portfolio is both
+cumulative and sanitized. What is still not proved is just as important:
+there is no verified shared shell or router yet, so the manual should
+keep navigation and capability claims at the desk level until that
+evidence appears.
+
+ Figure: The owner should compare desks by the rule
+each one uses. Semiconductors changes by variation, portfolio grows by
+accumulation, and Safe Mode narrows meaning instead of turning outputs
+into live truth.
+
+flowchart LR
+ A[How the owner should read capability] --> B[Semiconductors]
+ A --> C[Portfolio tiers]
+ A --> D[Portfolio Safe Mode]
+ B --> E[Capability changes by variation]
+ C --> F[Later tiers add tools]
+ D --> G[Outputs stay inside sanitized snapshot logic]
+
+ Compare the desks on different rules. Semiconductors changes
+capability by variation. Portfolio grows capability by adding tools in
+later tiers. Portfolio Safe Mode keeps outputs inside sanitized snapshot
+logic. The consequence is that the owner cannot treat all desk outputs
+as the same kind of product truth.
+
+ What Is Solid Here
+
+ Desk boundaries that hold up
+
+ The strongest part of the evidence is where the docs and the live
+behavior agree on desk-local boundaries. That matters because it gives
+the opening map something stable to stand on: the repository does not
+need a single verified cockpit to be intelligible, and the manual does
+not have to pretend otherwise. The medtech analyst route being read-only
+while separate maintenance scripts handle writing is a good example of
+the same boundary line. For the owner, that means the first trust
+decision is not “which one grand interface am I looking at?” but “which
+desk am I in, and what kind of work is this desk actually built to do?”
+The limit is just as important as the strength: the shared shell and
+router suggested by top-level docs were not verified in the reviewed
+runtime, so the map stays desk-first rather than platform-first.
+
+ Variation is explicit, not
+inferred
+
+ The semiconductors desk is unusually useful because its variation
+system is named clearly enough to support tier-by-tier explanation
+instead of guesswork. That makes capability changes easier to reason
+about: the owner can see that differences are packaged as variations,
+not hidden inside one flat bundle that somehow becomes larger or smaller
+without explanation. In practice, that reduces the chance of reading a
+richer variation as a surprise or a lighter one as a defect when it is
+really just a different tier. The boundary is that this strength depends
+on the current evidence remaining explicit; if future variations overlap
+in a way the reviewed material does not yet show, the tidy tier story
+would need to be rechecked. A concrete reading is simple: if one
+variation adds comparison tools and another adds plotting or output
+packaging, the owner should understand that as deliberate desk
+packaging, not as an accidental drift in what the desk means.
+
+ Safe Mode stays bounded
+
+ Portfolio is clearly marked as Safe Mode with sanitized data, and
+that clarity is a real strength. It keeps the desk tightly bounded so
+its outputs are read as controlled research or mock portfolio logic
+rather than live holdings truth. For the owner, that sharply changes how
+to use the desk: it is suitable for bounded analysis, demonstrations, or
+internal review, but not for interpreting the result as an account
+statement. The boundary is explicit in the evidence, which is exactly
+what makes the desk safe to include in the opening map; if Safe Mode
+were not clearly marked, the same outputs would carry much more
+ambiguity. A practical example is a portfolio summary that looks
+plausible and structured but still must be treated as sanitized snapshot
+material, not current positions or balances.
+
+ Refresh failures stay
+legible
+
+ The refresh behavior in semiconductors and xAmkor is best-effort
+rather than all-or-nothing, and that is a strength because it makes
+failure modes readable. The refresh chain tries to continue after
+individual source problems, so a broken pull does not automatically
+erase the rest of the run. For the owner, that means freshness can be
+partial, but partial freshness is still visible and actionable; the
+system is not pretending that every refresh is atomic when it is not.
+This is a better contract than a false guarantee of completeness because
+it tells operators and reviewers where the uncertainty lives. The
+boundary is equally clear: best-effort does not mean complete, and a
+successful rebuild can still leave mixed freshness or partial snapshots.
+A concrete scenario is a source pull that fails for one symbol while the
+rest of the chain succeeds; the resulting snapshot may still be useful,
+but it should be read as incomplete rather than magically whole.
+
+ Evidence Boundary
+
+ Evidence boundary — Reviewed: - desk-local
+navigation evidence and the absence of a verified shared shell - the
+medtech analyst route and its separate maintenance writers - tiered
+variation registries in semiconductors and cumulative tool growth in
+portfolio - best-effort refresh behavior in semiconductors and xAmkor -
+the portfolio Safe Mode policy and its sanitized snapshot boundary
+
+ Not reviewed: - a verified shared cockpit or router - live runtime
+state outside the reviewed evidence - external databases, feeds, or
+snapshots that were not part of the reviewed material - detailed
+advisory gate behavior beyond the opening map
+
+ If the product shape changes, re-check the live desk entry points,
+variation registries, refresh scripts, and Safe Mode policy. If a shared
+shell appears, or if any desk begins to promise atomic refresh or live
+holdings, update this opening map only after re-verifying those claims
+in current code and documentation.
+
+ Reviewed: blue-az/bt-inc-platform repository snapshot, Founder/owner
+context
+
+ Not reviewed: External runtime and integrations, Unreviewed runtime
+and owner context
+
+ How a Desk Operates
+
+ This chapter gives the owner the working model, not a full
+platform map. The reviewed evidence supports separate desk families with
+desk-local SQLite services, analysts using desk tools to answer
+questions, operators refreshing and rebuilding local data where
+maintenance flows exist, and reviewers appearing only inside gated
+advisory work. 
+
+ One-Minute Snapshot
+
+ This chapter gives the owner the working model, not a full platform
+map. The reviewed evidence supports separate desk families with
+desk-local SQLite services, analysts using desk tools to answer
+questions, operators refreshing and rebuilding local data where
+maintenance flows exist, and reviewers appearing only inside gated
+advisory work. The main boundary is simple: the desk model is verified,
+but a single shared shell, external data assets, and some caller
+boundaries are not.
+
+ What You Should Be Able To
+Explain
+
+ See which part of the product is analyst-facing, which part is
+operator-maintained, and where reviewer gates enter.
+
+ Distinguish tool tiers and variation growth from one flat product
+bundle.
+
+ Know where refresh, validation, and Safe Mode behavior stop at the
+reviewed evidence boundary.
+
+ Spot the places where the product can drift: partial refreshes,
+fail-open gates, and unresolved authority boundaries.
+
+ Mental Model
+
+ Treat the workspace as a set of desk families, not one proven shared
+shell. The owner should expect the analyst, operator, and reviewer roles
+to hand off differently from desk to desk. Analysts ask questions
+through desk-local tools and receive research output. Operators refresh
+sources, normalize them, and rebuild local SQLite snapshots where those
+workflows exist. Reviewers show up only where a desk adds a gate around
+an advisory result.
+
+ That is why the manual should stay desk-first. Some desks are
+read-only for the analyst route, some add more tools as the variation
+grows, and some add Safe Mode or review checkpoints. Portfolio is
+explicitly sanitized and Safe Mode, so it should be read as controlled
+portfolio logic rather than live holdings.
+
+ Figure: Do not collapse the manual into one shared
+shell: the verified runtime is desk-local, and the analyst route stays
+read-only while separate maintenance scripts can still write
+locally.
+
+flowchart TD
+ U[Unproven shared shell]
+ V[Verified desk families]
+ A[Analyst route]
+ R[Read-only research]
+ M[Separate maintenance scripts]
+ W[Local writes]
+ U -. not verified in live code .-> V
+ V --> A --> R
+ V --> M --> W
+
+ The diagram separates an unproven shared shell from the verified desk
+families. Inside the verified side, the analyst route leads to read-only
+research, while separate maintenance scripts lead to local writes. The
+consequence is that the owner should keep the manual desk-first until a
+shared shell is proven in live code.
+
+ How It Works
+
+ The clearest analyst path is medtech: a prompt is routed to one of
+six tools, the database handle is opened directly, and the tool bodies
+issue read-only queries. The same desk package also includes separate
+import scripts that can write local data, so the package is not entirely
+read-only even though the analyst route is.
+
+ Variation is what changes capability. Semiconductors is tiered by
+variation, with later tiers adding more specialized comparison,
+note-taking, run-tracking, plotting, and research-pack surfaces.
+Portfolio uses the same general idea but grows cumulatively, with later
+variations appending to earlier tool registries instead of replacing
+them.
+
+ Refresh is a separate operator path. In the desks that ship
+maintenance flows, source normalization comes before pulls and the final
+SQLite rebuild, and the refresh chain continues past individual upstream
+failures. That means refresh is best-effort, not atomic, and a completed
+run does not prove complete freshness.
+
+ Governance is part of the model too. The portfolio P0 validation
+policy keeps the saved artifact bounded to the local snapshot and
+current variation implementations, not to a claim of full cockpit
+coverage. In the advisory flow, the score-list view can still show the
+current gate state when no score history exists. After this pass,
+corrupt or non-list score history blocks instead of being treated as
+empty history. The reviewed score submission body also accepts
+caller-supplied reviewer and gate values, and the outer caller boundary
+was not verified, so reviewer authority is not proven at the point that
+matters.
+
+ Figure: Variation is not one flat bundle.
+Semiconductors grows by tier, while portfolio grows by appending
+capability across variations, so the owner should read desk coverage as
+versioned and desk-specific.
+
+flowchart LR
+ subgraph S1[Semiconductors]
+ S[Baseline desk]
+ ST[Each tier adds more tools]
+ S --> ST
+ end
+ subgraph P1[Portfolio]
+ P[Baseline desk]
+ PC[Each variation appends tools]
+ P --> PC
+ end
+
+ One branch shows semiconductors growing by tiers, where each tier
+adds more tools. The other branch shows portfolio growing cumulatively,
+where each variation appends tools instead of replacing the earlier set.
+The consequence is that capability should be read as desk-specific
+growth, not as one uniform product bundle.
+
+ Figure: Refresh is staged and best-effort, so a
+completed run can still leave partial snapshots before the rebuild
+settles the local data. Success does not prove complete freshness.
+
+flowchart LR
+ A[Normalize sources]
+ B[Pull upstream data]
+ C[Continue after a miss]
+ D[Rebuild the local store]
+ E[Partial snapshot can remain]
+ A --> B --> C --> D --> E
+
+ The refresh path starts by normalizing sources, then pulls upstream
+data, keeps going after a miss, and rebuilds the local store. Even after
+the run completes, a partial snapshot can still be left behind for a
+while. The consequence is that a finished refresh is not the same thing
+as fully fresh data.
+
+ Verified Facts
+
+ The strongest verified surface is desk-first navigation: the live
+proof points are separate desk-local SQLite services, not a proven
+shared cockpit or router. Medtech keeps the analyst route deterministic
+and read-only, while separate maintenance scripts can still write.
+Semiconductors and portfolio both use variation tiers to change
+capability instead of one flat bundle. The portfolio desk is sanitized
+and Safe Mode, and the xAmkor advisory surface has a clean empty-state
+score view. After this pass, corrupt score history fails closed instead
+of being treated as empty history.
+
+ Figure: The advisory gate has an explicit
+empty-state path when no score history exists. After this pass, corrupt
+score history fails closed; reviewer identity is still caller-supplied
+and the outer caller boundary remains unverified. That means reviewer
+control is not proven where the write actually happens.
+
+flowchart TD
+ H[Missing score history]
+ C[Corrupt score history]
+ G[Advisory gate]
+ O[Empty state continues]
+ X[Blocked until repaired]
+ W[Score writer]
+ F[Caller-provided review fields]
+ B[Outer caller boundary]
+ H --> G --> O
+ C --> G --> X
+ W --> F
+ B -. not verified .-> W
+
+ The first part of the diagram separates missing score history from
+corrupt score history: missing history remains an empty unscored state,
+while corrupt history now blocks until repair. The second part shows the
+score writer taking caller-provided review fields, with the outer caller
+boundary still unverified. The consequence is that unreadable
+persistence no longer silently reopens the gate, but reviewer authority
+is still not proven at the inspected write boundary.
+
+ Strengths
+
+ Desk-local boundaries make the product easier to reason about: the
+owner can see where an analyst route ends and an operator route begins.
+Explicit variation tiers keep capability growth visible instead of
+hiding it in one registry. The medtech analyst route fails explicitly on
+missing databases or unrecognized prompts, and the score-list view
+degrades cleanly when no persisted scores exist. Safe Mode keeps the
+portfolio desk from being mistaken for live holdings.
+
+ Evidence Boundary
+
+ Evidence boundary — Reviewed: - Desk-level
+navigation material and live service startup show separate desk families
+backed by desk-local SQLite services. - The medtech analyst route is
+deterministic and read-only, while separate maintenance scripts can
+still write local data. - Semiconductors uses variation tiers and an
+ordered, best-effort refresh chain that rebuilds from snapshots. -
+Portfolio runs in Safe Mode, grows cumulatively across variations, and
+has a validation policy that bounds the saved artifact to the local
+snapshot and current variations. - The advisory desk has a fallback
+score view for genuinely empty history; corrupt score history now blocks
+advisory generation and listing.
+
+ Not reviewed: - A verified shared shell or unified router. - External
+databases, feeds, snapshots, and schedules that are not part of the
+reviewed evidence. - The outer caller or transport boundary that would
+control score submission access. - Live freshness, completeness, and
+reproducibility beyond the repository-bounded proof.
+
+ Check for a live shared router or shell before upgrading the manual
+from desk-first navigation. Rerun the desks’ refresh and rebuild steps
+and inspect whether partial snapshots still appear after upstream
+failures. Inspect the caller boundary around score submission and
+re-check the empty-history policy if missing score history should become
+blocking.
+
+ Reviewed: blue-az/bt-inc-platform repository snapshot, Founder/owner
+context
+
+ Not reviewed: External runtime and integrations, Unreviewed runtime
+and owner context
+
+ Medtech Desk:
+Deterministic Analyst Research
+
+ Medtech is the clearest desk-level example of how this product
+appears to work today: an analyst question goes into a deterministic
+command path, gets matched to one of six tools, and those tools read
+from a desk-local SQLite database. Separate maintenance scripts in the
+same desk package can write device records, so the read-only promise
+applies to the analyst route, not to every script in the
+folder. 
+
+ One-Minute Snapshot
+
+ Medtech is the clearest desk-level example of how this product
+appears to work today: an analyst question goes into a deterministic
+command path, gets matched to one of six tools, and those tools read
+from a desk-local SQLite database. Separate maintenance scripts in the
+same desk package can write device records, so the read-only promise
+applies to the analyst route, not to every script in the folder. This
+outline is built from reviewed code, so it shows what the product does
+today, not what you mean it to be; that part still needs
+confirmation.
+
+ What You Should Be Able To
+Explain
+
+ Explain medtech as a bounded analyst research desk rather than a
+proof of a whole-platform shell.
+
+ Separate the analyst read path from the maintenance write path and
+say which one is actually read-only.
+
+ Name the concrete gates that make the analyst route deterministic
+and failure-aware.
+
+ State the evidence boundary clearly: what was verified in the
+reviewed code and what was not.
+
+ How To Think About Medtech
+
+ A bounded research desk
+
+ Treat medtech as the clearest example of a desk that answers analyst
+questions from its own desk-local SQLite data. That is the right mental
+model for this chapter: one bounded research surface, not proof of a
+verified product-wide shell. The reviewed runtime evidence points to
+separate desk families backed by desk-local SQLite services, while the
+shared shell or router suggested by top-level documentation was not
+verified in the live surfaces. For an owner, that means the safest
+reading is narrow and concrete: this chapter shows what one desk appears
+to do, not what the whole workspace must do.
+
+ Research and
+maintenance are not the same job
+
+ Keep analyst question handling separate from operator maintenance
+work in your head. The analyst path is the part that turns a question
+into a database-backed answer, and it is the part this chapter is really
+about. Maintenance work sits beside it, not inside it. That separation
+matters because it changes how you judge risk: a desk can be dependable
+for research while still having a different, write-capable maintenance
+lane for keeping the underlying records current. In other words, the
+question path is not a general-purpose editing surface, even if the same
+desk package also contains scripts that can update device records.
+
+ A simple example makes the boundary clearer. If an analyst asks which
+devices match a pattern, the desk should be understood as working from
+its own stored data and answering within that research lane. If an
+operator is refreshing or correcting device records, that is a different
+kind of action with a different consequence for the dataset. Mixing
+those two mental models leads to bad expectations: you start treating
+every desk action as if it had the same permissions, the same failure
+modes, and the same purpose. It does not.
+
+ One exemplar, not a universal
+rule
+
+ Read medtech as an exemplar of one bounded desk, not as a promise
+that every other desk behaves the same way. The chapter is useful
+precisely because it is specific: it gives you a grounded example of how
+a desk can support analyst research over local data without claiming
+that the rest of the repository shares the same shape. That keeps the
+manual honest. It also protects you from a common mistake: assuming that
+because one desk looks deterministic and desk-bounded, the whole
+workspace has the same navigation model, the same data boundary, or the
+same split between read paths and maintenance paths.
+
+ So the owner-level takeaway is restraint. Use medtech to calibrate
+your expectation of what a strong desk can look like, but do not promote
+it to a platform-wide definition. If a later desk needs a different tool
+set, a different data boundary, or a different operating rhythm, this
+chapter does not contradict that. It gives you a known-good reference
+point for one desk only, with the shared-shell question still open.
+
+ Figure: Treat Medtech as one bounded desk-local
+surface. The reviewed runtime supports that narrow reading, so the
+manual should not promote a unified shell until live code proves it.
+
+flowchart TD
+ A[Medtech desk] --> B[Bounded analyst surface]
+ A --> C[Desk-local records]
+ D[Shared shell or router] -. not verified in live runtime .-> A
+ D -. remains unproven .-> E[Keep the manual desk-level]
+
+ Medtech sits as one desk with its own bounded analyst surface and
+desk-local records. A shared shell or router is shown as unverified in
+the reviewed runtime. The consequence for the owner is simple: keep the
+manual desk-level and do not generalize this chapter into a
+whole-product shell claim.
+
+ What The Analyst Route
+Actually Does
+
+ Routing Is Narrow
+
+ In the reviewed medtech desk, an analyst prompt does not wander
+through a broad shell and hope for the best. It is matched into one of
+six analytical tools, and the path is deterministic enough to fail
+openly when the prompt does not fit or when the database is missing. For
+the owner, that changes the expectation of the desk: this is not a
+guess-and-fill system. It is a bounded research route that either
+recognizes the request shape or stops. The important boundary is that
+this describes the analyst path only; it does not say that every script
+shipped with the desk behaves the same way.
+
+ Read-Only Research
+
+ Once the prompt lands in a tool, the tool reads the desk-local SQLite
+data through read-only database queries. In other words, the analyst
+route is built to inspect existing records, not to change them. That
+matters because it gives the owner a cleaner mental contract: an analyst
+can ask for a company comparison, a device lookup, or another
+evidence-backed answer, and the path is meant to return a result without
+mutating the dataset as part of that same flow. A concrete example is a
+request for the current device list. The selected tool can read the
+stored rows and summarize them, but it is not the route that adds new
+rows or refreshes old ones.
+
+ Capability or behavior 
+ Analyst route 
+ Separate maintenance scripts 
+
+ Prompt handling 
+ Matches the prompt into one of six tools; unrecognized input fails
+explicitly. 
+ Not a prompt route. 
+
+ Database access 
+ Reads the desk-local SQLite data with read-only queries. 
+ Can write device rows. 
+
+ Operational effect 
+ Produces research answers without changing the analyst data
+path. 
+ Changes desk data during maintenance, outside the analyst question
+path. 
+
+ Maintenance Is Separate
+
+ The same desk package also includes separate import scripts that
+write device rows. That is the operational split that matters: research
+asks questions against the desk data, while maintenance changes the data
+outside that path. For the owner, this means the read-only promise
+should be read narrowly and correctly. It applies to the analyst route,
+not to every script in the folder. If a maintainer runs an import after
+updating source material, that job can alter device records; later, the
+analyst route can read those records without being the thing that wrote
+them. The reviewed evidence establishes the split, but it does not prove
+a single shared control surface for both activities.
+
+ Figure: The analyst route is narrow and fail-aware.
+A supported request reaches a tool and reads existing records; an
+unsupported request or missing records stop the run instead of prompting
+a guess.
+
+flowchart TD
+ A[Analyst prompt] --> B[Matched to one of six tools]
+ B --> C[Read existing desk records]
+ C --> D[Research answer]
+ A -. not recognized .-> E[Stop openly]
+ C -. missing records .-> E
+
+ An analyst prompt enters the desk, is matched to one of six tools,
+and the selected tool reads the desk’s stored records before returning a
+research answer. If the prompt does not fit or the records are missing,
+the route stops openly. The consequence is deterministic research
+behavior rather than improvisation.
+
+ What The Review Proved
+
+ What was actually verified
+
+ The review did not prove a broad product-wide shell. What it did
+verify was narrower and more useful for the owner: medtech’s reviewed
+runtime surfaces are desk-local SQLite services, and the supposed shared
+shell or router seen in top-level framing was not verified in the live
+runtime. That boundary matters. It means the strongest evidence supports
+a desk-bounded reading of medtech, not a claim that the whole workspace
+shares one confirmed navigation layer.
+
+ The analyst path is
+deterministic
+
+ Within that desk-local surface, the analyst route behaved
+deterministically enough to map prompts to tools instead of improvising
+a response. The reviewed path routes an analyst prompt into one of six
+analytical tools, and it fails explicitly when the prompt is not
+recognized or when the database is missing. For an owner, that changes
+the reliability story: the system is not pretending to answer when its
+input or data is incomplete. In practice, a malformed question is
+treated as a failure state, and a missing database is treated as a
+missing prerequisite, not as something to guess through.
+
+ A concrete example shows why this matters. If an analyst asks a
+question that fits the desk’s supported research patterns, the route can
+select a tool and continue against the SQLite-backed data. If the same
+desk is opened without the expected database, the reviewed path stops
+rather than fabricating an answer. That is a bounded, fail-aware
+behavior, and it is one of the clearest facts the review
+established.
+
+ Maintenance writes still
+exist
+
+ The same desk package also contains separate maintenance scripts that
+can write device records. That is a distinct fact from the analyst
+route, and it is the main reason the chapter keeps separating research
+from upkeep. The reviewed evidence supports the stronger statement that
+the analyst path is read-only, while maintenance remains write-capable
+inside the package.
+
+ For the owner, the consequence is simple but important: read-only
+behavior applies to the analyst research path, not to every script in
+the medtech folder. A maintainer can still refresh or import device data
+through those separate scripts, so the desk is not an entirely read-only
+system. The review did not establish that those writes are exposed
+through the analyst route, and it did not prove a unified shell that
+would collapse the difference between research and maintenance. The
+verified boundary is narrower: analyst questions read, maintenance
+scripts can write, and the two paths are intentionally not the same
+thing.
+
+ Figure: Keep the read-only promise scoped to the
+analyst path. Separate maintenance scripts can still change device
+records, so the whole package is not read-only.
+
+flowchart LR
+ subgraph A[Read-only analyst path]
+ Q[Analyst questions] --> R[Read existing records] --> S[Research answers]
+ end
+ subgraph M[Separate maintenance lane]
+ I[Import scripts] --> W[Write device records]
+ end
+ M -. separate from .-> A
+
+ One lane is the analyst path, which reads existing records and
+returns research answers. A separate maintenance lane can write device
+records. The consequence is that read-only behavior stops at the analyst
+route; maintenance remains a write-capable exception.
+
+ What Is Solid Here
+
+ Repeatable analyst answers
+
+ The strongest thing in this medtech desk is not that it does
+everything, but that it does one thing in a controlled way: it turns an
+analyst question into a database-backed answer through a fixed route.
+That matters to an owner because it reduces the amount of judgment the
+system has to invent on the fly. The question is not handed to a
+general-purpose shell and hoped through; it is matched to one of a small
+set of analytical tools, and those tools draw from the desk’s SQLite
+data. In practice, that gives the desk a predictable shape: the same
+kind of request follows the same path, and the answer comes from the
+same governed data layer.
+
+ That repeatability is valuable because it makes the desk easier to
+trust operationally. If a team asks the same kind of market or device
+question twice, they should not be getting two different styles of
+answer because the route changed its mind about how to interpret the
+request. The reviewed behavior shows a bounded analyst surface, not a
+wide-open conversational interface, which is exactly what gives the
+product its discipline here. The boundary is important: this is solid
+evidence for the medtech analyst route, not proof that every desk in the
+workspace is equally controlled or equally deterministic.
+
+ Fail fast instead of
+guessing
+
+ The other strength is that the path does not try to hide bad starting
+conditions. When the database is missing or the request does not map to
+a recognized analytical tool, the route fails explicitly rather than
+guessing. That is a better owner outcome than a system that silently
+fabricates a partial answer, because a visible failure tells the
+operator or analyst that the run did not actually complete. It keeps bad
+entry states from being mistaken for valid research.
+
+ This matters because the worst failure mode in research tooling is
+often not a hard stop, but a plausible-looking answer built on the wrong
+assumptions. The medtech route avoids that trap by making the error
+state part of the behavior. If the desk cannot open the data it expects,
+or cannot place the question into its known tool set, it stops early.
+The limitation is just as important as the strength: fail-fast behavior
+improves visibility, but it does not by itself prove that the underlying
+data is complete, fresh, or exhaustive.
+
+ Clean separation of reads
+and writes
+
+ A third strength is the separation between analyst research and
+maintenance work. The analyst path is read-only, while separate
+maintenance scripts can still write device records. For an owner, that
+split is cleaner than combining research and data refresh in one
+uncontrolled path, because it reduces the chance that a normal
+question-answering flow mutates the desk’s data by accident. The analyst
+gets a stable read surface; the operator keeps the write power in a
+different lane.
+
+ That separation improves both confidence and responsibility. Analysts
+can use the desk without worrying that their queries are altering device
+data, and operators can refresh or import data without forcing that work
+through the research route. A concrete example: an analyst asks for a
+comparison and gets a result from the desk database; later, an operator
+runs a maintenance import that updates device rows, but that write
+happens outside the analyst path and does not change the read-only
+guarantee of the research route itself. The qualifier is that this
+cleanliness applies to the reviewed medtech package as observed, not as
+a blanket promise about every script or every desk in the
+repository.
+
+ Evidence Boundary
+
+ Evidence boundary — Reviewed: - Desk-level
+navigation evidence showing separate desk families backed by desk-local
+SQLite services, with no verified shared shell or router. - The medtech
+analyst command path, the desk service that opens SQLite, the six
+analyst tools, and the separate maintenance import scripts that can
+write device records.
+
+ Not reviewed: - A verified shared shell or router in live runtime
+code. - Any outer UI, transport, or auth wrapper beyond the reviewed
+analyst route. - Live databases, snapshots, or runtime state outside the
+reviewed code. - Owner-confirmed product intent for how this desk should
+be framed.
+
+ If a shared router is later verified, widen the navigation claims
+then. If new medtech tools or import scripts appear, recheck the analyst
+route and the write paths before broadening any read-only statement.
+Keep runtime completeness claims out unless live data assets are
+explicitly verified.
+
+ Reviewed: blue-az/bt-inc-platform repository snapshot, Founder/owner
+context
+
+ Not reviewed: External runtime and integrations, Unreviewed runtime
+and owner context
+
+ Semiconductors Desk:
+Workflow Variations
+
+ This chapter shows the semiconductors desk as the reviewed code
+presents it today: a tiered set of variations that starts with baseline
+market, vendor, price, and search work, then adds comparison and
+concentration, catalyst notes, SOP runs, plotting, and interactive HTML
+research packs. 
+
+ One-Minute Snapshot
+
+ This chapter shows the semiconductors desk as the reviewed code
+presents it today: a tiered set of variations that starts with baseline
+market, vendor, price, and search work, then adds comparison and
+concentration, catalyst notes, SOP runs, plotting, and interactive HTML
+research packs. That matters because the desk is built from the code, so
+it tells you what it does today, not what you mean it to be, and the
+cross-desk shell implied by top-level docs is still not verified
+here.
+
+ What You Should Be Able To
+Explain
+
+ Explain that semiconductors is a tiered workflow suite, and how that
+differs from the narrower medtech analyst route.
+
+ Name which capabilities belong to the early, middle, and later tiers
+without flattening them into one bundle.
+
+ Explain why a refresh can complete and still leave partial snapshots
+behind.
+
+ Separate verified desk-local behavior from unverified runtime
+assumptions, especially around shared navigation and generated
+outputs.
+
+ What This Desk Is
+
+ The semiconductors desk is best understood as a packaged family of
+variations, not a single loop that happens to grow more features over
+time. That distinction matters because the reviewed materials do not
+describe one flat research path; they describe a desk whose capabilities
+are grouped into tiers, and each tier changes what the analyst can do
+without erasing the earlier baseline. For the owner, the practical
+consequence is that a request to use semiconductors is a request to
+enter a particular workflow family, with a scope that is broader than a
+bare search-and-read routine.
+
+ The unit of meaning
+is the workflow family
+
+ The useful mental model is a family of related research actions:
+baseline analysis first, then comparison and concentration work, then
+catalyst notes, then SOP runs, then plotting, then HTML research packs.
+These are not just stylistic variations on the same move. They represent
+distinct ways the desk packages work for different research needs. In
+one context, the analyst may only need the baseline market and vendor
+picture; in another, the owner may want the desk to progress into
+comparison, written notes, a repeatable operating procedure, or a
+presentation-ready output.
+
+ This is why the desk should not be read as one research loop with
+extra output formats. The earlier tiers establish the base research
+surface, but the later tiers widen what the desk can express. A plot is
+not the same thing as a catalyst note, and an HTML pack is not the same
+thing as a plain comparison. The owner’s consequence is simple: when you
+choose semiconductors, you are choosing a research suite that can move
+from discovery to interpretation to packaged output within one desk
+family, rather than forcing every task through the same narrow path.
+
+ Broader than medtech
+
+ Compared with medtech’s narrower read-only analyst route,
+semiconductors covers a broader spread of owner-relevant research
+actions. Medtech is useful as a contrast because it keeps the analyst
+path tightly bounded. Semiconductors goes further: it includes not only
+baseline research, but also comparison and concentration work,
+note-making, repeated operating runs, plotting, and HTML research packs.
+The owner-facing difference is breadth. In semiconductors, the desk is
+not only answering questions; it can also shape, package, and stage the
+research in more forms.
+
+ That breadth does not make semiconductors a universal template. It is
+the clearest live example of a tiered research suite in the reviewed
+materials, but that is a statement about the evidence we have, not a
+claim about the rest of the workspace. The reviewed live surfaces are
+desk-local, and the shared shell or router implied by top-level
+documentation was not verified in the runtime reviewed here. So the safe
+reading is: semiconductors clearly behaves like a tiered suite in the
+evidence we have, and the manual should not assume every other desk
+follows the same pattern unless its own evidence proves it.
+
+ A concrete owner scenario
+
+ Suppose the owner asks an analyst to prepare a briefing on a supplier
+change in the semiconductor chain. The desk may begin with baseline
+analysis to establish the market picture. If the question sharpens, the
+analyst can move into comparison and concentration work to separate the
+strongest vendors from the rest. If the owner needs a traceable
+narrative, catalyst notes can capture the why behind the shift. If the
+work needs to be repeated or reviewed later, SOP runs make that a
+distinct tier rather than an ad hoc rerun. If the briefing needs a
+visual, plotting and HTML packs give the desk ways to package the result
+for others.
+
+ What changes for the owner is not just the format of the output, but
+the shape of the research itself. You are not asking for one static
+answer. You are selecting a desk family that can travel through several
+research forms as the question matures. The boundary is that this is
+still desk-local behavior, not a promise about every product surface in
+the repository. The semiconductors desk is the clearest live example of
+a tiered research suite in the reviewed materials, and this chapter
+treats it that way because the evidence supports it. But that strength
+should stay local: it is a model for understanding this desk, not a rule
+to impose on all others.
+
+ Figure: The desk does not swap one workflow for
+another. It keeps the baseline in place and layers later families on
+top, so the owner can ask for deeper analysis or packaged output without
+losing the earlier research floor.
+
+flowchart LR
+ A["What stays"]
+ B["Baseline research"]
+ C["What gets added"]
+ D["Comparison and concentration"]
+ E["Catalyst notes"]
+ F["SOP runs"]
+ G["Plots"]
+ H["HTML packs"]
+ A --> B
+ C --> D
+ C --> E
+ C --> F
+ C --> G
+ C --> H
+ B -. "still available" .-> C
+
+ The diagram separates what stays from what gets added. Baseline
+research remains available, and later families add comparison and
+concentration, catalyst notes, SOP runs, plots, and HTML packs. The
+consequence is cumulative growth: later tiers expand the desk without
+replacing the earlier tools.
+
+ What Each Tier Adds
+
+ At the semiconductors desk, later variations do not replace earlier
+ones. The reviewed shape is cumulative: each tier adds new capability on
+top of the baseline rather than swapping the baseline out. For the
+owner, that means the variation number is a real boundary of promise. It
+tells you what is newly available in that slice of the desk, while the
+earlier tools remain the floor underneath it.
+
+ Variation tier 
+ What it adds 
+
+ Baseline analytics 
+ Core market, vendor, price, and search work. 
+
+ Comparison and concentration 
+ Comparison that can line up alternate names and concentration
+views. 
+
+ Catalyst notes 
+ Write-and-verify catalyst-note work. 
+
+ SOP runs 
+ Persisted SOP runs for repeatable research paths. 
+
+ Plotting 
+ Plotting outputs for visual analysis. 
+
+ Interactive HTML research packs 
+ Interactive HTML packs for interactive review and sharing. 
+
+ Reading the progression
+
+ A useful way to read the sequence is by the kind of result each tier
+makes possible. The baseline tier gives the analyst ordinary research
+tools. The comparison and concentration tier adds the ability to line up
+related companies or names instead of treating each search in isolation.
+Catalyst notes change the desk again: the workflow is no longer only
+about retrieving facts, but about writing and checking a research note
+that can be revisited. SOP runs then make that path persistent, so the
+work can be repeated rather than recreated from scratch. Plotting turns
+the same research stream into a visual output, and the HTML pack tier
+packages the result into something interactive.
+
+ The owner consequence is straightforward: the later tiers broaden
+both the research process and the artifact that comes out of it. A user
+starting from the baseline can stay in a lighter workflow, but a user
+who needs a comparative read, a documented note, a repeatable procedure,
+a chart, or a browsable pack moves into a later tier instead of a
+different desk. That is the main operational meaning of the tiering: it
+grows the desk by layering outputs, not by retiring earlier ones.
+
+ Refresh Order
+
+ The refresh path is staged in a fixed order. Normalization runs
+first, then upstream pulls, then the local database rebuild. That order
+matters because each stage depends on the previous one: the desk tries
+to shape incoming material before it fetches fresh source data, and only
+after that does it rebuild the local SQLite state from the snapshot
+files. For the operator, the refresh is therefore a pipeline, not a
+single irreversible event.
+
+ Best-Effort Completion
+
+ The same review also shows that refresh is best-effort rather than
+atomic. Individual pull failures do not stop the whole chain, so a run
+can still reach the rebuild step even when some upstream pulls did not
+succeed. The consequence is that a completed refresh does not prove
+complete upstream coverage. It proves that the pipeline advanced through
+rebuild, but the rebuilt state only reflects the snapshot files that
+were actually written.
+
+ A concrete example is a source that is unavailable during the pull
+stage. The refresh can continue, normalize what it already has, and
+finish the rebuild anyway. That is useful because the desk keeps moving
+instead of failing fast on one source, but it also sets a boundary for
+the owner: a successful run is not the same thing as perfect freshness,
+and it should not be read that way.
+
+ Figure: Refresh is a staged pipeline, not an
+all-or-nothing switch. Because rebuild only consumes the snapshots that
+were actually written, a finished run can still reflect partial upstream
+coverage.
+
+flowchart TD
+ A["Normalize incoming material"] --> B["Pull source updates"]
+ B --> C["Keep going after one source fails"]
+ C --> D["Write snapshot files"]
+ D --> E["Rebuild local state from snapshots"]
+
+ The diagram shows a staged refresh path. Incoming material is
+normalized first, then source updates are pulled, then the run keeps
+going even if one source fails, then snapshot files are written, and
+finally the local state is rebuilt from those snapshots. The consequence
+is that a refresh can complete without proving that every upstream
+source was covered.
+
+ What The Review Established
+
+ Eight variation
+families, one tiered shape
+
+ The reviewed semiconductor materials do not describe one flat
+research loop. The README names eight variation families, and the
+reviewed modules line up with that progression from the first variation
+through the eighth. For an owner, the important fact is not just the
+count; it is the structure. Each later step is presented as a separate
+package of capability, so the desk grows by addition rather than by
+renaming the same baseline work.
+
+ That matters because it makes the boundary of each stage inspectable.
+A change in the later families is not a silent background tweak to the
+whole desk. It is a new declared lane with its own purpose. In practical
+terms, if the desk gains a comparison-focused family or a plotting
+family, that is evidence that the desk now reaches a different kind of
+output, not merely the same output with a different label.
+
+ Later tiers are distinct
+additions
+
+ The review also established that the later tiers are not copies of
+the same tool set. Comparison and concentration, catalyst notes, SOP
+runs, plotting, and HTML research packs appear as distinct additions.
+That distinction matters because it tells the owner where new value
+comes from: each family expands the desk in a different direction,
+rather than repeating the baseline research path.
+
+ The consequence is a cleaner reading of capability. A later family
+should be understood as a new research surface or output form, not as a
+duplicate of an earlier one. For example, a plotting family is there to
+turn the desk’s work into a visual artifact, while an HTML pack is there
+to present research in an interactive package. Those are materially
+different outcomes, so the owner should not expect one family to stand
+in for the others.
+
+ The boundary is equally important. The review supports that these
+families exist as separate additions, but it does not prove that every
+desk follows this exact layout. This is a strong semiconductor-specific
+pattern, not a universal rule for the rest of the workspace.
+
+ Refresh writes
+snapshots before rebuild
+
+ The refresh path is also clear enough to state with confidence. The
+reviewed scripts write CSV snapshots before the SQLite rebuild happens.
+Normalization runs first, then source pulls, then the rebuild step
+repopulates from those snapshots. The order matters because it shows
+where the usable intermediate state lives: the CSVs are not incidental
+byproducts, they are the handoff point for the rebuild.
+
+ For the owner, that means a refresh can make progress even when the
+final rebuild has not yet completed. Imagine an operator refreshing the
+desk and one source pull fails for a single ticker. The run can still
+leave behind partial snapshot files, and the later rebuild can still be
+driven from whatever was captured. That is useful operationally, but it
+also means freshness is not atomic. A completed run does not
+automatically imply complete upstream coverage.
+
+ The review does not establish a stronger guarantee than that. It
+shows an ordered, best-effort chain, not an all-or-nothing refresh
+contract.
+
+ What is and is not
+proven about navigation
+
+ Finally, the reviewed runtime does not prove a shared cross-desk
+shell. The safest live statement is desk-local behavior: the evidence
+supports separate desk families backed by desk-local SQLite services,
+while the shared shell or router implied by top-level docs remains
+unverified in the reviewed runtime.
+
+ That boundary matters for how the owner reads the workspace. It is
+safe to treat the semiconductor desk as a verified local unit with its
+own variation structure and refresh behavior. It is not safe, from this
+review alone, to assume a common navigation layer that binds all desks
+together in one confirmed runtime surface. If a user expects to move
+between desks through a single shared shell, that may be true in
+documentation, but it is not proven here.
+
+ So the most exact live claim is narrower: the semiconductor desk’s
+variation tiers and refresh chain are verified, while the broader
+cross-desk navigation story is still provisional.
+
+ Figure: Only the desk-local surface is verified in
+the reviewed runtime. The broader shared navigation story remains
+provisional, so the manual should stay scoped to the desk instead of
+promising a confirmed unified cockpit.
+
+flowchart TD
+ A["Reviewed evidence"] --> B["Desk-local service"]
+ A -. "not proven here" .-> C["Shared shell or router"]
+ B --> D["Keep the manual at desk level"]
+ C --> D
+
+ The diagram shows reviewed evidence pointing to a desk-local service,
+while the shared shell or router is marked as not proven here. Both
+paths lead to the same conclusion: keep the manual scoped to the desk.
+The consequence is that the broader navigation layer should not be
+described as verified from this evidence alone.
+
+ What Is Solid
+
+ Clear boundaries
+
+ The strongest thing about this desk is that its capability boundaries
+are named well enough to inspect without guessing. The reviewed
+semiconductors materials do not describe one vague research bundle; they
+lay out a tiered set of variation families, and the later families are
+distinct additions rather than hidden copies of the same idea. That
+matters for an owner because you can tell, from the structure alone,
+which kinds of work belong to the baseline, which belong to comparison
+and concentration, and which belong to later work such as catalyst
+notes, SOP runs, plotting, and HTML packs. The boundary is also the
+limit: explicit tiering does not mean every variation has the same
+reach, and it does not prove that every output is available in every
+run.
+
+ Failure does not stop the
+chain
+
+ The refresh path is also solid in a specific way: it keeps moving
+after upstream trouble instead of disguising it as success. The reviewed
+flow is ordered, with normalization first, then source pulls, then the
+database rebuild, and individual ticker-level failures do not abort the
+whole sequence. For the owner, that changes the operational posture. A
+refresh can still complete enough of the work to leave behind usable
+snapshots even when one source or one ticker misbehaves, which is better
+than a brittle all-or-nothing run. The qualifier is just as important:
+this is best-effort behavior, not atomic freshness. A completed refresh
+does not prove that every source succeeded or that the resulting
+snapshots are complete.
+
+ A concrete example is a run where most semiconductor names refresh
+normally, but one ticker fails during the source pull. Under this
+pattern, the operator still gets the later steps, the snapshots still
+rebuild, and the desk can still surface whatever was successfully
+captured. What the owner should not infer is that the failed ticker was
+handled cleanly or that the final snapshot represents every upstream
+source equally well. The strength is resilience, not certainty.
+
+ Outputs
+stay attached to the tier that produced them
+
+ The variation structure is especially useful because it makes the
+output story legible. Since the desk is split into named families, it is
+easier to see which artifacts came from baseline research, which came
+from comparison work, which came from later plotting or HTML packaging,
+and which came from intermediate workflow stages such as catalyst notes
+or SOP runs. That makes the desk easier to operate and easier to audit.
+An owner looking at a result does not have to reverse-engineer which
+layer produced it; the tiering itself acts as the map.
+
+ This does not make the desk perfectly uniform. It means the desk’s
+packaging helps prevent a common failure mode in workflow products,
+where every result looks like it came from the same tool even though
+different tiers are doing different jobs. Here, the structure keeps
+those differences visible.
+
+ Broader than the
+narrower analyst route
+
+ Compared with the medtech analyst route, this desk gives the owner a
+broader and more expressive workflow story. The medtech path is a fixed,
+read-only route through a small set of analytical tools, so it is good
+at deterministic research but narrow in scope. The semiconductors desk
+goes further: it spans multiple workflow families and includes
+later-stage outputs rather than stopping at query and readback. That
+gives the owner more room to support real research progression, from
+baseline analysis into comparison, note-taking, runs, plots, and
+packaged research outputs.
+
+ The boundary here is not that broader is automatically better. A
+narrower route can be easier to reason about when the task is simple.
+The point is that semiconductors is deliberately more expressive, and
+the reviewed materials support that reading. For an owner, that means
+the desk can carry more of the research journey inside one packaging
+model instead of handing every step off to a separate path.
+
+ Evidence Boundary
+
+ Evidence boundary — Reviewed: - The semiconductors
+desk README and variation implementations were reviewed for the tier
+structure and named capability families. - The semiconductors refresh
+scripts were reviewed for the order of source normalization, source
+pulls, and database rebuilds. - The medtech desk route was reviewed as a
+contrast case for a narrower read-only analyst path. - The repository
+navigation docs were reviewed only enough to confirm that a shared
+cross-desk shell is not yet proven.
+
+ Not reviewed: - Any live cross-desk shell outside the reviewed
+runtime. - Any external data snapshots, feeds, or generated files that
+are not present in the repository evidence. - Whether plotting and
+interactive HTML outputs are fully available in the deployed
+environment. - Owner-confirmed intent for how this desk should be
+positioned in the product.
+
+ Recheck the semiconductors desk README against a live runtime, run
+the refresh path end to end with at least one known upstream failure,
+and verify the plotting and HTML-pack outputs in the deployed
+environment before describing them as reliable owner-facing outputs. If
+a shared cross-desk shell appears, move navigation language out of
+desk-local framing.
+
+ Reviewed: blue-az/bt-inc-platform repository snapshot, Founder/owner
+context
+
+ Not reviewed: External runtime and integrations, Unreviewed runtime
+and owner context
+
+ OSAT Desk: AMKR
+Intelligence and Review Gates
+
+ This chapter is about the OSAT desk: the AMKR-focused desk that
+pulls company facts, filings, news, job postings, and prices into local
+data, then uses saved review scores to decide whether advisory
+hypotheses can still be generated. 
+
+ One-Minute Snapshot
+
+ This chapter is about the OSAT desk: the AMKR-focused desk that pulls
+company facts, filings, news, job postings, and prices into local data,
+then uses saved review scores to decide whether advisory hypotheses can
+still be generated. The important owner signal is not just that the desk
+refreshes data, but that the score log is part of the control boundary:
+missing history is an empty unscored state, corrupt history now blocks,
+and the score submission path accepts reviewer and gate values from the
+caller. That means the desk can look controlled on paper while still
+depending on persistence and an unverified caller boundary. This is
+built from the code, so it shows what your product does today, not what
+you mean it to be; that part is yours to confirm.
+
+ What You Should Be Able To
+Explain
+
+ Explain OSAT as a bounded AMKR intelligence desk with separate
+refresh and review-state layers.
+
+ Describe what happens when upstream pulls fail or the refresh
+environment is missing its expected header value.
+
+ Explain when advisory generation is blocked, including the new
+corrupt-score-history block and the remaining empty-history policy.
+
+ Separate the verified in-repo score-log behavior from the
+still-unverified caller boundary.
+
+ How to Think About the OSAT
+Desk
+
+ A bounded desk, not a
+platform
+
+ Think of OSAT as a narrow AMKR company-intelligence desk first and
+anything larger only if later evidence proves it. The reviewed runtime
+does not verify a shared shell or router at the top of the product; what
+it does verify is desk-local behavior, with separate desk families
+backed by their own local services. That matters for an owner because it
+changes what you can safely assume. A working OSAT desk does not mean
+the whole workspace has one shared navigation model, one shared identity
+layer, or one shared operating pattern. Until those gaps are closed,
+OSAT should be read as a bounded desk with its own local rules, not as
+proof of a general cross-desk platform.
+
+ A concrete way to picture it: an operator can refresh the desk and
+still not have evidence that another desk, or the workspace navigation
+around it, behaves the same way. The scope is intentionally smaller than
+a platform claim.
+
+ Refresh data
+is not the same as advisory control
+
+ Keep the refresh path and the reviewer-gated advisory path in
+separate mental boxes. The refresh side is about pulling source material
+and rebuilding local data; the advisory side is about whether the desk
+is allowed to produce later guidance from the saved review state. Those
+are different control layers, and they fail differently. A source pull
+can be best effort and still leave partial but usable data, while the
+advisory gate depends on saved score state that can be missing or
+unreadable. In the current implementation, missing score state remains
+an empty unscored state, while corrupted score state now blocks later
+hypothesis generation instead of collapsing into an empty set.
+
+ For the owner, the consequence is simple but important: fresh data
+does not automatically mean constrained advisory output. A desk can look
+operational on the refresh side and still be permissive on the review
+side if persisted score state is absent or broken. That is a real
+boundary, not a theoretical one. If score history exists but is corrupt,
+the local implementation now blocks advisory generation until the score
+history is inspected and repaired or archived.
+
+ Authority is only partly
+pinned down
+
+ There is also a split between the saved review state and the
+authority that writes it. The reviewed score-writing path accepts
+reviewer and gate choices from the caller, and the inspected path does
+not show a check that the caller itself is the right person. At the same
+time, the outer entry point that would confirm who can reach that write
+step was not reviewed here. So the safest owner model is not “reviewer
+authority is enforced end to end,” but “the desk stores reviewer and
+gate choices, while enforcement at the outer boundary remains
+unverified.”
+
+ That distinction matters because it tells you where confidence stops.
+The desk-local code can show that review decisions are persisted and
+later consulted, but it does not by itself prove that only an authorized
+reviewer can supply those decisions. In practice, that means the desk
+should be treated as having a meaningful review state, not a fully
+proven trust boundary.
+
+ Where the evidence ceiling
+sits
+
+ The right mental model, then, is a bounded desk with two layers of
+control and a few missing edges. We know enough to say OSAT is
+AMKR-focused, desk-local, and review-gated in intent and in parts of its
+behavior. We do not know enough to promote it to a general workspace
+pattern, or to claim the caller boundary and shared navigation are fully
+settled. Until those gaps are closed, the manual should stay scoped to
+what the reviewed desk-local evidence actually shows.
+
+ Figure: OSAT should be read as a desk-local AMKR
+intelligence surface with separate desk families; the reviewed runtime
+does not prove a shared shell or router.
+
+flowchart TD
+ A[OSAT desk] --> B[AMKR intelligence work]
+ A --> C[Desk-local services]
+ A -. not proven .-> D[Shared shell or router]
+ D --> E[Unverified boundary]
+
+ OSAT is a desk-local AMKR intelligence surface that connects to AMKR
+work and desk-local services. The shared shell or router is shown as
+unproven, so the owner should treat a unified cross-desk navigation
+layer as still unverified.
+
+ Refresh, Score, and Decide
+
+ Refresh comes before rebuild
+
+ The refresh path is not a single atomic sweep. It runs source pulls
+first, then rebuilds the local data from what those pulls produced. That
+order matters because the rebuild is downstream of the fetches: if an
+upstream source warns, is missing an expected environment value, or
+fails on one part of the chain, the refresh does not stop at the first
+problem. It keeps moving and writes whatever partial snapshot the
+earlier steps made available.
+
+ For an owner, the practical effect is that refresh is best-effort
+rather than all-or-nothing. You should read a successful run as “the
+desk tried the full chain and rebuilt from the sources it managed to
+collect,” not as a guarantee that every upstream source was complete. In
+a live operator scenario, that means one failed source does not
+necessarily freeze the whole desk. The boundary is also important: this
+evidence shows the order and the continuation behavior, but it does not
+establish that the resulting snapshot is fully fresh or complete in
+every run.
+
+ Advisory state is
+read from persisted scores
+
+ The desk’s advisory behavior hangs off persisted score state, not
+just the latest request. Before later hypotheses can be generated, the
+code consults what has already been stored. Missing score state remains
+an empty unscored state, but unreadable or non-list score history now
+blocks generation and listing until the file is inspected and repaired
+or archived.
+
+ That distinction matters because it changes what ‘blocked’ means in
+practice. A stored no-go decision suppresses later hypotheses, and
+corrupt persistence now blocks instead of silently reopening the gate.
+Empty history still means no review decision has been recorded; whether
+that should also block is an owner policy decision.
+
+ State 
+ Score-list result 
+ Gate state / advisory effect 
+
+ Missing or empty score file 
+ Zero rows, plus the current gate state 
+ The desk stays open because empty state does not trigger a
+block. 
+
+ Populated score file 
+ Rows returned in reverse order, trimmed to the requested limit 
+ The latest persisted gate state governs whether later advisory
+generation can proceed. 
+
+ Corrupt or non-list persisted score log 
+ Blocked unreadable state 
+ Advisory generation and score listing block until the score history
+is inspected and repaired or archived. 
+
+ Read that table as a control story, not just a display rule. When the
+score file is present and populated, the desk can surface a bounded
+history of scored entries and apply the persisted gate. When the file is
+absent or empty, the view degrades to a no-rows state without collapsing
+the whole desk. When the file is unreadable, the path now blocks. The
+remaining owner decision is whether genuinely missing score history
+should remain an empty state or become a hard gate.
+
+ Score writes trust the
+caller boundary
+
+ The write path is equally important because it shows where authority
+is and is not enforced. The inspected score writer accepts reviewer and
+gate values from the caller, stores them, and verifies that the file was
+written by reading it back. What it does not show is an identity check
+at the body boundary. So the persisted review record reflects the values
+the caller supplied, not an independently proven reviewer identity.
+
+ For an owner, that means the review system’s trust model is only as
+strong as the outer transport or access wrapper around it, and that
+outer boundary was not verified in this snapshot. The safe reading is
+narrower than “anyone can edit it,” because reachability was not
+inspected; but it is still wider than “the writer itself enforces
+reviewer authority.” In other words, the desk confirms persistence, not
+legitimacy. Until the caller boundary is verified, the manual should
+treat the score writer as accepting caller-provided review metadata
+rather than as a self-authenticating gate.
+
+ Figure: Refresh is staged and best-effort: source
+pulls run before rebuild, and individual failures do not stop the chain
+from writing a partial snapshot.
+
+flowchart TD
+ A[Start refresh] --> B[Pull sources]
+ B --> C[Company facts]
+ C --> D[Filings]
+ D --> E[News]
+ E --> F[Job postings]
+ F --> G[Prices]
+ G --> H[Rebuild local data]
+ C -. warning or failure .-> H
+ D -. warning or failure .-> H
+ E -. warning or failure .-> H
+ F -. warning or failure .-> H
+ G -. warning or failure .-> H
+
+ A refresh starts by pulling sources in order, then rebuilds local
+data from what those pulls produced. If one source warns or fails, the
+run can still continue to the rebuild step, so the desk may finish with
+a partial snapshot instead of stopping outright.
+
+ Figure: A populated score log can carry a blocking
+review state. Missing score history remains an empty state; unreadable
+score persistence now blocks later hypotheses until repaired.
+
+flowchart LR
+ subgraph L[Populated score state]
+ A[Score rows present] --> B[Latest review state]
+ B --> C[Blocking review state]
+ C --> D[Later hypotheses stay blocked]
+ end
+ subgraph R[Missing or unreadable score state]
+ E[No usable score log] --> F[Empty score state]
+ F --> G[Later hypotheses remain open]
+ end
+
+ When score rows are present, the latest review state can be blocking
+and later hypotheses stay blocked. When the score log is missing or
+unreadable, the desk falls back to an empty score state, and later
+hypotheses remain open instead of being blocked.
+
+ Figure: The score writer persists caller-supplied
+reviewer and gate decision values and verifies only that the file was
+written back; the outer caller identity boundary remains unverified.
+
+flowchart TD
+ A[Caller reaches score write] --> B[Supplies reviewer and gate decision]
+ B --> C[Writer stores the submitted review state]
+ C --> D[Writer reads it back to confirm persistence]
+ A -. outer identity check not proven .-> E[Unverified caller boundary]
+
+ The score write path accepts reviewer and gate decision values from
+the caller, stores them, and reads them back to confirm the file was
+written. What is not proven is the outer caller identity boundary, so
+the owner should treat the write path as persistent but not
+self-authenticating.
+
+ What This Snapshot Proves
+
+ The refresh chain
+is fixed and multi-source
+
+ The reviewed evidence proves that the refresh path does not rely on a
+single market feed. It pulls company facts from SEC sources, then SEC
+filings, then Google News RSS, then job postings, and then Stooq prices
+before the rebuild step runs. That order matters because it tells the
+owner what kind of freshness the desk can actually claim: it is
+assembling a local intelligence snapshot from several upstream inputs
+first, and only after those pulls does it move into rebuilding the desk
+data.
+
+ The practical consequence is that a failed upstream pull does not
+erase the existence of the chain; it leaves the refresh in a partial
+state that still reflects the order the desk tried to follow. That is
+useful for operator reasoning, because it shows where missing evidence
+can enter the system. The boundary is equally important: the snapshot
+proves the sequence and the presence of those sources, but it does not
+prove those sources were complete, current, or equally reliable at the
+time of every run.
+
+ Empty score state does not
+hard-fail
+
+ The score-list helper has a verified empty-state path. When no score
+file exists, or when the file is empty, the helper does not collapse
+into an error path. It returns no score rows and keeps reporting the
+current gate state instead. That is a meaningful design choice for the
+owner because it means the desk can still show its present review
+posture even when there is nothing persisted to list.
+
+ This matters because an empty or missing score log is not treated as
+a system failure in the evidence we reviewed. The desk therefore remains
+readable in a blank state, which is better than hiding the gate behind
+an exception. The limit is that this proof is about the helper’s
+behavior in the cases the evidence covered; it does not establish what
+every surrounding view or caller does with that result.
+
+ The
+score writer is present, but the caller boundary is not closed
+
+ The reviewed variation four bundle includes the score writer, and
+that writer re-reads the saved data after it writes it. That reread step
+is the strongest sign in this snapshot that the write is meant to be
+persistent rather than merely assembled in memory. It also means the
+desk has a local check that the stored score state can be read back
+after submission.
+
+ What this snapshot does not prove is the outer caller boundary. The
+evidence shows the body of the writer and what it stores, but it does
+not verify the full path that decides who is allowed to reach that body
+in the first place. So the owner can trust that the writer persists and
+confirms its own output, but should not read that as proof that caller
+identity is enforced at the edge. The difference is important: a
+well-behaved writer can still sit behind a weaker entry point.
+
+ Navigation stays desk-local
+
+ No verified shared shell or router was found in the reviewed runtime
+evidence. That means the safest proven reading of the product is still
+desk-local navigation, not a confirmed unified cockpit across desks. The
+top-level documentation may suggest a broader shared frame, but this
+snapshot does not close that gap.
+
+ For the owner, the consequence is simple: the desk should be
+described and reasoned about as its own visible surface until a shared
+navigation layer is actually verified in live code. That avoids
+overstating how much of the workspace is truly unified. The boundary is
+not that a shared shell is impossible; it is that this evidence set did
+not establish one, so the manual should not pretend it did.
+
+ What Looks Solid
+
+ Clear refresh order
+
+ The strongest part of the desk is that its refresh flow is explicit
+about sequence and about how it behaves when something upstream goes
+wrong. Sources are pulled before the rebuild step, and the path is
+written to keep moving after warnings or individual source failures
+rather than pretending every refresh is all-or-nothing. For an operator,
+that matters because the desk is easier to reason about in the real
+world: if one feed is late or a source pull only produces partial
+output, the refresh does not stop being useful just because the ideal
+path was interrupted.
+
+ The practical effect is that the operator can tell the difference
+between “the desk ran” and “every source was perfect”. That is a useful
+boundary. It means the desk favors continuity over ceremonial
+completeness, which is usually the right tradeoff for a research
+workflow that depends on outside feeds. The qualifier is equally
+important: this is best-effort behavior, not proof of atomic freshness.
+A refresh can still leave partial but usable snapshots, so the owner
+should read the result as resilient, not magically complete.
+
+ Empty state that still
+says something
+
+ The score-list behavior is also well-shaped for day-to-day use. When
+no score file is present, or when it is empty, the desk does not
+collapse into an error state. Instead, it returns no score rows and
+still reports the current gate state. That gives the reviewer or
+operator a stable surface even when there is no history to show.
+
+ This matters because an empty desk is not the same thing as a broken
+desk. In a real review cycle, there will be times when scoring has not
+started yet, or when persistence has been reset. In that case, the user
+still needs to know whether the desk currently considers the gate open
+or closed. A simple example is a new AMKR review run: the score list may
+be blank on the first day, but the gate state still tells the reviewer
+whether advisory generation is currently being held back or allowed
+through. The boundary is that this tells you the visible state of the
+desk, not that the underlying review process has been fully
+validated.
+
+ What is confirmed, and what
+is not
+
+ The reviewed evidence is also clean about scope. It clearly separates
+desk-local behavior that is confirmed here from the parts that remain
+unverified, especially shared navigation and the outer caller boundary
+around score submission. That separation is a strength because it
+prevents the manual from overstating control that has not been
+demonstrated in the reviewed runtime.
+
+ For the owner, the consequence is straightforward: you can trust the
+desk-local refresh and score-list behavior as observed, but you should
+not assume the surrounding shell or the caller enforcement story is
+equally settled. The practical risk is not hidden inside the desk; it
+sits at the boundary. A score write may accept reviewer and gate values
+from the caller, and the reviewed evidence does not prove that an outer
+wrapper blocks unauthorized access before that point. Likewise, the
+broader navigation shape remains desk-local in the evidence rather than
+proven as one shared shell. That is not a flaw in the sectioned desk
+behavior itself. It is a useful limit on how far the confirmed story can
+be stretched.
+
+ Evidence Boundary
+
+ Evidence boundary — Reviewed: - The OSAT refresh
+chain and its best-effort failure handling. - The advisory gate logic
+that reads persisted score state. - The score-list fallback behavior
+when score files are missing or empty. - The score submission path that
+writes reviewer and gate values. - The desk-local service shape already
+established by the broader reviewed evidence.
+
+ Not reviewed: - Any shared shell or router implementation. - Any
+outer user interface, API wrapper, or authorization layer around score
+submission. - Any live external data source beyond the repository
+evidence. - Any runtime state outside the reviewed snapshot.
+
+ Reverify the refresh path by tracing a failed upstream pull through
+the next rebuild; reverify the gate if the empty-history policy changes;
+reverify caller authority by inspecting the outer entry point that
+invokes score submission; reverify navigation only if a shared shell or
+router is later confirmed in live runtime code.
+
+ Reviewed: blue-az/bt-inc-platform repository snapshot, Founder/owner
+context
+
+ Not reviewed: External runtime and integrations, Unreviewed runtime
+and owner context
+
+ Portfolio Desk:
+Safe-Mode Research Workflows
+
+ This chapter is built from the reviewed docs and runtime
+evidence, so it shows what the portfolio desk does today, not what you
+may intend it to be. The verified picture is a safe-mode portfolio desk
+with sanitized data: private holdings, account numbers, transactions,
+and balances were removed. 
+
+ One-Minute Snapshot
+
+ This chapter is built from the reviewed docs and runtime evidence, so
+it shows what the portfolio desk does today, not what you may intend it
+to be. The verified picture is a safe-mode portfolio desk with sanitized
+data: private holdings, account numbers, transactions, and balances were
+removed. The tool set grows by variation tier instead of arriving all at
+once, so the real question for you is which tier you are looking at and
+whether you want it kept in mock, sanitized mode.
+
+ What You Should Be Able To
+Explain
+
+ Explain why the portfolio desk should be read as one bounded desk
+inside a wider workspace, not as the whole product identity.
+
+ Explain what Safe Mode means here in plain owner terms: sanitized
+portfolio logic, not live holdings.
+
+ Explain how variation tiers change the tool bundle and why later
+tiers should not be assumed to exist in earlier ones.
+
+ How to Think About the
+Portfolio Desk
+
+ A desk, not the whole product
+
+ Think of the portfolio area as one bounded desk inside a larger
+workspace, not as proof that the whole product shares one common front
+door. The reviewed runtime did not verify a single shared shell or
+router, even though the top-level material still talks in unified terms.
+For an owner, that matters because it limits how much you can generalize
+from this desk: what is true here is safe to treat as desk-local unless
+another reviewed surface proves it applies more widely.
+
+ A simple way to picture the boundary is this: you are looking at one
+research desk that has its own live surface and its own rules of
+exposure, but not a confirmed workspace-wide navigation layer. That
+means the safest mental model is “one desk, one evidence base”. If you
+later discover another desk with different behavior, the portfolio desk
+does not automatically tell you how that other desk works. It only tells
+you what this bounded portfolio workspace reveals.
+
+ Safe Mode means
+sanitized portfolio logic
+
+ Safe Mode here is not a cosmetic label. The evidence says the
+portfolio desk was sanitized by removing private holdings, account
+numbers, transactions, and balances. In owner terms, that means you
+should read the desk as mock portfolio logic with sensitive portfolio
+detail stripped out, not as a live holdings system.
+
+ The consequence is practical: output from this desk can be useful for
+understanding workflow shape, tiered capability, and research behavior,
+but it should not be mistaken for a production account view. A report
+may look portfolio-shaped and still be intentionally incomplete because
+the sensitive parts were removed. The boundary matters because it
+protects you from over-reading the desk as if it were connected to real
+customer assets. What the evidence establishes is the removal of those
+sensitive categories; it does not establish every possible portfolio
+field or every downstream use that might have been preserved.
+
+ For example, if an analyst sees a portfolio summary in Safe Mode, the
+right interpretation is “this shows the desk’s logic with sensitive data
+sanitized,” not “this is an authoritative live account snapshot.” That
+distinction changes how you rely on it: good for structure, comparisons,
+and workflow testing, but not for operational decisions that require
+live balances.
+
+ Variation adds capability
+in layers
+
+ The portfolio desk also has a cumulative shape. Capability does not
+arrive all at once; it expands by variation tier, and later tiers build
+on earlier ones instead of replacing them. That means each tier should
+be read as an additive package: the earlier capability remains the base,
+and later variation layers append more tools on top.
+
+ For an owner, this is the important mental shortcut: do not assume
+that a higher tier simply renames the desk or swaps the whole bundle.
+The reviewed evidence shows a progression from smaller to larger tool
+sets, with later variation adding to the exported registry rather than
+starting from scratch. In other words, the desk grows by accretion. That
+makes tier number meaningful, because it signals how much of the desk
+has been built out and what level of capability you should expect to
+see.
+
+ The boundary is equally important. Because the tiers are cumulative,
+you should not infer that every deployment or snapshot includes the same
+bundle. A claim about a later tier is not automatically a claim about an
+earlier one. If you are evaluating the desk in practice, the owner
+question is always: which variation am I looking at, and what was added
+there that was not present before? A later-tier example might include
+watchlist or alert-related behavior that simply does not exist in the
+earlier package. That is a packaging difference, not a
+contradiction.
+
+ Taken together, these three ideas give you the durable picture: a
+desk-local portfolio surface, deliberately sanitized into Safe Mode,
+with capability layered by variation. That is the right frame for
+interpreting the rest of the chapter without turning this desk into the
+identity of the whole workspace.
+
+ Figure: Because the sensitive facts are stripped at
+the desk boundary, the output can help the owner study workflow shape,
+but it cannot be treated as proof of real positions or balances.
+
+flowchart TD
+ subgraph D[Safe Mode portfolio desk]
+ A[Local portfolio snapshot] --> B[Desk logic]
+ B --> C[Sanitized output]
+ end
+ X[Private holdings, account numbers, transactions, balances] -. removed at the boundary .-> A
+ C --> Y[Useful for research and workflow checks]
+ C -. not a live holdings view .-> Z[Owner should not treat this as account truth]
+
+ The diagram shows a local portfolio snapshot entering the Safe Mode
+desk, where desk logic turns it into sanitized output. Private holdings,
+account numbers, transactions, and balances are removed at that
+boundary. The consequence is that the result is useful for research and
+workflow checks, but it is not a live holdings view and should not be
+treated as account truth.
+
+ Figure: The verified runtime surface is desk-local,
+so the owner should keep navigation claims scoped to each desk until a
+shared front door is proven in live code.
+
+flowchart TD
+ A[Reviewed runtime] --> B[Desk-local service]
+ A --> C[Shared front door]
+ B --> D[Verified]
+ C --> E[Still unproven]
+ D --> F[Keep navigation claims at the desk level]
+ E --> F
+
+ The diagram starts with the reviewed runtime and splits it into two
+paths: desk-local service surfaces that are verified, and a shared front
+door that is still unproven. Both paths lead to the same consequence:
+navigation claims should stay at the desk level until a shared entry
+layer is actually proven.
+
+ What Changes by Variation
+Tier
+
+ Tier progression at a glance
+
+ The portfolio desk does not arrive as one fixed bundle of tools. It
+expands cumulatively, so each variation is best read as a step up from
+the previous one: the earlier tier stays in place, then the next tier
+adds to it. That is the practical consequence for the owner. You do not
+compare the tiers by asking whether they describe the same desk in
+different words; you compare them by asking what new work becomes
+possible at each step.
+
+ Variation 
+ Tools exported 
+ What this tier adds 
+
+ 1 
+ 33 
+ Baseline portfolio bundle. 
+
+ 2 
+ 42 
+ Adds nine more tools on top of variation 1. 
+
+ 3 
+ 53 
+ Adds eleven more tools on top of variation 2. 
+
+ 4 
+ 60 
+ Adds seven watchlist, alert, and cross-pollinated tools, then
+regenerates the exported tool-name list. 
+
+ How to read the step-up
+
+ The counts matter because they tell the owner that the desk is
+packaged by variation, not by a single all-or-nothing release. Variation
+1 already exports 33 tools, variation 2 raises that to 42, variation 3
+raises it again to 53, and variation 4 reaches 60. The key operating
+point is that the later tiers append to the earlier registry instead of
+replacing it. In a concrete planning scenario, that means someone
+checking variation 4 should not assume a variation 2-style tool surface
+plus a few isolated extras; the later bundle carries forward the earlier
+tools and then adds the watchlist, alert, and cross-pollinated layer on
+top.
+
+ Why the boundary still
+matters
+
+ This growth pattern sits inside a safe-mode portfolio package, not a
+live holdings operating system. The reviewed evidence ties the package
+to a local portfolio snapshot and the current variation implementations
+that export the tools, so the owner should treat the desk as a bounded
+research surface whose shape depends on which variation is being built
+or inspected. That boundary matters because it limits what the counts
+can prove: they show how much tool surface is present in the package,
+but not live portfolio completeness, account freshness, or real-time
+brokerage behavior. In other words, the desk is substantial, but it is
+still a sanitized portfolio desk with a local snapshot behind it.
+
+ Figure: The owner should compare tiers as additive
+packages, not as alternative names for the same bundle; each later tier
+carries the earlier base forward and adds more capability on top.
+
+flowchart LR
+ V1[Variation 1\n33 tools] --> V2[Variation 2\n42 tools]
+ V1 --> V3[Variation 3\n53 tools]
+ V1 --> V4[Variation 4\n60 tools]
+ V2 --> A[Adds more tools to the earlier bundle]
+ V3 --> B[Adds even more tools to the earlier bundle]
+ V4 --> C[Adds watchlist and alert tools, then rebuilds the tool list]
+
+ The diagram compares four variation tiers. Variation 1 starts with 33
+tools. Variation 2 rises to 42 tools by adding more to the earlier
+bundle. Variation 3 rises to 53 tools by adding even more on top of that
+base. Variation 4 reaches 60 tools and adds watchlist and alert tools
+before rebuilding the tool list. The consequence is that capability has
+to be read tier by tier, because later tiers append to earlier ones
+instead of replacing them.
+
+ What the Evidence Clearly
+Shows
+
+ Safe Mode is stated
+in more than one place
+
+ The reviewed evidence does not leave Safe Mode to inference. The
+top-level documentation, the coverage index, and the portfolio
+validation policy all point to the same reading: this desk is running
+with sanitized portfolio data, not with live holdings. That matters
+because it turns Safe Mode from a loose label into a repeated condition
+across separate sources. For an owner, the practical consequence is
+simple: the desk should be read as a bounded research surface whose
+outputs are meant to be inspected as mock or sanitized portfolio logic,
+not as a statement of real account state.
+
+ This repeated framing also sets the limit of what can be promised.
+The evidence supports a safe, stripped-down portfolio representation,
+but it does not establish a live portfolio service hiding underneath the
+same wording. So if a user sees portfolio behavior in this desk, the
+correct expectation is that it comes from the sanitized package the
+repository describes, not from a proven production feed. A concrete
+example is a portfolio summary that looks internally consistent inside
+the desk but still cannot be taken as proof of a real brokerage account
+or current market position.
+
+ What was removed
+
+ The same evidence is specific about what was taken out: private
+holdings, account numbers, transactions, and balances. That is a
+meaningful boundary because it tells the owner what kinds of claims the
+desk can no longer make. Without those fields, the desk may still
+support portfolio-shaped analysis or demonstrations, but it is no longer
+carrying the personal financial facts that would make it a live holdings
+system.
+
+ The removal is not just cosmetic. Private holdings and balances are
+the facts that would anchor ownership, exposure, and value at a specific
+moment; account numbers and transactions are the identifiers and
+activity trail that would connect the desk to a real account history.
+Once those are removed, the desk can still show portfolio logic, but it
+cannot be read as evidence of a real position ledger. For example, if an
+analyst reviews a sample allocation or balance-like display, the owner
+should treat it as a sanitized representation of portfolio behavior, not
+as a verified account record that could be used for reconciliation.
+
+ What the saved artifact
+is bounded to
+
+ The reviewed material also narrows the saved result. It is bounded to
+the local portfolio snapshot plus the current variation implementations.
+That means the exported artifact is not described as a free-floating,
+live portfolio model that absorbs whatever external state exists at the
+moment. It is tied to the snapshot the repository carries locally and to
+the variation code that is currently in force.
+
+ For the owner, this is the main operational constraint: if the
+snapshot changes, or if the current variation set changes, the artifact
+can change with it. The evidence does not establish a stronger guarantee
+such as live synchronization, continuous refresh, or completeness beyond
+the snapshot boundary. So the safest way to read the saved output is as
+a desk-local package assembled from the repository’s present snapshot
+and its active variation code. A practical example is a regenerated
+portfolio export that reflects the current variation bundle even when
+there is no proof that it matches a live upstream account state.
+
+ The shared shell was not
+verified
+
+ The final boundary is navigation and runtime shape. The reviewed
+runtime did not verify a shared shell or router, even though the
+top-level docs still speak in the language of a unified cockpit and
+manual. That gap matters because it separates document framing from
+verified behavior. The docs suggest a single front door, but the live
+evidence only confirms desk-local surfaces.
+
+ So the owner should not treat the unified cockpit language as
+established runtime fact in this chapter. At most, it is the shape
+implied by the docs; the reviewed code did not confirm it. The
+consequence is a conservative one: navigation should be understood at
+the desk level until a shared shell is actually proven. If a reader
+expects to move through one common interface across the workspace, the
+evidence here does not support that claim yet. The correct verified
+statement is narrower: this portfolio desk exists as a bounded,
+sanitized desk surface, and the broader shared entry point remains
+unconfirmed.
+
+ What Is Solid Here
+
+ Explicit tiering
+
+ The strongest thing about the portfolio desk is that its packaging is
+cumulative and visible. Variation 1 starts with 33 tools, and the later
+steps rise to 42, 53, and 60 by adding on top of what came before rather
+than swapping the whole bundle out. For an owner, that matters because
+tier boundaries become something you can reason about directly: a larger
+count is not just a bigger number, it is a signal that the desk has
+acquired additional capability while retaining the earlier base. In a
+review, that lets you compare two variations as related packages instead
+of treating each one as a separate product.
+
+ That clarity is valuable, but it has a boundary. The evidence
+supports this staircase for the reviewed portfolio path; it does not
+prove that every future variation will keep the same shape. What is
+solid is the pattern already shown: the desk grows by explicit layering,
+not by hidden replacement. If someone asks whether a higher tier still
+contains the earlier desk logic, the reviewed packaging says yes for the
+observed sequence. A lower tier should not be assumed to contain later
+additions that only appear once the package has been expanded.
+
+ Safe Mode is repeated, not
+implied
+
+ The safe-mode boundary is also unusually sturdy because it appears
+across independent documents, not just one note. The root README, the
+coverage index, and the validation policy all point to sanitized
+portfolio data and a local snapshot. That repetition matters because it
+turns “no live holdings” into a consistent reading rather than an
+incidental label. For the owner, the consequence is simple: this desk
+should be described as mock portfolio logic with removed holdings
+details, not as a live account system.
+
+ That is a strength because it lowers the risk of overclaiming. If a
+support person or reviewer sees missing holdings fields, account
+numbers, transactions, or balances, the reviewed evidence says those
+omissions are part of the safe-mode posture, not proof that the desk is
+incomplete or broken. The limit is equally important: this confidence
+depends on the desk remaining in Safe Mode and on the sanitized snapshot
+staying the reference point. If the desk moves out of that posture, this
+reading has to be refreshed rather than carried forward unchanged.
+
+ The live boundary is
+desk-local
+
+ The runtime boundary is defensible because what was actually verified
+is desk-local. The reviewed live surfaces are desk-local SQLite
+services, while the shared shell or router suggested by the top-level
+docs was not verified. That gives the owner a practical floor: the
+portfolio desk can be treated as a bounded, working surface on its own
+terms even though the broader workspace wrapper remains unproven. In
+other words, the evidence is strong enough to describe the portfolio
+desk itself without pretending the entire product has been confirmed as
+one unified shell.
+
+ A concrete way this helps is in expectation-setting. If one desk
+behaves normally while another desk is unavailable, the reviewed
+evidence still supports the first desk as a local service path. What it
+does not support is a claim that every desk must be passing through the
+same live router behind the scenes. That distinction is useful because
+it keeps the manual honest: the portfolio desk has a verified boundary,
+but the wider shell behavior stays outside the proof until a live shared
+router is actually found.
+
+ Evidence Boundary
+
+ Evidence boundary — Reviewed: - The top-level README
+and coverage index that describe the portfolio desk and its safe-mode
+posture. - The portfolio validation policy that bounds the saved
+artifact and current variation implementations. - The portfolio
+variations README and the variation 1 and variation 4 tool registries
+that show cumulative tiering.
+
+ Not reviewed: - A verified shared shell or router in live runtime
+code. - Any deployed user interface outside the reviewed repository
+evidence. - Real portfolio feeds, account state, freshness, or
+production brokerage behavior. - Any broader runtime behavior beyond the
+reviewed desk-local evidence.
+
+ Recheck the portfolio docs if Safe Mode or the sanitized data story
+changes. Inspect later variation tool registries to confirm whether the
+cumulative counts still hold. Verify any shared router in live runtime
+before widening navigation claims.
+
+ Reviewed: blue-az/bt-inc-platform repository snapshot, Founder/owner
+context
+
+ Not reviewed: External runtime and integrations, Unreviewed runtime
+and owner context
+
+ Review
+Appendix: Deduped Attention And Owner Decisions
+
+ Resolved in this pass
+
+ Synthetic/fiction boundary verified. The README says BT Inc. is
+fictional, reflect-manual/NOTE.md says this repo is a
+synthetic multi-domain conglomerate, and the generated manual preserves
+that boundary instead of pretending the platform is one real production
+shell.
+
+ Portfolio Safe Mode boundary verified. The manual repeatedly says
+portfolio outputs are sanitized/mock snapshot logic, not live holdings
+or account truth.
+
+ OSAT corrupt score history fail-open fixed. Corrupt or non-list
+advisory score JSON no longer looks like empty score history; generation
+and listing now block until the score history is inspected and repaired
+or archived.
+
+ OSAT tests now exercise the local BT Inc. implementation instead of
+importing Project Phoenix’s external domains.xAmkor 
+module.
+
+ Things to know
+
+ Shared navigation is not proven. Keep the manual desk-first until a
+live shared router or shell is verified.
+
+ Refresh is not atomic. A successful refresh can still represent
+partial upstream coverage when individual pulls warn or fail.
+
+ Empty score history is still an explicit empty state, not a
+historical NO_GO. Corrupt score history is now blocked.
+
+ Reviewer identity is still caller-supplied at the score write
+boundary. Treat identity enforcement as an owner decision unless a
+caller-auth layer is added.
+
+ Medtech’s read-only analyst path does not prove every desk is
+read-only; maintenance and refresh scripts can write.
+
+ Portfolio variation tiers are cumulative and Safe Mode; do not read
+higher tiers as live brokerage functionality.
+
+ Open owner decisions
+
+ Should navigation stay desk-local until a shared router is
+proven?
+
+ Should refresh success require complete upstream source coverage, or
+is partial snapshot rebuild acceptable with explicit warnings?
+
+ Should missing score history block advisory generation, or remain an
+explicit unscored empty state?
+
+ Where should reviewer identity be enforced before a score write is
+accepted?
+
+ Should portfolio remain permanently framed as sanitized mock logic,
+or is there a future live-holdings mode that requires a separate
+manual?

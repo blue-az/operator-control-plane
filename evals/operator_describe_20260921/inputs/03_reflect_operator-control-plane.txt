@@ -1,0 +1,1602 @@
+# SOURCE: https://bulkheadtau.com/bulkhead-tau/reflect/operator-control-plane.html
+# captured 2026-09-21, text extracted from the live page
+
+Operator Control Plane — Owner's Manual 
+
+ Operator Control Plane — Owner's Manual
+
+ Visual package (live ledger orientation, not a Reflect rescan):
+
+ Project board 
+
+ Issue catalog 
+
+ Project map 
+
+ Open a task card on the project board for that task’s resolution ledger (claim → evidence → review → verifier → handoff).
+
+ Visual package 
+
+ Owner’s Manual
+for blue-az/operator-control-plane 
+
+ What this manual does not
+establish 
+
+ Quickstart 
+
+ What Operator Control Plane
+Is 
+
+ Running the Core Ledger
+Workflow 
+
+ Governing the Ledger
+and Evidence Record 
+
+ When to Use Enrolled
+Authority Mode 
+
+ Operating Safely and
+Recovering Cleanly 
+
+ Harnesses, Delegation, and
+Study Work 
+
+ Entry Checks 
+
+ Phase States and Control 
+
+ Approval, Pause, Resume 
+
+ Checkpointed Replay 
+
+ Local
+Comparison 
+
+ Worked
+example 
+
+ Command
+reference 
+
+ Configuration 
+
+ Appendix —
+Attention Items and Owner Decisions 
+
+ Owner’s Manual
+for blue-az/operator-control-plane
+
+ Generated from a Reflect scan of
+ blue-az/operator-control-plane-v2:main@7968d1a , an archive
+snapshot of the product tree at
+ blue-az/operator-control-plane@cab4a7a with the benchmark
+corpus removed. The chapters are Reflect’s. The quickstart, worked
+example, command reference, configuration notes and appendix are from
+the repository and edited by hand.
+
+ Attention items and owner decisions are deduplicated into the
+appendix rather than interleaved. Two scans of the same tree produced
+two differently worded card sets; the appendix states their union
+once.
+
+ What this manual does not
+establish
+
+ It is written from a static read of the source tree at the pin above.
+Three things it describes but does not demonstrate.
+
+ Runtime compatibility with external harness
+binaries. Twelve harness profiles are seeded at
+ operator init and listed in the command reference. That
+they are cataloged is a fact about the source. That each provider’s CLI
+still behaves as this product expects is not shown here.
+
+ Live host behaviour for enrolled authority. 
+Provisioning, service enablement and rollback safety on the broker path
+were not exercised against a real host. A checkout is not a production
+install.
+
+ Backup and migration guarantees beyond the append-only
+model. The durable history and its projections are described.
+Whether a particular backup or migration procedure restores a running
+system is an operational question this document does not answer.
+
+ Two limits the scans raised are answered rather than open. Product
+intent was listed as unconfirmed; publishing this manual confirms it.
+Whether this repository is the whole system or one part of a larger one
+was listed as unknown; it is a standalone, domain-neutral control plane,
+developed alongside Bulkhead Tau but not importing, invoking or
+requiring it.
+
+ Quickstart
+
+ pip install -r requirements.txt # runtime: just PyYAML 
+ pip install -r requirements-dev.txt # tests/lint: pytest, ruff, black, isort 
+ ./operator --help 
+
+ mkdir /tmp/operator-demo && cd /tmp/operator-demo # init writes into the current directory 
+ /path/to/operator init # create a .operator/ ledger here 
+ /path/to/operator doctor # consistency check -> "All records consistent." 
+
+ Run the tests from the repo:
+
+ python3 -m pytest tests/test_operator.py -q # repo CLI, ledger layout, identity, doctor, usage 
+ python3 -m pytest tests/ -q # everything (some suites need a Linux host) 
+
+ The ledger ( .operator/ ) is gitignored — it’s your work
+history, not the tool. Its durable local event history is stored in
+ .operator/ledger.sqlite3 .
+
+ What Operator Control Plane
+Is
+
+ Operator Control Plane is a local-first control plane for AI
+coding work. Its center of gravity is a repository-local ledger that
+records claims, evidence, verification, and the doctor audit trail. That
+makes the product a trust record for work, not a generic workspace or
+hosted service. The roles are distinct. A builder creates claims and
+drafts evidence. A verifier establishes trusted sign-off. 
+
+ One-Minute Snapshot
+
+ Operator Control Plane is a local-first control plane for AI coding
+work. Its center of gravity is a repository-local ledger that records
+claims, evidence, verification, and the doctor audit trail. That makes
+the product a trust record for work, not a generic workspace or hosted
+service.
+
+ The roles are distinct. A builder creates claims and drafts evidence.
+A verifier establishes trusted sign-off. An administrator handles the
+enrolled authority boundary and its host prerequisites. A harness can
+run delegated or study work, but it is not a trust authority. The owner
+is the person reading this manual and deciding what the product should
+promise.
+
+ The product also has a layered boundary. The everyday path stays
+local. The enrolled authority path is optional and consequential. Later
+chapters separate the core workflow, the ledger lifecycle, the authority
+choice, recovery, and harness work instead of blending them into one
+story.
+
+ Mental Model
+
+ Operator Control Plane is a local-first control plane for AI coding
+work. Its center of gravity is a repository-local ledger that records
+claims, evidence, verification, and the doctor audit trail. That makes
+the product a trust record for work, not a generic workspace or hosted
+service.
+
+ The roles are distinct. A builder creates claims and drafts evidence.
+A verifier establishes trusted sign-off. An administrator handles the
+enrolled authority boundary and its host prerequisites. A harness can
+run delegated or study work, but it is not a trust authority. The owner
+is the person reading this manual and deciding what the product should
+promise.
+
+ The native terms matter because they mark different kinds of risk. A
+claim is the statement tied to a task. Evidence is the retained proof
+attached to that claim. Verification is the trusted status. Doctor is
+the read-only audit. UID-isolated metadata is part of the trust check
+when identity matters.
+
+ Figure: The owner should read the repository-local
+ledger as the default path for ordinary work, with enrolled authority,
+root-only administration, and read-only snapshots kept on separate
+paths. That separation means the product is not one generic control
+surface.
+
+ flowchart TD
+ local[Repository-local ledger]
+ work[Everyday local work]
+ enrolled[Enrolled authority path]
+ admin[Root-only administration]
+ read[Read-only snapshot path]
+ work --> local
+ local -. optional .-> enrolled
+ enrolled --> admin
+ local -. separate read path .-> read 
+
+ The diagram shows everyday work flowing into the repository-local
+ledger first. From that local center, one separate path leads to
+enrolled authority, another to root-only administration, and another to
+read-only snapshots. The consequence is that ordinary use should be
+treated as the default trust boundary, while privileged and
+inspection-only paths stay distinct.
+
+ How It Works
+
+ By default, the product stays local. The Operator command line
+creates draft claims, keeps a verification command beside them, and
+stores evidence as retained snapshots in the repository-local ledger
+area. That is the everyday loop.
+
+ If the repository is enrolled, ordinary commit requests are
+role-gated and the broker becomes the authority boundary. Root-only
+enrollment and rebind actions sit in a separate administrator surface.
+Read-only snapshot requests are handled separately from mutating
+commits, so inspection and mutation do not share the same trust
+path.
+
+ Later chapters take the pieces apart one by one: the core workflow
+chapter covers the day-to-day loop, the ledger lifecycle chapter covers
+stored history and evidence governance, the authority chapter covers the
+local-versus-enrolled choice, the operations chapter covers recovery and
+host prerequisites, and the harness chapter covers delegation, studies,
+and usage accounting.
+
+ Verified Facts
+
+ The local claim path writes a draft record with verification still
+false, and evidence attachment copies local files into retained
+snapshots.
+
+ Doctor fails closed on verified records when evidence references,
+the verification command, self-verification, or UID-isolated metadata
+are missing or malformed. Draft records surface the same issues as
+warnings or infos, and warning-only runs still exit cleanly.
+
+ Ordinary broker commits are builder- or verifier-gated. Root-only
+enrollment and rebind are separate requests, and the administrator
+surface itself requires root and host preflight.
+
+ The broker’s read-only snapshot path is separate from commit
+handling, and reconciliation does not silently adopt a replaced store.
+It needs explicit acknowledgement before it resets and retries prepared
+work.
+
+ The public navigation still places the local loop first, with
+enrolled authority and secondary command families following behind
+it.
+
+ Strengths
+
+ The structure protects the owner in four ways: - It keeps the
+everyday trust boundary close to the repository, which makes claims and
+evidence easier to reason about. - It separates read-only inspection
+from mutating commit paths. - It keeps recovery explicit instead of
+silent, which lowers the risk of accidentally inheriting the wrong store
+state. - It keeps study and dogfood workflows in their own lane instead
+of letting them define the product’s main identity.
+
+ Running the Core Ledger
+Workflow
+
+ This chapter is the product’s trust loop. A builder turns work
+into a claim, attaches evidence, and a separate verifier turns that
+claim into trusted state. Doctor is the continuing check on that trust,
+not a repair tool. The owner needs to notice one sharp edge: closeout
+can be reopened if a later verifier write negates the transition
+claim. 
+
+ One-Minute Snapshot
+
+ This chapter is the product’s trust loop. A builder turns work into a
+claim, attaches evidence, and a separate verifier turns that claim into
+trusted state. Doctor is the continuing check on that trust, not a
+repair tool. The owner needs to notice one sharp edge: closeout can be
+reopened if a later verifier write negates the transition claim. In
+enrolled mode, the ordinary builder and verifier path stays separate
+from root-only authority changes.
+
+ Mental Model
+
+ Think of the core loop as a trust ladder. A task starts as work. A
+builder turns that work into a claim and attaches evidence. A verifier
+is a different role that can turn the claim into a trusted record.
+Doctor keeps checking whether the record still fits the rules.
+
+ The key owner rule is that narration and trust are separate. A claim
+can exist before it is trusted, but verified records are held to
+stricter checks than drafts. That split lets the product keep work
+flexible without pretending it is already authoritative.
+
+ Figure: The owner should read this as a handoff, not
+a blur: work is not trusted until it passes from builder output into
+verifier judgment, and doctor keeps checking the result afterward.
+
+ flowchart TD
+ W[Work] --> B[Builder]
+ B --> C[Draft claim]
+ B --> E[Evidence]
+ C --> V[Verifier]
+ E --> V
+ V --> T[Trusted record]
+ T --> D[Doctor]
+ D --> T 
+
+ Work flows to the builder, which produces a draft claim and evidence.
+Those feed the verifier, which can produce a trusted record. Doctor then
+checks the trusted record and keeps feeding its result back as an
+ongoing audit rather than becoming the step that creates trust.
+
+ How It Works
+
+ In the default local path, the builder creates a draft claim and
+evidence stays in the local ledger. That is the everyday owner boundary
+for repo-local work.
+
+ When the repository is enrolled, the ordinary path splits builder and
+verifier duties cleanly. Builders create claims and attach draft
+evidence, verifiers attach status, and task transitions to verified or
+complete only happen when the claimed task state and uid-isolated checks
+still line up. Root-only enrollment and repository rebind are separate
+privileged steps, not part of the normal loop.
+
+ Doctor is read-only. On verified records it fails closed for missing
+evidence, missing verification command, self-verification, and malformed
+uid-isolated metadata. On draft records the same findings stay advisory,
+so a warning does not mean the trust boundary itself has failed.
+
+ Closeout sits after verification, but it is not a permanent
+guarantee. A later negative verifier write on the transition claim can
+reopen the task and clear the closeout state. Any replay or resumable
+work belongs to the later study and recovery chapters, not to the core
+daily loop.
+
+ Figure: The daily loop is only one trust path.
+Keeping enrollment, rebind, and read-only snapshots separate prevents
+owner readers from treating privileged authority changes or inspections
+as ordinary workflow.
+
+ flowchart LR
+ subgraph D[Daily loop]
+ B[Builder work] --> C[Claims and evidence] --> V[Verification] --> T[Trusted record]
+ end
+ subgraph P[Separate paths]
+ R[Root-only enrollment and rebind]
+ S[Read-only snapshots]
+ end
+ R -. separate trust path .-> T
+ S -. separate trust path .-> T 
+
+ The diagram separates the daily builder/verifier loop from two other
+paths. Ordinary work goes through claims, evidence, and verification
+into a trusted record. Root-only enrollment and rebind stay in a
+separate privileged path, and read-only snapshots stay on their own
+path. The consequence is that the owner should not treat privileged
+authority changes or inspection views as part of normal workflow.
+
+ Verified Facts
+
+ The local path writes a draft claim with verification marked false
+and keeps the intended verification command separate from the claim
+itself.
+
+ Evidence attachment in the local path keeps a retained, hashed
+snapshot instead of treating a bare status write as enough.
+
+ Doctor is not a repair tool. It is an audit that returns a failure
+only when issues exist, and warnings alone do not make the run fail.
+
+ In enrolled mode, ordinary builder and verifier actions are
+role-separated, while root-only enrollment and rebind are separate
+privileged requests.
+
+ A negative verifier write can reopen a task that had already been
+closed.
+
+ The command surface is intentionally split so the core loop is shown
+first and study, dogfood, and admin work stay secondary.
+
+ Figure: Draft output can warn about the same
+problems that would block a verified record, but only verified records
+are enforced. That means a warning on a draft is not proof that the
+trust boundary failed.
+
+ flowchart LR
+ P[Same problem]
+ P --> D[Draft claim]
+ P --> V[Verified record]
+ D --> A[Warning or info]
+ V --> B[Blocking failure] 
+
+ One branch shows a draft claim: if it has missing evidence or trust
+details, doctor reports a warning or info. The other branch shows a
+verified record: the same kind of problem becomes a blocking failure.
+The consequence is that warning-only draft output should be read as
+advisory, not as a broken trust boundary.
+
+ Figure: A closed task is only closed while its
+transition claim remains verified. If a later negative verifier write
+lands, the closeout is withdrawn and the task can open again.
+
+ stateDiagram-v2
+ [*] --> InProgress
+ InProgress --> Closed : verifier marks it done
+ Closed --> InProgress : later negative verifier write
+ InProgress --> Closed : verifier marks it done again 
+
+ The lifecycle starts with work in progress. When verification
+succeeds, the task moves to closed. If a later negative verifier write
+arrives on the transition claim, the task moves back to in progress and
+closeout clears. The consequence is that closeout is provisional rather
+than permanently final.
+
+ Strengths
+
+ The product makes trust transitions visible instead of hiding them.
+The owner can distinguish a draft claim from a verified record and see
+when evidence is still only backing, not trust.
+
+ Builder and verifier responsibilities are separated before trusted
+state is changed. That makes the handoff easier to reason about and
+reduces the chance that one role quietly acts as the other.
+
+ Doctor keeps checking consistency after the fact instead of acting
+like a one-time acceptance step. That gives the owner a continuing
+signal when the record no longer matches the rules.
+
+ The manual and command surface both lead with the core local loop
+first. That matches the product’s owner-facing shape and keeps secondary
+tooling from crowding out the real daily path.
+
+ Governing the Ledger
+and Evidence Record
+
+ The ledger is the product’s memory: it decides what work exists,
+which evidence supports it, and what can be trusted later. In the local
+path, claim creation and evidence attachment build a retained record
+first; in enrolled mode, the broker and administrator surfaces separate
+ordinary mutations from privileged enrollment and rebind
+actions. 
+
+ One-Minute Snapshot
+
+ The ledger is the product’s memory: it decides what work exists,
+which evidence supports it, and what can be trusted later. In the local
+path, claim creation and evidence attachment build a retained record
+first; in enrolled mode, the broker and administrator surfaces separate
+ordinary mutations from privileged enrollment and rebind actions.
+Compatibility views help the product read and reconcile state, but they
+are not the same thing as the durable history.
+
+ For the owner, the important question is not just where data lives,
+but which record is canonical, which parts can be rebuilt, and which
+lifecycle choices can reopen or wedge work. That matters for
+auditability, recovery, backup, and migration decisions.
+
+ Mental Model
+
+ Think of the ledger as the governed record of work. It is where the
+product decides what happened, what evidence supports it, and what can
+be trusted later. The durable history is the part the owner should rely
+on for audit and recovery. Compatibility projections help the product
+read or reconcile that history, but they are not the same thing as the
+history itself.
+
+ Evidence attachments matter because they are provenance, not just
+storage. A claim can exist as a draft, but a draft does not carry the
+same trust weight as a verified claim. That distinction shapes
+auditability, reconciliation, and every recovery decision that depends
+on rebuilding confidence from local records.
+
+ Figure: The owner should treat the append-only
+history as the record that must survive restore and audit work. The
+other surfaces help the product read or rebuild state, but they cannot
+stand in for the durable record when recovery or evidence review
+matters.
+
+ flowchart LR
+ A[Append-only ledger] --> B[Canonical history]
+ A --> C[Compatibility read surface]
+ A --> D[Read-only snapshot]
+ B --> E[Restore and audit]
+ C --> E
+ D --> E 
+
+ The diagram shows one append-only ledger feeding three outcomes: the
+canonical history, a compatibility read surface, and a read-only
+snapshot. Only the canonical history is the durable record. The other
+surfaces can be rebuilt or reread, so backup and restore planning has to
+protect the history rather than only the convenient read surfaces.
+
+ How It Works
+
+ Locally, claim creation writes a draft record with explicit
+verification metadata, and evidence attachment stores a retained, hashed
+snapshot in the repository-local ledger. The audit step then treats
+verified records more strictly than drafts: verified items fail closed
+on missing evidence, missing verification command, self-verification, or
+malformed trusted-identity metadata, while drafts surface the same
+problems only as warnings or infos.
+
+ When the repository is enrolled, the trust boundary moves to the
+broker. Ordinary commits remain role-gated: builders create claims and
+attach draft evidence, verifiers attach status, and root-only enrollment
+or rebind sits outside that ordinary matrix. Read-only snapshots are
+handled separately from mutating requests, the broker ties requests to
+the connecting peer’s operating-system identity, and privileged
+administration stays root-only and stops at host preflight until the
+machine is ready.
+
+ Figure: Local work can begin with a draft claim and
+retained evidence, but that is not the same authority as the broker.
+Once the boundary moves to the broker, ordinary commits, read-only
+snapshots, and privileged enrollment or rebind each follow different
+checks, so the owner should not treat them as one flat write path.
+
+ flowchart TD
+ subgraph Local[Local path]
+ A[Builder creates a draft claim]
+ B[Retained evidence snapshot]
+ A --> B
+ end
+
+ subgraph Broker[Broker authority]
+ C[Ordinary commits]
+ D[Read-only snapshot]
+ E[Root-only enroll and rebind]
+ C --> D
+ C --> E
+ end
+
+ B --> F[Broker boundary]
+ F --> C 
+
+ The diagram separates the local path from broker authority. On the
+local side, a builder creates a draft claim and stores a retained
+evidence snapshot. At the broker boundary, ordinary commits, read-only
+snapshots, and root-only enroll or rebind are handled as separate
+authority paths. The consequence is that local record creation and
+broker-controlled actions must be governed differently.
+
+ Verified Facts
+
+ The durable history is append-only, and projection state is treated
+as a compatibility read surface.
+
+ Reconciliation does not silently adopt a replaced store; it needs an
+explicit reset acknowledgment, then it drops prepared work tied to the
+old store and resumes from the new incarnation.
+
+ A later negative verifier write can reopen a task if it demotes the
+transition claim.
+
+ The manual’s navigation keeps the local ledger first and demotes
+privileged and secondary workflows to later chapters.
+
+ Strengths
+
+ This design has a few strong governance traits. Evidence snapshots
+are retained and hashed instead of being treated as throwaway
+attachments. Ordinary commits are role-gated, while snapshot reads stay
+separate from mutating writes. The history model is append-only, and
+reconciliation refuses to paper over a store replacement. Those
+constraints give the owner a cleaner audit trail and a better chance of
+understanding what can be rebuilt versus what must be preserved.
+
+ When to Use Enrolled
+Authority Mode
+
+ Enrolled authority mode is the optional privileged layer above
+the repo-local ledger. It matters when the owner needs a separate
+host-managed trust boundary, not just local claim and evidence tracking.
+The change is consequential. Administrators take over install,
+enrollment, rotation, revocation, repository rebind, and
+recovery. 
+
+ One-Minute Snapshot
+
+ Enrolled authority mode is the optional privileged layer above the
+repo-local ledger. It matters when the owner needs a separate
+host-managed trust boundary, not just local claim and evidence
+tracking.
+
+ The change is consequential. Administrators take over install,
+enrollment, rotation, revocation, repository rebind, and recovery. The
+broker then enforces who may mutate trusted state, read-only snapshots
+stay separate from mutating commits, and reconciliation will not quietly
+adopt a replaced store. That gives the owner stronger control, but it
+also creates a harder boundary to operate and recover.
+
+ Mental Model
+
+ Treat the product as local-first with an optional privileged layer on
+top. In ordinary use, builders create claims and attach draft evidence,
+verifiers sign off, and the ledger records that work. Enrolled authority
+mode changes the trust model: administrators own the privileged
+lifecycle, and the broker becomes the gate for durable trusted-state
+changes.
+
+ That is the owner decision in this chapter. If the team only needs
+local evidence tracking, the local ledger is enough. If the team needs a
+separate host-managed trust boundary with stronger role separation and
+recovery discipline, enrolled authority mode is worth the cost.
+
+ Figure: The owner keeps a lighter local loop until
+the team truly needs a separate host-managed boundary. After enrollment,
+privilege is no longer shared across everyone who touches the product:
+administrators own the privileged lifecycle, while the broker keeps
+trusted-state changes behind its own gate.
+
+ flowchart TD
+ A[Repo-local ledger]
+ B[Authority enrolled]
+ C[Builder]
+ D[Verifier]
+ E[Administrator]
+ F[Broker]
+
+ A -->|ordinary claim and evidence work| C
+ A -->|ordinary claim and evidence work| D
+ B -->|adds a privileged boundary| E
+ B -->|puts trusted-state changes behind a gate| F
+ C -->|draft claims and evidence| A
+ D -->|verification writes| A
+ E -->|owns the privileged lifecycle| B
+ F -->|gates durable trusted-state changes| B 
+
+ The diagram contrasts two operating modes. In the local mode,
+builders and verifiers work against the repo-local ledger. In the
+enrolled mode, authority is added as a separate boundary, administrators
+own the privileged lifecycle, and the broker becomes the gate for
+durable trusted-state changes. The consequence is that the team trades
+simplicity for stronger role separation and controlled recovery.
+
+ How It Works
+
+ Enrollment is not a generic switch. The admin surface is root-only
+and stops until host preflight passes, so privileged actions do not
+blend into everyday product use. The client side resolves enrollment
+through a fixed registry and repository identity check, which means a
+moved or altered repository does not silently inherit authority.
+
+ On the broker side, ordinary claim, evidence, and transition writes
+are role-gated, while root-only enrollment and repository rebind stay
+separate. The broker also keeps read-only snapshots apart from mutating
+commits. Reconciliation is another deliberate step: if the authority
+store has been replaced, the operator must explicitly acknowledge the
+reset before reconciliation adopts the new incarnation. The day-to-day
+claim and evidence loop stays in the core workflow chapter; host failure
+and recovery details belong in the next chapter.
+
+ Figure: Privileged administration is not just
+another broker action. The owner gets a hard boundary: the root-only
+surface must clear host checks before enrollment or rebind can happen,
+and read-only snapshots remain separate from mutating commits so a
+viewer path cannot drift into a write path.
+
+ flowchart TD
+ A[Root-only admin surface]
+ B[Host checks pass]
+ C[Enroll, rotate, revoke, rebind]
+ D[Broker request path]
+ E[Read-only snapshot request]
+ F[Mutating commit request]
+
+ A --> B
+ B --> C
+ D --> E
+ D --> F
+ E -->|stays read-only| D
+ F -->|writes trusted state| D 
+
+ The diagram shows two separations. First, the root-only admin surface
+must pass host checks before enrollment, rotation, revocation, or
+repository rebind can proceed. Second, within the broker, read-only
+snapshot requests are handled on a separate path from mutating commit
+requests. The consequence is that privileged setup and ordinary use do
+not blend together, and read-only access cannot slip into a write.
+
+ Verified Facts
+
+ Local, non-enrolled work stays in the repo-local ledger, where claim
+creation and evidence retention are separate from trusted
+verification.
+
+ Verified records fail closed when evidence prerequisites or
+identity-isolation checks are broken, but draft records surface the same
+conditions only as warnings or infos.
+
+ The broker’s ordinary commit paths are role-gated, and root-only
+enrollment or rebind stay outside that matrix.
+
+ A later negative verifier write can reopen a task if the demoted
+claim was the transition claim.
+
+ Reconciliation refuses to silently adopt a replaced store unless the
+operator explicitly acknowledges the reset.
+
+ Read-only snapshots are handled separately from mutating broker
+commits, so the same boundary does not apply to both kinds of
+request.
+
+ Strengths
+
+ The design keeps the trust boundary visible instead of hiding it.
+Local work stays light until the owner chooses to enroll authority.
+After enrollment, the product does not pretend that every request is the
+same: builders, verifiers, administrators, and the broker each have
+their own lane, the broker is locked down, and store replacement is
+explicit rather than silent.
+
+ That makes it easier to audit who changed trust, not just what
+changed. It also helps the owner see where trust became durable and
+where it can still be reopened or reset.
+
+ Operating Safely and
+Recovering Cleanly
+
+ This chapter is about what to do when the product stops being
+routine: a host fails preflight, the broker is unavailable, the
+authority store is replaced, or a run stops halfway through. The owner
+question is not whether to improvise, but which recovery path matches
+the failure that actually happened. The reviewed evidence supports a
+bounded answer. 
+
+ One-Minute Snapshot
+
+ This chapter is about what to do when the product stops being
+routine: a host fails preflight, the broker is unavailable, the
+authority store is replaced, or a run stops halfway through. The owner
+question is not whether to improvise, but which recovery path matches
+the failure that actually happened.
+
+ The reviewed evidence supports a bounded answer. Reconcile when the
+durable store or projection state has changed and the system needs
+explicit reset acknowledgement before it will adopt the new state.
+Resume when a checkpointed study or checkpointed dogfood run can
+continue on the same validated plan. Restart or re-stage when the host,
+socket, policy, or registry boundary is the thing that looks wrong.
+
+ What this snapshot does not prove is just as important. It does not
+establish live rollback safety or a full external harness compatibility
+matrix, so this chapter keeps those boundaries explicit instead of
+turning them into promises.
+
+ Figure: The owner should not treat every stop the
+same way. Recovery follows the boundary that failed: trust the machine
+again, adopt the changed saved state with reconciliation, or continue a
+checkpointed run only when the validated plan still matches.
+
+ flowchart LR
+ A[Recovery question] --> H[Host or enrollment boundary failed]
+ A --> S[Saved state changed]
+ A --> C[Checkpointed study or dogfood run]
+ H --> R1[Re-stage]
+ S --> R2[Reconcile]
+ C --> R3[Resume]
+
+ The figure shows one recovery question branching into three different
+answers. If the host or enrollment boundary failed, the right move is to
+re-stage. If the saved state changed underneath the product, the right
+move is to reconcile. If the run was checkpointed and the validated plan
+is still valid, the run can resume. The consequence is that owners
+should choose recovery by failure boundary, not by habit.
+
+ Mental Model
+
+ Think about recovery in three layers. The first layer is the host and
+enrollment boundary: the product needs the right privileges, the right
+host checks, and the right registry identity before it can trust any
+privileged action. The second layer is the durable ledger and projection
+state: when that state changes underneath the product, the right move is
+to reconcile rather than to guess. The third layer is checkpointed
+execution: some study and dogfood runs can continue from a stored point,
+but only inside the cataloged plan and only with the approval and quota
+rules that the product already records.
+
+ That is the practical split for an owner. If the host boundary is
+wrong, re-stage. If the durable store changed, reconcile. If a run
+stopped but the plan is still valid, resume. The earlier chapters own
+the ordinary claim and verification loop; this chapter only tells you
+what to do when the thing that failed is the boundary around that
+loop.
+
+ How Recovery Works
+
+ Privilege comes first. The admin surface is root-only, and enrollment
+or repository rebind does not begin until host preflight says the
+machine is ready and the active policy is in force. Enrollment lookup is
+pinned to a fixed registry path, requires absolute repository and socket
+paths, and treats a changed repository identity as an error instead of
+silently inheriting trust. The broker side is equally bounded: it uses a
+restricted Unix socket, ties requests to the connecting peer, and keeps
+the read-only snapshot path separate from mutating commit paths.
+
+ That means the owner should read runbook-style guidance as the place
+for setup, enrollment, rebind, and host repair, while ordinary workflow
+guidance covers the everyday claim and evidence path. The runbook is
+where you decide whether the machine is ready to be trusted at all. The
+workflow chapters are where you decide whether a claim is verified.
+
+ For state recovery, the key move is reconcile. When the authority
+store or projection layer has been replaced, the system does not
+silently adopt the new incarnation. It asks for explicit reset
+acknowledgement, resets its sequence progress, drops prepared work tied
+to the old store, and then retries prepared broker operations in an
+idempotent way. That is a bounded recovery path, not a generic repair
+mode.
+
+ For resumed work, the evidence is narrower but still useful. Study
+plans are validated before execution, mutating phases need explicit
+approval, quota exhaustion is surfaced as a state, and a resume path can
+continue from a stored run id. Dogfood runs are checkpointed as well.
+These are resumable flows, but they are not proof that every external
+provider binary or every interrupted host interaction can safely
+continue in place.
+
+ Figure: Reconcile is a guarded adoption path, not a
+silent swap. The system waits for explicit acknowledgement, clears
+progress tied to the old store, and only then retries prepared work so
+the owner does not mistake a rebuilt state for a safe automatic
+takeover.
+
+ stateDiagram-v2
+ [*] --> StoreChanged: new incarnation appears
+ StoreChanged --> AskReset: request explicit reset acknowledgement
+ AskReset --> ResetProgress: acknowledgement given
+ ResetProgress --> DropOldWork: old prepared work is discarded
+ DropOldWork --> RetryBrokerWork: prepared broker work retries idempotently
+ RetryBrokerWork --> [*]: recovery completes
+
+ The figure starts when a new store incarnation appears. Reconcile
+then asks for explicit reset acknowledgement. After that
+acknowledgement, the system resets sequence progress, drops prepared
+work tied to the old store, and retries prepared broker work in an
+idempotent way. The consequence is that a rebuilt authority state does
+not take effect silently; the owner has to acknowledge the reset
+first.
+
+ Verified Facts
+
+ Verified records are stricter than drafts. Doctor fails closed on
+missing evidence references, missing verification commands,
+self-verification, and malformed isolation metadata when the record is
+verified. Draft and unverified records surface the same issues as
+warnings or information instead, and warning-only runs still exit
+successfully. That split matters in recovery because a warning on an
+unfinished record does not mean the trust model itself is broken.
+
+ The ordinary broker commit path is also role-gated. Builders can
+create claims and attach draft evidence, verifiers can attach status,
+and task transitions only happen when the current claim and task state
+still satisfy the product’s trusted checks. Root-only enrollment and
+rebind are separate request kinds, so the ordinary builder and verifier
+roles do not cover the whole authority surface.
+
+ One more fact changes the recovery story: a later negative verifier
+write can reopen a task if it was the transition claim. Closeout is
+therefore not monotonic. A task that looked finished can become active
+again after later verification changes, so the owner should treat
+completion as provisional until the transition claim still holds.
+
+ What Looks Solid
+
+ The strongest property in this area is that the product does not blur
+its boundaries. Privileged administration is kept root-only and
+host-gated. Enrollment does not accept a casually moved registry entry.
+The broker keeps read-only snapshot access separate from mutating
+commits. Reconciliation does not silently swallow a replaced store.
+Those are all signs that the product is trying to make drift visible
+instead of hiding it.
+
+ The execution side is also more disciplined than a generic retry
+loop. Study plans are catalog-validated, mutating phases require
+approval, quota exhaustion is explicit, and completed phases can be
+replayed in a controlled way. Dogfood runs are checkpointed rather than
+guessed at. And the top-level navigation still puts the local ledger
+first, which helps the owner find the everyday path before reaching for
+privileged or secondary tooling.
+
+ Harnesses, Delegation, and
+Study Work
+
+ This chapter covers the extra work paths around the ledger:
+handing a run to a harness, running study plans, replaying checkpointed
+dogfood work, and doing small local A/B comparisons. The snapshot shows
+how those paths behave today, so it tells you what the product does now,
+not what you may want it to be. 
+
+ One-Minute Snapshot
+
+ This chapter covers the extra work paths around the ledger: handing a
+run to a harness, running study plans, replaying checkpointed dogfood
+work, and doing small local A/B comparisons. The snapshot shows how
+those paths behave today, so it tells you what the product does now, not
+what you may want it to be. It is solid on validation, approvals, quota
+pauses, and replay checkpoints, but it does not prove a full support
+list for every external provider.
+
+ Mental Model
+
+ Read These Paths as
+Evidence-Scoped
+
+ No owner-confirmed product intent was supplied for this run, so the
+safest way to read these workflows is as current code behavior rather
+than as proof of where the product is meant to center itself. That
+matters because this chapter is about secondary paths around the ledger:
+it describes what the system can do today, but it does not prove that
+these paths are the main story or the long-term organizing principle.
+The practical consequence for an owner is simple: use this material to
+understand present behavior and its limits, not to infer product
+strategy.
+
+ Support Paths, Not a New
+Trust Model
+
+ Harness and study work freeze a concrete execution shape. They make a
+run more specific by binding it to named harness profiles and explicit
+phases, and they keep the execution record orderly enough to replay or
+resume under the right conditions. That is useful because it reduces
+ambiguity about what was attempted and what was allowed to proceed. But
+this structure is support infrastructure, not a replacement for the
+ledger’s claim, evidence, and verification story. The ledger remains the
+place where trust is established; these workflows only govern how a
+delegated or experimental run is carried out around that core.
+
+ A good way to picture the difference is this: the ledger answers
+whether a claim has been backed by evidence and verified, while a study
+plan answers how a particular run should unfold, in what order, and
+under what limits. If a study run pauses for approval or quota, that
+pause changes execution, not truth. If a checkpointed dogfood run
+replays completed phases, that replay helps avoid redundant work, but it
+still does not turn the run itself into the source of verification. For
+an owner, the boundary is important: these paths can make work more
+controlled and repeatable, but they do not carry the same trust meaning
+as the ledger.
+
+ Compatibility Stays Narrow
+
+ The reviewed evidence does not establish a full external-provider
+compatibility promise. It shows cataloged support for the harness
+profiles used by study phases, and it shows a narrow local comparison
+path, but it stops short of proving that every named external provider
+binary works in all cases. That is a real boundary, not a cosmetic one.
+Owners should therefore read support claims as bounded to the cataloged
+profiles and the observed local workflows, not as a general guarantee
+across the broader provider landscape.
+
+ A concrete example: if a study plan names a supported harness
+profile, the system can reason about that run in a structured way. If
+the plan depends on some other external binary or provider setup, the
+evidence here does not let you assume it will behave the same way. The
+right mental model is that these workflows are dependable inside their
+documented lane, while the edges beyond that lane remain unproven until
+they are separately validated.
+
+ Figure: The ledger remains the place where trust is
+established. Harnessed study work, checkpointed replay, and local
+comparison can control and repeat execution, but they stay in support
+lanes and do not gain claim-evidence-verification authority from that
+structure.
+
+ flowchart TD
+ L[Ledger trust center]
+ H[Harnessed study run]
+ D[Checkpointed replay]
+ A[Local A/B comparison]
+ T[Trusted records]
+ H -->|runs beside| L
+ D -->|runs beside| L
+ A -->|runs beside| L
+ L -->|establishes trust| T
+ H -.->|does not establish trust on its own| T
+ D -.->|does not establish trust on its own| T
+ A -.->|does not establish trust on its own| T 
+
+ The diagram shows a ledger trust center and three support lanes: a
+harnessed study run, a checkpointed replay, and a local A/B comparison.
+Each support lane sits beside the ledger and points back to trusted
+records only through the ledger. The consequence for an owner is that
+these workflows can organize execution, but they do not replace the
+ledger as the source of trust.
+
+ How It Works
+
+ Entry Checks
+
+ Study work does not begin by trusting whatever plan text arrives. The
+plan is checked before launch, and it is rejected if it names an
+operation the catalog does not recognize, puts phases in the wrong
+order, supplies the wrong number of harness profiles, or marks a phase
+as mutating when the phase shape says it should be read only. That early
+rejection is the main mechanism that keeps a malformed study from
+consuming time as if it were valid.
+
+ For an owner, the consequence is simple: a bad plan fails at the door
+instead of halfway through execution. That matters because it keeps the
+run from looking partially successful just because some later step
+happened to be runnable. The boundary is also important. This validation
+tells you whether the study is structurally acceptable; it does not say
+the external provider binaries behind every cataloged profile are
+universally compatible.
+
+ Phase States and Control
+
+ Execution path 
+ What controls entry or progress 
+ Replay or retry rule 
+ Scope 
+
+ Main study run 
+ Catalog validation, phase order checks, harness profile count
+checks, and the mutating-versus-read-only shape of each phase; mutating
+phases also wait for approval 
+ Completed phases replay idempotently; quota exhaustion pauses the
+run instead of forcing a guess 
+ Study execution with explicit phase states and cataloged harness
+profiles 
+
+ Checkpointed dogfood run 
+ Saved phase checkpoints plus the same approval and quota gates used
+by study execution 
+ Completed phases replay only when the saved plan fingerprint still
+matches; failed work needs an explicit quota-reset acknowledgment before
+retrying 
+ Dogfood replay with retained checkpoints 
+
+ Local A/B race 
+ Only two local OpenCode arms are allowed 
+ It is a local comparison only, not a broad replay path or a provider
+matrix 
+ Narrow comparison between two local arms 
+
+ The table shows the practical split: the main study path is governed
+by validation and explicit phase control, the checkpointed dogfood path
+is governed by saved checkpoints, and the local A/B path stays
+intentionally narrow. These are separate execution surfaces, not three
+names for the same thing.
+
+ Approval, Pause, Resume
+
+ Once a study run is in motion, it moves through explicit phase states
+rather than a single yes-or-no launch switch. The execution layer tracks
+phases as completed, failed, waiting for quota, pending, or not started.
+Mutating phases require approval before they proceed. If quota runs out,
+the run pauses. Nothing is silently skipped, and nothing is assumed to
+have finished just because the pipeline reached a later point.
+
+ That pause behavior changes what resume means. To continue, the
+operator has to acknowledge the quota reset explicitly. The same
+acknowledgment is required when a failed phase is retried in the
+checkpointed dogfood path. In practice, this means a paused run is
+visible as paused work, not as hidden debt that the system resolves on
+its own. A concrete example: a mutating study phase can wait for
+approval after earlier read-only phases have already completed; if the
+quota is then exhausted, the run stays paused until the owner resets
+quota and acknowledges that reset before retrying.
+
+ Checkpointed Replay
+
+ Dogfood runs add a second layer of persistence by keeping completed
+phases in checkpoints. That checkpointed replay is not a free restart.
+The system reuses completed work only when the saved plan fingerprint
+still matches, which is the safeguard against resuming an old shape of
+work as if it were the current one. If the fingerprint no longer
+matches, the old completed phases are not treated as fresh truth.
+
+ The consequence for the owner is that replay is resumable, but only
+within the same plan shape. That is useful when a long run was
+interrupted for a recoverable reason, because completed work does not
+need to be redone blindly. The boundary is equally clear: the checkpoint
+does not authorize a different plan, and retrying failed work still
+needs the same explicit quota-reset acknowledgment.
+
+ Local Comparison
+
+ The local A/B tool is deliberately smaller in scope than the other
+execution paths. It compares two local OpenCode arms only. That gives
+the owner a narrow comparison surface for local behavior, but it does
+not establish broad provider coverage and it does not turn the result
+into a general compatibility statement.
+
+ A concrete way to read it is this: if you want to compare two local
+arms on the same machine, the tool is built for that. If you want
+evidence that every named provider binary behaves the same way, this
+evidence does not give you that. The comparison is useful because it
+stays bounded; its value comes from being a local race, not from
+pretending to be a full external matrix.
+
+ Figure: Malformed plans do not get a partial pass.
+Once a plan validates, mutating phases still wait for approval, and
+quota exhaustion turns into a visible pause that resumes only after an
+explicit reset acknowledgment.
+
+ stateDiagram-v2
+ [*] --> Planned
+ Planned --> Rejected: bad plan
+ Planned --> Ready: plan validates
+ Ready --> Running: launch
+ Running --> WaitingApproval: mutating phase
+ WaitingApproval --> Running: approval granted
+ Running --> Paused: quota runs out
+ Paused --> Running: quota reset acknowledged
+ Running --> Done: phases complete
+ Rejected --> [*]
+ Done --> [*] 
+
+ The lifecycle starts with a planned study. A bad plan is rejected
+before execution begins. A valid plan becomes ready, then runs. If a
+mutating phase appears, the run waits for approval before continuing. If
+quota runs out, the run pauses and only resumes after the quota reset is
+acknowledged. When all phases finish, the run ends. The consequence for
+an owner is that failed validation, approval, and quota recovery are
+separate control points rather than hidden states.
+
+ Verified Facts
+
+ Separate Entry Points
+
+ The snapshot shows a command surface that stays local-ledger-first
+instead of collapsing everything into one generic launcher. The core
+claim-evidence-verification-doctor loop comes first, and the admin,
+broker, study, and race paths remain separate entry points rather than
+being flattened into a single menu. That layout matters because it keeps
+the main trust story visible: the owner can tell which parts are
+ordinary workflow, which parts are privileged administration, and which
+parts are secondary harness work. For example, someone trying to run a
+study does not have to infer that they are still inside the same lane as
+the core ledger flow; the layout itself already separates those
+concerns. What this fact does not prove is broader product intent or
+runtime behavior beyond the documented ordering and command
+taxonomy.
+
+ Harness Setup Before Hashing
+
+ The snapshot also shows that a harness run is not treated as an
+abstract label alone. Before the plan is hashed, the setup records the
+executable path, version, arguments, role, and workspace. In practice,
+that means the run is anchored to a concrete execution shape: the same
+named harness with different arguments or a different version is not the
+same planned run, because the recorded setup changes first. For an
+owner, that is useful when comparing reports or replaying a study,
+because the recorded shape explains why two runs with the same broad
+goal may not be equivalent. A simple scenario is a study that moves from
+one binary version to another; the recorded setup captures that shift
+before the plan identity is fixed. This fact stops at the recording
+boundary, though: it does not tell us that the external tool will behave
+the same way in every environment.
+
+ Compatibility Boundary
+
+ The evidence also leaves an important boundary open. The snapshot
+does not establish runtime compatibility for every named external
+provider binary. Put another way, the presence of a cataloged harness
+profile or a named provider in the materials is not the same thing as a
+proven, current promise that the binary will launch and work today. That
+boundary matters for owners because it prevents over-reading the
+snapshot as a universal support matrix. It is safe to say the system is
+organized to track harnessed study work, but not safe to claim that
+every external provider listed in the materials is runtime-verified in
+this environment. A concrete example is a study configuration that names
+multiple providers: the snapshot can show how the plan is recorded, yet
+still leave one provider’s live behavior unproven.
+
+ Figure: The snapshot gives owners a bounded support
+story: cataloged harness profiles and local comparison are confirmed,
+but that does not become a blanket promise that every named external
+provider binary works everywhere.
+
+ flowchart LR
+ subgraph C[Confirmed here]
+ P[Cataloged harness profiles]
+ R[Checkpointed dogfood replay]
+ L[Two local OpenCode arms]
+ end
+ subgraph U[Still unproven]
+ B[Every named external provider binary]
+ M[Full runtime compatibility matrix]
+ end
+ P -->|supports study phases| R
+ L -->|stays local only| R
+ P -.->|does not prove| B
+ L -.->|does not prove| M 
+
+ The comparison has two sides. One side is what the snapshot confirms:
+cataloged harness profiles, checkpointed dogfood replay, and a local
+two-arm comparison. The other side is what stays unproven: that every
+named external provider binary works in the same way or that the product
+has a full runtime compatibility matrix. The consequence for an owner is
+that local and cataloged support should not be treated as universal
+provider proof.
+
+ What Is Solid Here
+
+ Secondary by Design
+
+ The strongest thing in this snapshot is the separation itself. The
+command layout keeps the core ledger path, administration, broker work,
+study runs, and local races in separate lanes, and the product is
+introduced as local-ledger-first before the enrolled authority path.
+That matters because it prevents harness work from being mistaken for
+the trust center of the product. An owner can treat delegation briefs,
+study plans, and local comparisons as supporting tools around claim,
+evidence, verification, and doctor rather than as a substitute for them.
+The boundary is important: this is a documented operating shape, not a
+promise that the secondary lanes are irrelevant in every deployment. In
+practice, it means a team can use a study run to test an alternate
+workflow without rewriting the mental model of how trusted records are
+established.
+
+ Study Runs Are Readable
+
+ Study execution is also solid because it exposes its failure modes
+instead of hiding them. Plans are rejected before launch when they name
+unknown operations, use the wrong phase order, provide the wrong number
+of harness profiles, or mix mutating and read-only phases incorrectly.
+Once a run starts, it does not treat all interruptions the same way. The
+execution path tracks whether a phase is completed, failed, waiting on
+quota, pending, or not started; mutating phases need approval; and quota
+exhaustion pauses the run instead of pretending it succeeded. The owner
+value is straightforward: you can tell whether a run is blocked by
+policy, by capacity, or by a real failure, and resume is explicit rather
+than magical. The checkpointed dogfood path reinforces that strength by
+keeping completed phases and replaying them only when the saved plan
+fingerprint still matches, with a deliberate quota-reset acknowledgment
+before failed work is retried. That keeps the rerun story honest. What
+this does not establish is universal external provider behavior; it
+shows a controlled study workflow, not a blanket compatibility
+guarantee.
+
+ Narrow Local Comparison
+
+ The local comparison tool is deliberately narrow, and that narrowness
+is a strength. It compares only two local arms and excludes broader
+frontier harnesses, so its output should be read as a local comparison,
+not as evidence that every named external provider binary behaves the
+same way. That lowers the risk of over-reading the result. An owner can
+use it to compare two local choices quickly, knowing the comparison is
+bounded and intentionally small. The limitation is the point: because
+the tool does not pretend to cover the whole provider surface, it is
+harder to mistake a useful local race for a general compatibility
+matrix. In a workflow where trust still belongs to the ledger and
+verification path, that restraint keeps the secondary tooling from
+making claims it cannot support.
+
+ Worked example
+
+ A runnable version of this lives at examples/verified-work/run.sh 
+and is executed on every CI run, so it cannot quietly stop working.
+Nothing in it is stubbed: it writes a real module, runs a real
+ pytest , then tries two things that should fail and shows
+them failing —
+
+ editing an evidence file after attachment → doctor 
+reports a SHA-256 mismatch and exits non-zero
+
+ a builder verifying its own claim under mode: enforced 
+→ refused before anything is written
+
+ The snippet below is the same lifecycle written out for reading
+rather than running.
+
+ The following end-to-end script demonstrates the creation and
+lifecycle of a task and claim. It shows how to initialize the local
+ledger, create a task, register a gate-bound claim, attach verifiable
+evidence (with an explicit verification command and reviewer signature),
+run the integrity doctor check, track a session’s usage metrics, and
+generate a downstream brief.
+
+ ./operator init # create .operator/ ledger (run this in a fresh throwaway dir) 
+
+ # a couple of stand-in files so the claim's gate and evidence actually exist 
+ mkdir -p tests/out 
+ printf 'def retries(n): return n <= 3\ndef test_retry(): assert retries(3) and not retries(4)\n' > tests/test_upload.py 
+ printf 'ok\n' > tests/out/upload.log 
+
+ # open a task 
+ ./operator task-create --objective "Add retry to the uploader" --id up-retry 
+
+ # an agent registers a typed, gate-bound claim 
+ ./operator claim-add --task up-retry --type test_passes \ 
+ --text "uploader retries 3x on 5xx" --gate tests/test_upload.py 
+
+ # attach evidence and record an advisory verification in the default single_user mode; 
+ # --verify-cmd is inert audit metadata and is not executed by operator 
+ ./operator evidence-attach tests/out/upload.log --task up-retry --claim claim-0001 \ 
+ --type test_output --status verified --verified-by reviewer \ 
+ --verify-cmd "pytest -q tests/test_upload.py" 
+
+ # read-only consistency check: unverified / self-verified / unverifiable-evidence claims 
+ ./operator doctor 
+
+ # track the session + its cost, then close out with a brief for the next harness 
+ ./operator session-start --task up-retry --harness claude # opens the session, recorded as usage-0001 
+ ./operator session-end usage-0001 --outcome useful --cost 12.50 
+ ./operator handoff-add --task up-retry --changed "uploader.py" --verified "retry test" --open "tune backoff" 
+ ./operator export-brief --for codex --task up-retry 
+
+ Command reference
+
+ The operator CLI exposes 23 subcommands across the task
+→ claim → evidence → verification → session → usage lifecycle. Run
+ ./operator <command> --help for full flags.
+
+ Setup — init creates the
+ .operator/ ledger in the current repo. Re-running it on an
+existing YAML-only ledger baselines those records into SQLite without
+changing their visible IDs or files.
+
+ Tasks -
+ task-create --objective "…" [--id ID] [--repo R] [--assign A] [--review R] 
+— open a task. - task-show [ID] — show a task’s claims,
+evidence, and status. - task-route --task ID --review H /
+ task-route --task ID --clear-review — append an auditable
+correction to reviewer routing. - task-list — list all
+tasks with outcome summaries. -
+ decide --claim ID --decision approve|reject|defer --rationale "…" 
+— operator ruling on a frozen proposal claim. Records UID; does not
+require a distinct verifier UID.
+
+ Claims (a claim is a typed, checkable assertion
+bound to a gate) -
+ claim-add --type TYPE --text "…" [--task ID] [--gate GATE] [--verify-cmd CMD] [--by WHO] 
+— register a claim. --gate is an artifact path;
+ --verify-cmd is the command a verifier reruns. Types:
+ file_exists, test_passes, numeric_measurement, real_data, model_output, firmware_behavior, deployment_state, supervision_credit, paper_or_report_claim .
+- claim-show [ID] / claim-list [--task ID] —
+inspect claims.
+
+ Evidence & verification (the core: a claim is
+only as good as its evidence + a different-identity sign-off) -
+ evidence-attach PATH_OR_URL --claim CID --type TYPE [--hash SHA256] [--status {verified,false,quarantined}] [--verified-by WHO] [--verify-cmd CMD] 
+— attach an artifact and optionally verify the claim. Local files are
+copied into the ledger and fingerprinted with SHA-256, byte size, and
+modification time; --hash is an expected digest that must
+match the local bytes before any evidence write. Missing filesystem
+paths are rejected; non-file external references must use an explicit
+URI scheme. Evidence types:
+ run_log, manifest, database_query, test_output, git_commit, screenshot, transcript, paper_section, external_doc, session_crystal .
+Crystal Markdown attaches via crystal-attach / imports via
+ crystal-import (draft only); hook glue is
+ crystal-bridge and
+ session-end --attach-crystal (see
+ CRYSTAL_LEDGER_INTEROP_SPEC.md and
+ CRYSTAL_SESSION_BRIDGE_SPEC.md ). Under enforced identity
+policy, draft attachment is a builder action and any status attachment
+is a verifier action from an OS UID distinct from the claim author. -
+ verify RUN_DIR — automated audit of a run directory’s
+artifacts. - doctor [--audit] — read-only consistency check
+across the ledger: flags unverified claims,
+ self-verification , advisory verification, malformed
+UID-isolated verification, and enforcement downgrades. Fails closed
+(exit code 1) on verified/completed records if they lack required
+evidence files, target repository references, matching gate/test files,
+or valid command run hashes. It also verifies SQLite event hashes,
+compares each latest event with the corresponding YAML projection, and
+recomputes local evidence fingerprints. A changed verified source or
+retained snapshot fails closed; an unavailable original source is
+reported separately when its retained snapshot is still current. Remote
+evidence without a local snapshot is explicitly uncheckable.
+ doctor never executes a stored
+ --verify-cmd .
+
+ Sessions (track a coding session and its cost) -
+ session-start --harness H [--task ID] [--force] -
+ session-end --outcome {useful,partial,no_go,quarantined,reverted,unknown} --cost N 
+- session-list [--open] [--task ID] [--harness H] 
+
+ Usage / quota accounting -
+ usage-add --harness H [--model M] [--outcome …] — capture a
+pasted usage snippet. -
+ usage-import --harness {claude,codex,gemini-agy,prime-agent} [--since …] [--dry-run] 
+— auto-ingest token/usage from implemented harness session-log adapters.
+Other registered harnesses, including Grok, can use
+ session-start , usage-add , and manual
+annotation until an adapter exists. The prime-agent adapter reads root
+session transcripts under ~/.prime/agent/sessions/ 
+(read-only, format v3 only): own usage fills the shared token columns;
+the RLM subtree aggregate is kept in distinctly-named
+ prime_agent.subtree_* fields so unlike units are never
+summed. Prime Agent is metered here without being a registered harness
+peer. -
+ usage-summary [--by-task] [--by-harness] [--by-model] [--by-lane] [--offload-audit] [--metering] 
+/ usage-annotate [--cost …] [--note …] .
+
+ Briefs & handoff -
+ brief --for H [--task ID] /
+ export-brief --for H [--task ID] — generate a
+harness-specific brief (copy-paste for the next agent).
+
+ Headless delegation (all vendors with a CLI backend) 
+-
+ ./delegate-brief --task ID --brief FILE --harness {claude,codex,grok,gemini-agy,fable,openrouter} [options] 
+- Preserves the brief under --deliver/.brief.md , optional
+ --freeze path hashes, full log + exit code. -
+ --record writes an Operator handoff (dispatch outcome only,
+not acceptance). - Local model harness ids ( gemma4_local ,
+…) are not agent CLIs — use ollama runners separately. - Example (Codex,
+no paste):
+
+ ./delegate-brief --task front-e1-gold-pack --brief .operator/briefs/front-e1-gold-pack.codex.NOW.md --harness codex --cwd . --deliver evals/local_lane_ladder/fixtures/e1-gold-pack --freeze evals/local_lane_ladder/GOLD_STANDARD.md --record 
+
+ handoff-add [--task ID] [--changed …] [--verified …] [--claimed …] [--open …] 
+— record a closeout.
+
+ Configuration
+
+ Operator is driven by files under .operator/ (created by
+ init ); behavior is governed by a small set of
+product-facing config:
+
+ .operator/identity.yaml — the
+identity-enforcement policy:
+
+ mode : enforced # or: single_user (advisory) 
+ uids : 
+ 1001 : 
+ name : builder 
+ roles : [ builder ] 
+ 1002 : 
+ name : reviewer 
+ roles : [ verifier ] 
+
+ In enforced mode, claim creation and draft evidence
+require the builder role. Status-bearing evidence requires
+the verifier role, a matching --verified-by ,
+and a verifier UID distinct from the recorded claim-author UID.
+Rejections occur before artifacts or ledger records are written. A
+legacy scalar entry such as 1001: builder remains loadable
+and grants both roles, but the distinct UID rule still prevents
+self-verification. In single_user , status writes remain
+available and are recorded as advisory , never
+ uid_isolated .
+
+ .operator/{tasks,claims,evidence,handoffs,usage}/ 
+— current YAML projections (gitignored).
+
+ .operator/ledger.sqlite3 —
+append-only, full-snapshot event versions for task, claim, evidence,
+handoff, and usage/session records. Session commands version their
+ usage-XXXX record.
+
+ SQLite is the durable audit history for CLI writes; YAML remains the
+compatibility read surface. Event versions are allocated
+transactionally, linked by per-record SHA-256 hashes, and protected from
+ UPDATE / DELETE through database triggers.
+ doctor reports divergence but does not silently repair
+either side. Because both live on the same writable disk, this improves
+local durability and auditability; it is not an off-machine backup or an
+adversarial tamper-proof boundary.
+
+ The registry supplies role policy. The trusted boundary also requires
+the processes to run under genuinely distinct OS UIDs; the CLI does not
+provision those users or containers.
+
+ Root-managed external policy
+(P3b)
+
+ Issue #5 adds the separate operator-admin installation
+and policy lifecycle described in AUTHORITY_POLICY_SPEC.md .
+It installs the standalone broker under fixed root-controlled paths,
+creates SQLite only after dropping to the broker UID, and supports
+strict generation-one install, append-only rotation, terminal
+revocation, audit, and conservative privilege preflight.
+
+ This is still not repo CLI integration. operator and
+existing .operator ledgers do not consult the external
+authority yet. The service is installed but not started or enabled, and
+real-host privilege proof remains issue #7. Initial installation must
+execute a root-owned staged copy of operator-admin ; its
+privileged wrapper intentionally refuses a user-writable checkout.
+
+ Appendix —
+Attention Items and Owner Decisions
+
+ The deduplicated set of caveats and open decisions two Reflect scans
+surfaced. Forty in-chapter cards across the two runs collapse to the
+twenty-two distinct items below. The two scans described the same
+product in different words, so items are stated once here rather than
+twice.
+
+ Operating caveats — things to
+know
+
+ Trusted verification needs a genuinely distinct
+verifier. Under mode: enforced , a verification
+only counts when the verifier’s OS uid differs from the claim author’s.
+A different harness name buys nothing. Two agents under one Unix user
+are one identity.
+
+ A harness name is routing, not authority. 
+ assigned_harness and review_harness describe
+where work goes. Neither confers the right to bless a claim.
+
+ Enrolled authority is a separate, root-managed
+surface. Enrollment, rotation, revocation and rebinding are
+privileged operations with host prerequisites. They are not part of the
+daily loop, and a failure there is usually a missing prerequisite rather
+than a product fault.
+
+ A broker receipt is not local convergence. The
+broker accepting a protected change means the change was authorized, not
+that the repository has finished reconciling.
+
+ Durable history is local, and projections are not
+backup. Compatibility views can be rebuilt; they do not
+reconstruct the authority store. Back up canonical history, not the
+projections derived from it.
+
+ Store replacement is never silent. Reconciliation
+refuses to adopt a new store incarnation without explicit
+acknowledgment. A rebuilt store can look healthier than it is, so
+rehearse the acknowledgment step before you need it.
+
+ Status-bearing evidence can reopen finished work. 
+Attaching evidence with a status can move a task backward or out of
+trusted state. Closeout is not one-way.
+
+ Doctor is strict on verified records and advisory on
+drafts. A warning on draft material is not the same signal as
+an error on a verified claim. Read the level, not just the presence of
+output.
+
+ Doctor never executes anything. It validates paths,
+bytes and identity. A recorded required_gate is an artifact
+path it checks for existence; the rerunnable command lives in
+ verify_cmd and is run by a verifier, never by doctor.
+
+ Study and dogfood runs have bounded recovery, not open-ended
+replay. A partial run resumes under defined rules or it does
+not resume. Neither is a general rerun queue.
+
+ Study runs stop for approval or quota. A paused
+study is a gate doing its job, not a failure. Someone has to resume
+it.
+
+ Dogfood is a privileged run. It is bound to
+installed machine paths and a release digest, with a deliberately narrow
+recovery path. Treating it as a retry button hands out a powerful
+command with less slack than people expect.
+
+ Harness support is proven only for cataloged
+profiles. The twelve profiles seeded at
+ operator init are the validated set. Anything else may
+write compatible ledger records manually, but it is not a supported
+adapter.
+
+ Local A/B results are easy to overread. The
+comparison tool is a narrow local instrument. Its output is a
+measurement of one machine on one day, not a general benchmark.
+
+ Rollback and provisioning safety are not proven from source
+alone. A checkout is not a production install, and reading the
+code does not demonstrate that recovery works on a live host.
+
+ Owner decisions — still open
+
+ Stay on the local ledger, or enroll authority? The
+local path is the documented default. Enrollment buys a root-managed
+boundary and costs host prerequisites and operational surface.
+
+ Who owns reconciliation and store-reset
+acknowledgment? And should explicit acknowledgment be a
+first-class documented step rather than an implicit one?
+
+ Are study plans and phase catalogs owner-facing? 
+They can be presented as supported product workflows or as
+operator-internal material. They are currently documented as both.
+
+ Should dogfood stay administrator-only with one acknowledged
+retry? 
+
+ Is closeout provisional until the transition claim stays
+verified? 
+
+ Should quota exhaustion pause a study for resumption, or stop
+the run outright? 
+
+ Should the local A/B tool stay a narrow local comparison
+instrument? 
+
+ Should root-only enrollment and rebind be documented as a
+separate privileged surface, rather than as advanced options
+inside the main flow?
+
+ Should warning-only doctor output be described as advisory
+for drafts in the owner-facing documentation, or left to the
+reader to infer from severity?
+
+ Resolved since the first
+scan
+
+ Three items raised by the first scan are answered in the repository
+and no longer open: whether the local ledger or enrolled authority leads
+(the local ledger does), whether the cataloged harness profiles are the
+supported set (they are), and a caveat about generated export material
+drifting from live behavior, which applied to a previously generated
+manual that has since been removed from the tree.

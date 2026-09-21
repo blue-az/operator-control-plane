@@ -1,0 +1,351 @@
+# SOURCE: https://github.com/blue-az/operator-control-plane (README.md, branch master)
+# captured 2026-09-21
+
+# Operator Control Plane
+
+[![tests](https://github.com/blue-az/operator-control-plane/actions/workflows/tests.yml/badge.svg)](https://github.com/blue-az/operator-control-plane/actions/workflows/tests.yml)
+
+**Your AI coding agent just said "done, tests pass." Do you actually know that's true?**
+
+Multi-agent and autonomous coding workflows run on trust: an agent claims it finished a task, and
+that claim gets merged, handed off, or billed as if it were fact. `operator` is a small, local
+ledger that makes those claims checkable instead of assumed. It enforces a
+**narration-vs-execution partition**: an agent's *claim* ("I did X, it passes") only counts once it
+has *evidence* attached and is *verified by a different identity* — not the identity that made the
+claim.
+
+The `operator` CLI records tasks → claims → evidence → verifications as YAML projections under
+`.operator/`, preserves every trust-relevant write in an append-only SQLite event history, binds
+writes to the executing OS identity, blocks same-UID "trusted" verification in enforced mode, and
+ships a `doctor` consistency checker that fails closed.
+
+Only an enforced verification by a registered verifier OS UID distinct from the claim author's UID is
+recorded as `uid_isolated`. Same-UID and default `single_user` verification still work but are
+explicitly advisory — no self-grading.
+
+## Is this a fleet harness?
+
+No, and the distinction is the point. A multi-agent "fleet harness" is usually pitched as six
+capabilities: treat every coding CLI as an option, let sessions talk to each other, across machines,
+and across harnesses, fork sessions between machines, and give missions and the fleet shared memory.
+Those are *capability* questions — can the fleet do X.
+
+This answers a different one: **an agent said it finished. Is that true, and did a different identity
+check?** Two of the six are covered here, two are refused on purpose with the reasons written down,
+and the rest sit somewhere in between. **[docs/FLEET_CAPABILITIES.md](docs/FLEET_CAPABILITIES.md)
+answers all six one at a time**, names the file that decides each, and lists what this tool does not
+do — including the parts that would make it the wrong choice for you.
+
+**Contributions welcome** — especially on the open problems below. Operator was developed alongside
+[Bulkhead τ](https://bulkheadtau.com), but it is a standalone, domain-neutral control plane. Bulkhead
+Tau may use Operator; Operator does not import, invoke, or require Bulkhead Tau.
+
+Implementer work runs through **pi**, which drives any model it is pointed at (Claude only in
+extra-usage mode). Operator stays the ledger. OpenCode is deprecated as the carrier but not
+disallowed. The old `opr` governed REPL is deprecated; `./opr` prints that pointer and exits.
+
+## Quickstart
+
+```bash
+pip install -r requirements.txt        # runtime: just PyYAML
+pip install -r requirements-dev.txt    # tests/lint: pytest, ruff, black, isort
+./operator --help
+
+mkdir /tmp/operator-demo && cd /tmp/operator-demo   # init writes into the current directory
+/path/to/operator init                 # create a .operator/ ledger here
+/path/to/operator doctor               # consistency check -> "All records consistent."
+```
+
+Run the tests from the repo:
+
+```bash
+python3 -m pytest tests/test_operator.py -q   # repo CLI, ledger layout, identity, doctor, usage
+python3 -m pytest tests/ -q                   # everything (some suites need a Linux host)
+```
+
+The ledger (`.operator/`) is gitignored — it's your work history, not the tool. Its durable local event
+history is stored in `.operator/ledger.sqlite3`.
+
+## Orientation boards
+
+When a prefix of tasks is hard to follow from `task-show` alone, generate static HTML boards from the
+local ledger:
+
+```bash
+python3 scripts/operator_project_board.py
+python3 scripts/operator_project_board.py --view issues
+python3 scripts/operator_project_board.py --view graph
+python3 scripts/operator_project_board.py --view resolution --task <task-id>
+```
+
+Checked-in snapshots for this repo's Pi extension work live in [`docs/boards/`](docs/boards/):
+
+- [Project board](docs/boards/pi-operator-extension.html) — tasks, claim ratios, stale `next_action`
+- [Issue backlog](docs/boards/pi-operator-extension-issues.html) — PBC dogfood issues
+- [Project map](docs/boards/pi-operator-extension-graph.html) — labeled columns for the whole prefix
+- Per-task **resolution** pages — the ledger timeline used during issue resolution (claim → evidence → review → verifier → handoff)
+
+`/op:project <prefix>` remains the in-Pi text dashboard. The HTML boards are the inspectable map.
+
+## P3 broker component (not installed)
+
+Issue #4 adds a standalone `operator-broker` process, external authority store, evidence CAS, receipts,
+and projection snapshots. It is isolated from the existing `operator` CLI: it does not read or promote
+`.operator` state, and development-fixture receipts confer no P3 authority on repo ledgers. Protected
+policy/service installation, CLI integration, and enrollment remain separate work.
+
+```bash
+# Test/development fixture only; use throwaway absolute paths.
+./operator-broker bootstrap-fixture --store /tmp/operator-authority.sqlite3 \
+    --content-dir /tmp/operator-authority-content --bootstrap-config /tmp/bootstrap.json
+./operator-broker serve --store /tmp/operator-authority.sqlite3 \
+    --content-dir /tmp/operator-authority-content --socket /tmp/operator-authority.sock
+./operator-broker audit --store /tmp/operator-authority.sqlite3 \
+    --content-dir /tmp/operator-authority-content
+```
+
+See [`AUTHORITY_BROKER_SPEC.md`](docs/specs/AUTHORITY_BROKER_SPEC.md) for the protocol, transaction, crash-recovery,
+and issue-boundary contracts.
+
+## Commands
+
+The `operator` CLI exposes 23 subcommands across the task → claim → evidence → verification →
+session → usage lifecycle. Run `./operator <command> --help` for full flags.
+
+**Setup** — `init` creates the `.operator/` ledger in the current repo. Re-running it on an existing
+YAML-only ledger baselines those records into SQLite without changing their visible IDs or files.
+
+**Tasks**
+- `task-create --objective "…" [--id ID] [--repo R] [--assign A] [--review R]` — open a task.
+- `task-show [ID]` — show a task's claims, evidence, and status.
+- `task-route --task ID --review H` / `task-route --task ID --clear-review` — append an auditable correction to reviewer routing.
+- `task-list` — list all tasks with outcome summaries.
+- `decide --claim ID --decision approve|reject|defer --rationale "…"` — operator ruling on a frozen proposal claim. Records UID; does not require a distinct verifier UID.
+
+**Claims** (a claim is a typed, checkable assertion bound to a gate)
+- `claim-add --type TYPE --text "…" [--task ID] [--gate GATE] [--verify-cmd CMD] [--by WHO]` — register a claim. `--gate` is an artifact path; `--verify-cmd` is the command a verifier reruns.
+  Types: `file_exists, test_passes, numeric_measurement, real_data, model_output,
+  firmware_behavior, deployment_state, supervision_credit, paper_or_report_claim`.
+- `claim-show [ID]` / `claim-list [--task ID]` — inspect claims.
+
+**Evidence & verification** (the core: a claim is only as good as its evidence + a different-identity sign-off)
+- `evidence-attach PATH_OR_URL --claim CID --type TYPE [--hash SHA256] [--status {verified,false,quarantined}] [--verified-by WHO] [--verify-cmd CMD]`
+  — attach an artifact and optionally verify the claim. Local files are copied into the ledger and
+  fingerprinted with SHA-256, byte size, and modification time; `--hash` is an expected digest that
+  must match the local bytes before any evidence write. Missing filesystem paths are rejected;
+  non-file external references must use an explicit URI scheme. Evidence types: `run_log, manifest,
+  database_query, test_output, git_commit, screenshot, transcript, paper_section, external_doc,
+  session_crystal`. Crystal Markdown attaches via `crystal-attach` / imports via
+  `crystal-import` (draft only); hook glue is `crystal-bridge` and
+  `session-end --attach-crystal` (see `CRYSTAL_LEDGER_INTEROP_SPEC.md` and
+  `CRYSTAL_SESSION_BRIDGE_SPEC.md`).
+  Under enforced identity policy, draft attachment is a builder action and any status attachment is a
+  verifier action from an OS UID distinct from the claim author.
+- `verify RUN_DIR` — automated audit of a run directory's artifacts.
+- `doctor [--audit]` — read-only consistency check across the ledger: flags unverified claims,
+  **self-verification**, advisory verification, malformed UID-isolated verification, and enforcement
+  downgrades. Fails closed (exit code 1) on
+  verified/completed records if they lack required evidence files, target repository references,
+  matching gate/test files, or valid command run hashes. It also verifies SQLite event hashes,
+  compares each latest event with the corresponding YAML projection, and recomputes local evidence
+  fingerprints. A changed verified source or retained snapshot fails closed; an unavailable original
+  source is reported separately when its retained snapshot is still current. Remote evidence without
+  a local snapshot is explicitly uncheckable. `doctor` never executes a stored `--verify-cmd`.
+
+**Sessions** (track a coding session and its cost)
+- `session-start --harness H [--task ID] [--force]`
+- `session-end --outcome {useful,partial,no_go,quarantined,reverted,unknown} --cost N`
+- `session-list [--open] [--task ID] [--harness H]`
+
+**Usage / quota accounting**
+- `usage-add --harness H [--model M] [--outcome …]` — capture a pasted usage snippet.
+- `usage-import --harness {claude,codex,gemini-agy,prime-agent} [--since …] [--dry-run]` — auto-ingest
+  token/usage from implemented harness session-log adapters. Other registered harnesses, including Grok,
+  can use `session-start`, `usage-add`, and manual annotation until an adapter exists.
+  The prime-agent adapter reads root session transcripts under `~/.prime/agent/sessions/`
+  (read-only, format v3 only): own usage fills the shared token columns; the RLM subtree
+  aggregate is kept in distinctly-named `prime_agent.subtree_*` fields so unlike units are
+  never summed. Prime Agent is metered here without being a registered harness peer.
+- `usage-summary [--by-task] [--by-harness] [--by-model] [--by-lane] [--offload-audit] [--metering]` / `usage-annotate [--cost …] [--note …]`.
+
+**Briefs & handoff**
+- `brief --for H [--task ID]` / `export-brief --for H [--task ID]` — generate a harness-specific
+  brief (copy-paste for the next agent).
+
+**Headless delegation (all vendors with a CLI backend)**
+- `./delegate-brief --task ID --brief FILE --harness {claude,codex,grok,gemini-agy,fable,openrouter} [options]`
+  - Preserves the brief under `--deliver/.brief.md`, optional `--freeze` path hashes, full log + exit code.
+  - `--record` writes an Operator handoff (dispatch outcome only, not acceptance).
+  - Local model harness ids (`gemma4_local`, …) are not agent CLIs — use ollama runners separately.
+  - Example (Codex, no paste):  
+    `./delegate-brief --task front-e1-gold-pack --brief .operator/briefs/front-e1-gold-pack.codex.NOW.md --harness codex --cwd . --deliver evals/local_lane_ladder/fixtures/e1-gold-pack --freeze evals/local_lane_ladder/GOLD_STANDARD.md --record`
+
+- `handoff-add [--task ID] [--changed …] [--verified …] [--claimed …] [--open …]` — record a closeout.
+
+## Worked example
+
+**A runnable version of this lives at [`examples/verified-work/run.sh`](examples/verified-work/run.sh)**
+and is executed on every CI run, so it cannot quietly stop working. Nothing in it is stubbed: it
+writes a real module, runs a real `pytest`, then tries two things that should fail and shows them
+failing —
+
+- editing an evidence file after attachment → `doctor` reports a SHA-256 mismatch and exits non-zero
+- a builder verifying its own claim under `mode: enforced` → refused before anything is written
+
+The snippet below is the same lifecycle written out for reading rather than running.
+
+The following end-to-end script demonstrates the creation and lifecycle of a task and claim. It shows how to initialize the local ledger, create a task, register a gate-bound claim, attach verifiable evidence (with an explicit verification command and reviewer signature), run the integrity doctor check, track a session's usage metrics, and generate a downstream brief.
+
+```bash
+./operator init                                    # create .operator/ ledger (run this in a fresh throwaway dir)
+
+# a couple of stand-in files so the claim's gate and evidence actually exist
+mkdir -p tests/out
+printf 'def retries(n): return n <= 3\ndef test_retry(): assert retries(3) and not retries(4)\n' > tests/test_upload.py
+printf 'ok\n' > tests/out/upload.log
+
+# open a task
+./operator task-create --objective "Add retry to the uploader" --id up-retry
+
+# an agent registers a typed, gate-bound claim
+./operator claim-add --task up-retry --type test_passes \
+    --text "uploader retries 3x on 5xx" --gate tests/test_upload.py
+
+# attach evidence and record an advisory verification in the default single_user mode;
+# --verify-cmd is inert audit metadata and is not executed by operator
+./operator evidence-attach tests/out/upload.log --task up-retry --claim claim-0001 \
+    --type test_output --status verified --verified-by reviewer \
+    --verify-cmd "pytest -q tests/test_upload.py"
+
+# read-only consistency check: unverified / self-verified / unverifiable-evidence claims
+./operator doctor
+
+# track the session + its cost, then close out with a brief for the next harness
+./operator session-start --task up-retry --harness claude   # opens the session, recorded as usage-0001
+./operator session-end usage-0001 --outcome useful --cost 12.50
+./operator handoff-add --task up-retry --changed "uploader.py" --verified "retry test" --open "tune backoff"
+./operator export-brief --for codex --task up-retry
+```
+
+## Configuration
+
+Operator is driven by files under `.operator/` (created by `init`); behavior is governed by a small
+set of product-facing config:
+
+- **`.operator/identity.yaml`** — the identity-enforcement policy:
+  ```yaml
+  mode: enforced          # or: single_user (advisory)
+  uids:
+    1001:
+      name: builder
+      roles: [builder]
+    1002:
+      name: reviewer
+      roles: [verifier]
+  ```
+  In `enforced` mode, claim creation and draft evidence require the `builder` role. Status-bearing
+  evidence requires the `verifier` role, a matching `--verified-by`, and a verifier UID distinct from
+  the recorded claim-author UID. Rejections occur before artifacts or ledger records are written. A
+  legacy scalar entry such as `1001: builder` remains loadable and grants both roles, but the distinct
+  UID rule still prevents self-verification. In `single_user`, status writes remain available and are
+  recorded as `advisory`, never `uid_isolated`.
+- **`.operator/{tasks,claims,evidence,handoffs,usage}/`** — current YAML projections (gitignored).
+- **`.operator/ledger.sqlite3`** — append-only, full-snapshot event versions for task, claim,
+  evidence, handoff, and usage/session records. Session commands version their `usage-XXXX` record.
+
+SQLite is the durable audit history for CLI writes; YAML remains the compatibility read surface. Event
+versions are allocated transactionally, linked by per-record SHA-256 hashes, and protected from
+`UPDATE`/`DELETE` through database triggers. `doctor` reports divergence but does not silently repair
+either side. Because both live on the same writable disk, this improves local durability and
+auditability; it is not an off-machine backup or an adversarial tamper-proof boundary.
+
+The registry supplies role policy. The trusted boundary also requires the processes to run under
+genuinely distinct OS UIDs; the CLI does not provision those users or containers.
+
+### Root-managed external policy (P3b)
+
+Issue #5 adds the separate `operator-admin` installation and policy lifecycle described in
+[`AUTHORITY_POLICY_SPEC.md`](docs/specs/AUTHORITY_POLICY_SPEC.md). It installs the standalone broker under fixed
+root-controlled paths, creates SQLite only after dropping to the broker UID, and supports strict
+generation-one install, append-only rotation, terminal revocation, audit, and conservative privilege
+preflight.
+
+This is still not repo CLI integration. `operator` and existing `.operator` ledgers do not consult
+the external authority yet. The service is installed but not started or enabled, and real-host privilege
+proof remains issue #7. Initial installation must execute a root-owned staged copy of
+`operator-admin`; its privileged wrapper intentionally refuses a user-writable checkout.
+
+## Local-lane task contract
+
+`pi` is the implementer carrier (since 2026-08-27); `operator` is the ledger. OpenCode
+held this role through 2026-08-27 and is deprecated as carrier, not disallowed.
+The old `opr` governed REPL is a deprecation stub; restore the last full
+implementation from git if you need it:
+
+```bash
+git checkout fe4211b09bc164c3dc0b7b48bad929e39ab68356 -- \
+    opr tests/test_opr.py tests/test_opr_tool_extraction.py
+```
+
+Working hypothesis: local models may fail more on **degrees of freedom than on
+knowledge** — a task phrased as open-ended intent invites discovery loops and
+wandering; the same task phrased as a concrete plan (exact paths, a verbatim
+anchor, numbered steps, a machine-checkable success criterion) converts search
+into lookup. The benefit of plan-shaped phrasing is measured; the *cause* of
+goal-shaped failure is not yet established, because the supporting negative
+records were produced through a harness that ended the agent loop on the first
+state-changing command ([audit](.operator/evidence/opr-continuation-loop-audit/evidence-0008.md)).
+Three pieces formalize and measure this:
+
+- [`LOCAL_LANE_CONTRACT.md`](LOCAL_LANE_CONTRACT.md) — the contract itself, rules R1–R6, each
+  tied to the failure mode it prevents.
+- [`task_lint.py`](task_lint.py) — a deterministic (no LLM calls) checker against those rules.
+  CLI: `task_lint.py <file|-> [--json]`, exit 0/1/2 = plan-shaped/semi-shaped/goal-shaped.
+- [`evals/local_lane_ladder/`](evals/local_lane_ladder/) — the measurement instrument: a task ×
+  specificity-level (L0 goal-shaped / L1 file-named / L2 plan-shaped) × model ×
+  trial grid, graded deterministically against a postcondition (grep/exec/output-match,
+  no LLM judging), run against disposable fixtures only, resumable, and
+  ledger-tagged (`lane=local`, `task_class=bounded`). Historical sweeps drove
+  `opr`; re-running that instrument requires restoring `opr` from git.
+  [`ANALYSIS.md`](evals/local_lane_ladder/ANALYSIS.md) has the first real sweep's results (6 tasks
+  × 3 levels × 4 models × 3 trials = 216 cells): the monotonic pass-rate claim
+  holds for 3 of 4 models tested and is honestly reported as refuted for the
+  fourth, plus a per-task breakdown of exactly where each model needs how much
+  specificity. Full design: [`LOCAL_LANE_CONTRACT_SPEC.md`](docs/specs/LOCAL_LANE_CONTRACT_SPEC.md).
+  Live dispatch contract: [`owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md`](owners-manual/pbc/appendix-local-implementer-dispatch.pbc.md).
+
+## Design specs
+
+- [`EXECUTOR_IDENTITY_SPEC.md`](docs/specs/EXECUTOR_IDENTITY_SPEC.md) — process-level identity binding via `os.getuid()`.
+- [`AUTHORITY_BROKER_SPEC.md`](docs/specs/AUTHORITY_BROKER_SPEC.md) — standalone external broker and store.
+- [`AUTHORITY_POLICY_SPEC.md`](docs/specs/AUTHORITY_POLICY_SPEC.md) — root-managed installation and policy lifecycle.
+- [`VERIFIED_BY_GUARD_SPEC.md`](docs/specs/VERIFIED_BY_GUARD_SPEC.md) — fail-closed on self-verification (a builder can't sign off its own claim).
+- [`USAGE_AUTOIMPORT_SPEC.md`](docs/specs/USAGE_AUTOIMPORT_SPEC.md) — ingest per-session token/usage from Claude/Codex/Gemini harness logs without unit conflation.
+- [`LOCAL_LANE_CONTRACT_SPEC.md`](docs/specs/LOCAL_LANE_CONTRACT_SPEC.md) — task-shaping contract, linter, and eval ladder for routing local models (see "Local-lane task contract" above).
+
+## Known limitations — help wanted
+
+These are real and known (named honestly rather than hidden — the whole point of the tool is that
+unverified claims are worthless):
+
+- **Advisory verification in `single_user` mode.** When every agent runs under one OS user, the
+  builder can assert a reviewer's name. Trusted `uid_isolated` verification requires pre-provisioned,
+  distinct OS users; provisioning them is outside this tool.
+- **The durable ledger is still local-only.** SQLite preserves version history when a YAML projection
+  is damaged or removed, but `.operator/` remains gitignored and has no off-machine backup. A disk
+  loss can still remove both the event history and copied evidence.
+- **The repo CLI policy gate is self-amendable.** Any agent with write access to the local config can
+  weaken the gate it is supposed to be bound by. The standalone P3 broker component is not yet installed
+  or integrated, so it does not remove this limitation from current `.operator` ledgers.
+- **Evidence binding.** Local attachment preserves both the original source fingerprint and a retained
+  snapshot fingerprint, so later byte drift is visible. Remote evidence has no bytes to recompute and is
+  reported as uncheckable. Prefer binding a *re-runnable structural test* over a captured blob or a
+  byte-hash of a living document.
+- **Structural, not semantic, verification.** `doctor` checks bindings, metadata, and fingerprints. It
+  deliberately does not execute stored verification commands; those remain inert audit metadata even
+  for a UID-isolated verifier. A vacuous gate (`assert True`) or a hash of irrelevant bytes can still
+  look structurally valid. Whether evidence proves the claim remains a reviewer judgment.
+
+## License
+
+MIT.

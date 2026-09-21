@@ -1,0 +1,122 @@
+# SOURCE: https://bulkheadtau.com/bulkhead-tau/
+# captured 2026-09-21, text extracted from the live page
+
+Bulkhead τ | Deterministic Governance Substrate 
+
+ Release 0.6.1 
+ Bulkhead τ
+
+ Evidence-backed agent systems and deterministic substrates.
+
+ Home 
+ Tau-Bench 
+ Domains 
+ Research Papers 
+ Benchmarks 
+ Demos 
+
+ Related
+
+ Local Models 
+ Simulation Lab 
+ Reflect 
+
+ Aligning agent execution with charter specifications, grounded in logbook evidence.
+
+ The Substrate
+
+ Four surfaces of the engine room. Labs (local models, simulation, Reflect) sit in their own section below.
+
+ Research Papers
+
+ The published evidence catalog covering grounded systems, orchestration architecture, and local LLM operator judgment.
+
+ Explore Research → 
+
+ Domains
+
+ The full catalog. Every domain agent and industry intelligence site built on the substrate — personal agents, enterprise verticals, and research demos.
+
+ Browse Domains → 
+
+ Benchmarks & Proofs
+
+ Geographic TSP scale ladders and solver-backed orchestration proofs showing where correctness must live.
+
+ View Benchmarks → 
+
+ Boundary Series Demos
+
+ Playable proofs of charter and boundary enforcement — browser games plus sensor/CAD demos, each with deterministic rules and replay.
+
+ Play the Demos → 
+
+ Purpose
+
+ Bulkhead τ is the public release line for a deterministic expert system built as personal consultant tooling for complex implementations. The system does not attempt to expand model capabilities; instead, it enforces governance by bounding execution between a formal specification Charter above and an append-only evidence Logbook below.
+
+ Rather than relying on non-deterministic language models for runtime control, Bulkhead τ embeds those models inside a strict deterministic substrate. This makes governed operations auditable, bounded, and subject to explicit architectural boundaries.
+
+ The Boundary Architecture
+
+ Charter (Upper Boundary)
+
+ Specification Standard. Evaluated against Product Behavior Contract specifications ( .pbc.md ), which define target behavior patterns and routing constraints. PBC is maintained by stewie-sh . We actively contribute provider-neutral anchoring guidance upstream and canonically consume these specifications downstream. Every architectural and operational decision routes through the contract question: Does this behavior fit the charter? 
+
+ View PBC Specification → 
+
+ Engine Room (Bulkhead τ)
+
+ Core Substrate. A custom, deterministic expert system built locally for implementation engagements. It uses the open-source tau-bench grammar (domain, policy/SOPs, tools, tasks, database, variations) from Sierra Research (MIT License) on personal and consulting data. Runtime is a pattern-matcher over grounded tools, not an LLM talking to a simulated user. Supervisor/implementer rotation, phase discipline, and the four-phase framework (Glass Box → Human-in-the-Loop → Progressive Disclosure → Multi-Modal Output) sit on that grammar.
+
+ What tau-bench is, and is not here. Sierra’s τ-bench evaluates a model as the agent: tool calls, a simulated user, written policy, graded against database state, scored for reliability (Pass^k) on domains like retail and airline. Bulkhead τ keeps that tool-and-policy substrate. It does not ship Sierra’s airline/retail eval as the product, and it does not treat the language model as the production runtime.
+
+ tau-bench Foundation (MIT) → 
+
+ Logbook (Lower Boundary)
+
+ Evidence & Deliberation. Anchored in the intellectual lineage of the gt-kb codebase authored by Mike Palmeter (Remaker Digital). Bulkhead τ implements a parallel logbook design that inherits two properties from it: first-class priority for deliberation records, and strict append-only discipline. The “logbook” framing is our own. It implements a working trust-state database (SQLite trust.db in the .groundtruth_proto/ substrate) recording behavior assertions against PBC anchors on a seven-day verification lease; the first production entries were logged 2026-06-09 for tennis-agent LOSO graduation. Downstream execution gating is specified but not yet wired — the gate records verification state and returns an exit code that no caller currently enforces. It remains structurally separate from both of Mike’s repositories: groundtruth (MIT, the Membase-renamed bootstrap platform, dormant since March 2026) and groundtruth-kb (AGPL-3.0), which supersedes it.
+
+ Upstream gt-kb Lineage → 
+
+ The Evidence-Backed Trust Loop
+
+ Operational safety is maintained by separating historical governance milestones from current evidence-derived states through an active trust loop:
+
+ The Charter: Authored, stable, and provider-neutral specifications maintained upstream by stewie-sh .
+
+ The Engine Room: The core Bulkhead τ substrate, gating execution authority and enforcing phase discipline.
+
+ The Logbook: An append-only SQLite trust database that monitors real-time passing, failing, stale, or disputed states, actively gating execution.
+
+ Provenance note: The PBC anchoring path is upstream-aligned through provider-neutral specification guidelines. The trust-state verification logic is a custom parallel implementation, inheriting its conceptual structure from the gt-kb design.
+
+ Labs
+
+ Supporting surfaces. They are not the engine room. They measure models, simulate sensors, and generate owner manuals.
+
+ Local Models
+
+ The measured field. Chip-to-chip results, what a spilled layer costs, and a running count of the measurement faults caught along the way.
+
+ Open Local Models → 
+
+ Simulation Lab
+
+ Firmware validators for future hardware and physics microscopes for legacy sensor forensic data.
+
+ Enter Simulation Lab → 
+
+ Reflect
+
+ Owner's manuals. Repos run through Stewie Reflect — structured chapters plus flagged attention cards — then refined by hand against source.
+
+ Read the Manuals → 
+
+ Bulkhead τ · Built from the underlying engineering core
+
+ Papers: /papers/ · Domains: /domains/ · Labs: Local Models / Simulation / Reflect 
+
+ Contact: erik@efehnconsulting.com 
+
+ v0.6.1

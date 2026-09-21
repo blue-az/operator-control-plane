@@ -1,0 +1,171 @@
+# SOURCE: https://bulkheadtau.com/tennis-agent/
+# captured 2026-09-21, text extracted from the live page
+
+TennisAgent | Personal Tennis Analytics Cockpit 
+
+ TA 
+
+ personal tennis analytics
+
+ TennisAgent
+
+ tau-bench 
+ sensors 
+ Bulkhead τ 
+
+ agentic analyst's cockpit 
+
+ multi-sensor integration
+
+ Your Personal Tennis Analytics Cockpit
+
+ 189 tools for practice sessions and tournament matches using Apple Watch, Zepp, Babolat, and Garmin data with ML classification and 3D trajectory visualization.
+
+ view 189 tools 
+ use cases 
+
+ 189 tools
+
+ analysis, ML, vision
+
+ 5 sensors
+
+ watch, racquet, HR, GPS
+
+ 19 ML tools
+
+ stroke classification
+
+ data sources
+
+ Unified Tennis Database
+
+ Sessions from Apple Watch, Zepp Universal, Babolat PIQ, Garmin HR, and MiiFit merged into one queryable database.
+
+ see sensors 
+
+ smart tools
+
+ Context-Aware Analysis
+
+ 5 smart tools that auto-select data sources and analysis type based on context (match, practice, lab).
+
+ see smart tools 
+
+ sensors 
+ tools 
+ use cases 
+ ML 
+ vision 
+ smart 
+
+ example queries
+
+ "analyze my best session"
+
+ "show linked data for 2024-12-15"
+
+ "train stroke classifier"
+
+ "3D trajectory for swing 5"
+
+ "compare heart rate wins vs losses"
+
+ "detect fatigue patterns"
+
+ tool categories
+
+ Analysis (42) 
+
+ Visualization (46) 
+
+ Machine Learning (19) 
+
+ Vision (15) 
+
+ Session (16) 
+
+ Export (12) 
+
+ analysis 
+ 42 tools 
+
+ Shot-Level Match Analysis
+
+ Fatigue detection, consistency analysis, rally patterns, PIQ scores, and coaching insights from Babolat matches.
+
+ ml 
+ 19 tools 
+
+ Stroke Classification
+
+ Train RF/LDA/KNN classifiers, SHAP explainability, temporal cross-validation, and hyperparameter tuning.
+
+ vision 
+ 15 tools 
+
+ Video Analysis
+
+ Pose estimation, ball detection, stroke classification from video, CNN architecture comparison.
+
+ visualization 
+ 46 tools 
+
+ Interactive Dashboards
+
+ 3D trajectories, impact heatmaps, HR zone charts, PIQ trends, and drift monitoring dashboards.
+
+ session 
+ 16 tools 
+
+ Linked Session Analysis
+
+ Auto-detect Apple Watch + Zepp pairs, practice planning, DOE experiments, and multi-sensor fusion.
+
+ smart 
+ 5 tools 
+
+ Context-Aware Tools
+
+ smart_analyze, smart_compare, smart_query, smart_visualize, smart_practice with auto-context detection.
+
+ sensor support
+
+ Apple Watch (100Hz IMU)
+
+ Zepp Universal (333Hz)
+
+ Zepp2 Legacy Sensor
+
+ Babolat PIQ Sensor
+
+ Garmin Heart Rate
+
+ MiiFit Band (legacy)
+
+ data layer
+
+ DB
+
+ SQLite Unified
+
+ 6 databases merged
+
+ view architecture 
+
+ execution model
+
+ Deterministic agentic engine with plan-then-execute workflow. tau-bench principles.
+
+ tau-bench 
+
+ TennisAgent
+
+ 189 tools for personal tennis analytics.
+
+ tools 
+ use cases 
+ ML 
+ vision 
+
+ TennisAgent - Bulkhead τ Domain

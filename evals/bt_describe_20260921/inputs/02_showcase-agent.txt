@@ -1,0 +1,223 @@
+# SOURCE: https://bulkheadtau.com/showcase/
+# captured 2026-09-21, text extracted from the live page
+
+ShowcaseAgent | Meta-Domain Router 
+
+ Bulkhead τ Meta-Domain
+
+ ShowcaseAgent
+
+ Intelligent Domain Router & Orchestrator
+
+ Home 
+ Domains 
+ Routing 
+ Modes 
+ Benchmark 
+ Bulkhead τ 
+
+ 14
+
+ Domains
+
+ 649+
+
+ Tools
+
+ 80.6%
+
+ Routing Accuracy
+
+ 3
+
+ Variations
+
+ What is a Meta-Domain?
+
+ ShowcaseAgent is fundamentally different from typical Bulkhead τ domains. Instead of performing domain-specific work, it orchestrates and routes queries to 14 production domains through a unified interface.
+
+ The Meta-Domain Pattern
+
+ Doesn't execute domain work - pure orchestration layer
+
+ Cross-domain aggregation - unified interface to 649+ tools
+
+ Intelligent routing - rule-based + LLM hybrid
+
+ Hypothesis testing - benchmarks meta-tools vs direct access
+
+ Core Capabilities
+
+ GUI Browser
+
+ Interactive tkinter interface to browse all 14 domains, view tools, and route queries in real-time.
+
+ showcase_agent.py
+
+ Meta-Router
+
+ Hybrid routing: regex patterns for speed, LLM fallback for ambiguous queries.
+
+ router/domain_router.py
+
+ Domain Adapters
+
+ 14 uniform adapters providing consistent interface to varied domain implementations.
+
+ router/domain_adapters/
+
+ Benchmark Platform
+
+ Test hypothesis across 5 LLM providers with 150+ validation queries.
+
+ benchmark/
+
+ Dual Modes
+
+ Meta-tool mode (14 tools) vs Direct mode (649+ tools) for different LLM contexts.
+
+ unified_agent.py
+
+ Variations
+
+ 3 experimental configurations for comparative tool abstraction studies.
+
+ variations/
+
+ The Core Hypothesis
+
+ "Local LLMs perform better with abstracted meta-tools (14 domain tools) than direct access to 649+ individual tools."
+
+ This hypothesis drives the entire ShowcaseAgent architecture. By presenting 14 meta-tools instead of 649+ direct tools:
+
+ LLM makes one decision: "which domain?"
+
+ Reduces context window pressure
+
+ Better suited for local models with limited context
+
+ Routing accuracy: 80.6% on cross-domain queries
+
+ Architecture Overview
+
+ # Query Flow 
+User Query
+ |
+ v
++-------------------+
+| ShowcaseAgent | TennisAgent (171 tools)
+ +---> Optiver (84 tools)
+ +---> Portfolio (70 tools)
+ +---> WQ (38 tools)
+ +---> GarminAgent (32 tools)
+ +---> GolfAgent (31 tools)
+ +---> ... 8 more domains
+
+ Showcased Domains
+
+ Domain 
+ Tools 
+ Category 
+ Routing Accuracy 
+
+ TennisAgent 
+ 171 
+ Sports/Analytics 
+ 100% 
+
+ Optiver 
+ 84 
+ Finance/ML 
+ 80% 
+
+ Portfolio 
+ 70 
+ Finance/Analytics 
+ 90% 
+
+ WQ 
+ 38 
+ Education/DataScience 
+ 25% 
+
+ GarminAgent 
+ 32 
+ Fitness/Analytics 
+ - 
+
+ GolfAgent 
+ 31 
+ Sports/Analytics 
+ - 
+
+ QCiAgent 
+ 21 
+ Tech/Sales 
+ 100% 
+
+ ParableAgent 
+ 21 
+ Education/Religion 
+ 80% 
+
+ Stan 
+ 19 
+ Education/Statistics 
+ 40% 
+
+ YieldModel 
+ 18 
+ Manufacturing/ML 
+ 100% 
+
+ AI_WQ 
+ 18 
+ Education/DeepLearning 
+ 75% 
+
+ PPR_Agent 
+ 15 
+ Healthcare/Data 
+ 100% 
+
+ AmericanEconomy 
+ 18 
+ Macro/Data 
+ - 
+
+ GlobalTemperature 
+ 93 
+ Climate/Science 
+ - 
+
+ Overall routing accuracy: 80.6% (83/103 queries correctly routed)
+
+ Development Sprints
+
+ Sprint 
+ Focus 
+ Status 
+
+ 1 
+ Foundation (router, TennisAgent adapter) 
+ Complete 
+
+ 2 
+ 10 domain adapters with uniform interface 
+ Complete 
+
+ 3 
+ Benchmark platform (5 providers, 150+ queries) 
+ Complete 
+
+ 4 
+ LLM routing + direct mode + routing tracking 
+ Complete 
+
+ 5 
+ GUI integration with live query routing 
+ Complete 
+
+ ShowcaseAgent v2.5.0 - Bulkhead τ Meta-Domain
+
+ Back to Bulkhead τ

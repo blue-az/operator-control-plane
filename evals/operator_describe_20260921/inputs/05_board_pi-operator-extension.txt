@@ -1,0 +1,198 @@
+# SOURCE: https://bulkheadtau.com/bulkhead-tau/reflect/operator-boards/pi-operator-extension.html
+# captured 2026-09-21, text extracted from the live page
+
+Operator board · pi-operator-extension 
+
+ Project · Issues · Map 
+ pi-operator-extension
+
+ Simple Operator board · snapshot 2026-09-16 23:19 UTC · not Graphify, not a knowledge graph
+
+ 15 tasks
+
+ 10 verified tasks
+
+ 11/32 claims verified
+
+ 3 stale next_action
+
+ Step 0 PBC lifecycle shape
+ Step 1 Read-only orientation
+ Step 2 Claim / evidence / handoff
+ Step 3 Supervisor-review
+ Step 4 Delegate chooser
+ Step 5 Falsifiable dogfood
+
+ pi-operator-extension-cross-project-delegate 
+
+ new 
+
+ 0/0 claims verified · 0 evidence · 4 handoffs
+
+ Do not recreate the FUT slices from this task. Remaining work is owner publishing/commit and any new UX issues (POE-ISS-011..013), not another backlog stub.
+
+ latest verified: none · updated 2026-09-06T01:49:12
+
+ pi-operator-extension-cross-project-install 
+
+ verified 
+
+ 1/1 claims verified · 4 evidence · 2 handoffs
+
+ Cross-project install helper and disposable consumer smoke are verified; publishing and live non-temp consumer trust remain out of scope.
+
+ latest verified: claim-0159 · updated 2026-09-06T01:42:00
+
+ pi-operator-extension-next-steps 
+
+ verified 
+
+ 1/1 claims verified · 2 evidence · 2 handoffs
+
+ /op:next-steps implementation is verified; no further implementation or verification action is pending on this task.
+
+ latest verified: claim-0157 · updated 2026-09-06T01:41:59
+
+ pi-operator-extension-pbc-profile 
+
+ verified 
+
+ 2/3 claims verified · 8 evidence · 3 handoffs
+
+ Implementation claims 0156 and 0161 are verified. Remaining on this task is claim-0155 (Route C compatibility-route record, not proposed-rule ratification) and any later owner-authorized publish/profile work.
+
+ latest verified: claim-0161 · updated 2026-09-06T01:42:00
+
+ pi-operator-extension-pbc-review 
+
+ assigned 
+
+ 0/3 claims verified · 4 evidence · 5 handoffs
+
+ Do not start Step 1 from this review task. Use the existing step/FUT task IDs. claim-0119 remains historical on this task.
+
+ latest verified: none · updated 2026-09-06T01:49:12
+
+ pi-operator-extension-project-dashboard 
+
+ verified 
+
+ 1/1 claims verified · 2 evidence · 2 handoffs
+
+ /op:project dashboard implementation is verified; no further implementation or verification action is pending on this task.
+
+ latest verified: claim-0158 · updated 2026-09-06T01:41:59
+
+ pi-operator-extension-step1 
+
+ verified 
+
+ 1/4 claims verified · 7 evidence · 7 handoffs
+
+ STALE · Owner decision: proceed to Step 2 (/op:claim, /op:evidence, /op:handoff) or request additional verification of claims 0120-0122 before continuing.
+
+ latest verified: claim-0123 · updated 2026-09-01T23:28:39
+
+ pi-operator-extension-step2 
+
+ verified 
+
+ 1/4 claims verified · 11 evidence · 6 handoffs
+
+ STALE · Proceed to Step 3 decision: implement /op:supervisor-review, or first capture the verifier-only draft-evidence limitation in the PBC backlog.
+
+ latest verified: claim-0127 · updated 2026-09-02T00:37:26
+
+ pi-operator-extension-step3 
+
+ verified 
+
+ 1/4 claims verified · 8 evidence · 3 handoffs
+
+ Recommended: accept verified claim-0131 as sufficient for Step 3 and move to Step 4 /op:delegate design/implementation, unless owner wants live TUI dogfood first.
+
+ latest verified: claim-0131 · updated 2026-09-02T01:34:36
+
+ pi-operator-extension-step4-via-claude 
+
+ running 
+
+ 0/0 claims verified · 0 evidence · 1 handoffs
+
+ Do not resume this child loop. Parent step4 is verified; later dogfood is on step5 (currently quarantined for source drift).
+
+ latest verified: none · updated 2026-09-06T01:49:12
+
+ pi-operator-extension-step4 
+
+ verified 
+
+ 1/3 claims verified · 9 evidence · 8 handoffs
+
+ STALE · Reload Pi and run /op:handoff go on pi-operator-extension-step4; confirm it creates a non-empty generated handoff, not next_action: go.
+
+ latest verified: claim-0132 · updated 2026-09-02T06:08:56
+
+ pi-operator-extension-step5-dogfood 
+
+ quarantined 
+
+ 0/6 claims verified · 15 evidence · 12 handoffs
+
+ Do not restore trust on pi-operator-extension-step5-dogfood until an independent uid-966 verifier reruns against a coherent tree; current dirty test file is not that target.
+
+ latest verified: none · updated 2026-09-06T00:21:26
+
+ pi-operator-extension-target-ux-cleanup-via-grok 
+
+ quarantined 
+
+ 0/0 claims verified · 0 evidence · 1 handoffs
+
+ Use the separately scoped Project Phoenix task; do not resume this accidental child task.
+
+ latest verified: none · updated 2026-09-03T01:23:00
+
+ pi-operator-extension-target-ux-cleanup 
+
+ verified 
+
+ 1/1 claims verified · 2 evidence · 7 handoffs
+
+ Leave for publish hardening; continue cross-project trials or commit PBC backlog updates.
+
+ latest verified: claim-0141 · updated 2026-09-02T23:06:03
+
+ pi-operator-extension-workflow-guidance 
+
+ verified 
+
+ 1/1 claims verified · 2 evidence · 2 handoffs
+
+ Workflow-guidance tokens on /op:next-steps are verified; no /op:mode command and no further verification action pending on this task.
+
+ latest verified: claim-0160 · updated 2026-09-06T01:42:00
+
+ Recent PBC issues
+
+ POE-ISS-007 Distinct-UID verification currently blocks on ad hoc sudo/auth state; the correct UX is a human-visible authorization prompt, not a hidden agent retry or same-UID downgrade.
+ POE-ISS-008 Verifier-only identities cannot attach draft/no-status evidence because evidence attachment without verification requires builder authority; verifier rerun logs must be attached as verified evidence or supplied through a builder-produced artifact path.
+ POE-ISS-009 /op:handoff treated a one-word user input "go" as a literal next_action and recorded an empty handoff with null fields instead of generating a useful closeout from current task context.
+ POE-ISS-010 /op:claim and /op:evidence work but ask too many questions for the common path; Step 5 needs opinionated defaults so normal dogfood does not require the owner to re-specify obvious task, author, type, claim, and verify command fields.
+ POE-ISS-011 /op:doctor and /op:status are slow on large ledgers and previously showed no visible progress while running.
+ POE-ISS-012 Generated review_delegations scripts are not yet reliable end-to-end: operator-verifier may lack Pi provider credentials/home setup, sudo resets PATH so pytest may be unavailable, pytest cache writes warn under the verifier UID, and the generated prompt still suggests --verified-by reviewer even though evidence-attach requires the executing verifier identity.
+ POE-ISS-013 Review/delegation UI exposed too much harness plumbing: users reason in terms of model/persona targets such as Claude/Luna/Grok, while Pi is a carrier runtime and operator-verifier is a separate Unix authority identity.
+ POE-ISS-014 review-delegate resolved the Grok persona to the wrong provider/model: the intended xai/grok-4.x target was generated as openai-codex/gpt-5.6-luna (the Luna seat's cloud model), so pi hunted for a missing openai-codex credential instead of the present xai grant. Same GroK-vs-Luna mixup doctor already flags on claim-0090 (verified via luna harness rather than the task's grok review_harness).
+
+ Recent future features
+
+ POE-FUT-004 — Multi-claim supervisor review
+ POE-FUT-005 — Shared adapter export
+ POE-FUT-006 — Delegation target registry UI
+ POE-FUT-007 — Verifier authorization prompt
+ POE-FUT-008 /op:roadmap — Operator roadmap command
+ POE-FUT-009 /op:verify-run — Trusted verifier run command
+ POE-FUT-010 /op:next-steps — Operator next-steps command
+ POE-FUT-013 — Workflow strictness modes
+ POE-FUT-014 /pbc:validate or pbc validate --profile operator — PBC spec CLI compatibility/profile
+ POE-FUT-015 /op:crystal or /op:crystal-attach — Crystal capture and attach command

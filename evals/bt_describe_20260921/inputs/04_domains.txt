@@ -1,0 +1,216 @@
+# SOURCE: https://bulkheadtau.com/domains/
+# captured 2026-09-21, text extracted from the live page
+
+Domains | Bulkhead τ 
+
+ Full Catalog 
+ Domains
+
+ Every domain agent and intelligence site built on the Bulkhead τ substrate.
+
+ Home 
+ Tau-Bench 
+ Domains 
+ Research Papers 
+ Benchmarks 
+ Demos 
+
+ Related
+
+ Local Models 
+ Simulation Lab 
+ Reflect 
+
+ Each domain is a deterministic agentic cockpit, gated by its own charter and grounded in real data.
+
+ Personal & Lifestyle Agents
+
+ FallacyAgent
+
+ Detect logical fallacies — 48 fallacies, 15 case studies, 11 meta-principles, 17 counter-strategies.
+
+ GarminAgent
+
+ Garmin activity and wellness analysis from GDPR export data. 32 tools across 4 variations, with TennisAgent integration.
+
+ Pose-from-Video
+
+ MediaPipe pose landmarks overlaid on a real serve clip, frame by frame — pixels to pose directly, no sensors or simulation.
+
+ LabWired Serve HUD
+
+ Phone video of a serve with Zepp handle IMU and LabWired peak-detection firmware edges overlaid — not a simulated 3D body.
+
+ Groundstrokes (FH + BH)
+
+ Forehand and backhand clips with MediaPipe pose overlays. Serve demos stay separate; stroke-mode has no LabWired origin stream.
+
+ Skeleton Study
+
+ The same tracked pose, isolated on an open field instead of drawn over video — a motion study, joints only.
+
+ Skeleton + Sensor HUD
+
+ Both overlays on the same 90 frames — MediaPipe skeleton and the Zepp/LabWired telemetry panel, one render pass, not two videos stitched together.
+
+ GolfAgent
+
+ Golf swing analysis using the Zepp Universal sensor. 31 tools across 4 variations with performance profiling.
+
+ TennisAgent
+
+ Personal tennis analytics cockpit. 189 tools for multi-sensor analytics across Apple Watch, Zepp, Babolat, and Garmin.
+
+ TourAgent
+
+ Repeatable tennis answers — tour-level reference lookups.
+
+ ParableAgent
+
+ Parable-driven reasoning domain.
+
+ Recipes
+
+ Plant-based recipe domain with progressive tools for lookup, planning, discovery, and personalization.
+
+ WaterReportAgent
+
+ AZ Water — Arizona reservoir status and SRP infrastructure prototype (frozen CSV).
+
+ Stan
+
+ Stanford Stats 315A Statistical Learning coursework domain, based on Elements of Statistical Learning (ESL II).
+
+ Enterprise & Industry Domains
+
+ Amkor Technology
+
+ OSAT market analysis, Arizona facility thesis, advanced packaging trends for Amkor (AMKR).
+
+ xamkor
+
+ OSAT advisory prototype.
+
+ Honeywell Intelligence Hub
+
+ Honeywell landing page with Bulkhead τ design principles and links to the full domain site.
+
+ Honeywell Landing
+
+ Standalone Honeywell landing page for product visibility, revenue context, and executive dashboards.
+
+ ISO 13485
+
+ Deterministic medical device QMS compliance workflows. 23 tools across 4 variations.
+
+ Semiconductors
+
+ CPU/GPU-first semiconductor market intelligence with deterministic analysis workflows.
+
+ Semiconductors :: Geo-Matrix
+
+ Geo-matrix companion hub for the Semiconductors domain.
+
+ Optiver
+
+ "Trading at the Close" ML pipeline with deterministic feature engineering, model CV, and drift monitoring.
+
+ Optiver :: Geo-Matrix
+
+ Geo-matrix companion hub for the Optiver domain.
+
+ QCiAgent
+
+ Quantum Computing Inc. product analysis and sales intelligence.
+
+ YieldModel
+
+ IC manufacturing yield analysis with a physics-based optimization model and deterministic agentic cockpit.
+
+ PPR Agent
+
+ Regulated cardiac device performance reporting — 92 million US implants, 18 years, government-mandated data.
+
+ WQ
+
+ Agentic cockpits for the WorldQuant University Applied Data Science Lab curriculum. 41 tools across 7 projects.
+
+ AI_WQ
+
+ WorldQuant University AI Lab curriculum — deep learning for computer vision.
+
+ Portfolio
+
+ Financial portfolio analysis with tax optimization, options trading, and risk assessment.
+
+ Bulkhead τ Consulting
+
+ Strategic solutions demo-consulting landing page.
+
+ AmericanEconomy
+
+ U.S. macro conditions, fiscal position, and world-economy linkages.
+
+ GlobalTemperature
+
+ Climate data analysis — 93 tools across 8 variations covering temperature, CO2, methane, sea level, and Arctic ice.
+
+ Bulkhead τ Research & Architecture
+
+ ShowcaseAgent
+
+ Meta-agent orchestrating 14 production domains with 649+ tools via intelligent routing.
+
+ Agentic Coding Failure Patterns
+
+ Why strong agentic coding systems still collapse in familiar ways. Eight failure families, six evidenced from Bulkhead τ operations.
+
+ Capture Integrity
+
+ Papers 1.16 & 1.19: terminal capture corrupts protocol scores, and stronger models can override literal substrate inspection.
+
+ Fab Simulation & RVH
+
+ Semiconductor fab yield simulation using the Rough Volatility Hypothesis — defectivity as a dynamic path, not a static mean.
+
+ Boundary Results
+
+ Detailed failure-mode results from Bulkhead τ boundary testing.
+
+ Local Model Role Suitability
+
+ Which roles a local model is fit for, and which it isn't.
+
+ Offline Grounded Domain Agent
+
+ The useful unit is not the naked local model — it is the harnessed domain system.
+
+ The Operator Shell Pattern
+
+ Paper 1.17: how OpenClaw wraps Bulkhead τ as an operator access layer without replacing it as the authority.
+
+ OpenClaw Wrapper
+
+ OpenClaw as the operator wrapper over Bulkhead τ: access, compression, monitoring, and workflow discipline without crossing the authority boundary.
+
+ Orchestration Beats Raw Model Power
+
+ Harnesses, routing, repair, and the operating regimes where system shape settles the result before model size does.
+
+ Periodic Agent
+
+ Bulkhead τ prototype domain.
+
+ Rough Volatility as ML Benchmark
+
+ Rough volatility modeling used as a machine-learning benchmark.
+
+ Ski Chalet Harness Boundary
+
+ What a prepared local 3090 setup can still do offline — a harness boundary paper.
+
+ Bulkhead τ · Built from the underlying engineering core
+
+ Papers: /papers/ · Domains: /domains/ 
+
+ Contact: erik@efehnconsulting.com

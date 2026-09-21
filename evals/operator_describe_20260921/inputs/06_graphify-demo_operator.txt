@@ -1,0 +1,106 @@
+# SOURCE: https://bulkheadtau.com/bulkhead-tau/graphify-demo/operator.html
+# captured 2026-09-21, text extracted from the live page
+
+operator-control-plane — the whole thing vs. what stays in memory 
+
+ graphify pointed at: 
+
+ graphify (this tool, mapping itself) 
+ operator-control-plane (the Ledger) 
+ ppr-agent 
+ awesome-agent-architecture 
+
+ Built with graphify_compare.py , a script wrapping graphify's own extract → cluster-only → benchmark → explain pipeline into one page. 
+ View graphify on GitHub ↗ 
+
+ graphify · the Ledger, mapped
+
+ The whole thing, and what actually stays in memory
+
+ Real output from running graphify on operator : tree-sitter AST, code-only, no API key. Not a mockup — the graph below, and the numbers next to it, come straight out of this run.
+
+ Left is the entire thing, force-directed and clickable. Right is what an assistant would actually load into
+ context to answer one question about it.
+
+ Full graph
+ graphify-out/graph.html 
+
+ graphify - /tmp/graphify-compare-one-rc8mgn8b/out/graphify-out/graph.html 
+
+ Node Info
+
+ Click a node to inspect it 
+
+ Communities
+
+ Select All 
+
+ 183 nodes &middot; 449 edges &middot; 11 communities
+
+ " title="graphify force-directed graph" loading="lazy" sandbox="allow-scripts"> 
+
+ 183 nodes · 
+ 449 edges · 
+ 11 communities · 
+ 8 source files 
+
+ EXTRACTED — explicit in source (96%) 
+ INFERRED — resolved by graphify (4%) 
+
+ 3.1×
+
+ fewer tokens per query, vs. reading the raw corpus
+
+ corpus, naive read ~12,200 tok 
+
+ avg. scoped query ~3,901 tok 
+
+ Reduction by question
+
+ "what are the core abstractions"
+
+ 4.5× 
+
+ "what is the main entry point"
+
+ 3.0× 
+
+ "what connects the data layer to the api"
+
+ 2.5× 
+
+ What gets loaded, per question
+ graphify explain 
+
+ $ graphify explain "load_yaml()" 
+
+ Node: load_yaml() 
+
+ Source: operator L771
+
+ Community: load_yaml
+
+ Degree: 24
+
+ Connections (24):
+
+  <-- operator [contains] EXTRACTED 
+
+  <-- usage_import_cmd() [calls] EXTRACTED 
+
+  <-- resolve_task_record() [calls] EXTRACTED 
+
+  <-- evidence_attach_cmd() [calls] EXTRACTED 
+
+  <-- session_start_cmd() [calls] EXTRACTED 
+
+  <-- handoff_add_cmd() [calls] EXTRACTED 
+
+ … 18 more edges — the node and its neighborhood, nothing else
+
+ Real numbers, not illustrative ones. Pipeline: graphify extract operator --code-only →
+ graphify cluster-only → graphify benchmark →
+ graphify explain "load_yaml()" . Every edge is tagged EXTRACTED (explicit in the
+ source) or INFERRED (resolved by graphify).
+
+ v1.1

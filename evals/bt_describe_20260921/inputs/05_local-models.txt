@@ -1,0 +1,70 @@
+# SOURCE: https://bulkheadtau.com/local-models/
+# captured 2026-09-21, text extracted from the live page
+
+Local Models | Bulkhead τ 
+
+ Umbrella · 11 Sep 2026 
+ Local Models
+
+ Field notes from local models actually in use. What the measurements say, what the instrument got wrong, and which layer was carrying the result.
+
+ Home 
+ Tau-Bench 
+ Domains 
+ Research Papers 
+ Benchmarks 
+ Demos 
+
+ Related
+
+ Local Models 
+ Simulation Lab 
+ Reflect 
+
+ Nothing here ranks a model until the instrument that measured it has been checked.
+
+ The measured field
+
+ Personal benchmarking on hardware I actually use, published with the configuration attached. Each page carries its own date and moves when the numbers move.
+
+ Local Lane
+
+ RTX 3090 against a Ryzen AI MAX 390 on the same blobs. Which model holds the seat on each chip, and why decode rate does not decide it.
+
+ Read the numbers → 
+
+ Where the Layers Go
+
+ Interactive. Drag the context and watch layers spill to the CPU. Three of sixty-six costs 27.6%. Flip decode to wall clock and the ranking inverts.
+
+ Open the model → 
+
+ Qwen 3.6 vs 3.8
+
+ Same architecture, new weights. Speed, multi-token prediction on the 3090, and correctness across the same three fixtures.
+
+ Read the A/B → 
+
+ When the instrument was wrong
+
+ Two pages about measurement rather than models. Both exist because a number looked like a finding and was not.
+
+ The Instrument Log
+
+ Fourteen measurement faults caught in a week, and the finding each one would have been published as. Five upstream, nine mine. None of them were the model.
+
+ Read the count → 
+
+ Capture Integrity
+
+ Papers 1.16 and 1.19. Subprocess capture embedded terminal sequences that corrupted multi-line JSON, and a model took the blame for it. Under clean REST capture it passes all six probes.
+
+ The terminal failed, not the model → 
+
+ The layer underneath
+
+ Do not ask only which model is strongest. Ask which layer is carrying the result: grounding, routing, protocol discipline, repair policy, role fit, or raw model power.
+
+ The framework material that used to sit on this page has its own home now, because it is not about local models.
+
+ Open the Harness Layer →
