@@ -40,6 +40,7 @@ SKIP_PERMS=0
 SANDBOX="workspace-write"
 MAX_TURNS=""
 FREEZE=()
+EXPECT=()
 
 usage() {
     cat <<'EOF'
@@ -56,6 +57,9 @@ Options:
   --cwd DIR              Working directory for the run (default: current).
   --deliver DIR          Deliverable directory; receives .brief.md.
   --freeze PATH          Path that must not change. Repeatable. Hashed before/after.
+  --expect PATH          File the run must leave present and non-empty. Repeatable.
+                         Relative paths resolve against --cwd. If the harness exits 0
+                         without it, outcome=missing_deliverable and the script exits 1.
   --prompt TEXT          Kickoff prompt (default: execute the brief for the task).
   --allowed-tools LIST   Claude/Grok tool allowlist (vendor-specific).
   --model NAME           Model override where the vendor CLI supports it.
@@ -86,6 +90,7 @@ while [ $# -gt 0 ]; do
         --cwd)             WORK_CWD="$2"; shift 2 ;;
         --deliver)         DELIVER="$2"; shift 2 ;;
         --freeze)          FREEZE+=("$2"); shift 2 ;;
+        --expect)          EXPECT+=("$2"); shift 2 ;;
         --prompt)          PROMPT="$2"; shift 2 ;;
         --allowed-tools)   ALLOWED="$2"; shift 2 ;;
         --model)           MODEL="$2"; shift 2 ;;
@@ -266,6 +271,7 @@ if [ "$DRY" -eq 1 ]; then
     printf 'cwd     : %s\n' "$WORK_CWD"
     printf 'brief   : %s\n' "$BRIEF_ABS"
     printf 'deliver : %s\n' "${DELIVER:-<none>}"
+    for e in "${EXPECT[@]}"; do printf 'expect  : %s\n' "$e"; done
     printf 'log     : %s\n' "$LOG"
     printf 'timeout : %ss\n' "$TIMEOUT"
     printf 'command : timeout %s' "$TIMEOUT"
@@ -311,6 +317,18 @@ case "$EXIT_CODE" in
     *)   OUTCOME="failed" ;;
 esac
 
+# ---- deliverable check -----------------------------------------------------
+# A harness can exit 0 having refused the task or written nothing. Exit code alone
+# is not evidence of a deliverable, so named deliverables are checked explicitly.
+MISSING=()
+for e in "${EXPECT[@]}"; do
+    case "$e" in /*) ep="$e" ;; *) ep="$WORK_CWD/$e" ;; esac
+    [ -s "$ep" ] || MISSING+=("$e")
+done
+if [ "${#MISSING[@]}" -gt 0 ] && [ "$OUTCOME" = "completed" ]; then
+    OUTCOME="missing_deliverable"
+fi
+
 # ---- freeze verification ---------------------------------------------------
 VIOLATIONS=()
 for p in "${!BEFORE[@]}"; do
@@ -326,6 +344,12 @@ if [ "${#VIOLATIONS[@]}" -gt 0 ]; then
 else
     [ "${#BEFORE[@]}" -gt 0 ] && printf 'delegate-brief: freeze intact (%s path(s))\n' "${#BEFORE[@]}"
 fi
+if [ "${#MISSING[@]}" -gt 0 ]; then
+    printf 'delegate-brief: MISSING DELIVERABLE (%s path(s)):\n' "${#MISSING[@]}"
+    for m in "${MISSING[@]}"; do printf '  - %s\n' "$m"; done
+elif [ "${#EXPECT[@]}" -gt 0 ]; then
+    printf 'delegate-brief: deliverables present (%s path(s))\n' "${#EXPECT[@]}"
+fi
 printf 'delegate-brief: last log line: %s\n' "$(tail -n 1 "$LOG" 2>/dev/null)"
 
 # ---- optional ledger handoff ----------------------------------------------
@@ -334,9 +358,12 @@ if [ "$RECORD" -eq 1 ]; then
     if [ -x "$OP" ]; then
         frz="intact"
         [ "${#VIOLATIONS[@]}" -gt 0 ] && frz="VIOLATED: ${VIOLATIONS[*]}"
+        dlv="not specified (no --expect)"
+        [ "${#EXPECT[@]}" -gt 0 ] && dlv="present: ${EXPECT[*]}"
+        [ "${#MISSING[@]}" -gt 0 ] && dlv="MISSING: ${MISSING[*]}"
         "$OP" handoff-add --task "$TASK" --by "$HANDOFF_BY" \
             --changed "Delegated headless run (harness=$HARNESS) against brief $BRIEF_ABS in $WORK_CWD. Deliverable: ${DELIVER:-unspecified}. Brief preserved at ${DELIVER:+$DELIVER/.brief.md}." \
-            --verified "Wall-clock outcome only: outcome=$OUTCOME exit=$EXIT_CODE duration=${DURATION}s. Frozen paths $frz. No claim about whether the deliverable satisfies the brief's acceptance checklist." \
+            --verified "Wall-clock outcome only: outcome=$OUTCOME exit=$EXIT_CODE duration=${DURATION}s. Frozen paths $frz. Expected deliverables $dlv. No claim about whether the deliverable satisfies the brief's acceptance checklist." \
             --claimed "None. This handoff records dispatch and exit, not correctness." \
             --open "Acceptance checklist in the brief is unevaluated. Full run log at $LOG." \
             --assumptions "That the brief file at dispatch time is the governing brief. Harness backend=$HARNESS." \
@@ -348,4 +375,5 @@ if [ "$RECORD" -eq 1 ]; then
 fi
 
 [ "${#VIOLATIONS[@]}" -gt 0 ] && exit 1
+[ "${#MISSING[@]}" -gt 0 ] && exit 1
 exit "$EXIT_CODE"
