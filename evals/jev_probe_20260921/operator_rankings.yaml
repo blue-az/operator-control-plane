@@ -1,0 +1,26 @@
+# Operator (human) rankings used as ground truth by score.py, with their sources.
+# Recorded 2026-09-22 to close the provenance gap raised in review c86c0662-2147-44ea-98e1-748e872818ed.
+# "1/3" in the registry's quality field is a RANK, 1 = best; this file states rankings best-first.
+R3:
+  eval_dir: evals/bt_describe_20260921
+  ranking: [astra, terra, luna]
+  source: >-
+    External to this repo: Project Phoenix magic_bridge/dashboard_benchmark_registry.yaml,
+    rows "Blind read R3 — BT public site" (operator 1/3 astra, 2/3 terra, 3/3 luna).
+  source_repo: github.com/blue-az/Python
+  source_blob_sha1: 59ebb2f3ed079cb7d46e9845dd3c6e85675c71cd
+  source_verify_cmd: >-
+    git -C /home/blueaz/Python cat-file blob 59ebb2f3ed079cb7d46e9845dd3c6e85675c71cd |
+    grep -A6 'Blind read R3 — BT public site' | grep -E 'model:|quality:'
+  note: >-
+    Not derivable inside this repo; bt_describe_20260921 has no USER_RANKING.txt.
+    Operator's standalone boundary forbids depending on Phoenix, so the source is cited, not read.
+R4:
+  eval_dir: evals/operator_describe_20260921
+  ranking: [terra, luna, astra]
+  source: >-
+    In-repo: evals/operator_describe_20260921/USER_RANKING.txt ("user ranking: B > C > A")
+    resolved through KEY.txt (A = astra, B = terra, C = luna).
+  source_verify_cmd: >-
+    cat evals/operator_describe_20260921/USER_RANKING.txt evals/operator_describe_20260921/KEY.txt
+  note: Derived at runtime by score.py and cross-checked against the value above.

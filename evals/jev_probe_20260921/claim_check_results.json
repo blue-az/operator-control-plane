@@ -1,0 +1,236 @@
+[
+ {
+  "id": "S1",
+  "label": true,
+  "p": [
+   0.99,
+   0.97
+  ],
+  "claim": "ShowcaseAgent lists TennisAgent with 171 tools."
+ },
+ {
+  "id": "S2",
+  "label": true,
+  "p": [
+   0.8,
+   0.79
+  ],
+  "claim": "TennisAgent's own page says it has 189 tools."
+ },
+ {
+  "id": "S3",
+  "label": true,
+  "p": [
+   0.35,
+   0.33
+  ],
+  "claim": "The domains page says WQ has 41 tools across 7 projects."
+ },
+ {
+  "id": "S4",
+  "label": true,
+  "p": [
+   1,
+   1
+  ],
+  "claim": "The Logbook's downstream execution gating is specified but not yet wired."
+ },
+ {
+  "id": "S5",
+  "label": true,
+  "p": [
+   0.99,
+   0.98
+  ],
+  "claim": "Under clean REST capture, the model passes all six probes."
+ },
+ {
+  "id": "S6",
+  "label": true,
+  "p": [
+   1,
+   1
+  ],
+  "claim": "The score writer verifies that the file was written by reading it back."
+ },
+ {
+  "id": "S7",
+  "label": true,
+  "p": [
+   1,
+   1
+  ],
+  "claim": "BT Inc. is described as fictional, and the manual is not evidence that a real operating company exists."
+ },
+ {
+  "id": "S8",
+  "label": true,
+  "p": [
+   1,
+   1
+  ],
+  "claim": "tennis-sensor-toolkit is described as covering 192 tools."
+ },
+ {
+  "id": "S9",
+  "label": true,
+  "p": [
+   1,
+   1
+  ],
+  "claim": "When the score log is missing or unreadable, the desk falls back to an empty score state."
+ },
+ {
+  "id": "S10",
+  "label": true,
+  "p": [
+   0.91,
+   0.91
+  ],
+  "claim": "TennisAgent's data layer merges 6 databases into a unified SQLite store."
+ },
+ {
+  "id": "S11",
+  "label": true,
+  "p": [
+   1,
+   1
+  ],
+  "claim": "Overall routing accuracy is 80.6%, with 83 of 103 queries routed correctly."
+ },
+ {
+  "id": "S12",
+  "label": true,
+  "p": [
+   0.51,
+   0.56
+  ],
+  "claim": "TennisAgent sessions from Apple Watch, Zepp Universal, Babolat PIQ, Garmin HR, and MiiFit are merged into one queryable database."
+ },
+ {
+  "id": "U1",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "TennisAgent's own page says it has 171 tools."
+ },
+ {
+  "id": "U2",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "The domains page says WQ has 38 tools."
+ },
+ {
+  "id": "U3",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "Callers currently enforce the Logbook gate's exit code, so downstream execution is actively blocked."
+ },
+ {
+  "id": "U4",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "The corrupted multi-line JSON was caused by the model's own output formatting."
+ },
+ {
+  "id": "U5",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "The score writer checks the reviewer's identity before storing the review record."
+ },
+ {
+  "id": "U6",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "The manual describes Bulkhead Tau's production runtime as desk-first with an unverified shared router."
+ },
+ {
+  "id": "U7",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "The Reflect shelf gives TennisAgent 192 tools."
+ },
+ {
+  "id": "U8",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "When the score log is missing or unreadable, later hypotheses are blocked."
+ },
+ {
+  "id": "U9",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "TennisAgent's page lists exactly five supported sensors."
+ },
+ {
+  "id": "U10",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "The ShowcaseAgent page describes Safe Mode snapshots and refresh pipelines."
+ },
+ {
+  "id": "U11",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "Overall routing accuracy is 90%, with 93 of 103 queries routed correctly."
+ },
+ {
+  "id": "U12",
+  "label": false,
+  "p": [
+   0,
+   0
+  ],
+  "claim": "The bt-inc-platform manual is presented as evidence of a real, unified production cockpit."
+ },
+ {
+  "id": "B1",
+  "label": null,
+  "p": [
+   0.32,
+   0.27
+  ],
+  "claim": "The TennisAgent page describes six merged sensor sources."
+ },
+ {
+  "id": "B2",
+  "label": null,
+  "p": [
+   0.59,
+   0.58
+  ],
+  "claim": "TennisAgent merges six SQLite databases containing watch, racquet, and fitness data."
+ }
+]

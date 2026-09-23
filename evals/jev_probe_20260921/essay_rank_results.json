@@ -1,0 +1,338 @@
+[
+ {
+  "round": "R3",
+  "setup": "orig",
+  "rep": 0,
+  "secs": 0.35,
+  "best": "astra",
+  "best_p": {
+   "astra": 0.41,
+   "terra": 0.38,
+   "luna": 0.21
+  },
+  "worst": "astra",
+  "worst_p": {
+   "astra": 0.63,
+   "terra": 0.19,
+   "luna": 0.18
+  },
+  "scores": {
+   "luna": 1.36,
+   "terra": 1.43,
+   "astra": 1.06
+  },
+  "conf": {
+   "luna": 0.23,
+   "terra": 0.15,
+   "astra": 0.17
+  }
+ },
+ {
+  "round": "R3",
+  "setup": "orig",
+  "rep": 1,
+  "secs": 0.32,
+  "best": "terra",
+  "best_p": {
+   "terra": 0.39,
+   "luna": 0.24,
+   "astra": 0.37
+  },
+  "worst": "astra",
+  "worst_p": {
+   "terra": 0.18,
+   "luna": 0.16,
+   "astra": 0.66
+  },
+  "scores": {
+   "luna": 1.37,
+   "terra": 1.45,
+   "astra": 1.07
+  },
+  "conf": {
+   "luna": 0.23,
+   "terra": 0.18,
+   "astra": 0.17
+  }
+ },
+ {
+  "round": "R3",
+  "setup": "orig",
+  "rep": 2,
+  "secs": 0.32,
+  "best": "terra",
+  "best_p": {
+   "luna": 0.23,
+   "terra": 0.4,
+   "astra": 0.37
+  },
+  "worst": "astra",
+  "worst_p": {
+   "luna": 0.17,
+   "terra": 0.2,
+   "astra": 0.63
+  },
+  "scores": {
+   "luna": 1.37,
+   "terra": 1.38,
+   "astra": 1.04
+  },
+  "conf": {
+   "luna": 0.22,
+   "terra": 0.2,
+   "astra": 0.21
+  }
+ },
+ {
+  "round": "R3",
+  "setup": "shuffled",
+  "rep": 0,
+  "secs": 0.25,
+  "best": "astra",
+  "best_p": {
+   "terra": 0.2,
+   "astra": 0.49,
+   "luna": 0.31
+  },
+  "worst": "luna",
+  "worst_p": {
+   "terra": 0.28,
+   "astra": 0.36,
+   "luna": 0.36
+  },
+  "scores": {
+   "astra": 1.34,
+   "luna": 1.44,
+   "terra": 1.49
+  },
+  "conf": {
+   "astra": 0.01,
+   "luna": 0.16,
+   "terra": 0.23
+  }
+ },
+ {
+  "round": "R3",
+  "setup": "shuffled",
+  "rep": 1,
+  "secs": 0.34,
+  "best": "astra",
+  "best_p": {
+   "luna": 0.31,
+   "terra": 0.19,
+   "astra": 0.5
+  },
+  "worst": "luna",
+  "worst_p": {
+   "luna": 0.39,
+   "astra": 0.31,
+   "terra": 0.3
+  },
+  "scores": {
+   "astra": 1.35,
+   "luna": 1.43,
+   "terra": 1.46
+  },
+  "conf": {
+   "astra": 0.02,
+   "luna": 0.22,
+   "terra": 0.2
+  }
+ },
+ {
+  "round": "R3",
+  "setup": "shuffled",
+  "rep": 2,
+  "secs": 0.26,
+  "best": "astra",
+  "best_p": {
+   "astra": 0.52,
+   "terra": 0.18,
+   "luna": 0.3
+  },
+  "worst": "luna",
+  "worst_p": {
+   "terra": 0.32,
+   "astra": 0.32,
+   "luna": 0.36
+  },
+  "scores": {
+   "astra": 1.36,
+   "luna": 1.48,
+   "terra": 1.45
+  },
+  "conf": {
+   "astra": 0.04,
+   "luna": 0.21,
+   "terra": 0.18
+  }
+ },
+ {
+  "round": "R4",
+  "setup": "orig",
+  "rep": 0,
+  "secs": 0.39,
+  "best": "astra",
+  "best_p": {
+   "terra": 0.31,
+   "astra": 0.39,
+   "luna": 0.3
+  },
+  "worst": "terra",
+  "worst_p": {
+   "terra": 0.5,
+   "astra": 0.3,
+   "luna": 0.2
+  },
+  "scores": {
+   "astra": 1.27,
+   "terra": 0.99,
+   "luna": 1.12
+  },
+  "conf": {
+   "astra": 0.16,
+   "terra": 0.22,
+   "luna": 0.28
+  }
+ },
+ {
+  "round": "R4",
+  "setup": "orig",
+  "rep": 1,
+  "secs": 0.24,
+  "best": "astra",
+  "best_p": {
+   "terra": 0.33,
+   "luna": 0.31,
+   "astra": 0.36
+  },
+  "worst": "terra",
+  "worst_p": {
+   "terra": 0.48,
+   "luna": 0.19,
+   "astra": 0.33
+  },
+  "scores": {
+   "astra": 1.25,
+   "terra": 0.98,
+   "luna": 1.07
+  },
+  "conf": {
+   "astra": 0.18,
+   "terra": 0.18,
+   "luna": 0.25
+  }
+ },
+ {
+  "round": "R4",
+  "setup": "orig",
+  "rep": 2,
+  "secs": 0.34,
+  "best": "astra",
+  "best_p": {
+   "luna": 0.28,
+   "astra": 0.4,
+   "terra": 0.32
+  },
+  "worst": "terra",
+  "worst_p": {
+   "luna": 0.21,
+   "astra": 0.35,
+   "terra": 0.44
+  },
+  "scores": {
+   "astra": 1.25,
+   "terra": 1.06,
+   "luna": 1.16
+  },
+  "conf": {
+   "astra": 0.18,
+   "terra": 0.21,
+   "luna": 0.26
+  }
+ },
+ {
+  "round": "R4",
+  "setup": "shuffled",
+  "rep": 0,
+  "secs": 0.3,
+  "best": "astra",
+  "best_p": {
+   "astra": 0.57,
+   "luna": 0.14,
+   "terra": 0.29
+  },
+  "worst": "astra",
+  "worst_p": {
+   "astra": 0.54,
+   "luna": 0.33,
+   "terra": 0.13
+  },
+  "scores": {
+   "luna": 1.43,
+   "astra": 1.21,
+   "terra": 1.42
+  },
+  "conf": {
+   "luna": 0.14,
+   "astra": 0.17,
+   "terra": 0.13
+  }
+ },
+ {
+  "round": "R4",
+  "setup": "shuffled",
+  "rep": 1,
+  "secs": 0.29,
+  "best": "astra",
+  "best_p": {
+   "terra": 0.29,
+   "luna": 0.15,
+   "astra": 0.56
+  },
+  "worst": "astra",
+  "worst_p": {
+   "terra": 0.13,
+   "luna": 0.35,
+   "astra": 0.52
+  },
+  "scores": {
+   "luna": 1.41,
+   "astra": 1.24,
+   "terra": 1.45
+  },
+  "conf": {
+   "luna": 0.11,
+   "astra": 0.15,
+   "terra": 0.17
+  }
+ },
+ {
+  "round": "R4",
+  "setup": "shuffled",
+  "rep": 2,
+  "secs": 0.3,
+  "best": "astra",
+  "best_p": {
+   "terra": 0.29,
+   "luna": 0.15,
+   "astra": 0.56
+  },
+  "worst": "astra",
+  "worst_p": {
+   "terra": 0.14,
+   "luna": 0.34,
+   "astra": 0.52
+  },
+  "scores": {
+   "luna": 1.38,
+   "astra": 1.2,
+   "terra": 1.38
+  },
+  "conf": {
+   "luna": 0.07,
+   "astra": 0.16,
+   "terra": 0.2
+  }
+ }
+]
