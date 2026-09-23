@@ -116,6 +116,8 @@ def ensure_pinned_model(
     # forcing a layer-count cap (the mechanism gemma4-26b-16gb-cap/FINDING.md
     # validated as actually effective, unlike OLLAMA_GPU_OVERHEAD) requires
     # baking it into a derived Modelfile.
+    if os.environ.get('LOCAL_LANE_SKIP_PIN') == '1':
+        return base_model
     if num_ctx is None and temperature is None and num_gpu is None and max_output is None:
         return base_model
     key = (base_model, num_ctx, temperature, num_gpu, max_output)
@@ -346,9 +348,35 @@ def _git_rev() -> str:
                 ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT,
                 capture_output=True, text=True, timeout=10, check=False,
             )
-            _GIT_REV = result.stdout.strip() if result.returncode == 0 else "unknown"
+            rev = result.stdout.strip() if result.returncode == 0 else "unknown"
+            # A sha alone is a false stamp when the tree is dirty: it names code
+            # that is not what ran. runner.py itself was uncommitted through the
+            # September corpus, so every "git_rev" recorded then describes a
+            # revision the run did not use. Say so in the value.
+            dirty = subprocess.run(
+                ["git", "status", "--porcelain", "--", "evals/local_lane_ladder"],
+                cwd=REPO_ROOT, capture_output=True, text=True, timeout=10, check=False,
+            )
+            if dirty.returncode == 0 and dirty.stdout.strip():
+                changed = sorted(
+                    line[3:].strip() for line in dirty.stdout.strip().splitlines()
+                    if not line.startswith("??")
+                )
+                rev = f"{rev}-dirty({len(changed)} tracked file(s) modified)" if changed else rev
+            _GIT_REV = rev
         except Exception:  # noqa: BLE001 -- provenance is recorded, never fatal
             _GIT_REV = "unknown"
+        if _GIT_REV == "unknown" or _GIT_REV.startswith("unknown"):
+            # The staged host packages are loose copies, not checkouts, so git
+            # has nothing to say about them and "unknown" is the whole stamp.
+            # Hash the file that actually ran instead: it is the only identity
+            # available there, and it is enough to tell two runners apart.
+            try:
+                import hashlib
+                digest = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:16]
+                _GIT_REV = f"no-git:runner.py sha256:{digest}"
+            except OSError:
+                pass
     return _GIT_REV
 
 
@@ -429,16 +457,106 @@ def parse_trajectory(stdout: str) -> dict:
             for block in msg.get("content") or []:
                 if isinstance(block, dict) and block.get("type") == "thinking":
                     think_chars += len(block.get("text") or "")
+    stopped_length = '"stopReason":"length"' in stdout or '"rawStopReason":"length"' in stdout
     return {
         "tool_calls": calls,
         "n_calls": len(calls),
         "n_failed_calls": sum(1 for c in calls if not c["ok"]),
         "distinct_tools": sorted({c["tool"] for c in calls if c["tool"]}),
         "stopped_repeat": False,
+        # The turn ended because the model hit its context/output ceiling, not
+        # because it answered. Under a pinned 16k window this is a distinct
+        # outcome from a wrong answer: the task never got a final answer at all.
+        "stopped_length": stopped_length,
         "no_dispatch": not saw_tool_call,
         "completion_tokens": completion_tokens,
         "think_chars": think_chars,
     }
+
+
+# --- Cell outcomes -----------------------------------------------------------
+#
+# A failing cell is not evidence about the model until the instrument has proved
+# it was measuring one. The program's own record is lopsided: the published
+# Instrument Log is seventeen faults, none of them a model behaving badly; the
+# 0155Z attempt returned 18 cells with returncode 0 and no timeouts that were all
+# carrier violations; the 0638Z native run dispatched nothing at all; and Fusion
+# L3 v2's 17 apparent failures were all deterministic-grader false negatives.
+#
+# So a cell has three outcomes, not two. `unproven` is not a soft fail: it says
+# this cell is evidence about the harness, and is not poolable as a model result.
+#
+# Asymmetry is deliberate. Only a non-passing cell can be demoted to unproven.
+# Demoting passes on a missing proof would invalidate the corpus wholesale every
+# time a gate is added, which is the re-run treadmill this is meant to end. A
+# pass still records its proof flags, so the question stays askable.
+RUNTIME_POLLUTION_NAMES = (".pi-agent", ".pi-sessions", ".tmp", ".pi-auth", "node-cache")
+
+
+def carrier_scope_violations(fixture_root: Path) -> list[str]:
+    """Carrier runtime files inside the graded fixture. See incident 0155Z."""
+    found = []
+    for name in RUNTIME_POLLUTION_NAMES:
+        for hit in Path(fixture_root).rglob(name):
+            found.append(str(hit.relative_to(fixture_root)))
+    return sorted(found)
+
+
+def evaluate_proofs(
+    *, returncode: int | None, stdout: str, trajectory: dict, fixture_root: Path,
+    placement_verified: bool, timed_out: bool, grader_boundary_tested: bool,
+) -> dict:
+    """The five proofs a cell must satisfy before a failure means anything."""
+    scope_hits = carrier_scope_violations(fixture_root)
+    proofs = {
+        "dispatch": (
+            returncode == 0
+            and bool(stdout.strip())
+            and not trajectory.get("no_dispatch", True)
+        ),
+        "scope": not scope_hits,
+        "placement": bool(placement_verified),
+        "grader": bool(grader_boundary_tested),
+        "timing": not timed_out,
+    }
+    detail = {"missing": sorted(k for k, ok in proofs.items() if not ok),
+              "trajectory": trajectory}
+    if scope_hits:
+        detail["scope_violations"] = scope_hits
+    return {"proofs": proofs, **detail}
+
+
+def classify_failure(detail: str | None, trajectory: dict | None = None) -> str | None:
+    """Separate what the model could not do from what it was not allowed to do,
+    and from what it never finished.
+
+    Gemma's L2 misses are a mix: some are the implementation failing its own
+    battery, others are the model creating scratch test files (test_tmp.py,
+    test_solution.py, repro.py) outside its edit scope while the implementation
+    itself may be fine. A third kind is neither: the turn hit the pinned 16k
+    context ceiling and stopped mid-task, so the battery grades an absent answer.
+    qwen3.8's single L2 miss on 2026-09-22 was this -- it spent its window
+    debugging a regex and was cut off at 16,383 of 16,384 tokens.
+
+    Summing all three into one pass count makes a housekeeping habit and a
+    truncated turn both read as capability gaps.
+    """
+    if (trajectory or {}).get("stopped_length"):
+        return "truncated"
+    if not detail:
+        return None
+    if "created out of scope" in detail:
+        return "out_of_scope"
+    if "postcondition command exited" in detail:
+        return "capability"
+    return "other_check"
+
+
+def classify_outcome(graded_pass: bool, proof_report: dict) -> str:
+    if graded_pass:
+        return "pass"
+    return "fail" if not proof_report["missing"] else "unproven"
+
 
 
 def trace_path_for(trace_dir: Path, task_id: str, level: str, model: str, trial: int) -> Path:
@@ -474,11 +592,22 @@ def write_trace(
         "returncode": record.get("returncode"),
         "wall_clock_s": record.get("wall_clock_s"),
         "passed": record.get("passed"),
+        # The three-outcome verdict and its proofs belong in the trace too: the
+        # trace is what a forensic reads, and "passed: false" alone is the
+        # ambiguity this whole mechanism exists to remove.
+        "outcome": record.get("outcome"),
+        "proofs": record.get("proofs"),
+        "unproven_reasons": record.get("unproven_reasons"),
+        "scope_violations": record.get("scope_violations"),
+        "placement_evidence": record.get("placement_evidence"),
         "grade_detail": record.get("detail"),
         "tok_s": record.get("tok_s"),
         "tok_s_probe": record.get("tok_s_probe"),
         "prompt": prompt,
         "argv": argv,
+        "carrier_outer_argv": record.get("carrier_outer_argv"),
+        "pi_inner_argv": record.get("pi_inner_argv"),
+        "carrier_env_policy": record.get("carrier_env_policy"),
         "trajectory": parse_trajectory(stdout),
         "stdout": stdout,
         "stderr": stderr,
@@ -677,15 +806,186 @@ def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
     return result
 
 
+# --- Placement, per host class -----------------------------------------------
+#
+# `ollama ps` cannot carry this proof by itself. The Instrument Log records it
+# reporting 29 GB against 34,728 MiB actually allocated, and "100% GPU" for a
+# runner with a layer explicitly held back on CPU. A ratio from that source is
+# corroboration, never evidence.
+#
+# The right proof also differs by host class, so it is selected explicitly:
+#
+#   cuda-single-device  two discrete cards, so residency AND card count both
+#                       matter. nvidia-smi per device is primary; a model with
+#                       allocation on more than one card fails closed, because a
+#                       split model is a different measurement, not a slower one.
+#   unified-memory      the Z13 APU. VRAM residency is not the same question
+#                       when memory is unified, so it is recorded not-applicable
+#                       and endpoint identity is proved instead: a misrouted run
+#                       over a tunnel is the failure that actually occurs there.
+MIN_DEVICE_ALLOCATION_MIB = 512
+
+
+def _gpu_index_by_uuid(run=subprocess.run) -> dict[str, int]:
+    out = run(["nvidia-smi", "--query-gpu=index,uuid", "--format=csv,noheader"],
+              capture_output=True, text=True, timeout=15, check=True).stdout
+    mapping = {}
+    for line in out.strip().splitlines():
+        index, uuid = (part.strip() for part in line.split(",", 1))
+        mapping[uuid] = int(index)
+    return mapping
+
+
+def _compute_apps(run=subprocess.run) -> list[tuple[str, int, int]]:
+    """(gpu_uuid, pid, used MiB) for every process holding GPU memory."""
+    out = run(["nvidia-smi", "--query-compute-apps=gpu_uuid,pid,used_gpu_memory",
+               "--format=csv,noheader,nounits"],
+              capture_output=True, text=True, timeout=15, check=True).stdout
+    apps = []
+    for line in out.strip().splitlines():
+        if not line.strip():
+            continue
+        uuid, pid, mib = (part.strip() for part in line.split(","))
+        apps.append((uuid, int(pid), int(mib)))
+    return apps
+
+
+def daemon_process_tree(endpoint: str, run=subprocess.run) -> set[int]:
+    """PIDs of the daemon serving *endpoint* and its children.
+
+    Device totals cannot carry this proof on a host that runs more than one
+    daemon: testbench's gpu1 service pins a model with OLLAMA_KEEP_ALIVE=8760h,
+    so device 1 always shows ~22 GB allocated by a process that has nothing to
+    do with this run. Allocation must be attributed to our own process tree.
+    """
+    port = endpoint.rsplit(":", 1)[-1].split("/")[0]
+    listeners = run(["ss", "-lptnH", f"sport = :{port}"],
+                    capture_output=True, text=True, timeout=15, check=False).stdout
+    pids = {int(m) for m in re.findall(r"pid=(\d+)", listeners)}
+    for pid in list(pids):
+        children = run(["pgrep", "-P", str(pid)], capture_output=True, text=True,
+                       timeout=15, check=False).stdout
+        pids.update(int(line) for line in children.split() if line.strip().isdigit())
+    return pids
+
+
+def verify_placement(
+    model: str, *, profile: str, expected_device: int = 0, minimum_ratio: float = 0.9,
+    run=subprocess.run, ps_row: dict | None = None, endpoint: str | None = None,
+) -> dict:
+    """Prove where the model ran, by the rules of this host class.
+
+    Returns an evidence dict; raises GPUResidencyError when the proof fails.
+    """
+    endpoint = endpoint or ollama_base_url()
+    if profile == "unified-memory":
+        if not str(endpoint).startswith(("http://127.0.0.1", "http://localhost")):
+            raise GPUResidencyError(
+                f"placement: unified-memory host must serve its own daemon, got {endpoint}"
+            )
+        if ps_row is None:
+            raise GPUResidencyError("placement: no loaded model reported by the local daemon")
+        return {
+            "profile": profile, "proved": True, "endpoint": endpoint,
+            "vram_residency": "not_applicable_unified_memory",
+            "model": model, "size": int(ps_row.get("size") or 0),
+        }
+
+    if profile != "cuda-single-device":
+        raise GPUResidencyError(f"placement: unknown profile {profile!r}")
+
+    pids = daemon_process_tree(endpoint, run=run)
+    if not pids:
+        raise GPUResidencyError(
+            f"placement: found no daemon process listening on {endpoint}; "
+            "placement cannot be attributed"
+        )
+    index_by_uuid = _gpu_index_by_uuid(run=run)
+    ours: dict[int, int] = {}
+    for uuid, pid, mib in _compute_apps(run=run):
+        if pid in pids and mib >= MIN_DEVICE_ALLOCATION_MIB:
+            device = index_by_uuid.get(uuid)
+            if device is None:
+                raise GPUResidencyError(f"placement: unknown GPU uuid {uuid}")
+            ours[device] = ours.get(device, 0) + mib
+    devices = sorted(ours)
+    if len(devices) > 1:
+        raise GPUResidencyError(
+            f"placement: this daemon is spread over devices {devices} "
+            f"(MiB by device {ours}); pin it to one card"
+        )
+    if devices != [expected_device]:
+        raise GPUResidencyError(
+            f"placement: expected allocation on device {expected_device}, "
+            f"found {devices or 'none'} for pids {sorted(pids)}"
+        )
+    evidence = {
+        "profile": profile, "proved": True, "device": expected_device,
+        "attributed_mib_by_device": ours, "daemon_pids": sorted(pids),
+        "endpoint": endpoint, "model": model,
+    }
+    if ps_row:
+        size, vram = int(ps_row.get("size") or 0), int(ps_row.get("size_vram") or 0)
+        ratio = vram / size if size else 0.0
+        evidence["reported_ratio"] = round(ratio, 4)
+        evidence["reported_ratio_is_corroboration_only"] = True
+        if ratio < minimum_ratio:
+            raise GPUResidencyError(
+                f"placement: {model} reports {vram}/{size} bytes in VRAM "
+                f"({ratio:.1%}, required {minimum_ratio:.0%})"
+            )
+    return evidence
+
+
+def build_process_env(carrier_env: dict[str, str]) -> dict[str, str]:
+    return {
+        **os.environ,
+        "PYTHONUNBUFFERED": "1",
+        "PATH": _privilege_shim_dir() + os.pathsep + os.environ.get("PATH", ""),
+        **carrier_env,
+    }
+
+
+def provision_carrier_fixture(fixture_root: Path, carrier_pi_config: Path) -> None:
+    """Add only non-secret provider config; never copy Pi auth/runtime state."""
+    pi_config = fixture_root / "pi-config"
+    pi_config.mkdir(parents=True, exist_ok=True)
+    (fixture_root / "home").mkdir(exist_ok=True)
+    shutil.copyfile(carrier_pi_config, pi_config / "models.json")
+
+
+def build_carrier_command(
+    pi_argv: list[str], fixture_root: Path, carrier_script: Path | None = None,
+    provider: str = "local",
+) -> tuple[list[str], dict[str, str]]:
+    """Build an explicit sandbox command; default preserves historical dispatch."""
+    if carrier_script is None:
+        return pi_argv, {}
+    env = {
+        "HOME": "/work/home",
+        "PI_CODING_AGENT_DIR": "/work/pi-config",
+        "PATH": "/usr/local/bin:/usr/bin:/bin",
+    }
+    if provider == "l3-testbench":
+        env["BWRAP_SHARE_NET"] = "1"
+    env_args = [f"{key}={value}" for key, value in env.items()]
+    return [str(carrier_script), str(fixture_root), "env", *env_args, *pi_argv], env
+
+
 def run_trial(
     task: dict, level: str, model: str, trial_idx: int, ledger_dir: Path, use_ledger: bool,
     trace_dir: Path | None = None, sampling: dict | None = None, provider: str = "local",
-    append_system_prompt: str | None = None,
+    append_system_prompt: str | None = None, carrier_script: Path | None = None,
+    carrier_pi_config: Path | None = None,
 ) -> dict:
     prompt = task["prompts"][level]
     fixture_root = build_fixture(
         task.get("files", {}), prefix=f"{task['task_id']}-{level}", remove=task.get("remove")
     )
+    if carrier_script is not None:
+        if carrier_pi_config is None:
+            raise ValueError("--carrier-pi-config is required with --carrier-script")
+        provision_carrier_fixture(fixture_root, carrier_pi_config)
     # Pre-run state, so a scope postcondition can tell "edited the declared file"
     # from "edited the declared file and three others". Taken before pi runs.
     manifest = hash_tree(fixture_root)
@@ -699,8 +999,27 @@ def run_trial(
         model, sampling.get("num_ctx"), sampling.get("temperature"), sampling.get("num_gpu"),
         sampling.get("max_output")
     )
-    if sampling.get("require_gpu_residency"):
+    placement_verified = False
+    placement_evidence = None
+    profile = sampling.get("placement_profile")
+    if profile:
+        # require_gpu_residency loads the model and returns ollama's own ps row;
+        # verify_placement decides what that row is worth on this host class.
+        ps_row = None
+        if profile == "cuda-single-device" or sampling.get("require_gpu_residency"):
+            ps_row = require_gpu_residency(
+                dispatch_model, sampling.get("minimum_gpu_ratio", 0.9)
+            )
+        placement_evidence = verify_placement(
+            dispatch_model, profile=profile,
+            expected_device=sampling.get("gpu_index", 0),
+            minimum_ratio=sampling.get("minimum_gpu_ratio", 0.9),
+            ps_row=ps_row,
+        )
+        placement_verified = bool(placement_evidence.get("proved"))
+    elif sampling.get("require_gpu_residency"):
         require_gpu_residency(dispatch_model, sampling.get("minimum_gpu_ratio", 0.9))
+        placement_verified = True
     argv = [
         PI_BIN,
         # 127.0.0.1, not localhost. An `ssh -L 11434:127.0.0.1:11434 testbench`
@@ -732,6 +1051,9 @@ def run_trial(
     if append_system_prompt:
         argv += ["--append-system-prompt", append_system_prompt]
     argv += ["--", prompt]
+    inner_argv = list(argv)
+    carrier_env = {}
+    argv, carrier_env = build_carrier_command(argv, fixture_root, carrier_script, provider)
     # Fallback only -- overwritten below. Kept assigned so the TimeoutExpired
     # handler cannot hit an unbound `start` if the ledger call itself raises.
     start = time.monotonic()
@@ -762,19 +1084,14 @@ def run_trial(
         try:
             completed = subprocess.run(
                 argv, capture_output=True, text=True, timeout=MAX_WALL_CLOCK_SECONDS,
-                cwd=str(fixture_root),  # pi has no --workspace flag; this is the sandbox boundary
+                cwd=str(fixture_root),  # host-side cwd; carrier changes inner cwd to /work
                 # PYTHONUNBUFFERED is load-bearing for diagnosis, not a tidy-up.
                 # On timeout the runner SIGKILLs the process and an unflushed
                 # buffer dies with it -- unbuffered, partial output survives the
                 # kill and shows how far the turn got. (Originally documented
                 # against opr; pi's own buffering behavior under a pipe hasn't
                 # been separately characterized, so this is left set.)
-                env={
-                    **os.environ,
-                    "PYTHONUNBUFFERED": "1",
-                    # Privilege shim first on PATH -- see _privilege_shim_dir().
-                    "PATH": _privilege_shim_dir() + os.pathsep + os.environ.get("PATH", ""),
-                },
+                env=build_process_env(carrier_env),
             )
         except subprocess.TimeoutExpired as exc:
             wall_clock = time.monotonic() - start
@@ -787,10 +1104,17 @@ def run_trial(
                 "trial": trial_idx,
                 "machine": MACHINE,
                 "passed": False,
+                "outcome": "unproven",
+                "proofs": {"dispatch": None, "scope": None, "placement": placement_verified,
+                           "grader": None, "timing": False},
+                "unproven_reasons": ["timing"],
                 "detail": f"timed out after {MAX_WALL_CLOCK_SECONDS}s",
                 "failure_cause": "timeout",
                 "wall_clock_s": round(wall_clock, 1),
                 "returncode": None,
+                "carrier_outer_argv": argv,
+                "pi_inner_argv": inner_argv,
+                "carrier_env_policy": carrier_env,
             }
             if trace_dir is not None:
                 record["trace"] = str(write_trace(
@@ -804,7 +1128,22 @@ def run_trial(
         grade_result = grade(
             task["postcondition"], fixture_root, completed.stdout, manifest
         )
-        outcome = "pass" if grade_result.passed else "fail"
+        proof_report = evaluate_proofs(
+            returncode=completed.returncode,
+            stdout=completed.stdout,
+            trajectory=parse_trajectory(completed.stdout),
+            fixture_root=fixture_root,
+            placement_verified=placement_verified,
+            timed_out=False,
+            # Absent an explicit task declaration this proof is assumed satisfied, and
+            # the assumption is recorded rather than hidden. Fusion L3 v2 is why: an
+            # untested deterministic grader turned 17 correct answers into failures.
+            grader_boundary_tested=bool(task.get("grader_boundary_tested", True)),
+        )
+        cell_outcome = classify_outcome(grade_result.passed, proof_report)
+        # The ledger vocabulary is pass/fail only; an unproven cell is not a model
+        # pass, so it closes as fail there while the record keeps the real outcome.
+        outcome = "pass" if cell_outcome == "pass" else "fail"
         if use_ledger and usage_id:
             _ledger_session_end(ledger_dir, usage_id, outcome)
         tok_s_probe = measure_tok_s(dispatch_model)
@@ -815,11 +1154,20 @@ def run_trial(
             "trial": trial_idx,
             "machine": MACHINE,
             "passed": grade_result.passed,
+            "outcome": cell_outcome,
+            "failure_class": (
+                None if grade_result.passed
+                else classify_failure(grade_result.detail, proof_report.get("trajectory"))
+            ),
+            "proofs": proof_report["proofs"],
+            "placement_evidence": placement_evidence,
+            "unproven_reasons": proof_report["missing"],
+            "scope_violations": proof_report.get("scope_violations", []),
             "detail": grade_result.detail,
             "failure_cause": (
                 None if grade_result.passed else
-                ("harness_failure" if completed.returncode != 0 else
-                 "harness_empty_output" if not completed.stdout.strip() else "grade_failure")
+                (f"unproven_{proof_report['missing'][0]}" if proof_report["missing"] else
+                 "grade_failure")
             ),
             "check_score": round(grade_result.score, 3),
             "checks": [
@@ -830,6 +1178,9 @@ def run_trial(
             "returncode": completed.returncode,
             "tok_s": tok_s_probe.get("tok_s") if tok_s_probe else None,
             "tok_s_probe": tok_s_probe,
+            "carrier_outer_argv": argv,
+            "pi_inner_argv": inner_argv,
+            "carrier_env_policy": carrier_env,
         }
         if trace_dir is not None:
             record["trace"] = str(write_trace(
@@ -843,6 +1194,30 @@ def run_trial(
         cleanup_fixture(fixture_root)
 
 
+def cell_summary(cell: list[dict]) -> str:
+    """`17/18`, or `16/18 (2 out-of-scope)`, or `16/18 (1 unproven)`.
+
+    Unproven cells stay in the denominator on purpose: hiding them would make a
+    contaminated battery read as a smaller clean one. Out-of-scope failures are
+    named rather than folded in, because they are a different kind of miss.
+    """
+    if not cell:
+        return "—"
+    passed = sum(1 for r in cell if r["passed"])
+    notes = []
+    unproven = sum(1 for r in cell if r.get("outcome") == "unproven")
+    if unproven:
+        notes.append(f"{unproven} unproven")
+    scope = sum(1 for r in cell if r.get("failure_class") == "out_of_scope")
+    if scope:
+        notes.append(f"{scope} out-of-scope")
+    trunc = sum(1 for r in cell if r.get("failure_class") == "truncated")
+    if trunc:
+        notes.append(f"{trunc} truncated")
+    base = f"{passed}/{len(cell)}"
+    return base if not notes else f"{base} ({', '.join(notes)})"
+
+
 def write_results_md(results: list[dict], output_path: Path) -> None:
     models = sorted({r["model"] for r in results})
     tasks = sorted({r["task_id"] for r in results})
@@ -850,6 +1225,16 @@ def write_results_md(results: list[dict], output_path: Path) -> None:
     lines.append(f"Generated from {len(results)} trial records.")
     machines = sorted({r.get("machine", "unknown") for r in results})
     lines.append(f"Producer machine(s): {', '.join(machines)}.")
+    unproven = [r for r in results if r.get("outcome") == "unproven"]
+    if unproven:
+        reasons = sorted({m for r in unproven for m in r.get("unproven_reasons") or []})
+        lines.append("")
+        lines.append(
+            f"> **{len(unproven)} of {len(results)} cells are unproven** "
+            f"({', '.join(reasons)}). An unproven cell is evidence about the harness, "
+            "not about the model: it is not a failure and is not poolable as a result. "
+            "Triage the instrument before reading the spread below."
+        )
     if len(machines) > 1:
         counts = ", ".join(
             f"{m}: {sum(1 for r in results if r.get('machine', 'unknown') == m)}"
@@ -874,7 +1259,7 @@ def write_results_md(results: list[dict], output_path: Path) -> None:
         row = [model]
         for level in DEFAULT_LEVELS:
             cell = [r for r in results if r["model"] == model and r["level"] == level]
-            row.append("—" if not cell else f"{sum(1 for r in cell if r['passed'])}/{len(cell)}")
+            row.append(cell_summary(cell))
         model_results = [r for r in results if r["model"] == model]
         tok_s_values = [r["tok_s"] for r in model_results if r.get("tok_s") is not None]
         row.append(f"{sum(tok_s_values) / len(tok_s_values):.1f}" if tok_s_values else "—")
@@ -906,9 +1291,7 @@ def write_results_md(results: list[dict], output_path: Path) -> None:
                     r for r in results
                     if r["model"] == model and r["level"] == level and r["task_id"] == task_id
                 ]
-                row.append(
-                    "—" if not cell else f"{sum(1 for r in cell if r['passed'])}/{len(cell)}"
-                )
+                row.append(cell_summary(cell))
             lines.append("| " + " | ".join(row) + " |")
         lines.append("")
     output_path.write_text("\n".join(lines), encoding="utf-8")
@@ -918,6 +1301,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Local lane eval ladder runner")
     parser.add_argument("--models", nargs="+", required=True, help="Ollama model tags, e.g. gemma4:26b")
     parser.add_argument("--provider", default="local", help="Pi provider name from models.json")
+    parser.add_argument("--placement-profile", default=None,
+                        choices=["cuda-single-device", "unified-memory"],
+                        help="How placement is proved on this host class. "
+                             "cuda-single-device fails closed if the model spans cards.")
+    parser.add_argument("--gpu-index", type=int, default=0,
+                        help="Expected CUDA device for cuda-single-device (default 0)")
+    parser.add_argument("--carrier-script", default=None,
+                        help="Explicit bwrap carrier script; omitted preserves historical dispatch")
+    parser.add_argument("--carrier-pi-config", default=None,
+                        help="Non-secret models.json copied into each carrier fixture")
     parser.add_argument("--host-gate-command", default=None,
                         help="Command to run before each cell; nonzero makes the cell invalid.")
     parser.add_argument("--append-system-prompt", default=None,
@@ -1048,6 +1441,8 @@ def main() -> int:
         "num_gpu": args.num_gpu,
         "max_output": args.max_output,
         "require_gpu_residency": args.require_gpu_residency,
+        "placement_profile": args.placement_profile,
+        "gpu_index": args.gpu_index,
         "minimum_gpu_ratio": args.minimum_gpu_ratio,
     }
     if args.seed is not None:
@@ -1100,7 +1495,9 @@ def main() -> int:
             run_host_gate(args.host_gate_command)
             result = run_trial(
                 task, level, model, trial, ledger_dir, use_ledger, trace_dir, sampling,
-                args.provider, args.append_system_prompt
+                args.provider, args.append_system_prompt,
+                Path(args.carrier_script) if args.carrier_script else None,
+                Path(args.carrier_pi_config) if args.carrier_pi_config else None,
             )
         except HostStateError as exc:
             print(f"[{key}] INVALID: {exc}", file=sys.stderr)
