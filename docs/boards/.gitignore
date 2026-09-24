@@ -1,1 +1,4 @@
 obsidian/
+# Board HTML is generated and kept private (committed in the private Python repo,
+# project-phoenix/magic_bridge/operator_boards/). Regenerate locally; do not commit here.
+*.html
