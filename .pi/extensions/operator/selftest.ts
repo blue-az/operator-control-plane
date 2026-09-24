@@ -1180,6 +1180,9 @@ function tierA3(ledger: core.Ledger): void {
 		"formatSudoInvocation truncates a long review payload",
 		core.formatSudoInvocation(core.sudoReviewLaunchArgv(`sudo -u nobody bash -lc 'cd /tmp && ${"pi ".repeat(80)}'`)).length < 160,
 	);
+	const authorizationArgv = core.sudoReviewLaunchArgv(`sudo -u nobody bash -lc 'cd /tmp && ${"pi ".repeat(80)}END_OF_AUTHORIZATION'`);
+	check("authorization preview retains the entire long payload", core.formatSudoInvocation(authorizationArgv, { full: true }).includes(authorizationArgv[6]));
+	eq("authorization preview shell-quotes embedded apostrophes", core.formatSudoInvocation(["sudo", "-A", "-u", "nobody", "bash", "-lc", "cd /tmp && echo 'quoted'"], { full: true }), "'sudo' '-A' '-u' 'nobody' 'bash' '-lc' 'cd /tmp && echo '\\''quoted'\\'''" );
 	if (isolatedParsed.runCommand) {
 		const launchArgv = core.sudoReviewLaunchArgv(isolatedParsed.runCommand);
 		eq("live uid-isolated launch uses sudo -A", launchArgv[1], "-A");
@@ -2008,6 +2011,9 @@ async function tierB(piPackage: string | null): Promise<unknown[] | null> {
 	const names = [...ext.commands.keys()].sort();
 	eq("registers exactly the implemented Operator commands", names, [
 		"op:claim",
+		"op:crystal",
+		"op:crystal-attach",
+		"op:crystal-import",
 		"op:delegate",
 		"op:doctor",
 		"op:evidence",
@@ -2018,8 +2024,13 @@ async function tierB(piPackage: string | null): Promise<unknown[] | null> {
 		"op:roadmap",
 		"op:status",
 		"op:supervisor-review",
+		"op:targets",
 		"op:tasks",
 		"op:use",
+		"op:verify-run",
+		"pbc:define",
+		"pbc:feature",
+		"pbc:validate",
 	]);
 	check(
 		"every command has a description",
@@ -2028,8 +2039,8 @@ async function tierB(piPackage: string | null): Promise<unknown[] | null> {
 	check("registers no model-callable tools at step 4", ext.tools.size === 0, `tools: ${[...ext.tools.keys()].join(", ")}`);
 	check("registers /op:delegate", ext.commands.has("op:delegate"));
 	check("registers /op:supervisor-review", ext.commands.has("op:supervisor-review"));
-	check("does not register /pbc:define", !ext.commands.has("pbc:define"));
-	check("does not register /pbc:feature", !ext.commands.has("pbc:feature"));
+	check("registers /pbc:define", ext.commands.has("pbc:define"));
+	check("registers /pbc:feature", ext.commands.has("pbc:feature"));
 	// The renderer load is deliberately non-fatal, so assert it actually
 	// happened: without it /op:* output never reaches the transcript.
 	check(

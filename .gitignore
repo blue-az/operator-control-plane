@@ -1,4 +1,9 @@
 .operator/
+# Local session artifacts are not release payload (at any workspace depth).
+.agent-crystals/
+# Transient target-registry writer files are not source or release payload.
+.pi/extensions/operator/.targets.json.lock
+.pi/extensions/operator/.targets.*.tmp
 __pycache__/
 *.pyc
 # Regenerable via fastfoodagent/fetch_substrate.py + build_substrate.py --

@@ -10,8 +10,9 @@ you pass that path yourself.
 
 ## What is actually discovered today
 
-Inspected against Pi 0.85 docs and the installed loader, plus this repo's
-`core.ts` `findLedger`.
+Historical inspection used Pi 0.85 docs and its loader, plus this repo's
+`core.ts` `findLedger`. The Git alpha's declared compatibility target and deferred
+validation are documented in `docs/releases/pi-operator-0.1.0-alpha.1.md`.
 
 ### Pi loads the extension from the consumer cwd
 
@@ -264,7 +265,9 @@ ambiguous fixture.
 
 ## What this is not
 
-- Not a pi package, not `pi install npm:` / `git:`, not a gallery publish
+- This copy/link helper is not a package installer or publisher. The root Pi
+  package manifest is a separate Git-alpha distribution path; do not install both
+  frontends into the same project.
 - Not a global install under `~/.pi/agent/extensions/`
 - Not automatic trust of the consumer project
 - Not a second ledger, and not an alternate authority path

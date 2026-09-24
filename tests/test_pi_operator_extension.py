@@ -120,6 +120,8 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
             '\t"session-end",\n'
             '\t"brief",\n'
             '\t"export-brief",\n'
+            '\t"crystal-attach",\n'
+            '\t"crystal-import",\n'
             "] as const;",
             text,
         )
@@ -196,6 +198,9 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
             registered,
             [
                 "op:claim",
+                "op:crystal",
+                "op:crystal-attach",
+                "op:crystal-import",
                 "op:delegate",
                 "op:doctor",
                 "op:evidence",
@@ -206,8 +211,13 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
                 "op:roadmap",
                 "op:status",
                 "op:supervisor-review",
+                "op:targets",
                 "op:tasks",
                 "op:use",
+                "op:verify-run",
+                "pbc:define",
+                "pbc:feature",
+                "pbc:validate",
             ],
         )
         self.assertNotIn("pi.registerTool(", text)
@@ -216,8 +226,8 @@ class PiOperatorExtensionLayoutTest(unittest.TestCase):
         self.assertIn('pi.registerCommand("op:roadmap"', text)
         self.assertIn('pi.registerCommand("op:next-steps"', text)
         self.assertIn('pi.registerCommand("op:project"', text)
-        self.assertNotIn('pi.registerCommand("pbc:define"', text)
-        self.assertNotIn('pi.registerCommand("pbc:feature"', text)
+        self.assertIn('pi.registerCommand("pbc:define"', text)
+        self.assertIn('pi.registerCommand("pbc:feature"', text)
         self.assertIn(
             '[experimental] Operator: register a claim (/op:claim [text]; /op:claim edit for type/gate/verify)',
             text,
@@ -302,6 +312,51 @@ class PiOperatorExtensionSelftest(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
             self.assertIn("ok", result.stdout)
+
+    def test_verifier_ui_workflow(self):
+        node = shutil.which("node")
+        if not node or not _node_supports_type_stripping(node):
+            self.skipTest("node with TypeScript stripping is not installed")
+        result = subprocess.run(
+            [node, "--experimental-strip-types", str(REPO_ROOT / "tests" / "pi_operator_verify.ts")],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("verifier UI checks passed", result.stdout)
+
+    def test_target_registry_workflows(self):
+        node = shutil.which("node")
+        if not node or not _node_supports_type_stripping(node):
+            self.skipTest("node with TypeScript stripping is not installed")
+        result = subprocess.run(
+            [node, "--experimental-strip-types", str(REPO_ROOT / "tests" / "pi_operator_targets.ts")],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("target registry checks passed", result.stdout)
+
+    def test_pbc_and_crystal_workflows(self):
+        node = shutil.which("node")
+        if not node or not _node_supports_type_stripping(node):
+            self.skipTest("node with TypeScript stripping is not installed")
+        result = subprocess.run(
+            [node, "--experimental-strip-types", str(REPO_ROOT / "tests" / "pi_operator_workflows.ts")],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=180,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("workflow checks passed", result.stdout)
 
     def test_selftest_passes(self):
         node = shutil.which("node")

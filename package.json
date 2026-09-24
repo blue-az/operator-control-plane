@@ -1,0 +1,40 @@
+{
+  "name": "pi-operator",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "description": "Pi shortcuts for a separately installed Operator control plane; small-audience Git alpha",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blue-az/operator-control-plane.git"
+  },
+  "keywords": ["pi-package"],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "pi": {
+    "extensions": ["./.pi/extensions/operator/index.ts"]
+  },
+  "files": [
+    "LICENSE",
+    "README.md",
+    ".pi/extensions/operator/index.ts",
+    ".pi/extensions/operator/core.ts",
+    ".pi/extensions/operator/client.ts",
+    ".pi/extensions/operator/render.ts",
+    ".pi/extensions/operator/targets.json",
+    ".pi/extensions/operator/orientation/actions.ts",
+    ".pi/extensions/operator/workflows/commands.ts",
+    ".pi/extensions/operator/workflows/targets.ts",
+    ".pi/extensions/operator/workflows/verify.ts",
+    ".pi/extensions/operator/README.md",
+    ".pi/extensions/operator/install-guide.md",
+    "docs/releases/pi-operator-0.1.0-alpha.1.md",
+    "docs/specs/VERIFY_RUN_SPEC.md"
+  ]
+}

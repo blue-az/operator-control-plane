@@ -201,6 +201,18 @@ class InstallOperatorExtensionTest(unittest.TestCase):
                     (dest / "orientation" / "actions.ts").is_file(),
                     f"{consumer} missing orientation/actions.ts imported by index.ts",
                 )
+            self.assertTrue(
+                (dest / "workflows" / "commands.ts").is_file(),
+                f"{consumer} missing workflows/commands.ts imported by index.ts",
+            )
+            self.assertTrue(
+                (dest / "workflows" / "targets.ts").is_file(),
+                f"{consumer} missing workflows/targets.ts imported by index.ts",
+            )
+            self.assertTrue(
+                (dest / "workflows" / "verify.ts").is_file(),
+                f"{consumer} missing workflows/verify.ts imported by index.ts",
+            )
             self.assertEqual(ledger_files_under(consumer), [])
             contract = json.loads(
                 (consumer / ".pi" / "operator-ledger.json").read_text(encoding="utf-8")

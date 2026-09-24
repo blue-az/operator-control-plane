@@ -1,5 +1,10 @@
 # Operator Control Plane
 
+For the separately installable **Pi frontend alpha**, see the
+[extension README](.pi/extensions/operator/README.md) and
+[release preparation notes](docs/releases/pi-operator-0.1.0-alpha.1.md).
+The root package manifest describes that frontend, not a bundled Python backend.
+
 [![tests](https://github.com/blue-az/operator-control-plane/actions/workflows/tests.yml/badge.svg)](https://github.com/blue-az/operator-control-plane/actions/workflows/tests.yml)
 
 **Your AI coding agent just said "done, tests pass." Do you actually know that's true?**

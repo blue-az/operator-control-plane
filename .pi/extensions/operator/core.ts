@@ -20,7 +20,8 @@
  * of task-create --assign (unrouted targets), session-start / brief /
  * export-brief (routed implementer targets), and harness_adapter invocation.
  * Step 1 orientation, step 2 authoring writes, and step 3 supervisor-review
- * stay as they were. The PBC commands and model-callable tools remain absent.
+ * stay as they were. PBC/crystal workflows live in workflows/commands.ts;
+ * model-callable tools remain absent.
  *
  * Two encoding rules keep user text from ever being read as a flag:
  *   - validated identifiers (task ids, claim ids, enum members, digests) are
@@ -49,10 +50,10 @@ export const LEDGER_CONTRACT_SCHEMA = "operator-pi-extension-ledger-contract/v1"
 export const LEDGER_CONTRACT_RELATIVE = ".pi/operator-ledger.json";
 
 /**
- * Subcommands this extension is allowed to invoke at step 4.
+ * Subcommands this extension is allowed to invoke.
  *
  * READ_ONLY never mutates the ledger. CONFIRMED_WRITE mutates it and may only
- * be reached after an explicit user confirmation in index.ts.
+ * be reached after an explicit user confirmation in the command handlers.
  * claim-show is read-only inspection used by /op:supervisor-review so it can
  * require a recorded or supplied verify command without guessing.
  * review-delegate writes a bundle under .operator/review_delegations/; it
@@ -80,6 +81,8 @@ export const CONFIRMED_WRITE_SUBCOMMANDS = [
 	"session-end",
 	"brief",
 	"export-brief",
+	"crystal-attach",
+	"crystal-import",
 ] as const;
 
 export type ReadOnlySubcommand = (typeof READ_ONLY_SUBCOMMANDS)[number];
@@ -119,6 +122,8 @@ export const ALLOWED_FLAGS: Record<AllowedSubcommand, readonly string[]> = {
 	"session-end": ["--outcome", "--cost"],
 	brief: ["--for", "--task"],
 	"export-brief": ["--for", "--task"],
+	"crystal-attach": ["--task", "--by", "--hash", "--claimed-provider", "--claimed-model", "--provenance-mode"],
+	"crystal-import": ["--task", "--by"],
 };
 
 /** Claim types accepted by `./operator claim-add --type`. */
@@ -560,6 +565,23 @@ export function assertSafeArgv(argv: string[]): string[] {
 		}
 	}
 	return argv;
+}
+
+export function crystalArgv(opts: {
+	kind: "attach" | "import"; path: string; taskId: string; by: string;
+	hash?: string; provider?: string; model?: string;
+}): string[] {
+	requireTaskId(opts.taskId, "crystal");
+	const by = requireAuthorLabel(opts.by, "crystal");
+	if (!opts.path || !isAbsolute(opts.path)) throw new Error("crystal path must be absolute");
+	const argv = [`crystal-${opts.kind}`, opts.path, "--task", opts.taskId, "--by", by];
+	if (opts.kind === "attach") {
+		argv.push("--provenance-mode", "fail");
+		if (opts.hash) argv.push("--hash", opts.hash);
+		if (opts.provider) argv.push("--claimed-provider", opts.provider);
+		if (opts.model) argv.push("--claimed-model", opts.model);
+	}
+	return assertSafeArgv(argv);
 }
 
 export function isReadOnly(argv: string[]): boolean {
@@ -2930,8 +2952,11 @@ export function sudoPopupArgv(target: SudoPopupTarget): string[] {
 	return sudoReviewLaunchArgv(run);
 }
 
-export function formatSudoInvocation(argv: string[]): string {
+export function formatSudoInvocation(argv: string[], opts: { full?: boolean } = {}): string {
 	assertSafeSudoArgv(argv);
+	// Authorization must expose every argument, with shell-safe quoting and no truncation.
+	// The compact default is only for transcript summaries.
+	if (opts.full) return argv.map((arg) => `'${arg.replace(/'/g, `'\\''`)}'`).join(" ");
 	if (argv.length === 7 && argv[5] === "-lc") {
 		const inner = argv[6];
 		const short = inner.length > 72 ? `${inner.slice(0, 69)}...` : inner;

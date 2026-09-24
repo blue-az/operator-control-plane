@@ -9,7 +9,7 @@ tags:
   - pi
   - extension
   - harness
-updated: 2026-09-16
+updated: 2026-09-23
 ---
 
 # Pi Operator Extension — Behavior Contract Draft
@@ -287,6 +287,13 @@ trust: proposed
 
 ## Candidate Command Set
 
+> Historical planning record (original wave plan), kept for provenance. The shipped
+> command surface differs: `/op:pbc-draft` and `/op:pbc-lint` became `/pbc:define`,
+> `/pbc:feature` and `/pbc:validate`, and later commands (`/op:next-steps`,
+> `/op:project`, `/op:roadmap`, `/op:targets`, `/op:popup`, `/op:verify-run`,
+> `/op:crystal*`) are not listed here. See Candidate Reconciliation below and the
+> extension README for the current inventory.
+
 ```pbc:grounding
 status: draft
 commands:
@@ -378,14 +385,6 @@ product_shape:
 ```pbc:grounding
 status: draft
 future_features:
-  - id: POE-FUT-001
-    name: PBC define command
-    command: /pbc:define
-    description: Guided creation or update of the product/project shape sections from an owner prompt, producing draft/proposed blocks but not ratifying them.
-  - id: POE-FUT-002
-    name: PBC feature command
-    command: /pbc:feature
-    description: Add a future feature candidate or issue-backed feature slice with source links and next steps without making it part of the current acceptance gate.
   - id: POE-FUT-003
     name: PBC lifecycle wizard
     description: Walk the owner through proposed -> frozen claim -> operator ruling -> ratified block movement, preserving the distinct-agent requirement.
@@ -393,45 +392,75 @@ future_features:
     name: Multi-claim supervisor review
     description: First-class claim-set/session review if Operator later gains a review unit broader than one claim.
   - id: POE-FUT-005
-    name: Shared adapter export
-    description: Extract stable Operator integration logic for Claude/OpenCode/MCP after the Pi extension reveals the minimum useful surface.
-  - id: POE-FUT-006
-    name: Delegation target registry UI
-    description: Manage aliases, harness ids, carrier commands, models, isolation modes, and brief formats through a chooser/editor.
-  - id: POE-FUT-007
-    name: Verifier authorization prompt
-    description: Use a user-visible authorization prompt for distinct-UID verification instead of requiring agents to improvise sudo commands or silently fall back to same-UID advisory review.
-  - id: POE-FUT-008
-    name: Operator roadmap command
-    command: /op:roadmap
-    description: Show the current implementation ladder, verified steps, active blockers/decisions, next recommended action, and future feature candidates without mixing future scope into the current acceptance gate.
-  - id: POE-FUT-009
-    name: Trusted verifier run command
-    command: /op:verify-run
-    description: Launch a generated review_delegations verifier script through a visible human authorization prompt, stream/report failures, and attach verifier run logs when possible, so users do not copy/paste sudo bash while still preserving the no-silent-cross-UID boundary.
-  - id: POE-FUT-010
-    name: Operator next-steps command
-    command: /op:next-steps
-    description: "Turn the active task's ledger state into a short prioritized action list: current next_action first, then unverified claims, missing review/verification gates, recent dogfood issues, and recommended future slices."
-  - id: POE-FUT-013
-    name: Workflow strictness modes
-    description: "Closed as guidance-only. Do not ship /op:mode. Support/deliverable can close on user acceptance; engineering-light expects tests plus claim/evidence/handoff; engineering-trust expects PBC/spec, review, evidence, and a distinct verifier. Optional copy in /op:next-steps is enough; this must not become another required gate."
-  - id: POE-FUT-014
-    name: PBC spec CLI compatibility/profile
-    command: /pbc:validate or pbc validate --profile operator
-    description: "Align Operator-authored PBC files with the upstream pbc-spec CLI before publishing: either upstream proposed-* lifecycle block support, avoid custom block names, or define an Operator dialect/profile that accepts proposed-rules/proposed-behavior/proposed-outcomes and local trust vocabulary while still catching real YAML/frontmatter errors."
-  - id: POE-FUT-015
-    name: Crystal capture and attach command
-    command: /op:crystal or /op:crystal-attach
-    description: "Expose a bounded Pi-extension flow for agent-crystallize session artifacts: capture or select a crystal with live session provenance, attach/import it through the existing Operator crystal path as draft session_crystal evidence, and keep crystal narration untrusted and never verification."
+    name: Shared adapter consumer integrations
+    description: "Partial: carrier-neutral client.ts already exists with fixed argv and lifecycle retry tests. Remaining scope is concrete Claude/OpenCode/MCP consumer adapters and their integration tests; do not re-extract the existing client."
+  - id: POE-FUT-016
+    name: Opt-in crystal capture near compaction
+    description: "Optional setting, off by default: when session context reaches a threshold (owner suggestion 90%), prompt to run the existing /op:crystal capture before Pi compacts, so the pre-compaction reasoning trail survives for later audit or as a handoff draft source. Keeps crystal separate from core: handoff remains the authored continuity record; crystal is optional pre-compaction capture. Same review/redact and confirmation as /op:crystal, no automatic ledger attachment. Open before building: whether Pi exposes a context-threshold or pre-compaction event, and whether capture after compaction still sees pre-compaction entries (post-release crystal validation). Not alpha scope."
 ```
 
+## Candidate Reconciliation
+
+This is an implementation inventory, not ratification or a new verification verdict.
+The future list above contains only remaining implementation scope. IDs are preserved;
+implemented items are not renamed as unspecified "enhancements".
+
+| ID | Reconciled status | Basis / remaining acceptance |
+|---|---|---|
+| POE-FUT-001–002 | Implemented; not independently accepted | `/pbc:define` and `/pbc:feature` edit structured drafts, validate a temporary candidate, preview and confirm an append-only `pbc:grounding` proposal. Existing rules are unchanged; no ratification. |
+| POE-FUT-003 | Not implemented | No lifecycle wizard. |
+| POE-FUT-004 | Not implemented | Supervisor review remains scoped to one named claim. |
+| POE-FUT-005 | Partially implemented | `client.ts` exports `CarrierNeutralOperatorClient`; `selftest.ts` tests argv and lifecycle retries. Consumer adapters remain. |
+| POE-FUT-006 | Implemented; not independently accepted | `/op:targets` lists/adds/edits/removes target configuration with field prompts and confirmed preview. New/edited targets require a registered harness and resolved model; task routing and reviewer authority are untouched. |
+| POE-FUT-007 | Prompt implemented; owner-confirmed popup success | The owner confirms the GUI popup worked; reviewer execution then failed on provider authentication. The popup itself does not set status, but launched code has verifier permissions. Its authorization dialog now shows the complete shell-quoted argv; only compact transcript reports abbreviate it. Read-only inspection of `.operator/tasks/review-delegate-gui-auth-popup.yaml` during release preparation still shows `assigned` with empty claims/evidence; this historical task is not closed by that observation. |
+| POE-FUT-008 | Implemented | `/op:roadmap` reports ladder, current task, issues and futures; loader/handler selftests cover it. No new enhancement scope inferred. |
+| POE-FUT-009 | Implemented; live privileged acceptance pending | `/op:verify-run` (labeled `[experimental]`; its dialog discloses that author-writable code runs under the verifier account) reuses GUI askpass, invokes a distinct-UID helper with confirmed input hashes (a freshness check, not code signing), retains private logs, and the helper itself attaches only after a reviewer decision file approves. The helper, `operator` and the verification command come from the author-writable checkout and run with the verifier's permissions and credentials, so author-controlled code can still write verifier evidence without a decision; a resulting `uid_isolated` status shows a distinct UID launched the run, not independence from author code. No live sudo/model review is established by automated tests; see `docs/specs/VERIFY_RUN_SPEC.md`. |
+| POE-FUT-010 | Implemented; local task verified | `/op:next-steps` exists; local `pi-operator-extension-next-steps` records verified status and claim-0157. |
+| POE-FUT-011 | Implemented | `/op:project` and `/op:roadmap --project`. |
+| POE-FUT-012 | Implemented | Cross-project installer and explicit ledger contract; consumer project trust remains a human step. |
+| POE-FUT-013 | Closed as guidance-only | Optional `/op:next-steps` modes; do not add `/op:mode` or a new gate. |
+| POE-FUT-014 | Implemented; not independently accepted | `/pbc:validate [path]` uses the pinned Route C wrapper with fixed argv; no upstream `--profile`. |
+| POE-FUT-015 | Implemented; not independently accepted | `/op:crystal` captures reviewed current-session notes via installed crystallize 0.1.16; `/op:crystal-attach [path]` and `/op:crystal-import [path]` wrap draft-only backends. Chooser only when attach/import omit a path. No automatic download or attachment. |
+| POE-FUT-016 | Not implemented; idea recorded 2026-09-23 | Opt-in crystal prompt near a context threshold (suggested 90%) before compaction. Depends on post-release crystal validation and a Pi compaction/threshold hook. |
+
+### Suggested implementation order
+
+The first three slices are now implemented in `workflows/commands.ts` and registered
+in `index.ts`. `tests/pi_operator_workflows.ts` covers temporary-ledger workflows;
+installed capture/validator smoke checks explicitly skip if dependencies are absent.
+These implementation/test facts do not constitute independent acceptance.
+
+1. **014 — `/pbc:validate`: implemented.** Fixed wrapper invocation, explicit path, separated upstream/local findings; no invented flags.
+2. **015 — crystal shortcuts: implemented.** Direct capture shortcut, direct attach/import paths, chooser only for omitted paths. Explicit session/task provenance and confirmation; narration remains draft/untrusted.
+3. **001 then 002 — `/pbc:define`, `/pbc:feature`: implemented.** Validated draft-only append proposals, preview and confirmation. These are guided authoring flows, not assumed upstream subcommands.
+4. **006 — target registry editor: implemented.** `/op:targets [list|add|edit <alias>|remove <alias>]` validates the existing registry axes, previews exact config and saves atomically after confirmation. Symlinks, stale previews and changed harness/model resolution are refused. `tests/pi_operator_targets.ts` covers config-only changes and routing preservation.
+5. **009 — trusted verifier orchestration: implemented; acceptance pending.** `/op:verify-run` and the verifier-only helper provide bounded review/log/decision/attachment handling. Automated tests cover refusal and mocked UID/process paths. The 007 popup acceptance task and a live, explicitly authorized distinct-UID/provider run remain open. The author-side command exposes no verdict/status inputs, but that is not an enforcement boundary: author-writable code launched under the verifier account can attach verifier evidence.
+6. **004 — multi-claim review:** only after defining an Operator claim-set review contract; do not merely loosen the one-claim Pi UI.
+7. **005 — additional carrier adapters:** reuse the existing client when a concrete consumer needs it; validate each carrier rather than building speculative adapters.
+8. **003 — lifecycle wizard:** last, once draft authoring and review paths are exercised; transitions must retain distinct-agent requirements and never equate validation with ratification.
+
+This order prioritizes the requested PBC/crystal shortcuts, reuses existing backends,
+and defers authority-sensitive or speculative expansions. It is a recommendation,
+not task assignment. Existing static HTML boards are snapshots and need regeneration
+to reflect this inventory; `/op:roadmap` reads this source directly.
+
+> Release-preparation note (2026-09-23; not a ratification, acceptance or lifecycle change):
+> The `0.1.0-alpha.1` boundary, prerequisites and disclosures are in
+> `docs/releases/pi-operator-0.1.0-alpha.1.md`; `package.json` holds the frontend
+> allowlist. Distribution is a tag of the public source repository, so recipients get
+> the whole tracked tree, not only that allowlist. Core is orientation, task selection
+> and confirmed claim/evidence/handoff shortcuts; delegation, reviews, target editing,
+> PBC authoring/validation, crystals and the GUI/UID launchers are optional. Before
+> counting a `/op:verify-run` or `/op:popup` status toward the step 5 dogfood gate,
+> inspect what actually ran: a distinct verifier UID alone does not show independence
+> from author-writable code.
+>
 > Factual implementation note (2026-09-05; amended 2026-09-16; not a ratification or lifecycle change):
 > `/op:next-steps`, `/op:project`, and `/op:roadmap --project` exist as read-only orientation commands.
 > POE-FUT-011 is implemented by those project-dashboard commands and is no longer a future candidate.
 > POE-FUT-012 is implemented by `scripts/install-operator-extension.py` plus `.pi/operator-ledger.json` (`wired_into_findLedger: true`). There is no `/op:install` command. GitHub issue #18 is the tracking issue for that helper; it is not a remaining product gap beyond live Pi trust of the consumer project.
 > POE-FUT-013 is closed as guidance-only; do not add `/op:mode`.
-> POE-FUT-014 Route C is recorded as a compatibility-route choice only. The check is local wrapper `scripts/pbc_validate_operator.py` around the pinned pbc-spec CLI. The upstream CLI has no `--profile`. `proposed-*` fences are not canonical upstream types. `/pbc:*` commands remain unimplemented.
+> POE-FUT-014 Route C is recorded as a compatibility-route choice only. The check is local wrapper `scripts/pbc_validate_operator.py` around the pinned pbc-spec CLI. The upstream CLI has no `--profile`. `proposed-*` fences are not canonical upstream types. The subsequently implemented `/pbc:validate` shortcut uses this wrapper; `/pbc:define` and `/pbc:feature` write draft proposals only.
 >
 > POE-ISS-001 closed 2026-09-16 (F1 re-fence already on disk; not a ratification of the extension).
 > `pbc:rules` holds verified CLI facts POE-RUL-001–005 (`trust: verified`). Proposed extension
@@ -491,6 +520,10 @@ issues:
 
 ## Implementation Ladder
 
+> Historical ladder. Steps 1-4 are implemented; step 5 (falsifiable dogfood run with
+> distinct-UID verification) is not established. Later work (PBC/crystal shortcuts,
+> target editor, verify-run) is tracked in Candidate Reconciliation, not as ladder steps.
+
 ```pbc:grounding
 status: draft
 ladder:
@@ -516,6 +549,12 @@ ladder:
 
 ## Open Questions
 
+> Status note (2026-09-23): #3, #4, #5 and #8 have de facto answers in the implementation -
+> PBC authoring ships in this extension (`/pbc:*`); `/op:delegate` dispatches through
+> `harness_adapter` IMPLEMENTER with paste as a labeled fallback; `targets.json` uses
+> alias, harness id, carrier id, model, isolation and brief format; and `review-delegate`
+> launches Pi with `--no-approve`. They are left open here because none is ratified.
+
 1. Should Operator itself read Pi initiator/session environment variables (for example the values resolved by `resolve_initiator_identity()` / MSC-RUL-006), or should the extension pass a session-scoped `--by` explicitly on every write?
 2. Should `/op:status` be purely read-only, or should it offer guided follow-up actions through Pi UI prompts?
 3. Should PBC drafting be a command in this same extension, or remain a manual/spec workflow until the basic Operator commands prove useful?
@@ -530,6 +569,12 @@ ladder:
 Shows: a proposed safe shape for a Pi-native Operator extension and the role PBC
 should play when implementation detail exceeds easy owner correction.
 
-Does not show: that the extension has been implemented, that the proposed command
-set is complete, that the identity format is final, or that Claude/OpenCode/MCP
-integration should share all of the same affordances.
+The extension is implemented (see Candidate Reconciliation); implementation and
+automated tests are not independent acceptance.
+
+Does not show: that the implemented behavior is ratified, that the command set is
+complete, that the identity format is final, that end-to-end cross-UID,
+provider-authenticated verifier runs work, or that Claude/OpenCode/MCP integration
+should share all of the same affordances. The owner separately confirms GUI popup
+success; that launch reached Pi and then failed on provider authentication. This
+observation is not a completed reviewer run or formal closure of the ledger task.

@@ -22,7 +22,8 @@
  *   /op:next-steps          prioritized ledger actions; optional workflow guidance
  *   /op:project             read-only project-prefix dashboard
  *
- * Deliberately absent at step 4: the /pbc:* commands. Also absent: any
+ * PBC validation/draft authoring and crystal capture/attach/import are also present.
+ * Still absent: any
  * model-callable tool. These commands are human ergonomics (POE-RUL-103);
  * the model still has bash and can run ./operator itself under its own
  * rules, and does not get a shortcut here for authoring claims about its
@@ -50,6 +51,9 @@ import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-c
 import { REPORT_ENTRY_TYPE } from "./core.ts";
 import * as core from "./core.ts";
 import * as orientation from "./orientation/actions.ts";
+import { createWorkflows } from "./workflows/commands.ts";
+import { createTargetHandler } from "./workflows/targets.ts";
+import { createVerifyHandler } from "./workflows/verify.ts";
 
 /** Session-scoped task selection. Never written to the ledger on its own. */
 let sessionTask: string | null = null;
@@ -222,6 +226,40 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 			}
 		}
 	};
+
+	pi.registerCommand("op:verify-run", {
+		description: "[experimental] Operator: distinct-UID review launcher; author-writable code runs with verifier permissions",
+		handler: createVerifyHandler(pi, { ledger: requireLedger, emit }),
+	});
+	pi.registerCommand("op:targets", {
+		description: "Operator: list/add/edit/remove delegation targets; confirmed config changes, never task routing",
+		handler: createTargetHandler({ ledger: requireLedger, emit }),
+	});
+	const workflows = createWorkflows(pi, { ledger: requireLedger, writeContext: requireWriteContext, emit });
+	pi.registerCommand("pbc:validate", {
+		description: "PBC: validate a file/directory via the pinned Operator compatibility wrapper (read-only)",
+		handler: workflows.validate,
+	});
+	pi.registerCommand("pbc:define", {
+		description: "PBC: draft product shape (/pbc:define [file.pbc.md]); preview and confirm, never ratify",
+		handler: workflows.define,
+	});
+	pi.registerCommand("pbc:feature", {
+		description: "PBC: append a draft feature candidate (/pbc:feature [file.pbc.md]); not current acceptance scope",
+		handler: workflows.feature,
+	});
+	pi.registerCommand("op:crystal", {
+		description: "Operator: capture this session with reviewed notes; no automatic attachment",
+		handler: workflows.capture,
+	});
+	pi.registerCommand("op:crystal-attach", {
+		description: "Operator: attach a crystal as draft evidence (/op:crystal-attach [path])",
+		handler: workflows.attach,
+	});
+	pi.registerCommand("op:crystal-import", {
+		description: "Operator: import draft claims from a crystal (/op:crystal-import [path])",
+		handler: workflows.import,
+	});
 
 	// Restore the session selection after /reload or a session restart.
 	pi.on("session_start", async (_event, ctx) => {
@@ -1625,13 +1663,14 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 				refuse(ctx, "/op:popup", "Operator sudo askpass", err);
 				return;
 			}
-			const invocation = core.formatSudoInvocation(argv);
+			const invocation = core.formatSudoInvocation(argv, { full: true });
 			const ok = await ctx.ui.confirm(
 				"Run this sudo command with GUI askpass?",
 				[
 					"A desktop askpass popup will collect the password. This extension never reads it.",
 					"Uses sudo -A (GUI askpass). sudo -S / stdin password flags are refused.",
-					"This does not verify a claim or write verification status.",
+					"The popup itself does not set verification status. The launched reviewer/code can write evidence with the verifier's permissions and credentials.",
+					"Author-writable code is not isolated by using a different UID. Review the complete command below before authorizing.",
 					"",
 					invocation,
 				].join("\n"),
