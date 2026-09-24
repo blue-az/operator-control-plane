@@ -401,6 +401,9 @@ future_features:
     name: Doom-loop life-boat
     command: /op:life-boat
     description: "Owner-launched escape from a doom loop: the looping agent stops, lists every distinct attempt (owner edits before save), the record is saved and attached through /op:crystal and /op:crystal-attach (no source commit, stash or revert), a fresh read-only supervisor sees only the crystal, task and repo and returns a diagnosis, one next attempt and a do-not-retry list, then the original agent or a /op:delegate implementer resumes and the life-boat closes with /op:handoff. Charter: owners-manual/pbc/appendix-op-life-boat.pbc.md (draft; subordinate to this PBC). Depends on crystal capture, so it inherits POE-FUT-015's pending validation. Open decisions: a SUPERVISOR adapter role vs extending the review bundle; whether 'stop editing' is enforceable or advisory in Pi; a Rejected Attempts crystal section (pbc-spec#12). Not alpha scope."
+  - id: POE-FUT-018
+    name: General ledger boards
+    description: "Today scripts/operator_project_board.py is a read-only snapshot report hardcoded to pi-operator-extension (prefix, ladder, nav links, PBC path) that reads .operator YAML directly. (a) Make it work for any task prefix by taking the ladder, links and PBC path from arguments or the project's own PBC. (b) Optionally expose it as an ./operator board command that reads through the same checks as doctor, so a board cannot show records the ledger would flag. Part (b) changes Operator core, not only this extension. The whole-ledger hub (scripts/operator_hub.py, untracked) is out of scope: publishing it in the public repo is a separate owner decision. Not alpha scope."
 ```
 
 ## Candidate Reconciliation
@@ -427,6 +430,7 @@ implemented items are not renamed as unspecified "enhancements".
 | POE-FUT-015 | Implemented; not independently accepted | `/op:crystal` captures reviewed current-session notes via installed crystallize 0.1.16; `/op:crystal-attach [path]` and `/op:crystal-import [path]` wrap draft-only backends. Chooser only when attach/import omit a path. No automatic download or attachment. |
 | POE-FUT-016 | Not implemented; idea recorded 2026-09-23 | Opt-in crystal prompt near a context threshold (suggested 90%) before compaction. Depends on post-release crystal validation and a Pi compaction/threshold hook. |
 | POE-FUT-017 | Not implemented; draft charter 2026-09-23 | `/op:life-boat` doom-loop escape. Charter in `appendix-op-life-boat.pbc.md`; needs crystal capture validation and a supervisor-role decision first. |
+| POE-FUT-018 | Not implemented; idea recorded 2026-09-23 | Generalize the static boards beyond `pi-operator-extension`; optionally an `./operator` board command reading through `doctor`-level checks (Operator core change). Hub excluded. |
 
 ### Suggested implementation order
 
