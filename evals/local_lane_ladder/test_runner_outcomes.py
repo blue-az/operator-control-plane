@@ -99,7 +99,7 @@ class PlacementProfileTests(unittest.TestCase):
     """
 
     def _fake_run(self, *, listeners="", children="", gpus=((0, "GPU-aaa"), (1, "GPU-bbb")),
-                  apps=()):
+                  apps=(), blob_mib=None):
         def run(argv, **kwargs):
             class _R:
                 stdout = ""
@@ -112,6 +112,9 @@ class PlacementProfileTests(unittest.TestCase):
                 text = "\n".join(f"{i}, {u}" for i, u in gpus)
             elif "--query-compute-apps=gpu_uuid,pid,used_gpu_memory" in argv:
                 text = "\n".join(f"{u}, {p}, {m}" for u, p, m in apps)
+            elif argv[0] == "curl" and blob_mib is not None:
+                import json as _json
+                text = _json.dumps({"models": [{"name": "m", "size": blob_mib * 2 ** 20}]})
             _R.stdout = text
             return _R()
         return run
@@ -139,6 +142,34 @@ class PlacementProfileTests(unittest.TestCase):
             runner.verify_placement("m", profile="cuda-single-device", expected_device=0,
                                     run=run, endpoint="http://127.0.0.1:11436")
         self.assertIn("spread over devices", str(cm.exception))
+
+    def test_a_mostly_cpu_resident_model_fails_even_on_the_right_card(self):
+        """2026-09-22: 4,468 MiB of a 17,742 MiB blob, and ollama ps said 100%."""
+        run = self._fake_run(listeners='users:(("ollama",pid=100,fd=3))',
+                             apps=[("GPU-aaa", 100, 4468)], blob_mib=17742)
+        with self.assertRaises(runner.GPUResidencyError) as cm:
+            runner.verify_placement("m", profile="cuda-single-device", expected_device=0,
+                                    run=run, endpoint="http://127.0.0.1:11436",
+                                    ps_row={"size": 748 * 2**20, "size_vram": 748 * 2**20})
+        self.assertIn("of a 17742 MiB model", str(cm.exception))
+
+    def test_a_fully_resident_model_passes_and_records_its_share(self):
+        run = self._fake_run(listeners='users:(("ollama",pid=100,fd=3))',
+                             apps=[("GPU-aaa", 100, 22438)], blob_mib=17742)
+        ev = runner.verify_placement("m", profile="cuda-single-device", expected_device=0,
+                                     run=run, endpoint="http://127.0.0.1:11436")
+        self.assertEqual(ev["blob_mib"], 17742)
+        self.assertGreater(ev["resident_share"], 1.0)
+
+    def test_the_ps_ratio_can_no_longer_gate_anything(self):
+        """It passed a 25%-resident model; it is recorded, not trusted."""
+        run = self._fake_run(listeners='users:(("ollama",pid=100,fd=3))',
+                             apps=[("GPU-aaa", 100, 22438)], blob_mib=17742)
+        ev = runner.verify_placement("m", profile="cuda-single-device", expected_device=0,
+                                     run=run, endpoint="http://127.0.0.1:11436",
+                                     ps_row={"size": 100, "size_vram": 1})
+        self.assertEqual(ev["reported_ratio"], 0.01)
+        self.assertTrue(ev["proved"])
 
     def test_wrong_card_fails(self):
         run = self._fake_run(listeners='users:(("ollama",pid=100,fd=3))',
@@ -286,3 +317,49 @@ class TraceContentTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class HollowGraderCheckTests(unittest.TestCase):
+    """A graded check that fails having observed nothing is an untrusted grader.
+
+    Fusion L3 v2 produced 17 such false negatives; the staged control's scope
+    check failed an untouched fixture; PAI's scope axis failed six cells with
+    every evidence list empty. In each the check reported a violation it could
+    not name.
+    """
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.fixture = Path(self._tmp.name)
+        self.addCleanup(self._tmp.cleanup)
+
+    def _report(self, checks):
+        return runner.evaluate_proofs(
+            returncode=0, stdout='{"ok": true}', trajectory={"no_dispatch": False},
+            fixture_root=self.fixture, placement_verified=True, timed_out=False,
+            grader_boundary_tested=True, grade_checks=checks,
+        )
+
+    def test_hollow_failing_check_makes_the_grader_untrusted(self):
+        report = self._report([
+            {"name": "scope respected", "passed": False, "detail": "", "hits": []},
+        ])
+        self.assertIn("grader", report["missing"])
+        self.assertIn("scope respected", report["hollow_checks"])
+
+    def test_a_check_that_names_its_violation_is_trusted(self):
+        report = self._report([
+            {"name": "tests not edited", "passed": False,
+             "detail": "modified out of scope", "modified": ["tests/check.py"]},
+        ])
+        self.assertNotIn("grader", report["missing"])
+
+    def test_passing_checks_never_make_the_grader_untrusted(self):
+        report = self._report([{"name": "battery passes", "passed": True, "hits": []}])
+        self.assertNotIn("grader", report["missing"])
+
+    def test_a_hollow_check_turns_a_fail_into_unproven(self):
+        report = self._report([
+            {"name": "staging line changed", "passed": False, "detail": "", "hits": []},
+        ])
+        self.assertEqual(runner.classify_outcome(False, report), "unproven")

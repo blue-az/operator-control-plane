@@ -492,6 +492,16 @@ def parse_trajectory(stdout: str) -> dict:
 # pass still records its proof flags, so the question stays askable.
 RUNTIME_POLLUTION_NAMES = (".pi-agent", ".pi-sessions", ".tmp", ".pi-auth", "node-cache")
 
+# Shared triage. The `grader` proof was a declaration -- a task said whether its
+# grader had been boundary-tested and we believed it. Fusion L3 v2 showed why
+# that is not enough: 17 apparent failures were all grader false negatives.
+# empty_evidence catches the shape where a check fails having observed nothing.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+try:
+    from failure_triage import empty_evidence
+except ImportError:  # keep the runner usable if the module is not staged
+    empty_evidence = None
+
 
 def carrier_scope_violations(fixture_root: Path) -> list[str]:
     """Carrier runtime files inside the graded fixture. See incident 0155Z."""
@@ -505,9 +515,26 @@ def carrier_scope_violations(fixture_root: Path) -> list[str]:
 def evaluate_proofs(
     *, returncode: int | None, stdout: str, trajectory: dict, fixture_root: Path,
     placement_verified: bool, timed_out: bool, grader_boundary_tested: bool,
+    grade_checks: list | None = None,
 ) -> dict:
     """The five proofs a cell must satisfy before a failure means anything."""
     scope_hits = carrier_scope_violations(fixture_root)
+    # A graded check that failed while reporting nothing it objected to did not
+    # observe a violation; its pass condition decided the outcome. Treat that as
+    # an untrusted grader rather than a model failure.
+    grader_trusted = bool(grader_boundary_tested)
+    hollow_checks = []
+    if empty_evidence is not None:
+        for check in (grade_checks or []):
+            if isinstance(check, dict) and not check.get("passed", True):
+                if empty_evidence(
+                    {"pass": False, **{k: v for k, v in check.items()
+                                       if isinstance(v, (list, tuple, set))}}
+                ):
+                    hollow_checks.append(check.get("name"))
+        if hollow_checks:
+            grader_trusted = False
+
     proofs = {
         "dispatch": (
             returncode == 0
@@ -516,11 +543,13 @@ def evaluate_proofs(
         ),
         "scope": not scope_hits,
         "placement": bool(placement_verified),
-        "grader": bool(grader_boundary_tested),
+        "grader": grader_trusted,
         "timing": not timed_out,
     }
     detail = {"missing": sorted(k for k, ok in proofs.items() if not ok),
               "trajectory": trajectory}
+    if hollow_checks:
+        detail["hollow_checks"] = hollow_checks
     if scope_hits:
         detail["scope_violations"] = scope_hits
     return {"proofs": proofs, **detail}
@@ -869,6 +898,26 @@ def daemon_process_tree(endpoint: str, run=subprocess.run) -> set[int]:
     return pids
 
 
+def model_blob_mib(model: str, endpoint: str, run=subprocess.run) -> int | None:
+    """The model's own file size, from /api/tags.
+
+    /api/ps cannot answer how much of a model is resident. On 2026-09-22 it
+    reported size 748 MiB and size_vram 748 MiB -- a ratio of 1.0 -- for a
+    17,742 MiB blob with 4,468 MiB actually on the card. Its own numbers are
+    self-consistent and wrong together, so a ratio computed from them proves
+    nothing. /api/tags reports the blob, which is independent of placement.
+    """
+    try:
+        out = run(["curl", "-sS", "--max-time", "5", f"{endpoint}/api/tags"],
+                  capture_output=True, text=True, timeout=10, check=True).stdout
+        for item in json.loads(out).get("models", []):
+            if item.get("name") == model:
+                return int(item.get("size") or 0) // 2 ** 20
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError, ValueError):
+        return None
+    return None
+
+
 def verify_placement(
     model: str, *, profile: str, expected_device: int = 0, minimum_ratio: float = 0.9,
     run=subprocess.run, ps_row: dict | None = None, endpoint: str | None = None,
@@ -924,16 +973,32 @@ def verify_placement(
         "attributed_mib_by_device": ours, "daemon_pids": sorted(pids),
         "endpoint": endpoint, "model": model,
     }
+    # Which card is not the whole question. A model can sit on the right device
+    # and still be mostly in host RAM, because ollama's fitting pass decides
+    # placement at load time against whatever VRAM was free THEN and never
+    # revisits it. Check the attributed memory against the model's own blob.
+    blob = model_blob_mib(model, endpoint, run=run)
+    evidence["blob_mib"] = blob
+    if blob:
+        resident = ours.get(expected_device, 0)
+        share = resident / blob
+        evidence["resident_mib"] = resident
+        evidence["resident_share"] = round(share, 4)
+        if share < minimum_ratio:
+            raise GPUResidencyError(
+                f"placement: {model} is {resident} MiB on device {expected_device} of a "
+                f"{blob} MiB model ({share:.1%}, required {minimum_ratio:.0%}). "
+                "Placement is fixed at load time, so free VRAM now does not undo it -- "
+                "unload and reload with the card clear."
+            )
     if ps_row:
         size, vram = int(ps_row.get("size") or 0), int(ps_row.get("size_vram") or 0)
         ratio = vram / size if size else 0.0
         evidence["reported_ratio"] = round(ratio, 4)
         evidence["reported_ratio_is_corroboration_only"] = True
-        if ratio < minimum_ratio:
-            raise GPUResidencyError(
-                f"placement: {model} reports {vram}/{size} bytes in VRAM "
-                f"({ratio:.1%}, required {minimum_ratio:.0%})"
-            )
+        # Deliberately not a gate. This is the number that passed a 25%-resident
+        # model on 2026-09-22; it is recorded so the two can be compared, never
+        # so it can decide anything.
     return evidence
 
 
@@ -1139,6 +1204,8 @@ def run_trial(
             # the assumption is recorded rather than hidden. Fusion L3 v2 is why: an
             # untested deterministic grader turned 17 correct answers into failures.
             grader_boundary_tested=bool(task.get("grader_boundary_tested", True)),
+            grade_checks=[{"name": c.name, "passed": c.passed, "detail": c.detail}
+                          for c in grade_result.checks],
         )
         cell_outcome = classify_outcome(grade_result.passed, proof_report)
         # The ledger vocabulary is pass/fail only; an unproven cell is not a model
