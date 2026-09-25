@@ -57,12 +57,12 @@ An assigned harness writes handoff details into the local ledger, the ledger bui
 
 ### Orientation boards
 
-The CLI and Pi commands (`task-show`, `/op:status`, `/op:project`) are the live surfaces. For a prefix of related tasks they are easy to lose in. Static HTML boards in `docs/boards/` are a third inspection surface, generated from the same local ledger:
+The CLI and Pi commands (`task-show`, `/op:status`, `/op:project`) are the live surfaces. For a prefix of related tasks they are easy to lose in. Static HTML boards are a third inspection surface, generated from the same local ledger into `docs/boards/`, where they are gitignored. The repository does not ship board snapshots; generate them from your own ledger:
 
-- **[Project board](../../docs/boards/pi-operator-extension.html)** — one card per task: status, verified claims / total, evidence, handoffs, `next_action`.
-- **[Issue catalog](../../docs/boards/pi-operator-extension-issues.html)** — PBC dogfood issues (`POE-ISS-*`), not the live resolution log.
-- **[Project map](../../docs/boards/pi-operator-extension-graph.html)** — labeled columns for the whole prefix (spec, ladder, follow-on, cross-project).
-- **Resolution ledger** — time-ordered events for one task, e.g. [step 5 dogfood](../../docs/boards/pi-operator-extension-step5-dogfood-resolution.html): claim, builder evidence, review bundle, verifier evidence, handoff.
+- **Project board** (default view) — one card per task: status, verified claims / total, evidence, handoffs, `next_action`.
+- **Issue catalog** (`--view issues`) — PBC dogfood issues (`POE-ISS-*`), not the live resolution log.
+- **Project map** (`--view graph`) — labeled columns for the whole prefix (spec, ladder, follow-on, cross-project).
+- **Resolution ledger** (`--view resolution --task <task-id>`) — time-ordered events for one task: claim, builder evidence, review bundle, verifier evidence, handoff.
 
 Regenerate after ledger changes:
 
@@ -73,7 +73,7 @@ python3 scripts/operator_project_board.py --view graph
 python3 scripts/operator_project_board.py --view resolution --task <task-id>
 ```
 
-These boards do not write the ledger. They are orientation only. Start at the [project board](../../docs/boards/pi-operator-extension.html) for this repository's Pi extension prefix.
+These boards do not write the ledger. They are orientation only. Open the generated project board first.
 
 ### What the Reviewed Evidence Supports
 
