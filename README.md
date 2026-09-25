@@ -54,11 +54,30 @@ disallowed. The old `opr` governed REPL is deprecated; `./opr` prints that point
 pip install -r requirements.txt        # runtime: just PyYAML
 pip install -r requirements-dev.txt    # tests/lint: pytest, ruff, black, isort
 ./operator --help
-
-mkdir /tmp/operator-demo && cd /tmp/operator-demo   # init writes into the current directory
-/path/to/operator init                 # create a .operator/ ledger here
-/path/to/operator doctor               # consistency check -> "All records consistent."
+./operator init                        # create a .operator/ ledger in this folder (gitignored)
+./operator doctor                      # consistency check -> "All records consistent."
 ```
+
+The easiest way to start is to run everything from inside the cloned `operator-control-plane`
+folder, as above: `./operator` needs no path, and the `.operator/` ledger it creates there is already
+gitignored. `init` writes into the current directory, and every other command finds the ledger by
+walking upward from wherever you run it. To keep a ledger for a different project, `cd` into that
+project and call the script by its full path (`/path/to/operator-control-plane/operator init`), or
+put it on your `PATH`.
+
+### What the UID is
+
+Every write to the ledger records the **UID** of the process that made it: the numeric Linux/macOS
+user ID from `os.getuid()` (run `id -u` to see yours; it is often `1000` or `501`). It is not a UUID
+or a login token. It is the identity Operator uses to tell a claim's author from its verifier.
+
+Out of the box there is no `.operator/identity.yaml`, so the ledger runs in `single_user` mode.
+Everything you do, including your agents running under your account, carries the same UID. You can
+still attach evidence with `--status verified`, but it is recorded as `advisory`, and `doctor` warns
+that the verification is "NOT identity-enforced". That is expected for a first try. A verification
+only counts as independent (`uid_isolated`) when it comes from a second OS account registered as a
+verifier in an `enforced` identity policy; see
+[Configuration](#configuration) below.
 
 Run the tests from the repo:
 
