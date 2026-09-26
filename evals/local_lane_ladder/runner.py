@@ -362,7 +362,15 @@ def _git_rev() -> str:
                     line[3:].strip() for line in dirty.stdout.strip().splitlines()
                     if not line.startswith("??")
                 )
-                rev = f"{rev}-dirty({len(changed)} tracked file(s) modified)" if changed else rev
+                # Name the files, do not just count them. state.json is a tracked
+                # run ledger, so every completed run dirties the tree and a bare
+                # count made every later stamp read "-dirty(1)" whether or not any
+                # code had changed -- which is the one distinction the marker
+                # exists to draw. "-dirty(state.json)" is self-evidently benign;
+                # "-dirty(runner.py)" is the thing worth stopping for.
+                names = [Path(c).name for c in changed]
+                shown = ", ".join(names[:4]) + (f", +{len(names) - 4} more" if len(names) > 4 else "")
+                rev = f"{rev}-dirty({shown})" if changed else rev
             _GIT_REV = rev
         except Exception:  # noqa: BLE001 -- provenance is recorded, never fatal
             _GIT_REV = "unknown"

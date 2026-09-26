@@ -288,6 +288,60 @@ class ProvenanceTests(unittest.TestCase):
             tracked = [l for l in out.splitlines() if l.strip() and not l.startswith("??")]
             self.assertEqual(bool(tracked), "dirty" in rev)
 
+    def test_the_stamp_names_what_is_dirty_not_how_many(self):
+        """A count cannot tell a run ledger apart from changed code.
+
+        state.json is tracked and every completed run rewrites it, so after any
+        run the tree is dirty forever and "-dirty(1 tracked file(s) modified)"
+        appeared on stamps whose code was fully committed. That is the one
+        distinction the marker exists to draw, so the stamp names the files.
+        """
+        import subprocess as sp
+
+        def fake_run(cmd, **kw):
+            out = ""
+            if cmd[:2] == ["git", "rev-parse"]:
+                out = "abc123\n"
+            elif cmd[:2] == ["git", "status"]:
+                out = " M evals/local_lane_ladder/state.json\n"
+            return sp.CompletedProcess(cmd, 0, out, "")
+
+        real, runner.subprocess.run = runner.subprocess.run, fake_run
+        runner._GIT_REV = None
+        self.addCleanup(lambda: setattr(runner, "_GIT_REV", None))
+        try:
+            rev = runner._git_rev()
+        finally:
+            runner.subprocess.run = real
+        self.assertIn("state.json", rev)
+        self.assertNotIn("tracked file(s) modified", rev)
+
+    def test_dirty_code_is_visible_beside_the_ledger(self):
+        """The red flag must not be hidden by the benign entry next to it."""
+        import subprocess as sp
+
+        def fake_run(cmd, **kw):
+            out = ""
+            if cmd[:2] == ["git", "rev-parse"]:
+                out = "abc123\n"
+            elif cmd[:2] == ["git", "status"]:
+                out = (" M evals/local_lane_ladder/state.json\n"
+                       " M evals/local_lane_ladder/runner.py\n"
+                       "?? evals/local_lane_ladder/scratch.txt\n")
+            return sp.CompletedProcess(cmd, 0, out, "")
+
+        real, runner.subprocess.run = runner.subprocess.run, fake_run
+        runner._GIT_REV = None
+        self.addCleanup(lambda: setattr(runner, "_GIT_REV", None))
+        try:
+            rev = runner._git_rev()
+        finally:
+            runner.subprocess.run = real
+        self.assertIn("runner.py", rev)
+        self.assertIn("state.json", rev)
+        # Untracked files are not part of what ran.
+        self.assertNotIn("scratch.txt", rev)
+
 
 class NoGitProvenanceTests(unittest.TestCase):
     def test_a_loose_copy_still_identifies_itself(self):
