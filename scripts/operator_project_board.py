@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -30,6 +31,21 @@ LADDER = [
     (4, "Delegate chooser"),
     (5, "Falsifiable dogfood"),
 ]
+
+
+def extra_nav_links() -> str:
+    """Opt-in nav links from OPERATOR_BOARD_EXTRA_LINKS ("Label=URL;Label=URL").
+
+    Keeps machine-local links (e.g. file:// dashboards) out of this public script.
+    """
+    links = []
+    for item in os.environ.get("OPERATOR_BOARD_EXTRA_LINKS", "").split(";"):
+        label, sep, url = item.partition("=")
+        if sep and label.strip() and url.strip():
+            links.append(
+                f' · <a href="{html.escape(url.strip(), quote=True)}">{html.escape(label.strip())}</a>'
+            )
+    return "".join(links)
 
 
 def load_yaml(path: Path) -> dict:
@@ -233,7 +249,7 @@ def render(data: dict) -> str:
 </head>
 <body>
 <header class="top">
-  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a>{extra_nav_links()}</nav>
   <h1>{esc(data['prefix'])}</h1>
   <p class="sub">Simple Operator board · snapshot {esc(data['generated_at'])} · not Graphify, not a knowledge graph</p>
 </header>
@@ -708,7 +724,7 @@ def write_obsidian(root: Path, prefix: str, out: Path) -> int:
         )
     w(
         "README",
-        f"""# Obsidian Operator map\n\nOpen **this folder** as an Obsidian vault.\n\n1. Obsidian → Open folder as vault → `docs/boards/obsidian`\n2. Open [[00-project]]\n3. Open Graph view\n\nThis is a generated wiki-link map of the Operator ledger, not Graphify.\nRegenerate with:\n\n```bash\npython3 scripts/operator_project_board.py --view obsidian\n```\n""",
+        """# Obsidian Operator map\n\nOpen **this folder** as an Obsidian vault.\n\n1. Obsidian → Open folder as vault → `docs/boards/obsidian`\n2. Open [[00-project]]\n3. Open Graph view\n\nThis is a generated wiki-link map of the Operator ledger, not Graphify.\nRegenerate with:\n\n```bash\npython3 scripts/operator_project_board.py --view obsidian\n```\n""", 
     )
     return count
 

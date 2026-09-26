@@ -22,6 +22,16 @@ python3 scripts/operator_project_board.py --view obsidian
 python3 scripts/operator_project_board.py --prefix pi-operator-extension -o docs/boards/pi-operator-extension.html
 ```
 
+To add machine-local links to the project board's top menu (for example a
+`file://` dashboard), set `OPERATOR_BOARD_EXTRA_LINKS` to `Label=URL` pairs
+separated by `;`. Without it the menu has only the board links, so no local
+paths live in the generator itself:
+
+```bash
+OPERATOR_BOARD_EXTRA_LINKS='Dashboard=file:///path/to/report.html' \
+  python3 scripts/operator_project_board.py
+```
+
 Then open the HTML in a browser. The file is a snapshot, not a live
 server. `/op:project <prefix>` remains the in-Pi text dashboard.
 
