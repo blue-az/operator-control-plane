@@ -1067,7 +1067,34 @@ def run_trial(
     placement_verified = False
     placement_evidence = None
     profile = sampling.get("placement_profile")
-    if profile:
+    if profile == "unified-memory":
+        # The unified-memory proof reads the daemon's own /api/ps, which is empty
+        # until something is loaded. Warm the model first, then ask -- otherwise a
+        # cold start aborts the cell on a placement check that never had a chance
+        # to run. The CUDA path gets its row from require_gpu_residency, which
+        # already warms.
+        ps_row = None
+        for attempt in (0, 1):
+            try:
+                ps = subprocess.run(
+                    ["curl", "-sS", "--max-time", "5", f"{ollama_base_url()}/api/ps"],
+                    capture_output=True, text=True, timeout=10, check=True)
+                ps_row = next((m for m in json.loads(ps.stdout).get("models", [])
+                               if m.get("name") == dispatch_model), None)
+            except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
+                ps_row = None
+            if ps_row or attempt:
+                break
+            warm = json.dumps({"model": dispatch_model, "prompt": "ready",
+                               "stream": False, "keep_alive": "10m",
+                               "options": {"num_predict": 1}})
+            subprocess.run(["curl", "-sS", "--max-time", "180",
+                            f"{ollama_base_url()}/api/generate", "-d", warm],
+                           capture_output=True, text=True, timeout=185, check=False)
+        placement_evidence = verify_placement(
+            dispatch_model, profile=profile, ps_row=ps_row)
+        placement_verified = bool(placement_evidence.get("proved"))
+    elif profile:
         # require_gpu_residency loads the model and returns ollama's own ps row;
         # verify_placement decides what that row is worth on this host class.
         ps_row = None

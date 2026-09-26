@@ -363,3 +363,32 @@ class HollowGraderCheckTests(unittest.TestCase):
             {"name": "staging line changed", "passed": False, "detail": "", "hits": []},
         ])
         self.assertEqual(runner.classify_outcome(False, report), "unproven")
+
+
+class UnifiedMemoryWarmupTests(unittest.TestCase):
+    """The unified-memory proof reads /api/ps, which is empty on a cold daemon.
+
+    Without a warm-up the first cell aborts on "no loaded model reported by the
+    local daemon" -- a placement check that never had a chance to run, which is
+    an instrument failure dressed as a placement failure.
+    """
+
+    def test_unified_memory_needs_a_ps_row(self):
+        with self.assertRaises(runner.GPUResidencyError) as cm:
+            runner.verify_placement("m", profile="unified-memory",
+                                    endpoint="http://127.0.0.1:11434", ps_row=None)
+        self.assertIn("no loaded model", str(cm.exception))
+
+    def test_a_warmed_row_proves_placement(self):
+        ev = runner.verify_placement("m", profile="unified-memory",
+                                     endpoint="http://127.0.0.1:11434",
+                                     ps_row={"size": 17_000_000_000})
+        self.assertTrue(ev["proved"])
+        self.assertEqual(ev["vram_residency"], "not_applicable_unified_memory")
+
+    def test_run_trial_warms_before_asking(self):
+        import inspect
+        src = inspect.getsource(runner.run_trial)
+        i_warm = src.index("/api/generate")
+        i_verify = src.index('verify_placement(\n            dispatch_model, profile=profile, ps_row=ps_row)')
+        self.assertLess(i_warm, i_verify, "warm-up must precede the placement check")
