@@ -833,13 +833,28 @@ def require_gpu_residency(model: str, minimum_ratio: float = 0.9) -> dict:
     size = int(row.get("size") or 0)
     vram = int(row.get("size_vram") or 0)
     ratio = vram / size if size else 0.0
-    result = {"model": model, "size": size, "size_vram": vram, "ratio": round(ratio, 4)}
+    result = {"model": model, "size": size, "size_vram": vram, "ratio": round(ratio, 4),
+              "corroboration_only": True}
+    # This ratio is CORROBORATION, never a verdict, and it must not be able to
+    # fail a run. `size` and `size_vram` come from the daemon's own /api/ps, and
+    # GOLD_STANDARD rule 4a establishes that neither describes an MoE model's
+    # residency: the daemon moves every expert tensor to system RAM, reports only
+    # the part it accounts for, and so returns size == size_vram. On 2026-09-26
+    # that printed "100.0%" for gemma4:26b against 965 MiB when the blob is
+    # 17,742 MiB -- 100% of the wrong denominator. It has also failed the other
+    # way, rejecting a run at "23.8%" on the same meaningless reading, which
+    # would void cells for no reason.
+    #
+    # The verdict belongs to verify_placement, which attributes per-device VRAM
+    # to the measuring daemon's own process tree and checks it against the blob
+    # size from /api/tags. Here we only report, and we say what the number is
+    # worth so nobody reads the percentage as proof.
+    verdict = "plausible" if ratio >= minimum_ratio else "LOW -- see verify_placement"
+    print(f"  ollama ps corroboration (not proof): {model} "
+          f"{vram}/{size} bytes, {ratio:.1%} [{verdict}]")
     if ratio < minimum_ratio:
-        raise GPUResidencyError(
-            f"placement gate failed for {model}: {vram} / {size} bytes in VRAM "
-            f"({ratio:.1%}, required {minimum_ratio:.0%})"
-        )
-    print(f"Placement gate passed: {model} ({vram}/{size} VRAM, {ratio:.1%})")
+        print(f"  NOTE: {ratio:.1%} from ollama ps is not a failure on its own; "
+              f"placement is decided by per-device attribution.", file=sys.stderr)
     return result
 
 
@@ -1316,8 +1331,33 @@ def cell_summary(cell: list[dict]) -> str:
     trunc = sum(1 for r in cell if r.get("failure_class") == "truncated")
     if trunc:
         notes.append(f"{trunc} truncated")
+    # ANSWER-CORRECTNESS, per the 2026-09-26 scope ruling: the cell is graded on
+    # its answer, and out-of-scope writes are counted in their own column rather
+    # than summed into the pass count. Naming the count was not enough -- `passed`
+    # is still False for those cells, so the headline fraction absorbed them and
+    # the ruling had to be applied by hand to gemma4:26b's first campaign row
+    # (14/18 scored, 17/18 answer-correctness). Truncation is likewise not a
+    # capability miss: it is evidence about the context pin.
+    not_capability = scope + trunc
+    if not_capability:
+        notes.append(f"{passed + not_capability}/{len(cell)} answer-correctness")
     base = f"{passed}/{len(cell)}"
     return base if not notes else f"{base} ({', '.join(notes)})"
+
+
+def answer_correctness(cell: list[dict]) -> tuple[int, int]:
+    """(correct, total) with out-of-scope writes and truncation excluded.
+
+    Separate from the pass count on purpose. A caller that wants to rank models
+    on what they answered uses this; a caller reporting the battery verbatim uses
+    the pass count. Neither is allowed to silently stand in for the other.
+    """
+    if not cell:
+        return (0, 0)
+    excluded = {"out_of_scope", "truncated"}
+    correct = sum(1 for r in cell
+                  if r["passed"] or r.get("failure_class") in excluded)
+    return (correct, len(cell))
 
 
 def write_results_md(results: list[dict], output_path: Path) -> None:

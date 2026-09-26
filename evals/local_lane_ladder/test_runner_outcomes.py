@@ -5,6 +5,7 @@ Each case here is a real incident from the September corpus, not a hypothetical.
 from __future__ import annotations
 
 import tempfile
+import json
 import unittest
 from pathlib import Path
 
@@ -240,7 +241,11 @@ class FailureClassTests(unittest.TestCase):
     def test_summary_names_truncation(self):
         cell = [{"passed": True, "outcome": "pass"}] * 17 + [
             {"passed": False, "outcome": "fail", "failure_class": "truncated"}]
-        self.assertEqual(runner.cell_summary(cell), "17/18 (1 truncated)")
+        summary = runner.cell_summary(cell)
+        self.assertTrue(summary.startswith("17/18"), summary)
+        self.assertIn("1 truncated", summary)
+        # Truncation is not a capability miss, so it also reports answer-correctness.
+        self.assertIn("18/18 answer-correctness", summary)
 
     def test_battery_failure_is_capability(self):
         self.assertEqual(
@@ -259,14 +264,22 @@ class FailureClassTests(unittest.TestCase):
             {"passed": False, "outcome": "fail", "failure_class": "out_of_scope"},
             {"passed": False, "outcome": "fail", "failure_class": "capability"},
         ]
-        self.assertEqual(runner.cell_summary(cell), "16/18 (1 out-of-scope)")
+        summary = runner.cell_summary(cell)
+        self.assertTrue(summary.startswith("16/18"), summary)
+        self.assertIn("1 out-of-scope", summary)
+        self.assertIn("17/18 answer-correctness", summary)
 
     def test_summary_reports_both_kinds_of_note(self):
         cell = [{"passed": True, "outcome": "pass"}] * 4 + [
             {"passed": False, "outcome": "unproven", "unproven_reasons": ["scope"]},
             {"passed": False, "outcome": "fail", "failure_class": "out_of_scope"},
         ]
-        self.assertEqual(runner.cell_summary(cell), "4/6 (1 unproven, 1 out-of-scope)")
+        summary = runner.cell_summary(cell)
+        self.assertTrue(summary.startswith("4/6"), summary)
+        self.assertIn("1 unproven", summary)
+        self.assertIn("1 out-of-scope", summary)
+        # An unproven cell stays in the denominator; it is not answered either way.
+        self.assertIn("5/6 answer-correctness", summary)
 
 
 class ProvenanceTests(unittest.TestCase):
@@ -367,6 +380,108 @@ class TraceContentTests(unittest.TestCase):
         src = inspect.getsource(runner.write_trace)
         for field in ("outcome", "proofs", "unproven_reasons", "placement_evidence"):
             self.assertIn(f'"{field}": record.get("{field}")', src)
+
+
+class AnswerCorrectnessTests(unittest.TestCase):
+    """The 2026-09-26 scope ruling, enforced in code rather than by hand."""
+
+    @staticmethod
+    def _cell(passes, classes):
+        out = [{"passed": True, "outcome": "pass"} for _ in range(passes)]
+        for c in classes:
+            out.append({"passed": False, "outcome": "fail", "failure_class": c})
+        return out
+
+    def test_the_gemma_campaign_row_reproduces(self):
+        """14/18 scored, 17/18 answer-correctness -- applied by hand the first time."""
+        cell = self._cell(14, ["out_of_scope", "out_of_scope", "out_of_scope", "capability"])
+        self.assertEqual(runner.answer_correctness(cell), (17, 18))
+        summary = runner.cell_summary(cell)
+        self.assertIn("14/18", summary)
+        self.assertIn("3 out-of-scope", summary)
+        self.assertIn("17/18 answer-correctness", summary)
+
+    def test_both_numbers_are_shown_and_neither_replaces_the_other(self):
+        """The pass count is the battery verbatim; answer-correctness is the ruling."""
+        cell = self._cell(14, ["out_of_scope", "capability"])
+        summary = runner.cell_summary(cell)
+        self.assertTrue(summary.startswith("14/16"), summary)
+        self.assertIn("15/16 answer-correctness", summary)
+
+    def test_truncation_is_not_a_capability_miss_either(self):
+        """Ruled 2026-09-26: truncation is evidence about the pin, not the model."""
+        cell = self._cell(15, ["truncated", "capability", "capability"])
+        self.assertEqual(runner.answer_correctness(cell), (16, 18))
+
+    def test_a_clean_cell_gains_no_second_number(self):
+        """No excluded failures, so there is nothing to distinguish."""
+        cell = self._cell(18, [])
+        self.assertEqual(runner.cell_summary(cell), "18/18")
+        self.assertEqual(runner.answer_correctness(cell), (18, 18))
+
+    def test_capability_misses_are_never_excluded(self):
+        """The ruling covers hygiene and truncation, not wrong answers."""
+        cell = self._cell(10, ["capability"] * 8)
+        self.assertEqual(runner.answer_correctness(cell), (10, 18))
+        self.assertNotIn("answer-correctness", runner.cell_summary(cell))
+
+
+class ResidencyCorroborationTests(unittest.TestCase):
+    """ollama ps must not be able to fail a run. GOLD_STANDARD rule 4a."""
+
+    def test_a_low_ollama_ratio_does_not_raise(self):
+        """It rejected a run at 23.8% on a reading that means nothing for MoE."""
+        import subprocess as sp
+
+        ps = {"models": [{"name": "m:latest", "size": 22533685883,
+                          "size_vram": 5369264864, "digest": "d"}]}
+
+        def fake_run(cmd, **kw):
+            out = json.dumps(ps) if "/api/ps" in " ".join(cmd) else ""
+            return sp.CompletedProcess(cmd, 0, out, "")
+
+        real, runner.subprocess.run = runner.subprocess.run, fake_run
+        try:
+            result = runner.require_gpu_residency("m:latest", 0.9)
+        finally:
+            runner.subprocess.run = real
+        self.assertTrue(result["corroboration_only"])
+        self.assertLess(result["ratio"], 0.9)
+
+    def test_a_vacuous_100_percent_is_still_only_corroboration(self):
+        """gemma4:26b reported size == size_vram == 965 MiB against a 17,742 MiB blob."""
+        import subprocess as sp
+
+        ps = {"models": [{"name": "g:latest", "size": 1012536442,
+                          "size_vram": 1012536442, "digest": "d"}]}
+
+        def fake_run(cmd, **kw):
+            out = json.dumps(ps) if "/api/ps" in " ".join(cmd) else ""
+            return sp.CompletedProcess(cmd, 0, out, "")
+
+        real, runner.subprocess.run = runner.subprocess.run, fake_run
+        try:
+            result = runner.require_gpu_residency("g:latest", 0.9)
+        finally:
+            runner.subprocess.run = real
+        self.assertEqual(result["ratio"], 1.0)
+        self.assertTrue(result["corroboration_only"],
+                        "a 100% ratio from ollama ps must not present as proof")
+
+    def test_no_evidence_at_all_still_fails(self):
+        """Loosening the ratio must not loosen the case where nothing is loaded."""
+        import subprocess as sp
+
+        def fake_run(cmd, **kw):
+            out = json.dumps({"models": []}) if "/api/ps" in " ".join(cmd) else ""
+            return sp.CompletedProcess(cmd, 0, out, "")
+
+        real, runner.subprocess.run = runner.subprocess.run, fake_run
+        try:
+            with self.assertRaises(runner.GPUResidencyError):
+                runner.require_gpu_residency("absent:latest", 0.9)
+        finally:
+            runner.subprocess.run = real
 
 
 if __name__ == "__main__":
