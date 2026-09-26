@@ -5,6 +5,11 @@ For the separately installable **Pi frontend alpha**, see the
 [release preparation notes](docs/releases/pi-operator-0.1.0-alpha.1.md).
 The root package manifest describes that frontend, not a bundled Python backend.
 
+An experimental [OpenCode core TUI adapter](adapters/opencode/README.md) is also
+available from this source checkout. It is not included in the Pi alpha release;
+core commands were checked live on OpenCode 1.18.22 (see its README for
+what remains unchecked).
+
 [![tests](https://github.com/blue-az/operator-control-plane/actions/workflows/tests.yml/badge.svg)](https://github.com/blue-az/operator-control-plane/actions/workflows/tests.yml)
 
 **Your AI coding agent just said "done, tests pass." Do you actually know that's true?**
