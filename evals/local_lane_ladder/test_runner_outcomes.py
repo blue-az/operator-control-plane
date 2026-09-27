@@ -484,6 +484,54 @@ class ResidencyCorroborationTests(unittest.TestCase):
             runner.subprocess.run = real
 
 
+class AttemptRateTests(unittest.TestCase):
+    """At L0 the dominant variable is whether the model tried at all."""
+
+    @staticmethod
+    def _cell(n, attempted, passed):
+        return [{"passed": i < passed, "outcome": "pass" if i < passed else "fail",
+                 "attempted_edit": i < attempted} for i in range(n)]
+
+    def test_an_edit_tool_is_what_counts_as_an_attempt(self):
+        self.assertFalse(runner.attempted_edit({"distinct_tools": ["bash", "read"]}))
+        self.assertTrue(runner.attempted_edit({"distinct_tools": ["bash", "edit"]}))
+        self.assertTrue(runner.attempted_edit({"distinct_tools": ["write"]}))
+        # Absent or empty trajectory is not an attempt, and must not raise.
+        self.assertFalse(runner.attempted_edit(None))
+        self.assertFalse(runner.attempted_edit({}))
+
+    def test_the_gemma_l0_shape_reproduces(self):
+        """0/34 pass with 0/34 attempted -- the measured 2026-09-27 result."""
+        summary = runner.cell_summary(self._cell(34, 0, 0))
+        self.assertIn("0/34", summary)
+        self.assertIn("0/34 attempted", summary)
+        self.assertEqual(runner.attempt_rate(self._cell(34, 0, 0)), (0, 34))
+
+    def test_a_partial_attempt_rate_is_shown(self):
+        """qwen3.6: 11/34 passed, 23/34 attempted."""
+        summary = runner.cell_summary(self._cell(34, 23, 11))
+        self.assertIn("23/34 attempted", summary)
+
+    def test_it_stays_silent_when_everything_attempted(self):
+        """L1 and L2 attempt every time; the note would be noise there."""
+        self.assertEqual(runner.cell_summary(self._cell(6, 6, 6)), "6/6")
+        self.assertNotIn("attempted", runner.cell_summary(self._cell(18, 18, 17)))
+
+    def test_a_missing_field_is_unknown_not_zero(self):
+        """Records predating 2026-09-27 carry no flag.
+
+        Reading those as zero attempts would stamp every historical cell with a
+        failure it never had, so the summary stays silent instead.
+        """
+        cell = [{"passed": False, "outcome": "fail"} for _ in range(6)]
+        self.assertIsNone(runner.attempt_rate(cell))
+        self.assertNotIn("attempted", runner.cell_summary(cell))
+        # A genuine zero is still reported.
+        zero = [{"passed": False, "outcome": "fail", "attempted_edit": False} for _ in range(6)]
+        self.assertEqual(runner.attempt_rate(zero), (0, 6))
+        self.assertIn("0/6 attempted", runner.cell_summary(zero))
+
+
 if __name__ == "__main__":
     unittest.main()
 

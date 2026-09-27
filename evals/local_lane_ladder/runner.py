@@ -1272,6 +1272,7 @@ def run_trial(
             "machine": MACHINE,
             "passed": grade_result.passed,
             "outcome": cell_outcome,
+            "attempted_edit": attempted_edit(proof_report.get("trajectory")),
             "failure_class": (
                 None if grade_result.passed
                 else classify_failure(grade_result.detail, proof_report.get("trajectory"))
@@ -1311,6 +1312,37 @@ def run_trial(
         cleanup_fixture(fixture_root)
 
 
+# Tools that change the fixture. Calling none of them means the model never
+# attempted the task, which is a different failure from attempting and missing.
+_EDIT_TOOLS = frozenset({"edit", "write", "patch", "apply_patch", "str_replace"})
+
+
+def attempted_edit(trajectory: dict | None) -> bool:
+    """Did the model call anything that could change the fixture?
+
+    At L0 this is the dominant variable. Measured 2026-09-27 on
+    ambiguous-anchor: gemma4:26b never called an edit tool in 34 cells and
+    scored 0, while passing the same task 6/6 at L1 where it attempted every
+    time. A pass count cannot tell "did not try" from "tried and missed".
+    """
+    tools = set((trajectory or {}).get("distinct_tools") or [])
+    return bool(tools & _EDIT_TOOLS)
+
+
+def attempt_rate(cell: list[dict]) -> tuple[int, int] | None:
+    """(attempted, total), or None when the cell predates the field.
+
+    "Did not attempt" and "was not recorded" must not collapse: records written
+    before 2026-09-27 carry no attempted_edit, and reading those as zero
+    attempts would label every historical cell with a failure it never had.
+    """
+    if not cell:
+        return None
+    if not any("attempted_edit" in r for r in cell):
+        return None
+    return (sum(1 for r in cell if r.get("attempted_edit")), len(cell))
+
+
 def cell_summary(cell: list[dict]) -> str:
     """`17/18`, or `16/18 (2 out-of-scope)`, or `16/18 (1 unproven)`.
 
@@ -1341,6 +1373,12 @@ def cell_summary(cell: list[dict]) -> str:
     not_capability = scope + trunc
     if not_capability:
         notes.append(f"{passed + not_capability}/{len(cell)} answer-correctness")
+    # Attempt rate appears only when something did NOT attempt. At L1 and L2
+    # every cell attempts, so this stays silent there and fires exactly where
+    # it carries information.
+    rate = attempt_rate(cell)
+    if rate is not None and rate[0] < rate[1]:
+        notes.append(f"{rate[0]}/{rate[1]} attempted")
     base = f"{passed}/{len(cell)}"
     return base if not notes else f"{base} ({', '.join(notes)})"
 
