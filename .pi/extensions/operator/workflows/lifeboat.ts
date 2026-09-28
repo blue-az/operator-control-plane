@@ -4,8 +4,11 @@
  * Implemented: human launch (LB-RUL-001), enforced edit freeze (LB-RUL-002),
  * agent-drafted attempt log (LB-RUL-003) reviewed in the editor before anything is
  * written (LB-RUL-004), saved as a crystal with git HEAD and diff stat and offered for
- * attachment, never committing source (LB-RUL-005), direction handed back with the
- * do-not-retry list (LB-RUL-008), and a second-launch warning (LB-RUL-010).
+ * attachment, never committing source (LB-RUL-005), and direction handed back with the
+ * do-not-retry list (LB-RUL-008).
+ *
+ * Partial: LB-RUL-010 is a warning in the launch dialog; it does not show the earlier
+ * crystal and direction side by side.
  *
  * Not implemented: launching the fresh supervisor (LB-RUL-006/007). The operator starts
  * it by hand from the saved crystal, pending the supervisor-role decision.
@@ -19,6 +22,12 @@ export const LIFEBOAT_ENTRY_TYPE = "operator-life-boat";
 
 /** Tools the agent keeps while frozen. Anything else, including bash and unknown tools, is blocked. */
 export const READ_ONLY_TOOLS: ReadonlySet<string> = new Set(["read", "grep", "find", "ls"]);
+
+/**
+ * Upper bound on waiting for the agent's reply at launch. A bound, not a measurement:
+ * past it the launch reports "no attempt log yet" and `/op:life-boat save` picks it up.
+ */
+export const REPLY_WAIT_MS = 10 * 60_000;
 
 export const ATTEMPT_LOG_REQUEST = `The operator suspects a doom loop and has opened a life-boat. Editing is frozen: stop changing files.
 
@@ -51,7 +60,7 @@ export function initialState(): LifeboatState {
 	return { open: false, taskId: null, launches: {} };
 }
 
-/** Latest persisted state on the branch; entries are display-only and never reach the model. */
+/** Latest persisted state across every entry in the session file. Entries never reach the model. */
 export function restoreState(entries: readonly { type: string; customType?: string; data?: unknown }[]): LifeboatState {
 	let state = initialState();
 	for (const entry of entries) {
@@ -73,44 +82,61 @@ export function freezeDecision(state: LifeboatState, toolName: string): { block:
 
 type BranchEntry = { type: string; message?: { role?: string; content?: unknown } };
 
-/** Text of the newest assistant message, skipping thinking and tool parts. */
-export function lastAssistantText(branch: readonly BranchEntry[]): string | null {
+function messageText(content: unknown): string {
+	if (typeof content === "string") return content;
+	if (!Array.isArray(content)) return "";
+	return content.filter((part) => part?.type === "text").map((part) => String(part.text ?? "")).join("\n");
+}
+
+/**
+ * The agent's reply to the newest attempt-log request: the last assistant text after
+ * that request on the branch. Null when there is no request or no reply yet, so text
+ * written before the launch can never be taken for the log.
+ */
+export function attemptLogReply(branch: readonly BranchEntry[]): string | null {
+	let request = -1;
 	for (let i = branch.length - 1; i >= 0; i--) {
 		const message = branch[i].type === "message" ? branch[i].message : undefined;
+		if (message?.role === "user" && messageText(message.content).trim() === ATTEMPT_LOG_REQUEST) { request = i; break; }
+	}
+	if (request < 0) return null;
+	for (let i = branch.length - 1; i > request; i--) {
+		const message = branch[i].type === "message" ? branch[i].message : undefined;
 		if (message?.role !== "assistant") continue;
-		const content = message.content;
-		const text = typeof content === "string"
-			? content
-			: Array.isArray(content)
-				? content.filter((part) => part?.type === "text").map((part) => String(part.text ?? "")).join("\n")
-				: "";
-		if (text.trim()) return text.trim();
+		const text = messageText(message.content).trim();
+		if (text) return text;
 	}
 	return null;
 }
 
-export function countAttempts(log: string): number {
-	return (log.match(/^###\s+Attempt\b/gim) ?? []).length;
+export function attemptTitles(log: string): string[] {
+	return [...log.matchAll(/^###\s+(Attempt\b.*)$/gim)].map((match) => match[1].trim());
 }
 
+/**
+ * Crystal body for the reviewed log. agent-crystallize nests the body under its own
+ * section and escapes `#`/`##` headings, so the log's headings are demoted to `###`
+ * and the attempts are also passed as `--finding` bullets by `lifeboatCaptureArgs`.
+ */
 export function crystalBody(log: string, head: string, diffStat: string): string {
 	return [
-		"# Life-boat attempt log",
+		"Life-boat attempt log, reviewed by the operator before capture. Narration is not verification.",
 		"",
-		"Reviewed by the operator before capture. Narration is not verification.",
+		log.trim().replace(/^( {0,3})#{1,2}(?=\s)/gm, "$1###"),
 		"",
 		`Git HEAD: ${head}`,
 		"",
-		"Working tree diff stat (uncommitted source was not committed, stashed or reverted):",
+		"Working tree diff stat against HEAD (untracked files not listed; source was not committed, stashed or reverted):",
 		"```",
 		diffStat || "(clean)",
 		"```",
-		"",
-		"## Rejected Attempts",
-		"",
-		log.trim(),
-		"",
 	].join("\n");
+}
+
+export function lifeboatCaptureArgs(base: string[], log: string, head: string): string[] {
+	const extra = ["--topic", "life-boat", "--evidence", `git HEAD ${head}`];
+	for (const title of attemptTitles(log)) extra.push("--finding", `Rejected attempt: ${title}`);
+	return [...base, ...extra];
 }
 
 export function directionMessage(direction: string): string {
@@ -130,15 +156,32 @@ export interface LifeboatHooks extends WorkflowHooks {
 
 export function registerLifeboat(pi: ExtensionAPI, hooks: LifeboatHooks) {
 	let state = initialState();
+	let agentEndWaiters: (() => void)[] = [];
 	const persist = () => pi.appendEntry(LIFEBOAT_ENTRY_TYPE, state);
 	const report = (ctx: ExtensionCommandContext, headline: string, lines: string[] = [], invocations: string[] = [], error = false) =>
 		hooks.emit(ctx, { command: "/op:life-boat", title: "op:life-boat", headline, lines, invocations, level: error ? "error" : "info" });
 	const invocation = (cmd: string, args: string[]) => [cmd, ...args].map((s) => JSON.stringify(s)).join(" ");
+	/** Delivers now when idle; while the agent is streaming, pi requires a delivery mode. */
+	const send = (ctx: ExtensionCommandContext, text: string, busyMode: "steer" | "followUp") => {
+		if (ctx.isIdle()) pi.sendUserMessage(text);
+		else pi.sendUserMessage(text, { deliverAs: busyMode });
+	};
+	/** Resolves at the next agent_end, or after `ms`. Armed before sending, so the end cannot be missed. */
+	const nextAgentEnd = (ms: number) => new Promise<void>((resolve) => {
+		const timer = setTimeout(resolve, ms);
+		timer.unref?.();
+		agentEndWaiters.push(() => { clearTimeout(timer); resolve(); });
+	});
 
 	pi.on("session_start", async (_event, ctx) => {
 		state = restoreState(ctx.sessionManager.getEntries());
 	});
 	pi.on("tool_call", async (event) => freezeDecision(state, event.toolName));
+	pi.on("agent_end", async () => {
+		const waiters = agentEndWaiters;
+		agentEndWaiters = [];
+		for (const wake of waiters) wake();
+	});
 
 	const git = async (ctx: ExtensionCommandContext, args: string[]) => {
 		const result = await pi.exec("git", args, { cwd: ctx.cwd, timeout: 30_000 });
@@ -147,9 +190,9 @@ export function registerLifeboat(pi: ExtensionAPI, hooks: LifeboatHooks) {
 
 	/** Review, capture and offer to attach. The freeze stays on either way. */
 	const save = async (ctx: ExtensionCommandContext, wc: { taskId: string }) => {
-		const draft = lastAssistantText(ctx.sessionManager.getBranch());
+		const draft = attemptLogReply(ctx.sessionManager.getBranch());
 		if (!draft) {
-			report(ctx, "no attempt log yet; still frozen", ["Wait for the agent's reply, then run /op:life-boat save."]);
+			report(ctx, "no attempt log yet; still frozen", ["When the agent has replied to the request, run /op:life-boat save."]);
 			return;
 		}
 		const log = await ctx.ui.editor("Life-boat attempt log — correct it, add missing attempts (saved as a crystal)", draft);
@@ -157,10 +200,11 @@ export function registerLifeboat(pi: ExtensionAPI, hooks: LifeboatHooks) {
 			report(ctx, "log not saved; still frozen", ["Run /op:life-boat save to try again, or /op:life-boat cancel."]);
 			return;
 		}
-		const attempts = countAttempts(log);
+		const attempts = attemptTitles(log).length;
 		const bin = capturePackage(ctx.cwd);
-		const body = crystalBody(log, await git(ctx, ["rev-parse", "HEAD"]), await git(ctx, ["diff", "--stat", "HEAD"]));
-		const argv = captureArgs(bin, realpathSync(ctx.cwd), ctx.sessionManager.getSessionId(), wc.taskId, body, ctx.model);
+		const head = await git(ctx, ["rev-parse", "HEAD"]);
+		const body = crystalBody(log, head, await git(ctx, ["diff", "--stat", "HEAD"]));
+		const argv = lifeboatCaptureArgs(captureArgs(bin, realpathSync(ctx.cwd), ctx.sessionManager.getSessionId(), wc.taskId, body, ctx.model), log, head);
 		const warning = attempts < 2 ? `\nWARNING: ${attempts} attempt(s) found. This may not be a loop.\n` : "";
 		if (!await ctx.ui.confirm("Save life-boat crystal?", `${warning}Writes only a local crystal; no source commit, stash or revert.\n\n${invocation(process.execPath, argv)}`)) {
 			report(ctx, "declined; nothing saved, still frozen", ["Run /op:life-boat save to try again, or /op:life-boat cancel."]);
@@ -198,10 +242,13 @@ export function registerLifeboat(pi: ExtensionAPI, hooks: LifeboatHooks) {
 			report(ctx, "declined; nothing changed");
 			return;
 		}
+		const replied = nextAgentEnd(REPLY_WAIT_MS);
+		// Freeze in the same tick as the send: pi starts the run only after later awaits,
+		// so no tool call can land between the two.
+		send(ctx, ATTEMPT_LOG_REQUEST, "steer");
 		state = { open: true, taskId: wc.taskId, launches: { ...state.launches, [wc.taskId]: prior + 1 } };
 		persist();
-		if (ctx.isIdle()) pi.sendUserMessage(ATTEMPT_LOG_REQUEST);
-		else pi.sendUserMessage(ATTEMPT_LOG_REQUEST, { deliverAs: "steer" });
+		await replied;
 		await ctx.waitForIdle();
 		await save(ctx, wc);
 	};
@@ -210,9 +257,16 @@ export function registerLifeboat(pi: ExtensionAPI, hooks: LifeboatHooks) {
 		if (!state.open) { report(ctx, "no life-boat is open"); return; }
 		const direction = cancel ? "" : await ctx.ui.editor("Supervisor direction and do-not-retry list (empty = unfreeze without direction)", "") ?? null;
 		if (direction === null) { report(ctx, "close cancelled; still frozen"); return; }
+		if (direction.trim()) {
+			try {
+				send(ctx, directionMessage(direction), "followUp");
+			} catch (err) {
+				report(ctx, "direction not delivered; still frozen", [String(err), "Run /op:life-boat close again."], [], true);
+				return;
+			}
+		}
 		state = { ...state, open: false };
 		persist();
-		if (direction.trim()) pi.sendUserMessage(directionMessage(direction));
 		report(ctx, cancel ? "cancelled; editing unfrozen" : "closed; editing unfrozen", cancel ? [] : ["Record the closeout with /op:handoff: crystal, direction taken, who implements next."]);
 	};
 
