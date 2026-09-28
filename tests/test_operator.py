@@ -4869,6 +4869,119 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(len(after_claims), len(before_claims))
         self.assertEqual(len(after_evidence), len(before_evidence))
 
+    def test_crystal_import_after_bridge_attach_still_extracts(self) -> None:
+        """A prior crystal-attach (e.g. Stop-hook bridge) must not turn import into a no-op."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Crystal attach then import",
+                "--id",
+                "crystal-attach-first-task",
+            ).returncode,
+            0,
+        )
+        crystal = self._crystal_fixture("valid-checkpoint.md")
+        att = self.run_operator("crystal-attach", str(crystal), "--by", "codex")
+        self.assertEqual(att.returncode, 0, att.stderr)
+
+        imp = self.run_operator("crystal-import", str(crystal), "--by", "codex")
+        self.assertEqual(imp.returncode, 0, imp.stderr + imp.stdout)
+        self.assertIn("draft_claims=2", imp.stdout)
+        self.assertNotIn("no-op", imp.stdout.lower())
+
+        claims_dir = Path(self.temp_dir) / ".operator" / "claims"
+        claim_files = sorted(claims_dir.glob("claim-*.yaml"))
+        self.assertEqual(len(claim_files), 2)
+        for path in claim_files:
+            claim = yaml.safe_load(path.read_text())
+            self.assertEqual(claim["crystal_import_evidence"], "evidence-0001")
+        # Reused the bridge's evidence record rather than attaching a second copy.
+        ev_dir = Path(self.temp_dir) / ".operator" / "evidence" / "crystal-attach-first-task"
+        self.assertEqual(len(list(ev_dir.glob("evidence-*.yaml"))), 1)
+
+        again = self.run_operator("crystal-import", str(crystal), "--by", "codex")
+        self.assertEqual(again.returncode, 0, again.stderr)
+        self.assertIn("already imported", again.stdout)
+        self.assertEqual(len(list(claims_dir.glob("claim-*.yaml"))), 2)
+
+    def test_crystal_import_resumes_after_partial_failure(self) -> None:
+        """A retry after a part-way failure creates only the missing claims."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Crystal import resume",
+                "--id",
+                "crystal-resume-task",
+            ).returncode,
+            0,
+        )
+        crystal = self._crystal_fixture("valid-checkpoint.md")
+        first = self.run_operator("crystal-import", str(crystal), "--by", "codex")
+        self.assertEqual(first.returncode, 0, first.stderr)
+
+        # Simulate a failure after the first claim: drop the second from the task.
+        op = Path(self.temp_dir) / ".operator"
+        task_path = op / "tasks" / "crystal-resume-task.yaml"
+        task = yaml.safe_load(task_path.read_text())
+        dropped = task["claims"].pop()
+        task_path.write_text(yaml.safe_dump(task, sort_keys=False))
+        dropped_text = yaml.safe_load((op / "claims" / f"{dropped}.yaml").read_text())["text"]
+        (op / "claims" / f"{dropped}.yaml").unlink()
+        self.rebaseline_ledger()
+
+        retry = self.run_operator("crystal-import", str(crystal), "--by", "codex")
+        self.assertEqual(retry.returncode, 0, retry.stderr + retry.stdout)
+        self.assertIn("draft_claims=1", retry.stdout)
+        self.assertIn("skipped 1 claim(s)", retry.stdout)
+
+        task = yaml.safe_load(task_path.read_text())
+        texts = [
+            yaml.safe_load((op / "claims" / f"{cid}.yaml").read_text())["text"]
+            for cid in task["claims"]
+        ]
+        self.assertEqual(len(texts), 2)
+        self.assertEqual(len(set(texts)), 2)
+        self.assertIn(dropped_text, texts)
+
+    def test_crystal_import_open_loop_tasks_not_duplicated(self) -> None:
+        """Re-running import with --open-loops-as-tasks does not recreate loop tasks."""
+        self.assertEqual(self.run_operator("init").returncode, 0)
+        self.assertEqual(
+            self.run_operator(
+                "task-create",
+                "--objective",
+                "Crystal open loops",
+                "--id",
+                "crystal-loops-task",
+            ).returncode,
+            0,
+        )
+        crystal = self._crystal_fixture("valid-checkpoint.md")
+        crystal.write_text(
+            crystal.read_text().replace(
+                "- No separate open loops captured beyond Next Actions.",
+                "- wire the retry path into CI",
+            )
+        )
+        tasks_dir = Path(self.temp_dir) / ".operator" / "tasks"
+        first = self.run_operator(
+            "crystal-import", str(crystal), "--by", "codex", "--open-loops-as-tasks"
+        )
+        self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
+        self.assertIn("open_loop_tasks=1", first.stdout)
+        count = len(list(tasks_dir.glob("*.yaml")))
+
+        second = self.run_operator(
+            "crystal-import", str(crystal), "--by", "codex", "--open-loops-as-tasks"
+        )
+        self.assertEqual(second.returncode, 0, second.stderr + second.stdout)
+        self.assertIn("already imported", second.stdout)
+        self.assertEqual(len(list(tasks_dir.glob("*.yaml"))), count)
+
     def test_doctor_crystal_drift_fail_closed_after_verified_import(self) -> None:
         """Test 7: verified imported claim + mutated crystal snapshot → doctor exit 1."""
         self.assertEqual(self.run_operator("init").returncode, 0)

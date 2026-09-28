@@ -3235,6 +3235,28 @@ def find_session_crystal_by_fingerprint(
     return None
 
 
+def crystal_imported_claim_texts(op_dir: str, task: dict, evidence_id: str) -> list[str]:
+    """Texts of claims on ``task`` already extracted from crystal ``evidence_id``."""
+    texts: list[str] = []
+    for claim_id in task.get("claims") or []:
+        claim = load_yaml(os.path.join(op_dir, "claims", f"{claim_id}.yaml"))
+        if isinstance(claim, dict) and claim.get("crystal_import_evidence") == evidence_id:
+            texts.append(claim.get("text") or "")
+    return texts
+
+
+def crystal_open_loop_task_exists(op_dir: str, objective: str, evidence_id: str) -> bool:
+    """True if an open-loop task for ``objective`` was already created from ``evidence_id``."""
+    marker = f"Extracted from crystal {evidence_id};"
+    for path in glob.glob(os.path.join(op_dir, "tasks", "*.yaml")):
+        data = load_yaml(path)
+        if not isinstance(data, dict) or data.get("objective") != objective:
+            continue
+        if any(marker in str(a) for a in data.get("open_assumptions") or []):
+            return True
+    return False
+
+
 def crystal_import_cmd(args) -> int:
     """Extract draft claims from a crystal (Phase 2). Always draft-tier (T2).
 
@@ -3243,7 +3265,10 @@ def crystal_import_cmd(args) -> int:
     - Open Loops → new tasks only with ``--open-loops-as-tasks``.
     - Decisions / Findings / Memory Candidates / Resume Prompt / Continuity Tail
       are never extracted (T3 + Phase 2 scope).
-    - Same fingerprint re-import is a no-op with a notice.
+    - Resumable and idempotent per item: an already-attached crystal (e.g. from
+      the Stop-hook bridge, or a partially failed import) is reused, and only
+      bullets / open loops not yet extracted from it are created. A fully
+      imported crystal is a no-op with a notice.
     """
     op_dir = find_operator_dir()
     if not op_dir:
@@ -3289,14 +3314,6 @@ def crystal_import_cmd(args) -> int:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 
-    existing = find_session_crystal_by_fingerprint(op_dir, task_id, source_fp["value"])
-    if existing:
-        print(
-            f"Notice: crystal fingerprint {source_fp['value'][:12]}… already imported as "
-            f"{existing.get('evidence_id')} on task '{task_id}'; no-op (idempotent)."
-        )
-        return 0
-
     parsed = crystal_parse.load_and_parse_crystal(original_locator)
     for warning in parsed.warnings:
         print(f"[Warning] {warning}")
@@ -3305,38 +3322,57 @@ def crystal_import_cmd(args) -> int:
             print(f"Error: crystal rejected (structural): {err}", file=sys.stderr)
         return 1
 
-    # Attach once as shared draft evidence (no claim_id so multiple claims may cite it).
-    attach_args = argparse.Namespace(
-        path=original_locator,
-        claim=None,
-        task_id=task_id,
-        by=args.by,
-        hash=None,
-        notes=args.notes or "crystal-import auto-attach",
-        status=None,
-        verified_by=None,
-        verdict=None,
-    )
-    rc = crystal_attach_cmd(attach_args)
-    if rc != 0:
-        return rc
-
+    # An existing attach (Stop-hook bridge, or an earlier import that failed
+    # part-way) only means the crystal is evidence, not that it was imported.
     attached = find_session_crystal_by_fingerprint(op_dir, task_id, source_fp["value"])
-    if not attached:
-        print(
-            "Error: crystal-attach succeeded but evidence record was not found.",
-            file=sys.stderr,
+    already_attached = attached is not None
+    if not already_attached:
+        # Attach once as shared draft evidence (no claim_id so multiple claims may cite it).
+        attach_args = argparse.Namespace(
+            path=original_locator,
+            claim=None,
+            task_id=task_id,
+            by=args.by,
+            hash=None,
+            notes=args.notes or "crystal-import auto-attach",
+            status=None,
+            verified_by=None,
+            verdict=None,
         )
-        return 1
+        rc = crystal_attach_cmd(attach_args)
+        if rc != 0:
+            return rc
+
+        attached = find_session_crystal_by_fingerprint(op_dir, task_id, source_fp["value"])
+        if not attached:
+            print(
+                "Error: crystal-attach succeeded but evidence record was not found.",
+                file=sys.stderr,
+            )
+            return 1
     evidence_id = attached["evidence_id"]
     ref_str = f"evidence/{task_id}/{evidence_id}.yaml"
 
+    # Multiset of claim texts already extracted from this evidence, so a
+    # resumed import creates only the missing ones (duplicate bullets included).
+    # Known gap, left on purpose: a crash between claim-add and saving
+    # crystal_import_evidence below leaves an unlinked claim, which a retry
+    # will duplicate. The window is two local file writes; not worth more.
+    remaining_existing = crystal_imported_claim_texts(op_dir, task, evidence_id)
+    open_loops_wanted = getattr(args, "open_loops_as_tasks", False)
+
     # Never pull Decisions / Findings / Resume Prompt / Continuity Tail into claims.
     created_claims: list[str] = []
+    skipped_claims = 0
     for bullet in parsed.test_bullets:
+        claim_text = f"[crystal-narrated] {bullet}"
+        if claim_text in remaining_existing:
+            remaining_existing.remove(claim_text)
+            skipped_claims += 1
+            continue
         claim_args = argparse.Namespace(
             type="test_passes",
-            text=f"[crystal-narrated] {bullet}",
+            text=claim_text,
             task_id=task_id,
             by=args.by,
             gate=None,
@@ -3369,11 +3405,16 @@ def crystal_import_cmd(args) -> int:
         created_claims.append(claim_id)
 
     created_tasks: list[str] = []
-    if getattr(args, "open_loops_as_tasks", False):
+    skipped_tasks = 0
+    if open_loops_wanted:
         for loop_text in parsed.open_loop_bullets:
+            objective = f"[crystal-open-loop] {loop_text}"
+            if crystal_open_loop_task_exists(op_dir, objective, evidence_id):
+                skipped_tasks += 1
+                continue
             loop_id = slugify(loop_text)[:50] or None
             create_args = argparse.Namespace(
-                objective=f"[crystal-open-loop] {loop_text}",
+                objective=objective,
                 task_id=loop_id,
                 repo=task.get("repo") or ".",
                 assign=None,
@@ -3397,6 +3438,19 @@ def crystal_import_cmd(args) -> int:
             if create_args.task_id:
                 created_tasks.append(create_args.task_id)
 
+    if already_attached and not created_claims and not created_tasks:
+        print(
+            f"Notice: crystal fingerprint {source_fp['value'][:12]}… already imported as "
+            f"{evidence_id} on task '{task_id}'; no-op (idempotent)."
+        )
+        return 0
+
+    if already_attached:
+        print(
+            f"Notice: reusing already-attached crystal {evidence_id}; "
+            f"skipped {skipped_claims} claim(s) and {skipped_tasks} open-loop task(s) "
+            "already extracted from it."
+        )
     print(
         f"Crystal import on task '{task_id}': evidence={evidence_id}, "
         f"draft_claims={len(created_claims)}"
