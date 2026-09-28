@@ -358,6 +358,21 @@ class PiOperatorExtensionSelftest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("workflow checks passed", result.stdout)
 
+    def test_life_boat_workflow(self):
+        node = shutil.which("node")
+        if not node or not _node_supports_type_stripping(node):
+            self.skipTest("node with TypeScript stripping is not installed")
+        result = subprocess.run(
+            [node, "--experimental-strip-types", str(REPO_ROOT / "tests" / "pi_operator_lifeboat.ts")],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("life-boat checks passed", result.stdout)
+
     def test_selftest_passes(self):
         node = shutil.which("node")
         if not node:

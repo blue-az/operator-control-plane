@@ -2018,6 +2018,7 @@ async function tierB(piPackage: string | null): Promise<unknown[] | null> {
 		"op:doctor",
 		"op:evidence",
 		"op:handoff",
+		"op:life-boat",
 		"op:next-steps",
 		"op:popup",
 		"op:project",

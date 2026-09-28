@@ -36,7 +36,7 @@ function readBounded(path: string): string {
 	if (!stat.isFile() || stat.size > MAX_BYTES) throw new Error("Expected a regular file under 512 KB.");
 	return readFileSync(path, "utf8");
 }
-function refuseSymlink(path: string): void {
+export function refuseSymlink(path: string): void {
 	try {
 		if (lstatSync(path).isSymbolicLink()) throw new Error(`Symlink write destination refused: ${path}`);
 	} catch (err) {

@@ -429,7 +429,7 @@ implemented items are not renamed as unspecified "enhancements".
 | POE-FUT-014 | Implemented; not independently accepted | `/pbc:validate [path]` uses the pinned Route C wrapper with fixed argv; no upstream `--profile`. |
 | POE-FUT-015 | Implemented; not independently accepted | `/op:crystal` captures reviewed current-session notes via installed crystallize 0.1.16; `/op:crystal-attach [path]` and `/op:crystal-import [path]` wrap draft-only backends. Chooser only when attach/import omit a path. No automatic download or attachment. |
 | POE-FUT-016 | Not implemented; idea recorded 2026-09-23 | Opt-in crystal prompt near a context threshold (suggested 90%) before compaction. Depends on post-release crystal validation and a Pi compaction/threshold hook. |
-| POE-FUT-017 | Not implemented; draft charter 2026-09-23 | `/op:life-boat` doom-loop escape. Charter in `appendix-op-life-boat.pbc.md`; needs crystal capture validation and a supervisor-role decision first. |
+| POE-FUT-017 | Minimal slice implemented 2026-09-28 (freeze, reviewed attempt log, crystal, direction handback); supervisor launch not implemented | `/op:life-boat` doom-loop escape. Charter in `appendix-op-life-boat.pbc.md`; needs crystal capture validation and a supervisor-role decision first. |
 | POE-FUT-018 | Not implemented; idea recorded 2026-09-23 | Generalize the static boards beyond `pi-operator-extension`; optionally an `./operator` board command reading through `doctor`-level checks (Operator core change). Hub excluded. |
 
 ### Suggested implementation order

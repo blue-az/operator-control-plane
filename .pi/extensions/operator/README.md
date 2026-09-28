@@ -58,6 +58,7 @@ No workflow validation was run for this packaging pass.
 | `/pbc:define [file.pbc.md]` | edit structured product-shape draft; validate, preview, confirm | document only |
 | `/pbc:feature [file.pbc.md]` | edit structured feature candidate; validate, preview, confirm | document only |
 | `/op:crystal` | installed `agent-crystallize@0.1.16 now` with reviewed current-session notes | artifact only |
+| `/op:life-boat [save\|close\|cancel]` | **experimental** doom-loop escape: freezes every tool but read/grep/find/ls, asks the agent for an attempt log, opens it in your editor, saves it as a crystal (installed crystallize 0.1.16) and offers `/op:crystal-attach`; `close` hands your supervisor's direction back and unfreezes. You start the fresh supervisor yourself. Charter: `appendix-op-life-boat.pbc.md` | only via `/op:crystal-attach` confirmation |
 | `/op:crystal-attach [path]` | `operator crystal-attach` with explicit task, session author, hash, strict provenance comparison | only on confirmation |
 | `/op:crystal-import [path]` | `operator crystal-import`; draft claims, no open-loop tasks | only on confirmation |
 | `/op:targets [list\|add\|edit <alias>\|remove <alias>]` | delegation target registry UI | config only, after confirmation |

@@ -30,6 +30,7 @@
     ".pi/extensions/operator/targets.json",
     ".pi/extensions/operator/orientation/actions.ts",
     ".pi/extensions/operator/workflows/commands.ts",
+    ".pi/extensions/operator/workflows/lifeboat.ts",
     ".pi/extensions/operator/workflows/targets.ts",
     ".pi/extensions/operator/workflows/verify.ts",
     ".pi/extensions/operator/README.md",

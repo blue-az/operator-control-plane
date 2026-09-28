@@ -21,6 +21,7 @@
  *   /op:roadmap --project   read-only project-prefix dashboard (alias of /op:project)
  *   /op:next-steps          prioritized ledger actions; optional workflow guidance
  *   /op:project             read-only project-prefix dashboard
+ *   /op:life-boat           doom-loop escape: freeze edits, reviewed attempt log as a crystal (experimental)
  *
  * PBC validation/draft authoring and crystal capture/attach/import are also present.
  * Still absent: any
@@ -52,6 +53,7 @@ import { REPORT_ENTRY_TYPE } from "./core.ts";
 import * as core from "./core.ts";
 import * as orientation from "./orientation/actions.ts";
 import { createWorkflows } from "./workflows/commands.ts";
+import { registerLifeboat } from "./workflows/lifeboat.ts";
 import { createTargetHandler } from "./workflows/targets.ts";
 import { createVerifyHandler } from "./workflows/verify.ts";
 
@@ -260,6 +262,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 		description: "Operator: import draft claims from a crystal (/op:crystal-import [path])",
 		handler: workflows.import,
 	});
+	registerLifeboat(pi, { ledger: requireLedger, writeContext: requireWriteContext, emit, attach: workflows.attach });
 
 	// Restore the session selection after /reload or a session restart.
 	pi.on("session_start", async (_event, ctx) => {
