@@ -9,6 +9,7 @@
 # fixtures/e9-full-battery-saturation/FINDING.md and
 # fixtures/gemma26-csv-n100-baseline/FINDING.md.
 task_id: csv-summarize-repair
+initial_state: must_fail
 description: >
   Repair an expense summariser that looks correct and silently produces wrong
   totals. The naive split(",") breaks on quoted amounts, float() rejects

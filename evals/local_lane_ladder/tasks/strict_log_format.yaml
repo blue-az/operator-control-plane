@@ -5,6 +5,7 @@
 # gemma4:26b miss, its own known failure mode, not new spread). See
 # fixtures/e9-full-battery-saturation/FINDING.md.
 task_id: strict-log-format
+initial_state: must_fail
 description: >
   Build a log summariser against an exact output contract. The traps are all in
   the format rather than the logic: a zero-padded hour, a deliberately

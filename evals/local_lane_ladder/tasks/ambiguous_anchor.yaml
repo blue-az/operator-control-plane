@@ -6,6 +6,7 @@
 # describes the e9+e11 corpus, not current models. See
 # fixtures/e9-full-battery-saturation/FINDING.md.
 task_id: ambiguous-anchor
+initial_state: must_fail
 description: >
   The anchor text appears three times, once under each environment heading. Only
   the occurrence under one named section may change; the other two must survive

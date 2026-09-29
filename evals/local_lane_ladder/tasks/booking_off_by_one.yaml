@@ -6,6 +6,7 @@
 # 2026-08-30: still saturated (30/30) for the current 5-model roster, as
 # expected -- see fixtures/e9-full-battery-saturation/FINDING.md.
 task_id: booking-off-by-one
+initial_state: must_fail
 description: >
   A boundary bug in a booking overlap check. The end date is the checkout day and
   is exclusive, so a stay ending on the day another begins does not conflict. The
@@ -22,7 +23,7 @@ files:
         free again on that day, so a booking ending 2026-03-10 does not conflict
         with one starting 2026-03-10.
         """
-        return start1 < end2 and start2 < end1
+        return start1 <= end2 and start2 <= end1
 
   tests/check_bookings.py: |
     import sys

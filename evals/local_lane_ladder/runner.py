@@ -269,7 +269,9 @@ def _privilege_shim_dir() -> str:
 
 DEFAULT_LEVELS = ("L0", "L1", "L2")
 HARNESS_ID = "local-lane-eval"
-MAX_WALL_CLOCK_SECONDS = 600  # 10 minutes per trial, per spec
+# 10 minutes per trial, per spec. LOCAL_LANE_MAX_WALL_CLOCK overrides it for a
+# declared cohort (e.g. a reasoning model); record the value with the run.
+MAX_WALL_CLOCK_SECONDS = int(os.environ.get("LOCAL_LANE_MAX_WALL_CLOCK", "600"))
 
 
 def resolve_machine() -> str:
@@ -316,6 +318,28 @@ def validate_task_prompts(tasks: list[dict]) -> list[str]:
                 f"{task['task_id']}: L2 prompt lints {l2_verdict!r}, expected 'plan-shaped'"
             )
     return problems
+
+
+class FixtureBaselineError(RuntimeError):
+    """A repair fixture must not satisfy its own postcondition before dispatch."""
+
+
+def validate_task_baseline(task: dict) -> None:
+    policy = task.get("initial_state")
+    if policy is None:
+        return  # Observation/non-repair tasks may intentionally start valid.
+    if policy != "must_fail":
+        raise FixtureBaselineError(f"{task['task_id']}: unknown initial_state {policy!r}")
+    root = build_fixture(task.get("files", {}), prefix="baseline",
+                         remove=task.get("remove"))
+    try:
+        result = grade(task["postcondition"], root, "", hash_tree(root))
+        if result.passed:
+            raise FixtureBaselineError(
+                f"{task['task_id']}: untouched repair fixture already passes; "
+                "refusing model dispatch. Restore the intended bug first.")
+    finally:
+        cleanup_fixture(root)
 
 
 def load_state(state_path: Path) -> dict:
@@ -1066,6 +1090,7 @@ def run_trial(
     append_system_prompt: str | None = None, carrier_script: Path | None = None,
     carrier_pi_config: Path | None = None,
 ) -> dict:
+    validate_task_baseline(task)
     prompt = task["prompts"][level]
     fixture_root = build_fixture(
         task.get("files", {}), prefix=f"{task['task_id']}-{level}", remove=task.get("remove")
@@ -1593,6 +1618,13 @@ def main() -> int:
             print(f"  - {problem}", file=sys.stderr)
         return 1
 
+    try:
+        for task in tasks:
+            validate_task_baseline(task)
+    except FixtureBaselineError as exc:
+        print(f"Fixture preflight failed: {exc}", file=sys.stderr)
+        return 2
+
     grid = [
         (task, level, model, trial)
         for task in tasks
@@ -1606,7 +1638,7 @@ def main() -> int:
     )
 
     if args.dry_run:
-        print("Dry run: task prompts validated, no trials executed.")
+        print("Dry run: task prompts and declared fixture baselines validated, no trials executed.")
         return 0
 
     ledger_dir = Path(args.ledger_dir).resolve()
@@ -1679,6 +1711,10 @@ def main() -> int:
                 Path(args.carrier_script) if args.carrier_script else None,
                 Path(args.carrier_pi_config) if args.carrier_pi_config else None,
             )
+        except FixtureBaselineError as exc:
+            print(f"[{key}] ABORT: {exc}", file=sys.stderr)
+            save_state(state_path, state)
+            return 2
         except HostStateError as exc:
             print(f"[{key}] INVALID: {exc}", file=sys.stderr)
             failures.append({"cell_key": key, "task_id": task["task_id"], "level": level,

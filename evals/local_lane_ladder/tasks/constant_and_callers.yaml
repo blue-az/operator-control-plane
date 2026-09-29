@@ -3,6 +3,7 @@
 # 2026-08-30: still saturated (30/30) for the current 5-model roster, as
 # expected -- see fixtures/e9-full-battery-saturation/FINDING.md.
 task_id: constant-and-callers
+initial_state: must_fail
 description: >
   Change a constant and every caller that hard-codes its old value. Three files
   must end up consistent, and the stale value must survive nowhere. Probes
