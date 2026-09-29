@@ -1,0 +1,36 @@
+captured_utc: 2026-09-28T21:06:15Z
+git_rev: 2b63be163ff5e2a3514f83331ccd64f23bd3f06a
+== nemotron-lightning-e9pin-ctx16384-t0p8
+draft_num_predict              2
+num_ctx                        16384
+temperature                    0.8
+top_p                          0.95
+capabilities ['completion', 'tools', 'thinking']
+== qwen3-next-instruct-e9pin-ctx16384-t0p8
+num_ctx                        16384
+repeat_penalty                 1
+stop                           "<|im_start|>"
+stop                           "<|im_end|>"
+temperature                    0.8
+top_k                          20
+top_p                          0.8
+capabilities ['completion', 'tools']
+== qwen3.6-35b-e9pin-ctx16384-t0p8
+repeat_penalty                 1
+temperature                    0.8
+top_k                          20
+top_p                          0.95
+draft_num_predict              2
+min_p                          0
+num_ctx                        16384
+presence_penalty               1.5
+capabilities ['completion', 'vision', 'tools', 'thinking']
+== qwen3-next-thinking-ctx32768-t0p6
+num_ctx                        32768
+repeat_penalty                 1
+stop                           "<|im_start|>"
+stop                           "<|im_end|>"
+temperature                    0.6
+top_k                          20
+top_p                          0.95
+capabilities ['completion', 'tools', 'thinking']

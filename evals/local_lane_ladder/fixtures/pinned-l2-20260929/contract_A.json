@@ -1,0 +1,61 @@
+{
+  "schema": "local-lane-comparison/v1",
+  "ollama_version": "0.32.12",
+  "think": "off",
+  "endpoint": "http://127.0.0.1:11444",
+  "parameters": {
+    "num_keep": 4,
+    "seed": 1234,
+    "top_k": 20,
+    "top_p": 0.95,
+    "min_p": 0,
+    "typical_p": 1,
+    "repeat_last_n": 64,
+    "repeat_penalty": 1,
+    "presence_penalty": 0,
+    "frequency_penalty": 0,
+    "draft_num_predict": 0,
+    "num_ctx": 16384,
+    "num_predict": 4096,
+    "temperature": 0.8
+  },
+  "placement": {
+    "host": "testbench",
+    "ssh_host": "testbench",
+    "port": 11437,
+    "gpu_uuids": [
+      "GPU-22b9dafe-e97d-dbb2-50ba-2f1f1dea61f9",
+      "GPU-102e9c9e-f883-58fa-6119-8c72f81fd88e"
+    ],
+    "minimum_weight_allocation_ratio": 0.9
+  },
+  "models": {
+    "pinA-nemotron-lightning:latest": {
+      "digest": "8f04b35c4de927b058c40c35c9ffdf4bf8d4e309e358afd6b3a29039617ebef9",
+      "weight_sha256": "5c19f6282f4fc51cb114cb6c876d70ca2fc3b9cf0fbd0a018d9908f4fe1f63b3",
+      "weight_bytes": 25430738944,
+      "variant": "hybrid",
+      "stop": []
+    },
+    "pinA-qwen3-next-instruct:latest": {
+      "digest": "14174e49b8e51ba723d86b1057da9fe629108f20103cb22e9bf8cf08fbbc73bc",
+      "weight_sha256": "158a9e5b76a1bef71fcea4e1990e647088122b51b9fa823a134c6f6033d856be",
+      "weight_bytes": 50075035936,
+      "variant": "instruct",
+      "stop": [
+        "<|im_start|>",
+        "<|im_end|>"
+      ]
+    },
+    "pinA-qwen3.6-35b:latest": {
+      "digest": "04ea2facd1da0ff34b6a40f41009a56123ff1d3790bbf8254bb550ec77336838",
+      "weight_sha256": "d372de8e934898a59e6ccfabc3368474711384d8f1fd4d22d87a3f0a45400cdc",
+      "weight_bytes": 21718480960,
+      "variant": "hybrid",
+      "stop": [],
+      "extra_blob_sha256s": [
+        "a62390d25b4b4a2d8afd7cc3c90021c11935c1fdd48d7cb0723ab71cd02a598e"
+      ]
+    }
+  }
+}

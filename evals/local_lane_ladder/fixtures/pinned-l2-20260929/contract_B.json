@@ -1,0 +1,44 @@
+{
+  "schema": "local-lane-comparison/v1",
+  "ollama_version": "0.32.12",
+  "think": "on",
+  "endpoint": "http://127.0.0.1:11444",
+  "parameters": {
+    "num_keep": 4,
+    "seed": 1234,
+    "top_k": 20,
+    "top_p": 0.95,
+    "min_p": 0,
+    "typical_p": 1,
+    "repeat_last_n": 64,
+    "repeat_penalty": 1,
+    "presence_penalty": 0,
+    "frequency_penalty": 0,
+    "draft_num_predict": 0,
+    "num_ctx": 32768,
+    "num_predict": 16384,
+    "temperature": 0.6
+  },
+  "placement": {
+    "host": "testbench",
+    "ssh_host": "testbench",
+    "port": 11437,
+    "gpu_uuids": [
+      "GPU-22b9dafe-e97d-dbb2-50ba-2f1f1dea61f9",
+      "GPU-102e9c9e-f883-58fa-6119-8c72f81fd88e"
+    ],
+    "minimum_weight_allocation_ratio": 0.9
+  },
+  "models": {
+    "pinB-qwen3-next-thinking:latest": {
+      "digest": "ebc66cf6b8d769738723ebd06d3071d9ba4ceada14bb6bb1990af338d52174e2",
+      "weight_sha256": "8476acca2ca7dc4dd86ad2e069cb270fdbd44287d9ff3006d86e9a54cc19acd1",
+      "weight_bytes": 50351320736,
+      "variant": "thinking",
+      "stop": [
+        "<|im_start|>",
+        "<|im_end|>"
+      ]
+    }
+  }
+}

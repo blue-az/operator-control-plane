@@ -1,0 +1,2498 @@
+{
+  "done": {
+    "ambiguous-anchor|L2|pinB-qwen3-next-thinking:latest|1": true,
+    "ambiguous-anchor|L2|pinB-qwen3-next-thinking:latest|2": true,
+    "ambiguous-anchor|L2|pinB-qwen3-next-thinking:latest|3": true,
+    "ambiguous-anchor|L2|pinB-qwen3-next-thinking:latest|4": true,
+    "ambiguous-anchor|L2|pinB-qwen3-next-thinking:latest|5": true,
+    "ambiguous-anchor|L2|pinB-qwen3-next-thinking:latest|6": true,
+    "booking-off-by-one|L2|pinB-qwen3-next-thinking:latest|1": true,
+    "booking-off-by-one|L2|pinB-qwen3-next-thinking:latest|2": true,
+    "booking-off-by-one|L2|pinB-qwen3-next-thinking:latest|3": true,
+    "booking-off-by-one|L2|pinB-qwen3-next-thinking:latest|4": true,
+    "booking-off-by-one|L2|pinB-qwen3-next-thinking:latest|5": true,
+    "booking-off-by-one|L2|pinB-qwen3-next-thinking:latest|6": true,
+    "constant-and-callers|L2|pinB-qwen3-next-thinking:latest|1": true,
+    "constant-and-callers|L2|pinB-qwen3-next-thinking:latest|2": true,
+    "constant-and-callers|L2|pinB-qwen3-next-thinking:latest|3": true,
+    "constant-and-callers|L2|pinB-qwen3-next-thinking:latest|4": true,
+    "constant-and-callers|L2|pinB-qwen3-next-thinking:latest|5": true,
+    "constant-and-callers|L2|pinB-qwen3-next-thinking:latest|6": true,
+    "csv-summarize-repair|L2|pinB-qwen3-next-thinking:latest|1": true,
+    "csv-summarize-repair|L2|pinB-qwen3-next-thinking:latest|2": true,
+    "csv-summarize-repair|L2|pinB-qwen3-next-thinking:latest|3": true,
+    "csv-summarize-repair|L2|pinB-qwen3-next-thinking:latest|4": true,
+    "csv-summarize-repair|L2|pinB-qwen3-next-thinking:latest|5": true,
+    "csv-summarize-repair|L2|pinB-qwen3-next-thinking:latest|6": true,
+    "strict-log-format|L2|pinB-qwen3-next-thinking:latest|1": true,
+    "strict-log-format|L2|pinB-qwen3-next-thinking:latest|2": true,
+    "strict-log-format|L2|pinB-qwen3-next-thinking:latest|3": true,
+    "strict-log-format|L2|pinB-qwen3-next-thinking:latest|4": true,
+    "strict-log-format|L2|pinB-qwen3-next-thinking:latest|5": true,
+    "strict-log-format|L2|pinB-qwen3-next-thinking:latest|6": true
+  },
+  "failures": [],
+  "results": [
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "ambiguous-anchor",
+      "tok_s": 66.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.93,
+        "tok_s": 66.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/ambiguous-anchor__L2__pinB-qwen3-next-thinking-latest__t1.json",
+      "trial": 1,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 193.6
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "ambiguous-anchor",
+      "tok_s": 64.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.98,
+        "tok_s": 64.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/ambiguous-anchor__L2__pinB-qwen3-next-thinking-latest__t2.json",
+      "trial": 2,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 158.3
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "ambiguous-anchor",
+      "tok_s": 67.9,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.88,
+        "tok_s": 67.9
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/ambiguous-anchor__L2__pinB-qwen3-next-thinking-latest__t3.json",
+      "trial": 3,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 158.6
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "ambiguous-anchor",
+      "tok_s": 69.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.85,
+        "tok_s": 69.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/ambiguous-anchor__L2__pinB-qwen3-next-thinking-latest__t4.json",
+      "trial": 4,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 178.2
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "ambiguous-anchor",
+      "tok_s": 69.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.85,
+        "tok_s": 69.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/ambiguous-anchor__L2__pinB-qwen3-next-thinking-latest__t5.json",
+      "trial": 5,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 153.1
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'",
+          "name": "staging line changed",
+          "passed": true
+        },
+        {
+          "detail": "found exactly 1 occurrence(s) of 'restart the service --force'",
+          "name": "exactly one forced occurrence",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'",
+          "name": "other two occurrences untouched",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['runbook.md']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read runbook.md and note that \"Run: restart the service\" appears three times.\n2. In runbook.md, under the heading \"## Staging\" only, replace the single line\n   \"2. Run: restart the service\" with \"2. Run: restart the service --force\".\n   Do not change the identical line under \"## Production\" or under \"## Development\".\n3. Verify the file now contains exactly one line reading\n   \"2. Run: restart the service --force\".\nOnly touch runbook.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "ambiguous-anchor",
+      "tok_s": 59.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.15,
+        "tok_s": 59.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/ambiguous-anchor__L2__pinB-qwen3-next-thinking-latest__t6.json",
+      "trial": 6,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 145.6
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "booking-off-by-one",
+      "tok_s": 76.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.67,
+        "tok_s": 76.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/booking-off-by-one__L2__pinB-qwen3-next-thinking-latest__t1.json",
+      "trial": 1,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 68.8
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "booking-off-by-one",
+      "tok_s": 57.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.23,
+        "tok_s": 57.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/booking-off-by-one__L2__pinB-qwen3-next-thinking-latest__t2.json",
+      "trial": 2,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 64.3
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "booking-off-by-one",
+      "tok_s": 75.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.69,
+        "tok_s": 75.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/booking-off-by-one__L2__pinB-qwen3-next-thinking-latest__t3.json",
+      "trial": 3,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 66.3
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "booking-off-by-one",
+      "tok_s": 63.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.03,
+        "tok_s": 63.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/booking-off-by-one__L2__pinB-qwen3-next-thinking-latest__t4.json",
+      "trial": 4,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 72.5
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "booking-off-by-one",
+      "tok_s": 72.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.76,
+        "tok_s": 72.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/booking-off-by-one__L2__pinB-qwen3-next-thinking-latest__t5.json",
+      "trial": 5,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 53.1
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']",
+          "name": "signature preserved",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/bookings.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "booking-off-by-one",
+      "tok_s": 72.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.77,
+        "tok_s": 72.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/booking-off-by-one__L2__pinB-qwen3-next-thinking-latest__t6.json",
+      "trial": 6,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 84.8
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "constant-and-callers",
+      "tok_s": 72.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.78,
+        "tok_s": 72.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/constant-and-callers__L2__pinB-qwen3-next-thinking-latest__t1.json",
+      "trial": 1,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 87.6
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "constant-and-callers",
+      "tok_s": 69.8,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.83,
+        "tok_s": 69.8
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/constant-and-callers__L2__pinB-qwen3-next-thinking-latest__t2.json",
+      "trial": 2,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 425.3
+    },
+    {
+      "attempted_edit": false,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "check_score": 0.25,
+      "checks": [
+        {
+          "detail": "postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-dqb6wurm/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5",
+          "name": "all three files consistent",
+          "passed": false
+        },
+        {
+          "detail": "regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": false
+        },
+        {
+          "detail": "pattern not found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": false
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "3/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-dqb6wurm/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5; constant updated: regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'; no stale value in code: pattern not found: 'up to 5 times'",
+      "failure_cause": "unproven_dispatch",
+      "failure_class": "capability",
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "unproven",
+      "passed": false,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": false,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "constant-and-callers",
+      "tok_s": 76.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.68,
+        "tok_s": 76.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/constant-and-callers__L2__pinB-qwen3-next-thinking-latest__t3.json",
+      "trial": 3,
+      "unproven_reasons": [
+        "dispatch",
+        "placement"
+      ],
+      "wall_clock_s": 59.2
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "constant-and-callers",
+      "tok_s": 72.6,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.76,
+        "tok_s": 72.6
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/constant-and-callers__L2__pinB-qwen3-next-thinking-latest__t4.json",
+      "trial": 4,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 40.0
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "constant-and-callers",
+      "tok_s": 74.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.73,
+        "tok_s": 74.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/constant-and-callers__L2__pinB-qwen3-next-thinking-latest__t5.json",
+      "trial": 5,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 89.1
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "all three files consistent",
+          "passed": true
+        },
+        {
+          "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'",
+          "name": "constant updated",
+          "passed": true
+        },
+        {
+          "detail": "pattern found: 'up to 5 times'",
+          "name": "no stale value in code",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['docs/retry_policy.md', 'src/fetcher.py', 'src/limits.py']",
+          "name": "scope respected",
+          "passed": true
+        }
+      ],
+      "detail": "all 4 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. In src/limits.py, replace the line \"MAX_RETRIES = 3\" with \"MAX_RETRIES = 5\".\n2. In src/fetcher.py, replace the text \"retrying up to 3 times before giving up\"\n   with \"retrying up to 5 times before giving up\".\n3. In docs/retry_policy.md, replace the text \"retries up to 3 times before giving up\"\n   with \"retries up to 5 times before giving up\".\n4. Verify by running \"python3 tests/check_limits.py\" from the fixture root;\n   it should exit 0 and print \"LIMITS_OK\".\nOnly touch src/limits.py, src/fetcher.py and docs/retry_policy.md.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "constant-and-callers",
+      "tok_s": 68.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.88,
+        "tok_s": 68.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/constant-and-callers__L2__pinB-qwen3-next-thinking-latest__t6.json",
+      "trial": 6,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 38.7
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "csv-summarize-repair",
+      "tok_s": 66.7,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.92,
+        "tok_s": 66.7
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/csv-summarize-repair__L2__pinB-qwen3-next-thinking-latest__t1.json",
+      "trial": 1,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 193.8
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "csv-summarize-repair",
+      "tok_s": 73.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.75,
+        "tok_s": 73.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/csv-summarize-repair__L2__pinB-qwen3-next-thinking-latest__t2.json",
+      "trial": 2,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 219.2
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "csv-summarize-repair",
+      "tok_s": 62.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 2.05,
+        "tok_s": 62.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/csv-summarize-repair__L2__pinB-qwen3-next-thinking-latest__t3.json",
+      "trial": 3,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 145.1
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "csv-summarize-repair",
+      "tok_s": 68.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.87,
+        "tok_s": 68.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/csv-summarize-repair__L2__pinB-qwen3-next-thinking-latest__t4.json",
+      "trial": 4,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 153.0
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "csv-summarize-repair",
+      "tok_s": 71.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.8,
+        "tok_s": 71.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/csv-summarize-repair__L2__pinB-qwen3-next-thinking-latest__t5.json",
+      "trial": 5,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 151.7
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/expenses.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 2 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "csv-summarize-repair",
+      "tok_s": 69.4,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.84,
+        "tok_s": 69.4
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/csv-summarize-repair__L2__pinB-qwen3-next-thinking-latest__t6.json",
+      "trial": 6,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 187.7
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "strict-log-format",
+      "tok_s": 70.0,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.83,
+        "tok_s": 70.0
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/strict-log-format__L2__pinB-qwen3-next-thinking-latest__t1.json",
+      "trial": 1,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 240.0
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "strict-log-format",
+      "tok_s": 67.2,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.91,
+        "tok_s": 67.2
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/strict-log-format__L2__pinB-qwen3-next-thinking-latest__t2.json",
+      "trial": 2,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 161.9
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "strict-log-format",
+      "tok_s": 69.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.85,
+        "tok_s": 69.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/strict-log-format__L2__pinB-qwen3-next-thinking-latest__t3.json",
+      "trial": 3,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 162.1
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "strict-log-format",
+      "tok_s": 74.5,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.72,
+        "tok_s": 74.5
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/strict-log-format__L2__pinB-qwen3-next-thinking-latest__t4.json",
+      "trial": 4,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 147.8
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "strict-log-format",
+      "tok_s": 73.1,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.75,
+        "tok_s": 73.1
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/strict-log-format__L2__pinB-qwen3-next-thinking-latest__t5.json",
+      "trial": 5,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 137.0
+    },
+    {
+      "attempted_edit": true,
+      "carrier_env_policy": {},
+      "carrier_outer_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "check_score": 1.0,
+      "checks": [
+        {
+          "detail": "postcondition command exited 0",
+          "name": "battery passes",
+          "passed": true
+        },
+        {
+          "detail": "function 'error_report' defined with args ['log_text']",
+          "name": "function still defined",
+          "passed": true
+        },
+        {
+          "detail": "no writes outside ['src/logsum.py']",
+          "name": "tests not edited",
+          "passed": true
+        }
+      ],
+      "detail": "all 3 checks passed",
+      "failure_cause": null,
+      "failure_class": null,
+      "level": "L2",
+      "machine": "desktop",
+      "model": "pinB-qwen3-next-thinking:latest",
+      "outcome": "pass",
+      "passed": true,
+      "pi_inner_argv": [
+        "/usr/local/bin/pi",
+        "--provider",
+        "testbench-pinned",
+        "--model",
+        "pinB-qwen3-next-thinking:latest",
+        "--mode",
+        "json",
+        "--print",
+        "--thinking",
+        "medium",
+        "--",
+        "1. Read src/logsum.py and read tests/check_logsum.py.\n2. In src/logsum.py, replace the line \"        raise NotImplementedError\" with an\n   implementation of \"def error_report(log_text):\" that satisfies the docstring\n   already in that function.\n3. Verify by running \"python3 tests/check_logsum.py\" from the fixture root;\n   it should exit 0 and print \"LOGSUM_OK\".\nOnly touch src/logsum.py.\n"
+      ],
+      "placement_evidence": null,
+      "proofs": {
+        "dispatch": true,
+        "grader": true,
+        "placement": false,
+        "scope": true,
+        "timing": true
+      },
+      "returncode": 0,
+      "scope_violations": [],
+      "task_id": "strict-log-format",
+      "tok_s": 78.3,
+      "tok_s_probe": {
+        "eval_count": 128,
+        "eval_duration_s": 1.63,
+        "tok_s": 78.3
+      },
+      "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/pinned-l2-20260929/traces/strict-log-format__L2__pinB-qwen3-next-thinking-latest__t6.json",
+      "trial": 6,
+      "unproven_reasons": [
+        "placement"
+      ],
+      "wall_clock_s": 141.1
+    }
+  ]
+}

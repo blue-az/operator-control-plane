@@ -1,0 +1,1118 @@
+{
+  "booking_trace_reads": [
+    {
+      "cell": "booking-off-by-one|L2|nemotron-lightning-e9pin-ctx16384-t0p8:latest|1",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|nemotron-lightning-e9pin-ctx16384-t0p8:latest|2",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|nemotron-lightning-e9pin-ctx16384-t0p8:latest|3",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|nemotron-lightning-e9pin-ctx16384-t0p8:latest|4",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|nemotron-lightning-e9pin-ctx16384-t0p8:latest|5",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|nemotron-lightning-e9pin-ctx16384-t0p8:latest|6",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-instruct-e9pin-ctx16384-t0p8:latest|1",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-instruct-e9pin-ctx16384-t0p8:latest|2",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-instruct-e9pin-ctx16384-t0p8:latest|3",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-instruct-e9pin-ctx16384-t0p8:latest|4",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-instruct-e9pin-ctx16384-t0p8:latest|5",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-instruct-e9pin-ctx16384-t0p8:latest|6",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3.6-35b-e9pin-ctx16384-t0p8:latest|1",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3.6-35b-e9pin-ctx16384-t0p8:latest|2",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3.6-35b-e9pin-ctx16384-t0p8:latest|3",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3.6-35b-e9pin-ctx16384-t0p8:latest|4",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3.6-35b-e9pin-ctx16384-t0p8:latest|5",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3.6-35b-e9pin-ctx16384-t0p8:latest|6",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-thinking-ctx32768-t0p6:latest|1",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-thinking-ctx32768-t0p6:latest|2",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-thinking-ctx32768-t0p6:latest|3",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-thinking-ctx32768-t0p6:latest|4",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-thinking-ctx32768-t0p6:latest|5",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    },
+    {
+      "cell": "booking-off-by-one|L2|qwen3-next-thinking-ctx32768-t0p6:latest|6",
+      "first_read_already_fixed": true,
+      "recorded_attempted_edit": false
+    }
+  ],
+  "hardware_arithmetic": {
+    "LONGCTX-PREFILL-001": {
+      "error_rows_excluded": 14,
+      "input_sha256": {
+        "results_20260928T102528.tsv": "3a343bebcba9109fc19cb6193bf0c70e3c8ccdc86ecda91f6816e8dea4c15dca",
+        "results_20260928T103545.tsv": "950f889377bc8c8d98fdbd67df1e56c22f9fe2c171e7b6ada716711ac323e079",
+        "results_20260928T112003.tsv": "17d69628e25683ae02d609d382240cb3be82861d0f50c856bfb6a15241a93788"
+      },
+      "means": [
+        {
+          "decode_tok_s": 178.415,
+          "group": {
+            "config": "single0",
+            "model": "gemma4:26b",
+            "target": "1000"
+          },
+          "n": 2,
+          "prefill_tok_s": 3491.6
+        },
+        {
+          "decode_tok_s": 107.405,
+          "group": {
+            "config": "single0",
+            "model": "gemma4:26b",
+            "target": "32000"
+          },
+          "n": 2,
+          "prefill_tok_s": 3748.4
+        },
+        {
+          "decode_tok_s": 89.94,
+          "group": {
+            "config": "single0",
+            "model": "gemma4:26b",
+            "target": "64000"
+          },
+          "n": 2,
+          "prefill_tok_s": 2697.2
+        },
+        {
+          "decode_tok_s": 140.825,
+          "group": {
+            "config": "single0",
+            "model": "gemma4:26b",
+            "target": "8000"
+          },
+          "n": 2,
+          "prefill_tok_s": 4071.5
+        },
+        {
+          "decode_tok_s": 86.535,
+          "group": {
+            "config": "spread",
+            "model": "gemma4:26b",
+            "target": "1000"
+          },
+          "n": 2,
+          "prefill_tok_s": 3497.05
+        },
+        {
+          "decode_tok_s": 31.415,
+          "group": {
+            "config": "spread",
+            "model": "gemma4:26b",
+            "target": "32000"
+          },
+          "n": 2,
+          "prefill_tok_s": 3927.2
+        },
+        {
+          "decode_tok_s": 34.3,
+          "group": {
+            "config": "spread",
+            "model": "gemma4:26b",
+            "target": "64000"
+          },
+          "n": 2,
+          "prefill_tok_s": 3203.3
+        },
+        {
+          "decode_tok_s": 53.47,
+          "group": {
+            "config": "spread",
+            "model": "gemma4:26b",
+            "target": "8000"
+          },
+          "n": 2,
+          "prefill_tok_s": 4218.75
+        },
+        {
+          "decode_tok_s": 1.205,
+          "group": {
+            "config": "onecard",
+            "model": "gemma4:31b",
+            "target": "128000"
+          },
+          "n": 2,
+          "prefill_tok_s": 389.2
+        },
+        {
+          "decode_tok_s": 27.865,
+          "group": {
+            "config": "onecard",
+            "model": "gemma4:31b",
+            "target": "32000"
+          },
+          "n": 2,
+          "prefill_tok_s": 938.05
+        },
+        {
+          "decode_tok_s": 13.835,
+          "group": {
+            "config": "onecard",
+            "model": "gemma4:31b",
+            "target": "64000"
+          },
+          "n": 2,
+          "prefill_tok_s": 700.7
+        },
+        {
+          "decode_tok_s": 32.735,
+          "group": {
+            "config": "onecard",
+            "model": "gemma4:31b",
+            "target": "8000"
+          },
+          "n": 2,
+          "prefill_tok_s": 1083.9
+        },
+        {
+          "decode_tok_s": 17.665,
+          "group": {
+            "config": "twocard",
+            "model": "gemma4:31b",
+            "target": "128000"
+          },
+          "n": 2,
+          "prefill_tok_s": 1000.6
+        },
+        {
+          "decode_tok_s": 13.725,
+          "group": {
+            "config": "twocard",
+            "model": "gemma4:31b",
+            "target": "200000"
+          },
+          "n": 2,
+          "prefill_tok_s": 778.8
+        },
+        {
+          "decode_tok_s": 27.55,
+          "group": {
+            "config": "twocard",
+            "model": "gemma4:31b",
+            "target": "32000"
+          },
+          "n": 2,
+          "prefill_tok_s": 1578.5
+        },
+        {
+          "decode_tok_s": 23.015,
+          "group": {
+            "config": "twocard",
+            "model": "gemma4:31b",
+            "target": "64000"
+          },
+          "n": 2,
+          "prefill_tok_s": 1417.6
+        },
+        {
+          "decode_tok_s": 32.615,
+          "group": {
+            "config": "twocard",
+            "model": "gemma4:31b",
+            "target": "8000"
+          },
+          "n": 2,
+          "prefill_tok_s": 1523.5
+        },
+        {
+          "decode_tok_s": 55.695,
+          "group": {
+            "config": "onecard",
+            "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "target": "1000"
+          },
+          "n": 2,
+          "prefill_tok_s": 1166.6
+        },
+        {
+          "decode_tok_s": 51.725,
+          "group": {
+            "config": "onecard",
+            "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "target": "32000"
+          },
+          "n": 2,
+          "prefill_tok_s": 1643.3
+        },
+        {
+          "decode_tok_s": 49.38,
+          "group": {
+            "config": "onecard",
+            "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "target": "64000"
+          },
+          "n": 2,
+          "prefill_tok_s": 1554.8
+        },
+        {
+          "decode_tok_s": 58.01,
+          "group": {
+            "config": "onecard",
+            "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "target": "8000"
+          },
+          "n": 2,
+          "prefill_tok_s": 1635.85
+        },
+        {
+          "decode_tok_s": 87.98,
+          "group": {
+            "config": "twocard",
+            "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "target": "1000"
+          },
+          "n": 2,
+          "prefill_tok_s": 3008.65
+        },
+        {
+          "decode_tok_s": 75.37,
+          "group": {
+            "config": "twocard",
+            "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "target": "128000"
+          },
+          "n": 2,
+          "prefill_tok_s": 2875.8
+        },
+        {
+          "decode_tok_s": 80.25,
+          "group": {
+            "config": "twocard",
+            "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "target": "32000"
+          },
+          "n": 2,
+          "prefill_tok_s": 4413.95
+        },
+        {
+          "decode_tok_s": 85.355,
+          "group": {
+            "config": "twocard",
+            "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "target": "64000"
+          },
+          "n": 2,
+          "prefill_tok_s": 3689.9
+        },
+        {
+          "decode_tok_s": 86.475,
+          "group": {
+            "config": "twocard",
+            "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "target": "8000"
+          },
+          "n": 2,
+          "prefill_tok_s": 4327.7
+        }
+      ]
+    },
+    "PCIE-X4-CARD-001": {
+      "error_rows_excluded": 0,
+      "input_sha256": {
+        "results_20260928T005015.tsv": "ba93bcc0cb11886839ea193a523e3a147142ede4b1fcd407fee2de10d360769e",
+        "results_20260928T005833.tsv": "c4442e738310e1c40196621e0add8ec9c6ba381c6b8235cd7393947aecef2632"
+      },
+      "means": [
+        {
+          "group": {
+            "gpu": "0",
+            "model": "gemma4:26b"
+          },
+          "n": 3,
+          "tok_s": 199.63
+        },
+        {
+          "group": {
+            "gpu": "1",
+            "model": "gemma4:26b"
+          },
+          "n": 3,
+          "tok_s": 179.84
+        },
+        {
+          "group": {
+            "gpu": "0",
+            "model": "gemma4:31b"
+          },
+          "n": 3,
+          "tok_s": 36.1933
+        },
+        {
+          "group": {
+            "gpu": "1",
+            "model": "gemma4:31b"
+          },
+          "n": 3,
+          "tok_s": 34.5
+        },
+        {
+          "group": {
+            "gpu": "0",
+            "model": "qwen3.8:27b"
+          },
+          "n": 9,
+          "tok_s": 79.4533
+        },
+        {
+          "group": {
+            "gpu": "1",
+            "model": "qwen3.8:27b"
+          },
+          "n": 9,
+          "tok_s": 69.9656
+        }
+      ]
+    },
+    "TESTBENCH-MATCHED-PAIR-001": {
+      "error_rows_excluded": 0,
+      "input_sha256": {
+        "results_20260927T220106.tsv": "d65386dd03b0ba7ae242235c797ddf05665474f774f333e04233abd0d6da32b9"
+      },
+      "means": [
+        {
+          "group": {
+            "config": "dual",
+            "model": "gemma4:26b",
+            "num_ctx": "8192"
+          },
+          "n": 3,
+          "tok_s": 155.9867
+        },
+        {
+          "group": {
+            "config": "single",
+            "model": "gemma4:26b",
+            "num_ctx": "8192"
+          },
+          "n": 3,
+          "tok_s": 197.7433
+        },
+        {
+          "group": {
+            "config": "dual",
+            "model": "gemma4:31b",
+            "num_ctx": "131072"
+          },
+          "n": 1,
+          "tok_s": 35.76
+        },
+        {
+          "group": {
+            "config": "dual",
+            "model": "gemma4:31b",
+            "num_ctx": "262144"
+          },
+          "n": 1,
+          "tok_s": 35.81
+        },
+        {
+          "group": {
+            "config": "dual",
+            "model": "gemma4:31b",
+            "num_ctx": "65536"
+          },
+          "n": 1,
+          "tok_s": 34.92
+        },
+        {
+          "group": {
+            "config": "dual",
+            "model": "gemma4:31b",
+            "num_ctx": "8192"
+          },
+          "n": 1,
+          "tok_s": 36.0
+        },
+        {
+          "group": {
+            "config": "single",
+            "model": "gemma4:31b",
+            "num_ctx": "131072"
+          },
+          "n": 1,
+          "tok_s": 6.26
+        },
+        {
+          "group": {
+            "config": "single",
+            "model": "gemma4:31b",
+            "num_ctx": "262144"
+          },
+          "n": 1,
+          "tok_s": 3.68
+        },
+        {
+          "group": {
+            "config": "single",
+            "model": "gemma4:31b",
+            "num_ctx": "65536"
+          },
+          "n": 1,
+          "tok_s": 23.48
+        },
+        {
+          "group": {
+            "config": "single",
+            "model": "gemma4:31b",
+            "num_ctx": "8192"
+          },
+          "n": 1,
+          "tok_s": 36.09
+        },
+        {
+          "group": {
+            "config": "dual",
+            "model": "qwen3-next:latest",
+            "num_ctx": "8192"
+          },
+          "n": 3,
+          "tok_s": 72.6033
+        },
+        {
+          "group": {
+            "config": "single",
+            "model": "qwen3-next:latest",
+            "num_ctx": "8192"
+          },
+          "n": 3,
+          "tok_s": 25.6433
+        }
+      ]
+    },
+    "starvation_saved_bursts": [
+      {
+        "file": "starve_20260927T194335_starve_smoke_ka1m_par2.jsonl",
+        "rep_max_wall_s": {
+          "1": 43.0
+        },
+        "sha256": "56a83293e221b50a4815a588f338d93c62ccb4c3b55b504ff9ecc4e6f64b7122"
+      },
+      {
+        "file": "starve_20260927T195402_starve_smoke2_ka1m_par2.jsonl",
+        "rep_max_wall_s": {
+          "1": 81.5
+        },
+        "sha256": "235059efbaf870e52b24dcb4acf07a6349b3649405af36f30fe8629f25780e40"
+      },
+      {
+        "file": "starve_20260927T202253_starve_gemma_ka15m_par4.jsonl",
+        "rep_max_wall_s": {
+          "1": 55.5
+        },
+        "sha256": "2b2eb16ae26fd80c1bc416fd43f64d7ca7fa2d36ea28e675fb8db3e2563befeb"
+      },
+      {
+        "file": "starve_20260927T202421_starve_gemma_ka2m_par4.jsonl",
+        "rep_max_wall_s": {
+          "1": 55.4,
+          "2": 52.9
+        },
+        "sha256": "47ada5fd82f1ebc7726982f2c6f0d22977cfe90c58549749f90a3e89ab0fb1be"
+      },
+      {
+        "file": "starve_20260927T202646_starve_gemma_ka15m_par2.jsonl",
+        "rep_max_wall_s": {
+          "1": 82.5
+        },
+        "sha256": "889fd6eb00860c059d4e0a663162a63225b7117298f7c30c7fcd2c0ba5ff5b19"
+      },
+      {
+        "file": "starve_20260927T202841_starve_qwen_ka2m_par4.jsonl",
+        "rep_max_wall_s": {
+          "1": 50.1
+        },
+        "sha256": "c42f95cf39516a4f172c23bb319b074437fb945536688544f77914496544fc1f"
+      },
+      {
+        "file": "starve_20260927T213621_starve_gemma_ka2m_par4_preload.jsonl",
+        "rep_max_wall_s": {
+          "1": 38.7,
+          "2": 158.9
+        },
+        "sha256": "b60afb0ac4920ee776eaa6cac86a092157b2d0c0d8dc4502c0c7fe24234df180"
+      },
+      {
+        "file": "starve_20260927T214059_starve_gemma_ka15m_par4_preload.jsonl",
+        "rep_max_wall_s": {
+          "1": 938.8
+        },
+        "sha256": "7058952cf3aef5a49fe1a1271e80fe357821a5c51551415948675df28d2135fb"
+      }
+    ]
+  },
+  "historical_task_comparison": {
+    "ambiguous-anchor": {
+      "files_match": true,
+      "postcondition_match": true,
+      "prompts_match": true
+    },
+    "booking-off-by-one": {
+      "files_match": false,
+      "postcondition_match": true,
+      "prompts_match": true
+    },
+    "constant-and-callers": {
+      "files_match": true,
+      "postcondition_match": true,
+      "prompts_match": true
+    },
+    "csv-summarize-repair": {
+      "files_match": true,
+      "postcondition_match": true,
+      "prompts_match": true
+    },
+    "strict-log-format": {
+      "files_match": true,
+      "postcondition_match": true,
+      "prompts_match": true
+    }
+  },
+  "historical_trace_summary": {
+    "qwen3-next:latest": {
+      "all_think_off": true,
+      "cells": 30,
+      "excluding_booking_passes": 8,
+      "executables": [
+        "/home/blueaz/operator-control-plane/opr"
+      ],
+      "recorded_passes": 10,
+      "recorded_revisions": [
+        "3e495641589fe445c72a359f38e5d03401ec4185"
+      ]
+    },
+    "qwen3.6:27b": {
+      "all_think_off": true,
+      "cells": 30,
+      "excluding_booking_passes": 14,
+      "executables": [
+        "/home/blueaz/operator-control-plane/opr"
+      ],
+      "recorded_passes": 20,
+      "recorded_revisions": [
+        "3e495641589fe445c72a359f38e5d03401ec4185"
+      ]
+    }
+  },
+  "input_sha256": {
+    "evidence/prerun.txt": "dd8d62832475c091a8e3887ea2b967d2a0c539e9cbb3e4fae5195f7a3780dc38",
+    "historical/ambiguous-anchor__L2__qwen3-next-latest__t1.json": "b70032877d551b64d70b485c7e90be23ce93652ea02f4a75df28a6703b1f7f30",
+    "historical/ambiguous-anchor__L2__qwen3-next-latest__t2.json": "ab1dd49c8bb56877c83da71f0224a63a07d62b74ab72c1cb5ee18aea97a37140",
+    "historical/ambiguous-anchor__L2__qwen3-next-latest__t3.json": "3cc7edf5188410bf2192d9b826357750733b25b45d3989ef0d43be3a28e9037b",
+    "historical/ambiguous-anchor__L2__qwen3-next-latest__t4.json": "58e17c542411a6ac47db0f6849f0dafe534016cd771635e54844148e2b63eb16",
+    "historical/ambiguous-anchor__L2__qwen3-next-latest__t5.json": "44414f81265a3e5253b1e80882120c9f638cbb9f87ea3837a67c99aa5e6bed61",
+    "historical/ambiguous-anchor__L2__qwen3-next-latest__t6.json": "4458b4378c1160511143c2c1622a10323d079bd35ae64d0c4482655324cbbdc1",
+    "historical/ambiguous-anchor__L2__qwen3.6-27b__t1.json": "b4c0af3ba8acd4947638789c142a504e7b64c20e9704a4963a1e4012feb97a12",
+    "historical/ambiguous-anchor__L2__qwen3.6-27b__t2.json": "ac0c278ba2186843cd0c437ed016855d9787aea8263139996c1b2282d0610da5",
+    "historical/ambiguous-anchor__L2__qwen3.6-27b__t3.json": "c640e382639cadae1f261ff882b0e438c3f456ab3403df8f4888a9bbc6336ff7",
+    "historical/ambiguous-anchor__L2__qwen3.6-27b__t4.json": "d4731a11d8d8c605de1f8c7af2c0ea2ce313eb5acafe7f915afa0dbe28364d2f",
+    "historical/ambiguous-anchor__L2__qwen3.6-27b__t5.json": "c610ac78687405fd590c0fff89b84e0258bb48db14df42e88cc1b4cdb97e5a0d",
+    "historical/ambiguous-anchor__L2__qwen3.6-27b__t6.json": "6eeeb6595efbbb4933e6a8c2eb89c089d9273894110d449062c6ad64e5e057f3",
+    "historical/booking-off-by-one__L2__qwen3-next-latest__t1.json": "7ea20a9c70d88e9a64f2fb63390c9f48db6b93790f29aa71169be8917c1f0674",
+    "historical/booking-off-by-one__L2__qwen3-next-latest__t2.json": "a53f0769247f0f6c7b1fb8a790f2c0cb249c20eb3fc45cab91de6371b5436609",
+    "historical/booking-off-by-one__L2__qwen3-next-latest__t3.json": "11515caf1c203a57f02df68d0902e3c9fd08febf287df456913ce3b3f30db95a",
+    "historical/booking-off-by-one__L2__qwen3-next-latest__t4.json": "3aeec050a0c7573de430ad76fa6e1d5437c6288cdf7853bf4f058e3df499334f",
+    "historical/booking-off-by-one__L2__qwen3-next-latest__t5.json": "828ca7b058a135d9c7b9a4edd794021a26ae5ec8b99c64960372c4307b0795f8",
+    "historical/booking-off-by-one__L2__qwen3-next-latest__t6.json": "d2e065d1e324ceb1f1645dd14598e2a3b6412658b642064f9c4dddd008c24480",
+    "historical/booking-off-by-one__L2__qwen3.6-27b__t1.json": "e8f84103e2f0ff59089578c66a867989241ffd4c5bb8c6426e6ade376f16e9a2",
+    "historical/booking-off-by-one__L2__qwen3.6-27b__t2.json": "dd24e6346f4f77b9127300a74bfae352105484ba4c41b2e9faa1ec26daf98345",
+    "historical/booking-off-by-one__L2__qwen3.6-27b__t3.json": "0074b525bc31585c56a05faa59bd5d4fd4ae0c019c8e2e71664457c2f7f05afd",
+    "historical/booking-off-by-one__L2__qwen3.6-27b__t4.json": "29b153a496e7debe5e1d819eb406a9e1fd3df822cb27360bdf2084129d31975b",
+    "historical/booking-off-by-one__L2__qwen3.6-27b__t5.json": "988241cfa291a685aa515ed84ca3a4ea1565bc699d31fbb593c923177b032be1",
+    "historical/booking-off-by-one__L2__qwen3.6-27b__t6.json": "f5b4b56bc4e69d38bdb21247bc719e58b1f4cbaec81f3d91e9b0ca407bae7a49",
+    "historical/constant-and-callers__L2__qwen3-next-latest__t1.json": "dd5bf80d25e32513b76a195828ac0e3ad132729ee2aef0e820cd6a25e0b792cc",
+    "historical/constant-and-callers__L2__qwen3-next-latest__t2.json": "894b821c27a545271608ecaca72e19c97a30541b0f516022672a4e0ecdbbfc2b",
+    "historical/constant-and-callers__L2__qwen3-next-latest__t3.json": "28f79461514ffc6fa2ff301db5d7fdcf24400bb7b897f84a0681f3ad2e592a38",
+    "historical/constant-and-callers__L2__qwen3-next-latest__t4.json": "0931473959abca6c49cd8a76f964a85d654d687c2b6e0cc5d8c0b80aaf320c4a",
+    "historical/constant-and-callers__L2__qwen3-next-latest__t5.json": "c1b14151fe6b01de074918e0ca89671f36026713623469cc7019bb3333d6b6d6",
+    "historical/constant-and-callers__L2__qwen3-next-latest__t6.json": "26973dfc9445dbd0021847fe30585c19ea9a63599e98e45c53cdc578e98138f4",
+    "historical/constant-and-callers__L2__qwen3.6-27b__t1.json": "60213c144d617108cded36b8f26d0c6ad3bfc60b3075212312ed25f5714c7b46",
+    "historical/constant-and-callers__L2__qwen3.6-27b__t2.json": "00716572c4a57bd76275f9232dcf6b2bfe059db2c8de4a26acc537aff128087e",
+    "historical/constant-and-callers__L2__qwen3.6-27b__t3.json": "74a7ae40a7b50be574365660914c476c829003dd122a47f22f67abcdeeeec1c3",
+    "historical/constant-and-callers__L2__qwen3.6-27b__t4.json": "a9013f59ff9bd2f488d29db2bfea91fff287d63e48a68e12725dc9048a1a3786",
+    "historical/constant-and-callers__L2__qwen3.6-27b__t5.json": "4ba8c4bb7e5664ac8c79f808af578798c46d214a00de96d5eb663ddf51948abf",
+    "historical/constant-and-callers__L2__qwen3.6-27b__t6.json": "1d94a92b9bb88b93d17ab7ff174b48b6a371cc4fcab4ce5a9bd9b1515e25efc6",
+    "historical/csv-summarize-repair__L2__qwen3-next-latest__t1.json": "abc480adfe1bca8bb0884a46ee969a7568d4e31c150e0e8ad4ae9788cdf36c78",
+    "historical/csv-summarize-repair__L2__qwen3-next-latest__t2.json": "18fbe6986804f1c733b37413a0b48608a8ed8e76234acd5e8093b9502121ef92",
+    "historical/csv-summarize-repair__L2__qwen3-next-latest__t3.json": "961e4736274537f78f806c9f40c0447bbbf6a32300f1e10191a32d4c43937fda",
+    "historical/csv-summarize-repair__L2__qwen3-next-latest__t4.json": "d5bf755a12b3211ad03ebed8ee315000d86176d444703f74952c4976869a14ff",
+    "historical/csv-summarize-repair__L2__qwen3-next-latest__t5.json": "779ea685f9072fa79f84b700fb629d881f1e0f31943c5811b8eee25bebb07556",
+    "historical/csv-summarize-repair__L2__qwen3-next-latest__t6.json": "9170241b263c6bdeddd16b634f312f1e8456c73803df15604f656222761d3a25",
+    "historical/csv-summarize-repair__L2__qwen3.6-27b__t1.json": "cae3cb385c5b76a6f233ecd0514087816a32c684ba41c82197694e10e8c5ac9e",
+    "historical/csv-summarize-repair__L2__qwen3.6-27b__t2.json": "c24ca558714c94bff5666de1d3d1bdf86395f22f185968901c04d2f4cbfaa5e7",
+    "historical/csv-summarize-repair__L2__qwen3.6-27b__t3.json": "1b9fef63080d20af8536e36270036ec1b9e8700c97485c07cccd9604726a16e3",
+    "historical/csv-summarize-repair__L2__qwen3.6-27b__t4.json": "60cad3410c002b542499763fdc5da240801983da4a5b005475d796dc5dda6694",
+    "historical/csv-summarize-repair__L2__qwen3.6-27b__t5.json": "3e4335280ccf5dd97c747b8e347614bb043739230a4489b2eb2bdabb014c486b",
+    "historical/csv-summarize-repair__L2__qwen3.6-27b__t6.json": "2926d3aa2df0fe710d2b03f7d6e8010119c3c7a8885daf0da607087f938200c5",
+    "historical/strict-log-format__L2__qwen3-next-latest__t1.json": "39dda874c21447a0051c5dabc9c19cb8f5cde4d62b463e6608af96dd128e33d7",
+    "historical/strict-log-format__L2__qwen3-next-latest__t2.json": "4322e9d076f0fef1a4fd95d64cc02e0c870bca7d1af8e194a19e428744771221",
+    "historical/strict-log-format__L2__qwen3-next-latest__t3.json": "9832a39d1e6560b1e84d5d86c6f5d679b0a0be639e627f388eec3a1a39287ab1",
+    "historical/strict-log-format__L2__qwen3-next-latest__t4.json": "04b2be833df32534e5ac86dd079dc1f4813f016df3ecd3157015c9f19ff42cd5",
+    "historical/strict-log-format__L2__qwen3-next-latest__t5.json": "184b1d82394be6cddb48d56a87cff410b93491aacc5be39ed53ed248994411ce",
+    "historical/strict-log-format__L2__qwen3-next-latest__t6.json": "4ac3e6f04debd19b056bb188c227dd47d79ec0d2b585b5deaab357c565d0136e",
+    "historical/strict-log-format__L2__qwen3.6-27b__t1.json": "bd35ca69eac5d9299d1e6e8d746f4d8d31441479f348ce2a31f229fc7b4cc313",
+    "historical/strict-log-format__L2__qwen3.6-27b__t2.json": "76ba8fcc08bfa70f4d1e3323964780de9748d25cefe259bb1e8dd00bb41e2edb",
+    "historical/strict-log-format__L2__qwen3.6-27b__t3.json": "4141139c02504c16955b1480cfb4711d96e2286097d27df49dd519f88577fcf4",
+    "historical/strict-log-format__L2__qwen3.6-27b__t4.json": "fb2d8b2d35efa83744b89d8f24ff85601d632b6e43d60d73400cfd1253e1277b",
+    "historical/strict-log-format__L2__qwen3.6-27b__t5.json": "9103e3c08e264b2d27c608fa74b5674cc3209dcfd44e86f09946e82919c6812a",
+    "historical/strict-log-format__L2__qwen3.6-27b__t6.json": "114b21a8b292061cf617578be3a2e0be972546ae60c8d4f6064af61778df067b",
+    "state_A.json": "d30a12c0f2aba3737a7e491c9829cb52846a4251ff3d3f99ddda76dd184bf2aa",
+    "state_B.json": "3d743896a3b6b84cd0bbcb0e7c5997c93769ff7909c89085a97d4ec8d07a832f",
+    "traces/ambiguous-anchor__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t1.json": "879cce6139203718e5dfdd2c716ef116e34a0e62c719a7f66924c2111604320d",
+    "traces/ambiguous-anchor__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t2.json": "47dd2511d19eb52dc65cf0e39d40f11cba4b4bd18e73143c1eb8407b4fe2b70b",
+    "traces/ambiguous-anchor__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t3.json": "1965a2772c5727d859b0533735dd95b769a9ebbc4820082de6014686e8ea425d",
+    "traces/ambiguous-anchor__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t4.json": "0c40a8218ad57b1c6a442aee4fb01e342a5d6c42032f5009945d0e32b9dd20b4",
+    "traces/ambiguous-anchor__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t5.json": "5c09cc8a5c28c7dcd9761351b0387e343d065b9a566612eff0b7b835148f8e87",
+    "traces/ambiguous-anchor__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t6.json": "7ba02cc2397c27eaf3aaaf8a7543dc990c7a145a52034338601be852bc37bf37",
+    "traces/ambiguous-anchor__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t1.json": "a3e4f9fb5848b6af9627b818895c3edaa9d429319cc18076e70732b5681dfdc5",
+    "traces/ambiguous-anchor__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t2.json": "4688e8a78b1e0d9018ca6d9e57e1a26cead55a403b455e900b3a7095854e12cb",
+    "traces/ambiguous-anchor__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t3.json": "af04c20f7229638da2b2e7aadcf0a715dc7f64b4815e266b8e9877c117b78af7",
+    "traces/ambiguous-anchor__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t4.json": "5939a657fe5bfc5d8bca5f2b71527b0d57929eef060a267111339839aa9da293",
+    "traces/ambiguous-anchor__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t5.json": "85efe8e8983d2fbaa2c22a154cf2533e1fc356cba1226b82ca05f0e45bb51554",
+    "traces/ambiguous-anchor__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t6.json": "46d576cc375e4b1f277028ed68a67ee1f5e90d7a326c63c3424818a96afb3bf1",
+    "traces/ambiguous-anchor__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t1.json": "e85e4ed69cabe88503625dc8678b554f72e5f12d9925a2c78a06c752d90c5736",
+    "traces/ambiguous-anchor__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t2.json": "5f915b8ef21abc0d06d81421af61388fbe850588555dab5b4de2e2d313b75b62",
+    "traces/ambiguous-anchor__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t3.json": "2b19b429a7969cccb897c339230d4172604cf61cfb7f9d9d226e2b2689fdae4d",
+    "traces/ambiguous-anchor__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t4.json": "f91d9c3af1a8f003402a2c3cdb51e4f1b03ec1a9feed2ef30eac4723130e35e2",
+    "traces/ambiguous-anchor__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t5.json": "fa567662170da5d6a8ac9fb5e0128383a1e298abf1296ac57565d70ca59417fe",
+    "traces/ambiguous-anchor__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t6.json": "84651101cdbe40fc204d8fdfe78ea51b899782035cb5ca6fd6f928514b8fec74",
+    "traces/ambiguous-anchor__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t1.json": "c65d2291bd30323cb8abcf71f87112bbdc6d18627f02cd0bfa68c682c6f131e9",
+    "traces/ambiguous-anchor__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t2.json": "304342415d4ded3cc36ffdc5b5470648975427990a60fae2ca4a672ccce2cbd6",
+    "traces/ambiguous-anchor__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t3.json": "f8f3df1428c0f9da7b78143569b012ea6b1408aa176cee0f24dc18dfd7de5ebf",
+    "traces/ambiguous-anchor__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t4.json": "94de1932f3cfd3e7b514bec6c3757e161d32396f244cf9ea9b757f1e07e65bd7",
+    "traces/ambiguous-anchor__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t5.json": "bf1d30d48e2696539c07c2a655939e5d520b6432919f856cb7727e2bb6bd8f15",
+    "traces/ambiguous-anchor__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t6.json": "07cf02c23f39295860184da6818fa42293d6152344de58b16bb401f89188991b",
+    "traces/booking-off-by-one__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t1.json": "1288a0856454d0eddf7ac63a812bcce6b87f62682a91221393b8dafb17e09ce9",
+    "traces/booking-off-by-one__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t2.json": "7805847ac3cf0c28baf4bc974019f144164d4594a0840c3287fb6d9582f1b693",
+    "traces/booking-off-by-one__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t3.json": "6a440522d4b672b5ca90a5e7c04a59278c52eaa657a362f8eb62eabfd33ee4bd",
+    "traces/booking-off-by-one__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t4.json": "3a8f5ee0dfeb18a8898852cf0d4eea04d2b666636a8ae3c842761037a11b1b97",
+    "traces/booking-off-by-one__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t5.json": "6ece0f5f28464c73964670cb2bfd38409f9a6608be76049807417a141221c974",
+    "traces/booking-off-by-one__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t6.json": "a40f67738ff83f82e56601ee4e911e93a51a3992ca571bad9a0c9d819968b39a",
+    "traces/booking-off-by-one__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t1.json": "e40582ed40b4ed642c763779e5a3ec953b7de6807c78a0b38a619650f4faaf8c",
+    "traces/booking-off-by-one__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t2.json": "6180ba2cb1edfbfe37316b475c8f5f8447d69ece08bb231efbe489db5bbed781",
+    "traces/booking-off-by-one__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t3.json": "bdfe937bf9b4dd6cf5d2311a78daad15660a0f88f99d596efbcbb7845c029493",
+    "traces/booking-off-by-one__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t4.json": "31aeebd1ccd744da2f48a35f8755624990b929fdc2a6d079eab2e1558d79c670",
+    "traces/booking-off-by-one__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t5.json": "9cdb6bdcbe6b6a5d1037b04b3f363dc4f8c2c57317d799191150540c840bcac8",
+    "traces/booking-off-by-one__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t6.json": "6b9a750bb3cd128b02e3d5e85be7a00dcba3a824d4c45d9a8fbdd8213b1e8237",
+    "traces/booking-off-by-one__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t1.json": "9aebf415f0b156b7200dc8348fbbdb985abfa449455587e932062e358e103ef2",
+    "traces/booking-off-by-one__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t2.json": "7ba9ffe225a792d89b53094165620a8b611c071bf5ae44c7074cecbcce86ef22",
+    "traces/booking-off-by-one__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t3.json": "a2d9db7af65bf66a4469160d4c9c33090e9d11f589bdfbd8e758a45f5c61991e",
+    "traces/booking-off-by-one__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t4.json": "87f58dea81b89128d9324b3fbb5e6668bd1d9ed2ce97f34e3047e8e483f864a8",
+    "traces/booking-off-by-one__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t5.json": "e6e0fa2c434f516ca55ff268dd2d8cee690d6ea65e3c2347e59e62a60a748a27",
+    "traces/booking-off-by-one__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t6.json": "b97a71035fbd9f893d7307937714dea557b3c0388b7ee55da928842177e400ed",
+    "traces/booking-off-by-one__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t1.json": "588462519cccae1107bb712591af2e19751888f552e73eac8f5cb0a941f40dfc",
+    "traces/booking-off-by-one__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t2.json": "8aa03fe89e629befa737b366f4dc7757c671645447cd491ce06f89dba86d0b9c",
+    "traces/booking-off-by-one__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t3.json": "da3615f561b734cad9b3e45de4fe7465b7de8408ee094e4f6273e3c0a5615ca4",
+    "traces/booking-off-by-one__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t4.json": "2e0e35b2c36e6d9a6d1e47182a91a50272df965c2517d9f7376c5d10efa9833a",
+    "traces/booking-off-by-one__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t5.json": "0147b6c33c99414c363be71616a8b281a6139b082799032acc7de70beee39cd4",
+    "traces/booking-off-by-one__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t6.json": "5ab495c20de3fc6d77058951627e69830cb422439d321313bf81dc2ef5de2788",
+    "traces/constant-and-callers__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t1.json": "2d4f4c92ddf0f29c75184371a7237e11ff968ede2871078c4f6b99f007b7263b",
+    "traces/constant-and-callers__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t2.json": "51c3fc0f33b9b84b7d708c4283ceb42bc3e8e6f30ab5187013b05cf6a512a046",
+    "traces/constant-and-callers__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t3.json": "ece048846bfc45966d481efb563348299bc473090409a8a53df26af3a31cb8b3",
+    "traces/constant-and-callers__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t4.json": "256aeb6854afbc6e53c069f8e7c349b192cfcd5226ed16e2b2055fe2c7a520f2",
+    "traces/constant-and-callers__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t5.json": "02a9f1de80dd534a3291368a144b471e4eed483193220a4f476b0201a2e857df",
+    "traces/constant-and-callers__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t6.json": "630c7514fba72d3184127a8b1c2932a81d99781309cd9a1909403510b0c09364",
+    "traces/constant-and-callers__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t1.json": "89161573037bdb2539b59933c34b3c816c9abcf486be913bae51bdd97da0dd64",
+    "traces/constant-and-callers__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t2.json": "df6f158362ebb427adc598283c6e657137e7d2e2fa382ea1874f73741ab641c7",
+    "traces/constant-and-callers__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t3.json": "bf76213ba61e822a70c61b9041834617c4ab5ded3ae1bb75f1feb833c7322261",
+    "traces/constant-and-callers__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t4.json": "78b7198008914a626f1854126816a8c66e95df341896785ec3ecb2f311484caa",
+    "traces/constant-and-callers__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t5.json": "c649bdf01fd2878895bc3011275370831cc753bc5a75e1213949409573a02928",
+    "traces/constant-and-callers__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t6.json": "71a6c2dc5bd93a22ce182b9c21be1ffc4db388ec04e8947aba3cabcb0dcdc85b",
+    "traces/constant-and-callers__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t1.json": "2e363af19e477e2f7a84065792e195a307b92dc8b17256390d3b53e8f7ca8a08",
+    "traces/constant-and-callers__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t2.json": "d558e0dfac3e6ae9da00dba3f756e980155fae221b0b48aa680382f747371bd4",
+    "traces/constant-and-callers__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t3.json": "9ceef152603750f8a8d255452739f5ddb959df9bc7c4a151d828f9b315847aa6",
+    "traces/constant-and-callers__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t4.json": "17da78ac0596e2bcc6bb38c03953e4046b44f777a7e949cd5378e92abd7e7744",
+    "traces/constant-and-callers__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t5.json": "33b98b4404c54c6720b8a69c649b5833113d3caccdb69216295f8189d7318072",
+    "traces/constant-and-callers__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t6.json": "b02c5fb00734f307a85adb2be6236507db2e6670e2f590575dc73149c209012f",
+    "traces/constant-and-callers__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t1.json": "0b19975a76749899534a2547cd72d624ecc973b1d84a2675b815b1c32144e66d",
+    "traces/constant-and-callers__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t2.json": "72ba308b2f1a73c008f8cfd67d3760a4e2de6211efe6677458bc25c0b7af363d",
+    "traces/constant-and-callers__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t3.json": "e676c8b6279703340547c451374cace30902e766c99fa5fc49bd0aca75e88f88",
+    "traces/constant-and-callers__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t4.json": "f655822637054d492e68af8516df0e34a7f9c9682b48d6000dc20150fac376b6",
+    "traces/constant-and-callers__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t5.json": "aa0c46d3985459110bfab01ba7a84e5bb4c3b9b431aa09e3ac172e1824e7d86c",
+    "traces/constant-and-callers__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t6.json": "a6c99e6a981c9cf494d32c622e4f75bfbbf16bd5bc7630eaad6779de1908c7a1",
+    "traces/csv-summarize-repair__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t1.json": "d1c8ea49c6d626445bb553f47fc0569bd3c369fbdff62d344b821e429908cf67",
+    "traces/csv-summarize-repair__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t2.json": "900facbe21ccb6ff186ece29a9ad46d44e754b8955e7425d415cf56efc29a910",
+    "traces/csv-summarize-repair__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t3.json": "28098aec157be32c8c91ab4330e01f2282a3c8a8f0b8a3242d98afe54aa2ae93",
+    "traces/csv-summarize-repair__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t4.json": "690aadaee6e2f5d2817542b21b5dcc4583a1b5c69b40b259aa837c2de0b281f4",
+    "traces/csv-summarize-repair__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t5.json": "3dfb5537ec1574e204c7de6e167b2f7f9fdc7d4e5ac3175613b8e40e685d3738",
+    "traces/csv-summarize-repair__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t6.json": "20a3d8c5a152911f43d9052a544dfb7de10630b1d5ef8160ff56a63ba715116f",
+    "traces/csv-summarize-repair__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t1.json": "a24ed0aa156fec08d87853e54423c243d65b09ef4f88e99c6c393c514b078115",
+    "traces/csv-summarize-repair__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t2.json": "e736cdc7be0d6ed052e8fe55af522ee095cec2078bb5f3daa5bbdb78c2a69a2f",
+    "traces/csv-summarize-repair__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t3.json": "dd3a8e5d7a58d371ba40627ddd2c9b3e0e73e74d0484e085f0bcebd4b89eab4e",
+    "traces/csv-summarize-repair__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t4.json": "9f3592002ac1341a11e842d7a6ccea8740ce9292036731b7a639983bdbbdab20",
+    "traces/csv-summarize-repair__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t5.json": "48db405191b09a8888efb43e2e057b20d3112d7b367a53cb8c14af6a83df1b0f",
+    "traces/csv-summarize-repair__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t6.json": "a2703dca1f5b8a55611e4f23b7072dc06039654ce9d88159a0a46d65d9a42143",
+    "traces/csv-summarize-repair__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t1.json": "39b6a75660523f25439d3ef0361869cbc18361f1bfdb8a7b8a9c0c14ab7c3020",
+    "traces/csv-summarize-repair__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t2.json": "25313ba14595ee345ccdebda6990f81880dba2d1b0282087ac6009dc3f56f8a6",
+    "traces/csv-summarize-repair__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t3.json": "71055410607f68c4060d6c43c606f5d82264ead517cf7d29b33d2031a2a31e31",
+    "traces/csv-summarize-repair__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t4.json": "409dfecf9d2d370b3b04498154daab1bf5ae33e9d3f650144d77917921eef9bc",
+    "traces/csv-summarize-repair__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t5.json": "0c3647edf0c38f6fb0edb6ecc040c1bf9d12d9ebaf2c1867d2600abee9f51fc5",
+    "traces/csv-summarize-repair__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t6.json": "890b8e3a9c53fc1749f0b02a7d14d35712ab20d98be3cc3e17314894f695b7e1",
+    "traces/csv-summarize-repair__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t1.json": "0230a03127144e6672aa31e5d786d937437e3347459e291e13bbb71746913f75",
+    "traces/csv-summarize-repair__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t2.json": "5fad5c0f8624c0010f2c3edae93c9d23e214d6b76dcb0b2f35f61052288228ec",
+    "traces/csv-summarize-repair__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t3.json": "0646eb0d35a0fae8253a0e63f8f6bdd8a3fcea06e92806e83d701e6991fbb933",
+    "traces/csv-summarize-repair__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t4.json": "801265280d49d5e4f3c5f15e9d161a99d7f4b8c9c89891cef25f99efe3b196cf",
+    "traces/csv-summarize-repair__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t5.json": "9934081a65b9d0adfdd00ba8c4a9251b2ca55e7cf109dc10dae5895ad8d55035",
+    "traces/csv-summarize-repair__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t6.json": "b03c705cabd36901deb7c4a229b7a4d0cec106355c86591e0351563fbc42d535",
+    "traces/strict-log-format__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t1.json": "2c59c03b08d6308baa103a5ec69a130550780f0797f327d8c310116d7533d1cc",
+    "traces/strict-log-format__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t2.json": "7de59bc59a9620357c6a28359af961a68ecf580a46097970756aa0afa67c0b8d",
+    "traces/strict-log-format__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t3.json": "8439d2e443a72c87a6d45148001887326f3b20dd189dd80d089ba99c017ca4e0",
+    "traces/strict-log-format__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t4.json": "4e4dc4df4bc652f18af97596c125fca133e697ef76ac0d7ed408c3bf425fa8d3",
+    "traces/strict-log-format__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t5.json": "40e74fcf3429e3c40e10baa442a60da3c8d3adfbbb4547de5676fcca3801815b",
+    "traces/strict-log-format__L2__nemotron-lightning-e9pin-ctx16384-t0p8-latest__t6.json": "535418156dc820286b2f30c5c99fdb36e0213d53001f4e35e42f64e72fdede17",
+    "traces/strict-log-format__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t1.json": "8fe763d06f6ea146ca82d389f4bbaf1afffbb0795c343e65a1597a0e47628868",
+    "traces/strict-log-format__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t2.json": "1d30e2e07e3e37f3dded08b1614dd09d08fe6c3720747974e89fb1dacaa3d9ec",
+    "traces/strict-log-format__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t3.json": "83d8ca686f5a98166bb635a6625dcf7d46c2d3fc018fc4a155e1ec37389b89fe",
+    "traces/strict-log-format__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t4.json": "a8ee1139084d9a391c2d1939e56bee7ede06ebddcae2f8a2990b327a071bbae3",
+    "traces/strict-log-format__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t5.json": "bf9184ac4d3d9123e2d406bf260bce108a284ef6530b532735a0125d27e139d2",
+    "traces/strict-log-format__L2__qwen3-next-instruct-e9pin-ctx16384-t0p8-latest__t6.json": "edd2198541078cbbb268917caae108d4ff888cc81555a3d67b5405f401320bbd",
+    "traces/strict-log-format__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t1.json": "995684d3474a9f6c82e3059d7b3bcf4fe0ae3862e99680a06ea233b38109b720",
+    "traces/strict-log-format__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t2.json": "d6764bad4063ddfedb0da74b069cb18a95da1bcae48d686d02a3d01329b2b711",
+    "traces/strict-log-format__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t3.json": "35b7e6194cad8f41c81407d478b3d2123b9b75caf804e28348ef35d709c6373b",
+    "traces/strict-log-format__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t4.json": "469a24aaba56e9cd0983f7fdef7b8d3c3e7a7502de306d85c27826e856eec6b4",
+    "traces/strict-log-format__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t5.json": "461b14acfc205618a2f21bf68fbf6de8d260d314813c5fcdb0bd7ace17183412",
+    "traces/strict-log-format__L2__qwen3-next-thinking-ctx32768-t0p6-latest__t6.json": "3174401d369b968c38c8f08ffe38f80a0c2569e7b0175d0e72a61aa091546f88",
+    "traces/strict-log-format__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t1.json": "aac93cf9822859d788f7f973997f456179cf482c272de9e8112880499713807f",
+    "traces/strict-log-format__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t2.json": "700a07e32dab1e4ddd22c1137ce749d7d40ac171d02c7e5e1ee29fdbdcbe4b23",
+    "traces/strict-log-format__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t3.json": "6559c807634215e577aa504f88d52cbfbc8e85f34c28e9be94f7624f91a3febe",
+    "traces/strict-log-format__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t4.json": "6eb59fdf49533d842b38271803d5b951e05f9e6d3fc05840ff569cef14d1f93c",
+    "traces/strict-log-format__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t5.json": "87ed773f17155c3bac4df9461d806e8551095e7b46b00acd3c0eb714067aacc0",
+    "traces/strict-log-format__L2__qwen3.6-35b-e9pin-ctx16384-t0p8-latest__t6.json": "79825451f7cb16584a2b46d9c86f6a9797f5cffa0620c5f89e3da3c638d1cb0b"
+  },
+  "mode": "retrospective audit; no new inference",
+  "models": {
+    "nemotron-lightning-e9pin-ctx16384-t0p8:latest": {
+      "excluding_pre_solved_booking": {
+        "pass": 24
+      },
+      "missing_placement_proof": 30,
+      "nonpasses": [],
+      "per_task": {
+        "ambiguous-anchor": {
+          "pass": 6
+        },
+        "booking-off-by-one": {
+          "pass": 6
+        },
+        "constant-and-callers": {
+          "pass": 6
+        },
+        "csv-summarize-repair": {
+          "pass": 6
+        },
+        "strict-log-format": {
+          "pass": 6
+        }
+      },
+      "recorded_outcomes": {
+        "pass": 30
+      },
+      "recorded_passes": 30
+    },
+    "qwen3-next-instruct-e9pin-ctx16384-t0p8:latest": {
+      "excluding_pre_solved_booking": {
+        "pass": 20,
+        "unproven": 4
+      },
+      "missing_placement_proof": 30,
+      "nonpasses": [
+        {
+          "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8takrklq/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-csv-summarize-repair-L2-8takrklq/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+          "outcome": "unproven",
+          "task_id": "csv-summarize-repair",
+          "trial": 1,
+          "unproven_reasons": [
+            "placement"
+          ],
+          "wall_clock_s": 70.1
+        },
+        {
+          "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-strict-log-format-L2-t6c2yog9/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/local-lane-eval-strict-log-format-L2-t6c2yog9/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+          "outcome": "unproven",
+          "task_id": "strict-log-format",
+          "trial": 1,
+          "unproven_reasons": [
+            "placement"
+          ],
+          "wall_clock_s": 66.0
+        },
+        {
+          "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-strict-log-format-L2-2qgqxf6d/tests/check_logsum.py\", line 17, in <module>\n    assert got == [\"09: 1 errors\", \"14: 2 errors\"], f\"got {got!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: got []",
+          "outcome": "unproven",
+          "task_id": "strict-log-format",
+          "trial": 4,
+          "unproven_reasons": [
+            "placement"
+          ],
+          "wall_clock_s": 219.0
+        },
+        {
+          "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-strict-log-format-L2-5nksqzym/tests/check_logsum.py\", line 17, in <module>\n    assert got == [\"09: 1 errors\", \"14: 2 errors\"], f\"got {got!r}\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: got []",
+          "outcome": "unproven",
+          "task_id": "strict-log-format",
+          "trial": 6,
+          "unproven_reasons": [
+            "placement"
+          ],
+          "wall_clock_s": 209.7
+        }
+      ],
+      "per_task": {
+        "ambiguous-anchor": {
+          "pass": 6
+        },
+        "booking-off-by-one": {
+          "pass": 6
+        },
+        "constant-and-callers": {
+          "pass": 6
+        },
+        "csv-summarize-repair": {
+          "pass": 5,
+          "unproven": 1
+        },
+        "strict-log-format": {
+          "pass": 3,
+          "unproven": 3
+        }
+      },
+      "recorded_outcomes": {
+        "pass": 26,
+        "unproven": 4
+      },
+      "recorded_passes": 26
+    },
+    "qwen3-next-thinking-ctx32768-t0p6:latest": {
+      "excluding_pre_solved_booking": {
+        "pass": 20,
+        "unproven": 4
+      },
+      "missing_placement_proof": 30,
+      "nonpasses": [
+        {
+          "detail": "3/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-constant-and-callers-L2-v5ferhp2/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5; constant updated: regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'; no stale value in code: pattern not found: 'up to 5 times'",
+          "outcome": "unproven",
+          "task_id": "constant-and-callers",
+          "trial": 2,
+          "unproven_reasons": [
+            "dispatch",
+            "placement"
+          ],
+          "wall_clock_s": 55.9
+        },
+        {
+          "detail": "timed out after 600s",
+          "outcome": "unproven",
+          "task_id": "csv-summarize-repair",
+          "trial": 1,
+          "unproven_reasons": [
+            "timing"
+          ],
+          "wall_clock_s": 600.1
+        },
+        {
+          "detail": "timed out after 600s",
+          "outcome": "unproven",
+          "task_id": "csv-summarize-repair",
+          "trial": 2,
+          "unproven_reasons": [
+            "timing"
+          ],
+          "wall_clock_s": 600.0
+        },
+        {
+          "detail": "timed out after 600s",
+          "outcome": "unproven",
+          "task_id": "csv-summarize-repair",
+          "trial": 5,
+          "unproven_reasons": [
+            "timing"
+          ],
+          "wall_clock_s": 600.0
+        }
+      ],
+      "per_task": {
+        "ambiguous-anchor": {
+          "pass": 6
+        },
+        "booking-off-by-one": {
+          "pass": 6
+        },
+        "constant-and-callers": {
+          "pass": 5,
+          "unproven": 1
+        },
+        "csv-summarize-repair": {
+          "pass": 3,
+          "unproven": 3
+        },
+        "strict-log-format": {
+          "pass": 6
+        }
+      },
+      "recorded_outcomes": {
+        "pass": 26,
+        "unproven": 4
+      },
+      "recorded_passes": 26
+    },
+    "qwen3.6-35b-e9pin-ctx16384-t0p8:latest": {
+      "excluding_pre_solved_booking": {
+        "pass": 24
+      },
+      "missing_placement_proof": 30,
+      "nonpasses": [],
+      "per_task": {
+        "ambiguous-anchor": {
+          "pass": 6
+        },
+        "booking-off-by-one": {
+          "pass": 6
+        },
+        "constant-and-callers": {
+          "pass": 6
+        },
+        "csv-summarize-repair": {
+          "pass": 6
+        },
+        "strict-log-format": {
+          "pass": 6
+        }
+      },
+      "recorded_outcomes": {
+        "pass": 30
+      },
+      "recorded_passes": 30
+    }
+  },
+  "recorded_run_revision": "2b63be163ff5e2a3514f83331ccd64f23bd3f06a",
+  "states": {
+    "state_A.json": {
+      "done": 90,
+      "failure_records": 0,
+      "results": 90
+    },
+    "state_B.json": {
+      "done": 30,
+      "failure_records": 0,
+      "results": 30
+    }
+  },
+  "trace_state_mismatches": [],
+  "untouched_fixture_baselines_at_run_revision": {
+    "ambiguous-anchor": {
+      "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+      "passed_without_model": false,
+      "run_revision_source_sha256": "2cedc1cd066c1c154b1665736a54a5a03c6b008b6b5ceb74f47ff2a04ad96649"
+    },
+    "booking-off-by-one": {
+      "detail": "all 3 checks passed",
+      "passed_without_model": true,
+      "restored_bug_in_disposable_fixture": {
+        "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-takeover-baseline-9cfgiph6/tests/check_bookings.py\", line 9, in <module>\n    assert not bookings_conflict(\"2026-03-05\", \"2026-03-10\", \"2026-03-10\", \"2026-03-12\"), \\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: checkout day is exclusive; these must not conflict",
+        "passed_without_model": false
+      },
+      "run_revision_source_sha256": "09fe82a9f0283b15ba38dd49ef8f1b8c8a18c18ce108c851124b275f2d9f23b8"
+    },
+    "constant-and-callers": {
+      "detail": "3/4 checks failed: all three files consistent: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-takeover-baseline-8kt2bowj/tests/check_limits.py\", line 9, in <module>\n    assert MAX_RETRIES == 5, f\"MAX_RETRIES={MAX_RETRIES}, expected 5\"\n           ^^^^^^^^^^^^^^^^\nAssertionError: MAX_RETRIES=3, expected 5; constant updated: regex did not match: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'; no stale value in code: pattern not found: 'up to 5 times'",
+      "passed_without_model": false,
+      "run_revision_source_sha256": "7f88f245d5203901a5d6fb74f711c9c1032cb2e28b66981bf1d8f162ea4a1b11"
+    },
+    "csv-summarize-repair": {
+      "detail": "1/2 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-takeover-baseline-ljvd8q6p/tests/check_expenses.py\", line 16, in <module>\n    r = summarize_expenses(BASIC)\n  File \"/tmp/local-lane-eval-takeover-baseline-ljvd8q6p/src/expenses.py\", line 14, in summarize_expenses\n    amount = float(parts[2])\nValueError: could not convert string to float: '\"$1'",
+      "passed_without_model": false,
+      "run_revision_source_sha256": "01191c98d4cb6e79d51aa5140f2b567b6fa3a5b512767f92667f983d9ea724b4"
+    },
+    "strict-log-format": {
+      "detail": "1/3 checks failed: battery passes: postcondition command exited 1: Traceback (most recent call last):\n  File \"/tmp/local-lane-eval-takeover-baseline-08fz57wp/tests/check_logsum.py\", line 16, in <module>\n    got = error_report(BASIC)\n  File \"/tmp/local-lane-eval-takeover-baseline-08fz57wp/src/logsum.py\", line 14, in error_report\n    raise NotImplementedError\nNotImplementedError",
+      "passed_without_model": false,
+      "run_revision_source_sha256": "28eeafe0497a963615f54205fd3944650a1716687c4deb09815ad52bbfe132dd"
+    }
+  }
+}
