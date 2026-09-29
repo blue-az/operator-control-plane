@@ -13,7 +13,7 @@ import html
 import json
 import os
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 try:
@@ -46,6 +46,14 @@ def extra_nav_links() -> str:
                 f' · <a href="{html.escape(url.strip(), quote=True)}">{html.escape(label.strip())}</a>'
             )
     return "".join(links)
+
+
+def board_nav(prefix: str) -> str:
+    """Top-menu links. Only the default prefix has issues and map views."""
+    if prefix == PREFIX_DEFAULT:
+        return '<a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a>'
+    p = html.escape(prefix, quote=True)
+    return f'<a href="{p}.html">Project</a> · <a href="operator.html">Hub</a>'
 
 
 def load_yaml(path: Path) -> dict:
@@ -136,7 +144,7 @@ def collect(root: Path, prefix: str) -> dict:
         next_action = str(data.get("next_action") or "")
         status = str(data.get("status") or "?")
         stale = bool(
-            re.search(r"/op:handoff\s+go\b|Reload Pi|proceed to Step", next_action, re.I)
+            re.search(r"/op:handoff\s+go\b|Reload Pi|proceed to Step", next_action, re.IGNORECASE)
             and status in {"verified", "quarantined"}
         )
         rows.append(
@@ -156,12 +164,15 @@ def collect(root: Path, prefix: str) -> dict:
                 "latest_verified": next((c["id"] for c in reversed(claims) if c["verified"]), None),
             }
         )
-    issues, features = parse_pbc_lists(
-        root / "owners-manual" / "pbc" / "appendix-pi-operator-extension.pbc.md"
-    )
+    # The step ladder and PBC appendix describe the pi extension only.
+    issues, features = [], []
+    if prefix == PREFIX_DEFAULT:
+        issues, features = parse_pbc_lists(
+            root / "owners-manual" / "pbc" / "appendix-pi-operator-extension.pbc.md"
+        )
     return {
         "prefix": prefix,
-        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "generated_at": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
         "tasks": rows,
         "issues": issues[-8:],
         "features": features[-10:],
@@ -181,8 +192,7 @@ def render(data: dict) -> str:
     cards = []
     for t in tasks:
         pct = int(100 * t["verified"] / t["total"]) if t["total"] else 0
-        cards.append(
-            f"""
+        cards.append(f"""
 <article class="card status-{esc(t['status'])}{' stale' if t['stale'] else ''}">
   <header>
     <h2><a href="{esc(t['id'])}-resolution.html">{esc(t['id'])}</a></h2>
@@ -192,17 +202,40 @@ def render(data: dict) -> str:
   <p class="meta">{t['verified']}/{t['total']} claims verified · {t['evidence']} evidence · {t['handoffs']} handoffs</p>
   <p class="next">{'STALE · ' if t['stale'] else ''}{esc(t['next'][:220] or '(no next_action)')}</p>
   <p class="meta">latest verified: {esc(t['latest_verified'] or 'none')} · updated {esc(t['updated'][:19])}</p>
-</article>"""
-        )
+</article>""")
 
-    issues = "".join(
-        f"<li><strong>{esc(i.get('id'))}</strong> {esc(i.get('summary') or i.get('name') or '')}</li>"
-        for i in data["issues"]
-    ) or "<li>No PBC issues parsed.</li>"
-    features = "".join(
-        f"<li><strong>{esc(f.get('id'))}</strong> {esc(f.get('command') or '')} — {esc(f.get('name') or '')}</li>"
-        for f in data["features"]
-    ) or "<li>No future features parsed.</li>"
+    issues = (
+        "".join(
+            f"<li><strong>{esc(i.get('id'))}</strong> {esc(i.get('summary') or i.get('name') or '')}</li>"
+            for i in data["issues"]
+        )
+        or "<li>No PBC issues parsed.</li>"
+    )
+    features = (
+        "".join(
+            f"<li><strong>{esc(f.get('id'))}</strong> {esc(f.get('command') or '')} — {esc(f.get('name') or '')}</li>"
+            for f in data["features"]
+        )
+        or "<li>No future features parsed.</li>"
+    )
+    ladder = ""
+    if data["prefix"] == PREFIX_DEFAULT:
+        steps = "".join(
+            f'<div class="step"><span>Step {n}</span>{esc(name)}</div>' for n, name in LADDER
+        )
+        ladder = f'<div class="ladder">\n  {steps}\n</div>'
+    lists = ""
+    if data["issues"] or data["features"]:
+        lists = f"""<section class="lists">
+  <div>
+    <h3>Recent PBC issues</h3>
+    <ul>{issues}</ul>
+  </div>
+  <div>
+    <h3>Recent future features</h3>
+    <ul>{features}</ul>
+  </div>
+</section>"""
 
     payload = json.dumps(data, indent=2)
     return f"""<!DOCTYPE html>
@@ -249,7 +282,7 @@ def render(data: dict) -> str:
 </head>
 <body>
 <header class="top">
-  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a>{extra_nav_links()}</nav>
+  <nav class="nav">{board_nav(data['prefix'])}{extra_nav_links()}</nav>
   <h1>{esc(data['prefix'])}</h1>
   <p class="sub">Simple Operator board · snapshot {esc(data['generated_at'])} · not Graphify, not a knowledge graph</p>
 </header>
@@ -259,22 +292,11 @@ def render(data: dict) -> str:
   <div class="kpi"><b>{vclaims}/{tclaims}</b>claims verified</div>
   <div class="kpi"><b>{stale}</b>stale next_action</div>
 </div>
-<div class="ladder">
-  {''.join(f'<div class="step"><span>Step {n}</span>{esc(name)}</div>' for n,name in LADDER)}
-</div>
+{ladder}
 <div class="grid">
 {''.join(cards)}
 </div>
-<section class="lists">
-  <div>
-    <h3>Recent PBC issues</h3>
-    <ul>{issues}</ul>
-  </div>
-  <div>
-    <h3>Recent future features</h3>
-    <ul>{features}</ul>
-  </div>
-</section>
+{lists}
 <script type="application/json" id="board-data">{payload}</script>
 </body>
 </html>
@@ -329,7 +351,7 @@ def collect_issues(root: Path, prefix: str) -> dict:
         )
     return {
         "prefix": prefix,
-        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "generated_at": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
         "issues": rows,
     }
 
@@ -343,11 +365,11 @@ def render_issues(data: dict) -> str:
     cards = []
     for i in issues:
         claims = i["claims"]
-        claim_bits = ", ".join(
-            f"{c['id']}{' ✓' if c['verified'] else ''}" for c in claims[:6]
-        ) or "no matching claims"
-        cards.append(
-            f"""
+        claim_bits = (
+            ", ".join(f"{c['id']}{' ✓' if c['verified'] else ''}" for c in claims[:6])
+            or "no matching claims"
+        )
+        cards.append(f"""
 <article class="card state-{esc(i['state'])}">
   <header>
     <h2>{esc(i['id'])}</h2>
@@ -357,8 +379,7 @@ def render_issues(data: dict) -> str:
   <p class="meta">source: {esc(i['source'][:160])}</p>
   <p class="meta">next: {esc(i['next_step'][:220])}</p>
   <p class="meta">task hint: {esc(i['task_hint'] or 'none')} · claims: {esc(claim_bits)}</p>
-</article>"""
-        )
+</article>""")
     payload = json.dumps(data, indent=2)
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -412,7 +433,7 @@ def render_issues(data: dict) -> str:
 """
 
 
-def collect_resolution(root: Path, task_id: str) -> dict:
+def collect_resolution(root: Path, task_id: str, prefix: str = PREFIX_DEFAULT) -> dict:
     ledger = root / ".operator"
     task_path = ledger / "tasks" / f"{task_id}.yaml"
     task = load_yaml(task_path) if task_path.exists() else {}
@@ -430,7 +451,11 @@ def collect_resolution(root: Path, task_id: str) -> dict:
                 "at": str(c.get("made_at") or ""),
                 "actor": str(c.get("made_by") or ""),
                 "text": str(c.get("text") or "")[:240],
-                "status": "verified" if c.get("verification_status") else ("withdrawn" if c.get("verdict") else "unverified"),
+                "status": (
+                    "verified"
+                    if c.get("verification_status")
+                    else ("withdrawn" if c.get("verdict") else "unverified")
+                ),
                 "lane": "builder",
             }
         )
@@ -492,10 +517,11 @@ def collect_resolution(root: Path, task_id: str) -> dict:
     events.sort(key=lambda x: (x.get("at") or "", x.get("id") or ""))
     return {
         "task_id": task_id,
+        "prefix": prefix,
         "status": str(task.get("status") or "?"),
         "objective": str(task.get("objective") or ""),
         "next": str(task.get("next_action") or ""),
-        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "generated_at": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
         "events": events,
         "claims": [
             {
@@ -518,8 +544,7 @@ def render_resolution(data: dict) -> str:
         counts[e["kind"]] = counts.get(e["kind"], 0) + 1
     rows = []
     for e in events:
-        rows.append(
-            f"""
+        rows.append(f"""
 <div class="ev lane-{esc(e['lane'])} kind-{esc(e['kind'])}">
   <div class="when">{esc((e['at'] or '')[:19].replace('T',' '))}</div>
   <div class="kind">{esc(e['kind'])}</div>
@@ -528,8 +553,7 @@ def render_resolution(data: dict) -> str:
     <span class="actor">{esc(e['actor'])}</span>
     <p>{esc(e['text'])}</p>
   </div>
-</div>"""
-        )
+</div>""")
     payload = json.dumps(data, indent=2)
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -568,7 +592,7 @@ def render_resolution(data: dict) -> str:
 </head>
 <body>
 <header class="top">
-  <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
+  <nav class="nav">{board_nav(data['prefix'])}</nav>
   <h1>{esc(data['task_id'])}</h1>
   <p class="sub">Issue-resolution ledger · {esc(data['status'])} · snapshot {esc(data['generated_at'])}</p>
   <p class="obj">{esc(data['objective'][:400])}</p>
@@ -600,7 +624,12 @@ def task_family(tid: str, prefix: str) -> str:
         return "spec"
     if "cross-project" in rest:
         return "cross-project"
-    if rest in {"next-steps", "project-dashboard", "workflow-guidance", "target-ux-cleanup"} or rest.startswith("target-ux"):
+    if rest in {
+        "next-steps",
+        "project-dashboard",
+        "workflow-guidance",
+        "target-ux-cleanup",
+    } or rest.startswith("target-ux"):
         return "follow-on"
     return "other"
 
@@ -609,7 +638,17 @@ def write_graph_html(root: Path, prefix: str, out: Path) -> None:
     project = collect(root, prefix)
     issues = collect_issues(root, prefix)
     families: dict[str, list[dict]] = {}
-    order = ["spec", "ladder step1", "ladder step2", "ladder step3", "ladder step4", "ladder step5", "follow-on", "cross-project", "other"]
+    order = [
+        "spec",
+        "ladder step1",
+        "ladder step2",
+        "ladder step3",
+        "ladder step4",
+        "ladder step5",
+        "follow-on",
+        "cross-project",
+        "other",
+    ]
     for t in project["tasks"]:
         families.setdefault(task_family(t["id"], prefix), []).append(t)
     for key in families:
@@ -690,7 +729,9 @@ def write_obsidian(root: Path, prefix: str, out: Path) -> int:
         (out / f"{name}.md").write_text(body.strip() + "\n", encoding="utf-8")
         count += 1
 
-    task_links = "\n".join(f"- [[{t['id']}]] `{t['status']}` {t['verified']}/{t['total']}" for t in project["tasks"])
+    task_links = "\n".join(
+        f"- [[{t['id']}]] `{t['status']}` {t['verified']}/{t['total']}" for t in project["tasks"]
+    )
     issue_links = "\n".join(f"- [[{i['id']}]] `{i['state']}`" for i in issues["issues"])
     w(
         "00-project",
@@ -698,13 +739,15 @@ def write_obsidian(root: Path, prefix: str, out: Path) -> int:
     )
     for t in project["tasks"]:
         resolution = collect_resolution(root, t["id"])
-        claim_links = "\n".join(
-            f"- [[{c['id']}]]" for c in t["claims"]
-        ) or "- (none)"
+        claim_links = "\n".join(f"- [[{c['id']}]]" for c in t["claims"]) or "- (none)"
         event_links = "\n".join(
             f"- {e['kind']}: `{e['id']}` {e.get('actor','')}" for e in resolution["events"][:40]
         )
-        issue_hits = [i for i in issues["issues"] if i.get("task_hint") == t["id"] or t["id"] in (i.get("source") or "")]
+        issue_hits = [
+            i
+            for i in issues["issues"]
+            if i.get("task_hint") == t["id"] or t["id"] in (i.get("source") or "")
+        ]
         iss = "\n".join(f"- [[{i['id']}]]" for i in issue_hits) or "- (none named)"
         w(
             t["id"],
@@ -716,7 +759,9 @@ def write_obsidian(root: Path, prefix: str, out: Path) -> int:
                 f"""# {c['id']}\n\ntask: [[{t['id']}]]\nverified: `{c['verified']}`\n\n{c['text']}\n\n[[00-project]]\n""",
             )
     for i in issues["issues"]:
-        claim_links = "\n".join(f"- [[{c['id']}]] on [[{c['task']}]]" for c in i["claims"]) or "- (no claims)"
+        claim_links = (
+            "\n".join(f"- [[{c['id']}]] on [[{c['task']}]]" for c in i["claims"]) or "- (no claims)"
+        )
         task = f"[[{i['task_hint']}]]" if i.get("task_hint") else "(none)"
         w(
             i["id"],
@@ -724,7 +769,7 @@ def write_obsidian(root: Path, prefix: str, out: Path) -> int:
         )
     w(
         "README",
-        """# Obsidian Operator map\n\nOpen **this folder** as an Obsidian vault.\n\n1. Obsidian → Open folder as vault → `docs/boards/obsidian`\n2. Open [[00-project]]\n3. Open Graph view\n\nThis is a generated wiki-link map of the Operator ledger, not Graphify.\nRegenerate with:\n\n```bash\npython3 scripts/operator_project_board.py --view obsidian\n```\n""", 
+        """# Obsidian Operator map\n\nOpen **this folder** as an Obsidian vault.\n\n1. Obsidian → Open folder as vault → `docs/boards/obsidian`\n2. Open [[00-project]]\n3. Open Graph view\n\nThis is a generated wiki-link map of the Operator ledger, not Graphify.\nRegenerate with:\n\n```bash\npython3 scripts/operator_project_board.py --view obsidian\n```\n""",
     )
     return count
 
@@ -733,7 +778,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prefix", default=PREFIX_DEFAULT)
     parser.add_argument("--root", type=Path, default=Path.cwd())
-    parser.add_argument("--view", choices=["project", "issues", "resolution", "obsidian", "graph"], default="project")
+    parser.add_argument(
+        "--view",
+        choices=["project", "issues", "resolution", "obsidian", "graph"],
+        default="project",
+    )
     parser.add_argument("--task", default="pi-operator-extension-step5-dogfood")
     parser.add_argument(
         "-o",
@@ -758,13 +807,13 @@ def main() -> int:
         html_text = render_issues(data)
         label = f"{len(data['issues'])} issues"
     elif args.view == "resolution":
-        data = collect_resolution(args.root, args.task)
+        data = collect_resolution(args.root, args.task, args.prefix)
         out = args.output or Path(f"docs/boards/{args.task}-resolution.html")
         html_text = render_resolution(data)
         label = f"{len(data['events'])} ledger events"
     else:
         data = collect(args.root, args.prefix)
-        out = args.output or Path("docs/boards/pi-operator-extension.html")
+        out = args.output or Path(f"docs/boards/{args.prefix}.html")
         html_text = render(data)
         label = f"{len(data['tasks'])} tasks"
     out.parent.mkdir(parents=True, exist_ok=True)

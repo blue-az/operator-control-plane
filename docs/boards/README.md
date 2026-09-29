@@ -22,7 +22,7 @@ python3 scripts/operator_project_board.py --view obsidian
 python3 scripts/operator_project_board.py --prefix pi-operator-extension -o docs/boards/pi-operator-extension.html
 ```
 
-To add machine-local links to the project board's top menu (for example a
+To add machine-local links to the top menu of the project boards and the hub (for example a
 `file://` dashboard), set `OPERATOR_BOARD_EXTRA_LINKS` to `Label=URL` pairs
 separated by `;`. Without it the menu has only the board links, so no local
 paths live in the generator itself:
