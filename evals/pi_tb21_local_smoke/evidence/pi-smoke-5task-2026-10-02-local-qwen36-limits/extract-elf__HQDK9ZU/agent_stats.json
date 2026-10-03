@@ -1,0 +1,10 @@
+{
+  "assistant_turns": 14,
+  "max_turn_input_tokens": 19932,
+  "max_turn_output_tokens": 4096,
+  "length_stops": 1,
+  "last_stop_reason": "length",
+  "thinking_chars": 28195,
+  "compactions": 0,
+  "first_error": null
+}

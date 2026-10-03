@@ -1,9 +1,9 @@
 # Evals — benchmark suite index
 
-Seven distinct local-model benchmark suites exist across this repo. They were built
+Eight distinct benchmark suites exist across this repo. They were built
 at different times for different questions and don't share fixtures, task formats,
 or scoring — this file exists so that isn't only discoverable by reading each one's
-own README separately. If you're about to build an eighth, check here first for
+own README separately. If you're about to build a ninth, check here first for
 whether one of these already covers the question.
 
 | Suite | Location | Measures | Status |
@@ -15,6 +15,7 @@ whether one of these already covers the question.
 | **bt_floor** | `evals/bt_floor/` | How small a model can recover the Bulkhead Tau boundary map from a cold read of 5 repo documents. Tracks input-corpus drift explicitly as a first-class variable (22.7k tokens in the `july` epoch → 37k in `current`, +63%) — results across epochs are declared non-comparable, same discipline as harness-revision tracking elsewhere. | `HARD_PROBE_RESULTS.md` on disk. Record which epoch a run used. |
 | **comfyui_symbolic_benchmark** | `evals/comfyui_symbolic_benchmark/` | Image-generation symbolic-constraint compliance — a fixed prompt (an editorial cartoon requiring several meaning-carrying constraints, e.g. relative size/pose, to land simultaneously) for Paper 1.19, "The Capability Ceiling." | Has runs on disk (`score_sheet.csv`). |
 | **stella_vs_pi_smoke** | `evals/stella_vs_pi_smoke/` | Third-party coding-agent comparison (not a local-model suite): Stella vs. pi on Terminal-Bench 2.1, same model (GLM-5.2) via OpenRouter. | **One real 5-of-89-task smoke run, evidence-backed, deliberately never published** — see that suite's own README for why. Do not cite the result as a benchmark claim without a full 89-task re-run. |
+| **pi_tb21_local_smoke** | `evals/pi_tb21_local_smoke/` | Local Ollama models through pi 1.0.0 on the same 5 Terminal-Bench 2.1 tasks, via Harbor. Mainly a setup recipe: what pi needs declared (context window, `max_tokens` field, thinking off, system role) for a local model to work at all. | Four local runs plus two failed setups, 2026-10-01/02, one sample each. Best: qwen3.8 27B at 64k context, thinking off, 4/5 (32k qwen3.6 stayed at 2/5). Smoke only, not a claim. |
 
 ## On "the Stella benchmark work"
 
@@ -37,7 +38,7 @@ Two separate things both answer to that description, and it's worth keeping them
 
 Each suite that predates `LOCAL_INFERENCE_BENCH_HARNESS.md` (2026-08-19, governs
 `project-phoenix/docs/domain_runs/*` hardware/throughput work) has its **own**
-protocol — none of these seven use that contract, because none of them measure raw
+protocol — none of these eight use that contract, because none of them measure raw
 decode throughput. Don't cite a number from one suite as if it were comparable to
 another's, or to a `docs/domain_runs/` figure, without checking whether the
 protocols line up.

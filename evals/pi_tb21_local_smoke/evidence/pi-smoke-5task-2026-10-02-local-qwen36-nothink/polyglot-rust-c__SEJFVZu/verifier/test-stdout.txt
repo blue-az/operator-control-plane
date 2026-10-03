@@ -1,0 +1,669 @@
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+curl is already the newest version (8.5.0-2ubuntu10.15).
+0 upgraded, 0 newly installed, 0 to remove and 90 not upgraded.
+downloading uv 0.9.5 x86_64-unknown-linux-gnu
+no checksums to verify
+installing to /root/.local/bin
+  uv
+  uvx
+everything's installed!
+
+To add $HOME/.local/bin to your PATH, either restart your shell or run:
+
+    source $HOME/.local/bin/env (sh, bash, zsh)
+    source $HOME/.local/bin/env.fish (fish)
+Downloading cpython-3.13.9-linux-x86_64-gnu (download) (32.0MiB)
+ Downloading cpython-3.13.9-linux-x86_64-gnu (download)
+Downloading pygments (1.2MiB)
+ Downloading pygments
+Installed 6 packages in 25ms
+============================= test session starts ==============================
+platform linux -- Python 3.13.9, pytest-8.4.1, pluggy-1.6.0
+rootdir: /tests
+plugins: json-ctrf-0.3.5
+collected 1 item
+
+../tests/test_outputs.py F                                               [100%]
+
+=================================== FAILURES ===================================
+___________________________ test_fibonacci_polyglot ____________________________
+
+    def test_fibonacci_polyglot():
+        """
+        Test that main.rs is a valid polyglot that compiles with both rustc and g++,
+        produces correct Fibonacci numbers, and is contained in a single file.
+        """
+    
+        # Check that main.rs exists (dont require it to be the only file — compilation may leave binaries)
+        assert os.path.isfile("/app/polyglot/main.rs"), "main.rs not found in /app/polyglot"
+    
+        # Test compilation and Fibonacci computation
+        os.popen("rustc /app/polyglot/main.rs -o /app/polyglot/main").read()
+        os.popen("g++ -x c++ /app/polyglot/main.rs -o /app/polyglot/cmain").read()
+    
+        test_cases = [(0, "1"), (1, "1"), (2, "2"), (10, "89"), (42, "433494437")]
+    
+        for n, expected in test_cases:
+>           rust_result = subprocess.run(
+                ["/app/polyglot/main", str(n)],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+/tests/test_outputs.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/root/.local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/lib/python3.13/subprocess.py:554: in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/lib/python3.13/subprocess.py:1039: in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Popen: returncode: 255 args: ['/app/polyglot/main', '0']>
+args = ['/app/polyglot/main', '0'], executable = b'/app/polyglot/main'
+preexec_fn = None, close_fds = True, pass_fds = (), cwd = None, env = None
+startupinfo = None, creationflags = 0, shell = False, p2cread = -1
+p2cwrite = -1, c2pread = 12, c2pwrite = 13, errread = 14, errwrite = 15
+restore_signals = True, gid = None, gids = None, uid = None, umask = -1
+start_new_session = False, process_group = -1
+
+    def _execute_child(self, args, executable, preexec_fn, close_fds,
+                       pass_fds, cwd, env,
+                       startupinfo, creationflags, shell,
+                       p2cread, p2cwrite,
+                       c2pread, c2pwrite,
+                       errread, errwrite,
+                       restore_signals,
+                       gid, gids, uid, umask,
+                       start_new_session, process_group):
+        """Execute program (POSIX version)"""
+    
+        if isinstance(args, (str, bytes)):
+            args = [args]
+        elif isinstance(args, os.PathLike):
+            if shell:
+                raise TypeError('path-like args is not allowed when '
+                                'shell is true')
+            args = [args]
+        else:
+            args = list(args)
+    
+        if shell:
+            # On Android the default shell is at '/system/bin/sh'.
+            unix_shell = ('/system/bin/sh' if
+                      hasattr(sys, 'getandroidapilevel') else '/bin/sh')
+            args = [unix_shell, "-c"] + args
+            if executable:
+                args[0] = executable
+    
+        if executable is None:
+            executable = args[0]
+    
+        sys.audit("subprocess.Popen", executable, args, cwd, env)
+    
+        if (_USE_POSIX_SPAWN
+                and os.path.dirname(executable)
+                and preexec_fn is None
+                and (not close_fds or _HAVE_POSIX_SPAWN_CLOSEFROM)
+                and not pass_fds
+                and cwd is None
+                and (p2cread == -1 or p2cread > 2)
+                and (c2pwrite == -1 or c2pwrite > 2)
+                and (errwrite == -1 or errwrite > 2)
+                and not start_new_session
+                and process_group == -1
+                and gid is None
+                and gids is None
+                and uid is None
+                and umask < 0):
+            self._posix_spawn(args, executable, env, restore_signals, close_fds,
+                              p2cread, p2cwrite,
+                              c2pread, c2pwrite,
+                              errread, errwrite)
+            return
+    
+        orig_executable = executable
+    
+        # For transferring possible exec failure from child to parent.
+        # Data format: "exception name:hex errno:description"
+        # Pickle is not used; it is complex and involves memory allocation.
+        errpipe_read, errpipe_write = os.pipe()
+        # errpipe_write must not be in the standard io 0, 1, or 2 fd range.
+        low_fds_to_close = []
+        while errpipe_write < 3:
+            low_fds_to_close.append(errpipe_write)
+            errpipe_write = os.dup(errpipe_write)
+        for low_fd in low_fds_to_close:
+            os.close(low_fd)
+        try:
+            try:
+                # We must avoid complex work that could involve
+                # malloc or free in the child process to avoid
+                # potential deadlocks, thus we do all this here.
+                # and pass it to fork_exec()
+    
+                if env is not None:
+                    env_list = []
+                    for k, v in env.items():
+                        k = os.fsencode(k)
+                        if b'=' in k:
+                            raise ValueError("illegal environment variable name")
+                        env_list.append(k + b'=' + os.fsencode(v))
+                else:
+                    env_list = None  # Use execv instead of execve.
+                executable = os.fsencode(executable)
+                if os.path.dirname(executable):
+                    executable_list = (executable,)
+                else:
+                    # This matches the behavior of os._execvpe().
+                    executable_list = tuple(
+                        os.path.join(os.fsencode(dir), executable)
+                        for dir in os.get_exec_path(env))
+                fds_to_keep = set(pass_fds)
+                fds_to_keep.add(errpipe_write)
+                self.pid = _fork_exec(
+                        args, executable_list,
+                        close_fds, tuple(sorted(map(int, fds_to_keep))),
+                        cwd, env_list,
+                        p2cread, p2cwrite, c2pread, c2pwrite,
+                        errread, errwrite,
+                        errpipe_read, errpipe_write,
+                        restore_signals, start_new_session,
+                        process_group, gid, gids, uid, umask,
+                        preexec_fn, _USE_VFORK)
+                self._child_created = True
+            finally:
+                # be sure the FD is closed no matter what
+                os.close(errpipe_write)
+    
+            self._close_pipe_fds(p2cread, p2cwrite,
+                                 c2pread, c2pwrite,
+                                 errread, errwrite)
+    
+            # Wait for exec to fail or succeed; possibly raising an
+            # exception (limited in size)
+            errpipe_data = bytearray()
+            while True:
+                part = os.read(errpipe_read, 50000)
+                errpipe_data += part
+                if not part or len(errpipe_data) > 50000:
+                    break
+        finally:
+            # be sure the FD is closed no matter what
+            os.close(errpipe_read)
+    
+        if errpipe_data:
+            try:
+                pid, sts = os.waitpid(self.pid, 0)
+                if pid == self.pid:
+                    self._handle_exitstatus(sts)
+                else:
+                    self.returncode = sys.maxsize
+            except ChildProcessError:
+                pass
+    
+            try:
+                exception_name, hex_errno, err_msg = (
+                        errpipe_data.split(b':', 2))
+                # The encoding here should match the encoding
+                # written in by the subprocess implementations
+                # like _posixsubprocess
+                err_msg = err_msg.decode()
+            except ValueError:
+                exception_name = b'SubprocessError'
+                hex_errno = b'0'
+                err_msg = 'Bad exception data from child: {!r}'.format(
+                              bytes(errpipe_data))
+            child_exception_type = getattr(
+                    builtins, exception_name.decode('ascii'),
+                    SubprocessError)
+            if issubclass(child_exception_type, OSError) and hex_errno:
+                errno_num = int(hex_errno, 16)
+                if err_msg == "noexec:chdir":
+                    err_msg = ""
+                    # The error must be from chdir(cwd).
+                    err_filename = cwd
+                elif err_msg == "noexec":
+                    err_msg = ""
+                    err_filename = None
+                else:
+                    err_filename = orig_executable
+                if errno_num != 0:
+                    err_msg = os.strerror(errno_num)
+                if err_filename is not None:
+>                   raise child_exception_type(errno_num, err_msg, err_filename)
+E                   FileNotFoundError: [Errno 2] No such file or directory: '/app/polyglot/main'
+
+/root/.local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/lib/python3.13/subprocess.py:1972: FileNotFoundError
+----------------------------- Captured stderr call -----------------------------
+error: expected one of `!` or `[`, found keyword `if`
+ --> /app/polyglot/main.rs:3:2
+  |
+3 | #if 0
+  |  ^^ expected one of `!` or `[`
+
+error: aborting due to previous error
+
+/app/polyglot/main.rs:27:77: error: ‘comments’ does not name a type
+   27 | /* From this point on, the code is valid C++. It hides from rustc via /* */ comments.*/
+      |                                                                             ^~~~~~~~
+In file included from /usr/include/c++/13/cstdlib:79,
+                 from /usr/include/c++/13/stdlib.h:36,
+                 from /app/polyglot/main.rs:29:
+/usr/include/stdlib.h:98:8: error: ‘size_t’ does not name a type
+   98 | extern size_t __ctype_get_mb_cur_max (void) __THROW __wur;
+      |        ^~~~~~
+/usr/include/stdlib.h:42:1: note: ‘size_t’ is defined in header ‘<cstddef>’; did you forget to ‘#include <cstddef>’?
+   41 | # include <bits/waitstatus.h>
+  +++ |+#include <cstddef>
+   42 | 
+/usr/include/stdlib.h:278:36: error: ‘size_t’ has not been declared
+  278 | extern int strfromd (char *__dest, size_t __size, const char *__format,
+      |                                    ^~~~~~
+/usr/include/stdlib.h:282:36: error: ‘size_t’ has not been declared
+  282 | extern int strfromf (char *__dest, size_t __size, const char *__format,
+      |                                    ^~~~~~
+/usr/include/stdlib.h:286:36: error: ‘size_t’ has not been declared
+  286 | extern int strfroml (char *__dest, size_t __size, const char *__format,
+      |                                    ^~~~~~
+/usr/include/stdlib.h:298:38: error: ‘size_t’ has not been declared
+  298 | extern int strfromf32 (char *__dest, size_t __size, const char * __format,
+      |                                      ^~~~~~
+/usr/include/stdlib.h:304:38: error: ‘size_t’ has not been declared
+  304 | extern int strfromf64 (char *__dest, size_t __size, const char * __format,
+      |                                      ^~~~~~
+/usr/include/stdlib.h:310:39: error: ‘size_t’ has not been declared
+  310 | extern int strfromf128 (char *__dest, size_t __size, const char * __format,
+      |                                       ^~~~~~
+/usr/include/stdlib.h:316:39: error: ‘size_t’ has not been declared
+  316 | extern int strfromf32x (char *__dest, size_t __size, const char * __format,
+      |                                       ^~~~~~
+/usr/include/stdlib.h:322:39: error: ‘size_t’ has not been declared
+  322 | extern int strfromf64x (char *__dest, size_t __size, const char * __format,
+      |                                       ^~~~~~
+In file included from /usr/include/stdlib.h:514:
+/usr/include/x86_64-linux-gnu/sys/types.h:33:9: error: ‘__u_char’ does not name a type
+   33 | typedef __u_char u_char;
+      |         ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:34:9: error: ‘__u_short’ does not name a type
+   34 | typedef __u_short u_short;
+      |         ^~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:35:9: error: ‘__u_int’ does not name a type
+   35 | typedef __u_int u_int;
+      |         ^~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:36:9: error: ‘__u_long’ does not name a type
+   36 | typedef __u_long u_long;
+      |         ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:37:9: error: ‘__quad_t’ does not name a type
+   37 | typedef __quad_t quad_t;
+      |         ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:38:9: error: ‘__u_quad_t’ does not name a type
+   38 | typedef __u_quad_t u_quad_t;
+      |         ^~~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:39:9: error: ‘__fsid_t’ does not name a type
+   39 | typedef __fsid_t fsid_t;
+      |         ^~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:42:9: error: ‘__loff_t’ does not name a type; did you mean ‘__locale_t’?
+   42 | typedef __loff_t loff_t;
+      |         ^~~~~~~~
+      |         __locale_t
+/usr/include/x86_64-linux-gnu/sys/types.h:47:9: error: ‘__ino_t’ does not name a type
+   47 | typedef __ino_t ino_t;
+      |         ^~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:54:9: error: ‘__ino64_t’ does not name a type
+   54 | typedef __ino64_t ino64_t;
+      |         ^~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:59:9: error: ‘__dev_t’ does not name a type
+   59 | typedef __dev_t dev_t;
+      |         ^~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:64:9: error: ‘__gid_t’ does not name a type
+   64 | typedef __gid_t gid_t;
+      |         ^~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:69:9: error: ‘__mode_t’ does not name a type; did you mean ‘__locale_t’?
+   69 | typedef __mode_t mode_t;
+      |         ^~~~~~~~
+      |         __locale_t
+/usr/include/x86_64-linux-gnu/sys/types.h:74:9: error: ‘__nlink_t’ does not name a type
+   74 | typedef __nlink_t nlink_t;
+      |         ^~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:79:9: error: ‘__uid_t’ does not name a type
+   79 | typedef __uid_t uid_t;
+      |         ^~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:97:9: error: ‘__pid_t’ does not name a type
+   97 | typedef __pid_t pid_t;
+      |         ^~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:103:9: error: ‘__id_t’ does not name a type
+  103 | typedef __id_t id_t;
+      |         ^~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:114:9: error: ‘__daddr_t’ does not name a type
+  114 | typedef __daddr_t daddr_t;
+      |         ^~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:115:9: error: ‘__caddr_t’ does not name a type
+  115 | typedef __caddr_t caddr_t;
+      |         ^~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:121:9: error: ‘__key_t’ does not name a type
+  121 | typedef __key_t key_t;
+      |         ^~~~~~~
+In file included from /usr/include/x86_64-linux-gnu/sys/types.h:126:
+/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:7:9: error: ‘__clock_t’ does not name a type
+    7 | typedef __clock_t clock_t;
+      |         ^~~~~~~~~
+In file included from /usr/include/x86_64-linux-gnu/sys/types.h:128:
+/usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:7:9: error: ‘__clockid_t’ does not name a type
+    7 | typedef __clockid_t clockid_t;
+      |         ^~~~~~~~~~~
+In file included from /usr/include/x86_64-linux-gnu/sys/types.h:129:
+/usr/include/x86_64-linux-gnu/bits/types/time_t.h:10:9: error: ‘__time_t’ does not name a type
+   10 | typedef __time_t time_t;
+      |         ^~~~~~~~
+In file included from /usr/include/x86_64-linux-gnu/sys/types.h:130:
+/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:7:9: error: ‘__timer_t’ does not name a type
+    7 | typedef __timer_t timer_t;
+      |         ^~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:134:9: error: ‘__useconds_t’ does not name a type
+  134 | typedef __useconds_t useconds_t;
+      |         ^~~~~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:138:9: error: ‘__suseconds_t’ does not name a type
+  138 | typedef __suseconds_t suseconds_t;
+      |         ^~~~~~~~~~~~~
+In file included from /usr/include/x86_64-linux-gnu/sys/types.h:155:
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:24:9: error: ‘__int8_t’ does not name a type; did you mean ‘__int128_t’?
+   24 | typedef __int8_t int8_t;
+      |         ^~~~~~~~
+      |         __int128_t
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:25:9: error: ‘__int16_t’ does not name a type; did you mean ‘__int128_t’?
+   25 | typedef __int16_t int16_t;
+      |         ^~~~~~~~~
+      |         __int128_t
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:26:9: error: ‘__int32_t’ does not name a type; did you mean ‘__int128_t’?
+   26 | typedef __int32_t int32_t;
+      |         ^~~~~~~~~
+      |         __int128_t
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:27:9: error: ‘__int64_t’ does not name a type; did you mean ‘__int128_t’?
+   27 | typedef __int64_t int64_t;
+      |         ^~~~~~~~~
+      |         __int128_t
+/usr/include/x86_64-linux-gnu/sys/types.h:158:9: error: ‘__uint8_t’ does not name a type; did you mean ‘__uint128_t’?
+  158 | typedef __uint8_t u_int8_t;
+      |         ^~~~~~~~~
+      |         __uint128_t
+/usr/include/x86_64-linux-gnu/sys/types.h:159:9: error: ‘__uint16_t’ does not name a type; did you mean ‘__uint128_t’?
+  159 | typedef __uint16_t u_int16_t;
+      |         ^~~~~~~~~~
+      |         __uint128_t
+/usr/include/x86_64-linux-gnu/sys/types.h:160:9: error: ‘__uint32_t’ does not name a type; did you mean ‘__uint128_t’?
+  160 | typedef __uint32_t u_int32_t;
+      |         ^~~~~~~~~~
+      |         __uint128_t
+/usr/include/x86_64-linux-gnu/sys/types.h:161:9: error: ‘__uint64_t’ does not name a type; did you mean ‘__uint128_t’?
+  161 | typedef __uint64_t u_int64_t;
+      |         ^~~~~~~~~~
+      |         __uint128_t
+In file included from /usr/include/endian.h:35,
+                 from /usr/include/x86_64-linux-gnu/sys/types.h:176:
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:33:17: error: ‘__uint16_t’ does not name a type; did you mean ‘__uint128_t’?
+   33 | static __inline __uint16_t
+      |                 ^~~~~~~~~~
+      |                 __uint128_t
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:48:17: error: ‘__uint32_t’ does not name a type; did you mean ‘__uint128_t’?
+   48 | static __inline __uint32_t
+      |                 ^~~~~~~~~~
+      |                 __uint128_t
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:69:31: error: ‘__uint64_t’ does not name a type; did you mean ‘__uint128_t’?
+   69 | __extension__ static __inline __uint64_t
+      |                               ^~~~~~~~~~
+      |                               __uint128_t
+In file included from /usr/include/endian.h:36:
+/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:32:17: error: ‘__uint16_t’ does not name a type; did you mean ‘__uint128_t’?
+   32 | static __inline __uint16_t
+      |                 ^~~~~~~~~~
+      |                 __uint128_t
+/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:38:17: error: ‘__uint32_t’ does not name a type; did you mean ‘__uint128_t’?
+   38 | static __inline __uint32_t
+      |                 ^~~~~~~~~~
+      |                 __uint128_t
+/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:44:17: error: ‘__uint64_t’ does not name a type; did you mean ‘__uint128_t’?
+   44 | static __inline __uint64_t
+      |                 ^~~~~~~~~~
+      |                 __uint128_t
+In file included from /usr/include/x86_64-linux-gnu/sys/select.h:37,
+                 from /usr/include/x86_64-linux-gnu/sys/types.h:179:
+/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:14:3: error: ‘__time_t’ does not name a type; did you mean ‘__sigset_t’?
+   14 |   __time_t tv_sec;              /* Seconds.  */
+      |   ^~~~~~~~
+      |   __sigset_t
+/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:15:3: error: ‘__suseconds_t’ does not name a type
+   15 |   __suseconds_t tv_usec;        /* Microseconds.  */
+      |   ^~~~~~~~~~~~~
+In file included from /usr/include/x86_64-linux-gnu/sys/select.h:39:
+/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:16:3: error: ‘__time_t’ does not name a type; did you mean ‘__sigset_t’?
+   16 |   __time_t tv_sec;              /* Seconds.  */
+      |   ^~~~~~~~
+      |   __sigset_t
+/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:21:3: error: ‘__syscall_slong_t’ does not name a type
+   21 |   __syscall_slong_t tv_nsec;    /* Nanoseconds.  */
+      |   ^~~~~~~~~~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:185:9: error: ‘__blksize_t’ does not name a type
+  185 | typedef __blksize_t blksize_t;
+      |         ^~~~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:192:9: error: ‘__blkcnt_t’ does not name a type
+  192 | typedef __blkcnt_t blkcnt_t;     /* Type to count number of disk blocks.  */
+      |         ^~~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:196:9: error: ‘__fsblkcnt_t’ does not name a type
+  196 | typedef __fsblkcnt_t fsblkcnt_t; /* Type to count file system blocks.  */
+      |         ^~~~~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:200:9: error: ‘__fsfilcnt_t’ does not name a type
+  200 | typedef __fsfilcnt_t fsfilcnt_t; /* Type to count file system inodes.  */
+      |         ^~~~~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:219:9: error: ‘__blkcnt64_t’ does not name a type
+  219 | typedef __blkcnt64_t blkcnt64_t;     /* Type to count number of disk blocks. */
+      |         ^~~~~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:220:9: error: ‘__fsblkcnt64_t’ does not name a type
+  220 | typedef __fsblkcnt64_t fsblkcnt64_t; /* Type to count file system blocks.  */
+      |         ^~~~~~~~~~~~~~
+/usr/include/x86_64-linux-gnu/sys/types.h:221:9: error: ‘__fsfilcnt64_t’ does not name a type
+  221 | typedef __fsfilcnt64_t fsfilcnt64_t; /* Type to count file system inodes.  */
+      |         ^~~~~~~~~~~~~~
+/usr/include/stdlib.h:531:25: error: ‘size_t’ has not been declared
+  531 |                         size_t __statelen) __THROW __nonnull ((2));
+      |                         ^~~~~~
+/usr/include/stdlib.h:545:5: error: ‘int32_t’ does not name a type
+  545 |     int32_t *fptr;              /* Front pointer.  */
+      |     ^~~~~~~
+/usr/include/stdlib.h:515:1: note: ‘int32_t’ is defined in header ‘<cstdint>’; did you forget to ‘#include <cstdint>’?
+  514 | # include <sys/types.h> /* we need int32_t... */
+  +++ |+#include <cstdint>
+  515 | 
+/usr/include/stdlib.h:546:5: error: ‘int32_t’ does not name a type
+  546 |     int32_t *rptr;              /* Rear pointer.  */
+      |     ^~~~~~~
+/usr/include/stdlib.h:546:5: note: ‘int32_t’ is defined in header ‘<cstdint>’; did you forget to ‘#include <cstdint>’?
+/usr/include/stdlib.h:547:5: error: ‘int32_t’ does not name a type
+  547 |     int32_t *state;             /* Array of state values.  */
+      |     ^~~~~~~
+/usr/include/stdlib.h:547:5: note: ‘int32_t’ is defined in header ‘<cstdint>’; did you forget to ‘#include <cstdint>’?
+/usr/include/stdlib.h:551:5: error: ‘int32_t’ does not name a type
+  551 |     int32_t *end_ptr;           /* Pointer behind state table.  */
+      |     ^~~~~~~
+/usr/include/stdlib.h:551:5: note: ‘int32_t’ is defined in header ‘<cstdint>’; did you forget to ‘#include <cstdint>’?
+/usr/include/stdlib.h:555:22: error: ‘int32_t’ has not been declared
+  555 |                      int32_t *__restrict __result) __THROW __nonnull ((1, 2));
+      |                      ^~~~~~~
+/usr/include/stdlib.h:561:25: error: ‘size_t’ has not been declared
+  561 |                         size_t __statelen,
+      |                         ^~~~~~
+/usr/include/stdlib.h:657:8: error: ‘__uint32_t’ does not name a type; did you mean ‘__uint128_t’?
+  657 | extern __uint32_t arc4random (void)
+      |        ^~~~~~~~~~
+      |        __uint128_t
+/usr/include/stdlib.h:661:42: error: ‘size_t’ has not been declared
+  661 | extern void arc4random_buf (void *__buf, size_t __size)
+      |                                          ^~~~~~
+/usr/include/stdlib.h:666:8: error: ‘__uint32_t’ does not name a type; did you mean ‘__uint128_t’?
+  666 | extern __uint32_t arc4random_uniform (__uint32_t __upper_bound)
+      |        ^~~~~~~~~~
+      |        __uint128_t
+/usr/include/stdlib.h:672:22: error: ‘size_t’ was not declared in this scope; did you mean ‘std::size_t’?
+  672 | extern void *malloc (size_t __size) __THROW __attribute_malloc__
+      |                      ^~~~~~
+      |                      std::size_t
+In file included from /usr/include/c++/13/cstdlib:41:
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:308:33: note: ‘std::size_t’ declared here
+  308 |   typedef __SIZE_TYPE__         size_t;
+      |                                 ^~~~~~
+/usr/include/stdlib.h:675:22: error: ‘size_t’ was not declared in this scope; did you mean ‘std::size_t’?
+  675 | extern void *calloc (size_t __nmemb, size_t __size)
+      |                      ^~~~~~
+      |                      std::size_t
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:308:33: note: ‘std::size_t’ declared here
+  308 |   typedef __SIZE_TYPE__         size_t;
+      |                                 ^~~~~~
+/usr/include/stdlib.h:675:38: error: ‘size_t’ was not declared in this scope; did you mean ‘std::size_t’?
+  675 | extern void *calloc (size_t __nmemb, size_t __size)
+      |                                      ^~~~~~
+      |                                      std::size_t
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:308:33: note: ‘std::size_t’ declared here
+  308 |   typedef __SIZE_TYPE__         size_t;
+      |                                 ^~~~~~
+/usr/include/stdlib.h:675:51: error: expression list treated as compound expression in initializer [-fpermissive]
+  675 | extern void *calloc (size_t __nmemb, size_t __size)
+      |                                                   ^
+/usr/include/stdlib.h:683:36: error: ‘size_t’ has not been declared
+  683 | extern void *realloc (void *__ptr, size_t __size)
+      |                                    ^~~~~~
+/usr/include/stdlib.h:695:41: error: ‘size_t’ has not been declared
+  695 | extern void *reallocarray (void *__ptr, size_t __nmemb, size_t __size)
+      |                                         ^~~~~~
+/usr/include/stdlib.h:695:57: error: ‘size_t’ has not been declared
+  695 | extern void *reallocarray (void *__ptr, size_t __nmemb, size_t __size)
+      |                                                         ^~~~~~
+/usr/include/stdlib.h:701:41: error: ‘size_t’ has not been declared
+  701 | extern void *reallocarray (void *__ptr, size_t __nmemb, size_t __size)
+      |                                         ^~~~~~
+/usr/include/stdlib.h:701:57: error: ‘size_t’ has not been declared
+  701 | extern void *reallocarray (void *__ptr, size_t __nmemb, size_t __size)
+      |                                                         ^~~~~~
+In file included from /usr/include/stdlib.h:706:
+/usr/include/alloca.h:32:22: error: ‘size_t’ was not declared in this scope; did you mean ‘std::size_t’?
+   32 | extern void *alloca (size_t __size) __THROW;
+      |                      ^~~~~~
+      |                      std::size_t
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:308:33: note: ‘std::size_t’ declared here
+  308 |   typedef __SIZE_TYPE__         size_t;
+      |                                 ^~~~~~
+/usr/include/stdlib.h:712:22: error: ‘size_t’ was not declared in this scope; did you mean ‘std::size_t’?
+  712 | extern void *valloc (size_t __size) __THROW __attribute_malloc__
+      |                      ^~~~~~
+      |                      std::size_t
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:308:33: note: ‘std::size_t’ declared here
+  308 |   typedef __SIZE_TYPE__         size_t;
+      |                                 ^~~~~~
+/usr/include/stdlib.h:718:45: error: ‘size_t’ has not been declared
+  718 | extern int posix_memalign (void **__memptr, size_t __alignment, size_t __size)
+      |                                             ^~~~~~
+/usr/include/stdlib.h:718:65: error: ‘size_t’ has not been declared
+  718 | extern int posix_memalign (void **__memptr, size_t __alignment, size_t __size)
+      |                                                                 ^~~~~~
+/usr/include/stdlib.h:724:29: error: ‘size_t’ was not declared in this scope; did you mean ‘std::size_t’?
+  724 | extern void *aligned_alloc (size_t __alignment, size_t __size)
+      |                             ^~~~~~
+      |                             std::size_t
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:308:33: note: ‘std::size_t’ declared here
+  308 |   typedef __SIZE_TYPE__         size_t;
+      |                                 ^~~~~~
+/usr/include/stdlib.h:724:49: error: ‘size_t’ was not declared in this scope; did you mean ‘std::size_t’?
+  724 | extern void *aligned_alloc (size_t __alignment, size_t __size)
+      |                                                 ^~~~~~
+      |                                                 std::size_t
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:308:33: note: ‘std::size_t’ declared here
+  308 |   typedef __SIZE_TYPE__         size_t;
+      |                                 ^~~~~~
+/usr/include/stdlib.h:724:62: error: expression list treated as compound expression in initializer [-fpermissive]
+  724 | extern void *aligned_alloc (size_t __alignment, size_t __size)
+      |                                                              ^
+/usr/include/stdlib.h:961:23: error: ‘size_t’ has not been declared
+  961 |                       size_t __nmemb, size_t __size, __compar_fn_t __compar)
+      |                       ^~~~~~
+/usr/include/stdlib.h:961:39: error: ‘size_t’ has not been declared
+  961 |                       size_t __nmemb, size_t __size, __compar_fn_t __compar)
+      |                                       ^~~~~~
+/usr/include/stdlib.h:970:34: error: ‘size_t’ has not been declared
+  970 | extern void qsort (void *__base, size_t __nmemb, size_t __size,
+      |                                  ^~~~~~
+/usr/include/stdlib.h:970:50: error: ‘size_t’ has not been declared
+  970 | extern void qsort (void *__base, size_t __nmemb, size_t __size,
+      |                                                  ^~~~~~
+/usr/include/stdlib.h:973:36: error: ‘size_t’ has not been declared
+  973 | extern void qsort_r (void *__base, size_t __nmemb, size_t __size,
+      |                                    ^~~~~~
+/usr/include/stdlib.h:973:52: error: ‘size_t’ has not been declared
+  973 | extern void qsort_r (void *__base, size_t __nmemb, size_t __size,
+      |                                                    ^~~~~~
+/usr/include/stdlib.h:1044:20: error: ‘size_t’ has not been declared
+ 1044 |                    size_t __len) __THROW __nonnull ((3, 4, 5));
+      |                    ^~~~~~
+/usr/include/stdlib.h:1047:20: error: ‘size_t’ has not been declared
+ 1047 |                    size_t __len) __THROW __nonnull ((3, 4, 5));
+      |                    ^~~~~~
+/usr/include/stdlib.h:1051:45: error: ‘size_t’ has not been declared
+ 1051 |                     char *__restrict __buf, size_t __len)
+      |                                             ^~~~~~
+/usr/include/stdlib.h:1055:45: error: ‘size_t’ has not been declared
+ 1055 |                     char *__restrict __buf, size_t __len)
+      |                                             ^~~~~~
+/usr/include/stdlib.h:1062:36: error: ‘size_t’ has not been declared
+ 1062 | extern int mblen (const char *__s, size_t __n) __THROW;
+      |                                    ^~~~~~
+/usr/include/stdlib.h:1066:48: error: ‘size_t’ has not been declared
+ 1066 |                    const char *__restrict __s, size_t __n) __THROW;
+      |                                                ^~~~~~
+/usr/include/stdlib.h:1073:8: error: ‘size_t’ does not name a type
+ 1073 | extern size_t mbstowcs (wchar_t *__restrict  __pwcs,
+      |        ^~~~~~
+/usr/include/stdlib.h:1073:8: note: ‘size_t’ is defined in header ‘<cstddef>’; did you forget to ‘#include <cstddef>’?
+/usr/include/stdlib.h:1077:8: error: ‘size_t’ does not name a type
+ 1077 | extern size_t wcstombs (char *__restrict __s,
+      |        ^~~~~~
+/usr/include/stdlib.h:1077:8: note: ‘size_t’ is defined in header ‘<cstddef>’; did you forget to ‘#include <cstddef>’?
+/usr/include/stdlib.h:1134:46: error: ‘size_t’ has not been declared
+ 1134 | extern int ptsname_r (int __fd, char *__buf, size_t __buflen)
+      |                                              ^~~~~~
+/usr/include/c++/13/cstdlib:158:11: error: ‘mbstowcs’ has not been declared in ‘::’
+  158 |   using ::mbstowcs;
+      |           ^~~~~~~~
+/usr/include/c++/13/cstdlib:175:11: error: ‘wcstombs’ has not been declared in ‘::’
+  175 |   using ::wcstombs;
+      |           ^~~~~~~~
+/usr/include/c++/13/stdlib.h:71:12: error: ‘mbstowcs’ has not been declared in ‘std’
+   71 | using std::mbstowcs;
+      |            ^~~~~~~~
+/usr/include/c++/13/stdlib.h:83:12: error: ‘wcstombs’ has not been declared in ‘std’
+   83 | using std::wcstombs;
+      |            ^~~~~~~~
+In file included from /app/polyglot/main.rs:28:
+/app/polyglot/main.rs: In function ‘int main(int, char**)’:
+/app/polyglot/main.rs:43:29: error: ‘stderr’ was not declared in this scope
+   43 |     if (argc < 2) { fprintf(stderr, "Usage: %s N\n", argv[0]); return 1; }
+      |                             ^~~~~~
+/app/polyglot/main.rs:30:1: note: ‘stderr’ is defined in header ‘<cstdio>’; did you forget to ‘#include <cstdio>’?
+   29 | #include <stdlib.h>
+  +++ |+#include <cstdio>
+   30 | 
+/app/polyglot/main.rs:43:21: error: ‘fprintf’ was not declared in this scope
+   43 |     if (argc < 2) { fprintf(stderr, "Usage: %s N\n", argv[0]); return 1; }
+      |                     ^~~~~~~
+/app/polyglot/main.rs:45:5: error: ‘printf’ was not declared in this scope
+   45 |     printf("%d\n", fib(n));
+      |     ^~~~~~
+/app/polyglot/main.rs:45:5: note: ‘printf’ is defined in header ‘<cstdio>’; did you forget to ‘#include <cstdio>’?
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_fibonacci_polyglot - FileNotFoundError:...
+============================== 1 failed in 0.14s ===============================

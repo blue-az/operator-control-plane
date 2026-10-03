@@ -1,0 +1,21 @@
+{
+    "task": {
+        "name": "terminal-bench/extract-elf",
+        "ref": "sha256:1ef31d566be4fe3459d5368621ae7ef7a31b23ef675737e473bbc43c8c7b3fce",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "extract-elf__HQDK9ZU",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task-2026-10-02-local-qwen36-limits",
+    "agent": {
+        "import_path": "harbor_pi_local:PiLocalLimits",
+        "model_name": "[REDACTED]/qwen3.6-35b-interactive-ctx32768:latest",
+        "kwargs": {
+            "model_api": "openai-completions"
+        },
+        "env": {
+            "OLLAMA_API_KEY": "****",
+            "OLLAMA_BASE_URL": "http://172.17.0.1:11462/v1"
+        }
+    },
+    "job_id": "0a88880d-790a-4831-9319-b4ea310c5450"
+}

@@ -1,0 +1,21 @@
+{
+    "task": {
+        "name": "terminal-bench/fix-git",
+        "ref": "sha256:16948b980df9d96de616a205f5acca1c5d395de83ff4f8ffabcafacb93226f2e",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "fix-git__d7JZrjC",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task-2026-10-02-local-qwen36-limits",
+    "agent": {
+        "import_path": "harbor_pi_local:PiLocalLimits",
+        "model_name": "[REDACTED]/qwen3.6-35b-interactive-ctx32768:latest",
+        "kwargs": {
+            "model_api": "openai-completions"
+        },
+        "env": {
+            "OLLAMA_API_KEY": "****",
+            "OLLAMA_BASE_URL": "http://172.17.0.1:11462/v1"
+        }
+    },
+    "job_id": "0a88880d-790a-4831-9319-b4ea310c5450"
+}

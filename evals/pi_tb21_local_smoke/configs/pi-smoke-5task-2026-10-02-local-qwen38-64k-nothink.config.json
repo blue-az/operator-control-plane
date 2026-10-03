@@ -1,0 +1,32 @@
+{
+  "job_name": "pi-smoke-5task-2026-10-02-local-qwen38-64k-nothink",
+  "jobs_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs",
+  "n_concurrent_trials": 1,
+  "agents": [
+    {
+      "model_name": "ollama/depth65536-qwen38:latest",
+      "kwargs": {
+        "model_api": "openai-completions",
+        "thinking": "off"
+      },
+      "env": {
+        "OLLAMA_API_KEY": "ollama",
+        "OLLAMA_BASE_URL": "http://172.17.0.1:11462/v1"
+      },
+      "import_path": "harbor_pi_local:PiLocalLimits"
+    }
+  ],
+  "datasets": [
+    {
+      "name": "terminal-bench/terminal-bench-2-1",
+      "ref": "sha256:7d7bdc1cbedad549fc1140404bd4dc45e5fd0ea7c4186773687d177ad3a0699a",
+      "task_names": [
+        "terminal-bench/distribution-search",
+        "terminal-bench/prove-plus-comm",
+        "terminal-bench/fix-git",
+        "terminal-bench/polyglot-rust-c",
+        "terminal-bench/extract-elf"
+      ]
+    }
+  ]
+}

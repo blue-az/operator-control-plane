@@ -1,0 +1,22 @@
+{
+    "task": {
+        "name": "terminal-bench/polyglot-rust-c",
+        "ref": "sha256:a33dc72e2278d225513c0724abe2e4539653d5ee7e4c2a90ba2d676586ba9f3d",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "polyglot-rust-c__SEJFVZu",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task-2026-10-02-local-qwen36-nothink",
+    "agent": {
+        "import_path": "harbor_pi_local:PiLocalLimits",
+        "model_name": "[REDACTED]/qwen3.6-35b-interactive-ctx32768:latest",
+        "kwargs": {
+            "model_api": "openai-completions",
+            "thinking": "off"
+        },
+        "env": {
+            "OLLAMA_API_KEY": "****",
+            "OLLAMA_BASE_URL": "http://172.17.0.1:11462/v1"
+        }
+    },
+    "job_id": "8ea62892-4883-4398-b504-2e490cd38754"
+}

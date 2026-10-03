@@ -1,0 +1,22 @@
+{
+    "task": {
+        "name": "terminal-bench/prove-plus-comm",
+        "ref": "sha256:d5ae25720df1f7cd619ed8408cda4b87b79a3d8b0ff4f1919e2c96e9547339c2",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "prove-plus-comm__QsTKMDE",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task-2026-10-02-local-qwen38-64k-nothink",
+    "agent": {
+        "import_path": "harbor_pi_local:PiLocalLimits",
+        "model_name": "[REDACTED]/depth65536-qwen38:latest",
+        "kwargs": {
+            "model_api": "openai-completions",
+            "thinking": "off"
+        },
+        "env": {
+            "OLLAMA_API_KEY": "****",
+            "OLLAMA_BASE_URL": "http://172.17.0.1:11462/v1"
+        }
+    },
+    "job_id": "1b0d51c1-ac4b-46ba-9eab-1d380063df1e"
+}

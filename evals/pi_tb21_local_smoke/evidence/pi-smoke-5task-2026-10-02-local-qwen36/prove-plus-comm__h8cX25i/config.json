@@ -1,0 +1,21 @@
+{
+    "task": {
+        "name": "terminal-bench/prove-plus-comm",
+        "ref": "sha256:d5ae25720df1f7cd619ed8408cda4b87b79a3d8b0ff4f1919e2c96e9547339c2",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "prove-plus-comm__h8cX25i",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task-2026-10-02-local-qwen36",
+    "agent": {
+        "name": "pi",
+        "model_name": "[REDACTED]/qwen3.6-35b-interactive-ctx32768:latest",
+        "kwargs": {
+            "model_api": "openai-completions"
+        },
+        "env": {
+            "OLLAMA_API_KEY": "****",
+            "OLLAMA_BASE_URL": "http://172.17.0.1:11462/v1"
+        }
+    },
+    "job_id": "ba42a65d-8505-4ab4-828e-7946a738a9f0"
+}

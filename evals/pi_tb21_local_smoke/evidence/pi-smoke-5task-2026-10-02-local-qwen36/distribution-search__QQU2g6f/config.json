@@ -1,0 +1,21 @@
+{
+    "task": {
+        "name": "terminal-bench/distribution-search",
+        "ref": "sha256:8787d3004ac4dd9d78f0c14f5b5ef94a4ad3e69d8828d7d35b9fbd7828a69ed1",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "distribution-search__QQU2g6f",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task-2026-10-02-local-qwen36",
+    "agent": {
+        "name": "pi",
+        "model_name": "[REDACTED]/qwen3.6-35b-interactive-ctx32768:latest",
+        "kwargs": {
+            "model_api": "openai-completions"
+        },
+        "env": {
+            "OLLAMA_API_KEY": "****",
+            "OLLAMA_BASE_URL": "http://172.17.0.1:11462/v1"
+        }
+    },
+    "job_id": "ba42a65d-8505-4ab4-828e-7946a738a9f0"
+}

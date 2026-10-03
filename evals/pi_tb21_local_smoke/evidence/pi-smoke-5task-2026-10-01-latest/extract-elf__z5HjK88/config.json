@@ -1,0 +1,14 @@
+{
+    "task": {
+        "name": "terminal-bench/extract-elf",
+        "ref": "sha256:1ef31d566be4fe3459d5368621ae7ef7a31b23ef675737e473bbc43c8c7b3fce",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "extract-elf__z5HjK88",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task-2026-10-01-latest",
+    "agent": {
+        "name": "pi",
+        "model_name": "openrouter/z-ai/glm-5.2"
+    },
+    "job_id": "a1a45044-eb29-4cfc-814d-aba59e43b19a"
+}

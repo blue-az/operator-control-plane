@@ -1,0 +1,22 @@
+{
+    "task": {
+        "name": "terminal-bench/extract-elf",
+        "ref": "sha256:1ef31d566be4fe3459d5368621ae7ef7a31b23ef675737e473bbc43c8c7b3fce",
+        "source": "terminal-bench/terminal-bench-2-1"
+    },
+    "trial_name": "extract-elf__AoyPZBS",
+    "trials_dir": "/home/blueaz/Python/Evaluation/pi-mono/.harbor-jobs/pi-smoke-5task-2026-10-02-local-qwen38-64k-nothink",
+    "agent": {
+        "import_path": "harbor_pi_local:PiLocalLimits",
+        "model_name": "[REDACTED]/depth65536-qwen38:latest",
+        "kwargs": {
+            "model_api": "openai-completions",
+            "thinking": "off"
+        },
+        "env": {
+            "OLLAMA_API_KEY": "****",
+            "OLLAMA_BASE_URL": "http://172.17.0.1:11462/v1"
+        }
+    },
+    "job_id": "1b0d51c1-ac4b-46ba-9eab-1d380063df1e"
+}

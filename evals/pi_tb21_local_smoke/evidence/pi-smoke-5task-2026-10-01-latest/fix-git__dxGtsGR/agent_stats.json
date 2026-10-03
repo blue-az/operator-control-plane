@@ -1,0 +1,10 @@
+{
+  "assistant_turns": 4,
+  "max_turn_input_tokens": 0,
+  "max_turn_output_tokens": 0,
+  "length_stops": 0,
+  "last_stop_reason": "error",
+  "thinking_chars": 0,
+  "compactions": 0,
+  "first_error": "402: {\"message\":\"This request requires more credits, or fewer max_tokens. You requested up to 942197 tokens, but can only afford 272727. To increase, visit https://openrouter.ai/workspaces/default/keys/8d5b3533280e9820cb3b0a57b947d49f1e8581830b6c12d6c64d60872967b8ee and adjust the key's total limit\""
+}
