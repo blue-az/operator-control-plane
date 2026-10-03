@@ -2220,6 +2220,18 @@ async function tierC(piPackage: string | null, ledger: core.Ledger): Promise<voi
 			statusCalls.some(([, text]) => text === undefined),
 		JSON.stringify(statusCalls),
 	);
+	const tuiNotice = notifications.at(-1)?.[1] ?? "";
+	eq("/op:status TUI notify is the headline only", tuiNotice, `${report.command} ${report.headline}`);
+
+	// RPC hosts (T3 Code) have no entry renderer: the notify must carry the report.
+	ctx.mode = "rpc";
+	await commands.get("op:status")!.handler("", ctx);
+	ctx.mode = "tui";
+	report = lastReport();
+	const rpcNotice = notifications.at(-1)?.[1] ?? "";
+	check("/op:status RPC notify starts with the headline", rpcNotice.startsWith(`${report.command} ${report.headline}\n`), rpcNotice);
+	check("/op:status RPC notify carries the report body", report.lines.every((l) => rpcNotice.includes(l)), rpcNotice);
+	check("/op:status RPC notify carries the invocations", report.invocations.every((i) => rpcNotice.includes(`$ ${i}`)), rpcNotice);
 
 	await commands.get("op:roadmap")!.handler("", ctx);
 	report = lastReport();

@@ -186,6 +186,21 @@ async function askOptional(ctx: ExtensionCommandContext, title: string, placehol
 	return answer === undefined ? null : answer.trim();
 }
 
+/**
+ * The notify text for a report.
+ *
+ * RPC hosts (T3 Code, editor integrations) never see the entry renderer, and
+ * typically drop custom entries, so the notify is their only copy of the
+ * report: carry the body and invocations too. The TUI gets the headline only
+ * because the renderer already shows the rest.
+ */
+export function rpcAwareNotice(ctx: { mode?: string }, report: core.Report): string {
+	const headline = `${report.command} ${report.headline}`;
+	if (ctx.mode !== "rpc") return headline;
+	const invocations = report.invocations.map((i) => `$ ${i}`);
+	return [headline, ...(report.lines.length > 0 ? ["", ...report.lines] : []), ...(invocations.length > 0 ? ["", ...invocations] : [])].join("\n");
+}
+
 export default async function operatorExtension(pi: ExtensionAPI) {
 	// The renderer is the only thing that needs pi-tui. Keep its failure
 	// non-fatal so the commands still work under a bare loader, but say so
@@ -206,7 +221,7 @@ export default async function operatorExtension(pi: ExtensionAPI) {
 			rendererWarned = true;
 			ctx.ui.notify(`Operator reports will not render in the transcript: ${rendererError}`, "warning");
 		}
-		ctx.ui.notify(`${report.command} ${report.headline}`, report.level);
+		ctx.ui.notify(rpcAwareNotice(ctx, report), report.level);
 	};
 
 	/**
