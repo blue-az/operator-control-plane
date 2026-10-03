@@ -1,0 +1,40 @@
+Grid: 1 tasks x 3 levels x 1 trials = 3 cells
+booking-off-by-one L0 t1: pass (8.7s)
+booking-off-by-one L1 t1: pass (7.5s)
+Traceback (most recent call last):
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py", line 220, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py", line 182, in main
+    before = gate(cell / "before.json")
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py", line 165, in gate
+    raise RuntimeError(f"preflight refused: {result.stdout} {result.stderr}")
+RuntimeError: preflight refused:  Traceback (most recent call last):
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/preflight_comparison.py", line 116, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/preflight_comparison.py", line 110, in main
+    args.capture.write_text(json.dumps(report, indent=2, sort_keys=True) + '\n')
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.14/pathlib/__init__.py", line 810, in write_text
+    return f.write(data)
+           ~~~~~~~^^^^^^
+OSError: [Errno 28] No space left on device
+
+Traceback (most recent call last):
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r2/launch-c1-3090.py", line 208, in <module>
+    main()
+    ~~~~^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r2/launch-c1-3090.py", line 181, in main
+    packet(model, P / f"canary-{stem}", canary=True)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r2/launch-c1-3090.py", line 72, in packet
+    run(args)
+    ~~~^^^^^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r2/launch-c1-3090.py", line 34, in run
+    return subprocess.run(argv, check=True, env=ENV, **kwargs)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['/usr/bin/python3', '-u', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py', '--contract', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r2/contract-c1-3090.json', '--model', 'c1-qwen3.6-35b:latest', '--provider', 'standard-packet', '--request-log', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r2/request-gate.jsonl', '--request-body', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r2/requests/c1-qwen3.6-35b_latest.json', '--output', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r2/canary-c1-qwen3.6-35b', '--tasks', 'booking-off-by-one', '--trials', '1']' returned non-zero exit status 1.

@@ -1288,7 +1288,7 @@ def run_trial(
         outcome = "pass" if cell_outcome == "pass" else "fail"
         if use_ledger and usage_id:
             _ledger_session_end(ledger_dir, usage_id, outcome)
-        tok_s_probe = measure_tok_s(dispatch_model)
+        tok_s_probe = None if sampling.get("skip_decode_probe") else measure_tok_s(dispatch_model)
         record = {
             "task_id": task["task_id"],
             "level": level,

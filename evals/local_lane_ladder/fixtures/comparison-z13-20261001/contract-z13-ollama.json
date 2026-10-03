@@ -1,0 +1,72 @@
+{
+  "schema": "local-lane-comparison/v1",
+  "ollama_version": "0.32.12",
+  "think": "off",
+  "endpoint": "http://127.0.0.1:18690",
+  "profile": "C1 (Z13 own seat weights)",
+  "daemon": {
+    "script": "/home/blueaz/c1-study-z13-20261001/serve.sh",
+    "models_dir": "/home/blueaz/c1-study-z13-20261001/models (btrfs reflinks of the Z13 seat blobs)",
+    "env": {
+      "OLLAMA_VULKAN": "1",
+      "HIP_VISIBLE_DEVICES": "-1",
+      "OLLAMA_IGPU_ENABLE": "1",
+      "OLLAMA_NUM_PARALLEL": "1",
+      "OLLAMA_MAX_LOADED_MODELS": "1",
+      "OLLAMA_FLASH_ATTENTION": "1",
+      "OLLAMA_KV_CACHE_TYPE": "f16",
+      "OLLAMA_KEEP_ALIVE": "-1",
+      "OLLAMA_CONTEXT_LENGTH": "16384",
+      "OLLAMA_NOPRUNE": "1"
+    }
+  },
+  "parameters": {
+    "num_ctx": 16384,
+    "num_predict": 4096,
+    "seed": 1234,
+    "temperature": 0.7,
+    "top_k": 20,
+    "top_p": 0.8,
+    "min_p": 0,
+    "typical_p": 1,
+    "repeat_last_n": 64,
+    "repeat_penalty": 1,
+    "presence_penalty": 0,
+    "frequency_penalty": 0,
+    "num_keep": 4,
+    "draft_num_predict": 0
+  },
+  "placement": {
+    "kind": "uma-amdgpu",
+    "host": "z13",
+    "ssh_host": "z13",
+    "port": 18669,
+    "platform_profile": "balanced",
+    "maximum_foreign_mib": 1536,
+    "device": "AMD Radeon 8050S (RADV GFX1151), 4 GiB carve-out + 20 GiB GTT"
+  },
+  "models": {
+    "c1z-qwen3.6-35b:latest": {
+      "seat_tag": "qwen3.6:35b",
+      "seat_digest": "07d35212591fc27746f0a317c975a6d68754fb38e9053d82e25f06057af28522",
+      "digest": "6f52c80f2fb01f2e89adee7fab9ae4b0d9a5e982bb95628bbea1b81bd2f175c9",
+      "weight_sha256": "f5ee307a2982106a6eb82b62b2c00b575c9072145a759ae4660378acda8dcf2d",
+      "weight_bytes": 23938321664,
+      "variant": "hybrid",
+      "stop": [],
+      "extra_blob_sha256s": [],
+      "note": "Z13's own seat blob; NOT the testbench blob d372de8e..."
+    },
+    "c1z-gemma4-26b:latest": {
+      "seat_tag": "gemma4:26b",
+      "seat_digest": "5571076f3d70050487b26b341705799e0ab29b808164f90d20d4cf84f699d251",
+      "digest": "5052eccc0a7a0bab8d08517f45ac6686838e915af68849592c8a89ddc569410a",
+      "weight_sha256": "7121486771cbfe218851513210c40b35dbdee93ab1ef43fe36283c883980f0df",
+      "weight_bytes": 17987569344,
+      "variant": "hybrid",
+      "stop": [],
+      "extra_blob_sha256s": [],
+      "note": "Z13's own seat blob; NOT the testbench blob dfd98d27..."
+    }
+  }
+}

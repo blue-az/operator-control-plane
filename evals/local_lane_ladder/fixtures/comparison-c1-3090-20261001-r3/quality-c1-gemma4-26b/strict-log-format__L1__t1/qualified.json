@@ -1,0 +1,5003 @@
+{
+  "outcome": "unproven",
+  "raw": {
+    "task_id": "strict-log-format",
+    "level": "L1",
+    "model": "c1-gemma4-26b:latest",
+    "trial": 1,
+    "machine": "desktop",
+    "passed": false,
+    "outcome": "unproven",
+    "proofs": {
+      "dispatch": null,
+      "scope": null,
+      "placement": false,
+      "grader": null,
+      "timing": false
+    },
+    "unproven_reasons": [
+      "timing"
+    ],
+    "detail": "timed out after 600s",
+    "failure_cause": "timeout",
+    "wall_clock_s": 600.0,
+    "returncode": null,
+    "carrier_outer_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "standard-packet",
+      "--model",
+      "c1-gemma4-26b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "Implement error_report in src/logsum.py per its docstring: one entry per hour containing at least one ERROR, formatted \"HH: N errors\", sorted ascending, [] when there are none. Do not change the tests.\n"
+    ],
+    "pi_inner_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "standard-packet",
+      "--model",
+      "c1-gemma4-26b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "Implement error_report in src/logsum.py per its docstring: one entry per hour containing at least one ERROR, formatted \"HH: N errors\", sorted ascending, [] when there are none. Do not change the tests.\n"
+    ],
+    "carrier_env_policy": {},
+    "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r3/quality-c1-gemma4-26b/strict-log-format__L1__t1/traces/strict-log-format__L1__c1-gemma4-26b-latest__t1.json"
+  },
+  "placement": {
+    "before": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r3/quality-c1-gemma4-26b/strict-log-format__L1__t1/before.json",
+    "after": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001-r3/quality-c1-gemma4-26b/strict-log-format__L1__t1/after.json"
+  },
+  "requests": [
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838252.4221542
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838253.6692245
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838254.6254451
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838255.572785
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838260.1714046
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838261.2169683
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838262.123484
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838266.2182877
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838267.1970026
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838268.083447
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838269.3773086
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838270.6202686
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838271.8411095
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838273.1055114
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838274.3215892
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838275.5281582
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838276.7463906
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838277.9797583
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838279.1530027
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838280.3265023
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838281.54807
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838282.7577999
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838284.0019212
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838285.2129002
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838286.4579563
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838287.6422954
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838288.8987658
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838290.0679288
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838291.2701163
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838292.4429705
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838293.633979
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838294.822218
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838296.0402982
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838297.2577944
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838298.5241566
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838299.7333307
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838300.9660652
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838302.1883593
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838303.476566
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838304.7324262
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838305.9419994
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838307.1688292
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838308.4165354
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838309.6433275
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838310.8317337
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838312.0589936
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838313.2930658
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838314.537295
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838315.7685966
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838317.004003
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838318.1972718
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838319.4191859
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838320.6772788
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838321.9896727
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838323.2103457
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838324.429896
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838325.6847184
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838326.9266722
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838328.1689577
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838329.4222634
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838330.6557455
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838331.891927
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838333.1197116
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838334.3199065
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838335.5938892
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838336.8179517
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838338.0921903
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838339.3416364
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838340.5704496
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838341.7684581
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838343.045496
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838344.2729518
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838345.5030715
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838346.7019424
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838347.9428246
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838349.2248755
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838350.4606647
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838351.6861215
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838352.8949778
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838354.1359396
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838355.3887615
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838356.6538732
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838357.8561218
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838359.088377
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838360.324251
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838361.5619042
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838362.7905025
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838364.0589159
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838365.31816
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838366.577998
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838367.82137
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838369.019926
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838370.2776015
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838371.5399206
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838372.776583
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838373.9986696
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838375.2147431
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838376.4902048
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838377.7350297
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838378.998909
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838380.2553499
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838381.4805415
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838382.72237
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838383.9810631
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838385.2353656
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838386.495272
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838387.7547743
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838389.0099893
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838390.2626407
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838391.5022016
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838392.7401495
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838393.981262
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838395.2581398
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838396.5281298
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838397.802934
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838399.0677493
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838400.3440382
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838401.5908308
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838402.8831093
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838404.1245701
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838405.3939095
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838406.658548
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838407.9282088
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838409.1470113
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838410.450706
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838411.6645708
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838412.9324737
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838414.163174
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838415.4455924
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838416.667213
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838417.9471586
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838419.18678
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838420.638485
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838421.8875198
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838423.1918201
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838424.4526474
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838425.6898327
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838426.9298253
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838428.1993282
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838429.4265938
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838430.6731539
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838431.8967125
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838433.1294222
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838434.3620906
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838435.6116285
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838436.8670647
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838438.1573708
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838439.4036531
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838440.6971214
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838441.9590585
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838443.2432535
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838444.485604
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838445.7507093
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838446.9921098
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838448.263438
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838449.5003586
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838450.790494
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838452.027667
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838453.3878927
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838454.6723018
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838455.9841597
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838457.260274
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838458.5786076
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838459.864748
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838461.1780615
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838462.4336147
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838463.7084239
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838464.975396
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838466.2489488
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838467.5224724
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838468.818922
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838470.0849805
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838471.3379822
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838472.6032472
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838473.9155195
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838475.1833599
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838476.429438
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838477.684619
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838482.6474197
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838487.6742492
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838492.7714748
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838494.2917285
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838495.8313785
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838501.0493832
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838502.6118991
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838504.1931446
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838505.80072
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838507.4389186
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838509.0346553
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838510.1369493
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838515.0603814
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838520.7659562
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838526.436343
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838528.6136153
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838530.7436266
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838532.2921124
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838538.1208415
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838540.3559926
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838542.6202304
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838548.6670723
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838554.5719697
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838557.3553038
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838559.7894325
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838564.9189663
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838569.8248508
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838574.8376262
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838579.8754897
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838585.0076814
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838590.1930149
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838595.6398966
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838600.9708138
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838606.3995264
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838611.9009295
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838617.4167616
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838623.0414236
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838628.7538843
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838634.7716715
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838640.610208
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838646.5396945
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838652.518569
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838658.5601652
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838664.792233
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838671.0235941
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838677.3435755
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838683.7384593
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838690.2123945
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838696.723949
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838703.4735496
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838710.186299
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838716.989443
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838723.8668623
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838730.8021874
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838737.8224404
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838744.948961
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838752.1688132
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838759.4476354
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838766.8277636
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838774.425083
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838781.9976692
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838789.6193807
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838797.3264318
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838805.3233273
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838813.2201424
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838821.2305882
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838829.3366487
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838837.793838
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790838846.118463
+    }
+  ],
+  "request_log_offset": 268414
+}

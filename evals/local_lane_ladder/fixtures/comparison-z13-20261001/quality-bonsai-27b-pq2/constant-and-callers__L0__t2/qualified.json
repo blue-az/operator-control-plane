@@ -1,0 +1,1072 @@
+{
+  "outcome": "fail",
+  "raw": {
+    "task_id": "constant-and-callers",
+    "level": "L0",
+    "model": "bonsai-27b-pq2",
+    "trial": 2,
+    "machine": "desktop",
+    "passed": false,
+    "outcome": "unproven",
+    "attempted_edit": true,
+    "failure_class": "other_check",
+    "proofs": {
+      "dispatch": true,
+      "scope": true,
+      "placement": false,
+      "grader": true,
+      "timing": true
+    },
+    "placement_evidence": null,
+    "unproven_reasons": [
+      "placement"
+    ],
+    "scope_violations": [],
+    "detail": "1/4 checks failed: scope respected: modified out of scope: ['tests/check_limits.py']",
+    "failure_cause": "unproven_placement",
+    "check_score": 0.75,
+    "checks": [
+      {
+        "name": "all three files consistent",
+        "passed": true,
+        "detail": "postcondition command exited 0"
+      },
+      {
+        "name": "constant updated",
+        "passed": true,
+        "detail": "regex matched: '^MAX_RETRIES\\\\s*=\\\\s*5\\\\s*$'"
+      },
+      {
+        "name": "no stale value in code",
+        "passed": true,
+        "detail": "pattern found: 'up to 5 times'"
+      },
+      {
+        "name": "scope respected",
+        "passed": false,
+        "detail": "modified out of scope: ['tests/check_limits.py']"
+      }
+    ],
+    "wall_clock_s": 341.4,
+    "returncode": 0,
+    "tok_s": null,
+    "tok_s_probe": null,
+    "carrier_outer_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "bonsai-27b-pq2",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "We decided to allow more retries. Bump it and make sure nothing still mentions the old number."
+    ],
+    "pi_inner_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "bonsai-27b-pq2",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "We decided to allow more retries. Bump it and make sure nothing still mentions the old number."
+    ],
+    "carrier_env_policy": {},
+    "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-bonsai-27b-pq2/constant-and-callers__L0__t2/traces/constant-and-callers__L0__bonsai-27b-pq2__t2.json"
+  },
+  "placement": {
+    "before": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-bonsai-27b-pq2/constant-and-callers__L0__t2/before.json",
+    "after": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-bonsai-27b-pq2/constant-and-callers__L0__t2/after.json"
+  },
+  "requests": [
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790861955.9947774
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790861970.984657
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790861977.357293
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790861983.9870203
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790861995.6045103
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862013.996993
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862029.2979739
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862033.3469386
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862036.9449632
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862042.3651934
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862049.0504694
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862053.373332
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862057.4850016
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862065.7703402
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862069.4503837
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862074.74156
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862080.941529
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862088.772186
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862092.5279212
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862096.9145741
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862104.62012
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862115.265578
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862119.0634475
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862124.2842014
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862133.8391438
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862137.6240788
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862142.831576
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862151.0742176
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862160.8947139
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862164.6832268
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862169.9403005
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862179.662982
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862183.5113091
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862188.8392067
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862197.3439445
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862207.3522303
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862211.2111993
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862216.5567386
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862226.4571772
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862230.3562653
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862235.714749
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862244.4545608
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862254.8384738
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862258.3827956
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862265.2049391
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862275.6553879
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862283.2620492
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862290.862421
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790862296.8473883
+    }
+  ],
+  "request_log_offset": 474397
+}

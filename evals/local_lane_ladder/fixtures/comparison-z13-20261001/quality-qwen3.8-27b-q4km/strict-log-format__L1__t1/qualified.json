@@ -1,0 +1,207 @@
+{
+  "outcome": "pass",
+  "raw": {
+    "task_id": "strict-log-format",
+    "level": "L1",
+    "model": "qwen3.8-27b-q4km",
+    "trial": 1,
+    "machine": "desktop",
+    "passed": true,
+    "outcome": "pass",
+    "attempted_edit": true,
+    "failure_class": null,
+    "proofs": {
+      "dispatch": true,
+      "scope": true,
+      "placement": false,
+      "grader": true,
+      "timing": true
+    },
+    "placement_evidence": null,
+    "unproven_reasons": [
+      "placement"
+    ],
+    "scope_violations": [],
+    "detail": "all 3 checks passed",
+    "failure_cause": null,
+    "check_score": 1.0,
+    "checks": [
+      {
+        "name": "battery passes",
+        "passed": true,
+        "detail": "postcondition command exited 0"
+      },
+      {
+        "name": "function still defined",
+        "passed": true,
+        "detail": "function 'error_report' defined with args ['log_text']"
+      },
+      {
+        "name": "tests not edited",
+        "passed": true,
+        "detail": "no writes outside ['src/logsum.py']"
+      }
+    ],
+    "wall_clock_s": 77.7,
+    "returncode": 0,
+    "tok_s": null,
+    "tok_s_probe": null,
+    "carrier_outer_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "qwen3.8-27b-q4km",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "Implement error_report in src/logsum.py per its docstring: one entry per hour containing at least one ERROR, formatted \"HH: N errors\", sorted ascending, [] when there are none. Do not change the tests.\n"
+    ],
+    "pi_inner_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "qwen3.8-27b-q4km",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "Implement error_report in src/logsum.py per its docstring: one entry per hour containing at least one ERROR, formatted \"HH: N errors\", sorted ascending, [] when there are none. Do not change the tests.\n"
+    ],
+    "carrier_env_policy": {},
+    "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-qwen3.8-27b-q4km/strict-log-format__L1__t1/traces/strict-log-format__L1__qwen3.8-27b-q4km__t1.json"
+  },
+  "placement": {
+    "before": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-qwen3.8-27b-q4km/strict-log-format__L1__t1/before.json",
+    "after": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-qwen3.8-27b-q4km/strict-log-format__L1__t1/after.json"
+  },
+  "requests": [
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "qwen3.8-27b-q4km",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "qwen3.8-27b-q4km",
+      "passed": true,
+      "ts": 1790849836.1044104
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "qwen3.8-27b-q4km",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "qwen3.8-27b-q4km",
+      "passed": true,
+      "ts": 1790849853.220394
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "qwen3.8-27b-q4km",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "qwen3.8-27b-q4km",
+      "passed": true,
+      "ts": 1790849885.2191389
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "qwen3.8-27b-q4km",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "qwen3.8-27b-q4km",
+      "passed": true,
+      "ts": 1790849891.5869114
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "qwen3.8-27b-q4km",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "qwen3.8-27b-q4km",
+      "passed": true,
+      "ts": 1790849896.1751707
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "qwen3.8-27b-q4km",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "qwen3.8-27b-q4km",
+      "passed": true,
+      "ts": 1790849903.527231
+    }
+  ],
+  "request_log_offset": 186152
+}

@@ -1,0 +1,51 @@
+{
+  "hashes": {
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py": "8b33e6b1c23105345257ee669e9b9affd0f17e1069ca72a4c5739846c9ac0a09",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/runner.py": "d49da8af44bc597a12e6962215b25d2a4690a7ba9c643d737e1a54c0e14cded4",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/grading.py": "86ec4483b4823b7f79d5d8588c25eee28312fdf95508705ef0305fe638570d32",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures.py": "cf2cf1cb5df1f5a19efeb03265c590d00f25f0a3b5699d1d1e856fea0ad0a180",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/comparison_preflight.py": "cb9e71051a5d66d08971509df0c42dd0244b5e339081d762f9fb6bae6ba2f855",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/request_gate_proxy.py": "977ffeabc065d60295d4233f688e5c3565431412aceeeb572aead152a59c5d25",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/preflight_comparison.py": "4a8d122f1052e165f10bb7d656bdc57bb3a99d07cecb714f29b2f849c2a9f11e",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/preflight_llama_server.py": "b604980c9a466eaaf2693b17324852e6a3d16c75d146ff85b281d0bcc3ca5fba",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/preflight_uma.py": "e337ba475ec083fdf6f6922359a07fbd0f52354166b931f725013b93d3e1e7b8",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/uma_placement.py": "3e85c452f17d27d34565ece41a0cb88cd2b52665fbff0038d71a72bf0f5c724f",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/contract-z13-ollama.json": "921358be55d4fae9787ca30277de1097f30fe71343db646b15ed74a84c4e7f9e",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/alias_add.yaml": "8fc729bdc1389d2949bf94c713f09432aacf99a3dae5e7456c5c74f759d960b9",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/ambiguous_anchor.yaml": "17cf88051c125a6c57345609dc2a884795805d4c57db9a7c38954fa1b0693a6d",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/booking_off_by_one.yaml": "27b5402a66e722a9da1170cbb9b4010408a86921f6a52dbb16211eafd40dd2f0",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/config_value_change.yaml": "4b4531bd70533dcabb9dc56db0bd1647269b611eb9517e49b924aed631bbf635",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/constant_and_callers.yaml": "dceaf27a6d80c9b705a6b306ba5a7b323baf9c1ea5b51feca552b5ce7a043814",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/csv_summarize_repair.yaml": "8913996cf08940a90fa6baf7a637f0cf5f39ddbe46eaff943b56332c40e9dcc0",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/doc_fix.yaml": "8bc80bcc1dfc620715f2e85ddf61f5cb2583e4a24e24246ece68f0976f2b585a",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/extraction_faithful.yaml": "9f0eb1c69585631d65ca4e5bf05e0bdf186fad10eebce6abf049eaef44d78721",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/function_add.yaml": "cfa63265f4f860ed0cb51da14835818fa1fedcfa6ed2eaa553f2eb240f57e343",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/grep_and_report.yaml": "cf34661157302a7970b1fc4f6686d775a9d88d042de90e694e09b53f0dc44b6e",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/ledger_gate.yaml": "a0900338c837e63ae37fd5c08a5f153f2c74241f79589663aad4c141050d8e40",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/ledger_strict_reconciliation.yaml": "e8303ee495e59a5a551a6c89413c05b595a3ddd78005648ca5e1c9789b61c116",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/multi_file_rename_reference.yaml": "14045f5c2e014e0c6604eec44de846133928d42d5efa47e937a795dc7423c226",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/strict_log_format.yaml": "6bc45fdeced03e2343177cbd505e29823b0e6aa78913694e432241b1d794ed3d",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/strict_table_render.yaml": "1f2aa5cd7c108da100720fb8d5a0ced4e0326e4a38519c48b39a8ed9b3cd95da",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/tool_forbidden.yaml": "abc2a5a9d6ba6be3f63f286c1ef3d87012986b3b4a505cf68315f013eea3c5eb",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/tasks/window_stamp.yaml": "c1c785f745e0d587e35fc3bfdafc5a8a9f3e463103c1257b55053b56bf788cd4",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/pi-config/models.json": "a87a4fc87c729aa0430e3db2c1aab165c8da6f85795005bf0cce1fdb9f86c9fd",
+    "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/pi-config/settings.json": "562b1d4b83e65d86a2b4d4f0cac2038b667a74a03cb432b65f97f34df2202b4e"
+  },
+  "model": "c1z-qwen3.6-35b:latest",
+  "provider": "z13-packet",
+  "tasks": [
+    "booking-off-by-one"
+  ],
+  "levels": [
+    "L0",
+    "L1",
+    "L2"
+  ],
+  "trials_per_task_level": 1,
+  "cells": 3,
+  "timeout_s": 600,
+  "order": "trial, level, task",
+  "placement_scope": "pre/post snapshots, not continuous",
+  "decode": "separate run; never legacy per-cell probe",
+  "cache_reset": "ollama unload + prompt-free reload before the before-gate"
+}

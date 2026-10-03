@@ -1,0 +1,262 @@
+{
+  "outcome": "pass",
+  "raw": {
+    "task_id": "csv-summarize-repair",
+    "level": "L2",
+    "model": "bonsai-27b-pq2",
+    "trial": 5,
+    "machine": "desktop",
+    "passed": true,
+    "outcome": "pass",
+    "attempted_edit": true,
+    "failure_class": null,
+    "proofs": {
+      "dispatch": true,
+      "scope": true,
+      "placement": false,
+      "grader": true,
+      "timing": true
+    },
+    "placement_evidence": null,
+    "unproven_reasons": [
+      "placement"
+    ],
+    "scope_violations": [],
+    "detail": "all 2 checks passed",
+    "failure_cause": null,
+    "check_score": 1.0,
+    "checks": [
+      {
+        "name": "battery passes",
+        "passed": true,
+        "detail": "postcondition command exited 0"
+      },
+      {
+        "name": "tests not edited",
+        "passed": true,
+        "detail": "no writes outside ['src/expenses.py']"
+      }
+    ],
+    "wall_clock_s": 102.7,
+    "returncode": 0,
+    "tok_s": null,
+    "tok_s_probe": null,
+    "carrier_outer_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "bonsai-27b-pq2",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+    ],
+    "pi_inner_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "bonsai-27b-pq2",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "1. Read src/expenses.py and read tests/check_expenses.py.\n2. In src/expenses.py, rewrite the body of \"def summarize_expenses(csv_text):\"\n   so that it satisfies the docstring already in that function.\n3. Verify by running \"python3 tests/check_expenses.py\" from the fixture root;\n   it should exit 0 and print \"EXPENSES_OK\".\nOnly touch src/expenses.py.\n"
+    ],
+    "carrier_env_policy": {},
+    "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-bonsai-27b-pq2/csv-summarize-repair__L2__t5/traces/csv-summarize-repair__L2__bonsai-27b-pq2__t5.json"
+  },
+  "placement": {
+    "before": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-bonsai-27b-pq2/csv-summarize-repair__L2__t5/before.json",
+    "after": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-bonsai-27b-pq2/csv-summarize-repair__L2__t5/after.json"
+  },
+  "requests": [
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790871226.0569625
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790871241.943634
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790871248.319149
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790871267.3099363
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790871270.976742
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790871291.3904266
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790871295.0185957
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790871315.6507237
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "bonsai-27b-pq2",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "bonsai-27b-pq2",
+      "passed": true,
+      "ts": 1790871319.3428187
+    }
+  ],
+  "request_log_offset": 755622
+}

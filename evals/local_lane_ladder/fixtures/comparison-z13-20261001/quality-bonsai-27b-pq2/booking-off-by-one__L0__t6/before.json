@@ -1,0 +1,2159 @@
+{
+  "errors": [],
+  "mode": "read-only preflight; no generation",
+  "model": {
+    "gguf_sha256": "3907dc1658db1f78a9826bf8d5bcb8dc65db0d466388937af57f2294fae62ec1",
+    "model": "bonsai-27b-pq2",
+    "n_ctx": 16384,
+    "params": {
+      "frequency_penalty": 0.0,
+      "min_p": 0.0,
+      "presence_penalty": 0.0,
+      "repeat_last_n": 64,
+      "repeat_penalty": 1.0,
+      "seed": 1234,
+      "temperature": 0.699999988079071,
+      "top_k": 20,
+      "top_p": 0.800000011920929,
+      "typical_p": 1.0
+    }
+  },
+  "passed": true,
+  "placement": {
+    "attributed_gtt_mib": 4797.4,
+    "attributed_mib": 8308.9,
+    "attributed_vram_mib": 3511.5,
+    "foreign_mib": 544.2,
+    "host": "z13",
+    "kind": "uma-amdgpu",
+    "label": "gpu-resident",
+    "listener_pid": 3181406,
+    "mem_available_mib": 19689,
+    "platform_profile": "balanced",
+    "proved": true,
+    "swap_used_mib": 1268,
+    "weight_allocation_ratio": 1.209,
+    "zero_cpu_offload_proved": false
+  },
+  "props": {
+    "bos_token": "<|endoftext|>",
+    "build_info": "b10743-adfffbe41",
+    "chat_template_caps": {
+      "supports_object_arguments": true,
+      "supports_parallel_tool_calls": true,
+      "supports_preserve_reasoning": true,
+      "supports_reasoning_effort": true,
+      "supports_string_content": true,
+      "supports_system_role": true,
+      "supports_tool_calls": true,
+      "supports_tools": true,
+      "supports_typed_content": false
+    },
+    "cors_proxy_enabled": false,
+    "default_generation_settings": {
+      "n_ctx": 16384,
+      "params": {
+        "adaptive_decay": 0.8999999761581421,
+        "adaptive_target": -1.0,
+        "backend_sampling": false,
+        "chat_format": "Content-only",
+        "dry_allowed_length": 2,
+        "dry_base": 1.75,
+        "dry_multiplier": 0.0,
+        "dry_penalty_last_n": 64,
+        "dynatemp_exponent": 1.0,
+        "dynatemp_range": 0.0,
+        "frequency_penalty": 0.0,
+        "generation_prompt": "",
+        "ignore_eos": false,
+        "lora": [],
+        "max_tokens": -1,
+        "min_keep": 0,
+        "min_p": 0.0,
+        "mirostat": 0,
+        "mirostat_eta": 0.10000000149011612,
+        "mirostat_tau": 5.0,
+        "n_discard": 0,
+        "n_keep": 0,
+        "n_predict": -1,
+        "n_probs": 0,
+        "post_sampling_probs": false,
+        "presence_penalty": 0.0,
+        "reasoning_format": "none",
+        "reasoning_in_content": false,
+        "repeat_last_n": 64,
+        "repeat_penalty": 1.0,
+        "samplers": [
+          "penalties",
+          "dry",
+          "top_n_sigma",
+          "top_k",
+          "typ_p",
+          "top_p",
+          "min_p",
+          "xtc",
+          "temperature"
+        ],
+        "seed": 1234,
+        "speculative.types": "none",
+        "stream": false,
+        "temperature": 0.699999988079071,
+        "timings_per_token": false,
+        "top_k": 20,
+        "top_n_sigma": -1.0,
+        "top_p": 0.800000011920929,
+        "typical_p": 1.0,
+        "xtc_probability": 0.0,
+        "xtc_threshold": 0.10000000149011612
+      }
+    },
+    "endpoint_metrics": false,
+    "endpoint_props": false,
+    "endpoint_slots": true,
+    "eos_token": "<|im_end|>",
+    "is_sleeping": false,
+    "media_marker": "<__media_fl0SsUpHGG1yepScP7Pb59Ew2z8wzmAz__>",
+    "modalities": {
+      "audio": false,
+      "video": false,
+      "vision": false
+    },
+    "model_alias": "bonsai-27b-pq2",
+    "model_ftype": "PQ2_0 - 2.13 bpw (group 128)",
+    "model_path": "/home/blueaz/bonsai/Ternary-Bonsai-2-27B-PQ2_0.gguf",
+    "total_slots": 1,
+    "ui": false,
+    "ui_settings": {}
+  },
+  "remote": {
+    "ac_online": [
+      "0",
+      "1",
+      "1",
+      "0"
+    ],
+    "drm_clients": [
+      {
+        "gtt_kib": 2048,
+        "pid": 2000150,
+        "vram_kib": 12
+      },
+      {
+        "gtt_kib": 61840,
+        "pid": 2000218,
+        "vram_kib": 182792
+      },
+      {
+        "gtt_kib": 4912528,
+        "pid": 3181406,
+        "vram_kib": 3595792
+      }
+    ],
+    "gguf": {
+      "bytes": 7206168928,
+      "path": "/home/blueaz/bonsai/Ternary-Bonsai-2-27B-PQ2_0.gguf",
+      "sha256": "3907dc1658db1f78a9826bf8d5bcb8dc65db0d466388937af57f2294fae62ec1"
+    },
+    "gpu": {
+      "gtt_total": 21474836480,
+      "gtt_used": 5122945024,
+      "vram_total": 4294967296,
+      "vram_used": 4160163840
+    },
+    "host": "z13",
+    "listener_pid": 3181406,
+    "meminfo_kib": {
+      "MemAvailable": 20161896,
+      "MemTotal": 28350048,
+      "SwapFree": 7089620,
+      "SwapTotal": 8388604
+    },
+    "nonce": "938e8b4ccc5447be9316a2b182f19f6f",
+    "platform_profile": "balanced",
+    "port": 18669,
+    "processes": [
+      {
+        "pid": 1,
+        "ppid": 0
+      },
+      {
+        "pid": 2,
+        "ppid": 0
+      },
+      {
+        "pid": 3,
+        "ppid": 2
+      },
+      {
+        "pid": 4,
+        "ppid": 2
+      },
+      {
+        "pid": 5,
+        "ppid": 2
+      },
+      {
+        "pid": 6,
+        "ppid": 2
+      },
+      {
+        "pid": 7,
+        "ppid": 2
+      },
+      {
+        "pid": 8,
+        "ppid": 2
+      },
+      {
+        "pid": 10,
+        "ppid": 2
+      },
+      {
+        "pid": 13,
+        "ppid": 2
+      },
+      {
+        "pid": 15,
+        "ppid": 2
+      },
+      {
+        "pid": 16,
+        "ppid": 2
+      },
+      {
+        "pid": 17,
+        "ppid": 2
+      },
+      {
+        "pid": 18,
+        "ppid": 2
+      },
+      {
+        "pid": 19,
+        "ppid": 2
+      },
+      {
+        "pid": 20,
+        "ppid": 2
+      },
+      {
+        "pid": 21,
+        "ppid": 2
+      },
+      {
+        "pid": 22,
+        "ppid": 2
+      },
+      {
+        "pid": 23,
+        "ppid": 2
+      },
+      {
+        "pid": 24,
+        "ppid": 2
+      },
+      {
+        "pid": 25,
+        "ppid": 2
+      },
+      {
+        "pid": 26,
+        "ppid": 2
+      },
+      {
+        "pid": 28,
+        "ppid": 2
+      },
+      {
+        "pid": 29,
+        "ppid": 2
+      },
+      {
+        "pid": 30,
+        "ppid": 2
+      },
+      {
+        "pid": 31,
+        "ppid": 2
+      },
+      {
+        "pid": 32,
+        "ppid": 2
+      },
+      {
+        "pid": 34,
+        "ppid": 2
+      },
+      {
+        "pid": 35,
+        "ppid": 2
+      },
+      {
+        "pid": 36,
+        "ppid": 2
+      },
+      {
+        "pid": 37,
+        "ppid": 2
+      },
+      {
+        "pid": 38,
+        "ppid": 2
+      },
+      {
+        "pid": 40,
+        "ppid": 2
+      },
+      {
+        "pid": 41,
+        "ppid": 2
+      },
+      {
+        "pid": 42,
+        "ppid": 2
+      },
+      {
+        "pid": 43,
+        "ppid": 2
+      },
+      {
+        "pid": 44,
+        "ppid": 2
+      },
+      {
+        "pid": 46,
+        "ppid": 2
+      },
+      {
+        "pid": 47,
+        "ppid": 2
+      },
+      {
+        "pid": 48,
+        "ppid": 2
+      },
+      {
+        "pid": 49,
+        "ppid": 2
+      },
+      {
+        "pid": 50,
+        "ppid": 2
+      },
+      {
+        "pid": 52,
+        "ppid": 2
+      },
+      {
+        "pid": 53,
+        "ppid": 2
+      },
+      {
+        "pid": 54,
+        "ppid": 2
+      },
+      {
+        "pid": 55,
+        "ppid": 2
+      },
+      {
+        "pid": 56,
+        "ppid": 2
+      },
+      {
+        "pid": 58,
+        "ppid": 2
+      },
+      {
+        "pid": 59,
+        "ppid": 2
+      },
+      {
+        "pid": 60,
+        "ppid": 2
+      },
+      {
+        "pid": 61,
+        "ppid": 2
+      },
+      {
+        "pid": 62,
+        "ppid": 2
+      },
+      {
+        "pid": 64,
+        "ppid": 2
+      },
+      {
+        "pid": 65,
+        "ppid": 2
+      },
+      {
+        "pid": 66,
+        "ppid": 2
+      },
+      {
+        "pid": 67,
+        "ppid": 2
+      },
+      {
+        "pid": 68,
+        "ppid": 2
+      },
+      {
+        "pid": 70,
+        "ppid": 2
+      },
+      {
+        "pid": 71,
+        "ppid": 2
+      },
+      {
+        "pid": 72,
+        "ppid": 2
+      },
+      {
+        "pid": 73,
+        "ppid": 2
+      },
+      {
+        "pid": 74,
+        "ppid": 2
+      },
+      {
+        "pid": 76,
+        "ppid": 2
+      },
+      {
+        "pid": 77,
+        "ppid": 2
+      },
+      {
+        "pid": 78,
+        "ppid": 2
+      },
+      {
+        "pid": 79,
+        "ppid": 2
+      },
+      {
+        "pid": 80,
+        "ppid": 2
+      },
+      {
+        "pid": 82,
+        "ppid": 2
+      },
+      {
+        "pid": 83,
+        "ppid": 2
+      },
+      {
+        "pid": 84,
+        "ppid": 2
+      },
+      {
+        "pid": 85,
+        "ppid": 2
+      },
+      {
+        "pid": 86,
+        "ppid": 2
+      },
+      {
+        "pid": 88,
+        "ppid": 2
+      },
+      {
+        "pid": 89,
+        "ppid": 2
+      },
+      {
+        "pid": 90,
+        "ppid": 2
+      },
+      {
+        "pid": 91,
+        "ppid": 2
+      },
+      {
+        "pid": 92,
+        "ppid": 2
+      },
+      {
+        "pid": 94,
+        "ppid": 2
+      },
+      {
+        "pid": 95,
+        "ppid": 2
+      },
+      {
+        "pid": 96,
+        "ppid": 2
+      },
+      {
+        "pid": 97,
+        "ppid": 2
+      },
+      {
+        "pid": 98,
+        "ppid": 2
+      },
+      {
+        "pid": 99,
+        "ppid": 2
+      },
+      {
+        "pid": 101,
+        "ppid": 2
+      },
+      {
+        "pid": 102,
+        "ppid": 2
+      },
+      {
+        "pid": 103,
+        "ppid": 2
+      },
+      {
+        "pid": 104,
+        "ppid": 2
+      },
+      {
+        "pid": 105,
+        "ppid": 2
+      },
+      {
+        "pid": 107,
+        "ppid": 2
+      },
+      {
+        "pid": 108,
+        "ppid": 2
+      },
+      {
+        "pid": 109,
+        "ppid": 2
+      },
+      {
+        "pid": 110,
+        "ppid": 2
+      },
+      {
+        "pid": 111,
+        "ppid": 2
+      },
+      {
+        "pid": 113,
+        "ppid": 2
+      },
+      {
+        "pid": 114,
+        "ppid": 2
+      },
+      {
+        "pid": 115,
+        "ppid": 2
+      },
+      {
+        "pid": 116,
+        "ppid": 2
+      },
+      {
+        "pid": 117,
+        "ppid": 2
+      },
+      {
+        "pid": 119,
+        "ppid": 2
+      },
+      {
+        "pid": 120,
+        "ppid": 2
+      },
+      {
+        "pid": 121,
+        "ppid": 2
+      },
+      {
+        "pid": 122,
+        "ppid": 2
+      },
+      {
+        "pid": 123,
+        "ppid": 2
+      },
+      {
+        "pid": 125,
+        "ppid": 2
+      },
+      {
+        "pid": 126,
+        "ppid": 2
+      },
+      {
+        "pid": 127,
+        "ppid": 2
+      },
+      {
+        "pid": 128,
+        "ppid": 2
+      },
+      {
+        "pid": 129,
+        "ppid": 2
+      },
+      {
+        "pid": 131,
+        "ppid": 2
+      },
+      {
+        "pid": 132,
+        "ppid": 2
+      },
+      {
+        "pid": 133,
+        "ppid": 2
+      },
+      {
+        "pid": 134,
+        "ppid": 2
+      },
+      {
+        "pid": 135,
+        "ppid": 2
+      },
+      {
+        "pid": 137,
+        "ppid": 2
+      },
+      {
+        "pid": 138,
+        "ppid": 2
+      },
+      {
+        "pid": 139,
+        "ppid": 2
+      },
+      {
+        "pid": 140,
+        "ppid": 2
+      },
+      {
+        "pid": 141,
+        "ppid": 2
+      },
+      {
+        "pid": 143,
+        "ppid": 2
+      },
+      {
+        "pid": 144,
+        "ppid": 2
+      },
+      {
+        "pid": 145,
+        "ppid": 2
+      },
+      {
+        "pid": 146,
+        "ppid": 2
+      },
+      {
+        "pid": 147,
+        "ppid": 2
+      },
+      {
+        "pid": 149,
+        "ppid": 2
+      },
+      {
+        "pid": 150,
+        "ppid": 2
+      },
+      {
+        "pid": 151,
+        "ppid": 2
+      },
+      {
+        "pid": 152,
+        "ppid": 2
+      },
+      {
+        "pid": 153,
+        "ppid": 2
+      },
+      {
+        "pid": 155,
+        "ppid": 2
+      },
+      {
+        "pid": 156,
+        "ppid": 2
+      },
+      {
+        "pid": 157,
+        "ppid": 2
+      },
+      {
+        "pid": 158,
+        "ppid": 2
+      },
+      {
+        "pid": 159,
+        "ppid": 2
+      },
+      {
+        "pid": 161,
+        "ppid": 2
+      },
+      {
+        "pid": 164,
+        "ppid": 2
+      },
+      {
+        "pid": 165,
+        "ppid": 2
+      },
+      {
+        "pid": 166,
+        "ppid": 2
+      },
+      {
+        "pid": 167,
+        "ppid": 2
+      },
+      {
+        "pid": 168,
+        "ppid": 2
+      },
+      {
+        "pid": 169,
+        "ppid": 2
+      },
+      {
+        "pid": 172,
+        "ppid": 2
+      },
+      {
+        "pid": 173,
+        "ppid": 2
+      },
+      {
+        "pid": 174,
+        "ppid": 2
+      },
+      {
+        "pid": 175,
+        "ppid": 2
+      },
+      {
+        "pid": 176,
+        "ppid": 2
+      },
+      {
+        "pid": 177,
+        "ppid": 2
+      },
+      {
+        "pid": 178,
+        "ppid": 2
+      },
+      {
+        "pid": 179,
+        "ppid": 2
+      },
+      {
+        "pid": 183,
+        "ppid": 2
+      },
+      {
+        "pid": 184,
+        "ppid": 2
+      },
+      {
+        "pid": 185,
+        "ppid": 2
+      },
+      {
+        "pid": 186,
+        "ppid": 2
+      },
+      {
+        "pid": 187,
+        "ppid": 2
+      },
+      {
+        "pid": 188,
+        "ppid": 2
+      },
+      {
+        "pid": 190,
+        "ppid": 2
+      },
+      {
+        "pid": 192,
+        "ppid": 2
+      },
+      {
+        "pid": 194,
+        "ppid": 2
+      },
+      {
+        "pid": 195,
+        "ppid": 2
+      },
+      {
+        "pid": 197,
+        "ppid": 2
+      },
+      {
+        "pid": 199,
+        "ppid": 2
+      },
+      {
+        "pid": 200,
+        "ppid": 2
+      },
+      {
+        "pid": 201,
+        "ppid": 2
+      },
+      {
+        "pid": 203,
+        "ppid": 2
+      },
+      {
+        "pid": 207,
+        "ppid": 2
+      },
+      {
+        "pid": 210,
+        "ppid": 2
+      },
+      {
+        "pid": 212,
+        "ppid": 2
+      },
+      {
+        "pid": 213,
+        "ppid": 2
+      },
+      {
+        "pid": 315,
+        "ppid": 2
+      },
+      {
+        "pid": 316,
+        "ppid": 2
+      },
+      {
+        "pid": 317,
+        "ppid": 2
+      },
+      {
+        "pid": 318,
+        "ppid": 2
+      },
+      {
+        "pid": 552,
+        "ppid": 2
+      },
+      {
+        "pid": 553,
+        "ppid": 2
+      },
+      {
+        "pid": 568,
+        "ppid": 2
+      },
+      {
+        "pid": 569,
+        "ppid": 2
+      },
+      {
+        "pid": 570,
+        "ppid": 2
+      },
+      {
+        "pid": 571,
+        "ppid": 2
+      },
+      {
+        "pid": 572,
+        "ppid": 2
+      },
+      {
+        "pid": 574,
+        "ppid": 2
+      },
+      {
+        "pid": 578,
+        "ppid": 2
+      },
+      {
+        "pid": 580,
+        "ppid": 2
+      },
+      {
+        "pid": 586,
+        "ppid": 2
+      },
+      {
+        "pid": 594,
+        "ppid": 2
+      },
+      {
+        "pid": 595,
+        "ppid": 2
+      },
+      {
+        "pid": 596,
+        "ppid": 2
+      },
+      {
+        "pid": 597,
+        "ppid": 2
+      },
+      {
+        "pid": 598,
+        "ppid": 2
+      },
+      {
+        "pid": 599,
+        "ppid": 2
+      },
+      {
+        "pid": 600,
+        "ppid": 2
+      },
+      {
+        "pid": 601,
+        "ppid": 2
+      },
+      {
+        "pid": 602,
+        "ppid": 2
+      },
+      {
+        "pid": 603,
+        "ppid": 2
+      },
+      {
+        "pid": 604,
+        "ppid": 2
+      },
+      {
+        "pid": 605,
+        "ppid": 2
+      },
+      {
+        "pid": 606,
+        "ppid": 2
+      },
+      {
+        "pid": 607,
+        "ppid": 2
+      },
+      {
+        "pid": 633,
+        "ppid": 2
+      },
+      {
+        "pid": 634,
+        "ppid": 2
+      },
+      {
+        "pid": 635,
+        "ppid": 2
+      },
+      {
+        "pid": 636,
+        "ppid": 2
+      },
+      {
+        "pid": 637,
+        "ppid": 2
+      },
+      {
+        "pid": 639,
+        "ppid": 2
+      },
+      {
+        "pid": 640,
+        "ppid": 2
+      },
+      {
+        "pid": 641,
+        "ppid": 2
+      },
+      {
+        "pid": 642,
+        "ppid": 2
+      },
+      {
+        "pid": 643,
+        "ppid": 2
+      },
+      {
+        "pid": 644,
+        "ppid": 2
+      },
+      {
+        "pid": 645,
+        "ppid": 2
+      },
+      {
+        "pid": 646,
+        "ppid": 2
+      },
+      {
+        "pid": 647,
+        "ppid": 2
+      },
+      {
+        "pid": 648,
+        "ppid": 2
+      },
+      {
+        "pid": 649,
+        "ppid": 2
+      },
+      {
+        "pid": 650,
+        "ppid": 2
+      },
+      {
+        "pid": 651,
+        "ppid": 2
+      },
+      {
+        "pid": 652,
+        "ppid": 2
+      },
+      {
+        "pid": 653,
+        "ppid": 2
+      },
+      {
+        "pid": 654,
+        "ppid": 2
+      },
+      {
+        "pid": 655,
+        "ppid": 2
+      },
+      {
+        "pid": 656,
+        "ppid": 2
+      },
+      {
+        "pid": 657,
+        "ppid": 2
+      },
+      {
+        "pid": 658,
+        "ppid": 2
+      },
+      {
+        "pid": 659,
+        "ppid": 2
+      },
+      {
+        "pid": 660,
+        "ppid": 2
+      },
+      {
+        "pid": 661,
+        "ppid": 2
+      },
+      {
+        "pid": 662,
+        "ppid": 2
+      },
+      {
+        "pid": 663,
+        "ppid": 2
+      },
+      {
+        "pid": 664,
+        "ppid": 2
+      },
+      {
+        "pid": 665,
+        "ppid": 2
+      },
+      {
+        "pid": 666,
+        "ppid": 2
+      },
+      {
+        "pid": 667,
+        "ppid": 2
+      },
+      {
+        "pid": 668,
+        "ppid": 2
+      },
+      {
+        "pid": 669,
+        "ppid": 2
+      },
+      {
+        "pid": 670,
+        "ppid": 2
+      },
+      {
+        "pid": 671,
+        "ppid": 2
+      },
+      {
+        "pid": 681,
+        "ppid": 2
+      },
+      {
+        "pid": 686,
+        "ppid": 2
+      },
+      {
+        "pid": 688,
+        "ppid": 2
+      },
+      {
+        "pid": 696,
+        "ppid": 2
+      },
+      {
+        "pid": 697,
+        "ppid": 2
+      },
+      {
+        "pid": 705,
+        "ppid": 2
+      },
+      {
+        "pid": 708,
+        "ppid": 2
+      },
+      {
+        "pid": 710,
+        "ppid": 2
+      },
+      {
+        "pid": 736,
+        "ppid": 2
+      },
+      {
+        "pid": 751,
+        "ppid": 1
+      },
+      {
+        "pid": 761,
+        "ppid": 2
+      },
+      {
+        "pid": 782,
+        "ppid": 2
+      },
+      {
+        "pid": 786,
+        "ppid": 1
+      },
+      {
+        "pid": 800,
+        "ppid": 1
+      },
+      {
+        "pid": 801,
+        "ppid": 2
+      },
+      {
+        "pid": 806,
+        "ppid": 2
+      },
+      {
+        "pid": 877,
+        "ppid": 2
+      },
+      {
+        "pid": 878,
+        "ppid": 2
+      },
+      {
+        "pid": 938,
+        "ppid": 2
+      },
+      {
+        "pid": 952,
+        "ppid": 2
+      },
+      {
+        "pid": 953,
+        "ppid": 2
+      },
+      {
+        "pid": 957,
+        "ppid": 2
+      },
+      {
+        "pid": 964,
+        "ppid": 2
+      },
+      {
+        "pid": 968,
+        "ppid": 2
+      },
+      {
+        "pid": 1026,
+        "ppid": 2
+      },
+      {
+        "pid": 1027,
+        "ppid": 2
+      },
+      {
+        "pid": 1044,
+        "ppid": 2
+      },
+      {
+        "pid": 1045,
+        "ppid": 2
+      },
+      {
+        "pid": 1101,
+        "ppid": 2
+      },
+      {
+        "pid": 1104,
+        "ppid": 1
+      },
+      {
+        "pid": 1109,
+        "ppid": 1
+      },
+      {
+        "pid": 1111,
+        "ppid": 1109
+      },
+      {
+        "pid": 1118,
+        "ppid": 2
+      },
+      {
+        "pid": 1143,
+        "ppid": 1
+      },
+      {
+        "pid": 1145,
+        "ppid": 1143
+      },
+      {
+        "pid": 1149,
+        "ppid": 1
+      },
+      {
+        "pid": 1150,
+        "ppid": 1
+      },
+      {
+        "pid": 1154,
+        "ppid": 1
+      },
+      {
+        "pid": 1156,
+        "ppid": 1
+      },
+      {
+        "pid": 1158,
+        "ppid": 1
+      },
+      {
+        "pid": 1161,
+        "ppid": 1
+      },
+      {
+        "pid": 1165,
+        "ppid": 1
+      },
+      {
+        "pid": 1166,
+        "ppid": 1
+      },
+      {
+        "pid": 1170,
+        "ppid": 1
+      },
+      {
+        "pid": 1172,
+        "ppid": 1
+      },
+      {
+        "pid": 1174,
+        "ppid": 1
+      },
+      {
+        "pid": 1175,
+        "ppid": 1
+      },
+      {
+        "pid": 1190,
+        "ppid": 1149
+      },
+      {
+        "pid": 1193,
+        "ppid": 1
+      },
+      {
+        "pid": 1207,
+        "ppid": 1
+      },
+      {
+        "pid": 1214,
+        "ppid": 1
+      },
+      {
+        "pid": 1223,
+        "ppid": 2
+      },
+      {
+        "pid": 1252,
+        "ppid": 1
+      },
+      {
+        "pid": 1253,
+        "ppid": 1
+      },
+      {
+        "pid": 1267,
+        "ppid": 1
+      },
+      {
+        "pid": 1303,
+        "ppid": 1
+      },
+      {
+        "pid": 1304,
+        "ppid": 1
+      },
+      {
+        "pid": 1305,
+        "ppid": 1
+      },
+      {
+        "pid": 1308,
+        "ppid": 1
+      },
+      {
+        "pid": 1320,
+        "ppid": 2
+      },
+      {
+        "pid": 1360,
+        "ppid": 1
+      },
+      {
+        "pid": 1379,
+        "ppid": 2
+      },
+      {
+        "pid": 1380,
+        "ppid": 2
+      },
+      {
+        "pid": 1384,
+        "ppid": 1
+      },
+      {
+        "pid": 1389,
+        "ppid": 1
+      },
+      {
+        "pid": 1401,
+        "ppid": 1
+      },
+      {
+        "pid": 1403,
+        "ppid": 1
+      },
+      {
+        "pid": 1404,
+        "ppid": 1
+      },
+      {
+        "pid": 1475,
+        "ppid": 1
+      },
+      {
+        "pid": 1547,
+        "ppid": 1
+      },
+      {
+        "pid": 1556,
+        "ppid": 1
+      },
+      {
+        "pid": 1558,
+        "ppid": 1
+      },
+      {
+        "pid": 1587,
+        "ppid": 1
+      },
+      {
+        "pid": 1594,
+        "ppid": 1
+      },
+      {
+        "pid": 1597,
+        "ppid": 1
+      },
+      {
+        "pid": 1908,
+        "ppid": 1597
+      },
+      {
+        "pid": 1941,
+        "ppid": 1
+      },
+      {
+        "pid": 1959,
+        "ppid": 1941
+      },
+      {
+        "pid": 1989,
+        "ppid": 1908
+      },
+      {
+        "pid": 2074,
+        "ppid": 1989
+      },
+      {
+        "pid": 2460,
+        "ppid": 2
+      },
+      {
+        "pid": 105157,
+        "ppid": 1989
+      },
+      {
+        "pid": 105158,
+        "ppid": 105157
+      },
+      {
+        "pid": 193008,
+        "ppid": 2
+      },
+      {
+        "pid": 439543,
+        "ppid": 1941
+      },
+      {
+        "pid": 439560,
+        "ppid": 1941
+      },
+      {
+        "pid": 439561,
+        "ppid": 1941
+      },
+      {
+        "pid": 439562,
+        "ppid": 439543
+      },
+      {
+        "pid": 439563,
+        "ppid": 1941
+      },
+      {
+        "pid": 439564,
+        "ppid": 1941
+      },
+      {
+        "pid": 439570,
+        "ppid": 1941
+      },
+      {
+        "pid": 439680,
+        "ppid": 1941
+      },
+      {
+        "pid": 439685,
+        "ppid": 1
+      },
+      {
+        "pid": 613568,
+        "ppid": 1941
+      },
+      {
+        "pid": 613574,
+        "ppid": 613568
+      },
+      {
+        "pid": 613575,
+        "ppid": 613574
+      },
+      {
+        "pid": 613576,
+        "ppid": 1941
+      },
+      {
+        "pid": 613581,
+        "ppid": 1941
+      },
+      {
+        "pid": 613587,
+        "ppid": 613581
+      },
+      {
+        "pid": 613597,
+        "ppid": 1941
+      },
+      {
+        "pid": 613608,
+        "ppid": 1941
+      },
+      {
+        "pid": 613610,
+        "ppid": 1941
+      },
+      {
+        "pid": 783238,
+        "ppid": 1941
+      },
+      {
+        "pid": 783324,
+        "ppid": 1941
+      },
+      {
+        "pid": 2000150,
+        "ppid": 1989
+      },
+      {
+        "pid": 2000154,
+        "ppid": 2000150
+      },
+      {
+        "pid": 2000155,
+        "ppid": 2000150
+      },
+      {
+        "pid": 2000166,
+        "ppid": 1
+      },
+      {
+        "pid": 2000168,
+        "ppid": 1
+      },
+      {
+        "pid": 2000181,
+        "ppid": 2000150
+      },
+      {
+        "pid": 2000182,
+        "ppid": 2000150
+      },
+      {
+        "pid": 2000184,
+        "ppid": 2000182
+      },
+      {
+        "pid": 2000218,
+        "ppid": 2000181
+      },
+      {
+        "pid": 2000220,
+        "ppid": 2000150
+      },
+      {
+        "pid": 2000267,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2000321,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2000419,
+        "ppid": 1
+      },
+      {
+        "pid": 2000515,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2007303,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2007341,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2007448,
+        "ppid": 2000150
+      },
+      {
+        "pid": 2009975,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2010634,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2026725,
+        "ppid": 2
+      },
+      {
+        "pid": 2049540,
+        "ppid": 1404
+      },
+      {
+        "pid": 2049543,
+        "ppid": 2049540
+      },
+      {
+        "pid": 2257769,
+        "ppid": 1
+      },
+      {
+        "pid": 2257770,
+        "ppid": 2257769
+      },
+      {
+        "pid": 2257771,
+        "ppid": 2257769
+      },
+      {
+        "pid": 2293538,
+        "ppid": 1
+      },
+      {
+        "pid": 2375961,
+        "ppid": 1
+      },
+      {
+        "pid": 2459220,
+        "ppid": 1
+      },
+      {
+        "pid": 2459222,
+        "ppid": 2459220
+      },
+      {
+        "pid": 2459223,
+        "ppid": 2459220
+      },
+      {
+        "pid": 2546771,
+        "ppid": 1404
+      },
+      {
+        "pid": 2546780,
+        "ppid": 2546771
+      },
+      {
+        "pid": 2568056,
+        "ppid": 2
+      },
+      {
+        "pid": 2600057,
+        "ppid": 2
+      },
+      {
+        "pid": 2710368,
+        "ppid": 2
+      },
+      {
+        "pid": 2740630,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2748771,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2774164,
+        "ppid": 105158
+      },
+      {
+        "pid": 2774754,
+        "ppid": 2000184
+      },
+      {
+        "pid": 2774806,
+        "ppid": 2000150
+      },
+      {
+        "pid": 2779356,
+        "ppid": 1989
+      },
+      {
+        "pid": 2779376,
+        "ppid": 1
+      },
+      {
+        "pid": 2779377,
+        "ppid": 1
+      },
+      {
+        "pid": 2779378,
+        "ppid": 1
+      },
+      {
+        "pid": 2820490,
+        "ppid": 1
+      },
+      {
+        "pid": 2820555,
+        "ppid": 1
+      },
+      {
+        "pid": 2956348,
+        "ppid": 2
+      },
+      {
+        "pid": 3165265,
+        "ppid": 2
+      },
+      {
+        "pid": 3181245,
+        "ppid": 2
+      },
+      {
+        "pid": 3181402,
+        "ppid": 1404
+      },
+      {
+        "pid": 3181405,
+        "ppid": 3181402
+      },
+      {
+        "pid": 3181406,
+        "ppid": 3181405
+      },
+      {
+        "pid": 3200142,
+        "ppid": 2
+      },
+      {
+        "pid": 3211728,
+        "ppid": 2
+      },
+      {
+        "pid": 3215392,
+        "ppid": 2
+      },
+      {
+        "pid": 3221690,
+        "ppid": 2
+      },
+      {
+        "pid": 3222851,
+        "ppid": 2
+      },
+      {
+        "pid": 3308405,
+        "ppid": 1989
+      },
+      {
+        "pid": 3308406,
+        "ppid": 3308405
+      },
+      {
+        "pid": 3311006,
+        "ppid": 3308406
+      },
+      {
+        "pid": 3311007,
+        "ppid": 3311006
+      },
+      {
+        "pid": 3311008,
+        "ppid": 3311007
+      },
+      {
+        "pid": 3311099,
+        "ppid": 2
+      },
+      {
+        "pid": 3316763,
+        "ppid": 1989
+      },
+      {
+        "pid": 3316764,
+        "ppid": 3316763
+      },
+      {
+        "pid": 3320397,
+        "ppid": 2
+      },
+      {
+        "pid": 3333169,
+        "ppid": 1
+      },
+      {
+        "pid": 3360091,
+        "ppid": 2
+      },
+      {
+        "pid": 3375565,
+        "ppid": 2
+      },
+      {
+        "pid": 3397050,
+        "ppid": 2
+      },
+      {
+        "pid": 3398718,
+        "ppid": 2
+      },
+      {
+        "pid": 3416019,
+        "ppid": 2
+      },
+      {
+        "pid": 3419850,
+        "ppid": 2
+      },
+      {
+        "pid": 3419851,
+        "ppid": 2
+      },
+      {
+        "pid": 3433016,
+        "ppid": 2
+      },
+      {
+        "pid": 3469841,
+        "ppid": 2
+      },
+      {
+        "pid": 3470802,
+        "ppid": 2
+      },
+      {
+        "pid": 3496956,
+        "ppid": 2
+      },
+      {
+        "pid": 3531290,
+        "ppid": 2
+      },
+      {
+        "pid": 3538246,
+        "ppid": 2
+      },
+      {
+        "pid": 3538247,
+        "ppid": 2
+      },
+      {
+        "pid": 3556515,
+        "ppid": 2
+      },
+      {
+        "pid": 3566093,
+        "ppid": 2
+      },
+      {
+        "pid": 3568344,
+        "ppid": 2
+      },
+      {
+        "pid": 3572008,
+        "ppid": 2
+      },
+      {
+        "pid": 3572187,
+        "ppid": 2
+      },
+      {
+        "pid": 3575573,
+        "ppid": 2
+      },
+      {
+        "pid": 3630492,
+        "ppid": 2
+      },
+      {
+        "pid": 3634677,
+        "ppid": 2
+      },
+      {
+        "pid": 3634853,
+        "ppid": 2
+      },
+      {
+        "pid": 3638483,
+        "ppid": 2
+      },
+      {
+        "pid": 3638632,
+        "ppid": 2
+      },
+      {
+        "pid": 3647321,
+        "ppid": 2
+      },
+      {
+        "pid": 3650118,
+        "ppid": 2
+      },
+      {
+        "pid": 3654346,
+        "ppid": 2
+      },
+      {
+        "pid": 3677674,
+        "ppid": 2
+      },
+      {
+        "pid": 3677816,
+        "ppid": 2
+      },
+      {
+        "pid": 3679496,
+        "ppid": 2
+      },
+      {
+        "pid": 3681685,
+        "ppid": 2
+      },
+      {
+        "pid": 3683432,
+        "ppid": 2
+      },
+      {
+        "pid": 3683673,
+        "ppid": 2
+      },
+      {
+        "pid": 3692783,
+        "ppid": 2
+      },
+      {
+        "pid": 3697029,
+        "ppid": 2
+      },
+      {
+        "pid": 3698040,
+        "ppid": 2
+      },
+      {
+        "pid": 3700206,
+        "ppid": 2
+      },
+      {
+        "pid": 3701050,
+        "ppid": 2
+      },
+      {
+        "pid": 3703104,
+        "ppid": 2
+      },
+      {
+        "pid": 3704423,
+        "ppid": 2
+      },
+      {
+        "pid": 3704424,
+        "ppid": 2
+      },
+      {
+        "pid": 3707101,
+        "ppid": 2
+      },
+      {
+        "pid": 3714287,
+        "ppid": 2
+      },
+      {
+        "pid": 3719212,
+        "ppid": 2
+      },
+      {
+        "pid": 3724747,
+        "ppid": 2
+      },
+      {
+        "pid": 3724954,
+        "ppid": 2
+      },
+      {
+        "pid": 3730197,
+        "ppid": 2
+      },
+      {
+        "pid": 3737358,
+        "ppid": 2
+      },
+      {
+        "pid": 3738588,
+        "ppid": 2
+      },
+      {
+        "pid": 3738749,
+        "ppid": 2
+      },
+      {
+        "pid": 3740285,
+        "ppid": 2
+      },
+      {
+        "pid": 3742245,
+        "ppid": 2
+      },
+      {
+        "pid": 3742702,
+        "ppid": 2
+      },
+      {
+        "pid": 3746505,
+        "ppid": 2
+      },
+      {
+        "pid": 3751368,
+        "ppid": 2
+      },
+      {
+        "pid": 3752328,
+        "ppid": 2
+      },
+      {
+        "pid": 3758652,
+        "ppid": 2
+      },
+      {
+        "pid": 3758653,
+        "ppid": 2
+      },
+      {
+        "pid": 3758654,
+        "ppid": 2
+      },
+      {
+        "pid": 3761649,
+        "ppid": 2
+      },
+      {
+        "pid": 3761788,
+        "ppid": 2
+      },
+      {
+        "pid": 3763602,
+        "ppid": 2
+      },
+      {
+        "pid": 3764745,
+        "ppid": 2
+      },
+      {
+        "pid": 3765639,
+        "ppid": 2
+      },
+      {
+        "pid": 3766160,
+        "ppid": 2
+      },
+      {
+        "pid": 3766311,
+        "ppid": 2
+      },
+      {
+        "pid": 3767661,
+        "ppid": 2
+      },
+      {
+        "pid": 3767814,
+        "ppid": 2
+      },
+      {
+        "pid": 3767815,
+        "ppid": 2
+      },
+      {
+        "pid": 3768849,
+        "ppid": 786
+      },
+      {
+        "pid": 3768850,
+        "ppid": 786
+      },
+      {
+        "pid": 3769175,
+        "ppid": 2
+      },
+      {
+        "pid": 3772750,
+        "ppid": 2
+      },
+      {
+        "pid": 3772924,
+        "ppid": 2
+      },
+      {
+        "pid": 3775175,
+        "ppid": 2
+      },
+      {
+        "pid": 3777297,
+        "ppid": 786
+      },
+      {
+        "pid": 3777856,
+        "ppid": 2459220
+      },
+      {
+        "pid": 3778005,
+        "ppid": 2257769
+      },
+      {
+        "pid": 3778090,
+        "ppid": 2293538
+      },
+      {
+        "pid": 3778156,
+        "ppid": 1594
+      },
+      {
+        "pid": 3778242,
+        "ppid": 2375961
+      },
+      {
+        "pid": 3778274,
+        "ppid": 2
+      },
+      {
+        "pid": 3778275,
+        "ppid": 1404
+      },
+      {
+        "pid": 3778278,
+        "ppid": 3778275
+      },
+      {
+        "pid": 3778279,
+        "ppid": 3778278
+      },
+      {
+        "pid": 3778281,
+        "ppid": 3778279
+      }
+    ]
+  },
+  "request_options": {
+    "frequency_penalty": 0,
+    "max_tokens": 4096,
+    "model": "bonsai-27b-pq2",
+    "presence_penalty": 0,
+    "reasoning_effort": "none",
+    "seed": 1234,
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "temperature": 0.7,
+    "top_p": 0.8
+  }
+}

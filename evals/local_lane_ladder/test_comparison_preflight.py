@@ -229,6 +229,27 @@ class PlacementTests(unittest.TestCase):
         with self.assertRaisesRegex(PreflightError, "host"):
             validate_remote_placement(contract(), TAG, local_ps, remote)
 
+    def test_single_card_contract_passes_on_that_card(self):
+        c = contract()
+        c["placement"]["gpu_uuids"] = [GPU0]
+        local_ps, remote = placement_pair(used=(19000.0, 0.0))
+        remote["compute_apps"] = remote["compute_apps"][:1]
+        self.assertTrue(validate_remote_placement(c, TAG, local_ps, remote)["proved"])
+
+    def test_single_card_contract_refuses_the_other_card(self):
+        c = contract()
+        c["placement"]["gpu_uuids"] = [GPU0]
+        local_ps, remote = placement_pair()
+        with self.assertRaisesRegex(PreflightError, "outside allowed GPU set"):
+            validate_remote_placement(c, TAG, local_ps, remote)
+
+    def test_duplicate_gpu_declaration_refused(self):
+        c = contract()
+        c["placement"]["gpu_uuids"] = [GPU0, GPU0]
+        local_ps, remote = placement_pair()
+        with self.assertRaisesRegex(PreflightError, "distinct"):
+            validate_remote_placement(c, TAG, local_ps, remote)
+
     def test_second_loaded_model_fails(self):
         local_ps, remote = placement_pair()
         remote = copy.deepcopy(remote)

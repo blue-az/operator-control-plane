@@ -1,0 +1,227 @@
+{
+  "outcome": "pass",
+  "raw": {
+    "task_id": "strict-log-format",
+    "level": "L0",
+    "model": "c1z-qwen3.6-35b:latest",
+    "trial": 3,
+    "machine": "desktop",
+    "passed": true,
+    "outcome": "pass",
+    "attempted_edit": true,
+    "failure_class": null,
+    "proofs": {
+      "dispatch": true,
+      "scope": true,
+      "placement": false,
+      "grader": true,
+      "timing": true
+    },
+    "placement_evidence": null,
+    "unproven_reasons": [
+      "placement"
+    ],
+    "scope_violations": [],
+    "detail": "all 3 checks passed",
+    "failure_cause": null,
+    "check_score": 1.0,
+    "checks": [
+      {
+        "name": "battery passes",
+        "passed": true,
+        "detail": "postcondition command exited 0"
+      },
+      {
+        "name": "function still defined",
+        "passed": true,
+        "detail": "function 'error_report' defined with args ['log_text']"
+      },
+      {
+        "name": "tests not edited",
+        "passed": true,
+        "detail": "no writes outside ['src/logsum.py']"
+      }
+    ],
+    "wall_clock_s": 28.5,
+    "returncode": 0,
+    "tok_s": null,
+    "tok_s_probe": null,
+    "carrier_outer_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "c1z-qwen3.6-35b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "I need a summary of how many errors happened each hour from my logs."
+    ],
+    "pi_inner_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "c1z-qwen3.6-35b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "I need a summary of how many errors happened each hour from my logs."
+    ],
+    "carrier_env_policy": {},
+    "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-c1z-qwen3.6-35b/strict-log-format__L0__t3/traces/strict-log-format__L0__c1z-qwen3.6-35b-latest__t3.json"
+  },
+  "placement": {
+    "before": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-c1z-qwen3.6-35b/strict-log-format__L0__t3/before.json",
+    "after": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-c1z-qwen3.6-35b/strict-log-format__L0__t3/after.json"
+  },
+  "requests": [
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790846054.933589
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790846060.475225
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790846063.3435178
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790846065.380421
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790846069.391831
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790846075.6368606
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790846078.5301993
+    }
+  ],
+  "request_log_offset": 62354
+}

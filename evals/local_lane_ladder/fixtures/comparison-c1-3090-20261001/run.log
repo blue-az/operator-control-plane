@@ -1,0 +1,93 @@
+Grid: 1 tasks x 3 levels x 1 trials = 3 cells
+booking-off-by-one L0 t1: pass (9.1s)
+booking-off-by-one L1 t1: pass (7.4s)
+booking-off-by-one L2 t1: pass (6.1s)
+c1-qwen3.6-35b:latest decode failed contract: decode depth/output contract not met: prompt 12811, eval 24, stop
+Grid: 5 tasks x 3 levels x 6 trials = 90 cells
+ambiguous-anchor L0 t1: fail (6.6s)
+booking-off-by-one L0 t1: pass (8.5s)
+constant-and-callers L0 t1: pass (13.4s)
+csv-summarize-repair L0 t1: pass (14.8s)
+strict-log-format L0 t1: pass (12.3s)
+ambiguous-anchor L1 t1: pass (4.0s)
+booking-off-by-one L1 t1: pass (7.4s)
+constant-and-callers L1 t1: pass (7.1s)
+csv-summarize-repair L1 t1: pass (12.1s)
+strict-log-format L1 t1: pass (15.9s)
+ambiguous-anchor L2 t1: pass (6.9s)
+booking-off-by-one L2 t1: pass (6.8s)
+constant-and-callers L2 t1: pass (7.3s)
+csv-summarize-repair L2 t1: pass (7.9s)
+strict-log-format L2 t1: pass (6.4s)
+ambiguous-anchor L0 t2: fail (10.2s)
+booking-off-by-one L0 t2: pass (8.9s)
+constant-and-callers L0 t2: pass (12.5s)
+csv-summarize-repair L0 t2: pass (15.5s)
+strict-log-format L0 t2: pass (10.5s)
+ambiguous-anchor L1 t2: pass (4.0s)
+booking-off-by-one L1 t2: pass (8.2s)
+constant-and-callers L1 t2: pass (10.3s)
+csv-summarize-repair L1 t2: pass (21.9s)
+strict-log-format L1 t2: pass (17.6s)
+ambiguous-anchor L2 t2: pass (6.1s)
+booking-off-by-one L2 t2: pass (6.0s)
+constant-and-callers L2 t2: pass (7.4s)
+csv-summarize-repair L2 t2: pass (9.1s)
+strict-log-format L2 t2: pass (6.1s)
+ambiguous-anchor L0 t3: fail (8.6s)
+booking-off-by-one L0 t3: pass (8.7s)
+constant-and-callers L0 t3: pass (12.7s)
+csv-summarize-repair L0 t3: pass (19.1s)
+strict-log-format L0 t3: pass (10.7s)
+ambiguous-anchor L1 t3: pass (4.0s)
+booking-off-by-one L1 t3: pass (8.2s)
+constant-and-callers L1 t3: pass (7.9s)
+csv-summarize-repair L1 t3: pass (20.4s)
+strict-log-format L1 t3: pass (7.4s)
+ambiguous-anchor L2 t3: pass (6.7s)
+booking-off-by-one L2 t3: pass (6.0s)
+constant-and-callers L2 t3: pass (7.7s)
+csv-summarize-repair L2 t3: pass (9.0s)
+strict-log-format L2 t3: pass (6.6s)
+ambiguous-anchor L0 t4: pass (13.8s)
+booking-off-by-one L0 t4: pass (9.4s)
+constant-and-callers L0 t4: pass (10.5s)
+csv-summarize-repair L0 t4: pass (12.3s)
+strict-log-format L0 t4: pass (10.1s)
+ambiguous-anchor L1 t4: pass (4.0s)
+booking-off-by-one L1 t4: pass (7.4s)
+constant-and-callers L1 t4: pass (7.4s)
+csv-summarize-repair L1 t4: pass (11.3s)
+strict-log-format L1 t4: pass (7.5s)
+ambiguous-anchor L2 t4: pass (6.2s)
+booking-off-by-one L2 t4: pass (6.4s)
+constant-and-callers L2 t4: pass (7.5s)
+csv-summarize-repair L2 t4: pass (9.3s)
+Traceback (most recent call last):
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py", line 220, in <module>
+    print(f"{task['task_id']} {level} t{trial}: {record['outcome']} ({raw['wall_clock_s']}s)", flush=True)
+                 ^^^^^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py", line 182, in main
+    erased = call(contract["endpoint"], "/slots/0?action=erase", {})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py", line 159, in gate
+    preflight = "preflight_llama_server.py" if contract["schema"] == LLAMA_SCHEMA else "preflight_comparison.py"
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: frozen input changed: /home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py
+Traceback (most recent call last):
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/launch-c1-3090.py", line 208, in <module>
+    main()
+    ~~~~^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/launch-c1-3090.py", line 192, in main
+    packet(model, P / f"quality-{stem}")
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/launch-c1-3090.py", line 72, in packet
+    run(args)
+    ~~~^^^^^^
+  File "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/launch-c1-3090.py", line 34, in run
+    return subprocess.run(argv, check=True, env=ENV, **kwargs)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['/usr/bin/python3', '-u', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/run_standard_packet.py', '--contract', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/contract-c1-3090.json', '--model', 'c1-qwen3.6-35b:latest', '--provider', 'standard-packet', '--request-log', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/request-gate.jsonl', '--request-body', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/requests/c1-qwen3.6-35b_latest.json', '--output', '/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/quality-c1-qwen3.6-35b']' returned non-zero exit status 1.

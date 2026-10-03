@@ -1,0 +1,13 @@
+{
+  "model": "c1-qwen3.6-35b:latest",
+  "created_at": "2026-10-01T05:59:30.13929398Z",
+  "response": "oded = if env_flag_disabled(\"CAMELID_X86_Q8_FFN_DECODE_CHAIN\") {\n        env_updates.insert(\"CAMELLID_X86_Q8_FFN_DECODE_CHAIN\", Some(\"off\"));\n        \"off\"\n    } else {\n        env_updates.insert(\"CGate, \"CAMELID_X86_Q8_FFN_GATE_UP_DECODE_CONSUMER\", Some(\"on\"));\n        \"on\"\n    };\n    env_updates.insert(\n        \"CAMELID_X86\n\n<think>\nHere's a thinking process:\n\n1. ",
+  "done": true,
+  "done_reason": "length",
+  "total_duration": 5828720899,
+  "load_duration": 420682395,
+  "prompt_eval_count": 12811,
+  "prompt_eval_duration": 4524426000,
+  "eval_count": 128,
+  "eval_duration": 835381000
+}

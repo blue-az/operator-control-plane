@@ -1,0 +1,128 @@
+[
+  {
+    "trial": 0,
+    "discarded_warmup": true,
+    "prompt_sha256": "7409b2e72d7192d300c7b524f4a8b0bcd32e2e200ee948edad448e70c5165eff",
+    "options": {
+      "num_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "num_ctx": 16384
+    },
+    "cache_reset": {
+      "method": "ollama unload + prompt-free reload",
+      "unloaded_confirmed": true,
+      "reload_s": 6.93,
+      "ps": [
+        {
+          "name": "c1-qwen3.6-35b:latest",
+          "model": "c1-qwen3.6-35b:latest",
+          "size": 21619193936,
+          "digest": "bdb9106556df47bca30fee3bc2cff4df6bc93f4fedca08279f2ac4fdb0907235",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "qwen35moe",
+            "families": [
+              "qwen35moe"
+            ],
+            "parameter_size": "35.5B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2319-01-10T23:09:43.866884552-07:00",
+          "size_vram": 21619193936,
+          "context_length": 16384
+        }
+      ]
+    },
+    "prompt_eval_count": 12811,
+    "eval_count": 128,
+    "prompt_eval_duration_ns": 4517943000,
+    "eval_duration_ns": 834576000,
+    "decode_tok_s": 153.37129272828358
+  },
+  {
+    "trial": 1,
+    "discarded_warmup": false,
+    "prompt_sha256": "622210e5fddad3a5a23cb0de39df5ddbc6589a7d116a04e937e7787725dbda52",
+    "options": {
+      "num_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "num_ctx": 16384
+    },
+    "cache_reset": {
+      "method": "ollama unload + prompt-free reload",
+      "unloaded_confirmed": true,
+      "reload_s": 6.98,
+      "ps": [
+        {
+          "name": "c1-qwen3.6-35b:latest",
+          "model": "c1-qwen3.6-35b:latest",
+          "size": 21619193936,
+          "digest": "bdb9106556df47bca30fee3bc2cff4df6bc93f4fedca08279f2ac4fdb0907235",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "qwen35moe",
+            "families": [
+              "qwen35moe"
+            ],
+            "parameter_size": "35.5B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2319-01-10T23:09:58.157393953-07:00",
+          "size_vram": 21619193936,
+          "context_length": 16384
+        }
+      ]
+    },
+    "prompt_eval_count": 12811,
+    "eval_count": 128,
+    "prompt_eval_duration_ns": 4528268000,
+    "eval_duration_ns": 840076000,
+    "decode_tok_s": 152.36716678014847
+  },
+  {
+    "trial": 2,
+    "discarded_warmup": false,
+    "prompt_sha256": "56019a5c2f61eda5bafb3e1152e2ec3f0ce72a16f469ef5128b7b0526b9ddfe2",
+    "options": {
+      "num_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "num_ctx": 16384
+    },
+    "cache_reset": {
+      "method": "ollama unload + prompt-free reload",
+      "unloaded_confirmed": true,
+      "reload_s": 7.07,
+      "ps": [
+        {
+          "name": "c1-qwen3.6-35b:latest",
+          "model": "c1-qwen3.6-35b:latest",
+          "size": 21619193936,
+          "digest": "bdb9106556df47bca30fee3bc2cff4df6bc93f4fedca08279f2ac4fdb0907235",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "qwen35moe",
+            "families": [
+              "qwen35moe"
+            ],
+            "parameter_size": "35.5B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2319-01-10T23:10:12.576299516-07:00",
+          "size_vram": 21619193936,
+          "context_length": 16384
+        }
+      ]
+    },
+    "prompt_eval_count": 12811,
+    "eval_count": 128,
+    "prompt_eval_duration_ns": 4531469000,
+    "eval_duration_ns": 837786000,
+    "decode_tok_s": 152.78364642044627
+  }
+]

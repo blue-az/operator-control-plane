@@ -1,0 +1,172 @@
+{
+  "outcome": "pass",
+  "raw": {
+    "task_id": "ambiguous-anchor",
+    "level": "L0",
+    "model": "c1z-qwen3.6-35b:latest",
+    "trial": 3,
+    "machine": "desktop",
+    "passed": true,
+    "outcome": "pass",
+    "attempted_edit": true,
+    "failure_class": null,
+    "proofs": {
+      "dispatch": true,
+      "scope": true,
+      "placement": false,
+      "grader": true,
+      "timing": true
+    },
+    "placement_evidence": null,
+    "unproven_reasons": [
+      "placement"
+    ],
+    "scope_violations": [],
+    "detail": "all 4 checks passed",
+    "failure_cause": null,
+    "check_score": 1.0,
+    "checks": [
+      {
+        "name": "staging line changed",
+        "passed": true,
+        "detail": "regex matched: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'"
+      },
+      {
+        "name": "exactly one forced occurrence",
+        "passed": true,
+        "detail": "found exactly 1 occurrence(s) of 'restart the service --force'"
+      },
+      {
+        "name": "other two occurrences untouched",
+        "passed": true,
+        "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'"
+      },
+      {
+        "name": "scope respected",
+        "passed": true,
+        "detail": "no writes outside ['runbook.md']"
+      }
+    ],
+    "wall_clock_s": 19.6,
+    "returncode": 0,
+    "tok_s": null,
+    "tok_s_probe": null,
+    "carrier_outer_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "c1z-qwen3.6-35b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "Staging needs the force flag when we bounce it. The other environments must stay as they are."
+    ],
+    "pi_inner_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "c1z-qwen3.6-35b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "Staging needs the force flag when we bounce it. The other environments must stay as they are."
+    ],
+    "carrier_env_policy": {},
+    "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-c1z-qwen3.6-35b/ambiguous-anchor__L0__t3/traces/ambiguous-anchor__L0__c1z-qwen3.6-35b-latest__t3.json"
+  },
+  "placement": {
+    "before": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-c1z-qwen3.6-35b/ambiguous-anchor__L0__t3/before.json",
+    "after": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-c1z-qwen3.6-35b/ambiguous-anchor__L0__t3/after.json"
+  },
+  "requests": [
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790845894.5097208
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790845901.7197015
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790845905.453506
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790845910.8798187
+    }
+  ],
+  "request_log_offset": 54858
+}

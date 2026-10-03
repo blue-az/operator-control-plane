@@ -1,0 +1,167 @@
+{
+  "outcome": "pass",
+  "raw": {
+    "task_id": "booking-off-by-one",
+    "level": "L2",
+    "model": "c1-qwen3.6-35b:latest",
+    "trial": 1,
+    "machine": "desktop",
+    "passed": true,
+    "outcome": "pass",
+    "attempted_edit": true,
+    "failure_class": null,
+    "proofs": {
+      "dispatch": true,
+      "scope": true,
+      "placement": false,
+      "grader": true,
+      "timing": true
+    },
+    "placement_evidence": null,
+    "unproven_reasons": [
+      "placement"
+    ],
+    "scope_violations": [],
+    "detail": "all 3 checks passed",
+    "failure_cause": null,
+    "check_score": 1.0,
+    "checks": [
+      {
+        "name": "battery passes",
+        "passed": true,
+        "detail": "postcondition command exited 0"
+      },
+      {
+        "name": "signature preserved",
+        "passed": true,
+        "detail": "function 'bookings_conflict' defined with args ['start1', 'end1', 'start2', 'end2']"
+      },
+      {
+        "name": "tests not edited",
+        "passed": true,
+        "detail": "no writes outside ['src/bookings.py']"
+      }
+    ],
+    "wall_clock_s": 6.8,
+    "returncode": 0,
+    "tok_s": null,
+    "tok_s_probe": null,
+    "carrier_outer_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "standard-packet",
+      "--model",
+      "c1-qwen3.6-35b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+    ],
+    "pi_inner_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "standard-packet",
+      "--model",
+      "c1-qwen3.6-35b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "1. Read src/bookings.py and read tests/check_bookings.py.\n2. In src/bookings.py, replace the line \"    return start1 <= end2 and start2 <= end1\"\n   so the checkout day is exclusive, keeping the name and signature of\n   \"def bookings_conflict(start1, end1, start2, end2):\" unchanged.\n3. Verify by running \"python3 tests/check_bookings.py\" from the fixture root;\n   it should exit 0 and print \"BOOKINGS_OK\".\nOnly touch src/bookings.py.\n"
+    ],
+    "carrier_env_policy": {},
+    "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/quality-c1-qwen3.6-35b/booking-off-by-one__L2__t1/traces/booking-off-by-one__L2__c1-qwen3.6-35b-latest__t1.json"
+  },
+  "placement": {
+    "before": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/quality-c1-qwen3.6-35b/booking-off-by-one__L2__t1/before.json",
+    "after": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-c1-3090-20261001/quality-c1-qwen3.6-35b/booking-off-by-one__L2__t1/after.json"
+  },
+  "requests": [
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790834567.586593
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790834569.4298432
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790834571.5398293
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1-qwen3.6-35b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1-qwen3.6-35b:latest",
+      "passed": true,
+      "ts": 1790834572.6232734
+    }
+  ],
+  "request_log_offset": 27430
+}

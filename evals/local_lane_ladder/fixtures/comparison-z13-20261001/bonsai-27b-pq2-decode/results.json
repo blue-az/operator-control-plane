@@ -1,0 +1,86 @@
+[
+  {
+    "trial": 0,
+    "discarded_warmup": true,
+    "runtime": "llama",
+    "prompt_sha256": "7409b2e72d7192d300c7b524f4a8b0bcd32e2e200ee948edad448e70c5165eff",
+    "options": {
+      "n_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "cache_prompt": false,
+      "ignore_eos": true,
+      "stream": false
+    },
+    "cache_reset": {
+      "id_slot": 0,
+      "n_erased": 3050
+    },
+    "prompt_tokens": 12811,
+    "generated": 128,
+    "decode_tok_s": 18.703287802363683
+  },
+  {
+    "trial": 1,
+    "discarded_warmup": false,
+    "runtime": "llama",
+    "prompt_sha256": "622210e5fddad3a5a23cb0de39df5ddbc6589a7d116a04e937e7787725dbda52",
+    "options": {
+      "n_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "cache_prompt": false,
+      "ignore_eos": true,
+      "stream": false
+    },
+    "cache_reset": {
+      "id_slot": 0,
+      "n_erased": 12938
+    },
+    "prompt_tokens": 12811,
+    "generated": 128,
+    "decode_tok_s": 18.808497945949117
+  },
+  {
+    "trial": 2,
+    "discarded_warmup": false,
+    "runtime": "llama",
+    "prompt_sha256": "56019a5c2f61eda5bafb3e1152e2ec3f0ce72a16f469ef5128b7b0526b9ddfe2",
+    "options": {
+      "n_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "cache_prompt": false,
+      "ignore_eos": true,
+      "stream": false
+    },
+    "cache_reset": {
+      "id_slot": 0,
+      "n_erased": 12938
+    },
+    "prompt_tokens": 12811,
+    "generated": 128,
+    "decode_tok_s": 18.713892869888934
+  },
+  {
+    "trial": 3,
+    "discarded_warmup": false,
+    "runtime": "llama",
+    "prompt_sha256": "6befaaf64dc1235c76dc411c27242f8d30307a6ba100cfa41288b2f770f6d891",
+    "options": {
+      "n_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "cache_prompt": false,
+      "ignore_eos": true,
+      "stream": false
+    },
+    "cache_reset": {
+      "id_slot": 0,
+      "n_erased": 12938
+    },
+    "prompt_tokens": 12811,
+    "generated": 128,
+    "decode_tok_s": 18.80789629533314
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "method": "ollama unload + prompt-free reload",
+  "unloaded_confirmed": true,
+  "reload_s": 6.94,
+  "ps": [
+    {
+      "name": "c1-qwen3.6-35b:latest",
+      "model": "c1-qwen3.6-35b:latest",
+      "size": 21619193936,
+      "digest": "bdb9106556df47bca30fee3bc2cff4df6bc93f4fedca08279f2ac4fdb0907235",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen35moe",
+        "families": [
+          "qwen35moe"
+        ],
+        "parameter_size": "35.5B",
+        "quantization_level": "Q4_K_M"
+      },
+      "expires_at": "2319-01-10T23:35:45.560251125-07:00",
+      "size_vram": 21619193936,
+      "context_length": 16384
+    }
+  ]
+}

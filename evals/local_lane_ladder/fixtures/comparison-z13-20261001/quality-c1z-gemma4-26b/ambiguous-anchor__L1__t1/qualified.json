@@ -1,0 +1,132 @@
+{
+  "outcome": "fail",
+  "raw": {
+    "task_id": "ambiguous-anchor",
+    "level": "L1",
+    "model": "c1z-gemma4-26b:latest",
+    "trial": 1,
+    "machine": "desktop",
+    "passed": false,
+    "outcome": "unproven",
+    "attempted_edit": false,
+    "failure_class": "other_check",
+    "proofs": {
+      "dispatch": true,
+      "scope": true,
+      "placement": false,
+      "grader": true,
+      "timing": true
+    },
+    "placement_evidence": null,
+    "unproven_reasons": [
+      "placement"
+    ],
+    "scope_violations": [],
+    "detail": "2/4 checks failed: staging line changed: regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'; exactly one forced occurrence: pattern not found: 'restart the service --force'",
+    "failure_cause": "unproven_placement",
+    "check_score": 0.5,
+    "checks": [
+      {
+        "name": "staging line changed",
+        "passed": false,
+        "detail": "regex did not match: '## Staging\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service --force\\\\n'"
+      },
+      {
+        "name": "exactly one forced occurrence",
+        "passed": false,
+        "detail": "pattern not found: 'restart the service --force'"
+      },
+      {
+        "name": "other two occurrences untouched",
+        "passed": true,
+        "detail": "regex matched: '## Production\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n[\\\\s\\\\S]*## Development\\\\n1\\\\. Drain connections\\\\.\\\\n2\\\\. Run: restart the service\\\\n'"
+      },
+      {
+        "name": "scope respected",
+        "passed": true,
+        "detail": "no writes outside ['runbook.md']"
+      }
+    ],
+    "wall_clock_s": 5.1,
+    "returncode": 0,
+    "tok_s": null,
+    "tok_s_probe": null,
+    "carrier_outer_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "c1z-gemma4-26b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "In runbook.md, the step \"Run: restart the service\" appears under Production, Staging and Development. Change only the Staging one to \"Run: restart the service --force\". Leave the other two exactly as they are.\n"
+    ],
+    "pi_inner_argv": [
+      "/usr/local/bin/pi",
+      "--provider",
+      "z13-packet",
+      "--model",
+      "c1z-gemma4-26b:latest",
+      "--mode",
+      "json",
+      "--print",
+      "--thinking",
+      "off",
+      "--",
+      "In runbook.md, the step \"Run: restart the service\" appears under Production, Staging and Development. Change only the Staging one to \"Run: restart the service --force\". Leave the other two exactly as they are.\n"
+    ],
+    "carrier_env_policy": {},
+    "trace": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-c1z-gemma4-26b/ambiguous-anchor__L1__t1/traces/ambiguous-anchor__L1__c1z-gemma4-26b-latest__t1.json"
+  },
+  "placement": {
+    "before": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-c1z-gemma4-26b/ambiguous-anchor__L1__t1/before.json",
+    "after": "/home/blueaz/operator-control-plane/evals/local_lane_ladder/fixtures/comparison-z13-20261001/quality-c1z-gemma4-26b/ambiguous-anchor__L1__t1/after.json"
+  },
+  "requests": [
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790874765.4774516
+    },
+    {
+      "errors": [],
+      "fields": {
+        "frequency_penalty": 0,
+        "max_tokens": 4096,
+        "model": "c1z-gemma4-26b:latest",
+        "presence_penalty": 0,
+        "reasoning_effort": "none",
+        "seed": 1234,
+        "stream": true,
+        "stream_options": {
+          "include_usage": true
+        },
+        "temperature": 0.7,
+        "top_p": 0.8
+      },
+      "model": "c1z-gemma4-26b:latest",
+      "passed": true,
+      "ts": 1790874769.1200507
+    }
+  ],
+  "request_log_offset": 915152
+}

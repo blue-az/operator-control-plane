@@ -1,0 +1,13 @@
+{
+  "model": "c1-gemma4-26b:latest",
+  "created_at": "2026-10-01T06:54:12.862715376Z",
+  "response": " = |name| {\n enough\n<|channel>thought de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-duplication and de-du",
+  "done": true,
+  "done_reason": "length",
+  "total_duration": 4973418169,
+  "load_duration": 596046500,
+  "prompt_eval_count": 14595,
+  "prompt_eval_duration": 3220094000,
+  "eval_count": 128,
+  "eval_duration": 1095966000
+}

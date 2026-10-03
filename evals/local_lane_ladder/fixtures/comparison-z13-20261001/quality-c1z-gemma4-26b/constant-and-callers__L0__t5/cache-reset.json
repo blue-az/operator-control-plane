@@ -1,0 +1,26 @@
+{
+  "method": "ollama unload + prompt-free reload",
+  "unloaded_confirmed": true,
+  "reload_s": 7.16,
+  "ps": [
+    {
+      "name": "c1z-gemma4-26b:latest",
+      "model": "c1z-gemma4-26b:latest",
+      "size": 17595199650,
+      "digest": "5052eccc0a7a0bab8d08517f45ac6686838e915af68849592c8a89ddc569410a",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "gemma4",
+        "families": [
+          "gemma4"
+        ],
+        "parameter_size": "25.8B",
+        "quantization_level": "Q4_K_M"
+      },
+      "expires_at": "2319-01-11T10:32:55.605436921-07:00",
+      "size_vram": 17595199650,
+      "context_length": 16384
+    }
+  ]
+}

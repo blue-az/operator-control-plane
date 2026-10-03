@@ -53,7 +53,117 @@ def parse_parameters(text: str) -> dict[str, Any]:
     return result
 
 
+# llama-server contracts: the same sampler pin minus Ollama-only fields. num_keep
+# has no effect with context shift disabled, and speculation is pinned off
+# through /props instead of draft_num_predict.
+LLAMA_SCHEMA = "local-lane-comparison/llama-server-v1"
+LLAMA_PIN_FIELDS = PIN_FIELDS - {"num_keep", "draft_num_predict"}
+# /props default_generation_settings.params key for each pin field (num_ctx and
+# num_predict are checked separately: n_ctx, and max_tokens on every request).
+PROPS_FIELDS = {
+    "seed": "seed", "temperature": "temperature", "top_k": "top_k", "top_p": "top_p",
+    "min_p": "min_p", "typical_p": "typical_p", "repeat_last_n": "repeat_last_n",
+    "repeat_penalty": "repeat_penalty", "presence_penalty": "presence_penalty",
+    "frequency_penalty": "frequency_penalty",
+}
+
+
+def validate_llama_contract(contract: dict) -> None:
+    parameters = contract.get("parameters", {})
+    require(set(parameters) == LLAMA_PIN_FIELDS, "contract must explicitly declare every pin field and no others")
+    for key, value in parameters.items():
+        require(type(value) in (int, float), f"{key} must be numeric")
+        require(float('-inf') < value < float('inf'), f"{key} must be finite")
+    require(parameters['num_ctx'] > 0 and parameters['num_predict'] > 0, "positive context/output limits required")
+    require(contract.get("think") == "off", "llama-server contracts support the thinking-off profile only")
+    engine = contract.get("engine", {})
+    require(bool(engine.get("release")) and bool(re.fullmatch(r"[a-f0-9]{64}", str(engine.get("archive_sha256", "")))),
+            "declare engine release and archive_sha256")
+    models = contract.get("models", {})
+    require(bool(models), "empty model roster")
+    for tag, model in models.items():
+        require(isinstance(tag, str) and bool(tag), "empty model tag")
+        require(bool(re.fullmatch(r"[a-f0-9]{64}", str(model.get("gguf_sha256", "")))), f"{tag}: missing full gguf_sha256")
+        require(type(model.get("gguf_bytes")) is int and model["gguf_bytes"] > 0, f"{tag}: declare gguf_bytes")
+        require(isinstance(model.get("gguf_path"), str) and model["gguf_path"].startswith("/"), f"{tag}: declare absolute gguf_path")
+        require(model.get("variant") in ("instruct", "hybrid"), f"{tag}: declare variant")
+        # A model deliberately split across GPU and CPU (MoE experts on CPU to fit a
+        # smaller card) declares its own lower bound and a hard ceiling.
+        override = model.get("placement", {})
+        require(set(override) <= {"minimum_weight_allocation_ratio", "maximum_mib"}, f"{tag}: unknown placement override")
+        if "maximum_mib" in override:
+            require(type(override["maximum_mib"]) in (int, float) and override["maximum_mib"] > 0, f"{tag}: maximum_mib must be positive")
+    clock = contract.get("placement", {}).get("memory_clock_mhz")
+    require(clock is None or type(clock) is int, "memory_clock_mhz must be an integer when declared")
+
+
+def validate_llama_props(contract: dict, tag: str, props: dict, gguf: dict) -> dict:
+    """Check the live server's own report and a fresh hash of the file it loaded."""
+    validate_contract(contract)
+    require(contract.get("schema") == LLAMA_SCHEMA, "not a llama-server contract")
+    require(tag in contract["models"], "model is outside the frozen roster")
+    expected = contract["models"][tag]
+    require(props.get("model_alias") == tag, f"{tag}: server alias is {props.get('model_alias')!r}")
+    require(props.get("model_path") == expected["gguf_path"], f"{tag}: server loaded {props.get('model_path')!r}")
+    require(gguf.get("path") == expected["gguf_path"], f"{tag}: hashed a different file")
+    require(gguf.get("sha256") == expected["gguf_sha256"], f"{tag}: gguf sha256 mismatch")
+    require(gguf.get("bytes") == expected["gguf_bytes"], f"{tag}: gguf size mismatch")
+    require(props.get("total_slots") == 1, f"{tag}: expected exactly one slot")
+    settings = props.get("default_generation_settings", {})
+    require(settings.get("n_ctx") == contract["parameters"]["num_ctx"],
+            f"{tag}: n_ctx {settings.get('n_ctx')!r} != {contract['parameters']['num_ctx']}")
+    params = settings.get("params", {})
+    for pin_key, props_key in PROPS_FIELDS.items():
+        value = params.get(props_key)
+        # /props reports float32 values (0.7 -> 0.699999988...).
+        require(type(value) in (int, float) and abs(value - contract["parameters"][pin_key]) < 1e-6,
+                f"{tag}: {pin_key} expected {contract['parameters'][pin_key]!r}, observed {value!r}")
+    require(params.get("speculative.types") == "none", f"{tag}: speculative decoding is not off")
+    for key, neutral in (("dry_multiplier", 0), ("xtc_probability", 0), ("mirostat", 0), ("top_n_sigma", -1)):
+        require(params.get(key) == neutral, f"{tag}: {key} is {params.get(key)!r}, expected {neutral!r}")
+    require(params.get("lora") == [], f"{tag}: adapters loaded")
+    return {"model": tag, "gguf_sha256": gguf["sha256"], "n_ctx": settings["n_ctx"],
+            "params": {k: params[k] for k in PROPS_FIELDS.values()}}
+
+
+def validate_llama_placement(contract: dict, tag: str, remote: dict) -> dict:
+    """All GPU memory of the serving process on the one declared card."""
+    validate_contract(contract)
+    expected = contract.get("placement", {})
+    require(remote.get("host") == expected.get("host") and bool(expected.get("host")), "remote host mismatch")
+    require(remote.get("port") == expected.get("port") and type(expected.get("port")) is int, "remote listener port mismatch")
+    gpu = expected.get("gpu_uuid")
+    require(isinstance(gpu, str) and gpu.startswith("GPU-"), "declare exactly one allowed GPU UUID")
+    daemon = remote.get("listener_pid")
+    require(type(daemon) is int and daemon > 0, "no attributed remote listener")
+    allocated = {}
+    for app in remote.get("compute_apps", []):
+        if int(app["pid"]) != daemon:
+            require(float(app["used_mib"]) <= 64, "unrelated GPU workload present; do not evict it")
+            continue
+        allocated[app["gpu_uuid"]] = allocated.get(app["gpu_uuid"], 0.0) + float(app["used_mib"])
+    require(set(allocated) == {gpu}, f"server allocated on {sorted(allocated)}, expected only {gpu}")
+    override = contract["models"][tag].get("placement", {})
+    ratio = override.get("minimum_weight_allocation_ratio", expected.get("minimum_weight_allocation_ratio"))
+    require(type(ratio) in (int, float) and 0 < ratio <= 1, "declare minimum allocation ratio")
+    share = allocated[gpu] * 2**20 / contract["models"][tag]["gguf_bytes"]
+    require(share >= ratio, f"attributed allocation below bound: {share:.3f} < {ratio}")
+    ceiling = override.get("maximum_mib")
+    if ceiling is not None:
+        require(allocated[gpu] <= ceiling, f"attributed allocation {allocated[gpu]:.0f} MiB above ceiling {ceiling}")
+    clock = expected.get("memory_clock_mhz")
+    if clock is not None:
+        observed = remote.get("memory_clock_mhz", {}).get(gpu)
+        require(observed == clock, f"GPU memory clock {observed!r} MHz, contract requires {clock}")
+    return {"proved": True, "host": remote["host"], "listener_pid": daemon, "gpu_uuid": gpu,
+            "attributed_mib": allocated[gpu], "weight_allocation_ratio": share,
+            "maximum_mib": ceiling, "memory_clock_mhz": clock}
+
+
 def validate_contract(contract: dict) -> None:
+    if contract.get("schema") == LLAMA_SCHEMA:
+        validate_llama_contract(contract)
+        return
     require(contract.get("schema") == "local-lane-comparison/v1", "unknown comparison schema")
     parameters = contract.get("parameters", {})
     require(set(parameters) == PIN_FIELDS, "contract must explicitly declare every pin field and no others")
@@ -135,8 +245,12 @@ def validate_remote_placement(contract: dict, tag: str, local_ps: dict, remote: 
     for rows in (local, loaded):
         require(rows[0].get("name") == tag and rows[0].get("digest") == contract["models"][tag]["digest"], "tunnel/remote loaded model identity mismatch")
     require(local[0].get("size") == loaded[0].get("size") and local[0].get("size_vram") == loaded[0].get("size_vram"), "tunnel and remote placement disagree")
-    allowed = set(expected.get("gpu_uuids", []))
-    require(len(allowed) == 2 and all(isinstance(g, str) and g.startswith('GPU-') for g in allowed), "declare exactly two allowed GPU UUIDs")
+    # One card (a single-seat cohort) or both; the declared set is exhaustive.
+    declared = expected.get("gpu_uuids", [])
+    allowed = set(declared)
+    require(len(allowed) == len(declared) and len(allowed) in (1, 2)
+            and all(isinstance(g, str) and g.startswith('GPU-') for g in allowed),
+            "declare one or two distinct allowed GPU UUIDs")
     inventory = {g["uuid"]: g for g in remote.get("gpus", [])}
     require(allowed <= set(inventory), "expected GPUs absent")
     require(all("RTX 3090" in inventory[g]["name"] for g in allowed), "GPU model mismatch")

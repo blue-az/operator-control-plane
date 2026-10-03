@@ -1,0 +1,12 @@
+request gate listening on 127.0.0.1:18672 -> http://127.0.0.1:18670; 2 contracted models
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}
+{"model": "c1-qwen3.6-35b:latest", "passed": true, "errors": []}

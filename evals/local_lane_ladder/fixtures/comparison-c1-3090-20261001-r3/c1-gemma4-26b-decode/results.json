@@ -1,0 +1,170 @@
+[
+  {
+    "trial": 0,
+    "discarded_warmup": true,
+    "prompt_sha256": "7409b2e72d7192d300c7b524f4a8b0bcd32e2e200ee948edad448e70c5165eff",
+    "options": {
+      "num_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "num_ctx": 16384
+    },
+    "cache_reset": {
+      "method": "ollama unload + prompt-free reload",
+      "unloaded_confirmed": true,
+      "reload_s": 6.5,
+      "ps": [
+        {
+          "name": "c1-gemma4-26b:latest",
+          "model": "c1-gemma4-26b:latest",
+          "size": 17737680158,
+          "digest": "fa421b1e2b379d33d5bcbac2d70f3607728335c4b1d480649554cce23ea84063",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "gemma4",
+            "families": [
+              "gemma4"
+            ],
+            "parameter_size": "25.2B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2319-01-10T23:41:11.00005087-07:00",
+          "size_vram": 17737680158,
+          "context_length": 16384
+        }
+      ]
+    },
+    "prompt_eval_count": 14595,
+    "eval_count": 128,
+    "prompt_eval_duration_ns": 3234391000,
+    "eval_duration_ns": 1094017000,
+    "decode_tok_s": 117.00001005468836
+  },
+  {
+    "trial": 1,
+    "discarded_warmup": false,
+    "prompt_sha256": "622210e5fddad3a5a23cb0de39df5ddbc6589a7d116a04e937e7787725dbda52",
+    "options": {
+      "num_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "num_ctx": 16384
+    },
+    "cache_reset": {
+      "method": "ollama unload + prompt-free reload",
+      "unloaded_confirmed": true,
+      "reload_s": 6.45,
+      "ps": [
+        {
+          "name": "c1-gemma4-26b:latest",
+          "model": "c1-gemma4-26b:latest",
+          "size": 17737680158,
+          "digest": "fa421b1e2b379d33d5bcbac2d70f3607728335c4b1d480649554cce23ea84063",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "gemma4",
+            "families": [
+              "gemma4"
+            ],
+            "parameter_size": "25.2B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2319-01-10T23:41:24.081167265-07:00",
+          "size_vram": 17737680158,
+          "context_length": 16384
+        }
+      ]
+    },
+    "prompt_eval_count": 14595,
+    "eval_count": 128,
+    "prompt_eval_duration_ns": 3220094000,
+    "eval_duration_ns": 1095966000,
+    "decode_tok_s": 116.79194427564359
+  },
+  {
+    "trial": 2,
+    "discarded_warmup": false,
+    "prompt_sha256": "56019a5c2f61eda5bafb3e1152e2ec3f0ce72a16f469ef5128b7b0526b9ddfe2",
+    "options": {
+      "num_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "num_ctx": 16384
+    },
+    "cache_reset": {
+      "method": "ollama unload + prompt-free reload",
+      "unloaded_confirmed": true,
+      "reload_s": 6.48,
+      "ps": [
+        {
+          "name": "c1-gemma4-26b:latest",
+          "model": "c1-gemma4-26b:latest",
+          "size": 17737680158,
+          "digest": "fa421b1e2b379d33d5bcbac2d70f3607728335c4b1d480649554cce23ea84063",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "gemma4",
+            "families": [
+              "gemma4"
+            ],
+            "parameter_size": "25.2B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2319-01-10T23:41:37.076077946-07:00",
+          "size_vram": 17737680158,
+          "context_length": 16384
+        }
+      ]
+    },
+    "prompt_eval_count": 14595,
+    "eval_count": 128,
+    "prompt_eval_duration_ns": 3231160000,
+    "eval_duration_ns": 1130857000,
+    "decode_tok_s": 113.18849332851103
+  },
+  {
+    "trial": 3,
+    "discarded_warmup": false,
+    "prompt_sha256": "6befaaf64dc1235c76dc411c27242f8d30307a6ba100cfa41288b2f770f6d891",
+    "options": {
+      "num_predict": 128,
+      "temperature": 0,
+      "seed": 1234,
+      "num_ctx": 16384
+    },
+    "cache_reset": {
+      "method": "ollama unload + prompt-free reload",
+      "unloaded_confirmed": true,
+      "reload_s": 6.5,
+      "ps": [
+        {
+          "name": "c1-gemma4-26b:latest",
+          "model": "c1-gemma4-26b:latest",
+          "size": 17737680158,
+          "digest": "fa421b1e2b379d33d5bcbac2d70f3607728335c4b1d480649554cce23ea84063",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "gemma4",
+            "families": [
+              "gemma4"
+            ],
+            "parameter_size": "25.2B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2319-01-10T23:41:50.260001325-07:00",
+          "size_vram": 17737680158,
+          "context_length": 16384
+        }
+      ]
+    },
+    "prompt_eval_count": 14595,
+    "eval_count": 128,
+    "prompt_eval_duration_ns": 3223240000,
+    "eval_duration_ns": 1097248000,
+    "decode_tok_s": 116.65548718247834
+  }
+]

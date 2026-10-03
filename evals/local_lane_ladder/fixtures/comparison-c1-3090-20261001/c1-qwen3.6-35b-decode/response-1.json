@@ -1,0 +1,13 @@
+{
+  "model": "c1-qwen3.6-35b:latest",
+  "created_at": "2026-10-01T05:59:15.884741151Z",
+  "response": "oded_gate = |name| {\n        if env_flag_disabled(name) {\n            Some(\"off\")\n        } else {\n           \n<think>\n\n</think>\n\nHere is the implementation for `execution_plan.rs`.\n\n```rust\nuse std::{collections::BTreeMap, env, path::Path};\n\nuse serde::Serialize;\n\nuse crate::gguf::{GgufFile, GgufTensorType};\n\nconst MANAGED_ENV_KEYS: &[&str] = &[\n    \"CAMELID_PARALLEL_LINEAR\",\n    \"CAMELID_MAC_Q8_REPACK\",\n    \"C",
+  "done": true,
+  "done_reason": "length",
+  "total_duration": 5853315851,
+  "load_duration": 455713774,
+  "prompt_eval_count": 12811,
+  "prompt_eval_duration": 4515969000,
+  "eval_count": 128,
+  "eval_duration": 836493000
+}

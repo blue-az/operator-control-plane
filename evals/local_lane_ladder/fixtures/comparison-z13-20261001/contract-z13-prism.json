@@ -1,0 +1,50 @@
+{
+  "schema": "local-lane-comparison/llama-server-v1",
+  "think": "off",
+  "endpoint": "http://127.0.0.1:18690",
+  "profile": "F1 (Prism Vulkan)",
+  "engine": {
+    "release": "prism-b10743-adfffbe",
+    "archive": "/home/blueaz/bonsai/llama-prism-vulkan.tar.gz (Vulkan build)",
+    "archive_sha256": "95a3d082629643642842bc2195e0730880273005171517cf857804702f693edc",
+    "llama_server_sha256": "f0321669b20397593e3ac09972bf6f4b7a0684954906565353b7ca84b4b0320f",
+    "backend": "Vulkan (RADV)"
+  },
+  "parameters": {
+    "num_ctx": 16384,
+    "num_predict": 4096,
+    "seed": 1234,
+    "temperature": 0.7,
+    "top_k": 20,
+    "top_p": 0.8,
+    "min_p": 0,
+    "typical_p": 1,
+    "repeat_last_n": 64,
+    "repeat_penalty": 1,
+    "presence_penalty": 0,
+    "frequency_penalty": 0
+  },
+  "placement": {
+    "kind": "uma-amdgpu",
+    "host": "z13",
+    "ssh_host": "z13",
+    "port": 18669,
+    "platform_profile": "balanced",
+    "maximum_foreign_mib": 1536,
+    "device": "AMD Radeon 8050S (RADV GFX1151), 4 GiB carve-out + 20 GiB GTT"
+  },
+  "models": {
+    "qwen3.8-27b-q4km": {
+      "gguf_path": "/usr/share/ollama/.ollama/models/blobs/sha256-f5f1dd8920d417aac2718b0bda3403da274301efdd6760b4f0f4b864ff2ad57d",
+      "gguf_sha256": "f5f1dd8920d417aac2718b0bda3403da274301efdd6760b4f0f4b864ff2ad57d",
+      "gguf_bytes": 16810714464,
+      "variant": "hybrid"
+    },
+    "bonsai-27b-pq2": {
+      "gguf_path": "/home/blueaz/bonsai/Ternary-Bonsai-2-27B-PQ2_0.gguf",
+      "gguf_sha256": "3907dc1658db1f78a9826bf8d5bcb8dc65db0d466388937af57f2294fae62ec1",
+      "gguf_bytes": 7206168928,
+      "variant": "hybrid"
+    }
+  }
+}

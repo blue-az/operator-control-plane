@@ -1,0 +1,71 @@
+{
+  "schema": "local-lane-comparison/v1",
+  "ollama_version": "0.32.12",
+  "think": "off",
+  "endpoint": "http://127.0.0.1:18670",
+  "daemon": {
+    "script": "/home/ef-tb/c1-study-20261001/serve.sh",
+    "models_dir": "/home/ef-tb/c1-study-20261001/models (hardlinks of seat blobs)",
+    "env": {
+      "CUDA_VISIBLE_DEVICES": "GPU-22b9dafe-e97d-dbb2-50ba-2f1f1dea61f9",
+      "OLLAMA_NUM_PARALLEL": "1",
+      "OLLAMA_MAX_LOADED_MODELS": "1",
+      "OLLAMA_FLASH_ATTENTION": "1",
+      "OLLAMA_KV_CACHE_TYPE": "f16",
+      "OLLAMA_KEEP_ALIVE": "-1",
+      "OLLAMA_CONTEXT_LENGTH": "16384",
+      "OLLAMA_NOPRUNE": "1"
+    }
+  },
+  "parameters": {
+    "num_ctx": 16384,
+    "num_keep": 4,
+    "num_predict": 4096,
+    "seed": 1234,
+    "temperature": 0.7,
+    "top_k": 20,
+    "top_p": 0.8,
+    "min_p": 0,
+    "typical_p": 1,
+    "repeat_last_n": 64,
+    "repeat_penalty": 1,
+    "presence_penalty": 0,
+    "frequency_penalty": 0,
+    "draft_num_predict": 0
+  },
+  "placement": {
+    "host": "testbench",
+    "ssh_host": "testbench",
+    "port": 18669,
+    "gpu_uuids": [
+      "GPU-22b9dafe-e97d-dbb2-50ba-2f1f1dea61f9"
+    ],
+    "minimum_weight_allocation_ratio": 0.9
+  },
+  "models": {
+    "c1-qwen3.6-35b:latest": {
+      "seat_tag": "qwen3.6:35b",
+      "seat_digest": "096fdbd02fe620fc10cbeb6537e080f8041aece851e5d696aed024d4f70f2e47",
+      "digest": "bdb9106556df47bca30fee3bc2cff4df6bc93f4fedca08279f2ac4fdb0907235",
+      "weight_sha256": "d372de8e934898a59e6ccfabc3368474711384d8f1fd4d22d87a3f0a45400cdc",
+      "weight_bytes": 21718480960,
+      "variant": "hybrid",
+      "stop": [],
+      "extra_blob_sha256s": [
+        "a62390d25b4b4a2d8afd7cc3c90021c11935c1fdd48d7cb0723ab71cd02a598e"
+      ]
+    },
+    "c1-gemma4-26b:latest": {
+      "seat_tag": "gemma4:26b",
+      "seat_digest": "08ae7ec1744bd7f451c4a530afb39d2673ad9d07a8369b8a33a3613b41212a68",
+      "digest": "fa421b1e2b379d33d5bcbac2d70f3607728335c4b1d480649554cce23ea84063",
+      "weight_sha256": "dfd98d2734212d0c128e128e5d88edac764aaa4f4af2f4c196941f2354aab8da",
+      "weight_bytes": 16947541728,
+      "variant": "hybrid",
+      "stop": [],
+      "extra_blob_sha256s": [
+        "41926ed5f1403cf5add23b0684992805ea6f97253096132e769e65646b8cef9d"
+      ]
+    }
+  }
+}
