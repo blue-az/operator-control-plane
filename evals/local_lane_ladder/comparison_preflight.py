@@ -9,8 +9,10 @@ import json
 import re
 from typing import Any
 
-# Ollama 0.32.12 api.Options predict fields, plus explicit context and speculation.
+# Reviewed Ollama API profiles. Keep version cohorts explicit; live preflight
+# checks each declared profile's tag parameters and actual request fields.
 # Stop sequences are model-specific template semantics, declared per model.
+SUPPORTED_OLLAMA_VERSIONS = frozenset({"0.32.12", "0.40.0"})
 PIN_FIELDS = frozenset({
     "num_ctx", "num_keep", "num_predict", "seed", "temperature", "top_k", "top_p",
     "min_p", "typical_p", "repeat_last_n", "repeat_penalty", "presence_penalty",
@@ -172,7 +174,8 @@ def validate_contract(contract: dict) -> None:
         require(float('-inf') < value < float('inf'), f"{key} must be finite")
     require(parameters['num_ctx'] > 0 and parameters['num_predict'] > 0, "positive context/output limits required")
     require(contract.get("think") in ("off", "on"), "explicit thinking profile required")
-    require(contract.get("ollama_version") == "0.32.12", "review option contract before using another Ollama version")
+    require(contract.get("ollama_version") in SUPPORTED_OLLAMA_VERSIONS,
+            "review option contract before using an unsupported Ollama version")
     models = contract.get("models", {})
     require(bool(models), "empty model roster")
     for tag, model in models.items():

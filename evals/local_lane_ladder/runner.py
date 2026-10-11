@@ -1058,30 +1058,36 @@ def build_process_env(carrier_env: dict[str, str]) -> dict[str, str]:
     }
 
 
-def provision_carrier_fixture(fixture_root: Path, carrier_pi_config: Path) -> None:
-    """Add only non-secret provider config; never copy Pi auth/runtime state."""
-    pi_config = fixture_root / "pi-config"
-    pi_config.mkdir(parents=True, exist_ok=True)
-    (fixture_root / "home").mkdir(exist_ok=True)
-    shutil.copyfile(carrier_pi_config, pi_config / "models.json")
+def provision_carrier_config(carrier_pi_config: Path) -> Path:
+    """Copy only provider model routing config outside the graded fixture."""
+    config_dir = Path(tempfile.mkdtemp(prefix="local-lane-pi-config-"))
+    try:
+        shutil.copyfile(carrier_pi_config, config_dir / "models.json")
+    except Exception:
+        shutil.rmtree(config_dir, ignore_errors=True)
+        raise
+    return config_dir
 
 
 def build_carrier_command(
     pi_argv: list[str], fixture_root: Path, carrier_script: Path | None = None,
-    provider: str = "local",
+    provider: str = "local", carrier_config_dir: Path | None = None,
 ) -> tuple[list[str], dict[str, str]]:
     """Build an explicit sandbox command; default preserves historical dispatch."""
     if carrier_script is None:
         return pi_argv, {}
+    if carrier_config_dir is None:
+        raise ValueError("isolated carrier config directory is required")
     env = {
-        "HOME": "/work/home",
-        "PI_CODING_AGENT_DIR": "/work/pi-config",
+        "HOME": "/tmp/pi-home",
+        "PI_CODING_AGENT_DIR": "/pi-config",
         "PATH": "/usr/local/bin:/usr/bin:/bin",
     }
     if provider == "l3-testbench":
         env["BWRAP_SHARE_NET"] = "1"
     env_args = [f"{key}={value}" for key, value in env.items()]
-    return [str(carrier_script), str(fixture_root), "env", *env_args, *pi_argv], env
+    return [str(carrier_script), str(fixture_root), str(carrier_config_dir),
+            "env", *env_args, *pi_argv], env
 
 
 def run_trial(
@@ -1095,10 +1101,19 @@ def run_trial(
     fixture_root = build_fixture(
         task.get("files", {}), prefix=f"{task['task_id']}-{level}", remove=task.get("remove")
     )
+    carrier_config_dir = None
+    if carrier_script is None and carrier_pi_config is not None:
+        cleanup_fixture(fixture_root)
+        raise ValueError("--carrier-pi-config requires --carrier-script")
     if carrier_script is not None:
-        if carrier_pi_config is None:
-            raise ValueError("--carrier-pi-config is required with --carrier-script")
-        provision_carrier_fixture(fixture_root, carrier_pi_config)
+        if not carrier_script.is_file():
+            cleanup_fixture(fixture_root)
+            raise ValueError("carrier script does not exist")
+        if carrier_pi_config is None or not carrier_pi_config.is_file():
+            cleanup_fixture(fixture_root)
+            raise ValueError(
+                "a readable --carrier-pi-config file is required with --carrier-script"
+            )
     # Pre-run state, so a scope postcondition can tell "edited the declared file"
     # from "edited the declared file and three others". Taken before pi runs.
     manifest = hash_tree(fixture_root)
@@ -1193,7 +1208,17 @@ def run_trial(
     argv += ["--", prompt]
     inner_argv = list(argv)
     carrier_env = {}
-    argv, carrier_env = build_carrier_command(argv, fixture_root, carrier_script, provider)
+    try:
+        if carrier_script is not None:
+            carrier_config_dir = provision_carrier_config(carrier_pi_config)
+        argv, carrier_env = build_carrier_command(
+            argv, fixture_root, carrier_script, provider, carrier_config_dir
+        )
+    except Exception:
+        cleanup_fixture(fixture_root)
+        if carrier_config_dir is not None:
+            shutil.rmtree(carrier_config_dir, ignore_errors=True)
+        raise
     # Fallback only -- overwritten below. Kept assigned so the TimeoutExpired
     # handler cannot hit an unbound `start` if the ledger call itself raises.
     start = time.monotonic()
@@ -1335,6 +1360,8 @@ def run_trial(
         return record
     finally:
         cleanup_fixture(fixture_root)
+        if carrier_config_dir is not None:
+            shutil.rmtree(carrier_config_dir, ignore_errors=True)
 
 
 # Tools that change the fixture. Calling none of them means the model never

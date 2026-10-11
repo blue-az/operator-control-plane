@@ -108,7 +108,13 @@ class ContractTests(unittest.TestCase):
         with self.assertRaisesRegex(PreflightError, "reasoning-only"):
             validate_contract(c)
 
-    def test_other_ollama_version_refused(self):
+    def test_current_ollama_version_is_an_explicit_cohort(self):
+        c = contract(ollama_version="0.40.0")
+        validate_contract(c)
+        out = validate_model_snapshot(c, TAG, snapshot(ollama_version="0.40.0"))
+        self.assertEqual(out["model"], TAG)
+
+    def test_unreviewed_ollama_version_refused(self):
         with self.assertRaises(PreflightError):
             validate_contract(contract(ollama_version="0.33.0"))
 

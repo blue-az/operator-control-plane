@@ -7,7 +7,9 @@ import unittest
 from unittest.mock import patch
 
 import runner
-from run_standard_packet import LEVELS, TASKS, qualified_outcome, summarize
+from run_standard_packet import (
+    LEVELS, TASKS, build_grid, build_qualified_record, qualified_outcome, summarize,
+)
 
 
 class StandardPacketTest(unittest.TestCase):
@@ -22,6 +24,20 @@ class StandardPacketTest(unittest.TestCase):
         before = copy.deepcopy(self.raw)
         self.assertEqual(qualified_outcome(self.raw, self.gate, self.gate, self.requests), "pass")
         self.assertEqual(self.raw, before)
+
+    def test_qualified_record_embeds_the_matching_external_placement_gates(self):
+        record = build_qualified_record(
+            self.raw, self.gate, self.gate, self.requests, "before.json", "after.json", 17
+        )
+        self.assertEqual(record["outcome"], "pass")
+        self.assertEqual(record["placement"]["before"], self.gate)
+        self.assertEqual(record["placement"]["after"], self.gate)
+        self.assertEqual(record["request_log_offset"], 17)
+
+    def test_canary_grid_can_select_exactly_one_level(self):
+        task = {"task_id": "ambiguous-anchor"}
+        grid = build_grid([task], ["L0"], 1)
+        self.assertEqual(grid, [(task, "L0", 1)])
 
     def test_failed_grade_is_a_failure_only_with_complete_proofs(self):
         self.raw["passed"] = False

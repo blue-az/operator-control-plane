@@ -62,6 +62,11 @@ def ollama_reset(endpoint: str, model: str) -> dict:
             "reload_s": round(time.time() - started, 2), "ps": rows}
 
 
+def build_grid(tasks: list[dict], levels: list[str], trials: int) -> list[tuple[dict, str, int]]:
+    return [(task, level, trial) for trial in range(1, trials + 1)
+            for level in levels for task in tasks]
+
+
 def qualified_outcome(raw: dict, before: dict, after: dict, requests: list[dict]) -> str:
     if not before.get("passed") or not after.get("passed") or not requests:
         return "unproven"
@@ -73,6 +78,20 @@ def qualified_outcome(raw: dict, before: dict, after: dict, requests: list[dict]
     if any(proofs.get(k) is not True for k in ("dispatch", "scope", "grader", "timing", "placement")):
         return "unproven"
     return "pass" if raw["passed"] else "fail"
+
+
+def build_qualified_record(
+    raw: dict, before: dict, after: dict, requests: list[dict],
+    before_path: str, after_path: str, request_log_offset: int,
+) -> dict:
+    return {
+        "outcome": qualified_outcome(raw, before, after, requests),
+        "raw": raw,
+        "placement": {"before_path": before_path, "before": before,
+                      "after_path": after_path, "after": after},
+        "requests": requests,
+        "request_log_offset": request_log_offset,
+    }
 
 
 def summarize(records: list[dict], path: Path) -> None:
@@ -102,10 +121,21 @@ def main() -> int:
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--trials", type=int, default=6)
     ap.add_argument("--tasks", nargs="+", default=TASKS, choices=TASKS)
+    ap.add_argument("--levels", nargs="+", default=LEVELS, choices=LEVELS)
+    ap.add_argument("--carrier-script", type=Path)
+    ap.add_argument("--carrier-pi-config", type=Path)
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     if args.trials < 1:
         ap.error("positive trials required")
+    if len(set(args.levels)) != len(args.levels):
+        ap.error("duplicate levels are not allowed")
+    if (args.carrier_script is None) != (args.carrier_pi_config is None):
+        ap.error("--carrier-script and --carrier-pi-config must be supplied together")
+    if args.carrier_script and not args.carrier_script.is_file():
+        ap.error("carrier script does not exist")
+    if args.carrier_pi_config and not args.carrier_pi_config.is_file():
+        ap.error("carrier Pi config is not a file")
     contract = json.loads(args.contract.read_text())
     validate_contract(contract)
     if args.model not in contract["models"]:
@@ -128,11 +158,19 @@ def main() -> int:
     sources += sorted(Path(__file__).with_name("tasks").glob("*.yaml"))
     config_dir = os.environ.get("PI_CODING_AGENT_DIR")
     if config_dir:
-        sources += [Path(config_dir) / "models.json", Path(config_dir) / "settings.json"]
+        sources += [Path(config_dir) / name for name in ("models.json", "settings.json")
+                    if (Path(config_dir) / name).is_file()]
+    if args.carrier_script:
+        sources.append(args.carrier_script)
+    if args.carrier_pi_config:
+        sources.append(args.carrier_pi_config)
     hashes = {str(p.resolve()): digest(p) for p in sources}
-    grid = [(task, level, trial) for trial in range(1, args.trials + 1)
-            for level in LEVELS for task in tasks]
-    print(f"Grid: {len(tasks)} tasks x 3 levels x {args.trials} trials = {len(grid)} cells", flush=True)
+    grid = build_grid(tasks, args.levels, args.trials)
+    print(
+        f"Grid: {len(tasks)} tasks x {len(args.levels)} levels x {args.trials} trials "
+        f"= {len(grid)} cells",
+        flush=True,
+    )
     if args.dry_run:
         print("Prompts and untouched-fixture controls passed. No inference.")
         return 0
@@ -145,7 +183,7 @@ def main() -> int:
     args.output.mkdir(parents=True)
     (args.output / "manifest.json").write_text(json.dumps({
         "hashes": hashes, "model": args.model, "provider": args.provider,
-        "tasks": args.tasks, "levels": LEVELS, "trials_per_task_level": args.trials,
+        "tasks": args.tasks, "levels": args.levels, "trials_per_task_level": args.trials,
         "cells": len(grid), "timeout_s": runner.MAX_WALL_CLOCK_SECONDS,
         "order": "trial, level, task", "placement_scope": "pre/post snapshots, not continuous",
         "decode": "separate run; never legacy per-cell probe",
@@ -192,7 +230,8 @@ def main() -> int:
         raw = runner.run_trial(task, level, args.model, trial,
             ledger_dir=runner.REPO_ROOT, use_ledger=False, trace_dir=cell / "traces",
             provider=args.provider, sampling={"think": "off" if contract["think"] == "off" else "medium",
-                                              "skip_decode_probe": True})
+                                              "skip_decode_probe": True},
+            carrier_script=args.carrier_script, carrier_pi_config=args.carrier_pi_config)
         finished = time.time()
         # Gate failures leave the raw trace intact and stop the campaign.
         try:
@@ -210,9 +249,10 @@ def main() -> int:
             if request.get("model") != args.model or not started <= request["ts"] <= finished:
                 raise RuntimeError("request log contains traffic outside this cell")
             validate_request(contract, request["fields"])
-        record = {"outcome": qualified_outcome(raw, before, after, requests), "raw": raw,
-                  "placement": {"before": str(cell / "before.json"), "after": str(cell / "after.json")},
-                  "requests": requests, "request_log_offset": offset}
+        record = build_qualified_record(
+            raw, before, after, requests, str(cell / "before.json"),
+            str(cell / "after.json"), offset,
+        )
         (cell / "qualified.json").write_text(json.dumps(record, indent=2) + "\n")
         records.append(record)
         (args.output / "results.json").write_text(json.dumps(records, indent=2) + "\n")

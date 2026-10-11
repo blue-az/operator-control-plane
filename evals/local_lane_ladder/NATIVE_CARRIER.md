@@ -1,8 +1,10 @@
 # native_carrier.sh — the bwrap carrier for native testbench runs
 
-Deployed copy lives at `testbench:~/.local-lane-native-v1/native_carrier.sh`.
-It was untracked until 2026-09-27; this is that file, brought into the repo so
-its changes can be reviewed and cannot be lost with the host.
+The deployed copy lives at `testbench:~/.local-lane-native-v1/native_carrier.sh`.
+This repository version now expects a separate Pi-config directory argument;
+the remote copy was not changed here and must be updated or replaced by an
+updated temporary carrier before another run. The file was untracked until
+2026-09-27; this is the reviewed source copy.
 
 ## Why it is here
 
@@ -26,6 +28,17 @@ The fix binds only that file, outside `/work`:
 
 and `runner.py`'s `PI_BIN` points at `/opt/pi-wrapper`. After the change, `ls`
 in the model's cwd shows only the fixture.
+
+## Pi runtime state is not fixture state
+
+The carrier receives the task fixture and a separate, temporary directory
+containing only `models.json`. It mounts that file read-only at
+`/pi-config/models.json`; `/pi-config` and `/tmp/pi-home` are separate from
+`/work` and live on tmpfs. Pi may create auth metadata, model-store metadata,
+and session files there without those harness files entering the graded
+fixture.
+The temporary host config directory is removed after the cell. Do not restore a
+config directory beneath the fixture or exempt such paths from scope grading.
 
 ## What it does not invalidate
 
