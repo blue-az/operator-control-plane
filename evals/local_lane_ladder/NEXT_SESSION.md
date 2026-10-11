@@ -1,6 +1,14 @@
 # Local-lane eval — next session
 
-**Written:** 2026-08-13, desktop, rev `a244930`, by `claude-01FSgUqu`.
+## Current update — 2026-10-11
+
+A bounded Qwen3.6 35B qualification retry passed exactly one `ambiguous-anchor × L0 × 1` cell through the repaired standard packet. All four task checks and six gated requests passed; pre/post placement gates both attributed the model to TestBench GPU0. This is qualification evidence only—not a score, ranking, or comparison result. No further inference or overnight run is authorized by this handoff.
+
+The first fixture-based attempt was unproven because Pi runtime files entered the graded tree and the raw runner lacked the external placement proof. OCP commit `fbd189d` moves Pi state outside the fixture, adds carrier support and one-level packet selection, and embeds the external gate reports in the qualified record. A later preflight-only launch selected GPU1 through Vulkan and was refused before task inference; the successful private daemon explicitly set `OLLAMA_VULKAN=false` and used CUDA on GPU0.
+
+Evidence: Project Phoenix handoff `~/Python/project-phoenix/docs/handoffs/LOCAL_LANE_QWEN36_L0_CANARY_20261011.md`; qualified record `/tmp/fronti-q36-l0-retry-20261011T035126Z/packet/ambiguous-anchor__L0__t1/qualified.json`; session log `~/Python/project-phoenix/docs/handoffs/session_logs/local_lane_qwen36_l0_bounded_retry2_20261011T035232Z.log`. Shared Ollama/tags and source blobs were unchanged; the private daemon, tunnel, proxy, telemetry, and temporary store were cleaned up.
+
+**Historical baseline written:** 2026-08-13, desktop, rev `a244930`, by `claude-01FSgUqu`.
 **Read order:** this file → `GOLD_STANDARD.md` → the `FINDING.md` of whichever
 pack you touch.
 
