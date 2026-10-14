@@ -31,6 +31,10 @@ Use these files as structured context for coding agents, QA review, drift checks
   fail-closed, session+clipboard APIs only). Draft; proposed rules unratified. Ledger task: `pi-operator-extension-pbc-review`. POE-RUL-101–113
   are proposed and unratified; verified block POE-RUL-001–005 records the CLI constraints they
   must respect.
+- `appendix-pi-session-dashboard.pbc.md` — draft contract for Pi Session Dashboard, a local,
+  per-process, read-only Pi session roster. No JIG-specific feature, code, or API is used. A
+  separate follow-on design candidate concerns the expected TennisAgent Mac agent; registry/session
+  identity mapping remains unresolved and implementation is not authorized.
 - `appendix-retoolable-research-factory.pbc.md` — draft contract for a reusable research
   factory: one spine (ledger task, evidence rows, reconciliation, human gate) retooled by
   domain adapters. Ledger task: `retoolable-research-factory-pbc`. RRF-RUL-001–013 and
