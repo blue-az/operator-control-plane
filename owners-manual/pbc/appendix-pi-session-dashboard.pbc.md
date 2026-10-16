@@ -3,7 +3,7 @@ id: pbc-pi-session-dashboard
 title: "Pi Session Dashboard — Behavior Contract Draft"
 context: pi-session-dashboard
 status: draft
-updated: 2026-10-12
+updated: 2026-10-14
 tags:
   - pbc
   - operator
@@ -27,7 +27,7 @@ and metadata; `r` refreshes it and `q` closes it. No JIG-specific feature, code,
 A personal extension exists at `~/.pi/agent/extensions/agent-dashboard.ts`, outside this
 repository. Source review and a local screenshot confirm that `/dashboard` rendered a roster;
 Erik reports that `r` and `q` work. The source's provenance and canonical distribution location
-are not established. Disconnect/error handling, stale-boundary behavior, privacy, and Escape
+are not established. Disconnect/error handling, activity-age presentation, privacy, and Escape
 have not been systematically verified.
 
 Extension availability is process-local: a Pi process that did not load the extension does not
@@ -36,8 +36,8 @@ have `/dashboard`. The screenshot showed the dashboard in a separate Pi process 
 Reload/hot-load behavior has not been verified.
 
 This is a **draft contract**, not approval or ratification of the existing prototype. It does not
-authorize implementation changes or claim that the displayed session reports are independently
-verified.
+authorize broader implementation or claim that the displayed session reports are independently
+verified. Erik separately authorized the narrow age-label removal recorded below.
 
 ## Scope
 
@@ -49,8 +49,8 @@ verified.
 - Process-local extension availability and the operator path when an existing Pi process has not loaded it.
 - Honest treatment of missing channel, unavailable UI, missing optional fields, and refresh errors.
 
-The source/install path is currently local-only. Choosing a canonical, version-controlled source
-or distribution mechanism is an open decision, not implied by this contract.
+Erik accepts the current personal source/install path under `~/.pi/agent/extensions` for now.
+A canonical, version-controlled distribution can be considered later.
 
 ## Non-goals
 
@@ -79,6 +79,14 @@ Andrii Shylenko's Grok Bot post and `~/Pictures/LinkedIn/GrokFlow.jpeg` are desi
 the screenshot shows a mobile chat list with distinct project/role names and recent message
 snippets. It does not establish Grok Bot's internals or prove autonomous execution. This is a
 future-scope candidate, not a commitment to clone Grok Bot or expand the current v1 PBC.
+
+## Owner rulings (2026-10-14; draft only)
+
+Erik accepts a process-local dashboard for v1; a Pi process must load the extension before it
+can invoke `/dashboard`. He approves showing cwd, model, context percentage, and Herdr location in
+the local TUI, and keeping the personal extension under `~/.pi/agent/extensions` for now. He
+authorized showing activity as elapsed age only, with no categorical age label. These rulings
+clarify the draft; they do not freeze, approve, or ratify the PBC.
 
 ## Actors
 
@@ -116,7 +124,7 @@ future-scope candidate, not a commitment to clone Grok Bot or expand the current
   rule: >
     Status and metadata are client-reported. The UI MUST label status as
     reported, or unknown when absent, and MUST NOT infer that a session is
-    alive, dead, healthy, active, or available from a missing or stale report.
+    alive, dead, healthy, active, or available from a missing report or an older activity timestamp.
   trust: proposed
 - id: PSD-RUL-103
   name: Restrict displayed fields
@@ -127,12 +135,10 @@ future-scope candidate, not a commitment to clone Grok Bot or expand the current
     arguments, environment variables, secrets, or arbitrary channel payloads.
   trust: proposed
 - id: PSD-RUL-104
-  name: Make staleness a narrow timestamp label
+  name: Show activity age without a freshness label
   rule: >
-    A stale marker refers only to the age of the reported lastActivity
-    timestamp; it is not a liveness or health verdict. The prototype uses a
-    threshold greater than 120 seconds. The owner must confirm this threshold
-    before ratification, and the UI MUST expose the age that explains the marker.
+    The UI MUST display reported lastActivity as elapsed age only. It MUST NOT
+    add a categorical age label or infer session liveness or health from its age.
   trust: proposed
 - id: PSD-RUL-105
   name: Refresh only on operator request
@@ -213,10 +219,10 @@ future-scope candidate, not a commitment to clone Grok Bot or expand the current
     crash or silently discard the displayed roster.
   trust: proposed
 - id: PSD-OUT-104
-  name: Stale label has bounded meaning
+  name: Activity age has bounded meaning
   outcome: >
-    Tests at the threshold boundary show that the stale marker reflects only
-    lastActivity age and never asserts session liveness or health.
+    Tests show that lastActivity is presented as elapsed age only, without a
+    categorical age label or an inference about session liveness or health.
   trust: proposed
 - id: PSD-OUT-105
   name: Privacy and safe rendering
@@ -246,9 +252,9 @@ future-scope candidate, not a commitment to clone Grok Bot or expand the current
   empty, optional-field, malformed-string, and refresh-error cases.
 - A fresh interactive Pi smoke test for command load, roster display, `r`, `q`, and Escape if
   adopted; the current screenshot plus Erik's `r`/`q` report are preliminary evidence only.
-- A disconnect/channel-not-ready check and a stale-threshold boundary test.
+- A disconnect/channel-not-ready check and checks of elapsed-activity-age formatting.
 - A privacy/provenance review of the channel payload and displayed fields.
-- A decision on canonical source/distribution location and on the 120-second stale threshold.
+- A check that elapsed activity age is shown without a categorical age label.
 
 ## Proof boundary
 
@@ -258,13 +264,8 @@ session is alive or executing, validate the accuracy of every peer's metadata, e
 
 ## Open owner decisions
 
-1. Confirm the 120-second stale threshold and its exact presentation.
-2. Confirm that cwd, model, context percentage, and Herdr location are acceptable fields to show
-   in the local TUI.
-3. Choose the canonical source and distribution location for this personal extension.
-4. Decide whether Escape is a supported close binding or only `q` is guaranteed.
-5. Decide whether requiring a fresh/restarted Pi process is acceptable, or whether an existing session must be able to activate the dashboard without restart.
-6. For the follow-on agent view, decide the authoritative expected-agent registry, identity mapping, and its separate contract/scope before implementation.
+1. Decide whether Escape is a supported close binding or only `q` is guaranteed.
+2. For the follow-on agent view, decide the authoritative expected-agent registry, identity mapping, and its separate contract/scope before implementation.
 
 Until those decisions and the acceptance evidence are complete, this file remains `draft`; the
 existing local extension is a prototype and is not ratified by its presence or by the screenshot.
