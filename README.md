@@ -1,7 +1,8 @@
 # Operator Control Plane
 
 For the separately installable **Pi frontend alpha**, see the
-[extension README](.pi/extensions/operator/README.md) and
+[extension README](.pi/extensions/operator/README.md), its
+[Pi extension project board](https://bulkheadtau.com/bulkhead-tau/reflect/operator-boards/pi-operator-extension.html), and
 [release preparation notes](docs/releases/pi-operator-0.1.0-alpha.1.md).
 The root package manifest describes that frontend, not a bundled Python backend.
 
@@ -31,6 +32,18 @@ Only an enforced verification by a registered verifier OS UID distinct from the 
 recorded as `uid_isolated`. Same-UID and default `single_user` verification still work but are
 recorded as `advisory`, never `uid_isolated` — treat an advisory verification as the builder's own
 assertion, not an independent check.
+
+### Requesting an evaluation of this repository
+
+For an independent repository evaluation, track the work in Operator: freeze the exact source snapshot,
+create a scoped task, attach the request and test/review evidence, and record findings and their
+verification. Do not treat an informal reviewer label or a passing test suite as a complete evaluation.
+See [`docs/REVIEW_REQUEST_REPOSITORY.md`](docs/REVIEW_REQUEST_REPOSITORY.md) for scope, snapshot
+hygiene, Operator tracking steps, execution boundaries, and closeout criteria. The Pi extension's
+[project board](https://bulkheadtau.com/bulkhead-tau/reflect/operator-boards/pi-operator-extension.html) is also
+listed as supplementary review context, not as a substitute for source inspection. That document prepares
+a request; it does not mean a review has been requested or completed. Do not initialize or write a
+local `.operator/` ledger in this checkout just for the review unless that is explicitly intended.
 
 ## Is this a fleet harness?
 

@@ -1,5 +1,8 @@
 # Operator control plane - pi extension
 
+[Pi extension project board](https://bulkheadtau.com/bulkhead-tau/reflect/operator-boards/pi-operator-extension.html)
+(supplementary visual overview; inspect this repository's source and documentation for the authoritative behavior).
+
 [Pi](https://github.com/earendil-works/pi) shortcuts for a separately installed
 Operator control plane. The implementation includes the original ladder steps
 1–4 plus later orientation, PBC, crystal and target-registry work. This is an
