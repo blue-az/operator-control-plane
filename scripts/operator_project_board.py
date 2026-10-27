@@ -13,6 +13,7 @@ import html
 import json
 import os
 import re
+import subprocess
 from datetime import UTC, datetime, timezone
 from pathlib import Path
 
@@ -69,6 +70,68 @@ def load_yaml(path: Path) -> dict:
         key, _, val = line.partition(":")
         out[key.strip()] = val.strip().strip("'\"")
     return out
+
+
+def source_provenance(root: Path) -> dict:
+    """Describe the source checkout, not the trustworthiness of its ledger.
+
+    Git status includes tracked and untracked changes (not ignored runtime data).
+    Failure is unknown, never clean. No filenames or diff contents are exposed.
+    """
+    result = {"commit": None, "dirty": None}
+    try:
+        commit = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--verify", "HEAD"],
+            check=True, capture_output=True, text=True, timeout=10,
+        ).stdout.strip()
+        if re.fullmatch(r"[0-9a-f]{40,64}", commit):
+            result["commit"] = commit
+        status = subprocess.run(
+            ["git", "-C", str(root), "status", "--porcelain=v1", "--untracked-files=all"],
+            check=True, capture_output=True, text=True, timeout=10,
+        ).stdout
+        result["dirty"] = bool(status)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return result
+
+
+def provenance_text(data: dict) -> str:
+    source = data.get("source", {})
+    dirty = source.get("dirty")
+    state = "dirty" if dirty is True else "clean" if dirty is False else "unknown"
+    return (
+        f"Source commit: {source.get('commit') or 'unknown'} · worktree: {state}. "
+        "Captured before output writes; dirty/unknown snapshots are not an immutable commit. "
+        "Ledger data is a separate local snapshot, not independently validated."
+    )
+
+
+def provenance_html(data: dict) -> str:
+    return f'<p class="sub">{html.escape(provenance_text(data), quote=True)}</p>'
+
+
+def parse_feature_inventory(pbc: Path, candidates: list[dict]) -> list[dict]:
+    """Join historical candidate descriptions to the explicit reconciliation table.
+
+    Preserve status/basis verbatim: implementation and acceptance are different,
+    and neither a status word nor a missing table constitutes verification.
+    """
+    inventory = {c["id"]: {**c, "status": "Unreconciled candidate; implementation/acceptance unknown"}
+                 for c in candidates}
+    in_table = False
+    if pbc.exists():
+        for line in pbc.read_text(encoding="utf-8").splitlines():
+            if line.startswith("## "):
+                in_table = line.strip() == "## Candidate Reconciliation"
+            if not in_table:
+                continue
+            match = re.match(r"^\|\s*(POE-FUT-\d+(?:[–-]\d+)?)\s*\|\s*([^|]+)\|\s*(.*?)\s*\|$", line)
+            if match:
+                fid, status, basis = match.groups()
+                inventory.setdefault(fid, {"id": fid})
+                inventory[fid].update(status=status.strip(), basis=basis.strip())
+    return sorted(inventory.values(), key=lambda f: f["id"])
 
 
 def parse_pbc_lists(pbc: Path) -> tuple[list[dict], list[dict]]:
@@ -167,15 +230,16 @@ def collect(root: Path, prefix: str) -> dict:
     # The step ladder and PBC appendix describe the pi extension only.
     issues, features = [], []
     if prefix == PREFIX_DEFAULT:
-        issues, features = parse_pbc_lists(
-            root / "owners-manual" / "pbc" / "appendix-pi-operator-extension.pbc.md"
-        )
+        pbc = root / "owners-manual" / "pbc" / "appendix-pi-operator-extension.pbc.md"
+        issues, candidates = parse_pbc_lists(pbc)
+        features = parse_feature_inventory(pbc, candidates)
     return {
         "prefix": prefix,
         "generated_at": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
         "tasks": rows,
         "issues": issues[-8:],
-        "features": features[-10:],
+        "features": features,
+        "source": source_provenance(root),
     }
 
 
@@ -213,10 +277,12 @@ def render(data: dict) -> str:
     )
     features = (
         "".join(
-            f"<li><strong>{esc(f.get('id'))}</strong> {esc(f.get('command') or '')} — {esc(f.get('name') or '')}</li>"
+            f"<li><strong>{esc(f.get('id'))}</strong> {esc(f.get('command') or '')} {esc(f.get('name') or '')}"
+            f"<p><b>{esc(f.get('status'))}</b></p>"
+            f"<p>{esc(f.get('basis') or f.get('description') or '')}</p></li>"
             for f in data["features"]
         )
-        or "<li>No future features parsed.</li>"
+        or "<li>No feature inventory parsed.</li>"
     )
     ladder = ""
     if data["prefix"] == PREFIX_DEFAULT:
@@ -232,7 +298,10 @@ def render(data: dict) -> str:
     <ul>{issues}</ul>
   </div>
   <div>
-    <h3>Recent future features</h3>
+    <h3>Feature implementation and acceptance inventory</h3>
+    <p>Source: PBC Candidate Reconciliation. Historical IDs are not an active-work queue.
+    Documented implementation is not independent acceptance; missing acceptance is unknown.
+    This board does not verify the inventory.</p>
     <ul>{features}</ul>
   </div>
 </section>"""
@@ -285,6 +354,8 @@ def render(data: dict) -> str:
   <nav class="nav">{board_nav(data['prefix'])}{extra_nav_links()}</nav>
   <h1>{esc(data['prefix'])}</h1>
   <p class="sub">Simple Operator board · snapshot {esc(data['generated_at'])} · not Graphify, not a knowledge graph</p>
+  {provenance_html(data)}
+  <p class="sub">Task status and claim ratios are distinct; aggregate counts do not establish independent acceptance.</p>
 </header>
 <div class="kpis">
   <div class="kpi"><b>{len(tasks)}</b>tasks</div>
@@ -353,6 +424,7 @@ def collect_issues(root: Path, prefix: str) -> dict:
         "prefix": prefix,
         "generated_at": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
         "issues": rows,
+        "source": source_provenance(root),
     }
 
 
@@ -417,6 +489,7 @@ def render_issues(data: dict) -> str:
   <nav class="nav"><a href="pi-operator-extension.html">Project</a> · <a href="pi-operator-extension-issues.html">Issues</a> · <a href="pi-operator-extension-graph.html">Map</a></nav>
   <h1>{esc(data['prefix'])} issues</h1>
   <p class="sub">Issue backlog catalog · snapshot {esc(data['generated_at'])} · PBC dogfood backlog + ledger mentions</p>
+  {provenance_html(data)}
 </header>
 <div class="kpis">
   <div class="kpi"><b>{len(issues)}</b>issues</div>
@@ -523,6 +596,7 @@ def collect_resolution(root: Path, task_id: str, prefix: str = PREFIX_DEFAULT) -
         "next": str(task.get("next_action") or ""),
         "generated_at": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
         "events": events,
+        "source": source_provenance(root),
         "claims": [
             {
                 "id": c.get("claim_id"),
@@ -595,6 +669,7 @@ def render_resolution(data: dict) -> str:
   <nav class="nav">{board_nav(data['prefix'])}</nav>
   <h1>{esc(data['task_id'])}</h1>
   <p class="sub">Issue-resolution ledger · {esc(data['status'])} · snapshot {esc(data['generated_at'])}</p>
+  {provenance_html(data)}
   <p class="obj">{esc(data['objective'][:400])}</p>
 </header>
 <div class="flow">
@@ -709,7 +784,8 @@ def write_graph_html(root: Path, prefix: str, out: Path) -> None:
 <body>
 <nav><a href="pi-operator-extension.html">Project</a> <a href="pi-operator-extension-issues.html">Issues</a></nav>
 <h1>{esc(prefix)}</h1>
-<p class="sub">Whole-project map · click a task for its resolution ledger · not Obsidian, not floating dots</p>
+<p class="sub">Whole-project map · snapshot {esc(project['generated_at'])} · click a task for its resolution ledger · not Obsidian, not floating dots</p>
+{provenance_html(project)}
 <div class="cols">{''.join(cols)}</div>
 <div class="issues"><h2>Issues</h2>{iss}</div>
 </body></html>
@@ -726,7 +802,8 @@ def write_obsidian(root: Path, prefix: str, out: Path) -> int:
 
     def w(name: str, body: str) -> None:
         nonlocal count
-        (out / f"{name}.md").write_text(body.strip() + "\n", encoding="utf-8")
+        stamp = f"Snapshot: {project['generated_at']}\n\n{provenance_text(project)}"
+        (out / f"{name}.md").write_text(body.strip() + "\n\n" + stamp + "\n", encoding="utf-8")
         count += 1
 
     task_links = "\n".join(
