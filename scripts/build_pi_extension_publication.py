@@ -9,6 +9,7 @@ import argparse
 import difflib
 import hashlib
 import html
+import os
 import subprocess
 import sys
 import tempfile
@@ -187,15 +188,65 @@ def render_pages(operator_root: Path, publisher_root: Path) -> dict[str, bytes]:
     }
 
 
+def safe_destinations(publisher_root: Path, outputs: dict[str, bytes]) -> dict[str, Path]:
+    root = publisher_root.resolve(strict=True)
+    destinations: dict[str, Path] = {}
+    for relative_path in outputs:
+        relative = Path(relative_path)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError(f"unsafe output path: {relative_path}")
+        destination = root / relative
+        cursor = root
+        for component in relative.parts[:-1]:
+            cursor = cursor / component
+            if cursor.is_symlink():
+                raise ValueError(f"refusing symlink output directory: {cursor}")
+        if destination.is_symlink():
+            raise ValueError(f"refusing symlink output file: {destination}")
+        if not destination.parent.resolve(strict=True).is_relative_to(root):
+            raise ValueError(f"output path escapes publisher root: {relative_path}")
+        if destination.exists() and not destination.is_file():
+            raise ValueError(f"output path is not a regular file: {destination}")
+        destinations[relative_path] = destination
+    return destinations
+
+
+def write_outputs(destinations: dict[str, Path], outputs: dict[str, bytes]) -> None:
+    staged: list[tuple[str, Path, Path]] = []
+    try:
+        for relative_path, expected in outputs.items():
+            destination = destinations[relative_path]
+            descriptor, temporary_name = tempfile.mkstemp(
+                prefix=f".{destination.name}.", suffix=".tmp", dir=destination.parent
+            )
+            temporary = Path(temporary_name)
+            staged.append((relative_path, temporary, destination))
+            with os.fdopen(descriptor, "wb") as stream:
+                stream.write(expected)
+                stream.flush()
+                os.fsync(stream.fileno())
+            mode = destination.stat().st_mode & 0o777 if destination.exists() else 0o644
+            os.chmod(temporary, mode)
+        for relative_path, temporary, destination in staged:
+            if destination.is_symlink():
+                raise ValueError(f"refusing symlink output file: {destination}")
+            os.replace(temporary, destination)
+            print(f"WROTE {relative_path} ({hashlib.sha256(outputs[relative_path]).hexdigest()})")
+    finally:
+        for _, temporary, _ in staged:
+            temporary.unlink(missing_ok=True)
+
+
 def check_or_write(publisher_root: Path, outputs: dict[str, bytes], write: bool) -> bool:
+    destinations = safe_destinations(publisher_root, outputs)
+    if write:
+        write_outputs(destinations, outputs)
+        print("Each file is atomically replaced; the three-file update is not a filesystem transaction.")
+        return True
+
     mismatches: list[str] = []
     for relative_path, expected in outputs.items():
-        destination = publisher_root / relative_path
-        if write:
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            destination.write_bytes(expected)
-            print(f"WROTE {relative_path} ({hashlib.sha256(expected).hexdigest()})")
-            continue
+        destination = destinations[relative_path]
         actual = destination.read_bytes() if destination.is_file() else b""
         if actual == expected:
             print(f"OK {relative_path} ({hashlib.sha256(expected).hexdigest()})")

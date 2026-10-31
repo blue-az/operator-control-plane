@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import os
+import subprocess
+import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from scripts.build_pi_extension_publication import (
@@ -11,6 +15,7 @@ from scripts.build_pi_extension_publication import (
     INVENTORY_NAME,
     MAIN_NAME,
     OUTPUT_DIR,
+    check_or_write,
     parse_inventory,
     render_inventory_page,
     render_pages,
@@ -66,6 +71,37 @@ class TestPiExtensionPublication(unittest.TestCase):
             current = (PUBLISHER_ROOT / relative_path).read_bytes()
             self.assertEqual(hashlib.sha256(generated).hexdigest(), expected_hash)
             self.assertEqual(generated, current, name)
+
+    @unittest.skipUnless(PUBLISHER_ROOT.is_dir(), "Public/Proto checkout not available")
+    def test_write_cycle_and_symlink_refusal_in_temporary_clone(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            publisher_fixture = Path(temporary_directory) / "publisher"
+            subprocess.run(
+                ["git", "clone", "--shared", "--quiet", "--no-checkout", str(PUBLISHER_ROOT), str(publisher_fixture)],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(publisher_fixture), "checkout", "--quiet", "--detach", "HEAD"],
+                check=True,
+            )
+            outputs = render_pages(PROJECT_ROOT, publisher_fixture)
+            main_path = publisher_fixture / OUTPUT_DIR / MAIN_NAME
+            main_path.write_text("stale candidate", encoding="utf-8")
+            with redirect_stdout(io.StringIO()):
+                self.assertFalse(check_or_write(publisher_fixture, outputs, write=False))
+            self.assertEqual(main_path.read_text(encoding="utf-8"), "stale candidate")
+            with redirect_stdout(io.StringIO()):
+                self.assertTrue(check_or_write(publisher_fixture, outputs, write=True))
+            self.assertEqual(main_path.read_bytes(), outputs[f"{OUTPUT_DIR}/{MAIN_NAME}"])
+
+            archive_path = publisher_fixture / OUTPUT_DIR / ARCHIVE_NAME
+            archive_path.unlink()
+            sentinel = Path(temporary_directory) / "outside.html"
+            sentinel.write_text("do not overwrite", encoding="utf-8")
+            archive_path.symlink_to(sentinel)
+            with self.assertRaises(ValueError):
+                check_or_write(publisher_fixture, outputs, write=True)
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), "do not overwrite")
 
 
 if __name__ == "__main__":
