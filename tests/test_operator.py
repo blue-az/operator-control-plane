@@ -2100,6 +2100,71 @@ class TestOperatorCLI(unittest.TestCase):
         self.assertEqual(closed.returncode, 1)
         self.assertIn("closed", closed.stderr)
 
+    def test_telemetry_rejects_out_of_range_bounds_without_events(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Telemetry bounds", "--id", "telemetry-bounds"
+        )
+        self.run_operator(
+            "session-start", "--task", "telemetry-bounds", "--harness", "claude"
+        )
+        for option, value in (("--interval-seconds", "0"), ("--duration-seconds", "3601")):
+            result = self.run_operator(
+                "telemetry", "capture", "--usage", "usage-0001", option, value
+            )
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("between 1 and 3600", result.stderr)
+        conn = sqlite3.connect(Path(self.temp_dir) / ".operator" / "ledger.sqlite3")
+        try:
+            self.assertEqual(conn.execute("SELECT COUNT(*) FROM telemetry_events").fetchone()[0], 0)
+        finally:
+            conn.close()
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux /proc telemetry only")
+    def test_telemetry_records_partial_capture_after_later_read_failure(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Telemetry partial", "--id", "telemetry-partial"
+        )
+        self.run_operator(
+            "session-start", "--task", "telemetry-partial", "--harness", "claude"
+        )
+        original_reader = op_mod.read_host_snapshot
+        reads = 0
+
+        def fail_after_first_read(previous_cpu=None):
+            nonlocal reads
+            reads += 1
+            if reads > 1:
+                raise OSError("simulated later sampling failure")
+            return original_reader(previous_cpu)
+
+        op_mod.read_host_snapshot = fail_after_first_read
+        try:
+            result = op_mod.telemetry_capture_cmd(
+                op_mod.argparse.Namespace(
+                    usage_id="usage-0001", interval_seconds=1, duration_seconds=2
+                )
+            )
+        finally:
+            op_mod.read_host_snapshot = original_reader
+        self.assertEqual(result, 1)
+        conn = sqlite3.connect(Path(self.temp_dir) / ".operator" / "ledger.sqlite3")
+        try:
+            event_types = [
+                row[0] for row in conn.execute(
+                    "SELECT event_type FROM telemetry_events WHERE usage_id = ? ORDER BY sequence",
+                    ("usage-0001",),
+                )
+            ]
+        finally:
+            conn.close()
+        self.assertEqual(
+            event_types, ["capture_started", "host_snapshot", "capture_partial"]
+        )
+        doctor = self.run_operator("doctor")
+        self.assertEqual(doctor.returncode, 0, doctor.stdout + doctor.stderr)
+
     def test_telemetry_table_migrates_existing_schema_v1(self) -> None:
         self.run_operator("init")
         self.run_operator(

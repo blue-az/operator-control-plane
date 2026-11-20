@@ -4,7 +4,7 @@
 
 Operator telemetry records a small, opt-in, timestamped account of host resource state while an existing Operator session is open. Its purpose is provenance/context, not performance scoring or proof that a task succeeded.
 
-The collector reads only the host on which `operator telemetry capture` runs. It does not inspect prompts, transcripts, environment variables, command lines, network traffic, or other processes. It does not launch or stop workloads, call services, modify configuration, or authorize work. Process-level telemetry, remote collection, GPU metrics, dashboards, and automatic start/stop hooks are out of scope.
+The collector reads only the host on which `operator telemetry capture` runs. It does not inspect prompts, transcripts, command lines, network traffic, or other processes. Host metric collection does not use environment variables; event actor attribution uses Operator's existing executor-identity hook, including its documented test-identity overrides. It does not launch or stop workloads, call services, modify configuration, or authorize work. Process-level telemetry, remote collection, GPU metrics, dashboards, and automatic start/stop hooks are out of scope.
 
 ## Interface
 
