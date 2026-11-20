@@ -200,6 +200,8 @@ YAML-only ledger baselines those records into SQLite without changing their visi
 - `session-start --harness H [--task ID] [--force]`
 - `session-end --outcome {useful,partial,no_go,quarantined,reverted,unknown} --cost N`
 - `session-list [--open] [--task ID] [--harness H]`
+- `telemetry capture --usage ID [--interval-seconds N] [--duration-seconds N]` — explicitly sample read-only host CPU/memory/load while an existing session is open (Linux; bounded to one hour).
+- `telemetry show --usage ID` — print that session's append-only telemetry events as JSON Lines. Telemetry records host context only; it does not inspect processes/workloads or authorize work. See [`docs/specs/TELEMETRY_SPEC.md`](docs/specs/TELEMETRY_SPEC.md).
 
 **Usage / quota accounting**
 - `usage-add --harness H [--model M] [--outcome …]` — capture a pasted usage snippet.
@@ -295,7 +297,8 @@ set of product-facing config:
   recorded as `advisory`, never `uid_isolated`.
 - **`.operator/{tasks,claims,evidence,handoffs,usage}/`** — current YAML projections (gitignored).
 - **`.operator/ledger.sqlite3`** — append-only, full-snapshot event versions for task, claim,
-  evidence, handoff, and usage/session records. Session commands version their `usage-XXXX` record.
+  evidence, handoff, and usage/session records, plus a separate hash-chained append-only telemetry
+  stream linked to usage/session and task IDs. Session commands version their `usage-XXXX` record.
 
 SQLite is the durable audit history for CLI writes; YAML remains the compatibility read surface. Event
 versions are allocated transactionally, linked by per-record SHA-256 hashes, and protected from

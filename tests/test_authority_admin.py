@@ -252,6 +252,34 @@ class TestAuthorityAdmin(unittest.TestCase):
                 with self.assertRaises(authority_admin.AdminError):
                     authority_admin.parse_policy_object(value)
 
+    def test_operational_ledger_trigger_validation_supports_schema_v1_and_v2(self) -> None:
+        for version in (1, 2):
+            with self.subTest(schema_version=version):
+                conn = sqlite3.connect(":memory:")
+                conn.row_factory = sqlite3.Row
+                try:
+                    conn.executescript(
+                        "CREATE TABLE ledger_events (event_id TEXT);"
+                        "CREATE TRIGGER ledger_events_no_update BEFORE UPDATE ON ledger_events "
+                        "BEGIN SELECT RAISE(ABORT, 'ledger_events is append-only'); END;"
+                        "CREATE TRIGGER ledger_events_no_delete BEFORE DELETE ON ledger_events "
+                        "BEGIN SELECT RAISE(ABORT, 'ledger_events is append-only'); END;"
+                    )
+                    if version == 2:
+                        conn.executescript(
+                            "CREATE TABLE telemetry_events (event_id TEXT);"
+                            "CREATE TRIGGER telemetry_events_no_update "
+                            "BEFORE UPDATE ON telemetry_events "
+                            "BEGIN SELECT RAISE(ABORT, 'telemetry_events is append-only'); END;"
+                            "CREATE TRIGGER telemetry_events_no_delete "
+                            "BEFORE DELETE ON telemetry_events "
+                            "BEGIN SELECT RAISE(ABORT, 'telemetry_events is append-only'); END;"
+                        )
+                    conn.execute(f"PRAGMA user_version = {version}")
+                    authority_admin._verify_ledger_schema_and_triggers(conn, "test")
+                finally:
+                    conn.close()
+
     def test_broker_commits_bind_policy_selected_inside_transaction(self) -> None:
         _, first, _ = self.install()
         before, _ = self.commit_claim("before", "task-0001", "claim-0001")

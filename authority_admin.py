@@ -4429,23 +4429,32 @@ def _ledger_migration_payload(repo_path: Path, identities: dict, chain_state: di
 
 def _verify_ledger_schema_and_triggers(conn: sqlite3.Connection, error_code: str) -> None:
     schema_version = conn.execute("PRAGMA user_version").fetchone()[0]
-    if schema_version != 1:
+    if schema_version not in (1, 2):
         raise AdminError(
             error_code,
             f"Durable ledger schema version {schema_version} is unsupported",
         )
 
+    trigger_names = ["ledger_events_no_update", "ledger_events_no_delete"]
+    if schema_version >= 2:
+        trigger_names.extend(["telemetry_events_no_update", "telemetry_events_no_delete"])
     triggers = {
         row["name"]: " ".join(row["sql"].lower().split())
         for row in conn.execute(
             "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' "
-            "AND name IN ('ledger_events_no_update', 'ledger_events_no_delete')"
+            f"AND name IN ({','.join('?' for _ in trigger_names)})",
+            trigger_names,
         )
     }
     expected_triggers = {
         "ledger_events_no_update": "create trigger ledger_events_no_update before update on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
         "ledger_events_no_delete": "create trigger ledger_events_no_delete before delete on ledger_events begin select raise(abort, 'ledger_events is append-only'); end",
     }
+    if schema_version >= 2:
+        expected_triggers.update({
+            "telemetry_events_no_update": "create trigger telemetry_events_no_update before update on telemetry_events begin select raise(abort, 'telemetry_events is append-only'); end",
+            "telemetry_events_no_delete": "create trigger telemetry_events_no_delete before delete on telemetry_events begin select raise(abort, 'telemetry_events is append-only'); end",
+        })
     if triggers != expected_triggers:
         raise AdminError(error_code, "Durable ledger append-only triggers differ")
 

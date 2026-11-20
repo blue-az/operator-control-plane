@@ -24,6 +24,8 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
+import uuid
 from pathlib import Path
 
 import yaml
@@ -37,7 +39,7 @@ import pi_model_provenance
 
 LEDGER_DB_NAME = "ledger.sqlite3"
 LEDGER_HASH_FORMAT = "operator-ledger-event-v1"
-LEDGER_SCHEMA_VERSION = 1
+LEDGER_SCHEMA_VERSION = 2
 VALID_TASK_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 VALID_CLAIM_ID = re.compile(r"^claim-[0-9]{4,}$")
 VALID_SHA256 = re.compile(r"^[0-9a-fA-F]{64}$")
@@ -134,6 +136,11 @@ def acquire_command_lock(command: str):
     operator_dir = find_operator_dir()
     if not operator_dir:
         return None
+    # A bounded telemetry capture may run for up to an hour. Do not hold the
+    # repository-wide command lock for that duration; SQLite serializes each
+    # append transaction, allowing normal session/task commands to proceed.
+    if command == "telemetry":
+        return None
     lock_path = os.path.join(operator_dir, "ledger.lock")
     is_mutating = command in MUTATING_COMMANDS
     if not is_mutating and not os.path.exists(lock_path):
@@ -228,6 +235,36 @@ def initialize_event_store(operator_dir: str) -> None:
                 BEFORE DELETE ON ledger_events
                 BEGIN
                     SELECT RAISE(ABORT, 'ledger_events is append-only');
+                END;
+
+                CREATE TABLE IF NOT EXISTS telemetry_events (
+                    sequence INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_id TEXT NOT NULL UNIQUE,
+                    usage_id TEXT NOT NULL,
+                    capture_id TEXT NOT NULL,
+                    task_id TEXT NOT NULL,
+                    event_type TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    actor_uid INTEGER,
+                    actor_name TEXT,
+                    previous_event_hash TEXT,
+                    event_hash TEXT NOT NULL UNIQUE
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_telemetry_events_session
+                    ON telemetry_events(usage_id, sequence);
+
+                CREATE TRIGGER IF NOT EXISTS telemetry_events_no_update
+                BEFORE UPDATE ON telemetry_events
+                BEGIN
+                    SELECT RAISE(ABORT, 'telemetry_events is append-only');
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS telemetry_events_no_delete
+                BEFORE DELETE ON telemetry_events
+                BEGIN
+                    SELECT RAISE(ABORT, 'telemetry_events is append-only');
                 END;
             """
         )
@@ -384,6 +421,99 @@ def event_hash_for_fields(
         "previous_event_hash": previous_event_hash,
     }
     return hashlib.sha256(canonical_json(hash_fields).encode("utf-8")).hexdigest()
+
+
+def telemetry_hash_for_fields(
+    *,
+    sequence: int,
+    usage_id: str,
+    capture_id: str,
+    task_id: str,
+    event_type: str,
+    payload_json: str,
+    created_at: str,
+    actor_uid: int | None,
+    actor_name: str | None,
+    previous_event_hash: str | None,
+) -> str:
+    fields = {
+        "hash_format": "operator-telemetry-event-v2",
+        "sequence": sequence,
+        "usage_id": usage_id,
+        "capture_id": capture_id,
+        "task_id": task_id,
+        "event_type": event_type,
+        "payload_json": payload_json,
+        "created_at": created_at,
+        "actor_uid": actor_uid,
+        "actor_name": actor_name,
+        "previous_event_hash": previous_event_hash,
+    }
+    return hashlib.sha256(canonical_json(fields).encode("utf-8")).hexdigest()
+
+
+def append_telemetry_event(
+    operator_dir: str,
+    *,
+    usage_id: str,
+    capture_id: str,
+    task_id: str,
+    event_type: str,
+    payload: dict,
+) -> str:
+    payload_json = canonical_json(payload)
+    created_at = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="microseconds")
+    actor = get_executor_identity()
+    conn = connect_event_store(operator_dir)
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+        previous = conn.execute(
+            "SELECT event_hash FROM telemetry_events WHERE usage_id = ? "
+            "ORDER BY sequence DESC LIMIT 1",
+            (usage_id,),
+        ).fetchone()
+        sequence = conn.execute(
+            "SELECT COALESCE(MAX(sequence), 0) + 1 FROM telemetry_events"
+        ).fetchone()[0]
+        previous_hash = previous["event_hash"] if previous else None
+        event_hash = telemetry_hash_for_fields(
+            sequence=sequence,
+            usage_id=usage_id,
+            capture_id=capture_id,
+            task_id=task_id,
+            event_type=event_type,
+            payload_json=payload_json,
+            created_at=created_at,
+            actor_uid=actor.get("uid"),
+            actor_name=actor.get("user"),
+            previous_event_hash=previous_hash,
+        )
+        conn.execute(
+            "INSERT INTO telemetry_events (sequence, event_id, usage_id, capture_id, task_id, "
+            "event_type, payload_json, created_at, actor_uid, actor_name, "
+            "previous_event_hash, event_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                sequence,
+                event_hash,
+                usage_id,
+                capture_id,
+                task_id,
+                event_type,
+                payload_json,
+                created_at,
+                actor.get("uid"),
+                actor.get("user"),
+                previous_hash,
+                event_hash,
+            ),
+        )
+        conn.commit()
+        return event_hash
+    except Exception as exc:
+        conn.rollback()
+        raise LedgerWriteError(f"Could not append telemetry event: {exc}") from exc
+    finally:
+        conn.close()
 
 
 def event_type_for(record_type: str, version: int, source_command: str) -> str:
@@ -609,6 +739,7 @@ def audit_event_store(operator_dir: str) -> list[str]:
     visible_records, messages = load_visible_records(operator_dir)
     latest_events = {}
     chain_state = {}
+    telemetry_rows = []
     try:
         conn = connect_event_store(operator_dir, read_only=True)
         try:
@@ -627,6 +758,9 @@ def audit_event_store(operator_dir: str) -> list[str]:
                 FROM ledger_events
                 ORDER BY record_type, record_id, version
                 """
+            ).fetchall()
+            telemetry_rows = conn.execute(
+                "SELECT * FROM telemetry_events ORDER BY usage_id, sequence"
             ).fetchall()
         finally:
             conn.close()
@@ -682,6 +816,48 @@ def audit_event_store(operator_dir: str) -> list[str]:
             )
         chain_state[key] = (row["version"], row["event_hash"])
         latest_events[key] = row["payload_json"]
+
+    telemetry_chain = {}
+    usage_records = {
+        record.get("usage_id"): record
+        for (kind, _), (record, _) in visible_records.items()
+        if kind == "usage"
+    }
+    for row in telemetry_rows:
+        previous = telemetry_chain.get(row["usage_id"])
+        expected_previous = previous[1] if previous else None
+        if row["previous_event_hash"] != expected_previous:
+            messages.append(
+                f"[Error] Telemetry hash chain is broken for session {row['usage_id']} "
+                f"at sequence {row['sequence']}"
+            )
+        try:
+            decoded_payload = json.loads(row["payload_json"])
+            if canonical_json(decoded_payload) != row["payload_json"]:
+                messages.append(
+                    f"[Error] Telemetry payload is not canonical at sequence {row['sequence']}"
+                )
+        except (TypeError, json.JSONDecodeError):
+            messages.append(f"[Error] Telemetry payload is invalid at sequence {row['sequence']}")
+        expected_hash = telemetry_hash_for_fields(
+            sequence=row["sequence"],
+            usage_id=row["usage_id"],
+            capture_id=row["capture_id"],
+            task_id=row["task_id"],
+            event_type=row["event_type"],
+            payload_json=row["payload_json"],
+            created_at=row["created_at"], actor_uid=row["actor_uid"],
+            actor_name=row["actor_name"], previous_event_hash=row["previous_event_hash"],
+        )
+        if row["event_hash"] != expected_hash or row["event_id"] != expected_hash:
+            messages.append(f"[Error] Telemetry hash mismatch at sequence {row['sequence']}")
+        session = usage_records.get(row["usage_id"])
+        if session is None or session.get("task_id") != row["task_id"]:
+            messages.append(
+                f"[Error] Telemetry sequence {row['sequence']} references missing or mismatched "
+                f"session/task {row['usage_id']}/{row['task_id']}"
+            )
+        telemetry_chain[row["usage_id"]] = (row["sequence"], row["event_hash"])
 
     for key, (record, relative_path) in sorted(visible_records.items()):
         stored_payload = latest_events.get(key)
@@ -7820,6 +7996,209 @@ def session_list_cmd(args) -> int:
     return 0
 
 
+def read_host_snapshot(previous_cpu: tuple[int, int] | None = None) -> tuple[dict, tuple[int, int]]:
+    """Read a small, passive Linux host snapshot without spawning processes."""
+    proc = Path("/proc")
+    if not sys.platform.startswith("linux") or not proc.is_dir():
+        raise LedgerWriteError("Host telemetry currently requires Linux /proc.")
+
+    cpu_line = (proc / "stat").read_text(encoding="ascii").splitlines()[0].split()
+    if not cpu_line or cpu_line[0] != "cpu":
+        raise LedgerWriteError("Could not read aggregate CPU counters from /proc/stat.")
+    counters = [int(value) for value in cpu_line[1:]]
+    # Linux guest/guest_nice counters are already included in user/nice.
+    total = sum(counters[:8]) if len(counters) >= 8 else sum(counters)
+    idle = counters[3] + (counters[4] if len(counters) > 4 else 0)
+    cpu = None
+    if previous_cpu:
+        total_delta = total - previous_cpu[0]
+        idle_delta = idle - previous_cpu[1]
+        if total_delta > 0:
+            cpu = round(100.0 * (total_delta - idle_delta) / total_delta, 2)
+
+    memory = {}
+    for line in (proc / "meminfo").read_text(encoding="ascii").splitlines():
+        key, sep, value = line.partition(":")
+        if sep and key in {"MemTotal", "MemAvailable"}:
+            memory[key] = int(value.strip().split()[0]) * 1024
+    load = os.getloadavg()
+    uptime = float((proc / "uptime").read_text(encoding="ascii").split()[0])
+    boot_id_path = proc / "sys/kernel/random/boot_id"
+    system_info = os.uname()
+    snapshot = {
+        "captured_at": datetime.datetime.now(datetime.timezone.utc).isoformat(
+            timespec="microseconds"
+        ),
+        "host": socket.gethostname(),
+        "platform": {
+            "system": system_info.sysname,
+            "release": system_info.release,
+            "machine": system_info.machine,
+        },
+        "boot_id": (
+            boot_id_path.read_text(encoding="ascii").strip() if boot_id_path.exists() else None
+        ),
+        "uptime_seconds": uptime,
+        "load_average_1_5_15": list(load),
+        "cpu_busy_percent_since_previous_sample": cpu,
+        "memory_total_bytes": memory.get("MemTotal"),
+        "memory_available_bytes": memory.get("MemAvailable"),
+        "memory_used_bytes": (
+            memory["MemTotal"] - memory["MemAvailable"]
+            if "MemTotal" in memory and "MemAvailable" in memory else None
+        ),
+    }
+    return snapshot, (total, idle)
+
+
+def telemetry_capture_cmd(args) -> int:
+    enrollment, op_dir = resolve_operator_context()
+    if enrollment:
+        print(
+            "Error: Telemetry capture is not yet supported for broker-enrolled ledgers; "
+            "refusing to write outside broker authority.",
+            file=sys.stderr,
+        )
+        return 1
+    if not op_dir:
+        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        return 1
+    ensure_event_store(op_dir)
+    filepath, records, index = find_usage_record(op_dir, args.usage_id)
+    if filepath is None:
+        print(f"Error: Usage session '{args.usage_id}' not found.", file=sys.stderr)
+        return 1
+    session = records[index]
+    if session.get("ended_at") is not None:
+        print(
+            f"Error: Usage session '{args.usage_id}' is closed; telemetry requires an "
+            "open session.",
+            file=sys.stderr,
+        )
+        return 1
+    if not session.get("task_id"):
+        print(f"Error: Usage session '{args.usage_id}' has no task association.", file=sys.stderr)
+        return 1
+    if not (1 <= args.interval_seconds <= 3600 and 1 <= args.duration_seconds <= 3600):
+        print(
+            "Error: interval and duration must each be between 1 and 3600 seconds.",
+            file=sys.stderr,
+        )
+        return 1
+    try:
+        first_snapshot, previous_cpu = read_host_snapshot()
+    except (OSError, ValueError, LedgerWriteError) as exc:
+        print(f"Error: Could not read host telemetry: {exc}", file=sys.stderr)
+        return 1
+
+    task_id = session.get("task_id")
+    capture_id = uuid.uuid4().hex
+    append_telemetry_event(
+        op_dir,
+        usage_id=args.usage_id,
+        capture_id=capture_id,
+        task_id=task_id,
+        event_type="capture_started",
+        payload={
+            "interval_seconds": args.interval_seconds,
+            "duration_seconds": args.duration_seconds,
+            "host": first_snapshot["host"],
+            "metrics": ["cpu", "memory", "load_average", "uptime"],
+        },
+    )
+    count = 0
+    deadline = time.monotonic() + args.duration_seconds
+    try:
+        snapshot = first_snapshot
+        while True:
+            append_telemetry_event(
+                op_dir,
+                usage_id=args.usage_id,
+                capture_id=capture_id,
+                task_id=task_id,
+                event_type="host_snapshot",
+                payload=snapshot,
+            )
+            count += 1
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            time.sleep(min(args.interval_seconds, remaining))
+            snapshot, previous_cpu = read_host_snapshot(previous_cpu)
+        append_telemetry_event(
+            op_dir,
+            usage_id=args.usage_id,
+            capture_id=capture_id,
+            task_id=task_id,
+            event_type="capture_completed",
+            payload={"samples": count},
+        )
+    except KeyboardInterrupt:
+        append_telemetry_event(
+            op_dir,
+            usage_id=args.usage_id,
+            capture_id=capture_id,
+            task_id=task_id,
+            event_type="capture_interrupted",
+            payload={"samples": count},
+        )
+        print(f"Telemetry capture interrupted after {count} samples.", file=sys.stderr)
+        return 130
+    except (OSError, ValueError, LedgerWriteError) as exc:
+        append_telemetry_event(
+            op_dir,
+            usage_id=args.usage_id,
+            capture_id=capture_id,
+            task_id=task_id,
+            event_type="capture_partial",
+            payload={"samples": count, "error": str(exc)},
+        )
+        print(f"Telemetry capture partial after {count} samples: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"Captured {count} host telemetry samples for {args.usage_id} "
+        f"(capture {capture_id}, task {task_id})."
+    )
+    return 0
+
+
+def telemetry_show_cmd(args) -> int:
+    _, op_dir = resolve_operator_context()
+    if not op_dir:
+        print("Error: No .operator directory found. Run 'operator init' first.", file=sys.stderr)
+        return 1
+    if not os.path.exists(ledger_db_path(op_dir)):
+        print("Error: Durable ledger store is missing; run 'operator init' first.", file=sys.stderr)
+        return 1
+    conn = connect_event_store(op_dir, read_only=True)
+    try:
+        rows = conn.execute(
+            "SELECT * FROM telemetry_events WHERE usage_id = ? ORDER BY sequence",
+            (args.usage_id,),
+        ).fetchall()
+    except sqlite3.Error as exc:
+        print(f"Error: Could not read telemetry: {exc}", file=sys.stderr)
+        return 1
+    finally:
+        conn.close()
+    if not rows:
+        print(f"No telemetry recorded for {args.usage_id}.")
+        return 0
+    for row in rows:
+        item = dict(row)
+        item["payload"] = json.loads(item.pop("payload_json"))
+        print(json.dumps(item, sort_keys=True))
+    return 0
+
+
+def telemetry_cmd(args) -> int:
+    if args.telemetry_action == "capture":
+        return telemetry_capture_cmd(args)
+    if args.telemetry_action == "show":
+        return telemetry_show_cmd(args)
+    return 1
+
+
 def task_transition_cmd(args) -> int:
     enrollment, op_dir = resolve_operator_context()
     if not op_dir:
@@ -8907,6 +9286,34 @@ def main() -> None:
         "--harness", dest="harness_id", default=None, help="Filter by harness ID."
     )
 
+    # operator telemetry
+    telemetry_parser = subparsers.add_parser(
+        "telemetry", help="Capture or inspect opt-in, passive host telemetry for a session."
+    )
+    telemetry_subparsers = telemetry_parser.add_subparsers(
+        dest="telemetry_action", required=True
+    )
+    telemetry_capture_parser = telemetry_subparsers.add_parser(
+        "capture", help="Capture bounded host CPU/memory/load snapshots for an open session."
+    )
+    telemetry_capture_parser.add_argument(
+        "--usage", dest="usage_id", required=True, help="Open usage/session ID (usage-XXXX)."
+    )
+    telemetry_capture_parser.add_argument(
+        "--interval-seconds", type=int, default=5,
+        help="Sampling interval (1-3600; default: 5).",
+    )
+    telemetry_capture_parser.add_argument(
+        "--duration-seconds", type=int, default=60,
+        help="Bounded capture duration (1-3600; default: 60).",
+    )
+    telemetry_show_parser = telemetry_subparsers.add_parser(
+        "show", help="Print recorded telemetry events for a session as JSON lines."
+    )
+    telemetry_show_parser.add_argument(
+        "--usage", dest="usage_id", required=True, help="Usage/session ID to inspect."
+    )
+
     # operator verify (Phase 3.1)
     verify_parser = subparsers.add_parser(
         "verify", help="Automated audit of a run directory artifacts (Phase 3)."
@@ -9057,6 +9464,7 @@ def main() -> None:
         "session-start": session_start_cmd,
         "session-end": session_end_cmd,
         "session-list": session_list_cmd,
+        "telemetry": telemetry_cmd,
         "brief": brief_cmd,
         "export-brief": export_brief_cmd,
         "doctor": doctor_cmd,

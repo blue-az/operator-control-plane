@@ -13,7 +13,7 @@ import yaml
 
 from authority_client import AuthorityClient, canonical_json
 
-LEDGER_SCHEMA_VERSION = 1
+LEDGER_SCHEMA_VERSION = 2
 LEDGER_HASH_FORMAT = "operator-ledger-event-v1"
 
 
@@ -524,6 +524,32 @@ def ensure_ledger_schema(conn_ledger: sqlite3.Connection) -> None:
         BEFORE DELETE ON ledger_events
         BEGIN
             SELECT RAISE(ABORT, 'ledger_events is append-only');
+        END;
+        CREATE TABLE IF NOT EXISTS telemetry_events (
+            sequence INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id TEXT NOT NULL UNIQUE,
+            usage_id TEXT NOT NULL,
+            capture_id TEXT NOT NULL,
+            task_id TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            payload_json TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            actor_uid INTEGER,
+            actor_name TEXT,
+            previous_event_hash TEXT,
+            event_hash TEXT NOT NULL UNIQUE
+        );
+        CREATE INDEX IF NOT EXISTS idx_telemetry_events_session
+            ON telemetry_events(usage_id, sequence);
+        CREATE TRIGGER IF NOT EXISTS telemetry_events_no_update
+        BEFORE UPDATE ON telemetry_events
+        BEGIN
+            SELECT RAISE(ABORT, 'telemetry_events is append-only');
+        END;
+        CREATE TRIGGER IF NOT EXISTS telemetry_events_no_delete
+        BEFORE DELETE ON telemetry_events
+        BEGIN
+            SELECT RAISE(ABORT, 'telemetry_events is append-only');
         END;
         CREATE TABLE IF NOT EXISTS authority_projection_events (
             record_type TEXT NOT NULL,

@@ -16,6 +16,7 @@ import shutil
 import sqlite3
 import stat
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -1354,22 +1355,22 @@ class TestOperatorCLI(unittest.TestCase):
         db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
         conn = sqlite3.connect(db_path)
         try:
-            conn.execute("PRAGMA user_version = 2")
+            conn.execute("PRAGMA user_version = 3")
         finally:
             conn.close()
 
         res = self.run_operator("init")
         self.assertEqual(res.returncode, 1)
-        self.assertIn("schema version 2 is newer", res.stderr)
+        self.assertIn("schema version 3 is newer", res.stderr)
         conn = sqlite3.connect(db_path)
         try:
-            self.assertEqual(conn.execute("PRAGMA user_version").fetchone()[0], 2)
+            self.assertEqual(conn.execute("PRAGMA user_version").fetchone()[0], 3)
         finally:
             conn.close()
 
         res = self.run_operator("doctor")
         self.assertEqual(res.returncode, 1)
-        self.assertIn("schema version 2 is unsupported", res.stdout)
+        self.assertIn("schema version 3 is unsupported", res.stdout)
 
     def test_task_lifecycle_and_quarantine_flow(self) -> None:
         # 1. Initialize
@@ -1973,6 +1974,167 @@ class TestOperatorCLI(unittest.TestCase):
         task_file = op_path / "tasks" / "session-test-task.yaml"
         task_data = yaml.safe_load(task_file.read_text())
         self.assertEqual(task_data.get("status"), "running")
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux /proc telemetry only")
+    def test_telemetry_capture_is_session_linked_append_only_and_audited(self) -> None:
+        self.run_operator("init")
+        self.run_operator("task-create", "--objective", "Telemetry test", "--id", "telemetry-task")
+        started = self.run_operator(
+            "session-start", "--task", "telemetry-task", "--harness", "claude"
+        )
+        self.assertEqual(started.returncode, 0, started.stderr)
+
+        capture = self.run_operator(
+            "telemetry", "capture", "--usage", "usage-0001",
+            "--interval-seconds", "1", "--duration-seconds", "1", timeout=10,
+        )
+        self.assertEqual(capture.returncode, 0, capture.stdout + capture.stderr)
+        self.assertIn("Captured", capture.stdout)
+
+        db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        try:
+            events = conn.execute(
+                "SELECT * FROM telemetry_events WHERE usage_id = 'usage-0001' ORDER BY sequence"
+            ).fetchall()
+            event_types = [event["event_type"] for event in events]
+            self.assertEqual(event_types[0], "capture_started")
+            self.assertIn("host_snapshot", event_types)
+            self.assertEqual(event_types[-1], "capture_completed")
+            snapshot = json.loads(
+                next(e["payload_json"] for e in events if e["event_type"] == "host_snapshot")
+            )
+            self.assertEqual(snapshot["host"], os.uname().nodename)
+            self.assertIn("memory_total_bytes", snapshot)
+            self.assertTrue(snapshot["captured_at"].endswith("+00:00"))
+            self.assertTrue(all(event["task_id"] == "telemetry-task" for event in events))
+            self.assertEqual(len({event["capture_id"] for event in events}), 1)
+            with self.assertRaises(sqlite3.IntegrityError):
+                conn.execute("UPDATE telemetry_events SET event_type = 'tampered'")
+            with self.assertRaises(sqlite3.IntegrityError):
+                conn.execute("DELETE FROM telemetry_events")
+        finally:
+            conn.close()
+
+        shown = self.run_operator("telemetry", "show", "--usage", "usage-0001")
+        self.assertEqual(shown.returncode, 0, shown.stderr)
+        self.assertIn('"event_type": "host_snapshot"', shown.stdout)
+        doctor = self.run_operator("doctor")
+        self.assertEqual(doctor.returncode, 0, doctor.stdout + doctor.stderr)
+
+        conn = sqlite3.connect(db_path)
+        try:
+            conn.execute("DROP TRIGGER telemetry_events_no_update")
+            conn.execute(
+                "UPDATE telemetry_events SET payload_json = '{}' WHERE event_type = 'host_snapshot'"
+            )
+            conn.commit()
+        finally:
+            conn.close()
+        tampered = self.run_operator("doctor")
+        self.assertEqual(tampered.returncode, 1)
+        self.assertIn("Telemetry hash mismatch", tampered.stdout)
+        conn = sqlite3.connect(db_path)
+        try:
+            conn.execute(
+                "UPDATE telemetry_events SET previous_event_hash = 'broken' "
+                "WHERE event_type = 'capture_completed'"
+            )
+            conn.commit()
+        finally:
+            conn.close()
+        broken_chain = self.run_operator("doctor")
+        self.assertEqual(broken_chain.returncode, 1)
+        self.assertIn("Telemetry hash chain is broken", broken_chain.stdout)
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux /proc telemetry only")
+    def test_concurrent_telemetry_captures_are_partitioned(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Concurrent telemetry", "--id", "telemetry-concurrent"
+        )
+        self.run_operator(
+            "session-start", "--task", "telemetry-concurrent", "--harness", "claude"
+        )
+        args = (
+            "telemetry", "capture", "--usage", "usage-0001",
+            "--interval-seconds", "1", "--duration-seconds", "1",
+        )
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(lambda _: self.run_operator(*args, timeout=10), range(2)))
+        for result in results:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+        db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        conn = sqlite3.connect(db_path)
+        try:
+            rows = conn.execute(
+                "SELECT capture_id, event_type FROM telemetry_events "
+                "WHERE usage_id = 'usage-0001' ORDER BY sequence"
+            ).fetchall()
+        finally:
+            conn.close()
+        by_capture: dict[str, list[str]] = {}
+        for capture_id, event_type in rows:
+            by_capture.setdefault(capture_id, []).append(event_type)
+        self.assertEqual(len(by_capture), 2)
+        for event_types in by_capture.values():
+            self.assertEqual(event_types[0], "capture_started")
+            self.assertEqual(event_types[-1], "capture_completed")
+            self.assertIn("host_snapshot", event_types)
+        doctor = self.run_operator("doctor")
+        self.assertEqual(doctor.returncode, 0, doctor.stdout + doctor.stderr)
+
+    def test_telemetry_rejects_closed_or_unknown_sessions(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Telemetry session", "--id", "telemetry-session"
+        )
+        self.run_operator("session-start", "--task", "telemetry-session", "--harness", "claude")
+        unknown = self.run_operator("telemetry", "capture", "--usage", "usage-9999")
+        self.assertEqual(unknown.returncode, 1)
+        self.assertIn("not found", unknown.stderr)
+        self.run_operator("session-end", "usage-0001", "--outcome", "useful", "--cost", "0")
+        closed = self.run_operator("telemetry", "capture", "--usage", "usage-0001")
+        self.assertEqual(closed.returncode, 1)
+        self.assertIn("closed", closed.stderr)
+
+    def test_telemetry_table_migrates_existing_schema_v1(self) -> None:
+        self.run_operator("init")
+        self.run_operator(
+            "task-create", "--objective", "Preserve this task through schema migration",
+            "--id", "migration-task",
+        )
+        db_path = Path(self.temp_dir) / ".operator" / "ledger.sqlite3"
+        conn = sqlite3.connect(db_path)
+        try:
+            conn.execute("DROP TRIGGER telemetry_events_no_update")
+            conn.execute("DROP TRIGGER telemetry_events_no_delete")
+            conn.execute("DROP TABLE telemetry_events")
+            conn.execute("PRAGMA user_version = 1")
+            conn.commit()
+        finally:
+            conn.close()
+        migrated = self.run_operator("init")
+        self.assertEqual(migrated.returncode, 0, migrated.stderr)
+        conn = sqlite3.connect(db_path)
+        try:
+            self.assertEqual(conn.execute("PRAGMA user_version").fetchone()[0], 2)
+            self.assertIsNotNone(conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='telemetry_events'"
+            ).fetchone())
+            self.assertEqual(
+                conn.execute(
+                    "SELECT COUNT(*) FROM ledger_events "
+                    "WHERE record_type = 'task' AND record_id = 'migration-task'"
+                ).fetchone()[0],
+                1,
+            )
+        finally:
+            conn.close()
+        doctor = self.run_operator("doctor")
+        self.assertEqual(doctor.returncode, 0, doctor.stdout + doctor.stderr)
 
     def test_session_end_trusted_status_requires_verifier_when_enforced(self) -> None:
         self.setup_p2_enforced_claim()
