@@ -35,4 +35,4 @@ class OpenCodeOperatorTest(unittest.TestCase):
             timeout=90,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("# fail 0", result.stdout)
+        self.assertRegex(result.stdout, r"(?m)^(?:#|ℹ) fail 0$")

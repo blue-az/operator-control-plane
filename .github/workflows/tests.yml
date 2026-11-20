@@ -12,6 +12,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Publication tests read an immutable source blob from a pinned commit.
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
